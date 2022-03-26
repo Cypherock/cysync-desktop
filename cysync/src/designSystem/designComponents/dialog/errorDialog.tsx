@@ -1,0 +1,246 @@
+import { Collapse } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import React from 'react';
+
+import { useFeedback } from '../../../store/provider/feedbackProvider';
+import ErrorExclamation from '../../iconGroups/errorExclamation';
+import CustomButton from '../buttons/button';
+import Icon from '../icons/Icon';
+
+import DialogBox from './dialogBox';
+
+const useStyles = makeStyles({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    minHeight: '20rem',
+    padding: '2rem',
+    position: 'relative'
+  },
+  btnCointainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  report: {
+    position: 'absolute',
+    right: 20,
+    bottom: 0
+  },
+  advanceText: {
+    marginBottom: '2rem',
+    padding: '15px',
+    backgroundColor: '#171717',
+    borderRadius: '3px',
+    fontSize: '14px',
+    wordBreak: 'break-all'
+  },
+  detailedText: {
+    marginBottom: '0.5rem',
+    padding: '5px',
+    backgroundColor: '#171717',
+    borderRadius: '3px',
+    fontSize: '14px'
+  }
+});
+
+const Error = (props: any) => {
+  const classes = useStyles();
+  const {
+    text,
+    handleClose,
+    handleFeedbackOpen,
+    actionText,
+    handleAction,
+    closeText,
+    advanceText,
+    detailedText,
+    detailedCTAText,
+    disableAction
+  } = props;
+
+  const [collapseTab, setCollapseTab] = React.useState(false);
+
+  const getAdvanceText = () => {
+    if (advanceText.length > 200) {
+      return `${advanceText.slice(0, 200)} ...`;
+    }
+
+    return advanceText;
+  };
+
+  const getDetailedText = () => {
+    const errors = detailedText.split('\n');
+    return (
+      <>
+        {errors.map((error: any) =>
+          error.length > 0 ? (
+            <div className={classes.detailedText}>
+              <Typography variant="caption">{error}</Typography>
+            </div>
+          ) : (
+            <></>
+          )
+        )}
+      </>
+    );
+  };
+
+  return (
+    <Grid container className={classes.root}>
+      <Icon size={100} viewBox=" 0 0 55 55" iconGroup={<ErrorExclamation />} />
+      <Typography
+        color="textPrimary"
+        align="center"
+        style={{ margin: '0.5rem 0', whiteSpace: 'pre-line' }}
+      >
+        {text}
+      </Typography>
+      {detailedText && (
+        <>
+          <CustomButton
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              e.nativeEvent.stopImmediatePropagation();
+              setCollapseTab(!collapseTab);
+            }}
+            disabled={disableAction}
+            style={{
+              borderRadius: '0 0 5px 5px',
+              marginBottom: '1rem',
+              textTransform: 'none'
+            }}
+            color="default"
+          >
+            {detailedCTAText}
+            {collapseTab ? <ExpandLess /> : <ExpandMore />}
+          </CustomButton>
+          <Collapse in={collapseTab} timeout="auto" unmountOnExit>
+            <div className={classes.detailedText}>
+              <Typography variant="caption">{getDetailedText()}</Typography>
+            </div>
+          </Collapse>
+        </>
+      )}
+      {advanceText && (
+        <div className={classes.advanceText}>
+          <Typography variant="caption">{getAdvanceText()}</Typography>
+        </div>
+      )}
+      <div className={classes.btnCointainer}>
+        {!actionText && (
+          <CustomButton
+            disabled={disableAction}
+            style={{ marginRight: '20px', textTransform: 'none' }}
+            variant="outlined"
+            color="default"
+            onClick={handleClose}
+          >
+            {closeText}
+          </CustomButton>
+        )}
+        {actionText && (
+          <CustomButton
+            disabled={disableAction}
+            style={{ marginRight: '20px', textTransform: 'none' }}
+            variant="outlined"
+            color="default"
+            onClick={handleAction || handleClose}
+          >
+            {actionText}
+          </CustomButton>
+        )}
+        <CustomButton
+          disabled={disableAction}
+          color="primary"
+          onClick={handleFeedbackOpen}
+        >
+          REPORT
+        </CustomButton>
+      </div>
+    </Grid>
+  );
+};
+
+export interface ErrorProps {
+  open: boolean;
+  handleClose: () => void;
+  text: string;
+  actionText?: string;
+  closeText?: string;
+  handleAction?: () => void;
+  advanceText?: string;
+  flow?: string;
+  detailedText?: string;
+  detailedCTAText?: string;
+  disableAction?: boolean;
+}
+
+const errorDialog: React.FC<ErrorProps> = ({
+  open,
+  handleClose,
+  text,
+  actionText,
+  handleAction,
+  closeText = 'Ok',
+  advanceText,
+  flow,
+  detailedText,
+  detailedCTAText,
+  disableAction
+}: ErrorProps) => {
+  const { showFeedback } = useFeedback();
+
+  const handleFeedbackOpen = () => {
+    showFeedback({
+      isContact: true,
+      heading: 'Report',
+      initFeedbackState: {
+        attachLogs: true,
+        attachDeviceLogs: false,
+        categories: ['Report'],
+        category: 'Report',
+        description: text,
+        descriptionError: '',
+        email: '',
+        emailError: '',
+        subject: flow ? `Reporting for Error (${flow})` : 'Reporting for Error',
+        subjectError: ''
+      }
+    });
+  };
+
+  return (
+    <DialogBox
+      fullWidth
+      maxWidth="sm"
+      open={open}
+      dialogHeading="Error"
+      isClosePresent={!disableAction}
+      handleClose={handleClose}
+      disableBackdropClick={disableAction}
+      restComponents={
+        <Error
+          advanceText={advanceText}
+          text={text}
+          closeText={closeText}
+          disableAction={disableAction}
+          handleClose={disableAction ? () => {} : handleClose}
+          handleFeedbackOpen={disableAction ? () => {} : handleFeedbackOpen}
+          actionText={actionText}
+          handleAction={disableAction ? () => {} : handleAction}
+          detailedText={detailedText}
+          detailedCTAText={detailedCTAText}
+        />
+      }
+    />
+  );
+};
+
+export default errorDialog;

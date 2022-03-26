@@ -1,0 +1,334 @@
+import Button from '@material-ui/core/Button';
+import Divider from '@material-ui/core/Divider';
+import Grid from '@material-ui/core/Grid';
+import {
+  createStyles,
+  makeStyles,
+  Theme,
+  useTheme
+} from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import Routes from '../../../../constants/routes';
+import CustomIconButton from '../../../../designSystem/designComponents/buttons/customIconButton';
+import CustomizedDialog from '../../../../designSystem/designComponents/dialog/newDialogBox';
+import PopOverText from '../../../../designSystem/designComponents/hover/popoverText';
+import Icon from '../../../../designSystem/designComponents/icons/Icon';
+import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
+import DeleteCoinIcon from '../../../../designSystem/iconGroups/deleteCoin';
+import Dustbin from '../../../../designSystem/iconGroups/dustbin';
+import ICONS from '../../../../designSystem/iconGroups/iconConstants';
+import {
+  useReceiveTransaction,
+  useSendTransaction
+} from '../../../../store/hooks/flows';
+import {
+  ReceiveTransactionContext,
+  SendTransactionContext,
+  useConnection,
+  useCurrentCoin,
+  useSnackbar,
+  useSync
+} from '../../../../store/provider';
+import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
+
+import { OneCoinProps, OneCoinPropTypes } from './OneCoinProps';
+import Recieve from './recieve';
+import Send from './send';
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    mainContainer: {
+      marginBottom: '10px',
+      width: '100%'
+    },
+    root: {
+      background: theme.palette.primary.light,
+      borderRadius: 5,
+      minHeight: 50,
+      margin: '10px 0px',
+      marginRight: '10px',
+      padding: '5px 0px',
+      cursor: 'pointer',
+      '&:hover': {
+        background: '#343a42'
+      }
+    },
+    loading: {
+      opacity: 0.6
+    },
+    button: {},
+    icon: {
+      margin: '0px !important'
+    },
+    divider: {
+      background: theme.palette.primary.dark,
+      height: '50%',
+      margin: '0px 10px'
+    },
+    actions: {
+      display: 'flex',
+      justifyContent: 'flex-start',
+      alignItems: 'center'
+    },
+    alignStartCenter: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'flex-start',
+      alignItems: 'center'
+    },
+    alignCenterCenter: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    recieveButton: {
+      color: theme.palette.info.main
+    },
+    red: {
+      color: theme.palette.error.main
+    },
+    orange: {
+      color: theme.palette.secondary.main
+    },
+    dialogRoot: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingBottom: '4rem'
+    }
+  })
+);
+
+const OneCoin: React.FC<OneCoinProps> = ({
+  initial,
+  name,
+  holding,
+  price,
+  value,
+  decimal,
+  isEmpty,
+  deleteCoin,
+  deleteHistory,
+  walletId
+}) => {
+  const classes = useStyles();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const sync = useSync();
+  const snackbar = useSnackbar();
+
+  const theme = useTheme();
+
+  const { coinDetails } = useCurrentCoin();
+
+  const { beforeNetworkAction } = useConnection();
+
+  useEffect(() => {
+    const key = `${walletId}-${initial.toLowerCase()}`;
+    if (initial && walletId && sync.modulesInExecutionQueue.includes(key)) {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [sync.modulesInExecutionQueue, walletId, initial]);
+
+  const beforeAction = () => {
+    if (isLoading) {
+      snackbar.showSnackbar(
+        `Please wait while we fetch the balance and latest price rates for ${name}`,
+        'warning'
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const handleDeleteOpen = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+    if (beforeAction()) {
+      setDeleteOpen(true);
+    }
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteOpen(false);
+  };
+
+  const handleDeleteConfirmation = async () => {
+    await deleteHistory(coinDetails);
+    await deleteCoin(coinDetails.xpub, coinDetails.coin, walletId);
+    setDeleteOpen(false);
+  };
+
+  const [sendForm, setSendForm] = useState(false);
+
+  const sendTransaction = useSendTransaction();
+
+  const handleSendFormOpen = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+    if (beforeAction() && beforeNetworkAction()) setSendForm(true);
+  };
+
+  const [receiveForm, setReceiveForm] = useState(false);
+
+  const receiveTransaction = useReceiveTransaction();
+
+  const handleReceiveFormOpen = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+    if (beforeAction() && beforeNetworkAction()) setReceiveForm(true);
+  };
+
+  const onClick = () => {
+    if (beforeAction()) {
+      navigate(
+        `${
+          Routes.transactions.index
+        }?coin=${initial.toLowerCase()}&wallet=${walletId}`
+      );
+    }
+  };
+
+  return (
+    <>
+      <CustomizedDialog
+        open={deleteOpen}
+        handleClose={handleDeleteClose}
+        onYes={handleDeleteConfirmation}
+      >
+        <Icon viewBox="0 0 116 125" size={120} iconGroup={<DeleteCoinIcon />} />
+        <Typography
+          color="error"
+          variant="h3"
+          gutterBottom
+          style={{ marginTop: '2rem' }}
+        >
+          Are you sure
+        </Typography>
+        <Typography color="textPrimary">{`You want to delete ${name} ?`}</Typography>
+      </CustomizedDialog>
+      <SendTransactionContext.Provider
+        value={{
+          sendForm,
+          setSendForm,
+          sendTransaction
+        }}
+      >
+        <Send />
+      </SendTransactionContext.Provider>
+
+      <ReceiveTransactionContext.Provider
+        value={{
+          receiveTransaction,
+          receiveForm,
+          setReceiveForm
+        }}
+      >
+        <Recieve />
+      </ReceiveTransactionContext.Provider>
+
+      <Grid
+        onClick={onClick}
+        container
+        className={clsx({ [classes.root]: true, [classes.loading]: isLoading })}
+      >
+        <Grid
+          item
+          xs={3}
+          className={classes.alignStartCenter}
+          style={{ paddingLeft: '1rem' }}
+        >
+          <CoinIcons initial={initial.toUpperCase()} />
+          <Typography color="textPrimary">{name}</Typography>
+        </Grid>
+        <Grid item xs={2} className={classes.alignStartCenter}>
+          <PopOverText
+            text={`${initial} ${formatDisplayAmount(holding, 4)}`}
+            color="textPrimary"
+            hoverText={`${initial} ${formatDisplayAmount(
+              holding,
+              decimal,
+              true
+            )}`}
+          />
+        </Grid>
+        <Grid item xs={2} className={classes.alignStartCenter}>
+          <Typography color="textPrimary">{`$ ${value}`}</Typography>
+        </Grid>
+        <Grid item xs={2} className={classes.alignStartCenter}>
+          <Typography color="textPrimary">{`$ ${price}`}</Typography>
+        </Grid>
+        <Grid item xs={2} className={classes.actions}>
+          {!isEmpty ? (
+            <Button
+              variant="text"
+              className={clsx(classes.button, classes.orange)}
+              onClick={handleSendFormOpen}
+              startIcon={
+                <Icon
+                  className={classes.icon}
+                  viewBox="0 0 14 15"
+                  icon={ICONS.walletSend}
+                  color={theme.palette.secondary.main}
+                />
+              }
+            >
+              Send
+            </Button>
+          ) : (
+            <Button
+              variant="text"
+              className={clsx(classes.button, classes.orange)}
+              onClick={handleSendFormOpen}
+              startIcon={
+                <Icon
+                  className={classes.icon}
+                  viewBox="0 0 14 15"
+                  icon={ICONS.walletSend}
+                  color={theme.palette.grey[500]}
+                />
+              }
+              disabled
+            >
+              Send
+            </Button>
+          )}
+          <Divider orientation="vertical" className={classes.divider} />
+          <Button
+            variant="text"
+            className={clsx(classes.button, classes.recieveButton)}
+            startIcon={
+              <Icon
+                className={classes.icon}
+                viewBox="0 0 14 15"
+                icon={ICONS.walletRecieve}
+                color={theme.palette.info.main}
+              />
+            }
+            onClick={handleReceiveFormOpen}
+          >
+            Receive
+          </Button>
+        </Grid>
+        <Grid item xs={1} className={classes.alignCenterCenter}>
+          <CustomIconButton title="Delete Coin" onClick={handleDeleteOpen}>
+            <Icon size={20} viewBox="0 0 18 18" iconGroup={<Dustbin />} />
+          </CustomIconButton>
+        </Grid>
+      </Grid>
+    </>
+  );
+};
+
+OneCoin.propTypes = OneCoinPropTypes;
+
+export default OneCoin;

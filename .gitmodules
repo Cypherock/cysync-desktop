@@ -1,0 +1,15 @@
+[submodule "packages/communication"]
+	path = packages/communication
+	url = ../cysync-module-communication.git
+[submodule "packages/server-wrapper"]
+	path = packages/server-wrapper
+	url = ../cysync-module-server
+[submodule "packages/database"]
+	path = packages/database
+	url = ../cysync-module-database.git
+[submodule "packages/wallet"]
+	path = packages/wallet
+	url = ../cysync-module-wallet
+[submodule "packages/protocols"]
+	path = packages/protocols
+	url = ../cysync-module-protocols

@@ -1,0 +1,35 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
+  "jsRules": {},
+  "rules": {
+    "await-promise": true,
+    "no-bitwise": true,
+    "no-console": true,
+    "ordered-imports": [true, { "grouped-imports": true }],
+    "no-conditional-assignment": true,
+    "no-debugger": true,
+    "no-duplicate-super": true,
+    "no-empty": false,
+    "no-unused-expression": true,
+    "no-any": {
+      "severity": "warn"
+    },
+    "no-parameter-reassignment": true,
+    "no-var-keyword": true,
+    "use-isnan": true,
+    "comment-format": true,
+    "variable-name": [
+      true,
+      "check-format",
+      "ban-keywords",
+      "allow-leading-underscore",
+      "allow-pascal-case"
+    ],
+    "jsx-no-lambda": false,
+    "array-type": [true, "array-simple"],
+    "jsx-boolean-value": false,
+    "prefer-for-of": false
+  },
+  "rulesDirectory": []
+}

@@ -1,0 +1,31 @@
+{
+  "name": "cypherock",
+  "version": "independent",
+  "author": "Cypherock",
+  "license": "AGPL-3.0",
+  "private": true,
+  "scripts": {
+    "build-pkgs": "node ./build.js all",
+    "install-pkgs": "node ./run.js packages \"yarn\"",
+    "start": "node ./run.js cysync \"yarn start\"",
+    "make": "node ./run.js cysync \"yarn make\"",
+    "package": "node ./run.js cysync \"yarn package\"",
+    "lint": "node ./run.js cysync \"yarn lint\"",
+    "lint:check": "node ./run.js cysync \"yarn lint:check\"",
+    "postinstall": "node ./run.js cysync \"yarn\" && husky install",
+    "lint-staged": "node ./run.js cysync \"yarn lint-staged\"",
+    "pretty:local": "prettier --config cysync/.prettierrc --write '*.{js,json}'",
+    "pretty:cysync": "node ./run.js cysync \"yarn pretty\"",
+    "pretty:local:check": "prettier --config cysync/.prettierrc --check '*.{js,json}'",
+    "pretty:cysync:check": "node ./run.js cysync \"yarn pretty:check\"",
+    "pretty": "yarn pretty:local && yarn pretty:cysync",
+    "pretty:check": "yarn pretty:local:check && yarn pretty:cysync:check"
+  },
+  "dependencies": {
+    "fs-extra": "^10.0.0"
+  },
+  "devDependencies": {
+    "husky": "^7.0.4",
+    "prettier": "^2.5.1"
+  }
+}

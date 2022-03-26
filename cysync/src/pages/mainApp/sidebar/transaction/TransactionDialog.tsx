@@ -1,0 +1,352 @@
+import { bitcoin as bitcoinServer } from '@cypherock/server-wrapper';
+import Chip from '@material-ui/core/Chip';
+import Grid from '@material-ui/core/Grid';
+import {
+  createStyles,
+  makeStyles,
+  Theme,
+  useTheme
+} from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import CopyIcon from '@material-ui/icons/FileCopyOutlined';
+import clsx from 'clsx';
+import { shell } from 'electron';
+import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
+
+import Button from '../../../../designSystem/designComponents/buttons/button';
+import IconButton from '../../../../designSystem/designComponents/buttons/customIconButton';
+import Icon from '../../../../designSystem/designComponents/icons/Icon';
+import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
+import ICONS from '../../../../designSystem/iconGroups/iconConstants';
+import { getLatestPriceForCoin } from '../../../../store/database';
+import {
+  DisplayTransaction,
+  DisplayTransactionPropTypes
+} from '../../../../store/hooks';
+import { useSnackbar } from '../../../../store/provider';
+import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
+import logger from '../../../../utils/logger';
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    container: {
+      padding: '0 25px',
+      minWidth: '300px'
+    },
+    dateTimeContainer: {
+      marginBottom: '20px'
+    },
+    dateText: {
+      fontWeight: 'bold'
+    },
+    timeText: {
+      fontWeight: 'lighter'
+    },
+    dataContainer: {
+      margin: '10px 0'
+    },
+    flex: {
+      display: 'flex',
+      alignItems: 'center'
+    },
+    flexCenter: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    button: {
+      background: '#71624C',
+      color: theme.palette.text.primary,
+      textTransform: 'none',
+      padding: '0.5rem 3.5rem',
+      marginBottom: '2rem',
+      marginTop: '20px',
+      '&:hover': {
+        background: theme.palette.secondary.dark
+      }
+    },
+    blue: {
+      color: theme.palette.info.main
+    },
+    red: {
+      color: theme.palette.error.main
+    },
+    orange: {
+      color: theme.palette.secondary.main
+    },
+    inputOutputContainer: {
+      maxHeight: '400px',
+      overflowY: 'auto',
+      '&::-webkit-scrollbar': {
+        width: '4px',
+        background: theme.palette.primary.light
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: theme.palette.text.secondary
+      }
+    }
+  })
+);
+
+interface TransactionDialogProps {
+  txn: DisplayTransaction;
+}
+
+const TransactionDialog: React.FC<TransactionDialogProps> = props => {
+  const classes = useStyles();
+  const theme = useTheme();
+  const { txn } = props;
+  const snackbar = useSnackbar();
+
+  const [coinPrice, setCoinPrice] = useState(0);
+  const [ethCoinPrice, setEthCoinPrice] = useState(0);
+
+  useEffect(() => {
+    if (txn && txn.coin) {
+      getLatestPriceForCoin(txn.coin.toLowerCase())
+        .then(price => {
+          setCoinPrice(price);
+        })
+        .catch(logger.error);
+
+      if (txn.ethCoin) {
+        getLatestPriceForCoin(txn.ethCoin.toLowerCase())
+          .then(price => {
+            setEthCoinPrice(price);
+          })
+          .catch(logger.error);
+      }
+    } else {
+      setCoinPrice(0);
+    }
+  }, [txn]);
+
+  const formatCoins = (coins: string) => {
+    return formatDisplayAmount(parseFloat(coins) || 0);
+  };
+
+  const getPriceForCoin = (coins: string) => {
+    return ((parseFloat(coins) || 0) * coinPrice).toFixed(2);
+  };
+
+  const getFeeCoinName = () => {
+    if (txn.isErc20 && txn.ethCoin) {
+      return txn.ethCoin.toUpperCase();
+    }
+
+    return txn.coin.toUpperCase();
+  };
+
+  const getFeePrice = () => {
+    if (txn.isErc20) {
+      return ((parseFloat(txn.displayFees) || 0) * ethCoinPrice).toFixed(2);
+    }
+
+    return getPriceForCoin(txn.displayFees);
+  };
+
+  const openTxn = () => {
+    shell.openExternal(
+      bitcoinServer.transaction.getOpenTxnLink({
+        coinType: txn.coin.toLowerCase(),
+        txHash: txn.hash
+      })
+    );
+  };
+
+  const getResultIcon = () => {
+    switch (txn.sentReceive) {
+      case 'SENT':
+        return (
+          <Icon
+            viewBox="0 0 14 14"
+            icon={ICONS.send}
+            color={theme.palette.secondary.main}
+          />
+        );
+      case 'RECEIVED':
+        return (
+          <Icon
+            viewBox="0 0 14 14"
+            icon={ICONS.recieve}
+            color={theme.palette.info.main}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  if (!txn) return <></>;
+
+  return (
+    <div className={classes.container}>
+      <div className={classes.dateTimeContainer}>
+        <Typography className={classes.dateText} variant="body1">
+          {txn.confirmed ? new Date(txn.confirmed).toLocaleDateString() : ''}
+        </Typography>
+        <Typography className={classes.timeText} variant="body1">
+          {txn.confirmed ? new Date(txn.confirmed).toLocaleTimeString() : ''}
+        </Typography>
+      </div>
+      <div className={classes.dataContainer}>
+        <Typography color="textSecondary">Wallet</Typography>
+        <Typography>{txn.walletName}</Typography>
+      </div>
+      <div className={classes.dataContainer}>
+        <Typography color="textSecondary">Action</Typography>
+        <Typography
+          className={
+            !(txn.sentReceive === 'SENT') ? classes.blue : classes.orange
+          }
+          variant="body2"
+        >
+          {getResultIcon()}
+          {txn.sentReceive}
+        </Typography>
+      </div>
+      <div className={classes.dataContainer}>
+        <Typography color="textSecondary">Status</Typography>
+        <Typography
+          className={
+            txn.status === 1
+              ? classes.blue
+              : txn.status === 0
+              ? classes.orange
+              : classes.red
+          }
+        >
+          {txn.status === 1
+            ? 'SUCCESS'
+            : txn.status === 0
+            ? 'PENDING'
+            : 'FAILED'}
+        </Typography>
+      </div>
+      <div className={classes.dataContainer}>
+        <Typography color="textSecondary">Amount</Typography>
+        <div className={classes.flex}>
+          <CoinIcons
+            style={{ marginLeft: '0' }}
+            initial={txn.coin.toUpperCase()}
+          />
+          <Typography>
+            {`${txn.coin.toUpperCase()} ${formatCoins(
+              txn.displayAmount
+            )} ($${getPriceForCoin(txn.displayAmount)})`}
+          </Typography>
+        </div>
+      </div>
+      <div className={classes.dataContainer}>
+        <Typography color="textSecondary">Fees</Typography>
+        <div className={classes.flex}>
+          <CoinIcons style={{ marginLeft: '0' }} initial={getFeeCoinName()} />
+          <Typography>{`${getFeeCoinName()} ${formatCoins(
+            txn.displayFees
+          )} ($${getFeePrice()})`}</Typography>
+        </div>
+      </div>
+      <Grid
+        container
+        spacing={2}
+        className={clsx(classes.dataContainer, classes.inputOutputContainer)}
+      >
+        <Grid item xs={6}>
+          <Typography style={{ marginBottom: '10px' }} color="textSecondary">
+            Sender
+          </Typography>
+          {(txn.inputs || [])
+            .sort((a, b) => a.index - b.index)
+            .map((elem, i) => (
+              <div key={elem.address} style={{ marginBottom: '10px' }}>
+                {elem.isMine && (
+                  <Chip size="small" variant="outlined" label="Mine" />
+                )}
+                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <Typography
+                    color={elem.isMine ? 'secondary' : undefined}
+                    style={{ marginRight: '2px' }}
+                  >
+                    {`${i + 1}.`}
+                  </Typography>
+                  <div>
+                    <Typography color={elem.isMine ? 'secondary' : undefined}>
+                      {elem.address}
+                    </Typography>
+                    <Typography color={elem.isMine ? 'secondary' : undefined}>
+                      {`${txn.coin.toUpperCase()} ${formatCoins(
+                        elem.displayValue
+                      )}`}
+                    </Typography>
+                  </div>
+                </div>
+              </div>
+            ))}
+        </Grid>
+
+        <Grid item xs={6}>
+          <Typography style={{ marginBottom: '10px' }} color="textSecondary">
+            Receiver
+          </Typography>
+          {(txn.outputs || [])
+            .sort((a, b) => a.index - b.index)
+            .map((elem, i) => (
+              <div key={elem.address} style={{ marginBottom: '10px' }}>
+                {elem.isMine && (
+                  <Chip size="small" variant="outlined" label="Mine" />
+                )}
+                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <Typography
+                    color={elem.isMine ? 'secondary' : undefined}
+                    style={{ marginRight: '2px' }}
+                  >
+                    {`${i + 1}.`}
+                  </Typography>
+                  <div>
+                    <Typography color={elem.isMine ? 'secondary' : undefined}>
+                      {elem.address}
+                    </Typography>
+                    <Typography color={elem.isMine ? 'secondary' : undefined}>
+                      {`${txn.coin.toUpperCase()} ${formatCoins(
+                        elem.displayValue
+                      )}`}
+                    </Typography>
+                  </div>
+                </div>
+              </div>
+            ))}
+        </Grid>
+      </Grid>
+      <div className={classes.dataContainer}>
+        <div className={classes.flex}>
+          <Typography color="textSecondary" style={{ marginRight: '5px' }}>
+            Transaction Hash
+          </Typography>
+          <IconButton
+            color="secondary"
+            title="Copy to clipboard"
+            onClick={() => {
+              navigator.clipboard.writeText(txn.hash);
+              snackbar.showSnackbar('Copied to clipboard.', 'success');
+            }}
+          >
+            <CopyIcon />
+          </IconButton>
+        </div>
+        <Typography>{txn.hash}</Typography>
+      </div>
+      <div className={classes.flexCenter}>
+        <Button onClick={openTxn} className={classes.button}>
+          Open in Browser
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+TransactionDialog.propTypes = {
+  txn: PropTypes.exact(DisplayTransactionPropTypes)
+};
+
+export default TransactionDialog;
