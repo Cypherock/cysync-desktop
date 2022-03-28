@@ -12,7 +12,7 @@
     "package": "node ./run.js cysync \"yarn package\"",
     "lint": "node ./run.js cysync \"yarn lint\"",
     "lint:check": "node ./run.js cysync \"yarn lint:check\"",
-    "postinstall": "node ./run.js cysync \"yarn\" && husky install",
+    "postinstall": "node ./run.js cysync \"yarn --network-timeout 500000\" && husky install",
     "lint-staged": "node ./run.js cysync \"yarn lint-staged\"",
     "pretty:local": "prettier --config cysync/.prettierrc --write '*.{js,json}'",
     "pretty:cysync": "node ./run.js cysync \"yarn pretty\"",

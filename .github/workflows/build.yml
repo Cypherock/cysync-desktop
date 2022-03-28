@@ -42,6 +42,6 @@ jobs:
         cache: 'yarn'
     - run: sudo apt-get install fakeroot dpkg rpm -y
     - run: yarn
-    - run: node scripts\prebuild.js prod
+    - run: node scripts/prebuild.js prod
     - run: yarn make
-    - run: node scripts\postbuild.js prod update
+    - run: node scripts/postbuild.js prod update
