@@ -4,7 +4,7 @@ const fs = require("fs");
 const childProcess = require("child_process");
 
 const GITHUB_BASE_API = "https://api.github.com";
-const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+const GITHUB_ACCESS_TOKEN = process.env.GH_ACCESS_TOKEN;
 
 const CONTENT_TYPE_MAP = {
   ".dmg": "application/x-apple-diskimage",

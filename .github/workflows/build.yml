@@ -2,6 +2,9 @@ name: Build CI
 
 on: [push]
 
+env:
+  GH_ACCESS_TOKEN: ${{secrets.GH_ACCESS_TOKEN}}    
+
 jobs:  
   build-win:
     runs-on: windows-latest
@@ -24,6 +27,7 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-latest
+    needs: build-win
 
     strategy:
       matrix:
