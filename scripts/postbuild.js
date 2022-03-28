@@ -17,7 +17,7 @@ const CONTENT_TYPE_MAP = {
 
 const getArgs = () => {
   const CMD_ERROR_MSG =
-    "Invalid command. Expected command: `node <file_name>.js <dev|debug|prod> <create|update>`";
+    "Invalid command. Expected command: `node <file_name>.js <dev|debug|prod> <folder1,folder2...>`";
 
   const args = process.argv.slice(2);
 
@@ -26,17 +26,13 @@ const getArgs = () => {
   }
 
   const buildType = args[0];
-  const createOrUpdate = args[1];
+  const foldernames = args[1];
 
   if (!["dev", "debug", "prod"].includes(buildType)) {
     throw new Error(CMD_ERROR_MSG);
   }
 
-  if (!["create", "update"].includes(createOrUpdate)) {
-    throw new Error(CMD_ERROR_MSG);
-  }
-
-  return [buildType, createOrUpdate];
+  return [buildType, foldernames.split(",")];
 };
 
 const getVersion = async () => {
@@ -126,8 +122,11 @@ const walk = (directoryName) => {
   return allFiles;
 };
 
-const uploadAllAssets = async (uploadUrl) => {
-  const allAssets = walk(path.join(__dirname, "..", "cysync", "out", "make"));
+const uploadAllAssets = async (uploadUrl, assetFolders) => {
+  let allAssets = [];
+  for (const folder of assetFolders) {
+    allAssets.push(...walk(path.join(__dirname, "..", folder)));
+  }
 
   for (const asset of allAssets) {
     const fileExt = path.extname(asset);
@@ -150,25 +149,19 @@ const uploadAllAssets = async (uploadUrl) => {
 
 const run = async () => {
   try {
-    const [buildType, createOrUpdate] = getArgs();
+    const [buildType, assetFolders] = getArgs();
     const version = await getVersion();
     const commitHash = await getCommitHash();
     const githubRepo = await getGithubRepo();
 
-    let uploadUrl = "";
+    const uploadUrl = await createRelease({
+      version,
+      commitHash,
+      githubRepo,
+      buildType,
+    });
 
-    if (createOrUpdate === "create") {
-      uploadUrl = await createRelease({
-        version,
-        commitHash,
-        githubRepo,
-        buildType,
-      });
-    } else {
-      uploadUrl = await getUploadUrl({ version, githubRepo });
-    }
-
-    await uploadAllAssets(uploadUrl);
+    await uploadAllAssets(uploadUrl, assetFolders);
   } catch (error) {
     console.error(error);
     process.exit(1);
