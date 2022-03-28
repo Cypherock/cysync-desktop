@@ -1,10 +1,9 @@
-name: Node CI
+name: Build CI
 
 on: [push]
 
 jobs:  
-  build:
-
+  build-win:
     runs-on: windows-latest
 
     strategy:
@@ -20,13 +19,25 @@ jobs:
         cache: 'yarn'
     - run: yarn
     - run: node scripts\prebuild.js prod
-    - run: cd cysync
     - run: yarn make
+    - run: node scripts\postbuild.js prod create
 
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v3
+  build-linux:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
       with:
-        name: builds
-        path: |
-          out/make/*
-          cysync/out/make/*
+        node-version: ${{ matrix.node-version }}
+        cache: 'yarn'
+    - run: sudo apt-get install fakeroot dpkg rpm -y
+    - run: yarn
+    - run: node scripts\prebuild.js prod
+    - run: yarn make
+    - run: node scripts\postbuild.js prod update
