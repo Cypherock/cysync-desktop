@@ -71,6 +71,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'yarn'
     - uses: actions/download-artifact@v3
+    - run: yarn --ignore-scripts
     - run: ls -al
     - run: node scripts/postbuild.js prod "build-win,build-linux"
 
