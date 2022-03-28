@@ -72,6 +72,7 @@ jobs:
         cache: 'yarn'
     - uses: actions/download-artifact@v3
     - run: yarn --ignore-scripts
+    - run: node scripts/prebuild.js prod
     - run: ls -al
     - run: node scripts/postbuild.js prod "build-win,build-linux"
 
