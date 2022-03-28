@@ -1,0 +1,7 @@
+{
+  "BUILD_TYPE": "debug",
+  "LOG_LEVEL": "silly",
+  "SERVER_ENV": "development",
+  "GITHUB_REPO": "Cypherock/Cysync-desktop-test-stm-dev",
+  "SIMULATE_PRODUCTION": false
+}
