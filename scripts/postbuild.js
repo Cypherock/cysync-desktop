@@ -17,22 +17,32 @@ const CONTENT_TYPE_MAP = {
 
 const getArgs = () => {
   const CMD_ERROR_MSG =
-    "Invalid command. Expected command: `node <file_name>.js <dev|debug|prod> <folder1,folder2...>`";
+    "Invalid command. Expected command: `node <file_name>.js <branch|tag> <branchName|tagName> <folder1,folder2...>`";
 
   const args = process.argv.slice(2);
 
-  if (args.length !== 2) {
+  if (args.length !== 3) {
     throw new Error(CMD_ERROR_MSG);
   }
 
-  const buildType = args[0];
-  const foldernames = args[1];
+  const branchOrTag = args[0];
+  const name = args[1];
+  let buildType = "prod";
+  const foldernames = args[2];
 
-  if (!["dev", "debug", "prod"].includes(buildType)) {
+  if (!["branch", "tag"].includes(branchOrTag)) {
     throw new Error(CMD_ERROR_MSG);
   }
 
-  return [buildType, foldernames.split(",")];
+  if (branchOrTag === "branch") {
+    if (!["dev", "debug"].includes(name)) {
+      throw new Error(CMD_ERROR_MSG);
+    }
+
+    buildType = name;
+  }
+
+  return { buildType, tagName: name, assetFolders: foldernames.split(",") };
 };
 
 const getVersion = async () => {
@@ -69,12 +79,7 @@ const getReleaseName = (version) => {
   return `v${version}`;
 };
 
-const createRelease = async ({
-  version,
-  commitHash,
-  githubRepo,
-  buildType,
-}) => {
+const createRelease = async ({ version, githubRepo, tagName, buildType }) => {
   const releaseName = getReleaseName(version);
 
   const postData = {
@@ -83,23 +88,13 @@ const createRelease = async ({
   };
 
   if (buildType === "prod") {
-    postData.target_commitish = commitHash;
+    postData.tag_name = tagName;
+    postData.name = tagName;
   }
 
   const resp = await axios.post(
     `${GITHUB_BASE_API}/repos/${githubRepo}/releases`,
     postData,
-    { headers: { Authorization: `token ${GITHUB_ACCESS_TOKEN}` } }
-  );
-
-  return resp.data.upload_url.replace("{?name,label}", "");
-};
-
-const getUploadUrl = async ({ version, githubRepo }) => {
-  const releaseName = getReleaseName(version);
-
-  const resp = await axios.get(
-    `${GITHUB_BASE_API}/repos/${githubRepo}/releases/tags/${releaseName}`,
     { headers: { Authorization: `token ${GITHUB_ACCESS_TOKEN}` } }
   );
 
@@ -149,15 +144,14 @@ const uploadAllAssets = async (uploadUrl, assetFolders) => {
 
 const run = async () => {
   try {
-    const [buildType, assetFolders] = getArgs();
+    const { buildType, tagName, assetFolders } = getArgs();
     const version = await getVersion();
-    const commitHash = await getCommitHash();
     const githubRepo = await getGithubRepo();
 
     const uploadUrl = await createRelease({
       version,
-      commitHash,
       githubRepo,
+      tagName,
       buildType,
     });
 

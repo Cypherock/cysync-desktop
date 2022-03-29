@@ -12,8 +12,8 @@ env:
   GH_ACCESS_TOKEN: ${{secrets.GH_ACCESS_TOKEN}}    
 
 jobs:  
-  test-env:
-    runs-on: ubuntu-latest
+  build-win:
+    runs-on: windows-latest
 
     strategy:
       matrix:
@@ -26,76 +26,59 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'yarn'
-    - run: echo $GITHUB_REF_NAME
-    - run: echo $GITHUB_REF_TYPE
-  
-  # build-win:
-  #   runs-on: windows-latest
-
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.x]
-
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Use Node.js ${{ matrix.node-version }}
-  #     uses: actions/setup-node@v2
-  #     with:
-  #       node-version: ${{ matrix.node-version }}
-  #       cache: 'yarn'
-  #   - run: yarn
-  #   - run: node scripts\prebuild.js prod
-  #   - run: yarn make
-  #   - uses: actions/upload-artifact@v3
-  #     with:
-  #       name: build-win
-  #       path: cysync/out/make/*
-  #       retention-days: 1
+    - run: yarn
+    - run: yarn lint:check
+    - run: yarn pretty:check
+    - run: node scripts\prebuild.js $GITHUB_REF_TYPE $GITHUB_REF_NAME
+    - run: yarn make
+    - uses: actions/upload-artifact@v3
+      with:
+        name: build-win
+        path: cysync/out/make/*
+        retention-days: 1
 
 
-  # build-linux:
-  #   runs-on: ubuntu-latest
-  #   needs: build-win
+  build-linux:
+    runs-on: ubuntu-latest
+    needs: build-win
 
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.x]
+    strategy:
+      matrix:
+        node-version: [16.x]
 
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Use Node.js ${{ matrix.node-version }}
-  #     uses: actions/setup-node@v2
-  #     with:
-  #       node-version: ${{ matrix.node-version }}
-  #       cache: 'yarn'
-  #   - run: sudo apt-get install fakeroot dpkg rpm -y
-  #   - run: yarn
-  #   - run: node scripts/prebuild.js prod
-  #   - run: yarn make
-  #   - uses: actions/upload-artifact@v3
-  #     with:
-  #       name: build-linux
-  #       path: cysync/out/make/*
-  #       retention-days: 1
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'yarn'
+    - run: sudo apt-get install fakeroot dpkg rpm -y
+    - run: yarn
+    - run: node scripts/prebuild.js $GITHUB_REF_TYPE $GITHUB_REF_NAME
+    - run: yarn make
+    - uses: actions/upload-artifact@v3
+      with:
+        name: build-linux
+        path: cysync/out/make/*
+        retention-days: 1
 
-  # release-build:
-  #   runs-on: ubuntu-latest
-  #   needs: build-linux
+  release-build:
+    runs-on: ubuntu-latest
+    needs: build-linux
 
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.x]
+    strategy:
+      matrix:
+        node-version: [16.x]
 
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Use Node.js ${{ matrix.node-version }}
-  #     uses: actions/setup-node@v2
-  #     with:
-  #       node-version: ${{ matrix.node-version }}
-  #       cache: 'yarn'
-  #   - uses: actions/download-artifact@v3
-  #   - run: yarn --ignore-scripts
-  #   - run: node scripts/prebuild.js prod
-  #   - run: ls -al
-  #   - run: node scripts/postbuild.js prod "build-win,build-linux"
-
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'yarn'
+    - uses: actions/download-artifact@v3
+    - run: yarn --ignore-scripts
+    - run: node scripts/prebuild.js $GITHUB_REF_TYPE $GITHUB_REF_NAME
+    - run: node scripts/postbuild.js $GITHUB_REF_TYPE $GITHUB_REF_NAME "build-win,build-linux"

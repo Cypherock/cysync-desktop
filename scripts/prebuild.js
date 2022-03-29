@@ -26,23 +26,33 @@ const BUILD_TYPE_CONFIG = {
   },
 };
 
-const getBuildType = () => {
+const getArgs = () => {
   const CMD_ERROR_MSG =
-    "Invalid command. Expected command: `node <file_name>.js <dev|debug|prod>`";
+    "Invalid command. Expected command: `node <file_name>.js <branch|tag> <branchName|tagName>`";
 
   const args = process.argv.slice(2);
 
-  if (args.length !== 1) {
+  if (args.length !== 2) {
     throw new Error(CMD_ERROR_MSG);
   }
 
-  const buildType = args[0];
+  const branchOrTag = args[0];
+  const name = args[1];
+  let buildType = "prod";
 
-  if (!["dev", "debug", "prod"].includes(buildType)) {
+  if (!["branch", "tag"].includes(branchOrTag)) {
     throw new Error(CMD_ERROR_MSG);
   }
 
-  return buildType;
+  if (branchOrTag === "branch") {
+    if (!["dev", "debug"].includes(name)) {
+      throw new Error(CMD_ERROR_MSG);
+    }
+
+    buildType = name;
+  }
+
+  return { buildType, tagName: name };
 };
 
 const setConfig = (buildType) => {
@@ -113,7 +123,7 @@ const setVersion = async (buildType) => {
 
 const run = async () => {
   try {
-    const buildType = getBuildType();
+    const { buildType } = getArgs();
     setConfig(buildType);
     await setVersion(buildType);
   } catch (error) {
