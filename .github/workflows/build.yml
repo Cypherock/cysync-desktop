@@ -54,7 +54,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'yarn'
     - run: yarn
-    - run: node scripts\prebuild.js $GITHUB_REF_TYPE $GITHUB_REF_NAME
+    - run: node scripts\prebuild.js %GITHUB_REF_TYPE% %GITHUB_REF_NAME%
     - run: yarn make
     - uses: actions/upload-artifact@v3
       with:
