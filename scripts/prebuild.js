@@ -106,7 +106,7 @@ const setVersion = async (buildType) => {
       packageJson.version = `${usableVersion}-dev.${commitHash.slice(0, 6)}`;
       break;
     case "debug":
-      packageJson.version = `${usableVersion}.${commitHash.slice(0, 6)}`;
+      packageJson.version = `${usableVersion}-debug.${commitHash.slice(0, 6)}`;
       break;
     case "prod":
     default:
