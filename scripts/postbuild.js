@@ -30,7 +30,7 @@ const getArgs = () => {
   const name = BRANCH_OR_TAG_NAME;
 
   let buildType = "prod";
-  const foldernames = args[1];
+  const foldernames = args[0];
 
   if (!["branch", "tag"].includes(branchOrTag)) {
     throw new Error("Invalid `GITHUB_REF_TYPE`: " + branchOrTag);
