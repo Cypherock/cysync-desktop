@@ -1,10 +1,11 @@
 const axios = require("axios");
 const path = require("path");
 const fs = require("fs");
-const childProcess = require("child_process");
 
 const GITHUB_BASE_API = "https://api.github.com";
 const GITHUB_ACCESS_TOKEN = process.env.GH_ACCESS_TOKEN;
+const BRANCH_OR_TAG = process.env.GITHUB_REF_TYPE;
+const BRANCH_OR_TAG_NAME = process.env.GITHUB_REF_NAME;
 
 const CONTENT_TYPE_MAP = {
   ".dmg": "application/x-apple-diskimage",
@@ -17,26 +18,27 @@ const CONTENT_TYPE_MAP = {
 
 const getArgs = () => {
   const CMD_ERROR_MSG =
-    "Invalid command. Expected command: `node <file_name>.js <branch|tag> <branchName|tagName> <folder1,folder2...>`";
+    "Invalid command. Expected command: `node <file_name>.js <folder1,folder2...>`";
 
   const args = process.argv.slice(2);
 
-  if (args.length !== 3) {
+  if (args.length !== 1) {
     throw new Error(CMD_ERROR_MSG);
   }
 
-  const branchOrTag = args[0];
-  const name = args[1];
+  const branchOrTag = BRANCH_OR_TAG;
+  const name = BRANCH_OR_TAG_NAME;
+
   let buildType = "prod";
-  const foldernames = args[2];
+  const foldernames = args[1];
 
   if (!["branch", "tag"].includes(branchOrTag)) {
-    throw new Error(CMD_ERROR_MSG);
+    throw new Error("Invalid `GITHUB_REF_TYPE`: " + branchOrTag);
   }
 
   if (branchOrTag === "branch") {
     if (!["dev", "debug"].includes(name)) {
-      throw new Error(CMD_ERROR_MSG);
+      throw new Error("Invalid `GITHUB_REF_NAME`: " + name);
     }
 
     buildType = name;
@@ -57,22 +59,6 @@ const getGithubRepo = async () => {
   const config = JSON.parse(fs.readFileSync(configPath));
 
   return config.GITHUB_REPO;
-};
-
-const getCommitHash = () => {
-  return new Promise((resolve, reject) => {
-    childProcess.exec(
-      'git log -n 1 --pretty=format:"%H"',
-      (err, stdout, stderr) => {
-        if (err || stderr) {
-          reject(err || stderr);
-          return;
-        }
-
-        resolve(stdout.trim());
-      }
-    );
-  });
 };
 
 const getReleaseName = (version) => {

@@ -2,6 +2,9 @@ const path = require("path");
 const fs = require("fs");
 const childProcess = require("child_process");
 
+const BRANCH_OR_TAG = process.env.GITHUB_REF_TYPE;
+const BRANCH_OR_TAG_NAME = process.env.GITHUB_REF_NAME;
+
 const BUILD_TYPE_CONFIG = {
   dev: {
     BUILD_TYPE: "debug",
@@ -27,26 +30,18 @@ const BUILD_TYPE_CONFIG = {
 };
 
 const getArgs = () => {
-  const CMD_ERROR_MSG =
-    "Invalid command. Expected command: `node <file_name>.js <branch|tag> <branchName|tagName>`";
+  const branchOrTag = BRANCH_OR_TAG;
+  const name = BRANCH_OR_TAG_NAME;
 
-  const args = process.argv.slice(2);
-
-  if (args.length !== 2) {
-    throw new Error(CMD_ERROR_MSG);
-  }
-
-  const branchOrTag = args[0];
-  const name = args[1];
   let buildType = "prod";
 
   if (!["branch", "tag"].includes(branchOrTag)) {
-    throw new Error(CMD_ERROR_MSG);
+    throw new Error("Invalid `GITHUB_REF_TYPE`: " + branchOrTag);
   }
 
   if (branchOrTag === "branch") {
     if (!["dev", "debug"].includes(name)) {
-      throw new Error(CMD_ERROR_MSG);
+      throw new Error("Invalid `GITHUB_REF_NAME`: " + name);
     }
 
     buildType = name;

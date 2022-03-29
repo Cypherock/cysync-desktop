@@ -30,7 +30,7 @@ jobs:
     - run: yarn
     - run: yarn lint:check
     - run: yarn pretty:check
-    - run: node scripts/prebuild.js $GITHUB_REF_TYPE $GITHUB_REF_NAME
+    - run: node scripts/prebuild.js
     - run: yarn make
     - uses: actions/upload-artifact@v3
       with:
@@ -54,7 +54,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'yarn'
     - run: yarn
-    - run: node scripts\prebuild.js %GITHUB_REF_TYPE% %GITHUB_REF_NAME%
+    - run: node scripts\prebuild.js
     - run: yarn make
     - uses: actions/upload-artifact@v3
       with:
@@ -79,5 +79,5 @@ jobs:
         cache: 'yarn'
     - uses: actions/download-artifact@v3
     - run: yarn --ignore-scripts
-    - run: node scripts/prebuild.js $GITHUB_REF_TYPE $GITHUB_REF_NAME
-    - run: node scripts/postbuild.js $GITHUB_REF_TYPE $GITHUB_REF_NAME "build-win,build-linux"
+    - run: node scripts/prebuild.js
+    - run: node scripts/postbuild.js "build-win,build-linux"
