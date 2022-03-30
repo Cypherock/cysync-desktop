@@ -20,6 +20,13 @@ const BUILD_TYPE_CONFIG = {
     GITHUB_REPO: "Cypherock/cysync-desktop-debug",
     SIMULATE_PRODUCTION: false,
   },
+  rc: {
+    BUILD_TYPE: "production",
+    LOG_LEVEL: "info",
+    SERVER_ENV: "production",
+    GITHUB_REPO: "Cypherock/cysync-desktop-rc",
+    SIMULATE_PRODUCTION: false,
+  },
   prod: {
     BUILD_TYPE: "production",
     LOG_LEVEL: "info",
@@ -45,6 +52,8 @@ const getArgs = () => {
     }
 
     buildType = name;
+  } else if (name.includes("rc")) {
+    buildType = "rc";
   }
 
   return { buildType, tagName: name };
@@ -107,6 +116,9 @@ const setVersion = async (buildType) => {
       break;
     case "debug":
       packageJson.version = `${usableVersion}-debug.${commitHash.slice(0, 6)}`;
+      break;
+    case "rc":
+      packageJson.version = `${usableVersion}-rc.${commitHash.slice(0, 6)}`;
       break;
     case "prod":
     default:
