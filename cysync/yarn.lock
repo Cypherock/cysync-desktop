@@ -153,6 +153,14 @@
     serialport "10.0.0"
     winston "^3.5.1"
 
+"@cypherock/communication@3.0.1-beta.13":
+  version "3.0.1-beta.13"
+  resolved "https://registry.yarnpkg.com/@cypherock/communication/-/communication-3.0.1-beta.13.tgz#31c3f53561a36fad08dcd4cb6d0d0ad84098ca79"
+  integrity sha512-CVb49juuTjfYYLA3ae9cDL8xV2mUYWOae1plPgCQ9TQO8MIzhI1e/XIUxai8CtLFm/BekQ2QJCQ3nxJH4y4ycA==
+  dependencies:
+    serialport "10.0.0"
+    winston "^3.5.1"
+
 "@cypherock/database@3.0.1-beta.10":
   version "3.0.1-beta.10"
   resolved "https://registry.yarnpkg.com/@cypherock/database/-/database-3.0.1-beta.10.tgz#03abedf0e573a6070bef7112ea5ba509ce191ccf"
