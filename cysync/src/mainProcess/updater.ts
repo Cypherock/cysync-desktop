@@ -1,12 +1,9 @@
 import axios from 'axios';
 import { ipcMain, WebContents } from 'electron';
-import gh from 'github-url-to-object';
 import autoUpdater from 'update-electron-app';
 
 import packageJson from '../../package.json';
 
-const repoString = packageJson.repository.url;
-const repoObject = gh(repoString);
 const currentVersion = packageJson.version;
 
 import logger from './logger';
@@ -20,12 +17,13 @@ export default class Updater {
   constructor(mainWindow: WebContents) {
     this.checkingForUpdate = false;
     this.renderer = mainWindow;
-    this.latestReleaseUrl = `https://api.github.com/repos/${repoObject.user}/${repoObject.repo}/releases/latest`;
+    this.latestReleaseUrl = `https://api.github.com/repos/${process.env.GITHUB_REPO}/releases/latest`;
 
     if (this.isAutoupdateAvailable()) {
       if (process.env.NODE_ENV !== 'development') {
         logger.info('Starting autoupdate');
         autoUpdater({
+          repo: process.env.GITHUB_REPO,
           // Winston logger is incompatable with `update-electron-app`, thus it needs to be modified.
           logger: {
             log: (...args: any) => {
