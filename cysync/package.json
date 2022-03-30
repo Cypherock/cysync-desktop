@@ -72,7 +72,7 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@cypherock/communication": "3.0.1-beta.12",
+    "@cypherock/communication": "3.0.1-beta.13",
     "@cypherock/database": "3.0.1-beta.10",
     "@cypherock/protocols": "3.0.1-beta.15",
     "@cypherock/server-wrapper": "1.0.1-beta.7",
