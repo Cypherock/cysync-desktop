@@ -70,7 +70,7 @@ export interface SyncContextInterface {
   ) => void;
 }
 
-type SyncQueueItem = HistorySyncItem | PriceSyncItem | BalanceSyncItem;
+type SyncQueueItem = HistorySyncItem | PriceSyncItem | BalanceSyncItem | LatestPriceSyncItem;
 
 export const SyncContext: React.Context<SyncContextInterface> =
   React.createContext<SyncContextInterface>({} as SyncContextInterface);
@@ -300,6 +300,31 @@ export const SyncProvider: React.FC = ({ children }) => {
         });
         addToQueue(newItem);
       }
+    }
+  };
+
+  const addLatestPriceSyncItemFromXpub = (
+    xpub: Xpub,
+    { module = 'default', isRefresh = false }
+  ) => {
+    const coinName = xpub.coin;
+
+    const coin = ALLCOINS[coinName];
+
+    if (!coin) {
+      logger.warn('Invalid coin in add latest price sync item', {
+        coinType: coinName
+      });
+      return;
+    }
+
+    if (!coin.isTest) {
+      const newItem = new LatestPriceSyncItem({        
+        coinType: coin.abbr,
+        isRefresh,
+        module
+      });
+      addToQueue(newItem);
     }
   };
 
@@ -895,14 +920,16 @@ export const SyncProvider: React.FC = ({ children }) => {
     const allXpubs = await xpubDb.getAll();
     const tokens = await erc20tokenDb.getAll();
 
-    pricingServer.getLatest({ coin }).then(res => {
-      if (res) {
-        const { price } = res.data.data;
-        return price;
-      }
-      logger.warn(`Cannot find price for coin ${coin}`);
-      return 0;
-    });
+    for (const xpub of allXpubs) {
+      addLatestPriceSyncItemFromXpub(xpub, { isRefresh, module });
+    }
+
+    for (const token of tokens) {
+      addLatestPriceSyncItemFromXpub({ coin: token.coin } as Xpub, {
+        isRefresh,
+        module
+      });
+    }
   }
 
   const addCoinTask = (xpub: Xpub, { module = 'default' }) => {
