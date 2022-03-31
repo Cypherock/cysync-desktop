@@ -321,7 +321,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
     descriptionError: '',
     email: '',
     emailError: '',
-    subject: 'Reporting for Error (CyCard Authentication)',
+    subject: 'Reporting for Error (X1 Card Authentication)',
     subjectError: ''
   };
 
@@ -337,7 +337,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
     <Grid container style={{ padding: '0.5rem 0rem' }}>
       <Grid item xs={12} className={classes.header}>
         <Typography color="secondary" variant="h5">
-          CyCard Authentication
+          X1 Card Authentication
         </Typography>
         <IconButton onClick={handleDeviceHealthTabClose} title="Close">
           <Icon size={16} viewBox="0 0 14 14" icon={ICONS.close} color="red" />
@@ -361,7 +361,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
             variant="h5"
             style={{ margin: '1rem 0rem 6rem' }}
           >
-            CyCard Authentication Successful
+            X1 Card Authentication Successful
           </Typography>
           <CustomButton
             onClick={handleDeviceHealthTabClose}
@@ -395,7 +395,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
             variant="h5"
             style={{ margin: '1rem 0rem 0rem' }}
           >
-            CyCard Authentication Failed
+            X1 Card Authentication Failed
           </Typography>
           <Typography
             color="textSecondary"

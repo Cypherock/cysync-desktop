@@ -3,18 +3,18 @@
 
 ## Initial Flow
 On the first launch, CySync asks you to setup a new device, followed by setting a password for the app.
-All CyCards are verified (one at a time) by tapping them on the device.
+All X1 Cards are verified (one at a time) by tapping them on the device.
 Once done, the app proceeds to update the firmware on the device, after which the app is successfully synced with the card.
 The following flow takes place in the desktop app -
 
 - **Card Authentication**
-    - The `protocols` package starts with the authetication of CyCards. The flow starts from the hook in `useCardAuth.ts`.
-    - It fetches the CyCard serial along with its signature. This data is communicated to the device by the `communications` package.
+    - The `protocols` package starts with the authetication of X1 Cards. The flow starts from the hook in `useCardAuth.ts`.
+    - It fetches the X1 Card serial along with its signature. This data is communicated to the device by the `communications` package.
     - The serial and signature are verified from the server using the `server-wrapper` package. Once verified, the server returns a random string challenge back to the protocols package.
-    > *Each CyCard has a unique serial.*
+    > *Each X1 Card has a unique serial.*
     - The challenge signature is verified and the signature is sent to server for verification.
     - On successful verification, the application displays a success message. `protocols` communicates the response to the device using the `communication` package.
-    <p align="center"><img src="images/CyCardAuth.png" /></p>
+    <p align="center"><img src="images/X1CardAuth.png" /></p>
 
 - **Device Authentication**
     - The `DeviceAuthenticator.run` method inside the `protocols` package authenticates the device. It verifies the device serial signature and challenge signature. The hook `useCheckDeviceAuth.ts` uses this method and logs event data for events such as `serial`, `firmwareVersion`, and `lastAuth`. Any errors in connection and authentication are handled by the `useCheckDeviceAuth` hook. See `useCheckDeviceAuth.ts` for implementation.
@@ -125,21 +125,21 @@ After you have this path, you need to add a file named "app_dfu_package.zip" (in
 # Packages
 
 ### Communication Package
-The communication padckage  handles all low level protocols such as checking for errors in transmission (CRC) and Acknowledgement. Read more about the package [here](../packages/communication/README.md).
+The communication padckage  handles all low level protocols such as checking for errors in transmission (CRC) and Acknowledgement. Read more about the package [here](https://github.com/Cypherock/cysync-module-communication).
 
 
 ### Database package
-The database package acts as a wrapper for all database and server calls in the application. Read more about the database package [here](../packages/database/README.md).
+The database package acts as a wrapper for all database and server calls in the application. Read more about the database package [here](https://github.com/Cypherock/cysync-module-database).
 
 
 ### Protocols package
-The protocols package contains the communciation flow with the hardware wallet - such as Add Wallet, Add Coin, Send Transaction, Receive Transaction, Card Authentication, and Device Upgrade. Read more about the package [here](../packages/protocols/README.md).
+The protocols package contains the communciation flow with the hardware wallet - such as Add Wallet, Add Coin, Send Transaction, Receive Transaction, Card Authentication, and Device Upgrade. Read more about the package [here](https://github.com/Cypherock/cysync-module-protocols).
 
 
 ### Server Wrapper
 The server wrapper interacts with the Cypherock Server. All other modules communicate with the server through this module.
-Read more about the package [here](../packages/server-wrapper/README.md).
+Read more about the package [here](https://github.com/Cypherock/cysync-module-server).
 
 
 ### Wallet package
-This module contains all the code for all blockchain-related functions, such as fetching and creating unsigned transactions, and getting a new receive address. Read more about the wallets package [here](../packages/wallet/README.md).
+This module contains all the code for all blockchain-related functions, such as fetching and creating unsigned transactions, and getting a new receive address. Read more about the wallets package [here](https://github.com/Cypherock/cysync-module-wallet).

@@ -259,8 +259,8 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
   }, [cardsAuth['04']]);
 
   const getCardText = (cardIndex: string) => {
-    const cardName = ['Red', 'Blue', 'Green', 'Yellow'][Number(cardIndex) - 1];
-    const defaultText = `Tap the ${cardName} cyCard`;
+    const cardName = ['1st', '2nd', '3rd', '4th'][Number(cardIndex) - 1];
+    const defaultText = `Tap the ${cardName} X1 Card`;
 
     return defaultText;
   };
@@ -291,7 +291,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     descriptionError: '',
     email: '',
     emailError: '',
-    subject: 'Reporting for Error (CyCard Authentication)',
+    subject: 'Reporting for Error (X1 Card Authentication)',
     subjectError: ''
   };
 
@@ -454,7 +454,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
           <div className={classes.success}>
             <AvatarIcon alt="success" src={success} size="small" />
             <Typography variant="body2" color="secondary">
-              All CyCards are verified successfully
+              All X1 Cards are verified successfully
             </Typography>
           </div>
         )}
