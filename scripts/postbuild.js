@@ -42,6 +42,8 @@ const getArgs = () => {
     }
 
     buildType = name;
+  } else if (name.includes("rc")) {
+    buildType = "rc";
   }
 
   return { buildType, tagName: name, assetFolders: foldernames.split(",") };
@@ -73,7 +75,7 @@ const createRelease = async ({ version, githubRepo, tagName, buildType }) => {
     name: releaseName,
   };
 
-  if (buildType === "prod") {
+  if (["prod", "rc"].includes(buildType)) {
     postData.tag_name = tagName;
     postData.name = tagName;
   }

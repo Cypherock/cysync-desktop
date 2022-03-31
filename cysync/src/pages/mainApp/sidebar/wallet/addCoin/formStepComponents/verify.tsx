@@ -73,7 +73,7 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
                 ? false
                 : !coinAdder.pinEntered
             }
-            text="Enter PIN and Tap any cyCard"
+            text="Enter PIN and Tap any X1 Card"
           />
         </>
       )}
@@ -86,7 +86,7 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
               ? false
               : !coinAdder.cardTap
           }
-          text="Please tap any cyCards"
+          text="Please tap any X1 Card"
         />
       )}
 
