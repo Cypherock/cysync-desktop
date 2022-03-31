@@ -2,6 +2,7 @@ import {
   AddressDB,
   DeviceDB,
   Erc20DB,
+  LatestPriceDB,
   NotificationDB,
   PassEncrypt,
   PriceDB,
@@ -18,6 +19,7 @@ const dbPath = process.env.userDataPath;
 export const passEnDb = new PassEncrypt(getAnalyticsId());
 
 export const priceDb = new PriceDB(dbPath);
+export const latestPriceDb = new LatestPriceDB(dbPath);
 export const xpubDb = new XpubDB(dbPath, passEnDb);
 export const transactionDb = new TransactionDB(dbPath);
 export const walletDb = new WalletDB(dbPath);
