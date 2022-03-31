@@ -106,7 +106,7 @@ const DeviceSettings = ({ allowExit, setAllowExit }: DeviceSettingsProps) => {
       route: RouteLinks.settings.device.auth
     },
     {
-      name: 'CyCard Authentication',
+      name: 'X1 Card Authentication',
       element: (
         <CardAuth
           allowExit={allowExit}

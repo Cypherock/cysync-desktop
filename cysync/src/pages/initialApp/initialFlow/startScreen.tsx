@@ -127,7 +127,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ handleNext }) => {
           color="textPrimary"
           style={{ position: 'absolute', bottom: '100px' }}
         >
-          CyCard
+          X1 Card
         </Typography>
       </Grid>
       <IconButton

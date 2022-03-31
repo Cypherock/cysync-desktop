@@ -133,7 +133,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
                 receiveTransaction.coinsConfirmed &&
                 !receiveTransaction.cardTapped
           }
-          text="Enter the pin and tap any CyCard"
+          text="Enter the pin and tap any X1 Card"
           stylex={{ marginTop: '0rem' }}
         />
       )}
@@ -150,7 +150,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
                 receiveTransaction.coinsConfirmed &&
                 !receiveTransaction.cardTapped
           }
-          text="Tap any CyCard"
+          text="Tap any X1 Card"
           stylex={{ marginTop: '0rem' }}
         />
       )}

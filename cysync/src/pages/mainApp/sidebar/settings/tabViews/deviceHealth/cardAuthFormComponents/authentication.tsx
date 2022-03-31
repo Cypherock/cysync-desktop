@@ -35,7 +35,7 @@ const Authentication: React.FC<Props> = ({ verified, errorMessage }) => {
         <br />
         <DynamicTextView
           state={verified}
-          text="Tap the CyCard on top of the device"
+          text="Tap the X1 Card on top of the device"
         />
       </Grid>
     </Grid>
