@@ -299,7 +299,7 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
         return 'Device authentication failed the last time.';
       case 8:
       default:
-        return 'An unknown error occured while connecting the device';
+        return 'An unknown error occurred while connecting the device';
     }
   };
 

@@ -52,7 +52,7 @@ const Confirmation: React.FC<Props> = ({
       case 6:
         return 'Looks like the device is not in the main menu.';
       case 7:
-        return 'An unknown error occured while connecting the device.';
+        return 'An unknown error occurred while connecting the device.';
       case 8:
         if (updateRequiredType === 'app') {
           return 'The current version of CySync is not compatible with the device connected.';
