@@ -16,7 +16,7 @@ const DeviceErrorPopup = () => {
   };
 
   useEffect(() => {
-    // Open only when device is not ready or unknown error occured.
+    // Open only when device is not ready or unknown error occurred.
     const doOpen = [6, 7].includes(verifyState);
     setIsOpen(doOpen);
     if (doOpen) {
