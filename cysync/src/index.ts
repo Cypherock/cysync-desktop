@@ -11,7 +11,6 @@ import {
   ipcMain
 } from 'electron';
 import { download } from 'electron-dl';
-import fs from 'fs';
 import path from 'path';
 
 import packageJson from '../package.json';
@@ -323,20 +322,6 @@ const createWindow = async () => {
 
     if (mainWindow === null) {
       throw new Error('Main window is not defined');
-    }
-
-    const firmwarePath = path.join(
-      app.getPath('userData'),
-      'app_dfu_package.bin'
-    );
-
-    if (process.env.BUILD_TYPE === 'debug') {
-      const doesFileExist = fs.existsSync(firmwarePath);
-
-      if (doesFileExist) {
-        mainWindow.webContents.send('download complete', firmwarePath);
-        return;
-      }
     }
 
     const currentWindow = mainWindow;
