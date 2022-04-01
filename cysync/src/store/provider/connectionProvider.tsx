@@ -130,8 +130,25 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   } = useGetDeviceInfo();
   const { connected, beforeNetworkAction } = useNetwork();
 
+  const latestDeviceConnection = React.useRef<any>();
+
   useEffect(() => {
-    checkForConnection(setDeviceConnectionStatus, 2);
+    latestDeviceConnection.current = internalDeviceConnection;
+  }, [internalDeviceConnection]);
+
+  useEffect(() => {
+    checkForConnection(newStatus => {
+      // Reconnect when the device connection was destroyed
+      if (
+        newStatus &&
+        latestDeviceConnection?.current &&
+        latestDeviceConnection?.current?.destroyed
+      ) {
+        setDeviceConnectionStatus(false);
+      } else {
+        setDeviceConnectionStatus(newStatus);
+      }
+    }, 2);
   }, []);
 
   const checkIfIncomplete = () => {
