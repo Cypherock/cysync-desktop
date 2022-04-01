@@ -84,7 +84,7 @@ const en: I18nStrings = {
     RECEIVE_TXN_DEVICE_MISCONFIGURED:
       'Looks like your device has been misconfigured, do you want to configure it now?',
     RECEIVE_TXN_DIFFERENT_ADDRESS:
-      'Some error occured while fetching the address.',
+      'Some error occurred while fetching the address.',
     RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER: `Please contact cypherock if the addresses on the application did not match the addresses on the device`,
 
     SEND_TXN_REJECTED: (coin: string) =>

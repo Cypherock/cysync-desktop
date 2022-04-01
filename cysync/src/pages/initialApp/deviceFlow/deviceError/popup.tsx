@@ -36,9 +36,9 @@ const Popup: React.FC<Props> = ({ handleClose, state }) => {
       case 6:
         return 'Looks like the device is not in the main menu.';
       case 7:
-        return 'An unknown error occured while connecting the device.';
+        return 'An unknown error occurred while connecting the device.';
       default:
-        return 'An unknown error occured while connecting the device.';
+        return 'An unknown error occurred while connecting the device.';
     }
   };
 
