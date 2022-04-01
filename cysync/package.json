@@ -72,11 +72,11 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@cypherock/communication": "3.0.1-beta.12",
-    "@cypherock/database": "3.0.1-beta.10",
-    "@cypherock/protocols": "3.0.1-beta.15",
+    "@cypherock/communication": "3.0.1-beta.13",
+    "@cypherock/database": "3.0.1-beta.11",
+    "@cypherock/protocols": "3.0.1-beta.16",
     "@cypherock/server-wrapper": "1.0.1-beta.7",
-    "@cypherock/wallet": "3.0.1-beta.13",
+    "@cypherock/wallet": "3.0.1-beta.14",
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",

@@ -9,7 +9,7 @@ import UpgradingDevice from './stepperFormComponents/upgradingDevice';
 import DeviceSetupFormFlow from './stepperFormFlow';
 
 const deviceSetupData = [
-  ['CyCard  Authentication', CardAuthentication],
+  ['X1 Card  Authentication', CardAuthentication],
   ['Device  Authentication', DeviceAuthentication],
   ['Upgrading Device', UpgradingDevice]
 ];
