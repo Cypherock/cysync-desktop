@@ -970,6 +970,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       await addBalanceRefresh({ isRefresh: true });
       await addHistoryRefresh({ isRefresh: true });
       await addPriceRefresh({ isRefresh: true });
+      await addLatestPriceRefresh({ isRefresh: true });
     }
 
     setInitialSetupDone(true);
@@ -981,6 +982,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     await addBalanceRefresh({ isRefresh: true });
     await addHistoryRefresh({ isRefresh: true });
     await addPriceRefresh({ isRefresh: true });
+    await addLatestPriceRefresh({ isRefresh: true });
     await notifications.getLatest();
   };
 
