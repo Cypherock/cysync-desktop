@@ -27,7 +27,7 @@ let showErrorTimeout: NodeJS.Timeout | null = null;
 const allErrors: string[] = [];
 
 const handleTimeout = (uuid: any) => {
-  const title = 'Some error occured, Please contact cypherock for support.';
+  const title = 'Some error occurred, Please contact cypherock for support.';
   const body = allErrors.join('\n\n');
 
   dialog.showErrorBox(title, body);
