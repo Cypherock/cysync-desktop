@@ -14,6 +14,7 @@ const DeviceStatePrompt = () => {
     openErrorPrompt,
     setOpenErrorPrompt,
     openCancelFlowPrompt,
+    setIsInFlow,
     setOpenCancelFlowPrompt
   } = useConnection();
 
@@ -21,7 +22,7 @@ const DeviceStatePrompt = () => {
 
   const runCancelFlow = async () => {
     setIsCancelRunning(true);
-    logger.info('ExitCleanup Started');
+    logger.info('Trying to stop existing flow');
     if (internalDeviceConnection) {
       try {
         await cancelFlow.run({
@@ -30,14 +31,13 @@ const DeviceStatePrompt = () => {
           sdkVersion: deviceSdkVersion
         });
       } catch (error) {
-        logger.error('Error in exit cleanup');
+        logger.error('Error in canceling existing flow');
         logger.error(error);
       }
     }
     setIsCancelRunning(false);
     setOpenCancelFlowPrompt(false);
-
-    logger.info('ExitCleanup Completed');
+    setIsInFlow(false);
   };
 
   if (openCancelFlowPrompt) {
