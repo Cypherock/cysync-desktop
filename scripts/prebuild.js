@@ -83,7 +83,7 @@ const getCommitHash = () => {
   });
 };
 
-const setVersion = async (buildType) => {
+const setVersion = async (buildType, tagName) => {
   const packageJsonPath = path.join(__dirname, "..", "cysync", "package.json");
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath));
 
@@ -118,7 +118,11 @@ const setVersion = async (buildType) => {
       packageJson.version = `${usableVersion}-debug.${commitHash.slice(0, 6)}`;
       break;
     case "rc":
-      packageJson.version = `${usableVersion}-rc.${commitHash.slice(0, 6)}`;
+      let newName = tagName;
+      if (newName.startsWith('v')) {
+        newName = newName.slice(1);
+      }
+      packageJson.version = newName;
       break;
     case "prod":
     default:
@@ -130,9 +134,9 @@ const setVersion = async (buildType) => {
 
 const run = async () => {
   try {
-    const { buildType } = getArgs();
+    const { buildType, tagName } = getArgs();
     setConfig(buildType);
-    await setVersion(buildType);
+    await setVersion(buildType, tagName);
   } catch (error) {
     console.error(error);
     process.exit(1);
