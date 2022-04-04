@@ -1,3 +1,4 @@
+import { COINS, EthCoinData } from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
@@ -19,6 +20,7 @@ import {
   useSendTransactionContext,
   useTokenContext
 } from '../../../../../../store/provider';
+import logger from '../../../../../../utils/logger';
 
 import {
   StepComponentProps,
@@ -125,12 +127,28 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
   }, [sendTransaction.hash]);
 
   const handleExternalLink = () => {
-    shell.openExternal(
-      Server.bitcoin.transaction.getOpenTxnLink({
-        coinType: coinDetails.coin,
-        txHash: sendTransaction.hash
-      })
-    );
+    const coin = COINS[coinDetails.coin];
+
+    if (!coin) {
+      logger.error('Invalid COIN in coinDetails: ' + coinDetails.coin);
+      return;
+    }
+
+    if (coin instanceof EthCoinData) {
+      shell.openExternal(
+        Server.eth.transaction.getOpenTxnLink({
+          network: coin.network,
+          txHash: sendTransaction.hash
+        })
+      );
+    } else {
+      shell.openExternal(
+        Server.bitcoin.transaction.getOpenTxnLink({
+          coinType: coinDetails.coin,
+          txHash: sendTransaction.hash
+        })
+      );
+    }
   };
 
   const goToTransactions = () => {
@@ -178,7 +196,11 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
             {' '}
             Transaction hash : &nbsp;
           </Typography>
-          <Typography color="textPrimary" variant="body1">
+          <Typography
+            style={{ userSelect: 'text' }}
+            color="textPrimary"
+            variant="body1"
+          >
             {` ${sendTransaction.hash}`}
           </Typography>
           <CustomIconButton
