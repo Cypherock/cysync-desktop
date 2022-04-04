@@ -145,6 +145,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         }
         setUpdateDownloaded(-1);
         setIsCompleted(-1);
+        setIsDeviceUpdating(false);
         if (internetSlowTimeout !== null) {
           clearTimeout(internetSlowTimeout);
           internetSlowTimeout = null;
@@ -168,6 +169,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         langStrings.ERRORS.DEVICE_UPGRADE_FIRMWARE_DOWNLOAD_FAILED
       );
       setIsCompleted(-1);
+      setIsDeviceUpdating(false);
       setUpdateDownloaded(-1);
     });
   };
@@ -198,6 +200,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setUpdated(-1);
       setApproved(-1);
       setIsCompleted(-1);
+      setIsDeviceUpdating(false);
       deviceUpdater.removeAllListeners();
       return;
     }
@@ -218,6 +221,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         setApproved(-1);
         setDisplayErrorMessage(langStrings.ERRORS.DEVICE_UPGRADE_REJECTED);
         setIsCompleted(-1);
+        setIsDeviceUpdating(false);
         deviceUpdater.removeAllListeners();
       }
     });
@@ -233,6 +237,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setUpdated(-1);
       setApproved(-1);
       setIsCompleted(-1);
+      setIsDeviceUpdating(false);
       deviceUpdater.removeAllListeners();
     });
 
@@ -265,6 +270,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setUpdated(-1);
       setApproved(-1);
       setIsCompleted(-1);
+      setIsDeviceUpdating(false);
       deviceUpdater.removeAllListeners();
     });
 
@@ -273,6 +279,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setUpdated(-1);
       setApproved(-1);
       setIsCompleted(-1);
+      setIsDeviceUpdating(false);
       setDisplayErrorMessage(langStrings.ERRORS.DEVICE_UPGRADE_FAILED);
       deviceUpdater.removeAllListeners();
     });
@@ -308,6 +315,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       if (!beforeFlowStart(true)) {
         setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
         setIsCompleted(-1);
+        setIsDeviceUpdating(false);
         return;
       }
       setIsDeviceUpdating(true);
@@ -349,6 +357,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           langStrings.ERRORS.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH
         );
         setIsCompleted(-1);
+        setIsDeviceUpdating(false);
       } else {
         logger.warn('Error in device auth, retrying...');
         logger.error(error);
@@ -390,6 +399,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           errorMessage || langStrings.ERRORS.DEVICE_AUTH_FAILED
         );
         setIsCompleted(-1);
+        setIsDeviceUpdating(false);
       } else {
         logger.warn('Error in device auth, retrying...');
         logger.warn(errorMessage);
@@ -404,6 +414,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     } else if (completed && verified === 2) {
       logger.info('Device auth completed');
       setIsCompleted(2);
+      setIsDeviceUpdating(false);
       resetHooks();
     }
   }, [verified, errorMessage, completed]);
