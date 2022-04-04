@@ -425,23 +425,17 @@ export const usePortfolio: UsePortfolio = () => {
     switch (index) {
       case 0:
         compareFunc = (a, b) => {
-          const comp1 = new BigNumber(a.value);
-          const comp2 = new BigNumber(b.value);
-
-          if (comp1.isGreaterThan(comp2)) return -1;
-          if (comp1.isLessThan(comp2)) return 1;
-          return 0;
+          const numA = new BigNumber(a.value);
+          const numB = new BigNumber(b.value);
+          return numB.comparedTo(numA);
         };
         break;
 
       case 1:
         compareFunc = (a, b) => {
-          const comp1 = new BigNumber(a.value);
-          const comp2 = new BigNumber(b.value);
-
-          if (comp1.isGreaterThan(comp2)) return 1;
-          if (comp1.isLessThan(comp2)) return -1;
-          return 0;
+          const numA = new BigNumber(a.value);
+          const numB = new BigNumber(b.value);
+          return numA.comparedTo(numB);
         };
         break;
 
@@ -463,67 +457,49 @@ export const usePortfolio: UsePortfolio = () => {
 
       case 4:
         compareFunc = (a, b) => {
-          const comp1 = new BigNumber(a.balance);
-          const comp2 = new BigNumber(b.balance);
-
-          if (comp1.isGreaterThan(comp2)) return -1;
-          if (comp1.isLessThan(comp2)) return 1;
-          return 0;
+          const numA = new BigNumber(a.balance);
+          const numB = new BigNumber(b.balance);
+          return numB.comparedTo(numA);
         };
         break;
 
       case 5:
         compareFunc = (a, b) => {
-          const comp1 = new BigNumber(a.balance);
-          const comp2 = new BigNumber(b.balance);
-
-          if (comp1.isGreaterThan(comp2)) return 1;
-          if (comp1.isLessThan(comp2)) return -1;
-          return 0;
+          const numA = new BigNumber(a.balance);
+          const numB = new BigNumber(b.balance);
+          return numA.comparedTo(numB);
         };
         break;
 
       case 6:
         compareFunc = (a, b) => {
-          const comp1 = new BigNumber(a.price);
-          const comp2 = new BigNumber(b.price);
-
-          if (comp1.isGreaterThan(comp2)) return -1;
-          if (comp1.isLessThan(comp2)) return 1;
-          return 0;
+          const numA = new BigNumber(a.price);
+          const numB = new BigNumber(b.price);
+          return numB.comparedTo(numA);
         };
         break;
 
       case 7:
         compareFunc = (a, b) => {
-          const comp1 = new BigNumber(a.price);
-          const comp2 = new BigNumber(b.price);
-
-          if (comp1.isGreaterThan(comp2)) return 1;
-          if (comp1.isLessThan(comp2)) return -1;
-          return 0;
+          const numA = new BigNumber(a.price);
+          const numB = new BigNumber(b.price);
+          return numA.comparedTo(numB);
         };
         break;
 
       case 8:
         compareFunc = (a, b) => {
-          const comp1 = new BigNumber(a.value).dividedBy(total);
-          const comp2 = new BigNumber(b.value).dividedBy(total);
-
-          if (comp1.isGreaterThan(comp2)) return -1;
-          if (comp1.isLessThan(comp2)) return 1;
-          return 0;
+          const numA = new BigNumber(a.value).dividedBy(total);
+          const numB = new BigNumber(b.value).dividedBy(total);
+          return numB.comparedTo(numA);
         };
         break;
 
       case 9:
         compareFunc = (a, b) => {
-          const comp1 = new BigNumber(a.value).dividedBy(total);
-          const comp2 = new BigNumber(b.value).dividedBy(total);
-
-          if (comp1.isGreaterThan(comp2)) return 1;
-          if (comp1.isLessThan(comp2)) return -1;
-          return 0;
+          const numA = new BigNumber(a.value).dividedBy(total);
+          const numB = new BigNumber(b.value).dividedBy(total);
+          return numA.comparedTo(numB);
         };
         break;
 
