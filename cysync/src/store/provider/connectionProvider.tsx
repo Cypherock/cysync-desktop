@@ -391,8 +391,11 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   }, [isDeviceNotReady]);
 
   const beforeFlowStart = (useInternal?: boolean) => {
-    if (isInFlow) {
-      setOpenCancelFlowPrompt(true);
+    if (inBackgroundProcess) {
+      snackbar.showSnackbar(
+        'Please wait while the device is connecting',
+        'warning'
+      );
       return false;
     }
 
@@ -405,11 +408,8 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       return false;
     }
 
-    if (inBackgroundProcess) {
-      snackbar.showSnackbar(
-        'Please wait while the device is connecting',
-        'warning'
-      );
+    if (isInFlow) {
+      setOpenCancelFlowPrompt(true);
       return false;
     }
 
