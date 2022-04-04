@@ -1,4 +1,8 @@
-import { bitcoin as bitcoinServer } from '@cypherock/server-wrapper';
+import { ETHCOINS } from '@cypherock/communication';
+import {
+  bitcoin as bitcoinServer,
+  eth as ethServer
+} from '@cypherock/server-wrapper';
 import Chip from '@material-ui/core/Chip';
 import Grid from '@material-ui/core/Grid';
 import {
@@ -147,12 +151,28 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   };
 
   const openTxn = () => {
-    shell.openExternal(
-      bitcoinServer.transaction.getOpenTxnLink({
-        coinType: txn.coin.toLowerCase(),
-        txHash: txn.hash
-      })
-    );
+    if (txn.ethCoin) {
+      const coin = ETHCOINS[txn.ethCoin];
+
+      if (!coin) {
+        logger.error('Invalid ETH COIN in txn: ' + txn.ethCoin);
+        return;
+      }
+
+      shell.openExternal(
+        ethServer.transaction.getOpenTxnLink({
+          network: coin.network,
+          txHash: txn.hash
+        })
+      );
+    } else {
+      shell.openExternal(
+        bitcoinServer.transaction.getOpenTxnLink({
+          coinType: txn.coin.toLowerCase(),
+          txHash: txn.hash
+        })
+      );
+    }
   };
 
   const getResultIcon = () => {
@@ -271,10 +291,16 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                     {`${i + 1}.`}
                   </Typography>
                   <div>
-                    <Typography color={elem.isMine ? 'secondary' : undefined}>
+                    <Typography
+                      style={{ userSelect: 'text' }}
+                      color={elem.isMine ? 'secondary' : undefined}
+                    >
                       {elem.address}
                     </Typography>
-                    <Typography color={elem.isMine ? 'secondary' : undefined}>
+                    <Typography
+                      style={{ userSelect: 'text' }}
+                      color={elem.isMine ? 'secondary' : undefined}
+                    >
                       {`${txn.coin.toUpperCase()} ${formatCoins(
                         elem.displayValue
                       )}`}
@@ -304,10 +330,16 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                     {`${i + 1}.`}
                   </Typography>
                   <div>
-                    <Typography color={elem.isMine ? 'secondary' : undefined}>
+                    <Typography
+                      style={{ userSelect: 'text' }}
+                      color={elem.isMine ? 'secondary' : undefined}
+                    >
                       {elem.address}
                     </Typography>
-                    <Typography color={elem.isMine ? 'secondary' : undefined}>
+                    <Typography
+                      style={{ userSelect: 'text' }}
+                      color={elem.isMine ? 'secondary' : undefined}
+                    >
                       {`${txn.coin.toUpperCase()} ${formatCoins(
                         elem.displayValue
                       )}`}
@@ -334,7 +366,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             <CopyIcon />
           </IconButton>
         </div>
-        <Typography>{txn.hash}</Typography>
+        <Typography style={{ userSelect: 'text' }}>{txn.hash}</Typography>
       </div>
       <div className={classes.flexCenter}>
         <Button onClick={openTxn} className={classes.button}>
