@@ -251,21 +251,23 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
             DeviceErrorType.CONNECTION_NOT_OPEN
           ].includes(err.errorType)
         ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
+          setDisplayErrorMessage(
+            langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW
+          );
         } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+          setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
         } else if (
           [
             DeviceErrorType.WRITE_TIMEOUT,
             DeviceErrorType.READ_TIMEOUT
           ].includes(err.errorType)
         ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
+          setDisplayErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
         } else {
-          setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+          setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
         }
       } else {
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
       }
       setUpdated(-1);
       setApproved(-1);
@@ -327,7 +329,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   // Trigger device auth when firmware version has changed,
   // update is completed and there is a device connection
   let timeout: NodeJS.Timeout | undefined;
-  let retries = 1;
+  const retries = React.useRef<number>(1);
   const MAX_RETRIES = 3;
 
   const initiateDeviceAuth = async () => {
@@ -348,9 +350,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         inTestApp: inTestApp(deviceState)
       });
     } catch (error) {
-      retries += 1;
+      retries.current += 1;
 
-      if (retries > MAX_RETRIES) {
+      if (retries.current > MAX_RETRIES) {
         logger.warn('Error in device auth, max retries exceeded.');
         logger.error(error);
         setDisplayErrorMessage(
@@ -387,9 +389,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
   useEffect(() => {
     if (verified === -1 || errorMessage) {
-      retries += 1;
+      retries.current += 1;
 
-      if (verified === -1 || retries > MAX_RETRIES) {
+      if (verified === -1 || retries.current > MAX_RETRIES) {
         if (verified === -1) {
           logger.warn('Device auth failed');
         } else {
@@ -414,7 +416,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     } else if (completed && verified === 2) {
       logger.info('Device auth completed');
       setIsCompleted(2);
-      setIsDeviceUpdating(false);
+      setTimeout(() => setIsDeviceUpdating(false), 500);
       resetHooks();
     }
   }, [verified, errorMessage, completed]);
