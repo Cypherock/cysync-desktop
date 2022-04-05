@@ -89,9 +89,9 @@ export const useWalletData: UseWalletData = () => {
       case 0:
         setCoinData(
           [...coins].sort((a, b) => {
-            if (a.displayValue > b.displayValue) return -1;
-            if (a.displayValue < b.displayValue) return 1;
-            return 0;
+            const numA = new BigNumber(a.displayValue);
+            const numB = new BigNumber(b.displayValue);
+            return numB.comparedTo(numA);
           })
         );
         break;
@@ -99,9 +99,9 @@ export const useWalletData: UseWalletData = () => {
       case 1:
         setCoinData(
           [...coins].sort((a, b) => {
-            if (a.displayValue > b.displayValue) return 1;
-            if (a.displayValue < b.displayValue) return -1;
-            return 0;
+            const numA = new BigNumber(a.displayValue);
+            const numB = new BigNumber(b.displayValue);
+            return numA.comparedTo(numB);
           })
         );
         break;
@@ -109,9 +109,9 @@ export const useWalletData: UseWalletData = () => {
       case 2:
         setCoinData(
           [...coins].sort((a, b) => {
-            if (a.coin > b.coin) return 1;
-            if (a.coin < b.coin) return -1;
-            return 0;
+            const numA = new BigNumber(a.coin);
+            const numB = new BigNumber(b.coin);
+            return numA.comparedTo(numB);
           })
         );
         break;
@@ -119,9 +119,9 @@ export const useWalletData: UseWalletData = () => {
       case 3:
         setCoinData(
           [...coins].sort((a, b) => {
-            if (a.coin > b.coin) return -1;
-            if (a.coin < b.coin) return 1;
-            return 0;
+            const numA = new BigNumber(a.coin);
+            const numB = new BigNumber(b.coin);
+            return numB.comparedTo(numA);
           })
         );
         break;
@@ -129,9 +129,9 @@ export const useWalletData: UseWalletData = () => {
       case 4:
         setCoinData(
           [...coins].sort((a, b) => {
-            if (a.displayBalance > b.displayBalance) return -1;
-            if (a.displayBalance < b.displayBalance) return 1;
-            return 0;
+            const numA = new BigNumber(a.displayBalance);
+            const numB = new BigNumber(b.displayBalance);
+            return numB.comparedTo(numA);
           })
         );
         break;
@@ -139,9 +139,9 @@ export const useWalletData: UseWalletData = () => {
       case 5:
         setCoinData(
           [...coins].sort((a, b) => {
-            if (a.displayBalance > b.displayBalance) return 1;
-            if (a.displayBalance < b.displayBalance) return -1;
-            return 0;
+            const numA = new BigNumber(a.displayBalance);
+            const numB = new BigNumber(b.displayBalance);
+            return numA.comparedTo(numB);
           })
         );
         break;
@@ -149,9 +149,9 @@ export const useWalletData: UseWalletData = () => {
       case 6:
         setCoinData(
           [...coins].sort((a, b) => {
-            if (a.displayPrice > b.displayPrice) return -1;
-            if (a.displayPrice < b.displayPrice) return 1;
-            return 0;
+            const numA = new BigNumber(a.displayPrice);
+            const numB = new BigNumber(b.displayPrice);
+            return numB.comparedTo(numA);
           })
         );
         break;
@@ -159,9 +159,9 @@ export const useWalletData: UseWalletData = () => {
       case 7:
         setCoinData(
           [...coins].sort((a, b) => {
-            if (a.displayPrice > b.displayPrice) return 1;
-            if (a.displayPrice < b.displayPrice) return -1;
-            return 0;
+            const numA = new BigNumber(a.displayPrice);
+            const numB = new BigNumber(b.displayPrice);
+            return numA.comparedTo(numB);
           })
         );
         break;

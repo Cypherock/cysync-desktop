@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
 import { transactionDb } from '../database';
@@ -114,33 +115,33 @@ export const useTransactionData: UseTransactionData = () => {
 
       case 4:
         sortFunc = (a, b) => {
-          if (a.amount > b.amount) return -1;
-          if (a.amount < b.amount) return 1;
-          return 0;
+          const numA = new BigNumber(a.amount);
+          const numB = new BigNumber(b.amount);
+          return numB.comparedTo(numA);
         };
         break;
 
       case 5:
         sortFunc = (a, b) => {
-          if (a.amount > b.amount) return 1;
-          if (a.amount < b.amount) return -1;
-          return 0;
+          const numA = new BigNumber(a.amount);
+          const numB = new BigNumber(b.amount);
+          return numA.comparedTo(numB);
         };
         break;
 
       case 6:
         sortFunc = (a, b) => {
-          if (a.displayValue > b.displayValue) return -1;
-          if (a.displayValue < b.displayValue) return 1;
-          return 0;
+          const numA = new BigNumber(a.displayValue);
+          const numB = new BigNumber(b.displayValue);
+          return numB.comparedTo(numA);
         };
         break;
 
       case 7:
         sortFunc = (a, b) => {
-          if (a.displayValue > b.displayValue) return 1;
-          if (a.displayValue < b.displayValue) return -1;
-          return 0;
+          const numA = new BigNumber(a.displayValue);
+          const numB = new BigNumber(b.displayValue);
+          return numA.comparedTo(numB);
         };
         break;
       default:
