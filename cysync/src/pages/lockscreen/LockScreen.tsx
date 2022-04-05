@@ -248,7 +248,7 @@ const LockScreen = (props: any) => {
                   value={values.password}
                   disabled={isLoading}
                   onChange={handleChange('password')}
-                  placeholder="Enter Your Password here"
+                  placeholder="Enter Password"
                   label="Enter Password"
                   InputProps={{
                     endAdornment: (
