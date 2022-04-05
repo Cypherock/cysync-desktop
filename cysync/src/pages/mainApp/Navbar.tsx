@@ -70,10 +70,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     }
   },
   chipLabel: {
-    border: '1px solid rgba(144, 202, 249, 0.7)',
-    color: 'rgba(144, 202, 249, 0.7)',
     borderRadius: '14px',
-    fontSize: '0.8rem',
+    fontSize: '13px',
     padding: '5px 3px 3px 3px',
     margin: ' auto 5px'
   }
@@ -452,15 +450,21 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
           iconGroup={<CySync color={theme.palette.text.primary} />}
         />
         {process.env.NODE_ENV === 'development' && (
-          <span className={classes.chipLabel}>
-            <Typography variant="body2" color="secondary">
+          <span
+            className={classes.chipLabel}
+            style={{ border: '1px solid rgb(144, 202, 249)' }}
+          >
+            <Typography variant="body2" style={{ color: 'rgb(144, 202, 249)' }}>
               Test Build
             </Typography>
           </span>
         )}
         {process.env.SERVER_ENV === 'development' && (
-          <span className={classes.chipLabel}>
-            <Typography variant="body2" color="secondary">
+          <span
+            className={classes.chipLabel}
+            style={{ border: '1px solid rgb(102, 187, 106)' }}
+          >
+            <Typography variant="body2" style={{ color: 'rgb(102, 187, 106)' }}>
               Dev Server
             </Typography>
           </span>
