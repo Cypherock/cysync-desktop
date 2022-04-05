@@ -68,6 +68,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     '100%': {
       transform: 'rotateZ(360deg)'
     }
+  },
+  chipLabel: {
+    border: '1px solid rgba(144, 202, 249, 0.7)',
+    color: 'rgba(144, 202, 249, 0.7)',
+    borderRadius: '14px',
+    fontSize: '0.8rem',
+    padding: '5px 3px 3px 3px',
+    margin: ' auto 5px'
   }
 }));
 
@@ -443,6 +451,20 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
           viewBox="0 0 74 23"
           iconGroup={<CySync color={theme.palette.text.primary} />}
         />
+        {process.env.NODE_ENV === 'development' && (
+          <span className={classes.chipLabel}>
+            <Typography variant="body2" color="secondary">
+              Test Build
+            </Typography>
+          </span>
+        )}
+        {process.env.SERVER_ENV === 'development' && (
+          <span className={classes.chipLabel}>
+            <Typography variant="body2" color="secondary">
+              Dev Server
+            </Typography>
+          </span>
+        )}
       </div>
       <div className={classes.rightContent}>
         <Tooltip title={getSyncToolTip()}>
