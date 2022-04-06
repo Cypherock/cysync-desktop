@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 
 import {
   addressDb,
+  Databases,
+  dbUtil,
   getLatestPriceForCoin,
   priceDb,
-  receiveAddressDb,
   Xpub,
   xpubDb
 } from '../database';
@@ -194,7 +195,10 @@ export const useWalletData: UseWalletData = () => {
     walletId: string
   ) => {
     await addressDb.deleteAll({ xpub, coinType: coin });
-    await receiveAddressDb.deleteAll({ walletId, coinType: coin });
+    await dbUtil(Databases.RECEIVEADDRESS, 'deleteAll', {
+      walletId,
+      coinType: coin
+    });
     await xpubDb.delete(xpub, coin);
     return getAllCoinsFromWallet();
   };

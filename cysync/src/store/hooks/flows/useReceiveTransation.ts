@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
-import { addressDb, receiveAddressDb } from '../../database';
+import { addressDb, Databases, dbUtil } from '../../database';
 import { useI18n, useSocket } from '../../provider';
 
 export interface HandleReceiveTransactionOptions {
@@ -96,7 +96,11 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   ) => {
     logger.info('New receive address', { coinType, walletId, addr });
     addReceiveAddressHook(addr, walletId, coinType);
-    receiveAddressDb.insert({ address: addr, walletId, coinType });
+    dbUtil(Databases.RECEIVEADDRESS, 'insert', {
+      address: addr,
+      walletId,
+      coinType
+    });
   };
 
   const handleReceiveTransaction: UseReceiveTransactionValues['handleReceiveTransaction'] =

@@ -8,7 +8,8 @@ import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
   addressDb,
-  receiveAddressDb,
+  Databases,
+  dbUtil,
   transactionDb,
   walletDb,
   xpubDb
@@ -204,8 +205,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       }
     }
 
-    const allReceiveAddr = await receiveAddressDb.getAll();
-
+    const allReceiveAddr = await dbUtil(Databases.RECEIVEADDRESS, 'getAll');
     for (const receiveAddr of allReceiveAddr) {
       const coin = COINS[receiveAddr.coinType];
       if (coin && coin.isEth) {
@@ -240,7 +240,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       }
     }
 
-    const allReceiveAddr = await receiveAddressDb.getAll();
+    const allReceiveAddr = await dbUtil(Databases.RECEIVEADDRESS, 'getAll');
 
     for (const receiveAddr of allReceiveAddr) {
       const coin = COINS[receiveAddr.coinType];

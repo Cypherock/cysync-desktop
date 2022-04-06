@@ -7,7 +7,6 @@ import {
   dbUtil,
   erc20tokenDb,
   priceDb,
-  receiveAddressDb,
   transactionDb,
   walletDb,
   xpubDb
@@ -52,7 +51,7 @@ const DBCleaupPopup = () => {
         },
         {
           name: 'Receive Address',
-          promise: receiveAddressDb.hasIncompatableData.bind(receiveAddressDb)
+          promise: dbUtil(Databases.RECEIVEADDRESS, 'hasIncompatableData')
         },
         {
           name: 'Notification',
