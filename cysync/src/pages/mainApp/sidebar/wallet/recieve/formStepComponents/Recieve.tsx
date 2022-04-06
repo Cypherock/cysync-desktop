@@ -16,7 +16,7 @@ import QRCode from 'qrcode';
 import React, { useState } from 'react';
 
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
-import { addressDb } from '../../../../../../store/database';
+import { Databases, dbUtil } from '../../../../../../store/database';
 import {
   useCurrentCoin,
   useReceiveTransactionContext,
@@ -109,12 +109,26 @@ const getReceiveAddress = async (
   }
 
   if (coin.isEth) {
-    w = wallet({ coinType, xpub, zpub, addressDB: addressDb });
+    w = wallet({
+      coinType,
+      xpub,
+      zpub,
+      addressDbUtil: (...args: any) => {
+        return dbUtil(Databases.ADDRESS, args);
+      }
+    });
     receiveAddress = (await w.newReceiveAddress()).toUpperCase();
     // To make the first x in lowercase
     receiveAddress = `0x${receiveAddress.slice(2)}`;
   } else {
-    w = wallet({ coinType, xpub, zpub, addressDB: addressDb });
+    w = wallet({
+      coinType,
+      xpub,
+      zpub,
+      addressDbUtil: (...args: any) => {
+        return dbUtil(Databases.ADDRESS, args);
+      }
+    });
     receiveAddress = await w.newReceiveAddress();
   }
   return receiveAddress;

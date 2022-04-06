@@ -28,7 +28,6 @@ import DeleteCoinIcon from '../../../../designSystem/iconGroups/deleteCoin';
 import Dustbin from '../../../../designSystem/iconGroups/dustbin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
 import {
-  addressDb,
   Databases,
   dbUtil,
   erc20tokenDb,
@@ -213,7 +212,10 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
     await deleteHistory(coinDetails);
     await deleteCoin(coinDetails.xpub, coinDetails.coin, walletId);
     tokenList.map(async token => {
-      await addressDb.deleteAll({ xpub: coinDetails.xpub, coinType: token });
+      await dbUtil(Databases.ADDRESS, 'deleteAll', {
+        xpub: coinDetails.xpub,
+        coinType: token
+      });
       await dbUtil(Databases.RECEIVEADDRESS, 'deleteAll', {
         walletId,
         coinType: token

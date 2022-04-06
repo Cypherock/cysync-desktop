@@ -13,7 +13,6 @@ import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../constants/routes';
 import {
-  addressDb,
   Databases,
   dbUtil,
   transactionDb,
@@ -138,7 +137,7 @@ const WalletItem = (props: WalletItemProps) => {
       await walletDb.delete(walletId);
       const allXpubs = await xpubDb.getByWalletId(walletId);
       allXpubs.map(async xpub => {
-        await addressDb.deleteAll({ xpub: xpub.xpub });
+        await dbUtil(Databases.ADDRESS, 'deleteAll', { xpub: xpub.xpub });
       });
       await dbUtil(Databases.RECEIVEADDRESS, 'deleteAll', {
         walletId

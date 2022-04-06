@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import {
-  addressDb,
   Databases,
   dbUtil,
   erc20tokenDb,
@@ -47,7 +46,7 @@ const DBCleaupPopup = () => {
         },
         {
           name: 'Addresses',
-          promise: addressDb.hasIncompatableData.bind(addressDb)
+          promise: dbUtil(Databases.ADDRESS, 'hasIncompatableData')
         },
         {
           name: 'Receive Address',
