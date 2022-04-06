@@ -943,6 +943,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     addBalanceSyncItemFromXpub(xpub, { module, isRefresh: true });
     addHistorySyncItemFromXpub(xpub, { module, isRefresh: true });
     addPriceSyncItemFromXpub(xpub, { module, isRefresh: true });
+    addLatestPriceSyncItemFromXpub(xpub, { module, isRefresh: true });
   };
 
   const addTokenTask = async (
@@ -966,6 +967,10 @@ export const SyncProvider: React.FC = ({ children }) => {
       })
     );
     addPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
+      isRefresh: true,
+      module: 'default'
+    });
+    addLatestPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
       isRefresh: true,
       module: 'default'
     });
