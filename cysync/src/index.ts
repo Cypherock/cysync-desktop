@@ -15,7 +15,6 @@ import path from 'path';
 
 import packageJson from '../package.json';
 
-// Sets config variable on envirnment, must be set before any other import
 import './mainProcess';
 import { handleError, reportCrash } from './mainProcess/crashReporter';
 import logger from './mainProcess/logger';
@@ -28,8 +27,9 @@ import {
   installExtensions,
   rimrafPromise
 } from './mainProcess/utils';
+import { Databases, dbs } from './store/database';
 
-import { dbs } from './store/database';
+// Sets config variable on envirnment, must be set before any other import
 
 const handleMainProcessError = async (error: any) => {
   logger.error('Unhandled error on main process');
@@ -374,8 +374,10 @@ const createWindow = async () => {
 
   ipcMain.handle(
     'database',
-    async (_, dbName: any, fnName: string, arg: any) => {
-      const results = await (dbs as any)[dbName][fnName](arg);
+    async (_, dbName: Databases, fnName: string, ...args: any) => {
+      const results = await (dbs as any)[dbName][fnName].bind(dbs[dbName])(
+        ...args
+      );
       return results;
     }
   );

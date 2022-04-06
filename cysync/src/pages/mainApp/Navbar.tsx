@@ -8,7 +8,6 @@ import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
 import WarningIcon from '@material-ui/icons/Warning';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
-import { ipcRenderer} from 'electron';
 
 import CustomIconButton from '../../designSystem/designComponents/buttons/customIconButton';
 import Icon from '../../designSystem/designComponents/icons/Icon';
@@ -18,6 +17,7 @@ import Analytics from '../../utils/analytics';
 import logger from '../../utils/logger';
 
 import NotificationComponent from './notification';
+import { dbUtil, Databases } from '../../store/database';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -479,8 +479,8 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
         )}
         <button onClick={
           async () => {
-            const result = await ipcRenderer.invoke('database', 'notificationDb', 'getLatest',3);
-            console.log("ipcrendere", result);
+            const result = await dbUtil(Databases.NOTIFICATION, 'getLatest',3);
+            console.log("ipcrenderer", result);
           }
         }>
           <Typography
