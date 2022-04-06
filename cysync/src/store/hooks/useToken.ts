@@ -3,8 +3,9 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
 import {
+  Databases,
+  dbUtil,
   ERC20Token,
-  erc20tokenDb,
   getLatestPriceForCoin,
   priceDb
 } from '../database';
@@ -42,17 +43,35 @@ export const useToken: UseToken = () => {
     priceDb.emitter.on('insert', onChange);
     priceDb.emitter.on('update', onChange);
 
-    erc20tokenDb.emitter.on('insert', onChange);
-    erc20tokenDb.emitter.on('update', onChange);
-    erc20tokenDb.emitter.on('delete', onChange);
+    dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'insert', onChange);
+    dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'update', onChange);
+    dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'delete', onChange);
 
     return () => {
       priceDb.emitter.removeListener('insert', onChange);
       priceDb.emitter.removeListener('update', onChange);
 
-      erc20tokenDb.emitter.removeListener('insert', onChange);
-      erc20tokenDb.emitter.removeListener('update', onChange);
-      erc20tokenDb.emitter.removeListener('delete', onChange);
+      dbUtil(
+        Databases.ERC20TOKEN,
+        'emitter',
+        'removeListener',
+        'insert',
+        onChange
+      );
+      dbUtil(
+        Databases.ERC20TOKEN,
+        'emitter',
+        'removeListener',
+        'update',
+        onChange
+      );
+      dbUtil(
+        Databases.ERC20TOKEN,
+        'emitter',
+        'removeListener',
+        'delete',
+        onChange
+      );
     };
   }, []);
 
@@ -95,9 +114,14 @@ export const useToken: UseToken = () => {
   };
 
   const getAllTokensFromWallet = async (walletId: string, ethCoin: string) => {
-    const res = await erc20tokenDb.getByWalletId(walletId, ethCoin);
+    const res = await dbUtil(
+      Databases.ERC20TOKEN,
+      'getByWalletId',
+      walletId,
+      ethCoin
+    );
     const tokens: string[] = [];
-    res.forEach(coin => {
+    res.forEach((coin: { coin: string }) => {
       tokens.push(coin.coin);
     });
     setTokenList(tokens);

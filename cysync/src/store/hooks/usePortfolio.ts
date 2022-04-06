@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import { getPortfolioCache } from '../../utils/cache';
 import logger from '../../utils/logger';
 import {
-  erc20tokenDb,
+  Databases,
+  dbUtil,
   priceDb,
   Transaction,
   transactionDb,
@@ -80,9 +81,27 @@ export const usePortfolio: UsePortfolio = () => {
   const debouncedRefreshFromDB = useDebouncedFunction(refreshFromDB, 2000);
 
   useEffect(() => {
-    erc20tokenDb.emitter.on('insert', debouncedRefreshFromDB);
-    erc20tokenDb.emitter.on('update', debouncedRefreshFromDB);
-    erc20tokenDb.emitter.on('delete', debouncedRefreshFromDB);
+    dbUtil(
+      Databases.ERC20TOKEN,
+      'emitter',
+      'on',
+      'insert',
+      debouncedRefreshFromDB
+    );
+    dbUtil(
+      Databases.ERC20TOKEN,
+      'emitter',
+      'on',
+      'update',
+      debouncedRefreshFromDB
+    );
+    dbUtil(
+      Databases.ERC20TOKEN,
+      'emitter',
+      'on',
+      'delete',
+      debouncedRefreshFromDB
+    );
 
     priceDb.emitter.on('insert', debouncedRefreshFromDB);
     priceDb.emitter.on('insert', debouncedRefreshFromDB);
@@ -97,9 +116,27 @@ export const usePortfolio: UsePortfolio = () => {
     transactionDb.emitter.on('delete', debouncedRefreshFromDB);
 
     return () => {
-      erc20tokenDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      erc20tokenDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      erc20tokenDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      dbUtil(
+        Databases.ERC20TOKEN,
+        'emitter',
+        'removeListener',
+        'insert',
+        debouncedRefreshFromDB
+      );
+      dbUtil(
+        Databases.ERC20TOKEN,
+        'emitter',
+        'removeListener',
+        'update',
+        debouncedRefreshFromDB
+      );
+      dbUtil(
+        Databases.ERC20TOKEN,
+        'emitter',
+        'removeListener',
+        'delete',
+        debouncedRefreshFromDB
+      );
 
       priceDb.emitter.removeListener('insert', debouncedRefreshFromDB);
       priceDb.emitter.removeListener('insert', debouncedRefreshFromDB);
@@ -139,7 +176,9 @@ export const usePortfolio: UsePortfolio = () => {
 
     if (wallet && wallet !== 'null') {
       if (coin.isErc20Token) {
-        const token = await erc20tokenDb.getByWalletIdandToken(
+        const token = await dbUtil(
+          Databases.ERC20TOKEN,
+          'getByWalletIdandToken',
           wallet,
           coinType
         );
@@ -165,7 +204,11 @@ export const usePortfolio: UsePortfolio = () => {
       );
     } else {
       if (coin.isErc20Token) {
-        const tokens = await erc20tokenDb.getByToken(coinType);
+        const tokens = await dbUtil(
+          Databases.ERC20TOKEN,
+          'getByToken',
+          coinType
+        );
         if (tokens.length === 0) return null;
         for (const token of tokens) {
           totalBalance = totalBalance.plus(token.balance);
@@ -348,7 +391,9 @@ export const usePortfolio: UsePortfolio = () => {
 
         if (walletId && walletId !== 'null') {
           if (coin.isErc20Token) {
-            const token = await erc20tokenDb.getByWalletIdandToken(
+            const token = await dbUtil(
+              Databases.ERC20TOKEN,
+              'getByWalletIdandToken',
               walletId,
               coinType
             );
@@ -363,7 +408,11 @@ export const usePortfolio: UsePortfolio = () => {
             else continue;
           }
         } else if (coin.isErc20Token) {
-          const tokens = await erc20tokenDb.getByToken(coinType);
+          const tokens = await dbUtil(
+            Databases.ERC20TOKEN,
+            'getByToken',
+            coinType
+          );
           if (tokens.length === 0) continue;
           for (const token of tokens) {
             totalBalance = totalBalance.plus(token.balance);

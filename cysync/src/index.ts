@@ -375,9 +375,14 @@ const createWindow = async () => {
   ipcMain.handle(
     'database',
     async (_, dbName: Databases, fnName: string, ...args: any) => {
-      const results = await (dbs as any)[dbName][fnName].bind(dbs[dbName])(
-        ...args
-      );
+      let results;
+      if (fnName === 'emitter') {
+        results = await (dbs as any)[dbName].emitter[args[0]].bind(dbs[dbName])(
+          ...args.slice(1)
+        );
+      } else {
+        results = await (dbs as any)[dbName][fnName].bind(dbs[dbName])(...args);
+      }
       return results;
     }
   );

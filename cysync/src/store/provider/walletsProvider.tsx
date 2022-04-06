@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { erc20tokenDb, walletDb, xpubDb } from '../database';
+import { Databases, dbUtil, walletDb, xpubDb } from '../database';
 
 export interface Coin {
   name: string;
@@ -61,7 +61,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
 
     try {
       const xpubRes = await xpubDb.getAll();
-      const erc20Res = await erc20tokenDb.getAll();
+      const erc20Res = await dbUtil(Databases.ERC20TOKEN, 'getAll');
       const coinTypeList = new Set<string>();
       for (const xpub of xpubRes) {
         coinTypeList.add(xpub.coin);
@@ -108,8 +108,8 @@ export const WalletsProvider: React.FC = ({ children }) => {
     xpubDb.emitter.on('insert', onUpdate);
     xpubDb.emitter.on('delete', onUpdate);
 
-    erc20tokenDb.emitter.on('insert', onUpdate);
-    erc20tokenDb.emitter.on('delete', onUpdate);
+    dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'insert', onUpdate);
+    dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'delete', onUpdate);
 
     return () => {
       logger.verbose('Removed all wallet & xpub DB listners.');
@@ -120,8 +120,20 @@ export const WalletsProvider: React.FC = ({ children }) => {
       xpubDb.emitter.removeListener('insert', onUpdate);
       xpubDb.emitter.removeListener('delete', onUpdate);
 
-      erc20tokenDb.emitter.removeListener('insert', onUpdate);
-      erc20tokenDb.emitter.removeListener('delete', onUpdate);
+      dbUtil(
+        Databases.ERC20TOKEN,
+        'emitter',
+        'removeListener',
+        'insert',
+        onUpdate
+      );
+      dbUtil(
+        Databases.ERC20TOKEN,
+        'emitter',
+        'removeListener',
+        'delete',
+        onUpdate
+      );
     };
   }, []);
 
