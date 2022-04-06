@@ -13,7 +13,7 @@ import CustomButton from '../../../../../designSystem/designComponents/buttons/b
 import CustomCheckBox from '../../../../../designSystem/designComponents/input/checkbox';
 import Input from '../../../../../designSystem/designComponents/input/input';
 import CoinIcons from '../../../../../designSystem/genericComponents/coinIcons';
-import { erc20tokenDb } from '../../../../../store/database';
+import { Databases, dbUtil } from '../../../../../store/database';
 import { useDebouncedFunction } from '../../../../../store/hooks';
 import { useSelectedWallet, useSync } from '../../../../../store/provider';
 
@@ -125,7 +125,7 @@ const AddTokenForm = ({ tokenList, ethCoin, handleClose }: any) => {
   const onContinue = () => {
     const tokensToAdd = tokens.filter(token => token[2]).map(token => token[0]);
     tokensToAdd.forEach(tokenName => {
-      erc20tokenDb.insert({
+      dbUtil(Databases.ERC20TOKEN, 'insert', {
         walletId: selectedWallet.walletId,
         coin: tokenName,
         ethCoin: ethCoin.toLowerCase(),

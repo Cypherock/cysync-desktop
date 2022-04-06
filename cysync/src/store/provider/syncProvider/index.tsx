@@ -622,13 +622,13 @@ export const SyncProvider: React.FC = ({ children }) => {
       }
 
       for (const tokenName of erc20Tokens) {
-        const token = await erc20tokenDb.getOne({
+        const token = await dbUtil(Databases.ERC20TOKEN, 'getOne', {
           walletId: item.walletId,
           coin: tokenName.toLowerCase(),
           ethCoin: item.coinType
         });
         if (!token) {
-          erc20tokenDb.insert({
+          dbUtil(Databases.ERC20TOKEN, 'insert', {
             walletId: item.walletId,
             coin: tokenName.toLowerCase(),
             ethCoin: item.coinType,
@@ -741,7 +741,9 @@ export const SyncProvider: React.FC = ({ children }) => {
             item.isRefresh
           );
           const balance = new BigNumber(balanceRes.data);
-          await erc20tokenDb.updateBalance(
+          await dbUtil(
+            Databases.ERC20TOKEN,
+            'updateBalance',
             item.coinType,
             item.walletId,
             balance.toString()
@@ -879,7 +881,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     module = 'default'
   }) => {
     const allXpubs = await xpubDb.getAll();
-    const tokens = await erc20tokenDb.getAll();
+    const tokens = await dbUtil(Databases.ERC20TOKEN, 'getAll');
 
     for (const xpub of allXpubs) {
       addBalanceSyncItemFromXpub(xpub, { isRefresh, module });
@@ -909,7 +911,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const addPriceRefresh = async ({ isRefresh = false, module = 'default' }) => {
     const allXpubs = await xpubDb.getAll();
-    const tokens = await erc20tokenDb.getAll();
+    const tokens = await dbUtil(Databases.ERC20TOKEN, 'getAll');
 
     for (const xpub of allXpubs) {
       addPriceSyncItemFromXpub(xpub, { isRefresh, module });
