@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import logger from '../../utils/logger';
-import { Notification, notificationDb as NotificationDB } from '../database';
+import { Databases, dbUtil } from '../database';
 
 export interface NotificationContextInterface {
   data: Notification[];
@@ -31,7 +31,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
   const markAllRead = async () => {
     try {
       logger.info('Marking all notifications as read');
-      await NotificationDB.markAllAsRead();
+      await dbUtil(Databases.NOTIFICATION, 'markAllAsRead');
       setHasUnread(false);
     } catch (error) {
       logger.error('Error in marking all notifications as read');
@@ -43,7 +43,11 @@ export const NotificationProvider: React.FC = ({ children }) => {
     setIsLoading(true);
     try {
       logger.info('Fetching latest notifications');
-      const res = await NotificationDB.getLatest(perPageLimit);
+      const res = await dbUtil(
+        Databases.NOTIFICATION,
+        'getLatest',
+        perPageLimit
+      );
       setNotifications(res.notifications);
       setHasNextPage(res.hasNext);
       setHasUnread(res.hasUnread);
@@ -64,7 +68,9 @@ export const NotificationProvider: React.FC = ({ children }) => {
       if (notifications.length > 0)
         lastNotif = notifications[notifications.length - 1];
 
-      const res = await NotificationDB.getAll(
+      const res = await dbUtil(
+        Databases.NOTIFICATION,
+        'getAll',
         lastNotif,
         notifications.length,
         perPageLimit

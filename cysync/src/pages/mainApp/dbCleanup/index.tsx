@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import {
   addressDb,
+  Databases,
+  dbUtil,
   deviceDb,
   erc20tokenDb,
-  notificationDb,
   priceDb,
   receiveAddressDb,
   transactionDb,
@@ -56,7 +57,7 @@ const DBCleaupPopup = () => {
         },
         {
           name: 'Notification',
-          promise: notificationDb.hasIncompatableData.bind(notificationDb)
+          promise: dbUtil(Databases.NOTIFICATION, 'hasIncompatableData')
         },
         {
           name: 'Device',
