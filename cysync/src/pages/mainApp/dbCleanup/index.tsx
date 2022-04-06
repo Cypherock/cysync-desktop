@@ -5,7 +5,6 @@ import {
   addressDb,
   Databases,
   dbUtil,
-  deviceDb,
   erc20tokenDb,
   priceDb,
   receiveAddressDb,
@@ -61,7 +60,7 @@ const DBCleaupPopup = () => {
         },
         {
           name: 'Device',
-          promise: deviceDb.hasIncompatableData.bind(deviceDb)
+          promise: dbUtil(Databases.DEVICE, 'hasIncompatableData')
         }
       ];
 

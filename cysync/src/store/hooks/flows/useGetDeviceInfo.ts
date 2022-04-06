@@ -12,7 +12,7 @@ import { useState } from 'react';
 import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
-import { deviceDb } from '../../database';
+import { Databases, dbUtil } from '../../database';
 import { useI18n } from '../../provider';
 
 export type UpdateRequiredType = 'app' | 'device' | 'all' | undefined;
@@ -190,7 +190,9 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
         connection,
         packetVersion: PacketVersionMap.v1,
         sdkVersion: '',
-        deviceDB: deviceDb
+        deviceDbUtil: (...args: any) => {
+          return dbUtil(Databases.DEVICE, args[0], ...args.splice(1));
+        }
       });
       setIsInFlow(false);
       logger.info('GetDeviceInfo: Completed.');

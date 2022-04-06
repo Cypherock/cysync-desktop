@@ -9,7 +9,7 @@ import { useState } from 'react';
 import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
-import { deviceDb } from '../../database';
+import { Databases, dbUtil } from '../../database';
 import { useI18n } from '../../provider';
 
 export interface HandleDeviceAuthOptions {
@@ -72,7 +72,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
         version: firmwareVersion,
         isAuth: auth
       };
-      deviceDb.insert(device);
+      dbUtil(Databases.DEVICE, 'insert', device);
     } catch (error) {
       logger.error('Error while inserting device auth data');
       logger.error(error);
