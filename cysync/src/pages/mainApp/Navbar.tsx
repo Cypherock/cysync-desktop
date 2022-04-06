@@ -8,6 +8,7 @@ import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
 import WarningIcon from '@material-ui/icons/Warning';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
+import { ipcRenderer} from 'electron';
 
 import CustomIconButton from '../../designSystem/designComponents/buttons/customIconButton';
 import Icon from '../../designSystem/designComponents/icons/Icon';
@@ -476,6 +477,19 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
             }}
           />
         )}
+        <button onClick={
+          async () => {
+            const result = await ipcRenderer.invoke('database', 'notificationDb', 'getLatest',3);
+            console.log("ipcrendere", result);
+          }
+        }>
+          <Typography
+            variant="body2"
+            className={classes.text}
+            color="secondary">
+            click
+          </Typography>
+        </button>
       </div>
       <div className={classes.rightContent}>
         <Tooltip title={getSyncToolTip()}>

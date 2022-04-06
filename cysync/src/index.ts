@@ -29,6 +29,8 @@ import {
   rimrafPromise
 } from './mainProcess/utils';
 
+import { dbs } from './store/database';
+
 const handleMainProcessError = async (error: any) => {
   logger.error('Unhandled error on main process');
   logger.error(error);
@@ -369,6 +371,14 @@ const createWindow = async () => {
       app.exit(0);
     }
   });
+
+  ipcMain.handle(
+    'database',
+    async (_, dbName: any, fnName: string, arg: any) => {
+      const results = await (dbs as any)[dbName][fnName](arg);
+      return results;
+    }
+  );
 };
 
 app.on('ready', async () => {
