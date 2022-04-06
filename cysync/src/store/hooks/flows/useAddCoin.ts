@@ -167,7 +167,7 @@ export const useAddCoin: UseAddCoin = () => {
           xpub: xpub.xpub,
           zpub: xpub.zpub,
           addressDbUtil: (...args: any) => {
-            return dbUtil(Databases.ADDRESS, args);
+            return dbUtil(Databases.ADDRESS, args[0], ...args.slice(1));
           }
         });
         await wallet.setupNewWallet();

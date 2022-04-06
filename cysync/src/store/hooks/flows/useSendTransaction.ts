@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
-import { addressDb, transactionDb } from '../../database';
+import { Databases, dbUtil, transactionDb } from '../../database';
 import { useI18n } from '../../provider';
 
 export const changeFormatOfOutputList = (
@@ -562,7 +562,9 @@ export const useSendTransaction: UseSendTransaction = () => {
           connection,
           packetVersion,
           sdkVersion,
-          addressDB: addressDb,
+          addressDbUtil: (...args: any) => {
+            return dbUtil(Databases.ADDRESS, args[0], ...args.slice(1));
+          },
           walletId,
           pinExists,
           passphraseExists,

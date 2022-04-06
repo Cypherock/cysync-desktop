@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
-import { addressDb, Databases, dbUtil } from '../../database';
+import { Databases, dbUtil } from '../../database';
 import { useI18n, useSocket } from '../../provider';
 
 export interface HandleReceiveTransactionOptions {
@@ -307,7 +307,9 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           connection,
           packetVersion,
           sdkVersion,
-          addressDB: addressDb,
+          addressDbUtil: (...args: any) => {
+            return dbUtil(Databases.ADDRESS, args[0], ...args.slice(1));
+          },
           walletId,
           coinType,
           xpub,

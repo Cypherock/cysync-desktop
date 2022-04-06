@@ -24,7 +24,8 @@ import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
 import {
-  addressDb,
+  Databases,
+  dbUtil,
   erc20tokenDb,
   latestPriceDb,
   priceDb,
@@ -414,7 +415,9 @@ export const SyncProvider: React.FC = ({ children }) => {
                 : [],
               walletId: item.walletId,
               coinType: item.coinType,
-              addressDB: addressDb,
+              addressDbUtil: (...args: any) => {
+                return dbUtil(Databases.ADDRESS, args[0], ...args.slice(1));
+              },
               walletName: item.walletName
             });
             // No need to retry if the inserting fails because it'll produce the same error.

@@ -7,7 +7,6 @@ import io, { Socket } from 'socket.io-client';
 import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
-  addressDb,
   Databases,
   dbUtil,
   transactionDb,
@@ -280,7 +279,9 @@ export const SocketProvider: React.FC = ({ children }) => {
                   addresses: [],
                   walletId: payload.walletId,
                   coinType: payload.coinType,
-                  addressDB: addressDb
+                  addressDbUtil: (...args: any) => {
+                    return dbUtil(Databases.ADDRESS, args[0], ...args.slice(1));
+                  }
                 });
                 if (payload.tokenAbbr) {
                   addBalanceSyncItemFromXpub(xpub, {
@@ -401,7 +402,10 @@ export const SocketProvider: React.FC = ({ children }) => {
     let walletId: string | undefined;
     let xpub: string | undefined;
 
-    const addressDetailsList = await addressDb.getAll({ address, coinType });
+    const addressDetailsList = await dbUtil(Databases.ADDRESS, 'getAll', {
+      address,
+      coinType
+    });
     if (addressDetailsList && addressDetailsList.length > 0) {
       const addressDetails = addressDetailsList[0];
       if (addressDetails.xpub) {
@@ -509,7 +513,9 @@ export const SocketProvider: React.FC = ({ children }) => {
                 addresses: [],
                 walletId: address.walletId,
                 coinType: payload.coinType,
-                addressDB: addressDb
+                addressDbUtil: (...args: any) => {
+                  return dbUtil(Databases.ADDRESS, args[0], ...args.slice(1));
+                }
               });
 
               if (isConfirmed) {

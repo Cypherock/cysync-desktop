@@ -114,7 +114,7 @@ const getReceiveAddress = async (
       xpub,
       zpub,
       addressDbUtil: (...args: any) => {
-        return dbUtil(Databases.ADDRESS, args);
+        return dbUtil(Databases.ADDRESS, args[0], ...args.slice(1));
       }
     });
     receiveAddress = (await w.newReceiveAddress()).toUpperCase();
@@ -126,7 +126,7 @@ const getReceiveAddress = async (
       xpub,
       zpub,
       addressDbUtil: (...args: any) => {
-        return dbUtil(Databases.ADDRESS, args);
+        return dbUtil(Databases.ADDRESS, args[0], ...args.slice(1));
       }
     });
     receiveAddress = await w.newReceiveAddress();
