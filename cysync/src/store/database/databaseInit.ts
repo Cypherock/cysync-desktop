@@ -39,7 +39,8 @@ export const dbs = {
   addressDb,
   receiveAddressDb,
   notificationDb,
-  deviceDb
+  deviceDb,
+  passEnDb
 };
 
 export enum Databases {
@@ -51,7 +52,8 @@ export enum Databases {
   ADDRESS = 'addressDb',
   RECEIVEADDRESS = 'receiveAddressDb',
   NOTIFICATION = 'notificationDb',
-  DEVICE = 'deviceDb'
+  DEVICE = 'deviceDb',
+  PASSEN = 'passEnDb'
 }
 
 export const dbUtil = async (
@@ -66,7 +68,7 @@ export const dbUtil = async (
  * Loads the data from disk. To be used only for encrypted databases.
  */
 export const loadDatabases = async () => {
-  await xpubDb.loadData();
+  await dbUtil(Databases.XPUB, 'loadData');
 };
 
 export * from '@cypherock/database';

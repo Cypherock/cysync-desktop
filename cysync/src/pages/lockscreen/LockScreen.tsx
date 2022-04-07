@@ -23,7 +23,7 @@ import CySync from '../../designSystem/iconGroups/cySync';
 import CySyncRound from '../../designSystem/iconGroups/cySyncRound';
 import ErrorExclamation from '../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../designSystem/iconGroups/iconConstants';
-import { loadDatabases, passEnDb } from '../../store/database';
+import { Databases, dbUtil, loadDatabases } from '../../store/database';
 import { FeedbackState, useFeedback } from '../../store/provider';
 import { generateSinglePasswordHash, verifyPassword } from '../../utils/auth';
 import { triggerClearData } from '../../utils/clearData';
@@ -120,7 +120,11 @@ const LockScreen = (props: any) => {
         ...values,
         error: ''
       });
-      passEnDb.setPassHash(generateSinglePasswordHash(values.password.trim()));
+      dbUtil(
+        Databases.PASSEN,
+        'setPassHash',
+        generateSinglePasswordHash(values.password.trim())
+      );
       await loadDatabases();
       props.handleClose();
     } else {

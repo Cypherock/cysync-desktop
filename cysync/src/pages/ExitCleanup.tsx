@@ -4,7 +4,7 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import { ipcRenderer } from 'electron';
 import React, { useEffect, useState } from 'react';
 
-import { passEnDb } from '../store/database';
+import { Databases, dbUtil } from '../store/database';
 import { useConnection } from '../store/provider';
 import logger from '../utils/logger';
 
@@ -31,7 +31,7 @@ const ExitCleanup = () => {
           packetVersion: devicePacketVersion,
           sdkVersion: deviceSdkVersion
         });
-        passEnDb.destroyHash();
+        dbUtil(Databases.PASSEN, 'destroyHash');
       } catch (error) {
         logger.error('Error in exit cleanup');
         logger.error(error);
