@@ -6,7 +6,7 @@ import io, { Socket } from 'socket.io-client';
 
 import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
-import { Databases, dbUtil, transactionDb, xpubDb } from '../../database';
+import { Databases, dbUtil, xpubDb } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
 
@@ -183,7 +183,7 @@ export const SocketProvider: React.FC = ({ children }) => {
   ) => {
     logger.info('Adding initial socket hooks');
 
-    const allPendingTxns = await transactionDb.getAll({ status: 'PENDING' });
+    const allPendingTxns = await dbUtil(Databases.TRANSACTION, 'getAll', { status: 'PENDING' });
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
@@ -218,7 +218,7 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket?: BlockbookSocket
   ) => {
     logger.info('Adding initial blockbook web subscriptions');
-    const allPendingTxns = await transactionDb.getAll({ status: 'PENDING' });
+    const allPendingTxns = await dbUtil(Databases.TRANSACTION, 'getAll', { status: 'PENDING' });
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
@@ -271,7 +271,7 @@ export const SocketProvider: React.FC = ({ children }) => {
               );
 
               if (xpub) {
-                transactionDb.insertFromFullTxn({
+                dbUtil(Databases.TRANSACTION, 'insertFromFullTxn', {
                   txn: payload,
                   xpub: xpub.xpub,
                   addresses: [],
@@ -293,8 +293,8 @@ export const SocketProvider: React.FC = ({ children }) => {
                 }
 
                 // Update the confirmation if the database has a txn with same hash
-                await transactionDb.updateConfirmations(payload);
-                const allTxWithSameHash = await transactionDb.getAll({
+                await dbUtil(Databases.TRANSACTION, 'updateConfirmations', payload);
+                const allTxWithSameHash = await dbUtil(Databases.TRANSACTION, 'getAll', {
                   hash: payload.hash
                 });
                 if (allTxWithSameHash && allTxWithSameHash.length > 0) {
@@ -344,7 +344,7 @@ export const SocketProvider: React.FC = ({ children }) => {
         try {
           logger.info('Received txn confirmation hook', { payload });
           if (payload && payload.hash && payload.coinType) {
-            const confirmations = await transactionDb.updateConfirmations(
+            const confirmations = await dbUtil(Databases.TRANSACTION, 'updateConfirmations', 
               payload
             );
             logger.info('Txn confirmed', {
@@ -505,7 +505,7 @@ export const SocketProvider: React.FC = ({ children }) => {
             );
 
             if (xpub) {
-              transactionDb.insertFromBlockbookTxn({
+              dbUtil(Databases.TRANSACTION, 'insertFromBlockbookTxn', {
                 txn: payload.txn,
                 xpub: xpub.xpub,
                 addresses: [],
@@ -537,7 +537,7 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket.on('block', async (payload: any) => {
       try {
         if (payload && payload.coinType) {
-          const pendingTxns = await transactionDb.getAll({
+          const pendingTxns = await dbUtil(Databases.TRANSACTION, 'getAll' ,{
             coin: payload.coinType,
             status: 'PENDING'
           });

@@ -27,7 +27,7 @@ import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import DeleteCoinIcon from '../../../../designSystem/iconGroups/deleteCoin';
 import Dustbin from '../../../../designSystem/iconGroups/dustbin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
-import { Databases, dbUtil, transactionDb } from '../../../../store/database';
+import { Databases, dbUtil } from '../../../../store/database';
 import { useToken } from '../../../../store/hooks';
 import {
   useReceiveTransaction,
@@ -215,7 +215,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
         walletId,
         coinType: token
       });
-      await transactionDb.deleteByCoin(walletId, token);
+      await dbUtil(Databases.TRANSACTION, 'deleteByCoin', walletId, token);
     });
     await dbUtil(Databases.ERC20TOKEN, 'deleteAll', {
       walletId: selectedWallet.walletId,

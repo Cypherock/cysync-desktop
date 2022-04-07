@@ -3,12 +3,7 @@ import { Xpub } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';
-import {
-  Databases,
-  dbUtil,
-  getLatestPriceForCoins,
-  transactionDb
-} from '../database';
+import { Databases, dbUtil, getLatestPriceForCoins } from '../database';
 
 import { DisplayInputOutput, DisplayTransaction } from './types';
 
@@ -38,7 +33,7 @@ export const useHistory: UseHistory = () => {
     if (coinType) {
       query.coin = coinType;
     }
-    const res = await transactionDb.getAll(query, {
+    const res = await dbUtil(Databases.TRANSACTION, 'getAll', query, {
       sort: 'confirmed',
       order: 'd'
     });
@@ -76,7 +71,7 @@ export const useHistory: UseHistory = () => {
       }
 
       if (txn.inputs) {
-        inputs = txn.inputs.map(elem => {
+        inputs = txn.inputs.map((elem: { value: any }) => {
           const val = new BigNumber(elem.value || 0)
             .dividedBy(coin.multiplier)
             .toString();
@@ -89,7 +84,7 @@ export const useHistory: UseHistory = () => {
       }
 
       if (txn.outputs) {
-        outputs = txn.outputs.map(elem => {
+        outputs = txn.outputs.map((elem: { value: any }) => {
           const val = new BigNumber(elem.value || 0)
             .dividedBy(coin.multiplier)
             .toString();
@@ -149,7 +144,12 @@ export const useHistory: UseHistory = () => {
   };
 
   const deleteCoinHistory = (xpub: Xpub) => {
-    return transactionDb.deleteByCoin(xpub.walletId, xpub.coin);
+    return dbUtil(
+      Databases.TRANSACTION,
+      'deleteByCoin',
+      xpub.walletId,
+      xpub.coin
+    );
   };
 
   return {

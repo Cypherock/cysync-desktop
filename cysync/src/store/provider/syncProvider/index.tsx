@@ -26,7 +26,6 @@ import logger from '../../../utils/logger';
 import {
   Databases,
   dbUtil,
-  transactionDb,
   xpubDb,
   latestPriceDb
 } from '../../database';
@@ -138,7 +137,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         .createHash('sha256')
         .update(xpub.xpub)
         .digest('base64');
-      const transactionHistory = await transactionDb.getAll(
+      const transactionHistory = await dbUtil(Databases.TRANSACTION, 'getAll' ,
         {
           walletId: xpub.walletId,
           walletName,
@@ -169,7 +168,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           .createHash('sha256')
           .update(xpub.zpub)
           .digest('base64');
-        const ztransactionHistory = await transactionDb.getAll(
+        const ztransactionHistory = await dbUtil(Databases.TRANSACTION, 'getAll' ,
           {
             walletId: xpub.walletId,
             walletName: zwalletName,
@@ -405,7 +404,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       if (response.data.transactions) {
         for (const txn of response.data.transactions) {
           try {
-            await transactionDb.insertFromBlockbookTxn({
+            await dbUtil(Databases.TRANSACTION, 'insertFromBlockbookTxn', {
               txn,
               xpub: item.xpub,
               addresses: response.data.tokens
@@ -611,7 +610,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       for (const txn of history) {
         try {
-          await transactionDb.insert(txn);
+          await dbUtil(Databases.TRANSACTION, 'insert' ,txn);
           // No need to retry if the inserting fails because it'll produce the same error.
         } catch (error) {
           logger.error('Error while inserting transaction in DB');
@@ -1003,7 +1002,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const intervals = useRef<NodeJS.Timeout[]>([]);
   useEffect(() => {
-    transactionDb.failExpiredTxn();
+    dbUtil(Databases.TRANSACTION, 'failExpiredTxn');
     setupInitial();
 
     // Refresh after 60 mins
@@ -1015,7 +1014,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             try {
               addPriceRefresh({ isRefresh: true, module: 'refresh' });
               await notifications.getLatest();
-              await transactionDb.failExpiredTxn();
+              await dbUtil(Databases.TRANSACTION, 'failExpiredTxn');
             } catch (error) {
               logger.error('Sync: Error in refresh');
               logger.error(error);

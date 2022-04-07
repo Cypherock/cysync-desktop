@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
-import { transactionDb } from '../database';
+import { Databases, dbUtil } from '../database';
 
 import { DisplayTransaction } from './types';
 import { useDebouncedFunction } from './useDebounce';
@@ -64,14 +64,50 @@ export const useTransactionData: UseTransactionData = () => {
   );
 
   useEffect(() => {
-    transactionDb.emitter.on('insert', debouncedRefreshFromDB);
-    transactionDb.emitter.on('update', debouncedRefreshFromDB);
-    transactionDb.emitter.on('delete', debouncedRefreshFromDB);
+    dbUtil(
+      Databases.TRANSACTION,
+      'emitter',
+      'on',
+      'insert',
+      debouncedRefreshFromDB
+    );
+    dbUtil(
+      Databases.TRANSACTION,
+      'emitter',
+      'on',
+      'update',
+      debouncedRefreshFromDB
+    );
+    dbUtil(
+      Databases.TRANSACTION,
+      'emitter',
+      'on',
+      'delete',
+      debouncedRefreshFromDB
+    );
 
     return () => {
-      transactionDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      transactionDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      transactionDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      dbUtil(
+        Databases.TRANSACTION,
+        'emitter',
+        'removeListener',
+        'insert',
+        debouncedRefreshFromDB
+      );
+      dbUtil(
+        Databases.TRANSACTION,
+        'emitter',
+        'removeListener',
+        'update',
+        debouncedRefreshFromDB
+      );
+      dbUtil(
+        Databases.TRANSACTION,
+        'emitter',
+        'removeListener',
+        'delete',
+        debouncedRefreshFromDB
+      );
     };
   }, []);
 

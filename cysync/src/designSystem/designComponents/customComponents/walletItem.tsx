@@ -15,7 +15,6 @@ import Routes from '../../../constants/routes';
 import {
   Databases,
   dbUtil,
-  transactionDb,
   xpubDb
 } from '../../../store/database';
 import logger from '../../../utils/logger';
@@ -142,7 +141,7 @@ const WalletItem = (props: WalletItemProps) => {
         walletId
       });
       await xpubDb.deleteWallet(walletId);
-      await transactionDb.deleteWallet(walletId);
+      await dbUtil(Databases.TRANSACTION, 'deleteWallet', walletId);
       navigate(Routes.wallet.index);
       setDeleteOpen(false);
       handleClose();

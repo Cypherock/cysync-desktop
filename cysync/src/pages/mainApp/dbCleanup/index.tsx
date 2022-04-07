@@ -4,7 +4,6 @@ import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import {
   Databases,
   dbUtil,
-  transactionDb,
   xpubDb
 } from '../../../store/database';
 import Analytics from '../../../utils/analytics';
@@ -23,7 +22,7 @@ const DBCleaupPopup = () => {
       const promiseList = [
         {
           name: 'History',
-          promise: transactionDb.hasIncompatableData.bind(transactionDb)
+          promise: dbUtil(Databases.TRANSACTION, 'hasIncompatableData')
         },
         {
           name: 'Xpub',

@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
-import { Databases, dbUtil, transactionDb } from '../../database';
+import { Databases, dbUtil } from '../../database';
 import { useI18n } from '../../provider';
 
 export const changeFormatOfOutputList = (
@@ -700,7 +700,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           blockHeight: -1,
           ethCoin: coin
         };
-        transactionDb.insert(feeTxn);
+        dbUtil(Databases.TRANSACTION, 'insert', feeTxn);
       } else {
         tx = {
           hash: txHash.toLowerCase(),
@@ -718,7 +718,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputs: formattedOutputs
         };
       }
-      transactionDb.insert(tx);
+      dbUtil(Databases.TRANSACTION, 'insert', tx);
     } catch (error) {
       logger.error('Error in onTxnBroadcast');
       logger.error(error);

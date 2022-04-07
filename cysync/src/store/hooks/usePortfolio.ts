@@ -4,13 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { getPortfolioCache } from '../../utils/cache';
 import logger from '../../utils/logger';
-import {
-  Databases,
-  dbUtil,
-  Transaction,
-  transactionDb,
-  xpubDb
-} from '../database';
+import { Databases, dbUtil, Transaction, xpubDb } from '../database';
 
 import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';
 import { useDebouncedFunction } from './useDebounce';
@@ -110,9 +104,27 @@ export const usePortfolio: UsePortfolio = () => {
     xpubDb.emitter.on('delete', debouncedRefreshFromDB);
     xpubDb.emitter.on('delete', debouncedRefreshFromDB);
 
-    transactionDb.emitter.on('insert', debouncedRefreshFromDB);
-    transactionDb.emitter.on('update', debouncedRefreshFromDB);
-    transactionDb.emitter.on('delete', debouncedRefreshFromDB);
+    dbUtil(
+      Databases.TRANSACTION,
+      'emitter',
+      'on',
+      'insert',
+      debouncedRefreshFromDB
+    );
+    dbUtil(
+      Databases.TRANSACTION,
+      'emitter',
+      'on',
+      'update',
+      debouncedRefreshFromDB
+    );
+    dbUtil(
+      Databases.TRANSACTION,
+      'emitter',
+      'on',
+      'delete',
+      debouncedRefreshFromDB
+    );
 
     return () => {
       dbUtil(
@@ -163,9 +175,27 @@ export const usePortfolio: UsePortfolio = () => {
       xpubDb.emitter.removeListener('delete', debouncedRefreshFromDB);
       xpubDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
-      transactionDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      transactionDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      transactionDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      dbUtil(
+        Databases.TRANSACTION,
+        'emitter',
+        'removeListener',
+        'insert',
+        debouncedRefreshFromDB
+      );
+      dbUtil(
+        Databases.TRANSACTION,
+        'emitter',
+        'removeListener',
+        'update',
+        debouncedRefreshFromDB
+      );
+      dbUtil(
+        Databases.TRANSACTION,
+        'emitter',
+        'removeListener',
+        'delete',
+        debouncedRefreshFromDB
+      );
     };
   }, []);
 
@@ -210,7 +240,9 @@ export const usePortfolio: UsePortfolio = () => {
         else return null;
       }
 
-      transactionHistory = await transactionDb.getAll(
+      transactionHistory = await dbUtil(
+        Databases.TRANSACTION,
+        'getAll',
         {
           walletId: wallet,
           coin: coinType,
@@ -240,7 +272,9 @@ export const usePortfolio: UsePortfolio = () => {
         }
       }
 
-      transactionHistory = await transactionDb.getAll(
+      transactionHistory = await dbUtil(
+        Databases.TRANSACTION,
+        'getAll',
         { coin: coinType, excludeFailed: true, excludePending: true },
         { sort: 'confirmed', order: 'd' }
       );
