@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { getPortfolioCache } from '../../utils/cache';
 import logger from '../../utils/logger';
-import { Databases, dbUtil, Transaction, xpubDb } from '../database';
+import { Databases, dbUtil, Transaction } from '../database';
 
 import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';
 import { useDebouncedFunction } from './useDebounce';
@@ -100,9 +100,9 @@ export const usePortfolio: UsePortfolio = () => {
     dbUtil(Databases.PRICE, 'emitter', 'on', 'update', debouncedRefreshFromDB);
     dbUtil(Databases.PRICE, 'emitter', 'on', 'delete', debouncedRefreshFromDB);
 
-    xpubDb.emitter.on('update', debouncedRefreshFromDB);
-    xpubDb.emitter.on('delete', debouncedRefreshFromDB);
-    xpubDb.emitter.on('delete', debouncedRefreshFromDB);
+    dbUtil(Databases.XPUB, 'emitter', 'on', 'insert', debouncedRefreshFromDB);
+    dbUtil(Databases.XPUB, 'emitter', 'on', 'update', debouncedRefreshFromDB);
+    dbUtil(Databases.XPUB, 'emitter', 'on', 'delete', debouncedRefreshFromDB);
 
     dbUtil(
       Databases.TRANSACTION,
@@ -171,9 +171,27 @@ export const usePortfolio: UsePortfolio = () => {
         debouncedRefreshFromDB
       );
 
-      xpubDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      xpubDb.emitter.removeListener('delete', debouncedRefreshFromDB);
-      xpubDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      dbUtil(
+        Databases.XPUB,
+        'emitter',
+        'removeListener',
+        'insert',
+        debouncedRefreshFromDB
+      );
+      dbUtil(
+        Databases.XPUB,
+        'emitter',
+        'removeListener',
+        'update',
+        debouncedRefreshFromDB
+      );
+      dbUtil(
+        Databases.XPUB,
+        'emitter',
+        'removeListener',
+        'delete',
+        debouncedRefreshFromDB
+      );
 
       dbUtil(
         Databases.TRANSACTION,
@@ -232,7 +250,12 @@ export const usePortfolio: UsePortfolio = () => {
         if (token) totalBalance = new BigNumber(token.balance);
         else return null;
       } else {
-        const xpub = await xpubDb.getByWalletIdandCoin(wallet, coinType);
+        const xpub = await dbUtil(
+          Databases.XPUB,
+          'getByWalletIdandCoin',
+          wallet,
+          coinType
+        );
         if (xpub)
           totalBalance = new BigNumber(
             xpub.totalBalance ? xpub.totalBalance.balance : 0
@@ -263,7 +286,7 @@ export const usePortfolio: UsePortfolio = () => {
           totalBalance = totalBalance.plus(token.balance);
         }
       } else {
-        const allCoins = await xpubDb.getByCoin(coinType);
+        const allCoins = await dbUtil(Databases.XPUB, 'getByCoin', coinType);
         if (!allCoins || allCoins.length === 0) return null;
         for (const xpub of allCoins) {
           totalBalance = totalBalance.plus(
@@ -451,7 +474,12 @@ export const usePortfolio: UsePortfolio = () => {
             if (token) totalBalance = new BigNumber(token.balance);
             else continue;
           } else {
-            const xpub = await xpubDb.getByWalletIdandCoin(walletId, coinType);
+            const xpub = await dbUtil(
+              Databases.XPUB,
+              'getByWalletIdandCoin',
+              walletId,
+              coinType
+            );
             if (xpub)
               totalBalance = new BigNumber(
                 xpub.totalBalance ? xpub.totalBalance.balance : 0
@@ -469,7 +497,11 @@ export const usePortfolio: UsePortfolio = () => {
             totalBalance = totalBalance.plus(token.balance);
           }
         } else {
-          const coinsFromDB = await xpubDb.getByCoin(coinType);
+          const coinsFromDB = await dbUtil(
+            Databases.XPUB,
+            'getByCoin',
+            coinType
+          );
           if (coinsFromDB.length === 0) continue;
           for (const c of coinsFromDB) {
             totalBalance = totalBalance.plus(

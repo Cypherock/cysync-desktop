@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
-import {
-  Databases,
-  dbUtil,
-  xpubDb
-} from '../../../store/database';
+import { Databases, dbUtil } from '../../../store/database';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
@@ -22,39 +18,43 @@ const DBCleaupPopup = () => {
       const promiseList = [
         {
           name: 'History',
-          promise: dbUtil(Databases.TRANSACTION, 'hasIncompatableData')
+          promise: async () =>
+            dbUtil(Databases.TRANSACTION, 'hasIncompatableData')
         },
         {
           name: 'Xpub',
-          promise: xpubDb.hasIncompatableData.bind(xpubDb)
+          promise: async () => dbUtil(Databases.XPUB, 'hasIncompatableData')
         },
         {
           name: 'Wallet',
-          promise: dbUtil(Databases.WALLET, 'hasIncompatableData')
+          promise: async () => dbUtil(Databases.WALLET, 'hasIncompatableData')
         },
         {
           name: 'Prices',
-          promise: dbUtil(Databases.PRICE, 'hasIncompatableData')
+          promise: async () => dbUtil(Databases.PRICE, 'hasIncompatableData')
         },
         {
           name: 'ERC20 Tokens',
-          promise: dbUtil(Databases.ERC20TOKEN, 'hasIncompatableData')
+          promise: async () =>
+            dbUtil(Databases.ERC20TOKEN, 'hasIncompatableData')
         },
         {
           name: 'Addresses',
-          promise: dbUtil(Databases.ADDRESS, 'hasIncompatableData')
+          promise: async () => dbUtil(Databases.ADDRESS, 'hasIncompatableData')
         },
         {
           name: 'Receive Address',
-          promise: dbUtil(Databases.RECEIVEADDRESS, 'hasIncompatableData')
+          promise: async () =>
+            dbUtil(Databases.RECEIVEADDRESS, 'hasIncompatableData')
         },
         {
           name: 'Notification',
-          promise: dbUtil(Databases.NOTIFICATION, 'hasIncompatableData')
+          promise: async () =>
+            dbUtil(Databases.NOTIFICATION, 'hasIncompatableData')
         },
         {
           name: 'Device',
-          promise: dbUtil(Databases.DEVICE, 'hasIncompatableData')
+          promise: async () => dbUtil(Databases.DEVICE, 'hasIncompatableData')
         }
       ];
 

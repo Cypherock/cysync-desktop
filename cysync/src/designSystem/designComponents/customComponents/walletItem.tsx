@@ -12,11 +12,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../constants/routes';
-import {
-  Databases,
-  dbUtil,
-  xpubDb
-} from '../../../store/database';
+import { Databases, dbUtil } from '../../../store/database';
 import logger from '../../../utils/logger';
 import DeleteWalletIcon from '../../iconGroups/deleteWallet';
 import CustomIconButton from '../buttons/customIconButton';
@@ -133,14 +129,14 @@ const WalletItem = (props: WalletItemProps) => {
         walletDetails: { walletId }
       } = props;
       await dbUtil(Databases.WALLET, 'delete', walletId);
-      const allXpubs = await xpubDb.getByWalletId(walletId);
-      allXpubs.map(async xpub => {
+      const allXpubs = await dbUtil(Databases.XPUB, 'getByWalletId', walletId);
+      allXpubs.map(async (xpub: { xpub: any }) => {
         await dbUtil(Databases.ADDRESS, 'deleteAll', { xpub: xpub.xpub });
       });
       await dbUtil(Databases.RECEIVEADDRESS, 'deleteAll', {
         walletId
       });
-      await xpubDb.deleteWallet(walletId);
+      await dbUtil(Databases.XPUB, 'deleteWallet', walletId);
       await dbUtil(Databases.TRANSACTION, 'deleteWallet', walletId);
       navigate(Routes.wallet.index);
       setDeleteOpen(false);

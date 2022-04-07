@@ -26,7 +26,6 @@ import logger from '../../../utils/logger';
 import {
   Databases,
   dbUtil,
-  xpubDb,
   latestPriceDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
@@ -137,7 +136,9 @@ export const SyncProvider: React.FC = ({ children }) => {
         .createHash('sha256')
         .update(xpub.xpub)
         .digest('base64');
-      const transactionHistory = await dbUtil(Databases.TRANSACTION, 'getAll' ,
+      const transactionHistory = await dbUtil(
+        Databases.TRANSACTION,
+        'getAll',
         {
           walletId: xpub.walletId,
           walletName,
@@ -168,7 +169,9 @@ export const SyncProvider: React.FC = ({ children }) => {
           .createHash('sha256')
           .update(xpub.zpub)
           .digest('base64');
-        const ztransactionHistory = await dbUtil(Databases.TRANSACTION, 'getAll' ,
+        const ztransactionHistory = await dbUtil(
+          Databases.TRANSACTION,
+          'getAll',
           {
             walletId: xpub.walletId,
             walletName: zwalletName,
@@ -359,7 +362,9 @@ export const SyncProvider: React.FC = ({ children }) => {
       const unconfirmedBalance = new BigNumber(
         response.data.unconfirmedBalance
       );
-      const xpub = await xpubDb.getByWalletIdandCoin(
+      const xpub = await dbUtil(
+        Databases.XPUB,
+        'getByWalletIdandCoin',
         item.walletId,
         item.coinType
       );
@@ -368,10 +373,16 @@ export const SyncProvider: React.FC = ({ children }) => {
         logger.warn('Cannot find xpub while fetching txn', { item });
       } else {
         if (item.zpub) {
-          await xpubDb.updateZpubBalance(item.xpub, item.coinType, {
-            balance: balance.toString(),
-            unconfirmedBalance: unconfirmedBalance.toString()
-          });
+          await dbUtil(
+            Databases.XPUB,
+            'updateZpubBalance',
+            item.xpub,
+            item.coinType,
+            {
+              balance: balance.toString(),
+              unconfirmedBalance: unconfirmedBalance.toString()
+            }
+          );
           if (xpub.xpubBalance) {
             if (xpub.xpubBalance.balance) {
               balance = balance.plus(xpub.xpubBalance.balance);
@@ -381,10 +392,16 @@ export const SyncProvider: React.FC = ({ children }) => {
             }
           }
         } else {
-          await xpubDb.updateBalance(item.xpub, item.coinType, {
-            balance: balance.toString(),
-            unconfirmedBalance: unconfirmedBalance.toString()
-          });
+          await dbUtil(
+            Databases.XPUB,
+            'updateBalance',
+            item.xpub,
+            item.coinType,
+            {
+              balance: balance.toString(),
+              unconfirmedBalance: unconfirmedBalance.toString()
+            }
+          );
           if (xpub.zpubBalance) {
             if (xpub.zpubBalance.balance) {
               balance = balance.plus(xpub.zpubBalance.balance);
@@ -395,10 +412,16 @@ export const SyncProvider: React.FC = ({ children }) => {
           }
         }
 
-        await xpubDb.updateTotalBalance(item.xpub, item.coinType, {
-          balance: balance.toString(),
-          unconfirmedBalance: unconfirmedBalance.toString()
-        });
+        await dbUtil(
+          Databases.XPUB,
+          'updateTotalBalance',
+          item.xpub,
+          item.coinType,
+          {
+            balance: balance.toString(),
+            unconfirmedBalance: unconfirmedBalance.toString()
+          }
+        );
       }
 
       if (response.data.transactions) {
@@ -610,7 +633,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       for (const txn of history) {
         try {
-          await dbUtil(Databases.TRANSACTION, 'insert' ,txn);
+          await dbUtil(Databases.TRANSACTION, 'insert', txn);
           // No need to retry if the inserting fails because it'll produce the same error.
         } catch (error) {
           logger.error('Error while inserting transaction in DB');
@@ -707,7 +730,13 @@ export const SyncProvider: React.FC = ({ children }) => {
         unconfirmedBalance: unconfirmedBalance.toString()
       };
 
-      await xpubDb.updateTotalBalance(item.xpub, item.coinType, bal);
+      await dbUtil(
+        Databases.XPUB,
+        'updateTotalBalance',
+        item.xpub,
+        item.coinType,
+        bal
+      );
     } else if (coin instanceof EthCoinData) {
       const address = generateEthAddressFromXpub(item.xpub);
       const balanceRes = await ethServer.wallet.getBalance(
@@ -719,10 +748,16 @@ export const SyncProvider: React.FC = ({ children }) => {
       );
       const balance = new BigNumber(balanceRes.data);
 
-      await xpubDb.updateTotalBalance(item.xpub, item.coinType, {
-        balance: balance.toString(),
-        unconfirmedBalance: '0'
-      });
+      await dbUtil(
+        Databases.XPUB,
+        'updateTotalBalance',
+        item.xpub,
+        item.coinType,
+        {
+          balance: balance.toString(),
+          unconfirmedBalance: '0'
+        }
+      );
     } else if (coin instanceof Erc20CoinData) {
       const address = generateEthAddressFromXpub(item.xpub);
       if (item.ethCoin) {
@@ -867,7 +902,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     isRefresh = false,
     module = 'default'
   }) => {
-    const allXpubs = await xpubDb.getAll();
+    const allXpubs = await dbUtil(Databases.XPUB, 'getAll');
     for (const xpub of allXpubs) {
       addHistorySyncItemFromXpub(xpub, { isRefresh, module });
     }
@@ -877,7 +912,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     isRefresh = false,
     module = 'default'
   }) => {
-    const allXpubs = await xpubDb.getAll();
+    const allXpubs = await dbUtil(Databases.XPUB, 'getAll');
     const tokens = await dbUtil(Databases.ERC20TOKEN, 'getAll');
 
     for (const xpub of allXpubs) {
@@ -885,7 +920,9 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
 
     for (const token of tokens) {
-      const ethXpub = await xpubDb.getByWalletIdandCoin(
+      const ethXpub = await dbUtil(
+        Databases.XPUB,
+        'getByWalletIdandCoin',
         token.walletId,
         token.ethCoin
       );
@@ -907,7 +944,7 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const addPriceRefresh = async ({ isRefresh = false, module = 'default' }) => {
-    const allXpubs = await xpubDb.getAll();
+    const allXpubs = await dbUtil(Databases.XPUB, 'getAll');
     const tokens = await dbUtil(Databases.ERC20TOKEN, 'getAll');
 
     for (const xpub of allXpubs) {
@@ -953,7 +990,12 @@ export const SyncProvider: React.FC = ({ children }) => {
     tokenName: string,
     ethCoin: string
   ) => {
-    const ethXpub = await xpubDb.getByWalletIdandCoin(walletId, ethCoin);
+    const ethXpub = await dbUtil(
+      Databases.XPUB,
+      'getByWalletIdandCoin',
+      walletId,
+      ethCoin
+    );
     if (!ethXpub) {
       logger.warn('EthCoin does not exist', { walletId, ethCoin });
       return;

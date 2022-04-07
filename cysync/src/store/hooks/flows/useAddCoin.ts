@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
-import { Databases, dbUtil, Xpub, xpubDb } from '../../database';
+import { Databases, dbUtil, Xpub } from '../../database';
 import { useI18n, useSync } from '../../provider';
 
 function sleep(ms: number) {
@@ -171,7 +171,7 @@ export const useAddCoin: UseAddCoin = () => {
           }
         });
         await wallet.setupNewWallet();
-        await xpubDb.insert(xpub);
+        await dbUtil(Databases.XPUB, 'insert', xpub);
         coinStatus[addCoinIndex].status = 2;
       } catch (error) {
         coinStatus[addCoinIndex].status = -1;

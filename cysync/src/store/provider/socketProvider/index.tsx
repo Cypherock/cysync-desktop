@@ -6,7 +6,7 @@ import io, { Socket } from 'socket.io-client';
 
 import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
-import { Databases, dbUtil, xpubDb } from '../../database';
+import { Databases, dbUtil } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
 
@@ -183,7 +183,9 @@ export const SocketProvider: React.FC = ({ children }) => {
   ) => {
     logger.info('Adding initial socket hooks');
 
-    const allPendingTxns = await dbUtil(Databases.TRANSACTION, 'getAll', { status: 'PENDING' });
+    const allPendingTxns = await dbUtil(Databases.TRANSACTION, 'getAll', {
+      status: 'PENDING'
+    });
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
@@ -218,7 +220,9 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket?: BlockbookSocket
   ) => {
     logger.info('Adding initial blockbook web subscriptions');
-    const allPendingTxns = await dbUtil(Databases.TRANSACTION, 'getAll', { status: 'PENDING' });
+    const allPendingTxns = await dbUtil(Databases.TRANSACTION, 'getAll', {
+      status: 'PENDING'
+    });
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
@@ -265,7 +269,9 @@ export const SocketProvider: React.FC = ({ children }) => {
               payload.walletId
             );
             if (wallet && wallet.length > 0) {
-              const xpub = await xpubDb.getByWalletIdandCoin(
+              const xpub = await dbUtil(
+                Databases.XPUB,
+                'getByWalletIdandCoin',
                 payload.walletId,
                 payload.coinType
               );
@@ -293,16 +299,26 @@ export const SocketProvider: React.FC = ({ children }) => {
                 }
 
                 // Update the confirmation if the database has a txn with same hash
-                await dbUtil(Databases.TRANSACTION, 'updateConfirmations', payload);
-                const allTxWithSameHash = await dbUtil(Databases.TRANSACTION, 'getAll', {
-                  hash: payload.hash
-                });
+                await dbUtil(
+                  Databases.TRANSACTION,
+                  'updateConfirmations',
+                  payload
+                );
+                const allTxWithSameHash = await dbUtil(
+                  Databases.TRANSACTION,
+                  'getAll',
+                  {
+                    hash: payload.hash
+                  }
+                );
                 if (allTxWithSameHash && allTxWithSameHash.length > 0) {
                   logger.info(
                     `Updating balances of ${allTxWithSameHash.length} txn via receive address hook`
                   );
                   for (const tx of allTxWithSameHash) {
-                    const txXpub = await xpubDb.getByWalletIdandCoin(
+                    const txXpub = await dbUtil(
+                      Databases.XPUB,
+                      'getByWalletIdandCoin',
                       tx.walletId,
                       tx.ethCoin || tx.coin
                     );
@@ -344,7 +360,9 @@ export const SocketProvider: React.FC = ({ children }) => {
         try {
           logger.info('Received txn confirmation hook', { payload });
           if (payload && payload.hash && payload.coinType) {
-            const confirmations = await dbUtil(Databases.TRANSACTION, 'updateConfirmations', 
+            const confirmations = await dbUtil(
+              Databases.TRANSACTION,
+              'updateConfirmations',
               payload
             );
             logger.info('Txn confirmed', {
@@ -358,7 +376,9 @@ export const SocketProvider: React.FC = ({ children }) => {
 
               // Update balance when confirmed
               if (payload.walletId) {
-                const xpub = await xpubDb.getByWalletIdandCoin(
+                const xpub = await dbUtil(
+                  Databases.XPUB,
+                  'getByWalletIdandCoin',
                   payload.walletId,
                   payload.coinType
                 );
@@ -409,7 +429,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       if (addressDetails.xpub) {
         xpub = addressDetails.xpub;
 
-        const walletDetailsList = await xpubDb.getAll({
+        const walletDetailsList = await dbUtil(Databases.XPUB, 'getAll', {
           xpub: addressDetails.xpub
         });
 
@@ -499,7 +519,9 @@ export const SocketProvider: React.FC = ({ children }) => {
             payload.txn.confirmations && payload.txn.confirmation > 0;
 
           for (const address of allAddresses) {
-            const xpub = await xpubDb.getByWalletIdandCoin(
+            const xpub = await dbUtil(
+              Databases.XPUB,
+              'getByWalletIdandCoin',
               address.walletId,
               payload.coinType
             );
@@ -537,7 +559,7 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket.on('block', async (payload: any) => {
       try {
         if (payload && payload.coinType) {
-          const pendingTxns = await dbUtil(Databases.TRANSACTION, 'getAll' ,{
+          const pendingTxns = await dbUtil(Databases.TRANSACTION, 'getAll', {
             coin: payload.coinType,
             status: 'PENDING'
           });
@@ -553,7 +575,7 @@ export const SocketProvider: React.FC = ({ children }) => {
             logger.info(`Updating balances of ${walletIdSet.size} coins`);
 
             for (const walletId of walletIdSet) {
-              const allXpub = await xpubDb.getAll({
+              const allXpub = await dbUtil(Databases.XPUB, 'getAll', {
                 coin: payload.coinType,
                 walletId
               });

@@ -2,13 +2,7 @@ import { ALLCOINS as COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
-import {
-  Databases,
-  dbUtil,
-  getLatestPriceForCoin,
-  Xpub,
-  xpubDb
-} from '../database';
+import { Databases, dbUtil, getLatestPriceForCoin, Xpub } from '../database';
 
 import { DisplayCoin } from './types';
 import { useDebouncedFunction } from './useDebounce';
@@ -46,7 +40,7 @@ export const useWalletData: UseWalletData = () => {
   const [doRefresh, setDoRefresh] = useState(false);
 
   const insert = (coin: Xpub) => {
-    return xpubDb.insert(coin);
+    return dbUtil(Databases.XPUB, 'insert', coin);
   };
 
   const getCoinsWithPrices = async (coins: Xpub[]) => {
@@ -176,9 +170,13 @@ export const useWalletData: UseWalletData = () => {
 
   const getAllCoinsFromWallet = async () => {
     if (currentWalletId) {
-      const res = await xpubDb.getByWalletId(currentWalletId);
+      const res = await dbUtil(
+        Databases.XPUB,
+        'getByWalletId',
+        currentWalletId
+      );
       const coinList: string[] = [];
-      res.forEach(coin => {
+      res.forEach((coin: { coin: string }) => {
         coinList.push(coin.coin);
       });
       setCoinsPresent(coinList);
@@ -197,7 +195,7 @@ export const useWalletData: UseWalletData = () => {
       walletId,
       coinType: coin
     });
-    await xpubDb.delete(xpub, coin);
+    await dbUtil(Databases.XPUB, 'delete', xpub, coin);
     return getAllCoinsFromWallet();
   };
 
@@ -211,9 +209,9 @@ export const useWalletData: UseWalletData = () => {
     dbUtil(Databases.PRICE, 'emitter', 'on', 'insert', onChange);
     dbUtil(Databases.PRICE, 'emitter', 'on', 'update', onChange);
 
-    xpubDb.emitter.on('insert', onChange);
-    xpubDb.emitter.on('update', onChange);
-    xpubDb.emitter.on('delete', onChange);
+    dbUtil(Databases.XPUB, 'emitter', 'on', 'insert', onChange);
+    dbUtil(Databases.XPUB, 'emitter', 'on', 'update', onChange);
+    dbUtil(Databases.XPUB, 'emitter', 'on', 'delete', onChange);
 
     return () => {
       dbUtil(Databases.PRICE, 'emitter', 'removeListener', 'insert', onChange);
@@ -225,9 +223,9 @@ export const useWalletData: UseWalletData = () => {
         onChange
       );
 
-      xpubDb.emitter.removeListener('insert', onChange);
-      xpubDb.emitter.removeListener('update', onChange);
-      xpubDb.emitter.removeListener('delete', onChange);
+      dbUtil(Databases.XPUB, 'emitter', 'removeListener', 'insert', onChange);
+      dbUtil(Databases.XPUB, 'emitter', 'removeListener', 'update', onChange);
+      dbUtil(Databases.XPUB, 'emitter', 'removeListener', 'delete', onChange);
     };
   }, []);
 
