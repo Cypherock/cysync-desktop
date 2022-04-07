@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { Databases, dbUtil, walletDb, xpubDb } from '../database';
+import { Databases, dbUtil, xpubDb } from '../database';
 
 export interface Coin {
   name: string;
@@ -42,7 +42,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
   const getAll = async () => {
     try {
       logger.verbose('Getting all wallets and xpub data');
-      const walletRes = await walletDb.getAll();
+      const walletRes = await dbUtil(Databases.WALLET, 'getAll');
 
       if (walletRes.length !== 0) setAllWallets(walletRes);
       else {
@@ -101,9 +101,9 @@ export const WalletsProvider: React.FC = ({ children }) => {
   useEffect(() => {
     logger.verbose('Adding all wallet & xpub DB listners.');
 
-    walletDb.emitter.on('insert', onUpdate);
-    walletDb.emitter.on('update', onUpdate);
-    walletDb.emitter.on('delete', onUpdate);
+    dbUtil(Databases.WALLET, 'emitter', 'on', 'insert', onUpdate);
+    dbUtil(Databases.WALLET, 'emitter', 'on', 'update', onUpdate);
+    dbUtil(Databases.WALLET, 'emitter', 'on', 'delete', onUpdate);
 
     xpubDb.emitter.on('insert', onUpdate);
     xpubDb.emitter.on('delete', onUpdate);
@@ -113,9 +113,9 @@ export const WalletsProvider: React.FC = ({ children }) => {
 
     return () => {
       logger.verbose('Removed all wallet & xpub DB listners.');
-      walletDb.emitter.removeListener('insert', onUpdate);
-      walletDb.emitter.removeListener('update', onUpdate);
-      walletDb.emitter.removeListener('delete', onUpdate);
+      dbUtil(Databases.WALLET, 'emitter', 'removeListener', 'insert', onUpdate);
+      dbUtil(Databases.WALLET, 'emitter', 'removeListener', 'update', onUpdate);
+      dbUtil(Databases.WALLET, 'emitter', 'removeListener', 'delete', onUpdate);
 
       xpubDb.emitter.removeListener('insert', onUpdate);
       xpubDb.emitter.removeListener('delete', onUpdate);

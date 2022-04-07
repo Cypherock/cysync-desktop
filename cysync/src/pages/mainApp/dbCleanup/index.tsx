@@ -5,7 +5,6 @@ import {
   Databases,
   dbUtil,
   transactionDb,
-  walletDb,
   xpubDb
 } from '../../../store/database';
 import Analytics from '../../../utils/analytics';
@@ -32,7 +31,7 @@ const DBCleaupPopup = () => {
         },
         {
           name: 'Wallet',
-          promise: walletDb.hasIncompatableData.bind(walletDb)
+          promise: dbUtil(Databases.WALLET, 'hasIncompatableData')
         },
         {
           name: 'Prices',

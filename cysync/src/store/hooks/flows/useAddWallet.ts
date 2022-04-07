@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
-import { walletDb } from '../../database';
+import { Databases, dbUtil } from '../../database';
 import { useI18n, useWallets } from '../../provider';
 
 export interface HandleAddWalletOptions {
@@ -156,7 +156,7 @@ export const useAddWallet: UseAddWallet = () => {
           return;
         }
 
-        const walletWithSameId = await walletDb.getAll({
+        const walletWithSameId = await dbUtil(Databases.WALLET, 'getAll', {
           walletId: walletDetails.walletId
         });
 
@@ -181,8 +181,7 @@ export const useAddWallet: UseAddWallet = () => {
           return;
         }
 
-        walletDb
-          .insert(walletDetails)
+        dbUtil(Databases.WALLET, 'insert', walletDetails)
           .then(() => {
             setWalletName(walletDetails.name);
             setWalletId(walletDetails.walletId);
@@ -255,7 +254,7 @@ export const useAddWallet: UseAddWallet = () => {
         throw new Error('New Wallet details are missing');
       }
 
-      const walletWithSameId = await walletDb.getAll({
+      const walletWithSameId = await dbUtil(Databases.WALLET, 'getAll', {
         walletId
       });
 
@@ -267,7 +266,7 @@ export const useAddWallet: UseAddWallet = () => {
       duplicateWallet.name = walletName;
       duplicateWallet.passphraseSet = passphraseSet;
       duplicateWallet.passwordSet = passwordSet;
-      await walletDb.update(duplicateWallet);
+      await dbUtil(Databases.WALLET, 'update', duplicateWallet);
       setIsNameDiff(false);
       setErrorMessage('');
       setWalletSuccess(true);

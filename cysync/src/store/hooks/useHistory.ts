@@ -3,7 +3,12 @@ import { Xpub } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';
-import { getLatestPriceForCoins, transactionDb, walletDb } from '../database';
+import {
+  Databases,
+  dbUtil,
+  getLatestPriceForCoins,
+  transactionDb
+} from '../database';
 
 import { DisplayInputOutput, DisplayTransaction } from './types';
 
@@ -37,7 +42,7 @@ export const useHistory: UseHistory = () => {
       sort: 'confirmed',
       order: 'd'
     });
-    const allWallets = await walletDb.getAll();
+    const allWallets = await dbUtil(Databases.WALLET, 'getAll');
     const latestTransactionsWithPrice: DisplayTransaction[] = [];
 
     const allUniqueCoins = new Set<string>();
@@ -128,7 +133,9 @@ export const useHistory: UseHistory = () => {
 
       newTxn.isErc20 = isErc20;
 
-      const wallet = allWallets.find(ob => ob.walletId === newTxn.walletId);
+      const wallet = allWallets.find(
+        (ob: { walletId: string }) => ob.walletId === newTxn.walletId
+      );
       if (!wallet) {
         logger.warn(`Cannot find wallet with name: ${newTxn.walletId}`);
       } else {

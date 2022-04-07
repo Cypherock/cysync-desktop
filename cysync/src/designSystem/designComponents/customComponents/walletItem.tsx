@@ -16,7 +16,6 @@ import {
   Databases,
   dbUtil,
   transactionDb,
-  walletDb,
   xpubDb
 } from '../../../store/database';
 import logger from '../../../utils/logger';
@@ -134,7 +133,7 @@ const WalletItem = (props: WalletItemProps) => {
       const {
         walletDetails: { walletId }
       } = props;
-      await walletDb.delete(walletId);
+      await dbUtil(Databases.WALLET, 'delete', walletId);
       const allXpubs = await xpubDb.getByWalletId(walletId);
       allXpubs.map(async xpub => {
         await dbUtil(Databases.ADDRESS, 'deleteAll', { xpub: xpub.xpub });

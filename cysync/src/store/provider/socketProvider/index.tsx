@@ -6,13 +6,7 @@ import io, { Socket } from 'socket.io-client';
 
 import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
-import {
-  Databases,
-  dbUtil,
-  transactionDb,
-  walletDb,
-  xpubDb
-} from '../../database';
+import { Databases, dbUtil, transactionDb, xpubDb } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
 
@@ -265,7 +259,11 @@ export const SocketProvider: React.FC = ({ children }) => {
         try {
           logger.info('Received receive txn hook', { payload });
           if (payload && payload.walletId && payload.coinType) {
-            const wallet = await walletDb.getByID(payload.walletId);
+            const wallet = await dbUtil(
+              Databases.WALLET,
+              'getByID',
+              payload.walletId
+            );
             if (wallet && wallet.length > 0) {
               const xpub = await xpubDb.getByWalletIdandCoin(
                 payload.walletId,
