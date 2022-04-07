@@ -18,9 +18,20 @@ export interface AddressInfo {
   walletId: string;
 }
 
+interface SocketInfo {
+  socket: BlockbookSocket;
+  info: WebSocketServerInfo;
+  isSubscribedToBlock: boolean;
+  connectRetryTimeout?: ReturnType<typeof setTimeout>;
+  totalRetries: number;
+  doConnect: boolean;
+}
+
+const MAX_CONNECTION_RETRIES = 50;
+
 export default class BlockbookProvider extends EventEmitter {
   private websocketServerInfoList: WebSocketServerInfo[];
-  private socketList: BlockbookSocket[] = [];
+  private socketInfoList: SocketInfo[] = [];
 
   private addressesList: string[][] = [];
 
@@ -35,16 +46,114 @@ export default class BlockbookProvider extends EventEmitter {
     this.websocketServerInfoList = [...serverInfo];
 
     for (const server of this.websocketServerInfoList) {
-      const socket = new BlockbookSocket({ url: server.url });
+      const socket = new BlockbookSocket({ url: server.url, keepAlive: true });
 
-      this.socketList.push(socket);
+      const socketInfo = {
+        socket,
+        info: server,
+        isSubscribedToBlock: false,
+        totalRetries: 0,
+        doConnect: false
+      };
+      this.socketInfoList.push(socketInfo);
       this.addressesList.push([]);
+      this.setAllSocketListeners(socketInfo);
+    }
+  }
 
-      socket.addListener(
-        'notification',
-        this.onNotification.bind(this, server.name)
+  private setAllSocketListeners(socketInfo: SocketInfo) {
+    socketInfo.socket.addListener(
+      'notification',
+      this.onNotification.bind(this, socketInfo.info.name)
+    );
+    socketInfo.socket.addListener(
+      'block',
+      this.onBlock.bind(this, socketInfo.info.name)
+    );
+    socketInfo.socket.addListener(
+      'disconnected',
+      this.onDisconnect.bind(this, socketInfo)
+    );
+  }
+
+  private setConnectRetry(socketInfo: SocketInfo) {
+    if (socketInfo.totalRetries >= MAX_CONNECTION_RETRIES) {
+      logger.error(
+        'Max retries exceeded for websocket connection',
+        socketInfo.info
       );
-      socket.addListener('block', this.onBlock.bind(this, server.name));
+      return;
+    }
+
+    if (socketInfo.connectRetryTimeout) {
+      clearTimeout(socketInfo.connectRetryTimeout);
+    }
+
+    if (!socketInfo.doConnect) {
+      return;
+    }
+
+    socketInfo.connectRetryTimeout = setTimeout(
+      this.retryConnection.bind(this, socketInfo),
+      this.getConnectRetryTimeout(socketInfo)
+    );
+  }
+
+  private getConnectRetryTimeout(socketInfo: SocketInfo) {
+    if (socketInfo.totalRetries <= 15) {
+      return 2000;
+    }
+
+    if (socketInfo.totalRetries <= 30) {
+      return 5000;
+    }
+
+    if (socketInfo.totalRetries <= 40) {
+      return 10000;
+    }
+
+    return 15000;
+  }
+
+  private onDisconnect(socketInfo: SocketInfo) {
+    logger.debug('Websocket disconnected', socketInfo.info);
+    this.setConnectRetry(socketInfo);
+  }
+
+  private async retryConnection(socketInfo: SocketInfo) {
+    if (!socketInfo.doConnect || socketInfo.socket.isConnected()) {
+      return;
+    }
+
+    try {
+      logger.debug('Trying to reconnect socket', {
+        ...socketInfo.info,
+        retries: socketInfo.totalRetries
+      });
+      await socketInfo.socket.connect();
+      this.setAllSocketListeners(socketInfo);
+      this.establishPreviousSocketState(socketInfo);
+      socketInfo.totalRetries = 0;
+    } catch (error) {
+      logger.debug('Failed to reconnect socket', {
+        ...socketInfo.info,
+        retries: socketInfo.totalRetries
+      });
+      socketInfo.totalRetries++;
+      this.setConnectRetry(socketInfo);
+    }
+  }
+
+  private async establishPreviousSocketState(socketInfo: SocketInfo) {
+    try {
+      if (socketInfo.isSubscribedToBlock) {
+        await this.subscribeBlock(socketInfo.info.name);
+      }
+
+      await this.addAddressListener(socketInfo.info.name, []);
+    } catch (error) {
+      logger.error('Unable to establishPreviousSocketState');
+      logger.error(error);
     }
   }
 
@@ -62,7 +171,10 @@ export default class BlockbookProvider extends EventEmitter {
 
   public async connect() {
     const results = await Promise.allSettled([
-      ...this.socketList.map(socket => socket.connect())
+      ...this.socketInfoList.map(socket => {
+        socket.doConnect = true;
+        return socket.socket.connect();
+      })
     ]);
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
@@ -78,9 +190,11 @@ export default class BlockbookProvider extends EventEmitter {
 
   public dispose() {
     this.addressWalletMap = {};
-    for (const socket of this.socketList) {
-      socket.dispose();
+    for (const socket of this.socketInfoList) {
+      socket.doConnect = false;
+      socket.socket.dispose();
     }
+    logger.info('All websocket disposed');
   }
 
   private getIndexFromCoin(coinType: string) {
@@ -97,8 +211,8 @@ export default class BlockbookProvider extends EventEmitter {
     return index;
   }
 
-  private getSocketFromCoin(coinType: string) {
-    return this.socketList[this.getIndexFromCoin(coinType)];
+  private getSocketInfoFromCoin(coinType: string) {
+    return this.socketInfoList[this.getIndexFromCoin(coinType)];
   }
 
   private getAddressesFromCoin(coinType: string) {
@@ -110,7 +224,7 @@ export default class BlockbookProvider extends EventEmitter {
   }
 
   public async addAddressListener(coinType: string, addresses: AddressInfo[]) {
-    const socket = this.getSocketFromCoin(coinType);
+    const socketInfo = this.getSocketInfoFromCoin(coinType);
     const prevAddresses = this.getAddressesFromCoin(coinType);
 
     const newAddressSet = new Set([...prevAddresses]);
@@ -124,14 +238,14 @@ export default class BlockbookProvider extends EventEmitter {
 
     this.setAddressesForCoin(coinType, newAddressList);
 
-    return socket.subscribeAddresses(newAddressList);
+    return socketInfo.socket.subscribeAddresses(newAddressList);
   }
 
   public async removeAddressListener(
     coinType: string,
     addresses: AddressInfo[]
   ) {
-    const socket = this.getSocketFromCoin(coinType);
+    const socketInfo = this.getSocketInfoFromCoin(coinType);
     const prevAddresses = this.getAddressesFromCoin(coinType);
 
     for (const address of addresses) {
@@ -148,13 +262,14 @@ export default class BlockbookProvider extends EventEmitter {
 
     this.setAddressesForCoin(coinType, newAddressList);
 
-    return socket.subscribeAddresses(newAddressList);
+    return socketInfo.socket.subscribeAddresses(newAddressList);
   }
 
   public async subscribeBlock(coinType: string) {
-    const socket = this.getSocketFromCoin(coinType);
+    const socketInfo = this.getSocketInfoFromCoin(coinType);
+    socketInfo.isSubscribedToBlock = true;
 
-    return socket.subscribeBlock();
+    return socketInfo.socket.subscribeBlock();
   }
 
   public async subscribeAllBlocks() {
