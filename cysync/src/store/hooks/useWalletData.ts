@@ -6,7 +6,6 @@ import {
   Databases,
   dbUtil,
   getLatestPriceForCoin,
-  priceDb,
   Xpub,
   xpubDb
 } from '../database';
@@ -209,16 +208,22 @@ export const useWalletData: UseWalletData = () => {
   const onChange = useDebouncedFunction(onDBChange, 800);
 
   useEffect(() => {
-    priceDb.emitter.on('insert', onChange);
-    priceDb.emitter.on('update', onChange);
+    dbUtil(Databases.PRICE, 'emitter', 'on', 'insert', onChange);
+    dbUtil(Databases.PRICE, 'emitter', 'on', 'update', onChange);
 
     xpubDb.emitter.on('insert', onChange);
     xpubDb.emitter.on('update', onChange);
     xpubDb.emitter.on('delete', onChange);
 
     return () => {
-      priceDb.emitter.removeListener('insert', onChange);
-      priceDb.emitter.removeListener('update', onChange);
+      dbUtil(Databases.PRICE, 'emitter', 'removeListener', 'insert', onChange);
+      dbUtil(
+        Databases.PRICE,
+        'emitter',
+        'oremoveListenern',
+        'update',
+        onChange
+      );
 
       xpubDb.emitter.removeListener('insert', onChange);
       xpubDb.emitter.removeListener('update', onChange);

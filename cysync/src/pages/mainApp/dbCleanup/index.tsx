@@ -4,7 +4,6 @@ import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import {
   Databases,
   dbUtil,
-  priceDb,
   transactionDb,
   walletDb,
   xpubDb
@@ -37,7 +36,7 @@ const DBCleaupPopup = () => {
         },
         {
           name: 'Prices',
-          promise: priceDb.hasIncompatableData.bind(priceDb)
+          promise: dbUtil(Databases.PRICE, 'hasIncompatableData')
         },
         {
           name: 'ERC20 Tokens',

@@ -26,11 +26,9 @@ import logger from '../../../utils/logger';
 import {
   Databases,
   dbUtil,
-  erc20tokenDb,
-  latestPriceDb,
-  priceDb,
   transactionDb,
-  xpubDb
+  xpubDb,
+  latestPriceDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
@@ -660,7 +658,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       coin: item.coinType,
       days: item.days
     });
-    await priceDb.insert(item.coinType, item.days, res.data.data.entries);
+    await dbUtil(Databases.PRICE, 'insert', item.coinType, item.days, res.data.data.entries);
   };
 
   const executeLatestPriceItem = async (item: LatestPriceSyncItem) => {
@@ -930,7 +928,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     module = 'default'
   }) => {
     const allXpubs = await xpubDb.getAll();
-    const tokens = await erc20tokenDb.getAll();
+    const tokens = await dbUtil(Databases.ERC20TOKEN, 'getAll');
 
     for (const xpub of allXpubs) {
       addLatestPriceSyncItemFromXpub(xpub, { isRefresh, module });

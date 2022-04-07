@@ -7,7 +7,6 @@ import logger from '../../utils/logger';
 import {
   Databases,
   dbUtil,
-  priceDb,
   Transaction,
   transactionDb,
   xpubDb
@@ -103,9 +102,9 @@ export const usePortfolio: UsePortfolio = () => {
       debouncedRefreshFromDB
     );
 
-    priceDb.emitter.on('insert', debouncedRefreshFromDB);
-    priceDb.emitter.on('insert', debouncedRefreshFromDB);
-    priceDb.emitter.on('update', debouncedRefreshFromDB);
+    dbUtil(Databases.PRICE, 'emitter', 'on', 'insert', debouncedRefreshFromDB);
+    dbUtil(Databases.PRICE, 'emitter', 'on', 'update', debouncedRefreshFromDB);
+    dbUtil(Databases.PRICE, 'emitter', 'on', 'delete', debouncedRefreshFromDB);
 
     xpubDb.emitter.on('update', debouncedRefreshFromDB);
     xpubDb.emitter.on('delete', debouncedRefreshFromDB);
@@ -138,9 +137,27 @@ export const usePortfolio: UsePortfolio = () => {
         debouncedRefreshFromDB
       );
 
-      priceDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      priceDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      priceDb.emitter.removeListener('update', debouncedRefreshFromDB);
+      dbUtil(
+        Databases.PRICE,
+        'emitter',
+        'removeListener',
+        'insert',
+        debouncedRefreshFromDB
+      );
+      dbUtil(
+        Databases.PRICE,
+        'emitter',
+        'removeListener',
+        'update',
+        debouncedRefreshFromDB
+      );
+      dbUtil(
+        Databases.PRICE,
+        'emitter',
+        'oremoveListenern',
+        'delete',
+        debouncedRefreshFromDB
+      );
 
       xpubDb.emitter.removeListener('update', debouncedRefreshFromDB);
       xpubDb.emitter.removeListener('delete', debouncedRefreshFromDB);
@@ -163,7 +180,7 @@ export const usePortfolio: UsePortfolio = () => {
     }
 
     let totalBalance = new BigNumber(0);
-    const allPrices = await priceDb.getPrice(coinType, days);
+    const allPrices = await dbUtil(Databases.PRICE, 'getPrice', coinType, days);
     if (!allPrices) {
       return null;
     }
@@ -431,7 +448,7 @@ export const usePortfolio: UsePortfolio = () => {
           setHasCoins(true);
         }
 
-        const res = await priceDb.getPrice(coinType, 7);
+        const res = await dbUtil(Databases.PRICE, 'getPrice', coinType, 7);
 
         let latestPrice = 0;
         if (res && res.data) {

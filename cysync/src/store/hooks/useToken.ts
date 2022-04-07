@@ -6,8 +6,7 @@ import {
   Databases,
   dbUtil,
   ERC20Token,
-  getLatestPriceForCoin,
-  priceDb
+  getLatestPriceForCoin
 } from '../database';
 
 import { DisplayToken } from './types';
@@ -40,16 +39,16 @@ export const useToken: UseToken = () => {
   const onChange = useDebouncedFunction(onDBChange, 800);
 
   useEffect(() => {
-    priceDb.emitter.on('insert', onChange);
-    priceDb.emitter.on('update', onChange);
+    dbUtil(Databases.PRICE, 'emitter', 'on', 'insert', onChange);
+    dbUtil(Databases.PRICE, 'emitter', 'on', 'update', onChange);
 
     dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'insert', onChange);
     dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'update', onChange);
     dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'delete', onChange);
 
     return () => {
-      priceDb.emitter.removeListener('insert', onChange);
-      priceDb.emitter.removeListener('update', onChange);
+      dbUtil(Databases.PRICE, 'emitter', 'removeListener', 'insert', onChange);
+      dbUtil(Databases.PRICE, 'emitter', 'removeListener', 'update', onChange);
 
       dbUtil(
         Databases.ERC20TOKEN,
