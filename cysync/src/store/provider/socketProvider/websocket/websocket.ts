@@ -48,11 +48,13 @@ interface Options {
   url: string;
   timeout?: number;
   pingTimeout?: number;
+  pongTimeout?: number;
   keepAlive?: boolean;
 }
 
 const DEFAULT_TIMEOUT = 20 * 1000;
 const DEFAULT_PING_TIMEOUT = 30 * 1000;
+const DEFAULT_PONG_TIMEOUT = 45 * 1000;
 
 export default class Socket extends EventEmitter {
   options: Options;
@@ -60,7 +62,11 @@ export default class Socket extends EventEmitter {
   messageID = 0;
   messages: Array<Deferred<any>> = [];
   subscriptions: Subscription[] = [];
+  // Timeout to send a ping request at a timeout
   pingTimeout: ReturnType<typeof setTimeout> | undefined;
+  // Timeout to receive a pong request, if not received the connection is marked as dead
+  pongTimeout: ReturnType<typeof setTimeout> | undefined;
+  // Timeout for the initial connection
   connectionTimeout: ReturnType<typeof setTimeout> | undefined;
 
   constructor(options: Options) {
@@ -94,11 +100,30 @@ export default class Socket extends EventEmitter {
     );
   }
 
+  setPongTimeout() {
+    if (this.pongTimeout) {
+      clearTimeout(this.pongTimeout);
+    }
+    this.pongTimeout = setTimeout(
+      this.onPong.bind(this),
+      this.options.pongTimeout || DEFAULT_PONG_TIMEOUT
+    );
+  }
+
   onTimeout() {
     const { ws } = this;
     if (!ws) return;
     this.messages.forEach(m => m.reject(new Error('websocket_timeout')));
     ws.close();
+  }
+
+  // Close the connection when no pong is received
+  async onPong() {
+    logger.error('Websocket closed due to no response from server', {
+      url: this.options.url
+    });
+    this.emit('disconnected');
+    this.dispose();
   }
 
   async onPing() {
@@ -169,6 +194,13 @@ export default class Socket extends EventEmitter {
       this.clearConnectionTimeout();
     }
     this.setPingTimeout();
+    this.setPongTimeout();
+  }
+
+  onclose(_event: any) {
+    logger.info('Websocket closed', { url: this.options.url });
+    this.emit('disconnected');
+    this.dispose();
   }
 
   connect() {
@@ -204,7 +236,7 @@ export default class Socket extends EventEmitter {
       this.init();
       dfd.resolve();
     };
-    ws.onclose = (_event: Event) => {
+    ws.onclose = () => {
       this.dispose();
     };
 
@@ -220,13 +252,11 @@ export default class Socket extends EventEmitter {
       throw Error('Blockbook websocket init cannot be called');
     }
     this.clearConnectionTimeout();
+    this.setPongTimeout();
 
     ws.onerror = this.onError.bind(this);
     ws.onmessage = this.onmessage.bind(this);
-    ws.onclose = () => {
-      this.emit('disconnected');
-      this.dispose();
-    };
+    ws.onclose = this.onclose.bind(this);
   }
 
   disconnect() {

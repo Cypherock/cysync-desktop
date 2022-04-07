@@ -645,9 +645,9 @@ export const SocketProvider: React.FC = ({ children }) => {
           currentSocket.disconnect();
         }
 
-        if (blockbookSocket) {
-          blockbookSocket.removeAllListeners();
-          blockbookSocket.dispose();
+        if (currentBlockbookSocket) {
+          currentBlockbookSocket.removeAllListeners();
+          currentBlockbookSocket.dispose();
         }
 
         setBlockbookSocket(undefined);
