@@ -25,9 +25,11 @@ import React, { useEffect, useRef } from 'react';
 import logger from '../../../utils/logger';
 import {
   Databases,
-  dbUtil,
-  latestPriceDb
+  dbUtil
 } from '../../database';
+import {
+  latestPriceDb
+} from '../../database/databases';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 

@@ -27,7 +27,8 @@ import {
   installExtensions,
   rimrafPromise
 } from './mainProcess/utils';
-import { Databases, dbs } from './store/database';
+import { Databases } from './store/database';
+import { dbs } from './store/database/databases';
 
 // Sets config variable on envirnment, must be set before any other import
 
