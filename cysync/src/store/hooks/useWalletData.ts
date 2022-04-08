@@ -1,5 +1,6 @@
 import { ALLCOINS as COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
+import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react';
 
 import { Databases, dbUtil, getLatestPriceForCoin, Xpub } from '../database';
@@ -206,26 +207,19 @@ export const useWalletData: UseWalletData = () => {
   const onChange = useDebouncedFunction(onDBChange, 800);
 
   useEffect(() => {
-    dbUtil(Databases.PRICE, 'emitter', 'on', 'insert', onChange);
-    dbUtil(Databases.PRICE, 'emitter', 'on', 'update', onChange);
+    ipcRenderer.on(`${Databases.PRICE}-insert`, onChange);
+    ipcRenderer.on(`${Databases.PRICE}-update`, onChange);
 
-    dbUtil(Databases.XPUB, 'emitter', 'on', 'insert', onChange);
-    dbUtil(Databases.XPUB, 'emitter', 'on', 'update', onChange);
-    dbUtil(Databases.XPUB, 'emitter', 'on', 'delete', onChange);
-
+    ipcRenderer.on(`${Databases.XPUB}-insert`, onChange);
+    ipcRenderer.on(`${Databases.XPUB}-update`, onChange);
+    ipcRenderer.on(`${Databases.XPUB}-delete`, onChange);
     return () => {
-      dbUtil(Databases.PRICE, 'emitter', 'removeListener', 'insert', onChange);
-      dbUtil(
-        Databases.PRICE,
-        'emitter',
-        'oremoveListenern',
-        'update',
-        onChange
-      );
+      ipcRenderer.removeListener(`${Databases.PRICE}-insert`, onChange);
+      ipcRenderer.removeListener(`${Databases.PRICE}-update`, onChange);
 
-      dbUtil(Databases.XPUB, 'emitter', 'removeListener', 'insert', onChange);
-      dbUtil(Databases.XPUB, 'emitter', 'removeListener', 'update', onChange);
-      dbUtil(Databases.XPUB, 'emitter', 'removeListener', 'delete', onChange);
+      ipcRenderer.removeListener(`${Databases.XPUB}-insert`, onChange);
+      ipcRenderer.removeListener(`${Databases.XPUB}-update`, onChange);
+      ipcRenderer.removeListener(`${Databases.XPUB}-delete`, onChange);
     };
   }, []);
 

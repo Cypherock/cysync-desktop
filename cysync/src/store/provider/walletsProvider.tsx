@@ -1,4 +1,5 @@
 import { ALLCOINS as COINS } from '@cypherock/communication';
+import { ipcRenderer } from 'electron';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
@@ -101,39 +102,27 @@ export const WalletsProvider: React.FC = ({ children }) => {
   useEffect(() => {
     logger.verbose('Adding all wallet & xpub DB listners.');
 
-    dbUtil(Databases.WALLET, 'emitter', 'on', 'insert', onUpdate);
-    dbUtil(Databases.WALLET, 'emitter', 'on', 'update', onUpdate);
-    dbUtil(Databases.WALLET, 'emitter', 'on', 'delete', onUpdate);
+    ipcRenderer.on(`${Databases.WALLET}-insert`, onUpdate);
+    ipcRenderer.on(`${Databases.WALLET}-update`, onUpdate);
+    ipcRenderer.on(`${Databases.WALLET}-delete`, onUpdate);
 
-    dbUtil(Databases.XPUB, 'emitter', 'on', 'insert', onUpdate);
-    dbUtil(Databases.XPUB, 'emitter', 'on', 'delete', onUpdate);
+    ipcRenderer.on(`${Databases.XPUB}-insert`, onUpdate);
+    ipcRenderer.on(`${Databases.XPUB}-delete`, onUpdate);
 
-    dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'insert', onUpdate);
-    dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'delete', onUpdate);
+    ipcRenderer.on(`${Databases.ERC20TOKEN}-insert`, onUpdate);
+    ipcRenderer.on(`${Databases.ERC20TOKEN}-delete`, onUpdate);
 
     return () => {
-      logger.verbose('Removed all wallet & xpub DB listners.');
-      dbUtil(Databases.WALLET, 'emitter', 'removeListener', 'insert', onUpdate);
-      dbUtil(Databases.WALLET, 'emitter', 'removeListener', 'update', onUpdate);
-      dbUtil(Databases.WALLET, 'emitter', 'removeListener', 'delete', onUpdate);
+      logger.verbose('Removing all wallet & xpub DB listners.');
+      ipcRenderer.removeListener(`${Databases.WALLET}-insert`, onUpdate);
+      ipcRenderer.removeListener(`${Databases.WALLET}-update`, onUpdate);
+      ipcRenderer.removeListener(`${Databases.WALLET}-delete`, onUpdate);
 
-      dbUtil(Databases.XPUB, 'emitter', 'removeListener', 'insert', onUpdate);
-      dbUtil(Databases.XPUB, 'emitter', 'removeListener', 'delete', onUpdate);
+      ipcRenderer.removeListener(`${Databases.XPUB}-insert`, onUpdate);
+      ipcRenderer.removeListener(`${Databases.XPUB}-delete`, onUpdate);
 
-      dbUtil(
-        Databases.ERC20TOKEN,
-        'emitter',
-        'removeListener',
-        'insert',
-        onUpdate
-      );
-      dbUtil(
-        Databases.ERC20TOKEN,
-        'emitter',
-        'removeListener',
-        'delete',
-        onUpdate
-      );
+      ipcRenderer.removeListener(`${Databases.ERC20TOKEN}-insert`, onUpdate);
+      ipcRenderer.removeListener(`${Databases.ERC20TOKEN}-delete`, onUpdate);
     };
   }, []);
 

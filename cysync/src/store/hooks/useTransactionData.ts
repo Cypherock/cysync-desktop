@@ -1,7 +1,8 @@
 import BigNumber from 'bignumber.js';
+import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react';
 
-import { Databases, dbUtil } from '../database';
+import { Databases } from '../database';
 
 import { DisplayTransaction } from './types';
 import { useDebouncedFunction } from './useDebounce';
@@ -64,50 +65,14 @@ export const useTransactionData: UseTransactionData = () => {
   );
 
   useEffect(() => {
-    dbUtil(
-      Databases.TRANSACTION,
-      'emitter',
-      'on',
-      'insert',
-      debouncedRefreshFromDB
-    );
-    dbUtil(
-      Databases.TRANSACTION,
-      'emitter',
-      'on',
-      'update',
-      debouncedRefreshFromDB
-    );
-    dbUtil(
-      Databases.TRANSACTION,
-      'emitter',
-      'on',
-      'delete',
-      debouncedRefreshFromDB
-    );
+    ipcRenderer.on(`${Databases.TRANSACTION}-insert`, debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.TRANSACTION}-update`, debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.TRANSACTION}-delete`, debouncedRefreshFromDB);
 
     return () => {
-      dbUtil(
-        Databases.TRANSACTION,
-        'emitter',
-        'removeListener',
-        'insert',
-        debouncedRefreshFromDB
-      );
-      dbUtil(
-        Databases.TRANSACTION,
-        'emitter',
-        'removeListener',
-        'update',
-        debouncedRefreshFromDB
-      );
-      dbUtil(
-        Databases.TRANSACTION,
-        'emitter',
-        'removeListener',
-        'delete',
-        debouncedRefreshFromDB
-      );
+      ipcRenderer.removeListener(`${Databases.TRANSACTION}-insert`, debouncedRefreshFromDB);
+      ipcRenderer.removeListener(`${Databases.TRANSACTION}-update`, debouncedRefreshFromDB);
+      ipcRenderer.removeListener(`${Databases.TRANSACTION}-delete`, debouncedRefreshFromDB);
     };
   }, []);
 

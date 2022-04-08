@@ -1,5 +1,6 @@
 import { ALLCOINS as COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
+import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react';
 
 import {
@@ -39,38 +40,20 @@ export const useToken: UseToken = () => {
   const onChange = useDebouncedFunction(onDBChange, 800);
 
   useEffect(() => {
-    dbUtil(Databases.PRICE, 'emitter', 'on', 'insert', onChange);
-    dbUtil(Databases.PRICE, 'emitter', 'on', 'update', onChange);
+    ipcRenderer.on(`${Databases.PRICE}-insert`, onChange);
+    ipcRenderer.on(`${Databases.PRICE}-update`, onChange);
 
-    dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'insert', onChange);
-    dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'update', onChange);
-    dbUtil(Databases.ERC20TOKEN, 'emitter', 'on', 'delete', onChange);
+    ipcRenderer.on(`${Databases.ERC20TOKEN}-insert`, onChange);
+    ipcRenderer.on(`${Databases.ERC20TOKEN}-update`, onChange);
+    ipcRenderer.on(`${Databases.ERC20TOKEN}-delete`, onChange);
 
     return () => {
-      dbUtil(Databases.PRICE, 'emitter', 'removeListener', 'insert', onChange);
-      dbUtil(Databases.PRICE, 'emitter', 'removeListener', 'update', onChange);
+      ipcRenderer.on(`${Databases.PRICE}-insert`, onChange);
+      ipcRenderer.removeListener(`${Databases.PRICE}-update`, onChange);
 
-      dbUtil(
-        Databases.ERC20TOKEN,
-        'emitter',
-        'removeListener',
-        'insert',
-        onChange
-      );
-      dbUtil(
-        Databases.ERC20TOKEN,
-        'emitter',
-        'removeListener',
-        'update',
-        onChange
-      );
-      dbUtil(
-        Databases.ERC20TOKEN,
-        'emitter',
-        'removeListener',
-        'delete',
-        onChange
-      );
+      ipcRenderer.removeListener(`${Databases.ERC20TOKEN}-insert`, onChange);
+      ipcRenderer.removeListener(`${Databases.ERC20TOKEN}-update`, onChange);
+      ipcRenderer.removeListener(`${Databases.ERC20TOKEN}-delete`, onChange);
     };
   }, []);
 

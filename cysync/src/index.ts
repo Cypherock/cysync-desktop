@@ -376,16 +376,30 @@ const createWindow = async () => {
     'database',
     async (_, dbName: Databases, fnName: string, ...args: any) => {
       let results;
-      if (fnName === 'emitter') {
-        results = await (dbs as any)[dbName].emitter[args[0]].bind(dbs[dbName])(
-          ...args.slice(1)
-        );
-      } else {
+      try {
         results = await (dbs as any)[dbName][fnName].bind(dbs[dbName])(...args);
+      } catch (e) {
+        logger.error(e.message);
+        logger.info(dbName);
+        logger.info(fnName);
+        logger.info(args);
       }
       return results;
     }
   );
+
+  // Database Event listeners
+  for (const db in dbs) {
+    const database = (dbs as any)[db];
+    const events = ['insert', 'update', 'delete'];
+
+    events.forEach(event => {
+      database.emitter?.on(event, () => {
+        if (mainWindow !== null && mainWindow !== undefined)
+          mainWindow.webContents.send(`${db}-${event}`);
+      });
+    });
+  }
 };
 
 app.on('ready', async () => {

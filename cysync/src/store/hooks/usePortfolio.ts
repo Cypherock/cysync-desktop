@@ -1,5 +1,6 @@
 import { ALLCOINS as COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
+import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react';
 
 import { getPortfolioCache } from '../../utils/cache';
@@ -74,146 +75,39 @@ export const usePortfolio: UsePortfolio = () => {
   const debouncedRefreshFromDB = useDebouncedFunction(refreshFromDB, 2000);
 
   useEffect(() => {
-    dbUtil(
-      Databases.ERC20TOKEN,
-      'emitter',
-      'on',
-      'insert',
-      debouncedRefreshFromDB
-    );
-    dbUtil(
-      Databases.ERC20TOKEN,
-      'emitter',
-      'on',
-      'update',
-      debouncedRefreshFromDB
-    );
-    dbUtil(
-      Databases.ERC20TOKEN,
-      'emitter',
-      'on',
-      'delete',
-      debouncedRefreshFromDB
-    );
+    ipcRenderer.on(`${Databases.ERC20TOKEN}-insert`, debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.ERC20TOKEN}-update`, debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.ERC20TOKEN}-delete`, debouncedRefreshFromDB);
 
-    dbUtil(Databases.PRICE, 'emitter', 'on', 'insert', debouncedRefreshFromDB);
-    dbUtil(Databases.PRICE, 'emitter', 'on', 'update', debouncedRefreshFromDB);
-    dbUtil(Databases.PRICE, 'emitter', 'on', 'delete', debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.PRICE}-insert`, debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.PRICE}-update`, debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.PRICE}-delete`, debouncedRefreshFromDB);
 
-    dbUtil(Databases.XPUB, 'emitter', 'on', 'insert', debouncedRefreshFromDB);
-    dbUtil(Databases.XPUB, 'emitter', 'on', 'update', debouncedRefreshFromDB);
-    dbUtil(Databases.XPUB, 'emitter', 'on', 'delete', debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.XPUB}-insert`, debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.XPUB}-update`, debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.XPUB}-delete`, debouncedRefreshFromDB);
 
-    dbUtil(
-      Databases.TRANSACTION,
-      'emitter',
-      'on',
-      'insert',
-      debouncedRefreshFromDB
-    );
-    dbUtil(
-      Databases.TRANSACTION,
-      'emitter',
-      'on',
-      'update',
-      debouncedRefreshFromDB
-    );
-    dbUtil(
-      Databases.TRANSACTION,
-      'emitter',
-      'on',
-      'delete',
-      debouncedRefreshFromDB
-    );
-
+    ipcRenderer.on(`${Databases.TRANSACTION}-insert`, debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.TRANSACTION}-update`, debouncedRefreshFromDB);
+    ipcRenderer.on(`${Databases.TRANSACTION}-delete`, debouncedRefreshFromDB);
+    
     return () => {
-      dbUtil(
-        Databases.ERC20TOKEN,
-        'emitter',
-        'removeListener',
-        'insert',
-        debouncedRefreshFromDB
-      );
-      dbUtil(
-        Databases.ERC20TOKEN,
-        'emitter',
-        'removeListener',
-        'update',
-        debouncedRefreshFromDB
-      );
-      dbUtil(
-        Databases.ERC20TOKEN,
-        'emitter',
-        'removeListener',
-        'delete',
-        debouncedRefreshFromDB
-      );
 
-      dbUtil(
-        Databases.PRICE,
-        'emitter',
-        'removeListener',
-        'insert',
-        debouncedRefreshFromDB
-      );
-      dbUtil(
-        Databases.PRICE,
-        'emitter',
-        'removeListener',
-        'update',
-        debouncedRefreshFromDB
-      );
-      dbUtil(
-        Databases.PRICE,
-        'emitter',
-        'oremoveListenern',
-        'delete',
-        debouncedRefreshFromDB
-      );
+      ipcRenderer.removeListener(`${Databases.ERC20TOKEN}-insert`, debouncedRefreshFromDB);
+      ipcRenderer.removeListener(`${Databases.ERC20TOKEN}-update`, debouncedRefreshFromDB);
+      ipcRenderer.removeListener(`${Databases.ERC20TOKEN}-delete`, debouncedRefreshFromDB);
 
-      dbUtil(
-        Databases.XPUB,
-        'emitter',
-        'removeListener',
-        'insert',
-        debouncedRefreshFromDB
-      );
-      dbUtil(
-        Databases.XPUB,
-        'emitter',
-        'removeListener',
-        'update',
-        debouncedRefreshFromDB
-      );
-      dbUtil(
-        Databases.XPUB,
-        'emitter',
-        'removeListener',
-        'delete',
-        debouncedRefreshFromDB
-      );
+      ipcRenderer.removeListener(`${Databases.PRICE}-insert`, debouncedRefreshFromDB);
+      ipcRenderer.removeListener(`${Databases.PRICE}-update`, debouncedRefreshFromDB);
+      ipcRenderer.removeListener(`${Databases.PRICE}-delete`, debouncedRefreshFromDB);
 
-      dbUtil(
-        Databases.TRANSACTION,
-        'emitter',
-        'removeListener',
-        'insert',
-        debouncedRefreshFromDB
-      );
-      dbUtil(
-        Databases.TRANSACTION,
-        'emitter',
-        'removeListener',
-        'update',
-        debouncedRefreshFromDB
-      );
-      dbUtil(
-        Databases.TRANSACTION,
-        'emitter',
-        'removeListener',
-        'delete',
-        debouncedRefreshFromDB
-      );
+      ipcRenderer.removeListener(`${Databases.XPUB}-insert`, debouncedRefreshFromDB);
+      ipcRenderer.removeListener(`${Databases.XPUB}-update`, debouncedRefreshFromDB);
+      ipcRenderer.removeListener(`${Databases.XPUB}-delete`, debouncedRefreshFromDB);
+      
+      ipcRenderer.removeListener(`${Databases.TRANSACTION}-insert`, debouncedRefreshFromDB);
+      ipcRenderer.removeListener(`${Databases.TRANSACTION}-update`, debouncedRefreshFromDB);
+      ipcRenderer.removeListener(`${Databases.TRANSACTION}-delete`, debouncedRefreshFromDB);
     };
   }, []);
 
