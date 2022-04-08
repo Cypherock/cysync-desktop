@@ -423,6 +423,15 @@ export const ConnectionProvider: React.FC = ({ children }) => {
     return false;
   };
 
+  const externalSetIsDeviceUpdating = (val: boolean) => {
+    // Refresh connection status when device is done updating
+    if (!val) {
+      setDeviceConnectionStatus(false);
+    }
+
+    setIsDeviceUpdating(val);
+  };
+
   return (
     <ConnectionContext.Provider
       value={{
@@ -431,7 +440,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         firmwareVersion,
         inBootloader,
         isDeviceUpdating,
-        setIsDeviceUpdating,
+        setIsDeviceUpdating: externalSetIsDeviceUpdating,
         internalDeviceConnection,
         isReady,
         verifyState,

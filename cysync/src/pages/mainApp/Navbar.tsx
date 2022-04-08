@@ -126,7 +126,7 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
     } else {
       setConnectedState(8);
     }
-  }, [verifyState, inBackgroundProcess]);
+  }, [verifyState, isDeviceUpdating, inBackgroundProcess]);
 
   const getDeviceConnectedIcon = () => {
     switch (connectedState) {
