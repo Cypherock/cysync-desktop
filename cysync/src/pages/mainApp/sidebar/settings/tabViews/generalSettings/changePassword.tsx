@@ -71,12 +71,15 @@ const ChangePassword: React.FC<Props> = ({
   const classes = useStyles();
   const theme = useTheme();
   const lockscreen = useLockscreen();
-  const [values, setValues] = React.useState<State>({
+  const INITIAL_VALUES = {
     oldPassword: '',
     password: '',
     confirmPassword: '',
     showPassword: false,
     showConfirmPassword: false
+  };
+  const [values, setValues] = React.useState<State>({
+    ...INITIAL_VALUES
   });
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -95,6 +98,11 @@ const ChangePassword: React.FC<Props> = ({
     setValues({ ...values, showConfirmPassword: !values.showConfirmPassword });
   };
 
+  const closeDialogBox = () => {
+    setValues({ ...INITIAL_VALUES });
+    closeChangePassword();
+  };
+
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
@@ -111,12 +119,18 @@ const ChangePassword: React.FC<Props> = ({
           setError(passwordCheckError);
         } else if (type === 'change') {
           if (await verifyPassword(values.oldPassword.trim())) {
-            setError('');
-            const passHash = await generatePasswordHash(values.password.trim());
-            await passChangeEffect(passHash.singleHash);
-            setPasswordHash(passHash.doubleHash);
-            lockscreen.setIsPasswordSet(true);
-            closeChangePassword();
+            if (values.password.trim() === values.oldPassword.trim()) {
+              setError('New password cannot be same as old password');
+            } else {
+              setError('');
+              const passHash = await generatePasswordHash(
+                values.password.trim()
+              );
+              await passChangeEffect(passHash.singleHash);
+              setPasswordHash(passHash.doubleHash);
+              lockscreen.setIsPasswordSet(true);
+              closeDialogBox();
+            }
           } else {
             setError('Old Password is incorrect');
           }
@@ -126,7 +140,7 @@ const ChangePassword: React.FC<Props> = ({
           await passChangeEffect(passHash.singleHash);
           setPasswordHash(passHash.doubleHash);
           lockscreen.setIsPasswordSet(true);
-          closeChangePassword();
+          closeDialogBox();
         }
       }
     } catch (error) {
@@ -162,7 +176,7 @@ const ChangePassword: React.FC<Props> = ({
       fullScreen
       maxWidth="sm"
       open={handleChangePasswordDialog}
-      handleClose={closeChangePassword}
+      handleClose={closeDialogBox}
       handleConfirmation={confirmChangePassword}
       confirmButtonDisabled={isLoading}
       rejectButtonDisabled={isLoading}
@@ -175,7 +189,9 @@ const ChangePassword: React.FC<Props> = ({
             gutterBottom
             style={{ margin: '0rem 0rem 3rem' }}
           >
-            Change password for your App
+            {type === 'change'
+              ? 'Change password for your App'
+              : 'Set password'}
           </Typography>
           <div className={classes.inputs}>
             {type === 'change' ? (
