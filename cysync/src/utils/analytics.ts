@@ -2,16 +2,20 @@ import ua from 'universal-analytics';
 import { v4 as uuid } from 'uuid';
 
 import { version } from '../../package.json';
+import storage from 'electron-json-storage';
 
 import logger from './logger';
+import { ipcRenderer } from 'electron';
 
 export const getAnalyticsId = () => {
-  let clientId = localStorage.getItem('analytics-id');
-  if (!clientId) {
-    clientId = uuid();
-    localStorage.setItem('analytics-id', clientId);
-  }
-  return clientId;
+  const data: any = storage.getSync('analytics-id');
+  if (data && data.clientId) return data.clientId;
+
+  const newClientId = uuid();
+  storage.set('analytics-id', { clientId: newClientId }, function (error) {
+    if (error) console.log(process.type, error);
+  });
+  return newClientId;
 };
 
 class Analytics {
@@ -87,7 +91,7 @@ class Analytics {
     // Stop analytics on development mode
     this.stopAnalytics = process.env.NODE_ENV === 'development';
 
-    const clientId = getAnalyticsId();
+    const clientId = await ipcRenderer.invoke('get-analytics-id');
 
     this.analyticsInstance = ua('UA-155315720-3', clientId);
   }

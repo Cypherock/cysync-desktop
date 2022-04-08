@@ -29,6 +29,7 @@ import {
 } from './mainProcess/utils';
 import { Databases } from './store/database';
 import { dbs } from './store/database/databases';
+import { getAnalyticsId } from './utils/analytics';
 
 // Sets config variable on envirnment, must be set before any other import
 
@@ -401,6 +402,9 @@ const createWindow = async () => {
       });
     });
   }
+  ipcMain.handle('get-analytics-id', async _ => {
+    return getAnalyticsId();
+  });
 };
 
 app.on('ready', async () => {

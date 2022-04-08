@@ -13,11 +13,11 @@ import {
   } from '@cypherock/database';
   
   
-  // import { getAnalyticsId } from '../../utils/analytics';
+  import { getAnalyticsId } from '../../utils/analytics';
   
   const dbPath = process.env.userDataPath;
   
-  const passEnDb = new PassEncrypt('adfds-dsfaf');
+  const passEnDb = new PassEncrypt(getAnalyticsId());
   
   const priceDb = new PriceDB(dbPath);
   const xpubDb = new XpubDB(dbPath, passEnDb);
