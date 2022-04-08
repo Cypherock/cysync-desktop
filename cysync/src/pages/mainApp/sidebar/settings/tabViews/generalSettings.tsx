@@ -139,54 +139,6 @@ const GeneralSettings = () => {
 
   const ListData = [
     {
-      name: 'Counter Value',
-      secondaryText: '(The balance will be denominated in this currency)',
-      element: (
-        <DropMenu
-          options={[
-            'US Dollars (USD)'
-            // "Indian Rupee (INR)"
-          ]}
-          type="currency"
-          index={index.currency}
-          handleMenuItemSelectionChange={handleListItemClick}
-          stylex={2}
-        />
-      )
-    },
-    {
-      name: 'Display Language',
-      secondaryText: '(Set the Language to be displayed in CySync)',
-      element: (
-        <DropMenu
-          options={[
-            'English'
-            // "Hindi"
-          ]}
-          type="language"
-          index={index.language}
-          handleMenuItemSelectionChange={handleListItemClick}
-          stylex={2}
-        />
-      )
-    },
-    {
-      name: 'Theme',
-      secondaryText: '(Select the Theme)',
-      element: (
-        <DropMenu
-          options={[
-            'Dark'
-            // "Light"
-          ]}
-          type="theme"
-          index={index.theme}
-          handleMenuItemSelectionChange={handleListItemClick}
-          stylex={2}
-        />
-      )
-    },
-    {
       name: 'Password',
       secondaryText: '(Change the password, Turn Off or On password)',
       element: previousSetPassword ? (
