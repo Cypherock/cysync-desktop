@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
-import { loadDatabases } from '../../store/database';
 import {
   completeFirstBoot,
   isFirstBoot,
@@ -9,6 +8,7 @@ import {
   removePassword
 } from '../../utils/auth';
 import { getAutolockTime } from '../../utils/autolock';
+import { loadDatabases } from '../database';
 
 export interface LockscreenContextInterface {
   lockscreen: boolean;

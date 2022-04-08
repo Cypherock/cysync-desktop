@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
-import { passEnDb, Databases, dbUtil, Xpub } from '../store/database';
+import { Databases, dbUtil, Xpub } from '../store/database';
 
 export const bcryptPass = (pass: string): string => {
   return bcrypt.hashSync(pass, 16);
@@ -77,7 +77,7 @@ export const resetDesktopApplication = (): void => {
 export const passChangeEffect = async (singleHash: string) => {
   const outputsXpubs: Xpub[] = await dbUtil(Databases.XPUB, 'getAll');
 
-  passEnDb.setPassHash(singleHash); //ensure this is cleared once wallet/xpub object are destroyed.
+  dbUtil(Databases.PASSEN, 'setPassHash', singleHash); //ensure this is cleared once wallet/xpub object are destroyed.
 
   await dbUtil(Databases.XPUB, 'updateAll', outputsXpubs);
 
