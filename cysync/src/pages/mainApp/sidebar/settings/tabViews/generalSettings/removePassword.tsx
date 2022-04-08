@@ -176,6 +176,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
               endAdornment: (
                 <InputAdornment position="end">
                   <MIconButton
+                    tabIndex={-1}
                     aria-label="toggle password visibility"
                     onClick={handleClickShowPassword}
                     onMouseDown={handleMouseDownPassword}
