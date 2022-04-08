@@ -49,10 +49,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface State {
   oldPassword: string;
-  password: string;
-  confirmPassword: string;
   showPassword: boolean;
-  showConfirmPassword: boolean;
 }
 
 type Props = {
@@ -64,12 +61,12 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
   const classes = useStyles();
   const theme = useTheme();
   const lockscreen = useLockscreen();
-  const [values, setValues] = React.useState<State>({
+  const INITIAL_VALUES = {
     oldPassword: '',
-    password: '',
-    confirmPassword: '',
-    showPassword: false,
-    showConfirmPassword: false
+    showPassword: false
+  };
+  const [values, setValues] = React.useState<State>({
+    ...INITIAL_VALUES
   });
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -100,7 +97,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
           await passChangeEffect(null);
           lockscreen.setIsPasswordSet(false);
           removePassword();
-          onClose();
+          closeDialogBox();
         } else {
           setError('Old Password is incorrect');
         }
@@ -131,6 +128,11 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
     setIsLoading(true);
   };
 
+  const closeDialogBox = () => {
+    setValues({ ...INITIAL_VALUES });
+    onClose();
+  };
+
   return (
     <DialogBoxConfirmation
       isClosePresent={!isLoading}
@@ -138,7 +140,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
       fullScreen
       maxWidth="sm"
       open={open}
-      handleClose={onClose}
+      handleClose={closeDialogBox}
       handleConfirmation={confirmChangePassword}
       confirmButtonDisabled={isLoading}
       rejectButtonDisabled={isLoading}
@@ -160,14 +162,14 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
             gutterBottom
             style={{ marginBottom: '3rem' }}
           >
-            Enter your old password
+            Enter your password
           </Typography>
           <Input
             fullWidth
             size="small"
             type={values.showPassword ? 'text' : 'password'}
             value={values.oldPassword}
-            placeholder="Enter Old Password"
+            placeholder="Enter Your Password"
             onChange={handleChange('oldPassword')}
             className={classes.marginTopBottom}
             InputProps={{
