@@ -1,4 +1,4 @@
-import { Button, Typography } from '@material-ui/core';
+import { Button, Chip, Typography } from '@material-ui/core';
 import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
@@ -68,12 +68,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     '100%': {
       transform: 'rotateZ(360deg)'
     }
-  },
-  chipLabel: {
-    borderRadius: '14px',
-    fontSize: '13px',
-    padding: '5px 3px 3px 3px',
-    margin: ' auto 5px'
   }
 }));
 
@@ -450,24 +444,26 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
           iconGroup={<CySync color={theme.palette.text.primary} />}
         />
         {process.env.NODE_ENV === 'development' && (
-          <span
-            className={classes.chipLabel}
-            style={{ border: '1px solid rgb(144, 202, 249)' }}
-          >
-            <Typography variant="body2" style={{ color: 'rgb(144, 202, 249)' }}>
-              Test Build
-            </Typography>
-          </span>
+          <Chip
+            label="Test Build"
+            variant="outlined"
+            style={{
+              color: theme.palette.info.main,
+              border: '1px solid',
+              margin: 'auto 5px'
+            }}
+          />
         )}
         {process.env.SERVER_ENV === 'development' && (
-          <span
-            className={classes.chipLabel}
-            style={{ border: '1px solid rgb(102, 187, 106)' }}
-          >
-            <Typography variant="body2" style={{ color: 'rgb(102, 187, 106)' }}>
-              Dev Server
-            </Typography>
-          </span>
+          <Chip
+            label="Dev Server"
+            variant="outlined"
+            style={{
+              color: theme.palette.warning.main,
+              border: '1px solid',
+              margin: 'auto 5px'
+            }}
+          />
         )}
       </div>
       <div className={classes.rightContent}>
