@@ -237,6 +237,7 @@ const SetPassword: React.FC<SetPasswordProps> = ({
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
+                      tabIndex={-1}
                       aria-label="toggle password visibility"
                       onClick={handleClickShowPassword}
                       onMouseDown={handleMouseDownPassword}
@@ -265,6 +266,7 @@ const SetPassword: React.FC<SetPasswordProps> = ({
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
+                      tabIndex={-1}
                       aria-label="toggle password visibility"
                       onClick={handleClickShowConfirmPassword}
                       onMouseDown={handleMouseDownPassword}
