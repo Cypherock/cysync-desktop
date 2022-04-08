@@ -17,7 +17,6 @@ import Analytics from '../../utils/analytics';
 import logger from '../../utils/logger';
 
 import NotificationComponent from './notification';
-import { dbUtil, Databases } from '../../store/database';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -477,19 +476,6 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
             }}
           />
         )}
-        <button onClick={
-          async () => {
-            const result = await dbUtil(Databases.NOTIFICATION, 'getLatest',3);
-            console.log("ipcrenderer", result);
-          }
-        }>
-          <Typography
-            variant="body2"
-            className={classes.text}
-            color="secondary">
-            click
-          </Typography>
-        </button>
       </div>
       <div className={classes.rightContent}>
         <Tooltip title={getSyncToolTip()}>
