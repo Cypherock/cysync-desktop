@@ -186,6 +186,14 @@ const createWindow = async () => {
 
     logger.info('Opening main screen');
 
+    logger.info('Config variables', {
+      log_level: process.env.LOG_LEVEL,
+      build_type: process.env.BUILD_TYPE,
+      server_env: process.env.SERVER_ENV,
+      github_repo: process.env.GITHUB_REPO,
+      node_env: process.env.NODE_ENV
+    });
+
     mainWindow = new BrowserWindow({
       show: false,
       opacity: 0,
