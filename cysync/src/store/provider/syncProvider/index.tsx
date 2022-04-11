@@ -20,12 +20,13 @@ import {
 import BigNumber from 'bignumber.js';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
 import {
   addressDb,
   erc20tokenDb,
+  latestPriceDb,
   priceDb,
   transactionDb,
   xpubDb
@@ -36,6 +37,7 @@ import { useNotifications } from '../notificationProvider';
 import {
   BalanceSyncItem,
   HistorySyncItem,
+  LatestPriceSyncItem,
   PriceSyncItem,
   PriceSyncItemOptions,
   SyncItem
@@ -68,7 +70,11 @@ export interface SyncContextInterface {
   ) => void;
 }
 
-type SyncQueueItem = HistorySyncItem | PriceSyncItem | BalanceSyncItem;
+type SyncQueueItem =
+  | HistorySyncItem
+  | PriceSyncItem
+  | BalanceSyncItem
+  | LatestPriceSyncItem;
 
 export const SyncContext: React.Context<SyncContextInterface> =
   React.createContext<SyncContextInterface>({} as SyncContextInterface);
@@ -298,6 +304,31 @@ export const SyncProvider: React.FC = ({ children }) => {
         });
         addToQueue(newItem);
       }
+    }
+  };
+
+  const addLatestPriceSyncItemFromXpub = (
+    xpub: Xpub,
+    { module = 'default', isRefresh = false }
+  ) => {
+    const coinName = xpub.coin;
+
+    const coin = ALLCOINS[coinName];
+
+    if (!coin) {
+      logger.warn('Invalid coin in add latest price sync item', {
+        coinType: coinName
+      });
+      return;
+    }
+
+    if (!coin.isTest) {
+      const newItem = new LatestPriceSyncItem({
+        coinType: coin.abbr,
+        isRefresh,
+        module
+      });
+      addToQueue(newItem);
     }
   };
 
@@ -629,6 +660,13 @@ export const SyncProvider: React.FC = ({ children }) => {
     await priceDb.insert(item.coinType, item.days, res.data.data.entries);
   };
 
+  const executeLatestPriceItem = async (item: LatestPriceSyncItem) => {
+    const res = await pricingServer.getLatest({
+      coin: item.coinType
+    });
+    await latestPriceDb.insert(item.coinType, res.data.data.price);
+  };
+
   const executeBalanceItem = async (item: BalanceSyncItem) => {
     const coin = ALLCOINS[item.coinType];
     if (!coin) {
@@ -750,8 +788,10 @@ export const SyncProvider: React.FC = ({ children }) => {
           nextItemBefore = await executeHistoryItem(item);
         } else if (item instanceof BalanceSyncItem) {
           await executeBalanceItem(item);
-        } else {
+        } else if (item instanceof PriceSyncItem) {
           await executePriceItem(item);
+        } else {
+          await executeLatestPriceItem(item);
         }
       } catch (error) {
         isError = true;
@@ -880,10 +920,30 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
   };
 
+  const addLatestPriceRefresh = async ({
+    isRefresh = false,
+    module = 'default'
+  }) => {
+    const allXpubs = await xpubDb.getAll();
+    const tokens = await erc20tokenDb.getAll();
+
+    for (const xpub of allXpubs) {
+      addLatestPriceSyncItemFromXpub(xpub, { isRefresh, module });
+    }
+
+    for (const token of tokens) {
+      addLatestPriceSyncItemFromXpub({ coin: token.coin } as Xpub, {
+        isRefresh,
+        module
+      });
+    }
+  };
+
   const addCoinTask = (xpub: Xpub, { module = 'default' }) => {
     addBalanceSyncItemFromXpub(xpub, { module, isRefresh: true });
     addHistorySyncItemFromXpub(xpub, { module, isRefresh: true });
     addPriceSyncItemFromXpub(xpub, { module, isRefresh: true });
+    addLatestPriceSyncItemFromXpub(xpub, { module, isRefresh: true });
   };
 
   const addTokenTask = async (
@@ -910,6 +970,10 @@ export const SyncProvider: React.FC = ({ children }) => {
       isRefresh: true,
       module: 'default'
     });
+    addLatestPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
+      isRefresh: true,
+      module: 'default'
+    });
   };
 
   const setupInitial = async () => {
@@ -918,6 +982,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       await addBalanceRefresh({ isRefresh: true });
       await addHistoryRefresh({ isRefresh: true });
       await addPriceRefresh({ isRefresh: true });
+      await addLatestPriceRefresh({ isRefresh: true });
     }
 
     setInitialSetupDone(true);
@@ -929,34 +994,51 @@ export const SyncProvider: React.FC = ({ children }) => {
     await addBalanceRefresh({ isRefresh: true });
     await addHistoryRefresh({ isRefresh: true });
     await addPriceRefresh({ isRefresh: true });
+    await addLatestPriceRefresh({ isRefresh: true });
     await notifications.getLatest();
   };
 
-  let interval: NodeJS.Timeout | undefined;
+  const intervals = useRef<NodeJS.Timeout[]>([]);
   useEffect(() => {
     transactionDb.failExpiredTxn();
     setupInitial();
 
-    // Refresh after 15 min
-    interval = setInterval(async () => {
-      if (connected && process.env.IS_PRODUCTION === 'true') {
-        logger.info('Sync: Refresh triggered');
-        try {
-          addPriceRefresh({ isRefresh: true, module: 'refresh' });
-          await notifications.getLatest();
-          await transactionDb.failExpiredTxn();
-        } catch (error) {
-          logger.error('Sync: Error in refresh');
-          logger.error(error);
-        }
-      }
-    }, 1000 * 60 * 15);
+    // Refresh after 60 mins
+    if (intervals.current.length === 0) {
+      intervals.current.push(
+        setInterval(async () => {
+          if (connected && process.env.IS_PRODUCTION === 'true') {
+            logger.info('Sync: Refresh triggered');
+            try {
+              addPriceRefresh({ isRefresh: true, module: 'refresh' });
+              await notifications.getLatest();
+              await transactionDb.failExpiredTxn();
+            } catch (error) {
+              logger.error('Sync: Error in refresh');
+              logger.error(error);
+            }
+          }
+        }, 1000 * 60 * 60)
+      );
 
+      // Refresh after 15 mins
+      intervals.current.push(
+        setInterval(async () => {
+          if (connected && process.env.IS_PRODUCTION === 'true') {
+            logger.info('Sync: Refresh triggered for latest price');
+            try {
+              addLatestPriceRefresh({ isRefresh: true, module: 'refresh' });
+            } catch (error) {
+              logger.error('Sync: Error in refreshing latest price');
+              logger.error(error);
+            }
+          }
+        }, 1000 * 60 * 15)
+      );
+    }
     return () => {
-      if (interval) {
-        clearInterval(interval);
-        interval = undefined;
-      }
+      intervals.current.forEach(interval => clearInterval(interval));
+      intervals.current = [] as NodeJS.Timeout[];
     };
   }, []);
 
