@@ -1,4 +1,4 @@
-import { Button, Typography } from '@material-ui/core';
+import { Button, Chip, Typography } from '@material-ui/core';
 import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
@@ -443,6 +443,39 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
           viewBox="0 0 74 23"
           iconGroup={<CySync color={theme.palette.text.primary} />}
         />
+        {process.env.BUILD_TYPE === 'debug' && (
+          <Chip
+            label="Test Build"
+            variant="outlined"
+            style={{
+              color: theme.palette.info.main,
+              border: '1px solid',
+              margin: 'auto 5px'
+            }}
+          />
+        )}
+        {process.env.SERVER_ENV === 'development' && (
+          <Chip
+            label="Dev Server"
+            variant="outlined"
+            style={{
+              color: theme.palette.warning.main,
+              border: '1px solid',
+              margin: 'auto 5px'
+            }}
+          />
+        )}
+        {process.env.SERVER_ENV === 'local' && (
+          <Chip
+            label="Local Server"
+            variant="outlined"
+            style={{
+              color: theme.palette.warning.main,
+              border: '1px solid',
+              margin: 'auto 5px'
+            }}
+          />
+        )}
       </div>
       <div className={classes.rightContent}>
         <Tooltip title={getSyncToolTip()}>
