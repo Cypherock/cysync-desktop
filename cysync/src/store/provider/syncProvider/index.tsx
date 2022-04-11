@@ -20,7 +20,7 @@ import {
 import BigNumber from 'bignumber.js';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
 import {
@@ -998,46 +998,47 @@ export const SyncProvider: React.FC = ({ children }) => {
     await notifications.getLatest();
   };
 
-  const intervals: NodeJS.Timeout[] = [];
+  const intervals = useRef<NodeJS.Timeout[]>([]);
   useEffect(() => {
     transactionDb.failExpiredTxn();
     setupInitial();
 
     // Refresh after 60 mins
-    intervals.push(
-      setInterval(async () => {
-        if (connected && process.env.IS_PRODUCTION === 'true') {
-          logger.info('Sync: Refresh triggered');
-          try {
-            addPriceRefresh({ isRefresh: true, module: 'refresh' });
-            await notifications.getLatest();
-            await transactionDb.failExpiredTxn();
-          } catch (error) {
-            logger.error('Sync: Error in refresh');
-            logger.error(error);
+    if (intervals.current.length === 0) {
+      intervals.current.push(
+        setInterval(async () => {
+          if (connected && process.env.IS_PRODUCTION === 'true') {
+            logger.info('Sync: Refresh triggered');
+            try {
+              addPriceRefresh({ isRefresh: true, module: 'refresh' });
+              await notifications.getLatest();
+              await transactionDb.failExpiredTxn();
+            } catch (error) {
+              logger.error('Sync: Error in refresh');
+              logger.error(error);
+            }
           }
-        }
-      }, 1000 * 60 * 60)
-    );
+        }, 1000 * 60 * 60)
+      );
 
-    // Refresh after 15 mins
-    intervals.push(
-      setInterval(async () => {
-        if (connected && process.env.IS_PRODUCTION === 'true') {
-          logger.info('Sync: Refresh triggered for latest price');
-          try {
-            addLatestPriceRefresh({ isRefresh: true, module: 'refresh' });
-          } catch (error) {
-            logger.error('Sync: Error in refreshing latest price');
-            logger.error(error);
+      // Refresh after 15 mins
+      intervals.current.push(
+        setInterval(async () => {
+          if (connected && process.env.IS_PRODUCTION === 'true') {
+            logger.info('Sync: Refresh triggered for latest price');
+            try {
+              addLatestPriceRefresh({ isRefresh: true, module: 'refresh' });
+            } catch (error) {
+              logger.error('Sync: Error in refreshing latest price');
+              logger.error(error);
+            }
           }
-        }
-      }, 1000 * 60 * 15)
-    );
-
+        }, 1000 * 60 * 15)
+      );
+    }
     return () => {
-      intervals.forEach(interval => clearInterval(interval));
-      intervals.length = 0;
+      intervals.current.forEach(interval => clearInterval(interval));
+      intervals.current = [] as NodeJS.Timeout[];
     };
   }, []);
 
