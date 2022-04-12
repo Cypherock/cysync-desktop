@@ -23,13 +23,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
-import {
-  Databases,
-  dbUtil
-} from '../../database';
-import {
-  latestPriceDb
-} from '../../database/databases';
+import { Databases, dbUtil } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
@@ -682,14 +676,25 @@ export const SyncProvider: React.FC = ({ children }) => {
       coin: item.coinType,
       days: item.days
     });
-    await dbUtil(Databases.PRICE, 'insert', item.coinType, item.days, res.data.data.entries);
+    await dbUtil(
+      Databases.PRICE,
+      'insert',
+      item.coinType,
+      item.days,
+      res.data.data.entries
+    );
   };
 
   const executeLatestPriceItem = async (item: LatestPriceSyncItem) => {
     const res = await pricingServer.getLatest({
       coin: item.coinType
     });
-    await latestPriceDb.insert(item.coinType, res.data.data.price);
+    await dbUtil(
+      Databases.LATESTPRICE,
+      'insert',
+      item.coinType,
+      res.data.data.price
+    );
   };
 
   const executeBalanceItem = async (item: BalanceSyncItem) => {
@@ -965,7 +970,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     isRefresh = false,
     module = 'default'
   }) => {
-    const allXpubs = await xpubDb.getAll();
+    const allXpubs = await dbUtil(Databases.XPUB, 'getAll');
     const tokens = await dbUtil(Databases.ERC20TOKEN, 'getAll');
 
     for (const xpub of allXpubs) {

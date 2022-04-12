@@ -2,6 +2,7 @@ import { ipcRenderer } from 'electron';
 
 export enum Databases {
   PRICE = 'priceDb',
+  LATESTPRICE = 'latestPriceDb',
   XPUB = 'xpubDb',
   TRANSACTION = 'transactionDb',
   WALLET = 'walletDb',
