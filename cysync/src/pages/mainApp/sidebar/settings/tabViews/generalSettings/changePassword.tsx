@@ -15,7 +15,7 @@ import React from 'react';
 
 import DialogBoxConfirmation from '../../../../../../designSystem/designComponents/dialog/dialogBoxConfirmation';
 import Input from '../../../../../../designSystem/designComponents/input/input';
-import { useLockscreen } from '../../../../../../store/provider';
+import { useLockscreen, useSnackbar } from '../../../../../../store/provider';
 import {
   checkPassword,
   generatePasswordHash,
@@ -71,6 +71,7 @@ const ChangePassword: React.FC<Props> = ({
   const classes = useStyles();
   const theme = useTheme();
   const lockscreen = useLockscreen();
+  const snackbar = useSnackbar();
   const INITIAL_VALUES = {
     oldPassword: '',
     password: '',
@@ -130,6 +131,15 @@ const ChangePassword: React.FC<Props> = ({
               setPasswordHash(passHash.doubleHash);
               lockscreen.setIsPasswordSet(true);
               closeDialogBox();
+              snackbar.showSnackbar(
+                'Password changed Successfully !',
+                'success',
+                undefined,
+                {
+                  dontCloseOnClickAway: true,
+                  autoHideDuration: 4000
+                }
+              );
             }
           } else {
             setError('Old Password is incorrect');
