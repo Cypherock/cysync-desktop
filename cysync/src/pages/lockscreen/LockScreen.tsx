@@ -151,7 +151,7 @@ const LockScreen = (props: any) => {
   const ENTER_KEY = 13;
   const handleKeyPress = (event: any) => {
     if (event.keyCode === ENTER_KEY) {
-      handleSubmit();
+      setIsLoading(true);
     }
   };
 
@@ -248,6 +248,7 @@ const LockScreen = (props: any) => {
                   value={values.password}
                   disabled={isLoading}
                   onChange={handleChange('password')}
+                  onKeyDown={handleKeyPress}
                   placeholder="Enter Password"
                   label="Enter Password"
                   InputProps={{

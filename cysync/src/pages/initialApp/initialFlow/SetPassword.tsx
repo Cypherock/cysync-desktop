@@ -132,6 +132,13 @@ const SetPassword: React.FC<SetPasswordProps> = ({
       setValues({ ...values, [prop]: event.target.value });
     };
 
+  const ENTER_KEY = 13;
+  const handleKeyPress = (event: any) => {
+    if (event.keyCode === ENTER_KEY) {
+      setIsLoading(true);
+    }
+  };
+
   const handleClickShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword });
   };
@@ -262,6 +269,7 @@ const SetPassword: React.FC<SetPasswordProps> = ({
               value={values.confirmPassword}
               placeholder="Confirm Password"
               onChange={handleChange('confirmPassword')}
+              onKeyDown={handleKeyPress}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
