@@ -299,12 +299,15 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         isNewDevice,
         lastAuthFailed,
         isNotReady,
-        errorMessage
+        errorMessage,
+        isUpdateRequired
       });
       let allowConnection = false;
       setUpdateRequiredType(undefined);
       // Allow connection in `isNewDevice` & `lastAuthFailed` states if app is in debug mode.
-      if (isNewDevice) {
+      if (!deviceConnectionStatus) {
+        setVerifyState(-1);
+      } else if (isNewDevice) {
         if (process.env.BUILD_TYPE !== 'debug') {
           setVerifyState(4);
         } else {
