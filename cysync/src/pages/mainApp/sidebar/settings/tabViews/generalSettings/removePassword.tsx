@@ -15,7 +15,7 @@ import React from 'react';
 
 import DialogBoxConfirmation from '../../../../../../designSystem/designComponents/dialog/dialogBoxConfirmation';
 import Input from '../../../../../../designSystem/designComponents/input/input';
-import { useLockscreen } from '../../../../../../store/provider';
+import { useLockscreen, useSnackbar } from '../../../../../../store/provider';
 import {
   passChangeEffect,
   removePassword,
@@ -61,6 +61,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
   const classes = useStyles();
   const theme = useTheme();
   const lockscreen = useLockscreen();
+  const snackbar = useSnackbar();
   const INITIAL_VALUES = {
     oldPassword: '',
     showPassword: false
@@ -104,6 +105,15 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
           lockscreen.setIsPasswordSet(false);
           removePassword();
           closeDialogBox();
+          snackbar.showSnackbar(
+            'Password removed Successfully !',
+            'success',
+            undefined,
+            {
+              dontCloseOnClickAway: true,
+              autoHideDuration: 4000
+            }
+          );
         } else {
           setError('Old Password is incorrect');
         }
