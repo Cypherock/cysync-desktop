@@ -107,7 +107,6 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
   const {
     internalDeviceConnection: deviceConnection,
     deviceSdkVersion,
-    devicePacketVersion,
     connected,
     inBootloader,
     firmwareVersion,
@@ -182,7 +181,6 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
             if (firmwareVersion) {
               return handleCardAuth({
                 connection: deviceConnection,
-                packetVersion: devicePacketVersion,
                 sdkVersion: deviceSdkVersion,
                 setIsInFlow,
                 firmwareVersion: hexToVersion(firmwareVersion),
@@ -238,7 +236,6 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
         if (deviceConnection && firmwareVersion) {
           handleCardAuth({
             connection: deviceConnection,
-            packetVersion: devicePacketVersion,
             sdkVersion: deviceSdkVersion,
             setIsInFlow,
             firmwareVersion: hexToVersion(firmwareVersion),
@@ -350,7 +347,6 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
       if (deviceConnection && firmwareVersion) {
         handleCardAuth({
           connection: deviceConnection,
-          packetVersion: devicePacketVersion,
           sdkVersion: deviceSdkVersion,
           setIsInFlow,
           firmwareVersion: hexToVersion(firmwareVersion),

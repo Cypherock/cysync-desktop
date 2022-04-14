@@ -26,7 +26,7 @@ const Index = () => {
   const { setAddCoinFormOpen, setActiveStep, setXpubMissing } =
     useAddCoinContext();
 
-  const { deviceConnection, devicePacketVersion } = useConnection();
+  const { deviceConnection } = useConnection();
 
   const [isDeviceFlow, setDeviceFlow] = useState(!!deviceConnection);
 
@@ -43,10 +43,7 @@ const Index = () => {
 
   const handleClose = (abort?: boolean) => {
     if (abort && deviceConnection)
-      receiveTransaction.cancelReceiveTxn(
-        deviceConnection,
-        devicePacketVersion
-      );
+      receiveTransaction.cancelReceiveTxn(deviceConnection);
     Analytics.Instance.event(
       Analytics.Categories.RECEIVE_ADDR,
       Analytics.Actions.CLOSED

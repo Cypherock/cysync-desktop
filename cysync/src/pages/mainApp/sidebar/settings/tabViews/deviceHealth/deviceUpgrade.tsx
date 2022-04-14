@@ -263,7 +263,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     cancelDeviceUpgrade,
     handleRetry,
     deviceConnection,
-    devicePacketVersion,
     firmwareVersion,
     deviceState,
     inBackgroundProcess,
@@ -281,12 +280,10 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   } = useDeviceUpgrade();
 
   const latestDeviceConnection = useRef<any>();
-  const latestPacketVersion = useRef<any>();
   const latestCompleted = useRef<boolean>();
 
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
-    latestPacketVersion.current = devicePacketVersion;
   }, [deviceConnection]);
 
   useEffect(() => {
@@ -305,10 +302,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
       setAllowExit(true);
       setIsDeviceUpdating(false);
       if (!latestCompleted.current && latestDeviceConnection.current) {
-        cancelDeviceUpgrade(
-          latestDeviceConnection.current,
-          latestPacketVersion.current
-        );
+        cancelDeviceUpgrade(latestDeviceConnection.current);
       }
       logger.info('Setting device update closed');
       Analytics.Instance.event(

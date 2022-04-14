@@ -66,7 +66,6 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
 
   const {
     internalDeviceConnection: deviceConnection,
-    devicePacketVersion,
     deviceSdkVersion,
     inBackgroundProcess,
     inBootloader,
@@ -125,7 +124,6 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
         if (firmwareVersion) {
           handleDeviceAuth({
             connection: deviceConnection,
-            packetVersion: devicePacketVersion,
             sdkVersion: deviceSdkVersion,
             setIsInFlow,
             firmwareVersion: hexToVersion(firmwareVersion),
@@ -199,7 +197,6 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
       if (deviceConnection && firmwareVersion) {
         handleDeviceAuth({
           connection: deviceConnection,
-          packetVersion: devicePacketVersion,
           sdkVersion: deviceSdkVersion,
           setIsInFlow,
           firmwareVersion: hexToVersion(firmwareVersion),

@@ -95,8 +95,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
     errorMessage,
     latestVersion,
     setUpdated,
-    setIsCompleted,
-    setIsDeviceUpdating
+    setIsCompleted
   } = useDeviceUpgrade(true);
 
   const refreshComponent = () => {
@@ -135,7 +134,6 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
 
     return () => {
       logger.info('Closed device update screen');
-      setIsDeviceUpdating(false);
     };
   }, []);
 

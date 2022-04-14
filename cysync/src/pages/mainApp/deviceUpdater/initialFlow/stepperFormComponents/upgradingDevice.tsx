@@ -93,8 +93,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     errorMessage,
     latestVersion,
     setUpdated,
-    setIsCompleted,
-    setIsDeviceUpdating
+    setIsCompleted
   } = useDeviceUpgrade(true);
 
   const refreshComponent = () => {
@@ -133,7 +132,6 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
 
     return () => {
       logger.info('Closed device update screen');
-      setIsDeviceUpdating(false);
     };
   }, []);
 

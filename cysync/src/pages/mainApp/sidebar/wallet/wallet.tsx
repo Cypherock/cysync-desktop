@@ -132,8 +132,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
     activeStep
   } = useAddCoinContext();
 
-  const { deviceConnection, devicePacketVersion, beforeNetworkAction } =
-    useConnection();
+  const { deviceConnection, beforeNetworkAction } = useConnection();
 
   const handleAddCoinFormOpen = () => {
     if (beforeNetworkAction()) {
@@ -145,7 +144,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
 
   const handleAddCoinFormClose = (abort?: boolean) => {
     if (abort && deviceConnection) {
-      coinAdder.cancelAddCoin(deviceConnection, devicePacketVersion);
+      coinAdder.cancelAddCoin(deviceConnection);
     }
     Analytics.Instance.event(
       Analytics.Categories.ADD_COIN,

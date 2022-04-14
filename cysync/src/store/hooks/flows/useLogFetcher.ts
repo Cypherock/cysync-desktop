@@ -1,18 +1,16 @@
 import {
+  DeviceConnection,
   DeviceError,
-  DeviceErrorType,
-  PacketVersion
+  DeviceErrorType
 } from '@cypherock/communication';
 import { LogsFetcher } from '@cypherock/protocols';
 import { useState } from 'react';
-import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
 import { useI18n } from '../../provider';
 
 export interface HandleLogFetcherOptions {
-  connection: SerialPort;
-  packetVersion: PacketVersion;
+  connection: DeviceConnection;
   sdkVersion: string;
   setIsInFlow: (val: boolean) => void;
   firmwareVersion: string;
@@ -26,10 +24,7 @@ export interface UseLogFetcherValues {
   requestStatus: number;
   logFetched: number;
   resetHooks: () => void;
-  cancelLogFetcher: (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => void;
+  cancelLogFetcher: (connection: DeviceConnection) => void;
 }
 
 export type UseLogFetcher = () => UseLogFetcherValues;
@@ -54,7 +49,6 @@ export const useLogFetcher: UseLogFetcher = () => {
   const handleLogFetch = async ({
     connection,
     sdkVersion,
-    packetVersion,
     setIsInFlow,
     firmwareVersion
   }: HandleLogFetcherOptions) => {
@@ -143,7 +137,6 @@ export const useLogFetcher: UseLogFetcher = () => {
       setIsInFlow(true);
       await logFetcher.run({
         connection,
-        packetVersion,
         sdkVersion,
         firmwareVersion
       });
@@ -162,19 +155,14 @@ export const useLogFetcher: UseLogFetcher = () => {
     }
   };
 
-  const cancelLogFetcher = async (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => {
-    if (connection && connection.isOpen)
-      return logFetcher
-        .cancel(connection, packetVersion)
-        .then(() => logger.info('LogFetcher: Cancelled'))
-        .catch(e => {
-          logger.error('LogFetcher: Error in flow cancel');
-          logger.error(e);
-        });
-    return null;
+  const cancelLogFetcher = async (connection: DeviceConnection) => {
+    return logFetcher
+      .cancel(connection)
+      .then(() => logger.info('LogFetcher: Cancelled'))
+      .catch(e => {
+        logger.error('LogFetcher: Error in flow cancel');
+        logger.error(e);
+      });
   };
 
   return {

@@ -245,7 +245,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 
   const [connStatus, setConnStatus] = React.useState<-1 | 0 | 1 | 2>(1);
 
-  const { deviceConnection, devicePacketVersion, connected } = useConnection();
+  const { deviceConnection, connected } = useConnection();
 
   const {
     handleDeviceAuth,
@@ -259,12 +259,10 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   } = useDeviceAuth();
 
   const latestDeviceConnection = useRef<any>();
-  const latestDevicePacketVersion = useRef<any>();
   const latestCompleted = useRef<boolean>();
 
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
-    latestDevicePacketVersion.current = devicePacketVersion;
   }, [deviceConnection]);
 
   useEffect(() => {
@@ -285,10 +283,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
       );
       logger.info('Setting device authentication closed');
       if (!latestCompleted.current && latestDeviceConnection.current) {
-        cancelDeviceAuth(
-          latestDeviceConnection.current,
-          latestDevicePacketVersion.current
-        );
+        cancelDeviceAuth(latestDeviceConnection.current);
       }
     };
   }, []);

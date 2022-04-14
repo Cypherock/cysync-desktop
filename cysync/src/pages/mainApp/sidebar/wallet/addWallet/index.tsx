@@ -80,17 +80,11 @@ const Index = () => {
 
   const [open, setOpen] = useState(false);
 
-  const {
-    deviceConnection,
-    deviceSdkVersion,
-    devicePacketVersion,
-    beforeFlowStart,
-    setIsInFlow
-  } = useConnection();
+  const { deviceConnection, deviceSdkVersion, beforeFlowStart, setIsInFlow } =
+    useConnection();
 
   const handleClose = (abort?: boolean, openAddCoinForm?: boolean) => {
-    if (abort && deviceConnection)
-      cancelAddWallet(deviceConnection, devicePacketVersion);
+    if (abort && deviceConnection) cancelAddWallet(deviceConnection);
     if (completed) {
       setErrorMessage('');
       Analytics.Instance.event(
@@ -128,7 +122,6 @@ const Index = () => {
 
       await handleAddWallet({
         connection: deviceConnection,
-        packetVersion: devicePacketVersion,
         sdkVersion: deviceSdkVersion,
         setIsInFlow
       });

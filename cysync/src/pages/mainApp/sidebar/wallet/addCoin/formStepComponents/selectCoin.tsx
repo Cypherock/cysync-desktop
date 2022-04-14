@@ -99,7 +99,6 @@ const SelectCoin: React.FC<StepComponentProps> = ({
   const {
     deviceConnection: connection,
     deviceSdkVersion,
-    devicePacketVersion,
     beforeFlowStart,
     setIsInFlow
   } = useConnection();
@@ -130,7 +129,6 @@ const SelectCoin: React.FC<StepComponentProps> = ({
       coinAdder.handleCoinAdd({
         connection,
         sdkVersion: deviceSdkVersion,
-        packetVersion: devicePacketVersion,
         setIsInFlow,
         walletId: selectedWallet.walletId,
         coinsFromGUI: coinsToAdd as any,
@@ -190,7 +188,6 @@ const SelectCoin: React.FC<StepComponentProps> = ({
     coinAdder.handleCoinAdd({
       connection,
       sdkVersion: deviceSdkVersion,
-      packetVersion: devicePacketVersion,
       setIsInFlow,
       walletId: selectedWallet.walletId,
       coinsFromGUI: coins as any,
