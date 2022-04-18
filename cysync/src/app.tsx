@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@material-ui/core';
 import { createTheme } from '@material-ui/core/styles';
 import 'electron-disable-file-drop';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { render } from 'react-dom';
 import 'react-virtualized/styles.css';
 import WebFont from 'webfontloader';
@@ -17,8 +17,6 @@ import './utils/errorHandler';
 const instance = Analytics.Instance;
 instance.setup();
 
-const AppContainer = Fragment;
-
 const cySyncTheme = createTheme(theme);
 
 WebFont.load({
@@ -29,15 +27,13 @@ WebFont.load({
 
 document.addEventListener('DOMContentLoaded', () =>
   render(
-    <AppContainer>
-      <ThemeProvider theme={cySyncTheme}>
-        <I18nProvider>
-          <ErrorBoundary>
-            <PermissionSetup />
-          </ErrorBoundary>
-        </I18nProvider>
-      </ThemeProvider>
-    </AppContainer>,
+    <ThemeProvider theme={cySyncTheme}>
+      <I18nProvider>
+        <ErrorBoundary>
+          <PermissionSetup />
+        </ErrorBoundary>
+      </I18nProvider>
+    </ThemeProvider>,
     document.getElementById('root')
   )
 );

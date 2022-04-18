@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef } from 'react';
 
 export type UseDebouncedFunctionTrigger = () => void;
 
@@ -11,17 +11,15 @@ export const useDebouncedFunction: UseDebouncedFunction = (
   handler: () => void,
   delay: number
 ) => {
-  const [timer, setTimer] = useState<NodeJS.Timeout | undefined>(undefined);
+  const timer = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const trigger: UseDebouncedFunctionTrigger = () => {
-    if (timer !== undefined) {
-      clearTimeout(timer);
+    if (timer.current !== undefined) {
+      clearTimeout(timer.current);
     }
-    setTimer(
-      setTimeout(() => {
-        handler();
-      }, delay)
-    );
+    timer.current = setTimeout(() => {
+      handler();
+    }, delay);
   };
 
   return trigger;
