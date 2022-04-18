@@ -1,5 +1,5 @@
-import { Backdrop, CircularProgress } from '@material-ui/core';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import { Backdrop, CircularProgress } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import React from 'react';
 
 import { useLockscreen } from '../store/provider';
@@ -9,14 +9,19 @@ import DeviceStatePrompt from './deviceStatePrompt';
 import Internals from './index';
 import LockScreen from './lockscreen';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  backdrop: {
+const PREFIX = 'Root';
+
+const classes = {
+  backdrop: `${PREFIX}-backdrop`
+};
+
+const StyledGlobalProvider = styled(GlobalProvider)(({ theme }) => ({
+  [`& .${classes.backdrop}`]: {
     zIndex: theme.zIndex.drawer + 1
   }
 }));
 
 const Root = () => {
-  const classes = useStyles();
   const {
     lockscreen,
     isLockscreenLoading,
@@ -43,10 +48,10 @@ const Root = () => {
   }
 
   return (
-    <GlobalProvider>
+    <StyledGlobalProvider>
       <DeviceStatePrompt />
       <Internals />
-    </GlobalProvider>
+    </StyledGlobalProvider>
   );
 };
 

@@ -1,7 +1,9 @@
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 

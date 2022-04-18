@@ -1,5 +1,5 @@
-import { IconButton, IconButtonProps } from '@material-ui/core';
-import Tooltip from '@material-ui/core/Tooltip';
+import { IconButton, IconButtonProps } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -44,7 +44,7 @@ const CustomIconButton: React.FC<Props> = ({
         className={iconButtonClassName}
         onClick={onClick}
         disabled={disabled}
-      >
+        size="large">
         {children}
       </IconButton>
     </Tooltip>

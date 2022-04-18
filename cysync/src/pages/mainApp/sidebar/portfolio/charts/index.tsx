@@ -1,7 +1,8 @@
-import { Typography } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import useTheme from '@material-ui/core/styles/useTheme';
+import { Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import { Theme, useTheme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 
 import { UsePortfolioValues } from '../../../../../store/hooks';

@@ -1,7 +1,9 @@
-import { DialogProps } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { DialogProps } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import React from 'react';
 
@@ -62,6 +64,7 @@ export interface Props extends DialogProps {
   restComponents?: string | undefined | JSX.Element | JSX.Element[];
   isClosePresent?: boolean | undefined;
   noBottomPadding?: boolean;
+  disableBackdropClick?: boolean;
 }
 
 const DialogBox: React.FC<Props> = ({
@@ -89,7 +92,7 @@ const DialogBox: React.FC<Props> = ({
       TransitionComponent={TransitionComponent}
       fullScreen={fullScreen}
       className={classes.root}
-      disableBackdropClick={disableBackdropClick}
+      onBackdropClick={disableBackdropClick ? null : handleClose}
       {...rest}
     >
       <div

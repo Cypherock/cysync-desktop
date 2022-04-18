@@ -1,23 +1,37 @@
-import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
+import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import NotificationItem from './notificationItem';
 
-const useStyles = makeStyles(() => ({
-  mainContainer: {
+const PREFIX = 'NotificationList';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  text: `${PREFIX}-text`,
+  mainContainer: `${PREFIX}-mainContainer`,
+  btnContainer: `${PREFIX}-btnContainer`,
+  list: `${PREFIX}-list`,
+  noneTextContainer: `${PREFIX}-noneTextContainer`,
+  noneText: `${PREFIX}-noneText`
+};
+
+const Root = styled('div')(() => ({
+  [`&.${classes.mainContainer}`]: {
     padding: '5px',
     width: '100%',
     boxSizing: 'border-box'
   },
-  btnContainer: {
+
+  [`& .${classes.btnContainer}`]: {
     margin: '10px',
     boxSizing: 'border-box'
   },
-  list: {
+
+  [`& .${classes.list}`]: {
     maxHeight: '300px',
     overflowY: 'auto',
     '&::-webkit-scrollbar-thumb': {
@@ -27,26 +41,20 @@ const useStyles = makeStyles(() => ({
       width: '5px'
     }
   },
-  noneTextContainer: {
+
+  [`& .${classes.noneTextContainer}`]: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: '20px'
   },
-  noneText: {
+
+  [`& .${classes.noneText}`]: {
     opacity: '0.6'
   }
 }));
 
-const CustomButton = withStyles(() => ({
-  root: {
-    backgroundColor: '#474848'
-  },
-  text: {
-    textTransform: 'none',
-    fontWeight: 'bold'
-  }
-}))(Button);
+const CustomButton = Button;
 
 type Props = {
   notifications: any[];
@@ -63,10 +71,10 @@ const NotificationList: React.FC<Props> = ({
   isLoading,
   handleClose
 }) => {
-  const classes = useStyles();
+
 
   return (
-    <div className={classes.mainContainer}>
+    <Root className={classes.mainContainer}>
       <div className={classes.list}>
         {notifications.length === 0 && (
           <div className={classes.noneTextContainer}>
@@ -90,7 +98,10 @@ const NotificationList: React.FC<Props> = ({
           size="large"
           onClick={onNextPage}
           disabled={isLoading || !hasNextPage}
-        >
+          classes={{
+            root: classes.root,
+            text: classes.text
+          }}>
           {isLoading ? (
             <CircularProgress color="secondary" size={20} />
           ) : (
@@ -98,7 +109,7 @@ const NotificationList: React.FC<Props> = ({
           )}
         </CustomButton>
       </div>
-    </div>
+    </Root>
   );
 };
 

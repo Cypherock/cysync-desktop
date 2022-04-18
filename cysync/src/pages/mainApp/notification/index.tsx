@@ -1,33 +1,48 @@
-import IconButton from '@material-ui/core/IconButton';
-import Popover from '@material-ui/core/Popover';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
-import NotificationIcon from '@material-ui/icons/NotificationsOutlined';
+import IconButton from '@mui/material/IconButton';
+import { styled } from '@mui/material/styles';
+import Popover from '@mui/material/Popover';
+import Typography from '@mui/material/Typography';
+import CloseIcon from '@mui/icons-material/Close';
+import NotificationIcon from '@mui/icons-material/NotificationsOutlined';
 import React, { useEffect, useState } from 'react';
 
 import { useConnection, useNotifications } from '../../../store/provider';
 
 import NotificationList from './notificationList';
 
-const useStyles = makeStyles(() => ({
-  mainContainer: {
+const PREFIX = 'Notification';
+
+const classes = {
+  paper: `${PREFIX}-paper`,
+  mainContainer: `${PREFIX}-mainContainer`,
+  headingContainer: `${PREFIX}-headingContainer`,
+  heading: `${PREFIX}-heading`,
+  icon: `${PREFIX}-icon`,
+  notificationBubble: `${PREFIX}-notificationBubble`
+};
+
+const Root = styled('div')(() => ({
+  [`& .${classes.mainContainer}`]: {
     padding: '10px 10px 10px 20px',
     minWidth: '350px'
   },
-  headingContainer: {
+
+  [`& .${classes.headingContainer}`]: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center'
   },
-  heading: {
+
+  [`& .${classes.heading}`]: {
     fontSize: '22px',
     fontWeight: 'bold'
   },
-  icon: {
+
+  [`& .${classes.icon}`]: {
     color: '#cccccc'
   },
-  notificationBubble: {
+
+  [`& .${classes.notificationBubble}`]: {
     width: '5px',
     height: '5px',
     borderRadius: '50%',
@@ -38,14 +53,10 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const CustomPopover = withStyles(() => ({
-  paper: {
-    borderRadius: '12px'
-  }
-}))(Popover);
+const CustomPopover = Popover;
 
 const Notification = () => {
-  const classes = useStyles();
+
   const [anchorEl, setAnchorEl] = useState(null);
   const {
     data,
@@ -79,7 +90,7 @@ const Notification = () => {
   const id = open ? 'simple-popover' : undefined;
 
   return (
-    <div>
+    <Root>
       <IconButton
         aria-describedby={id}
         aria-label="notification"
@@ -103,7 +114,9 @@ const Notification = () => {
           vertical: 'top',
           horizontal: 'center'
         }}
-      >
+        classes={{
+          paper: classes.paper
+        }}>
         <div className={classes.mainContainer}>
           <div className={classes.headingContainer}>
             <Typography className={classes.heading} variant="h5">
@@ -122,7 +135,7 @@ const Notification = () => {
           handleClose={handleClose}
         />
       </CustomPopover>
-    </div>
+    </Root>
   );
 };
 

@@ -1,17 +1,15 @@
-import { Button, Grid } from '@material-ui/core';
-import Step from '@material-ui/core/Step';
-import StepConnector from '@material-ui/core/StepConnector';
-import StepLabel from '@material-ui/core/StepLabel';
-import Stepper from '@material-ui/core/Stepper';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import AlertIcon from '@material-ui/icons/ReportProblemOutlined';
+import { Button, Grid } from '@mui/material';
+import Step from '@mui/material/Step';
+import StepConnector from '@mui/material/StepConnector';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
+import Typography from '@mui/material/Typography';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
@@ -433,7 +431,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
             <div className={classes.errorButtons}>
               <CustomButton
                 variant="outlined"
-                color="default"
                 onClick={handleDeviceHealthTabClose}
                 style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
               >
@@ -451,7 +448,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
             <div className={classes.errorButtons}>
               <CustomButton
                 variant="outlined"
-                color="default"
                 onClick={handleRetry}
                 style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
               >

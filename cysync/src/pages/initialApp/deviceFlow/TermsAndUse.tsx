@@ -1,9 +1,11 @@
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Grid from '@material-ui/core/Grid';
-import Link from '@material-ui/core/Link';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { shell } from 'electron';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -102,7 +104,7 @@ const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
             <br />
             Your use of Cypherock Services is also subject to Cypherock’s
             Privacy Policy, which is available at
-            <Link href="#" onClick={openPrivacyPolicy} color="secondary">
+            <Link href="#" onClick={openPrivacyPolicy} color="secondary" underline="hover">
               {' '}
               https://cypherock.com/privacy.
             </Link>

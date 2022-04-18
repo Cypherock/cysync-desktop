@@ -1,8 +1,9 @@
-import { IconButton } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ReportIcon from '@material-ui/icons/Report';
+import { IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
+import ReportIcon from '@mui/icons-material/Report';
 import React, { useEffect, useState } from 'react';
 
 import success from '../../../../../assets/icons/generic/success.png';
@@ -518,7 +519,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
         title="Report issue"
         onClick={handleFeedbackOpen}
         className={classes.report}
-      >
+        size="large">
         <ReportIcon color="secondary" />
       </IconButton>
     </Grid>

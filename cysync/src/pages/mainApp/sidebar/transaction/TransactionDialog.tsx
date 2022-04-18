@@ -3,16 +3,13 @@ import {
   bitcoin as bitcoinServer,
   eth as ethServer
 } from '@cypherock/server-wrapper';
-import Chip from '@material-ui/core/Chip';
-import Grid from '@material-ui/core/Grid';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import CopyIcon from '@material-ui/icons/FileCopyOutlined';
+import Chip from '@mui/material/Chip';
+import Grid from '@mui/material/Grid';
+import { Theme, useTheme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
+import CopyIcon from '@mui/icons-material/FileCopyOutlined';
 import clsx from 'clsx';
 import { shell } from 'electron';
 import PropTypes from 'prop-types';

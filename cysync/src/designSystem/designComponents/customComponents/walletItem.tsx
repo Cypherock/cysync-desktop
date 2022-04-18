@@ -1,13 +1,11 @@
-import Grid from '@material-ui/core/Grid';
-import Menu, { MenuProps } from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@mui/material/Grid';
+import Menu, { MenuProps } from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
+import Typography from '@mui/material/Typography';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,7 +33,6 @@ const StyledMenu = withStyles((theme: Theme) =>
 )((props: MenuProps) => (
   <Menu
     elevation={1}
-    getContentAnchorEl={null}
     anchorOrigin={{
       vertical: 'top',
       horizontal: 'right'
@@ -47,6 +44,7 @@ const StyledMenu = withStyles((theme: Theme) =>
     {...props}
   />
 ));
+{/* getContentAnchorEl={null} */}
 
 const StyledMenuItem = withStyles(theme => ({
   root: {
@@ -213,7 +211,7 @@ const WalletItem = (props: WalletItemProps) => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
-          <StyledMenuItem button disableRipple onClick={handleDeleteOpen}>
+          <StyledMenuItem disableRipple onClick={handleDeleteOpen}>
             Delete
           </StyledMenuItem>
         </StyledMenu>

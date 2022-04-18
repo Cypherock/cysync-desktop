@@ -1,10 +1,12 @@
 import { COINS, EthCoinData } from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import LaunchIcon from '@material-ui/icons/Launch';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
+import LaunchIcon from '@mui/icons-material/Launch';
 import { shell } from 'electron';
 import QRCode from 'qrcode';
 import React from 'react';

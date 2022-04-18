@@ -1,9 +1,10 @@
-import { Button } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles, withTheme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
-import UsbIcon from '@material-ui/icons/Usb';
+import { Button } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import Grid from '@mui/material/Grid';
+import withTheme from '@mui/styles/withTheme';
+import Typography from '@mui/material/Typography';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
+import UsbIcon from '@mui/icons-material/Usb';
 import OS from 'os';
 import React, { useEffect, useState } from 'react';
 
@@ -13,8 +14,18 @@ import { addToGroup, permissionStatus, restart } from '../utils/permissions';
 
 import Root from './Root';
 
-const useStyles = makeStyles({
-  root: {
+const PREFIX = 'PermissionSetup';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  text: `${PREFIX}-text`,
+  content: `${PREFIX}-content`,
+  button: `${PREFIX}-button`,
+  icon: `${PREFIX}-icon`
+};
+
+const StyledGrid = styled(Grid)({
+  [`&.${classes.root}`]: {
     width: '100%',
     height: '100%',
     display: 'flex',
@@ -22,25 +33,25 @@ const useStyles = makeStyles({
     alignItems: 'center',
     background: '#232222'
   },
-  text: {
+  [`& .${classes.text}`]: {
     color: '#FFF',
     marginBottom: '1rem',
     fontSize: '1.5rem'
   },
-  content: {
+  [`& .${classes.content}`]: {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center'
   },
-  button: {
+  [`& .${classes.button}`]: {
     background: '#E0B36A',
     textTransform: 'none',
     '&:hover': {
       background: '#DAA147'
     }
   },
-  icon: {
+  [`& .${classes.icon}`]: {
     fontSize: '5rem',
     color: '#DAA147',
     marginBottom: '2rem'
@@ -48,7 +59,7 @@ const useStyles = makeStyles({
 });
 
 const PermissionSetup = () => {
-  const classes = useStyles();
+
 
   const [hasPermission, setHasPermission] = useState({
     permission: false,
@@ -100,7 +111,7 @@ const PermissionSetup = () => {
   };
 
   return (
-    <Grid className={classes.root} container>
+    <StyledGrid className={classes.root} container>
       {hasPermission.permission ? (
         <Grid container className={classes.content}>
           <SettingsBackupRestoreIcon className={classes.icon} />
@@ -130,7 +141,7 @@ const PermissionSetup = () => {
           </Button>
         </Grid>
       )}
-    </Grid>
+    </StyledGrid>
   );
 };
 

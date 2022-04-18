@@ -1,12 +1,10 @@
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import AssignmentOutlinedIcon from '@material-ui/icons/AssignmentOutlined';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import PropTypes from 'prop-types';
 import React from 'react';
 

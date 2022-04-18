@@ -1,14 +1,12 @@
-import Step from '@material-ui/core/Step';
-import StepConnector from '@material-ui/core/StepConnector';
-import StepLabel from '@material-ui/core/StepLabel';
-import Stepper from '@material-ui/core/Stepper';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import Step from '@mui/material/Step';
+import StepConnector from '@mui/material/StepConnector';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React from 'react';

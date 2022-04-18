@@ -1,7 +1,9 @@
 import { ALLCOINS as COINS } from '@cypherock/communication';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@mui/material/Grid';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +20,7 @@ const useStyles = makeStyles((theme: Theme) =>
       background: theme.palette.primary.light,
       padding: theme.spacing(1),
       borderRadius: 5,
-      margin: `${theme.spacing(1)}px 0px`,
+      margin: `${theme.spacing(1)} 0px`,
       cursor: 'pointer',
       '&:hover': {
         background: '#343a42'

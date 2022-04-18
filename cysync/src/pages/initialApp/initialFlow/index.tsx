@@ -1,5 +1,5 @@
-import Slide from '@material-ui/core/Slide';
-import { TransitionProps } from '@material-ui/core/transitions';
+import Slide from '@mui/material/Slide';
+import { TransitionProps } from '@mui/material/transitions';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 
@@ -17,7 +17,16 @@ const TransitionRef = React.forwardRef<
   React.Ref<unknown>,
   CustomTransitionProps
 >(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return (
+    <Slide
+      direction="up"
+      in={props.in}
+      ref={ref}
+      unmountOnExit
+      children={props.children}
+      {...props}
+    />
+  );
 });
 
 interface Props {

@@ -1,21 +1,27 @@
-import Snackbar, { SnackbarProps } from '@material-ui/core/Snackbar';
-import { makeStyles, Theme } from '@material-ui/core/styles';
-import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import Snackbar, { SnackbarProps } from '@mui/material/Snackbar';
+import { styled } from '@mui/material/styles';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-function Alert(props: AlertProps) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
+const PREFIX = 'CustomSnackbar';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
+const classes = {
+  root: `${PREFIX}-root`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
     width: '100%',
     '& > * + *': {
       marginTop: theme.spacing(2)
     }
   }
 }));
+
+function Alert(props: AlertProps) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 interface Props {
   text: string;
@@ -32,10 +38,8 @@ const CustomSnackbar: React.FC<Props> = ({
   handleClose,
   autoHideDuration = 6000
 }) => {
-  const classes = useStyles();
-
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <Snackbar
         open={open}
         autoHideDuration={autoHideDuration}
@@ -45,7 +49,7 @@ const CustomSnackbar: React.FC<Props> = ({
           {text}
         </Alert>
       </Snackbar>
-    </div>
+    </Root>
   );
 };
 

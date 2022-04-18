@@ -1,12 +1,21 @@
-import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core/styles';
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
 import React from 'react';
 
 import colors from '../../designConstants/colors';
 import typography from '../../designConstants/typography';
 
-const CustomButton = withStyles({
-  root: {
+const CustomButton = Button;
+
+const PREFIX = 'containedButton';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  disabled: `${PREFIX}-disabled`
+};
+
+const StyledCustomButton = styled(CustomButton)({
+  [`& .${classes.root}`]: {
     background: colors.primary.mainColor,
     color: colors.systemColors.textAndBackground.light[100],
     textTransform: 'none',
@@ -24,11 +33,11 @@ const CustomButton = withStyles({
       border: 'none'
     }
   },
-  disabled: {
+  [`& .${classes.disabled}`]: {
     background: colors.systemColors.textAndBackground.light[400],
     color: `${colors.systemColors.textAndBackground.light[100]} !important`
   }
-})(Button);
+});
 
 export interface StyleProps {
   borderRadius?: string;
@@ -40,7 +49,7 @@ type Props = {
 };
 
 const containedButton: React.FC<Props> = ({ text }) => {
-  return <CustomButton disableElevation>{text}</CustomButton>;
+  return <StyledCustomButton disableElevation>{text}</StyledCustomButton>;
 };
 
 export default containedButton;

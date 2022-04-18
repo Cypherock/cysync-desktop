@@ -1,11 +1,9 @@
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Switch, { SwitchClassKey, SwitchProps } from '@material-ui/core/Switch';
-import Typography from '@material-ui/core/Typography';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
+import Switch, { SwitchClassKey, SwitchProps } from '@mui/material/Switch';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -24,7 +22,7 @@ const IOSSwitch = withStyles((theme: Theme) =>
       height: 18,
       padding: 0,
       paddingBottom: 2,
-      margin: `0px ${theme.spacing(1)}px `
+      margin: `0px ${theme.spacing(1)} `
     },
     switchBase: {
       padding: 1,

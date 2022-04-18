@@ -1,11 +1,13 @@
-import { IconButton } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ReportIcon from '@material-ui/icons/Report';
-import AlertIcon from '@material-ui/icons/ReportProblemOutlined';
-import Alert from '@material-ui/lab/Alert';
+import { IconButton } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
+import ReportIcon from '@mui/icons-material/Report';
+import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
+import Alert from '@mui/material/Alert';
 import React, { useEffect } from 'react';
 
 import success from '../../../../../assets/icons/generic/success.png';
@@ -334,7 +336,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
         title="Report issue"
         onClick={handleFeedbackOpen}
         className={classes.report}
-      >
+        size="large">
         <ReportIcon color="secondary" />
       </IconButton>
     </Grid>

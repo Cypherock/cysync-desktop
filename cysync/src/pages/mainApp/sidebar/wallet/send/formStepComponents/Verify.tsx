@@ -1,12 +1,10 @@
 import { ALLCOINS as COINS } from '@cypherock/communication';
-import { Typography } from '@material-ui/core';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Alert from '@material-ui/lab/Alert';
+import { Typography } from '@mui/material';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
+import Alert from '@mui/material/Alert';
 import React, { useEffect, useState } from 'react';
 
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';

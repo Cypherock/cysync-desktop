@@ -1,9 +1,16 @@
-import { Button, ButtonProps } from '@material-ui/core';
-import { Theme, withStyles } from '@material-ui/core/styles';
+import { Button, ButtonProps } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import React from 'react';
 
-const PrimaryCustomButton = withStyles((theme: Theme) => ({
-  root: {
+const PREFIX = 'NewButton';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  disabled: `${PREFIX}-disabled`
+};
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  [`& .${classes.root}`]: {
     background: '#71624C',
     color: '#FFFFFF',
     textTransform: 'none',
@@ -11,19 +18,31 @@ const PrimaryCustomButton = withStyles((theme: Theme) => ({
       background: theme.palette.secondary.dark
     }
   },
-  disabled: {
+
+  [`& .${classes.disabled}`]: {
     backgroundColor: `${theme.palette.text.secondary} !important`,
     color: `${theme.palette.primary.main} !important`,
     cursor: 'not-allowed !important'
   }
-}))(Button);
+}));
+
+const PrimaryCustomButton = Button;
 
 const NewButton = (props: ButtonProps) => {
   const { color } = props;
 
-  if (!color || color === 'primary') return <PrimaryCustomButton {...props} />;
+  if (!color || color === 'primary')
+    return (
+      <PrimaryCustomButton
+        {...props}
+        classes={{
+          root: classes.root,
+          disabled: classes.disabled
+        }}
+      />
+    );
 
-  return <Button {...props} />;
+  return <StyledButton {...props} />;
 };
 
 export default NewButton;

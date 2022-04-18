@@ -1,5 +1,5 @@
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -19,8 +19,22 @@ import Tutorial from './sidebar/tutorial';
 import Wallet from './sidebar/wallet';
 import Updater from './updater';
 
-const useStyles = makeStyles((theme: any) => ({
-  root: {
+const PREFIX = 'MainApp';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  navbar: `${PREFIX}-navbar`,
+  content: `${PREFIX}-content`,
+  contentChild: `${PREFIX}-contentChild`,
+  sideBarMain: `${PREFIX}-sideBarMain`,
+  dialogHeading: `${PREFIX}-dialogHeading`,
+  dialogCloseButton: `${PREFIX}-dialogCloseButton`,
+  dialogClose: `${PREFIX}-dialogClose`,
+  dialogButtonWrapper: `${PREFIX}-dialogButtonWrapper`
+};
+
+const StyledHashRouter = styled(HashRouter)(({ theme }) => ({
+  [`& .${classes.root}`]: {
     background: theme.palette.background.default,
     width: '100%',
     height: '100%',
@@ -30,36 +44,43 @@ const useStyles = makeStyles((theme: any) => ({
     alignItems: 'flex-start',
     overflow: 'hidden'
   },
-  navbar: {
+
+  [`& .${classes.navbar}`]: {
     height: '60px'
   },
-  content: {
+
+  [`& .${classes.content}`]: {
     height: 'calc(100% - 60px)'
   },
-  contentChild: {
+
+  [`& .${classes.contentChild}`]: {
     height: '100%',
     padding: '20px 40px 10px 30px',
     overflowY: 'scroll',
     overflowX: 'hidden'
   },
-  sideBarMain: {
+
+  [`& .${classes.sideBarMain}`]: {
     display: 'flex',
     alignItems: 'start',
     justifyContent: 'start',
     padding: '1rem',
     overflow: 'hidden'
   },
-  dialogHeading: {
+
+  [`& .${classes.dialogHeading}`]: {
     width: '100%',
     textAlign: 'center',
     margin: '2rem 0rem'
   },
-  dialogCloseButton: {
+
+  [`& .${classes.dialogCloseButton}`]: {
     position: 'absolute',
     right: '10px',
     top: '10px'
   },
-  dialogClose: {
+
+  [`& .${classes.dialogClose}`]: {
     textTransform: 'none',
     background: theme.palette.primary.light,
     color: theme.palette.text.primary,
@@ -69,7 +90,8 @@ const useStyles = makeStyles((theme: any) => ({
       color: theme.palette.primary.main
     }
   },
-  dialogButtonWrapper: {
+
+  [`& .${classes.dialogButtonWrapper}`]: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -81,11 +103,9 @@ interface Props {
   handleLock: () => void;
 }
 
-const Index: React.FC<Props> = ({ handleLock }) => {
-  const classes = useStyles();
-
+const MainApp: React.FC<Props> = ({ handleLock }) => {
   return (
-    <HashRouter>
+    <StyledHashRouter>
       <WalletsProvider>
         <UpdateProvider>
           <Grid container className={classes.root}>
@@ -94,7 +114,7 @@ const Index: React.FC<Props> = ({ handleLock }) => {
             </Grid>
             <Grid
               container
-              justify="center"
+              justifyContent="center"
               alignItems="center"
               className={classes.content}
             >
@@ -140,12 +160,12 @@ const Index: React.FC<Props> = ({ handleLock }) => {
           </Grid>
         </UpdateProvider>
       </WalletsProvider>
-    </HashRouter>
+    </StyledHashRouter>
   );
 };
 
-Index.propTypes = {
+MainApp.propTypes = {
   handleLock: PropTypes.func.isRequired
 };
 
-export default Index;
+export default MainApp;

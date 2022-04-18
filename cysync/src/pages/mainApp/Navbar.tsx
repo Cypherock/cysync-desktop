@@ -1,11 +1,11 @@
-import { Button, Chip, Typography } from '@material-ui/core';
-import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
-import Tooltip from '@material-ui/core/Tooltip';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
-import LoadingIcon from '@material-ui/icons/Loop';
-import NotInterestedIcon from '@material-ui/icons/NotInterested';
-import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
-import WarningIcon from '@material-ui/icons/Warning';
+import { Button, Chip, Typography } from '@mui/material';
+import { Theme, useTheme, styled, keyframes } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import LoadingIcon from '@mui/icons-material/Loop';
+import NotInterestedIcon from '@mui/icons-material/NotInterested';
+import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
+import WarningIcon from '@mui/icons-material/Warning';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
@@ -19,25 +19,6 @@ import logger from '../../utils/logger';
 import NotificationComponent from './notification';
 
 const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    borderBottom: `0.1px solid ${theme.palette.primary.light}`,
-    display: 'flex',
-    justifyContent: 'space-between',
-    width: '100%',
-    height: '100%'
-  },
-  leftContent: {
-    padding: `0px 50px`,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  rightContent: {
-    padding: `0px 50px`,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
   text: {
     marginLeft: 10
   },
@@ -60,15 +41,58 @@ const useStyles = makeStyles((theme: Theme) => ({
   loaderIcon: {
     animation: `$rotate 1500ms ${theme.transitions.easing.easeInOut}`,
     animationIterationCount: 'infinite'
-  },
-  '@keyframes rotate': {
-    '0%': {
-      transform: 'rotateZ(0deg)'
-    },
-    '100%': {
-      transform: 'rotateZ(360deg)'
-    }
   }
+}));
+
+const PREFIX = 'Navbar';
+
+const rotateKeyframe = keyframes`
+  '0%': {
+    transform: 'rotateZ(0deg)'
+  },
+  '100%': {
+    transform: 'rotateZ(360deg)'
+  }
+`;
+
+const classes = {
+  root: `${PREFIX}-root`,
+  leftContent: `${PREFIX}-leftContent`,
+  rightContent: `${PREFIX}-rightContent`,
+  text: `${PREFIX}-text`,
+  divider: `${PREFIX}-divider`,
+  clearFix: `${PREFIX}-clearFix`,
+  connectedStatus: `${PREFIX}-connectedStatus`,
+  loaderIcon: `${PREFIX}-loaderIcon`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [classes.root]: {
+    borderBottom: `0.1px solid ${theme.palette.primary.light}`,
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '100%',
+    height: '100%'
+  },
+  [classes.leftContent]: {
+    padding: `0px 50px`,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [classes.rightContent]: {
+    padding: `0px 50px`,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [classes.root]: {
+    borderBottom: `0.1px solid ${theme.palette.primary.light}`,
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '100%',
+    height: '100%'
+  },
 }));
 
 interface NavbarProps {

@@ -1,10 +1,10 @@
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import BigNumber from 'bignumber.js';
 import { isEqual } from 'lodash';
 import React from 'react';
@@ -14,16 +14,24 @@ import { UsePortfolioValues } from '../../../../../store/hooks';
 
 import OneCoin from './OneCoin';
 
-const useStyles = makeStyles({
-  root: {
+const PREFIX = 'index';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  coinMenuWrapper: `${PREFIX}-coinMenuWrapper`,
+  headerButtons: `${PREFIX}-headerButtons`
+};
+
+const StyledGrid = styled(Grid)({
+  [`&.${classes.root}`]: {
     marginTop: '1rem'
   },
-  coinMenuWrapper: {
+  [`& .${classes.coinMenuWrapper}`]: {
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center'
   },
-  headerButtons: {
+  [`& .${classes.headerButtons}`]: {
     padding: '0px',
     textTransform: 'none',
     fontSize: '1rem'
@@ -47,10 +55,10 @@ const PortfolioCoins = ({
   setSortIndex,
   handleRedirecttoAddCoin
 }: Props) => {
-  const classes = useStyles();
+
 
   return (
-    <Grid container className={classes.root}>
+    <StyledGrid container className={classes.root}>
       <Grid container>
         <Grid item xs={6}>
           <Typography
@@ -219,7 +227,7 @@ const PortfolioCoins = ({
           Add Coins
         </CustomButton>
       )}
-    </Grid>
+    </StyledGrid>
   );
 };
 

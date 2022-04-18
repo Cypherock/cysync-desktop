@@ -1,4 +1,4 @@
-import { useTheme } from '@material-ui/core/styles';
+import { useTheme } from '@mui/material/styles';
 import { ApexOptions } from 'apexcharts';
 import PropTypes from 'prop-types';
 import React from 'react';

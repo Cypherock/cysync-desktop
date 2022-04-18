@@ -1,22 +1,26 @@
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import { SvgIconComponent } from '@material-ui/icons';
-import PlusIcon from '@material-ui/icons/ControlPoint';
-import DownloadIcon from '@material-ui/icons/GetApp';
+import { styled } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
+import { SvgIconComponent } from '@mui/icons-material';
+import PlusIcon from '@mui/icons-material/ControlPoint';
+import DownloadIcon from '@mui/icons-material/GetApp';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../constants/routes';
 
-const NotificationTypes = {
-  DEFAULT: 0,
-  APP_UPDATE: 1,
-  DEVICE_UPDATE: 2
+const PREFIX = 'NotificationItem';
+
+const classes = {
+  mainContainer: `${PREFIX}-mainContainer`,
+  title: `${PREFIX}-title`,
+  description: `${PREFIX}-description`,
+  date: `${PREFIX}-date`
 };
 
-const useStyles = makeStyles(() => ({
-  mainContainer: {
+const Root = styled('div')(() => ({
+  [`& .${classes.mainContainer}`]: {
     width: '100%',
     padding: '4px 10px',
     display: 'flex',
@@ -29,16 +33,25 @@ const useStyles = makeStyles(() => ({
       backgroundColor: '#3B434B'
     }
   },
-  title: {
+
+  [`& .${classes.title}`]: {
     fontWeight: '600'
   },
-  description: {
+
+  [`& .${classes.description}`]: {
     opacity: '0.6'
   },
-  date: {
+
+  [`& .${classes.date}`]: {
     opacity: '0.6'
   }
 }));
+
+const NotificationTypes = {
+  DEFAULT: 0,
+  APP_UPDATE: 1,
+  DEVICE_UPDATE: 2
+};
 
 const iconStyles = makeStyles(() => ({
   container: {
@@ -88,9 +101,9 @@ const NotificationAvatar: React.FC<AvatarType> = ({ type }) => {
   }
 
   return (
-    <div className={`${classes.container} ${containerClass}`}>
+    <Root className={`${classes.container} ${containerClass}`}>
       <IconComponent className={classes.icon} />
-    </div>
+    </Root>
   );
 };
 
@@ -109,7 +122,6 @@ type Props = {
 };
 
 const NotificationItem: React.FC<Props> = ({ notification, handleClose }) => {
-  const classes = useStyles();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState('');

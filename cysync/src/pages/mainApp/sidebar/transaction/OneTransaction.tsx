@@ -1,12 +1,9 @@
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import { Theme, useTheme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -25,7 +22,7 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: 5,
       minHeight: 50,
       maxHeight: 60,
-      margin: `${theme.spacing(1)}px 0px`
+      margin: `${theme.spacing(1)} 0px`
     },
     alignStartCenter: {
       display: 'flex',

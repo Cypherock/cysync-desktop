@@ -1,7 +1,9 @@
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import withStyles from '@material-ui/core/styles/withStyles';
-import Typography from '@material-ui/core/Typography';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 

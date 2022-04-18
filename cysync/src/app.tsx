@@ -1,5 +1,5 @@
-import { ThemeProvider } from '@material-ui/core';
-import { createTheme } from '@material-ui/core/styles';
+import { ThemeProvider, Theme, StyledEngineProvider, adaptV4Theme } from '@mui/material';
+import { createTheme } from '@mui/material/styles';
 import 'electron-disable-file-drop';
 import React from 'react';
 import { render } from 'react-dom';
@@ -14,10 +14,17 @@ import { I18nProvider } from './store/provider';
 import Analytics from './utils/analytics';
 import './utils/errorHandler';
 
+
+declare module '@mui/styles/defaultTheme' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface DefaultTheme extends Theme {}
+}
+
+
 const instance = Analytics.Instance;
 instance.setup();
 
-const cySyncTheme = createTheme(theme);
+const cySyncTheme = createTheme(adaptV4Theme(theme));
 
 WebFont.load({
   google: {
@@ -27,13 +34,15 @@ WebFont.load({
 
 document.addEventListener('DOMContentLoaded', () =>
   render(
-    <ThemeProvider theme={cySyncTheme}>
-      <I18nProvider>
-        <ErrorBoundary>
-          <PermissionSetup />
-        </ErrorBoundary>
-      </I18nProvider>
-    </ThemeProvider>,
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={cySyncTheme}>
+        <I18nProvider>
+          <ErrorBoundary>
+            <PermissionSetup />
+          </ErrorBoundary>
+        </I18nProvider>
+      </ThemeProvider>
+    </StyledEngineProvider>,
     document.getElementById('root')
   )
 );

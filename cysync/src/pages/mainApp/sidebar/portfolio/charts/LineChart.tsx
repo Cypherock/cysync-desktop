@@ -1,10 +1,7 @@
-import Button from '@material-ui/core/Button';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
+import Button from '@mui/material/Button';
+import { Theme, useTheme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import { ApexOptions } from 'apexcharts';
 import clsx from 'clsx';
 import React from 'react';

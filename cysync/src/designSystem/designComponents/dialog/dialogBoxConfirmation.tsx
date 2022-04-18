@@ -1,7 +1,9 @@
-import { DialogProps } from '@material-ui/core';
-import { CircularProgress } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { DialogProps } from '@mui/material';
+import { CircularProgress } from '@mui/material';
+import Button from '@mui/material/Button';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import PropTypes from 'prop-types';
 import React from 'react';
 

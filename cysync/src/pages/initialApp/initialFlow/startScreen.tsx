@@ -1,9 +1,11 @@
-import { IconButton } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ReportIcon from '@material-ui/icons/Report';
+import { IconButton } from '@mui/material';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
+import ReportIcon from '@mui/icons-material/Report';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -134,7 +136,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ handleNext }) => {
         title="Report issue"
         onClick={handleFeedbackOpen}
         className={classes.report}
-      >
+        size="large">
         <ReportIcon color="secondary" />
       </IconButton>
     </Grid>

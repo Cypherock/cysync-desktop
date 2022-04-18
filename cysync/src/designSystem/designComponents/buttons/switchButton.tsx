@@ -1,12 +1,35 @@
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Switch, { SwitchClassKey, SwitchProps } from '@material-ui/core/Switch';
+import { styled } from '@mui/material/styles';
+import Switch, { SwitchClassKey, SwitchProps } from '@mui/material/Switch';
 import PropTypes from 'prop-types';
 import React from 'react';
+
+const PREFIX = 'SwitchButton';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  switchBase: `${PREFIX}-switchBase`,
+  thumb: `${PREFIX}-thumb`,
+  track: `${PREFIX}-track`,
+  checked: `${PREFIX}-checked`,
+  focusVisible: `${PREFIX}-focusVisible`,
+  root2: `${PREFIX}-root2`,
+  label: `${PREFIX}-label`,
+  sliderButton: `${PREFIX}-sliderButton`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+
+  [`& .${classes.label}`]: {
+    color: theme.palette.primary.contrastText,
+    fontSize: 20
+  },
+
+  [`& .${classes.sliderButton}`]: {}
+}));
 
 interface Styles extends Partial<Record<SwitchClassKey, string>> {
   focusVisible?: string;
@@ -16,53 +39,53 @@ interface Props extends SwitchProps {
   classes: Styles;
 }
 
-const IOSSwitch = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: 32,
-      height: 18,
-      padding: 0,
-      paddingBottom: 2,
-      margin: `0px 10px `
-    },
-    switchBase: {
-      padding: 1,
-      '&$checked': {
-        paddingTop: 1,
-        transform: 'translateX(15px)',
-        color: theme.palette.primary.main,
-        '& + $track': {
-          backgroundColor: theme.palette.primary.main,
-          opacity: 1,
-          border: `1px solid ${theme.palette.secondary.main}`
-        }
-      },
-      '&$focusVisible $thumb': {
-        color: theme.palette.secondary.main
+const IOSSwitchRoot = styled(Switch)(({ theme }) => ({
+  root: {
+    width: 32,
+    height: 18,
+    padding: 0,
+    paddingBottom: 2,
+    margin: `0px 10px `
+  },
+  switchBase: {
+    padding: 1,
+    '&$checked': {
+      paddingTop: 1,
+      transform: 'translateX(15px)',
+      color: theme.palette.primary.main,
+      '& + $track': {
+        backgroundColor: theme.palette.primary.main,
+        opacity: 1,
+        border: `1px solid ${theme.palette.secondary.main}`
       }
     },
-    thumb: {
-      width: 14,
-      height: 14,
-      marginTop: 1,
-      marginLeft: 1,
-      background: theme.palette.secondary.main
-    },
-    track: {
-      borderRadius: 18 / 2,
-      border: `1px solid ${theme.palette.secondary.light}`,
-      backgroundColor: theme.palette.primary.main,
-      opacity: 1,
-      transition: theme.transitions.create(['background-color', 'border'])
-    },
-    checked: {
-      padding: 0
-    },
-    focusVisible: {}
-  })
-)(({ classes, ...props }: Props) => {
+    '&$focusVisible $thumb': {
+      color: theme.palette.secondary.main
+    }
+  },
+  thumb: {
+    width: 14,
+    height: 14,
+    marginTop: 1,
+    marginLeft: 1,
+    background: theme.palette.secondary.main
+  },
+  track: {
+    borderRadius: 18 / 2,
+    border: `1px solid ${theme.palette.secondary.light}`,
+    backgroundColor: theme.palette.primary.main,
+    opacity: 1,
+    transition: theme.transitions.create(['background-color', 'border'])
+  },
+  checked: {
+    padding: 0
+  },
+  focusVisible: {}
+}));
+
+const IOSSwitch: React.FC<Props> = props => {
   return (
-    <Switch
+    <IOSSwitchRoot
       focusVisibleClassName={classes.focusVisible}
       disableRipple
       classes={{
@@ -75,7 +98,7 @@ const IOSSwitch = withStyles((theme: Theme) =>
       {...props}
     />
   );
-});
+};
 
 type SwitchButtonProps = {
   completed: boolean;
@@ -84,35 +107,30 @@ type SwitchButtonProps = {
   name?: string;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  label: {
-    color: theme.palette.primary.contrastText,
-    fontSize: 20
-  },
-  sliderButton: {}
-}));
-
 const SwitchButton: React.FC<SwitchButtonProps> = ({
   completed,
   label,
   handleChange,
   name
 }: SwitchButtonProps) => {
-  const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <span className={classes.label}>{label}</span>
       <IOSSwitch
         checked={completed}
         onChange={handleChange}
         name={name}
         className={classes.sliderButton}
+        classes={{
+          root: classes.root,
+          switchBase: classes.switchBase,
+          thumb: classes.thumb,
+          track: classes.track,
+          checked: classes.checked,
+          focusVisible: classes.focusVisible
+        }}
       />
-    </div>
+    </Root>
   );
 };
 

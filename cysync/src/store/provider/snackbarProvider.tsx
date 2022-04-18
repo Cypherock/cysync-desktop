@@ -1,4 +1,4 @@
-import { AlertProps } from '@material-ui/lab/';
+import { AlertProps } from '@mui/lab/';
 import PropTypes from 'prop-types';
 import React from 'react';
 

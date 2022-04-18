@@ -1,7 +1,9 @@
-import { TypographyProps } from '@material-ui/core';
-import Popover from '@material-ui/core/Popover';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { TypographyProps } from '@mui/material';
+import Popover from '@mui/material/Popover';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 

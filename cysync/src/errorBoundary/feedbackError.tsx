@@ -1,14 +1,19 @@
-import { Theme, withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import { Styles } from '@material-ui/styles';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React from 'react';
 
 import Icon from '../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../designSystem/iconGroups/errorExclamation';
 import logger from '../utils/logger';
 
-const useStyles: Styles<Theme, {}, string> = () => ({
-  root: {
+const PREFIX = 'feedbackError';
+
+const classes = {
+  root: `${PREFIX}-root`
+};
+
+const Root = styled('div')(() => ({
+  [`&.${classes.root}`]: {
     position: 'absolute',
     top: '50%',
     left: '50%',
@@ -20,7 +25,7 @@ const useStyles: Styles<Theme, {}, string> = () => ({
     justifyContent: 'space-between',
     alignItems: 'center'
   }
-});
+}));
 
 /**
  * This is used to show a minimal UI if the Feedback component has some error.
@@ -30,7 +35,7 @@ const useStyles: Styles<Theme, {}, string> = () => ({
  * the crash report.
  */
 class FeedbackErrorBoundary extends React.Component<
-  { classes?: any },
+  any,
   { hasError: boolean }
 > {
   constructor(props: any) {
@@ -45,11 +50,11 @@ class FeedbackErrorBoundary extends React.Component<
 
   render() {
     const { hasError } = this.state;
-    const { children, classes } = this.props;
+    const { children } = this.props;
 
     if (hasError) {
       return (
-        <div className={classes.root}>
+        <Root className={classes.root}>
           <Icon
             size={55}
             viewBox="0 0 55 55"
@@ -68,7 +73,7 @@ class FeedbackErrorBoundary extends React.Component<
             <br />
             Please contact us at support@cypherock.com.
           </Typography>
-        </div>
+        </Root>
       );
     }
 
@@ -76,4 +81,4 @@ class FeedbackErrorBoundary extends React.Component<
   }
 }
 
-export default withStyles(useStyles)(FeedbackErrorBoundary);
+export default FeedbackErrorBoundary;

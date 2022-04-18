@@ -1,11 +1,11 @@
-import { ThemeOptions } from '@material-ui/core/styles';
+import { DeprecatedThemeOptions } from '@mui/material/styles';
 
 import colors from './colors';
 import typography from './typography';
 
-const theme: ThemeOptions = {
+const theme: DeprecatedThemeOptions = {
   palette: {
-    type: 'dark',
+    mode: 'dark',
     primary: {
       light: '#161C23',
       main: '#0A1018',
