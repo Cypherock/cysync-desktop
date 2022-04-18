@@ -6,6 +6,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
 import BigNumber from 'bignumber.js';
+import { isEqual } from 'lodash';
 import React from 'react';
 
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
@@ -38,7 +39,7 @@ export interface Props {
   handleRedirecttoAddCoin: (walletId: string) => void;
 }
 
-const Index = ({
+const PortfolioCoins = ({
   currentWallet,
   coins,
   total,
@@ -222,4 +223,6 @@ const Index = ({
   );
 };
 
-export default Index;
+export default React.memo(PortfolioCoins, (prevProps, nextProps) =>
+  isEqual(prevProps, nextProps)
+);

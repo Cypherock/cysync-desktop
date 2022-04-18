@@ -142,4 +142,4 @@ OneCoin.propTypes = {
   index: PropTypes.number.isRequired
 };
 
-export default OneCoin;
+export default React.memo(OneCoin);

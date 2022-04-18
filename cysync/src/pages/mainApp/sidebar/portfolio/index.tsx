@@ -65,9 +65,13 @@ const Index = () => {
     else setOpen(false);
   }, [allWallets]);
 
-  const onAddCoin = (walletId: string) => {
+  const onAddCoin = React.useCallback((walletId: string) => {
     navigate(`${Routes.wallet.index}/${walletId}`);
-  };
+  }, []);
+
+  const setSortIndexProxy = React.useCallback((val: number) => {
+    setSortIndex(val);
+  }, []);
 
   const onAddWallet = () => {
     setOpen(false);
@@ -171,7 +175,7 @@ const Index = () => {
         coins={coins}
         total={total}
         sortIndex={sortIndex}
-        setSortIndex={setSortIndex}
+        setSortIndex={setSortIndexProxy}
         handleRedirecttoAddCoin={onAddCoin}
       />
     </Grid>
