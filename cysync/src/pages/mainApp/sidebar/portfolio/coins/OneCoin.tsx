@@ -1,8 +1,6 @@
 import { ALLCOINS as COINS } from '@cypherock/communication';
 import Grid from '@mui/material/Grid';
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -14,39 +12,45 @@ import colors from '../../../../../designSystem/designConstants/colors';
 import CoinIcons from '../../../../../designSystem/genericComponents/coinIcons';
 import formatDisplayAmount from '../../../../../utils/formatDisplayAmount';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      background: theme.palette.primary.light,
-      padding: theme.spacing(1),
-      borderRadius: 5,
-      margin: `${theme.spacing(1)} 0px`,
-      cursor: 'pointer',
-      '&:hover': {
-        background: '#343a42'
-      }
-    },
-    coin: {
-      display: 'flex'
-    },
-    coinText: {
-      display: 'flex',
-      flexDirection: 'column'
-    },
-    alignStartCenter: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      justifyContent: 'center'
-    },
-    text: {
-      color: colors.systemColors.textAndBackground.light[100]
-    },
-    bold: {
-      fontWeight: 700
-    }
-  })
-);
+const PREFIX = 'PortfolioOneCoin';
+
+const classes = {
+  coin: `${PREFIX}-coin`,
+  coinText: `${PREFIX}-coinText`,
+  alignStartCenter: `${PREFIX}-alignStartCenter`,
+  text: `${PREFIX}-text`,
+  bold: `${PREFIX}-bold`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  background: theme.palette.primary.light,
+  padding: theme.spacing(1),
+  borderRadius: 5,
+  margin: `${theme.spacing(1)} 0px`,
+  cursor: 'pointer',
+  '&:hover': {
+    background: '#343a42'
+  },
+  [`& .${classes.coin}`]: {
+    display: 'flex'
+  },
+  [`& .${classes.coinText}`]: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  [`& .${classes.alignStartCenter}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'center'
+  },
+  [`& .${classes.text}`]: {
+    color: colors.systemColors.textAndBackground.light[100]
+  },
+  [`& .${classes.bold}`]: {
+    fontWeight: 700
+  }
+}));
 
 interface OneCoinProps {
   coinInitial: string;
@@ -82,9 +86,8 @@ const OneCoin: React.FC<OneCoinProps> = props => {
     throw new Error(`Cannot find coinType: ${coinInitial}`);
   }
 
-  const classes = useStyles();
   return (
-    <Grid onClick={onClick} container className={classes.root}>
+    <Root onClick={onClick} container>
       <Grid item xs={3} className={classes.coin}>
         <CoinIcons initial={coinInitial.toUpperCase()} />
         <div className={classes.coinText}>
@@ -130,7 +133,7 @@ const OneCoin: React.FC<OneCoinProps> = props => {
           {coinPortfolio}
         </Typography>
       </Grid>
-    </Grid>
+    </Root>
   );
 };
 

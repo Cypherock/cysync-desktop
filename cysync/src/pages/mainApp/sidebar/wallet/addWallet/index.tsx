@@ -1,7 +1,6 @@
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,42 +14,47 @@ import logger from '../../../../../utils/logger';
 
 import AddWalletFlow from './addWalletFlow';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexDirection: 'column'
-    },
-    content: {
-      border: `2px dashed rgba(255,255,255,0.2)`,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexDirection: 'column',
-      minHeight: '10rem',
-      width: '90%'
-    },
-    button: {
-      background: '#71624C',
-      color: '#FFFFFF',
-      textTransform: 'none',
-      padding: '0.4rem 3rem',
-      margin: '1rem 0rem',
-      border: `1px solid #71624C`,
-      fontWeight: 700,
-      '&:hover': {
-        border: `1px solid #71624C`
-      }
-    }
-  })
-);
+const PREFIX = 'AddWallet';
 
-const Index = () => {
-  const classes = useStyles();
+const classes = {
+  root: `${PREFIX}-root`,
+  content: `${PREFIX}-content`,
+  button: `${PREFIX}-button`
+};
+
+const Root = styled(Grid)(() => ({
+  [`&.${classes.root}`]: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column'
+  },
+  [`& .${classes.content}`]: {
+    border: `2px dashed rgba(255,255,255,0.2)`,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column',
+    minHeight: '10rem',
+    width: '90%'
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: '#FFFFFF',
+    textTransform: 'none',
+    padding: '0.4rem 3rem',
+    margin: '1rem 0rem',
+    border: `1px solid #71624C`,
+    fontWeight: 700,
+    '&:hover': {
+      border: `1px solid #71624C`
+    }
+  }
+}));
+
+const AddWallet = () => {
   const navigate = useNavigate();
   const { allWallets } = useWallets();
 
@@ -158,7 +162,7 @@ const Index = () => {
   };
 
   return (
-    <Grid container className={classes.root}>
+    <Root container className={classes.root}>
       <ErrorBox
         open={!!errorMessage}
         actionText={isNameDiff ? 'Yes' : undefined}
@@ -186,8 +190,8 @@ const Index = () => {
           Import Wallet
         </Button>
       </div>
-    </Grid>
+    </Root>
   );
 };
 
-export default Index;
+export default AddWallet;

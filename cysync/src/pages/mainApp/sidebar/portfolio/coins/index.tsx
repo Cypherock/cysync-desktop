@@ -1,10 +1,10 @@
-import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import BigNumber from 'bignumber.js';
 import { isEqual } from 'lodash';
 import React from 'react';
@@ -55,8 +55,6 @@ const PortfolioCoins = ({
   setSortIndex,
   handleRedirecttoAddCoin
 }: Props) => {
-
-
   return (
     <StyledGrid container className={classes.root}>
       <Grid container>

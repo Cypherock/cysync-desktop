@@ -1,9 +1,7 @@
 import Paper from '@mui/material/Paper';
-import { Theme, useTheme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
+import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import withStyles from '@mui/styles/withStyles';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -29,30 +27,35 @@ type ToggleProps = {
   completed: boolean;
 };
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    text: {
-      color: completed =>
-        completed ? theme.palette.secondary.main : theme.palette.text.primary,
-      maxWidth: '80%',
-      lineHeight: '25px'
-    },
-    arrow: {
-      marginRight: '0.5rem'
-    },
-    checkmark: {
-      position: 'absolute',
-      right: '1rem',
-      transition: 'all 0.3s ease'
-    }
-  })
-);
+const PREFIX = 'TextView2';
+
+const classes = {
+  text: `${PREFIX}-text`,
+  arrow: `${PREFIX}-arrow`,
+  checkmark: `${PREFIX}-checkmark`
+};
+
+const Root = styled(CustomPaper)(({ theme }) => ({
+  [`& .${classes.text}`]: {
+    color: (completed: any) =>
+      completed ? theme.palette.secondary.main : theme.palette.text.primary,
+    maxWidth: '80%',
+    lineHeight: '25px'
+  },
+  [`& .${classes.arrow}`]: {
+    marginRight: '0.5rem'
+  },
+  [`& .${classes.checkmark}`]: {
+    position: 'absolute',
+    right: '1rem',
+    transition: 'all 0.3s ease'
+  }
+}));
 
 const ToggleButton: React.FC<ToggleProps> = ({ text, completed }) => {
-  const classes = useStyles(completed);
   const theme = useTheme();
   return (
-    <CustomPaper
+    <Root
       variant="outlined"
       elevation={0}
       style={{
@@ -80,7 +83,7 @@ const ToggleButton: React.FC<ToggleProps> = ({ text, completed }) => {
           color={theme.palette.secondary.main}
         />
       ) : null}
-    </CustomPaper>
+    </Root>
   );
 };
 

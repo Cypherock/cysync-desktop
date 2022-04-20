@@ -1,5 +1,5 @@
-import { styled } from '@mui/material/styles';
 import Checkbox, { CheckboxProps } from '@mui/material/Checkbox';
+import { styled } from '@mui/material/styles';
 import clsx from 'clsx';
 import React from 'react';
 

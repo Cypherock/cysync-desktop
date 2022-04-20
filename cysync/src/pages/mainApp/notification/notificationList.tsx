@@ -1,6 +1,6 @@
 import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
 import CircularProgress from '@mui/material/CircularProgress';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -51,6 +51,15 @@ const Root = styled('div')(() => ({
 
   [`& .${classes.noneText}`]: {
     opacity: '0.6'
+  },
+
+  [`& .${classes.root}`]: {
+    backgroundColor: '#474848'
+  },
+
+  [`& .${classes.text}`]: {
+    textTransform: 'none',
+    fontWeight: 'bold'
   }
 }));
 
@@ -71,8 +80,6 @@ const NotificationList: React.FC<Props> = ({
   isLoading,
   handleClose
 }) => {
-
-
   return (
     <Root className={classes.mainContainer}>
       <div className={classes.list}>
@@ -101,7 +108,8 @@ const NotificationList: React.FC<Props> = ({
           classes={{
             root: classes.root,
             text: classes.text
-          }}>
+          }}
+        >
           {isLoading ? (
             <CircularProgress color="secondary" size={20} />
           ) : (

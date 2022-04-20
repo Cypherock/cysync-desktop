@@ -1,15 +1,13 @@
+import ReportIcon from '@mui/icons-material/Report';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { CircularProgress } from '@mui/material';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import { Theme, useTheme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import ReportIcon from '@mui/icons-material/Report';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -31,65 +29,77 @@ import {
 
 import ErrorBox from './setPasswordErrorDialog';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    content: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      height: '40vh'
-    },
-    inputs: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      height: '20vh',
-      width: '100%'
-    },
-    buttons: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      maxWidth: 900
-    },
-    instructions: {
-      border: '1px solid grey',
-      borderRadius: '1rem',
-      margin: '1.5rem 0rem',
-      maxWidth: 900,
-      width: '100%'
-    },
-    error: {
-      color: theme.palette.error.main
-    },
-    buttonSet: {
-      background: '#71624C',
-      color: theme.palette.text.primary,
-      padding: '0.5rem 3rem',
-      letterSpacing: 1,
-      fontWeight: 700,
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
-    },
-    skipButton: {
-      border: `1px solid ${theme.palette.text.secondary}`,
-      color: theme.palette.text.secondary,
-      padding: '0.5rem 3rem',
-      textTransform: 'none'
-    },
-    instruction: {
-      margin: '15px 0px'
-    },
-    report: {
-      position: 'absolute',
-      right: 20,
-      bottom: 20
+const PREFIX = 'SetPassword';
+
+const classes = {
+  content: `${PREFIX}-content`,
+  inputs: `${PREFIX}-inputs`,
+  buttons: `${PREFIX}-buttons`,
+  instructions: `${PREFIX}-instructions`,
+  error: `${PREFIX}-error`,
+  buttonSet: `${PREFIX}-buttonSet`,
+  skipButton: `${PREFIX}-skipButton`,
+  instruction: `${PREFIX}-instruction`,
+  report: `${PREFIX}-report`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.content}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: '40vh'
+  },
+  [`& .${classes.inputs}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: '20vh',
+    width: '100%'
+  },
+  [`& .${classes.buttons}`]: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    maxWidth: 900
+  },
+  [`& .${classes.instructions}`]: {
+    border: '1px solid grey',
+    borderRadius: '1rem',
+    margin: '1.5rem 0rem',
+    maxWidth: 900,
+    width: '100%'
+  },
+  [`& .${classes.error}`]: {
+    color: theme.palette.error.main
+  },
+  [`& .${classes.buttonSet}`]: {
+    background: '#71624C',
+    color: theme.palette.text.primary,
+    padding: '0.5rem 3rem',
+    letterSpacing: 1,
+    fontWeight: 700,
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  },
+  [`& .${classes.skipButton}`]: {
+    border: `1px solid ${theme.palette.text.secondary}`,
+    color: theme.palette.text.secondary,
+    padding: '0.5rem 3rem',
+    textTransform: 'none'
+  },
+  [`& .${classes.instruction}`]: {
+    margin: '15px 0px'
+  },
+  [`& .${classes.report}`]: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20
+  }
+}));
 
 interface State {
   password: string;
@@ -109,7 +119,6 @@ const SetPassword: React.FC<SetPasswordProps> = ({
   handleSkipPassword,
   handleClose
 }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const lockscreen = useLockscreen();
 
@@ -214,7 +223,7 @@ const SetPassword: React.FC<SetPasswordProps> = ({
   };
 
   return (
-    <Grid container>
+    <Root container>
       <Grid container>
         <Grid item xs={4} />
         <Grid item xs={4} className={classes.content}>
@@ -245,7 +254,8 @@ const SetPassword: React.FC<SetPasswordProps> = ({
                       aria-label="toggle password visibility"
                       onClick={handleClickShowPassword}
                       onMouseDown={handleMouseDownPassword}
-                      size="large">
+                      size="large"
+                    >
                       {values.showPassword ? (
                         <Visibility
                           style={{ color: theme.palette.text.secondary }}
@@ -275,7 +285,8 @@ const SetPassword: React.FC<SetPasswordProps> = ({
                       aria-label="toggle password visibility"
                       onClick={handleClickShowConfirmPassword}
                       onMouseDown={handleMouseDownPassword}
-                      size="large">
+                      size="large"
+                    >
                       {values.showConfirmPassword ? (
                         <Visibility
                           style={{ color: theme.palette.text.secondary }}
@@ -380,10 +391,11 @@ const SetPassword: React.FC<SetPasswordProps> = ({
         title="Report issue"
         onClick={handleFeedbackOpen}
         className={classes.report}
-        size="large">
+        size="large"
+      >
         <ReportIcon color="secondary" />
       </IconButton>
-    </Grid>
+    </Root>
   );
 };
 

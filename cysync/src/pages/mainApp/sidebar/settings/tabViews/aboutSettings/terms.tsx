@@ -1,7 +1,7 @@
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { shell } from 'electron';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -64,7 +64,12 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               <br />
               Your use of Cypherock Services is also subject to Cypherock’s
               Privacy Policy, which is available at
-              <Link href="#" onClick={openPrivacyPolicy} color="secondary" underline="hover">
+              <Link
+                href="#"
+                onClick={openPrivacyPolicy}
+                color="secondary"
+                underline="hover"
+              >
                 {' '}
                 https://cypherock.com/privacy.
               </Link>

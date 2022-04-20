@@ -1,11 +1,11 @@
-import { Button, Chip, Typography } from '@mui/material';
-import { Theme, useTheme, styled, keyframes } from '@mui/material/styles';
-import Tooltip from '@mui/material/Tooltip';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LoadingIcon from '@mui/icons-material/Loop';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 import WarningIcon from '@mui/icons-material/Warning';
+import { Button, Chip, Typography } from '@mui/material';
+import { keyframes, styled, useTheme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
@@ -18,42 +18,7 @@ import logger from '../../utils/logger';
 
 import NotificationComponent from './notification';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  text: {
-    marginLeft: 10
-  },
-  divider: {
-    background: theme.palette.text.secondary,
-    height: '50%',
-    margin: '0px 10px'
-  },
-  clearFix: {
-    margin: `0px !important`,
-    padding: `0px !important`
-  },
-  connectedStatus: {
-    textTransform: 'none',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: '1rem'
-  },
-  loaderIcon: {
-    animation: `$rotate 1500ms ${theme.transitions.easing.easeInOut}`,
-    animationIterationCount: 'infinite'
-  }
-}));
-
 const PREFIX = 'Navbar';
-
-const rotateKeyframe = keyframes`
-  '0%': {
-    transform: 'rotateZ(0deg)'
-  },
-  '100%': {
-    transform: 'rotateZ(360deg)'
-  }
-`;
 
 const classes = {
   root: `${PREFIX}-root`,
@@ -66,33 +31,63 @@ const classes = {
   loaderIcon: `${PREFIX}-loaderIcon`
 };
 
+const rotateKeyframe = keyframes`
+  0% {
+    transform: rotateZ(0deg);
+  }
+
+  100% {
+    transform: rotateZ(360deg);
+  }
+`;
+
 const Root = styled('div')(({ theme }) => ({
-  [classes.root]: {
+  [`& .${classes.text}`]: {
+    marginLeft: 10
+  },
+
+  [`& .${classes.divider}`]: {
+    background: theme.palette.text.secondary,
+    height: '50%',
+    margin: '0px 10px'
+  },
+
+  [`& .${classes.clearFix}`]: {
+    margin: `0px !important`,
+    padding: `0px !important`
+  },
+
+  [`& .${classes.connectedStatus}`]: {
+    textTransform: 'none',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: '1rem'
+  },
+
+  [`& .${classes.loaderIcon}`]: {
+    animation: `${rotateKeyframe} 1500ms ${theme.transitions.easing.easeInOut} infinite`
+  },
+
+  [`&.${classes.root}`]: {
     borderBottom: `0.1px solid ${theme.palette.primary.light}`,
     display: 'flex',
     justifyContent: 'space-between',
     width: '100%',
     height: '100%'
   },
-  [classes.leftContent]: {
+  [`& .${classes.leftContent}`]: {
     padding: `0px 50px`,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'
   },
-  [classes.rightContent]: {
+  [`& .${classes.rightContent}`]: {
     padding: `0px 50px`,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'
-  },
-  [classes.root]: {
-    borderBottom: `0.1px solid ${theme.palette.primary.light}`,
-    display: 'flex',
-    justifyContent: 'space-between',
-    width: '100%',
-    height: '100%'
-  },
+  }
 }));
 
 interface NavbarProps {
@@ -100,7 +95,6 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const { isSyncing, isWaitingForConnection, reSync } = useSync();
   const { isPasswordSet } = useLockscreen();
@@ -459,7 +453,7 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
   };
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <div className={classes.leftContent}>
         <Icon
           size={74}
@@ -542,7 +536,7 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
           </CustomIconButton>
         )}
       </div>
-    </div>
+    </Root>
   );
 };
 

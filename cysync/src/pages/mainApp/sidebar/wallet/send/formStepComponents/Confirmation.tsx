@@ -1,12 +1,10 @@
 import { COINS, EthCoinData } from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
+import LaunchIcon from '@mui/icons-material/Launch';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import LaunchIcon from '@mui/icons-material/Launch';
 import { shell } from 'electron';
 import QRCode from 'qrcode';
 import React from 'react';
@@ -29,81 +27,96 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    },
-    checkmarkWrapper: {
-      borderRadius: '50%',
-      border: `1px solid ${theme.palette.secondary.main}`,
-      padding: '1.5rem'
-    },
-    divider: {
-      width: '100%',
-      borderTop: `1px solid ${theme.palette.text.secondary}`
-    },
-    footer: {
-      display: 'flex',
-      alignItems: 'flex-end',
-      width: '85%',
-      justifyContent: 'flex-end'
-    },
-    confirmationDetails: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '2rem 0rem 5rem'
-    },
-    sendSuccessfully: {
-      color: theme.palette.secondary.main
-    },
-    subtle: {
-      color: '#fff',
-      opacity: '0.3'
-    },
-    attentionHash: {
-      color: '#fff',
-      margin: `0px 1rem`
-    },
-    transactionId: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    alignColCenterCenter: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    qrImage: {
-      height: 150,
-      width: 150
-    },
-    flexCenter: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    footerBtn: {
-      width: '10rem',
-      height: '3rem',
-      marginTop: 15,
-      textTransform: 'none',
-      color: '#fff'
-    }
-  })
-);
+const PREFIX = 'WalletSendConfirmation';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  checkmarkWrapper: `${PREFIX}-checkmarkWrapper`,
+  divider: `${PREFIX}-divider`,
+  footer: `${PREFIX}-footer`,
+  confirmationDetails: `${PREFIX}-confirmationDetails`,
+  sendSuccessfully: `${PREFIX}-sendSuccessfully`,
+  subtle: `${PREFIX}-subtle`,
+  attentionHash: `${PREFIX}-attentionHash`,
+  transactionId: `${PREFIX}-transactionId`,
+  alignColCenterCenter: `${PREFIX}-alignColCenterCenter`,
+  qrImage: `${PREFIX}-qrImage`,
+  flexCenter: `${PREFIX}-flexCenter`,
+  footerBtn: `${PREFIX}-footerBtn`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  },
+  [`& .${classes.checkmarkWrapper}`]: {
+    borderRadius: '50%',
+    border: `1px solid ${theme.palette.secondary.main}`,
+    padding: '1.5rem'
+  },
+  [`& .${classes.divider}`]: {
+    width: '100%',
+    borderTop: `1px solid ${theme.palette.text.secondary}`
+  },
+  [`& .${classes.footer}`]: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    width: '85%',
+    justifyContent: 'flex-end'
+  },
+  [`& .${classes.confirmationDetails}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '2rem 0rem 5rem'
+  },
+  [`& .${classes.sendSuccessfully}`]: {
+    color: theme.palette.secondary.main
+  },
+  [`& .${classes.subtle}`]: {
+    color: '#fff',
+    opacity: '0.3'
+  },
+  [`& .${classes.attentionHash}`]: {
+    color: '#fff',
+    margin: `0px 1rem`
+  },
+  [`& .${classes.transactionId}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.alignColCenterCenter}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.qrImage}`]: {
+    height: 150,
+    width: 150
+  },
+  [`& .${classes.flexCenter}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.footerBtn}`]: {
+    width: '10rem',
+    height: '3rem',
+    marginTop: 15,
+    textTransform: 'none',
+    color: '#fff'
+  }
+}));
 
 const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
-  const classes = useStyles();
   const navigate = useNavigate();
 
   const { sendTransaction } = useSendTransactionContext();
@@ -159,7 +172,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
   };
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <div className={classes.confirmationDetails}>
         <Grid container>
           {coinAbbr.toUpperCase() === 'ETHR' && (
@@ -220,7 +233,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
           Check Transactions
         </CustomButton>
       </div>
-    </div>
+    </Root>
   );
 };
 

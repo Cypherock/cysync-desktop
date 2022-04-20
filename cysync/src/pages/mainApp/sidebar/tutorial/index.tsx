@@ -1,10 +1,8 @@
+import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
-import { Theme, useTheme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import Alert from '@mui/material/Alert';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import ReactPlayer from 'react-player/youtube';
@@ -52,28 +50,33 @@ CustomPlayer.propTypes = {
   url: PropTypes.string.isRequired
 };
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      flexGrow: 1,
-      background: theme.palette.primary.main,
-      borderBottom: `1px solid ${theme.palette.primary.light}`
-    },
-    tab: {
-      color: theme.palette.text.primary,
-      textTransform: 'none'
-    },
-    loaderContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingTop: '4rem'
-    }
-  })
-);
+const PREFIX = 'Tutorial';
 
-const Index = () => {
-  const classes = useStyles();
+const classes = {
+  root: `${PREFIX}-root`,
+  tab: `${PREFIX}-tab`,
+  loaderContainer: `${PREFIX}-loaderContainer`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.root}`]: {
+    flexGrow: 1,
+    background: theme.palette.primary.main,
+    borderBottom: `1px solid ${theme.palette.primary.light}`
+  },
+  [`& .${classes.tab}`]: {
+    color: theme.palette.text.primary,
+    textTransform: 'none'
+  },
+  [`& .${classes.loaderContainer}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: '4rem'
+  }
+}));
+
+const Tutorial = () => {
   const theme = useTheme();
   const { tutorials, isLoading, isFetched, getAll, errorMsg } = useTutorial();
 
@@ -88,7 +91,7 @@ const Index = () => {
   const getMainContent = () => {
     if (tutorials.length === 0) {
       return (
-        <Grid container>
+        <Root container>
           <Grid item xs={12}>
             <div className={classes.loaderContainer}>
               <Typography variant="subtitle1" color="textSecondary">
@@ -96,12 +99,12 @@ const Index = () => {
               </Typography>
             </div>
           </Grid>
-        </Grid>
+        </Root>
       );
     }
 
     return (
-      <Grid container>
+      <Root container>
         {tutorials.map(tutorial => (
           <Grid key={tutorial._id} item xs={6}>
             <div style={{ padding: '20px' }}>
@@ -109,7 +112,7 @@ const Index = () => {
             </div>
           </Grid>
         ))}
-      </Grid>
+      </Root>
     );
   };
 
@@ -151,4 +154,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Tutorial;

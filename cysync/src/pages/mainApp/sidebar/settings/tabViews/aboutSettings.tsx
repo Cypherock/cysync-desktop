@@ -4,9 +4,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
-import { Theme, useTheme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
@@ -18,42 +16,50 @@ import logger from '../../../../../utils/logger';
 import Privacy from './aboutSettings/privacy';
 import Terms from './aboutSettings/terms';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      height: 'min-content'
-    },
-    header: {
-      maxHeight: '3rem',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    listWrapper: {
-      width: '100%'
-    },
-    divider: {
-      height: 3,
-      background: '#13171D',
-      margin: '0.3rem 0rem'
-    },
-    listItem: {
-      color: theme.palette.text.primary
-    },
-    button: {
-      background: '#71624C',
-      color: '#FFFFFF',
-      textTransform: 'none',
-      padding: '0.5rem 1.5rem',
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
+const PREFIX = 'AboutSettings';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  header: `${PREFIX}-header`,
+  listWrapper: `${PREFIX}-listWrapper`,
+  divider: `${PREFIX}-divider`,
+  listItem: `${PREFIX}-listItem`,
+  button: `${PREFIX}-button`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.root}`]: {
+    height: 'min-content'
+  },
+  [`& .${classes.header}`]: {
+    maxHeight: '3rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.listWrapper}`]: {
+    width: '100%'
+  },
+  [`& .${classes.divider}`]: {
+    height: 3,
+    background: '#13171D',
+    margin: '0.3rem 0rem'
+  },
+  [`& .${classes.listItem}`]: {
+    color: theme.palette.text.primary
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: '#FFFFFF',
+    textTransform: 'none',
+    padding: '0.5rem 1.5rem',
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  }
+}));
 
 const AboutSettings = () => {
-  const classes = useStyles();
   const theme = useTheme();
 
   const [dialogState, setDialogState] = React.useState({
@@ -108,7 +114,7 @@ const AboutSettings = () => {
     }
   ];
   return (
-    <div style={{ width: '100%' }}>
+    <Root style={{ width: '100%' }}>
       <Terms
         open={dialogState.termsofuse}
         handleClose={() => {
@@ -152,7 +158,7 @@ const AboutSettings = () => {
           })}
         </List>
       </div>
-    </div>
+    </Root>
   );
 };
 

@@ -1,9 +1,7 @@
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
-import Typography from '@mui/material/Typography';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 
@@ -14,30 +12,37 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
 import Device from '../../../../../../designSystem/iconGroups/device';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
-    },
-    content: {
-      display: 'flex',
-      flexDirection: 'column',
-      width: '100%',
-      paddingBottom: '5rem'
-    },
-    error: {
-      color: 'red'
-    },
-    continue: {
-      background: theme.palette.primary.light,
-      color: theme.palette.text.secondary,
-      marginTop: '2rem'
-    }
-  })
-);
+const PREFIX = 'AddWalletForm';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  content: `${PREFIX}-content`,
+  error: `${PREFIX}-error`,
+  continue: `${PREFIX}-continue`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  },
+  [`& .${classes.content}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    paddingBottom: '5rem'
+  },
+  [`& .${classes.error}`]: {
+    color: 'red'
+  },
+  [`& .${classes.continue}`]: {
+    background: theme.palette.primary.light,
+    color: theme.palette.text.secondary,
+    marginTop: '2rem'
+  }
+}));
 
 interface AddWalletFormProps {
   handleClose: (
@@ -53,7 +58,6 @@ const AddWalletForm: React.FC<AddWalletFormProps> = ({
   walletSuccess,
   handleClose
 }) => {
-  const classes = useStyles();
   const [active, setActive] = React.useState(0);
 
   const handleNext = () => {
@@ -135,7 +139,7 @@ const AddWalletForm: React.FC<AddWalletFormProps> = ({
     }
   };
 
-  return <div className={classes.root}>{setActiveView()}</div>;
+  return <Root className={classes.root}>{setActiveView()}</Root>;
 };
 
 AddWalletForm.propTypes = {

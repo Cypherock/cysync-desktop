@@ -1,8 +1,6 @@
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import { Theme, useTheme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
@@ -14,48 +12,60 @@ import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      background: theme.palette.primary.light,
-      padding: '0.5rem 0rem 0.5rem 0rem',
-      borderRadius: 5,
-      minHeight: 50,
-      maxHeight: 60,
-      margin: `${theme.spacing(1)} 0px`
-    },
-    alignStartCenter: {
-      display: 'flex',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
-    },
-    alignCenterCenter: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    flexColumn: {
-      flexDirection: 'column',
-      alignItems: 'flex-start'
-    },
-    capitalize: {
-      textTransform: 'uppercase'
-    },
-    clearFix: {
-      margin: `0px !important`,
-      padding: `0px !important`
-    },
-    blue: {
-      color: theme.palette.info.main
-    },
-    red: {
-      color: theme.palette.error.main
-    },
-    orange: {
-      color: theme.palette.secondary.main
-    }
-  })
-);
+const PREFIX = 'OneTransaction';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  alignStartCenter: `${PREFIX}-alignStartCenter`,
+  alignCenterCenter: `${PREFIX}-alignCenterCenter`,
+  flexColumn: `${PREFIX}-flexColumn`,
+  capitalize: `${PREFIX}-capitalize`,
+  clearFix: `${PREFIX}-clearFix`,
+  blue: `${PREFIX}-blue`,
+  red: `${PREFIX}-red`,
+  orange: `${PREFIX}-orange`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.root}`]: {
+    background: theme.palette.primary.light,
+    padding: '0.5rem 0rem 0.5rem 0rem',
+    borderRadius: 5,
+    minHeight: 50,
+    maxHeight: 60,
+    margin: `${theme.spacing(1)} 0px`
+  },
+  [`& .${classes.alignStartCenter}`]: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  },
+  [`& .${classes.alignCenterCenter}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.flexColumn}`]: {
+    flexDirection: 'column',
+    alignItems: 'flex-start'
+  },
+  [`& .${classes.capitalize}`]: {
+    textTransform: 'uppercase'
+  },
+  [`& .${classes.clearFix}`]: {
+    margin: `0px !important`,
+    padding: `0px !important`
+  },
+  [`& .${classes.blue}`]: {
+    color: theme.palette.info.main
+  },
+  [`& .${classes.red}`]: {
+    color: theme.palette.error.main
+  },
+  [`& .${classes.orange}`]: {
+    color: theme.palette.secondary.main
+  }
+}));
 
 interface OneTransactionProps {
   date: string;
@@ -72,7 +82,6 @@ interface OneTransactionProps {
 }
 
 const OneTransaction: React.FC<OneTransactionProps> = props => {
-  const classes = useStyles();
   const theme = useTheme();
   const {
     date,
@@ -111,7 +120,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
   };
 
   return (
-    <div style={{ marginRight: '10px' }}>
+    <Root style={{ marginRight: '10px' }}>
       <Grid container className={classes.root}>
         <Grid
           item
@@ -190,7 +199,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
           </Button>
         </Grid>
       </Grid>
-    </div>
+    </Root>
   );
 };
 

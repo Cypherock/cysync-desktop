@@ -1,9 +1,8 @@
+import ReportIcon from '@mui/icons-material/Report';
 import { IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import ReportIcon from '@mui/icons-material/Report';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 
@@ -18,59 +17,66 @@ import {
 import { inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      paddingTop: '7rem'
-    },
-    content: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    heading: {
-      paddingTop: '2rem'
-    },
-    start: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'flex-end'
-    },
-    deviceIcon: {
-      position: 'absolute',
-      left: '50%',
-      top: '2vh',
-      transform: 'translateX(-50%)'
-    },
-    deviceTextContainer: {
-      position: 'absolute',
-      top: '51%',
-      right: '35%',
-      width: '236px',
-      height: '120px',
-      transform: 'translate(50%, -50%)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      textAlign: 'center',
-      borderRadius: '2px',
-      padding: '2px',
-      color: '#fff'
-    },
-    report: {
-      position: 'absolute',
-      right: 10,
-      bottom: 120
-    }
-  })
-);
+const PREFIX = 'DeviceConnection';
+
+const classes = {
+  content: `${PREFIX}-content`,
+  heading: `${PREFIX}-heading`,
+  start: `${PREFIX}-start`,
+  deviceIcon: `${PREFIX}-deviceIcon`,
+  deviceTextContainer: `${PREFIX}-deviceTextContainer`,
+  report: `${PREFIX}-report`
+};
+
+const Root = styled('div')(() => ({
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  paddingTop: '7rem',
+  [`& .${classes.content}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.heading}`]: {
+    paddingTop: '2rem'
+  },
+  [`& .${classes.start}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'flex-end'
+  },
+  [`& .${classes.deviceIcon}`]: {
+    position: 'absolute',
+    left: '50%',
+    top: '2vh',
+    transform: 'translateX(-50%)'
+  },
+  [`& .${classes.deviceTextContainer}`]: {
+    position: 'absolute',
+    top: '51%',
+    right: '35%',
+    width: '236px',
+    height: '120px',
+    transform: 'translate(50%, -50%)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    borderRadius: '2px',
+    padding: '2px',
+    color: '#fff'
+  },
+  [`& .${classes.report}`]: {
+    position: 'absolute',
+    right: 10,
+    bottom: 120
+  }
+}));
 
 const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
   const { showFeedback } = useFeedback();
@@ -96,7 +102,6 @@ const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
     });
   };
 
-  const classes = useStyles();
   const [connected, setConnected] = React.useState(false);
 
   const {
@@ -130,7 +135,7 @@ const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
   }, [deviceConnection, inBackgroundProcess]);
 
   return (
-    <div className={classes.root}>
+    <Root>
       <div className={classes.heading}>
         <Typography
           color="textPrimary"
@@ -167,10 +172,11 @@ const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
         title="Report issue"
         onClick={handleFeedbackOpen}
         className={classes.report}
-        size="large">
+        size="large"
+      >
         <ReportIcon color="secondary" />
       </IconButton>
-    </div>
+    </Root>
   );
 };
 

@@ -1,11 +1,9 @@
-import CircularProgress from '@mui/material/CircularProgress';
-import Grid from '@mui/material/Grid';
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
-import Typography from '@mui/material/Typography';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
 import success from '../../../assets/icons/generic/success.png';
@@ -18,40 +16,46 @@ import { useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    middle: {
-      minHeight: '20rem',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    progress: {
-      marginBottom: '3rem',
-      color: theme.palette.text.secondary
-    },
-    success: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    center: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    },
-    primaryColor: {
-      color: theme.palette.secondary.dark
-    }
-  })
-);
+const PREFIX = 'BootloaderCheck';
+
+const classes = {
+  middle: `${PREFIX}-middle`,
+  progress: `${PREFIX}-progress`,
+  success: `${PREFIX}-success`,
+  center: `${PREFIX}-center`,
+  primaryColor: `${PREFIX}-primaryColor`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.middle}`]: {
+    minHeight: '20rem',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.progress}`]: {
+    marginBottom: '3rem',
+    color: theme.palette.text.secondary
+  },
+  [`& .${classes.success}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.center}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  },
+  [`& .${classes.primaryColor}`]: {
+    color: theme.palette.secondary.dark
+  }
+}));
 
 const BootloaderCheck = (props: any) => {
-  const classes = useStyles();
-
   const { connected, inBootloader } = useConnection();
 
   const {
@@ -123,7 +127,7 @@ const BootloaderCheck = (props: any) => {
   }, [isCompleted]);
 
   return (
-    <Grid container>
+    <Root container>
       <Grid item xs={2} />
       <Grid item xs={8} className={classes.middle}>
         {isCompleted === 0 && updateDownloaded !== 2 && (
@@ -252,7 +256,7 @@ const BootloaderCheck = (props: any) => {
         )}
       </Grid>
       <Grid item xs={2} />
-    </Grid>
+    </Root>
   );
 };
 

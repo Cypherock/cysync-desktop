@@ -1,14 +1,14 @@
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ReportIcon from '@mui/icons-material/Report';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { CircularProgress } from '@mui/material';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import { useTheme, styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import ReportIcon from '@mui/icons-material/Report';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import React from 'react';
 
 import CustomizedDialog from '../../designSystem/designComponents/dialog/newDialogBox';
@@ -23,8 +23,9 @@ import { FeedbackState, useFeedback } from '../../store/provider';
 import { generateSinglePasswordHash, verifyPassword } from '../../utils/auth';
 import { triggerClearData } from '../../utils/clearData';
 
-const PREFIX = 'lockscreen';
+const PREFIX = 'Lockscreen';
 const classes = {
+  container: `${PREFIX}-container`,
   root: `${PREFIX}-root`,
   content: `${PREFIX}-content`,
   icon: `${PREFIX}-icon`,
@@ -34,12 +35,14 @@ const classes = {
 };
 
 const Root = styled('div')(({ theme }) => ({
-  [classes.root]: {
+  width: '100%',
+  height: '100%',
+  [`& .${classes.root}`]: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'
   },
-  [classes.content]: {
+  [`& .${classes.content}`]: {
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -47,17 +50,17 @@ const Root = styled('div')(({ theme }) => ({
     alignItems: 'center',
     minHeight: '50vh'
   },
-  [classes.icon]: {
+  [`& .${classes.icon}`]: {
     position: 'absolute',
     top: 10,
     left: 20
   },
-  [classes.inputFieldsContainer]: {
+  [`& .${classes.inputFieldsContainer}`]: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-end'
   },
-  [classes.submitButton]: {
+  [`& .${classes.submitButton}`]: {
     background: '#71624C',
     color: '#FFFFFF',
     padding: '0.3rem 3rem',
@@ -66,7 +69,7 @@ const Root = styled('div')(({ theme }) => ({
       background: theme.palette.secondary.dark
     }
   },
-  [classes.report]: {
+  [`& .${classes.report}`]: {
     position: 'absolute',
     right: 20,
     bottom: 20
@@ -181,7 +184,7 @@ const LockScreen = (props: any) => {
   };
 
   return (
-    <Root>
+    <Root className={classes.container}>
       <CustomizedDialog
         open={confirmationDialog}
         handleClose={handleCloseConfirmation}

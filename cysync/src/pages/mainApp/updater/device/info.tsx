@@ -1,40 +1,42 @@
 import Checkbox from '@mui/material/Checkbox';
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import Button from '../../../../designSystem/designComponents/buttons/button';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    container: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexDirection: 'column'
-    },
-    versionText: {
-      marginBottom: '20px'
-    },
-    button: {
-      background: '#71624C',
-      color: theme.palette.text.primary,
-      textTransform: 'none',
-      padding: '0.5rem 3.5rem',
-      marginBottom: '2rem',
-      marginTop: '20px',
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
-    },
-    knowMoreText: {
-      textTransform: 'none'
+const PREFIX = 'UpdaterDeviceInfo';
+
+const classes = {
+  versionText: `${PREFIX}-versionText`,
+  button: `${PREFIX}-button`,
+  knowMoreText: `${PREFIX}-knowMoreText`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexDirection: 'column',
+  [`& .${classes.versionText}`]: {
+    marginBottom: '20px'
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: theme.palette.text.primary,
+    textTransform: 'none',
+    padding: '0.5rem 3.5rem',
+    marginBottom: '2rem',
+    marginTop: '20px',
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  },
+  [`& .${classes.knowMoreText}`]: {
+    textTransform: 'none'
+  }
+}));
 
 interface UpdateInfoComponentProps {
   onUpdate: () => void;
@@ -49,14 +51,12 @@ const UpdateInfoComponent: React.FC<UpdateInfoComponentProps> = ({
   dontShowAgain,
   setDontShowAgain
 }) => {
-  const classes = useStyles();
-
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDontShowAgain(event.target.checked);
   };
 
   return (
-    <div className={classes.container}>
+    <Root>
       <Typography className={classes.versionText} variant="body1">
         {`New X1 wallet version ${version} Available!`}
       </Typography>
@@ -77,7 +77,7 @@ const UpdateInfoComponent: React.FC<UpdateInfoComponentProps> = ({
         />
         <Typography variant="body1">Don&apos;t show again</Typography>
       </div>
-    </div>
+    </Root>
   );
 };
 

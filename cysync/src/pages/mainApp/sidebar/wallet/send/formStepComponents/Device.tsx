@@ -1,6 +1,4 @@
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
@@ -18,61 +16,69 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    },
-    deviceDetails: {
-      width: '70%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      minHeight: '15rem',
-      paddingBottom: '5rem'
-    },
-    mainText: {
-      fontSize: '1rem',
-      color: theme.palette.primary.light,
-      marginBottom: '1rem'
-    },
-    divider: {
-      width: '100%',
-      borderTop: `1px solid ${theme.palette.text.secondary}`
-    },
-    footer: {
-      display: 'flex',
-      alignItems: 'flex-end',
-      width: '85%',
-      justifyContent: 'flex-end'
-    },
-    deviceContinueButon: {
-      width: '10rem',
-      height: '3rem',
-      marginTop: 15,
-      textTransform: 'none',
-      color: '#fff',
-      background: theme.palette.secondary.dark,
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
-    },
-    center: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
+const PREFIX = 'WalletSendDevice';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  deviceDetails: `${PREFIX}-deviceDetails`,
+  mainText: `${PREFIX}-mainText`,
+  divider: `${PREFIX}-divider`,
+  footer: `${PREFIX}-footer`,
+  deviceContinueButon: `${PREFIX}-deviceContinueButon`,
+  center: `${PREFIX}-center`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  },
+  [`& .${classes.deviceDetails}`]: {
+    width: '70%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    minHeight: '15rem',
+    paddingBottom: '5rem'
+  },
+  [`& .${classes.mainText}`]: {
+    fontSize: '1rem',
+    color: theme.palette.primary.light,
+    marginBottom: '1rem'
+  },
+  [`& .${classes.divider}`]: {
+    width: '100%',
+    borderTop: `1px solid ${theme.palette.text.secondary}`
+  },
+  [`& .${classes.footer}`]: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    width: '85%',
+    justifyContent: 'flex-end'
+  },
+  [`& .${classes.deviceContinueButon}`]: {
+    width: '10rem',
+    height: '3rem',
+    marginTop: 15,
+    textTransform: 'none',
+    color: '#fff',
+    background: theme.palette.secondary.dark,
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  },
+  [`& .${classes.center}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  }
+}));
 
 const Device: React.FC<StepComponentProps> = ({ handleNext }) => {
-  const classes = useStyles();
-
   const { sendTransaction } = useSendTransactionContext();
 
   const { selectedWallet } = useSelectedWallet();
@@ -86,7 +92,7 @@ const Device: React.FC<StepComponentProps> = ({ handleNext }) => {
   }, [sendTransaction.cardsTapped]);
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <div className={classes.deviceDetails}>
         <Typography color="textSecondary" variant="h6" gutterBottom>
           Follow the instruction on device
@@ -150,7 +156,7 @@ const Device: React.FC<StepComponentProps> = ({ handleNext }) => {
           </div>
         )}
       </div>
-    </div>
+    </Root>
   );
 };
 

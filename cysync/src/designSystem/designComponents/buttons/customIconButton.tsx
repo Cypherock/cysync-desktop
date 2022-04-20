@@ -44,7 +44,8 @@ const CustomIconButton: React.FC<Props> = ({
         className={iconButtonClassName}
         onClick={onClick}
         disabled={disabled}
-        size="large">
+        size="large"
+      >
         {children}
       </IconButton>
     </Tooltip>

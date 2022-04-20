@@ -1,10 +1,8 @@
 import CircularProgress from '@mui/material/CircularProgress';
 import LinearProgress from '@mui/material/LinearProgress';
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import withStyles from '@mui/styles/withStyles';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -14,34 +12,37 @@ const CustomLinearProgress = withStyles(() => ({
   }
 }))(LinearProgress);
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    progressContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-      flexDirection: 'column',
-      width: '100%'
-    },
-    successContainer: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '20rem'
-    },
-    button: {
-      background: '#71624C',
-      color: theme.palette.text.primary,
-      textTransform: 'none',
-      padding: '0.5rem 1.5rem',
-      marginBottom: '1rem',
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
+const PREFIX = 'UpdaterAppDownloading';
+
+const classes = {
+  successContainer: `${PREFIX}-successContainer`,
+  button: `${PREFIX}-button`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  flexDirection: 'column',
+  width: '100%',
+  [`& .${classes.successContainer}`]: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '20rem'
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: theme.palette.text.primary,
+    textTransform: 'none',
+    padding: '0.5rem 1.5rem',
+    marginBottom: '1rem',
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  }
+}));
 
 interface UpdateDownloadingComponentProps {
   progress: number;
@@ -50,9 +51,8 @@ interface UpdateDownloadingComponentProps {
 const UpdateDownloadingComponent: React.FC<UpdateDownloadingComponentProps> = ({
   progress
 }) => {
-  const classes = useStyles();
   return (
-    <div className={classes.progressContainer}>
+    <Root>
       <div style={{ margin: '30px auto' }}>
         <CircularProgress size={70} color="secondary" />
       </div>
@@ -71,7 +71,7 @@ const UpdateDownloadingComponent: React.FC<UpdateDownloadingComponentProps> = ({
         style={{ width: '100%' }}
         color="secondary"
       />
-    </div>
+    </Root>
   );
 };
 

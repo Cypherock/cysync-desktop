@@ -1,4 +1,4 @@
-import { ThemeProvider, Theme, StyledEngineProvider, adaptV4Theme } from '@mui/material';
+import { StyledEngineProvider, Theme, ThemeProvider } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import 'electron-disable-file-drop';
 import React from 'react';
@@ -14,17 +14,15 @@ import { I18nProvider } from './store/provider';
 import Analytics from './utils/analytics';
 import './utils/errorHandler';
 
-
 declare module '@mui/styles/defaultTheme' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  /* tslint:disable-next-line */
   interface DefaultTheme extends Theme {}
 }
-
 
 const instance = Analytics.Instance;
 instance.setup();
 
-const cySyncTheme = createTheme(adaptV4Theme(theme));
+const cySyncTheme = createTheme(theme);
 
 WebFont.load({
   google: {

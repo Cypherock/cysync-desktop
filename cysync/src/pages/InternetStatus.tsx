@@ -13,7 +13,7 @@ const classes = {
 };
 
 const Root = styled('div')(({ theme }) => ({
-  [`& .${classes.root}`]: {
+  [`&.${classes.root}`]: {
     width: '100%',
     backgroundColor: theme.palette.error.dark,
     color: theme.palette.error.contrastText,
@@ -24,12 +24,12 @@ const Root = styled('div')(({ theme }) => ({
     transition: 'opacity 0.3s, height 0.3s'
   },
 
-  [`& .${classes.show}`]: {
+  [`&.${classes.show}`]: {
     opacity: '1',
     height: '25px'
   },
 
-  [`& .${classes.hide}`]: {
+  [`&.${classes.hide}`]: {
     opacity: '0',
     height: '0'
   }

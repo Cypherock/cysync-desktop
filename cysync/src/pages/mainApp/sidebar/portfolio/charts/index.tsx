@@ -1,8 +1,6 @@
 import { Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { Theme, useTheme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled, useTheme } from '@mui/material/styles';
 import React from 'react';
 
 import { UsePortfolioValues } from '../../../../../store/hooks';
@@ -11,28 +9,34 @@ import formatDisplayAmount from '../../../../../utils/formatDisplayAmount';
 import DonutChart from './DonutChart';
 import LineChart from './LineChart';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      border: `1px solid ${theme.palette.primary.light}`,
-      borderRadius: '1rem',
-      padding: '0.5rem 0rem'
-    },
-    left: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    right: {
-      borderLeft: `1px solid ${theme.palette.primary.light}`,
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }
-  })
-);
+const PREFIX = 'PortfolioChart';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  left: `${PREFIX}-left`,
+  right: `${PREFIX}-right`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    border: `1px solid ${theme.palette.primary.light}`,
+    borderRadius: '1rem',
+    padding: '0.5rem 0rem'
+  },
+  [`& .${classes.left}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.right}`]: {
+    borderLeft: `1px solid ${theme.palette.primary.light}`,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
+}));
 
 export interface Props {
   coinHolding: UsePortfolioValues['coinHolding'];
@@ -48,7 +52,7 @@ export interface Props {
   series: UsePortfolioValues['series'];
 }
 
-const Index = ({
+const PortfolioCharts = ({
   coinHolding,
   coinList,
   hasCoins,
@@ -60,11 +64,10 @@ const Index = ({
   sinceText,
   series
 }: Props) => {
-  const classes = useStyles();
   const theme = useTheme();
 
   return (
-    <Grid container className={classes.root}>
+    <Root container className={classes.root}>
       <Grid item xs={9} className={classes.left}>
         <LineChart
           coinList={coinList}
@@ -144,8 +147,8 @@ const Index = ({
           </div>
         )}
       </Grid>
-    </Grid>
+    </Root>
   );
 };
 
-export default Index;
+export default PortfolioCharts;

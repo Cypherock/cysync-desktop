@@ -1,9 +1,9 @@
-import IconButton from '@mui/material/IconButton';
-import { styled } from '@mui/material/styles';
-import Popover from '@mui/material/Popover';
-import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 import NotificationIcon from '@mui/icons-material/NotificationsOutlined';
+import IconButton from '@mui/material/IconButton';
+import Popover from '@mui/material/Popover';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 
 import { useConnection, useNotifications } from '../../../store/provider';
@@ -22,6 +22,18 @@ const classes = {
 };
 
 const Root = styled('div')(() => ({
+  [`& .${classes.notificationBubble}`]: {
+    width: '5px',
+    height: '5px',
+    borderRadius: '50%',
+    backgroundColor: '#DB953C',
+    position: 'absolute',
+    top: '12px',
+    right: '12px'
+  }
+}));
+
+const PopoverRoot = styled(Popover)(() => ({
   [`& .${classes.mainContainer}`]: {
     padding: '10px 10px 10px 20px',
     minWidth: '350px'
@@ -40,23 +52,10 @@ const Root = styled('div')(() => ({
 
   [`& .${classes.icon}`]: {
     color: '#cccccc'
-  },
-
-  [`& .${classes.notificationBubble}`]: {
-    width: '5px',
-    height: '5px',
-    borderRadius: '50%',
-    backgroundColor: '#DB953C',
-    position: 'absolute',
-    top: '12px',
-    right: '12px'
   }
 }));
 
-const CustomPopover = Popover;
-
 const Notification = () => {
-
   const [anchorEl, setAnchorEl] = useState(null);
   const {
     data,
@@ -101,7 +100,7 @@ const Notification = () => {
         <NotificationIcon color="secondary" fontSize="inherit" />
         {hasUnread && <div className={classes.notificationBubble} />}
       </IconButton>
-      <CustomPopover
+      <PopoverRoot
         id={id}
         open={open}
         anchorEl={anchorEl}
@@ -116,7 +115,8 @@ const Notification = () => {
         }}
         classes={{
           paper: classes.paper
-        }}>
+        }}
+      >
         <div className={classes.mainContainer}>
           <div className={classes.headingContainer}>
             <Typography className={classes.heading} variant="h5">
@@ -134,7 +134,7 @@ const Notification = () => {
           onNextPage={getNextPage}
           handleClose={handleClose}
         />
-      </CustomPopover>
+      </PopoverRoot>
     </Root>
   );
 };

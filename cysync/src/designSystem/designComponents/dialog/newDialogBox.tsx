@@ -1,3 +1,4 @@
+import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import MuiDialogActions from '@mui/material/DialogActions';
@@ -5,11 +6,10 @@ import MuiDialogContent from '@mui/material/DialogContent';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import { Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import { WithStyles } from '@mui/styles';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
-import Typography from '@mui/material/Typography';
-import CloseIcon from '@mui/icons-material/Close';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -67,7 +67,8 @@ const DialogTitle = withStyles(styles)((props: DialogTitleProps) => {
           aria-label="close"
           className={classes.closeButton}
           onClick={onClose}
-          size="large">
+          size="large"
+        >
           <CloseIcon />
         </IconButton>
       ) : null}

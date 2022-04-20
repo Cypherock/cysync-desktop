@@ -3,5 +3,5 @@
   "LOG_LEVEL": "silly",
   "SERVER_ENV": "development",
   "GITHUB_REPO": "Cypherock/cysync-desktop-dev",
-  "SIMULATE_PRODUCTION": true
+  "SIMULATE_PRODUCTION": false
 }

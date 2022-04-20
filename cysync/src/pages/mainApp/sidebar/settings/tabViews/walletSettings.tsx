@@ -5,9 +5,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -17,39 +15,46 @@ import SwitchButton from '../../../../../designSystem/designComponents/buttons/s
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ICONS from '../../../../../designSystem/iconGroups/iconConstants';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      height: 'min-content'
-    },
-    header: {
-      maxHeight: '3rem',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    listWrapper: {
-      width: '100%'
-    },
-    divider: {
-      background: theme.palette.text.secondary
-    },
-    button: {
-      margin: '1rem'
-    },
-    listItem: {
-      color: theme.palette.text.primary
-    }
-  })
-);
+const PREFIX = 'WalletSettings';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  header: `${PREFIX}-header`,
+  listWrapper: `${PREFIX}-listWrapper`,
+  divider: `${PREFIX}-divider`,
+  button: `${PREFIX}-button`,
+  listItem: `${PREFIX}-listItem`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    height: 'min-content'
+  },
+  [`& .${classes.header}`]: {
+    maxHeight: '3rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.listWrapper}`]: {
+    width: '100%'
+  },
+  [`& .${classes.divider}`]: {
+    background: theme.palette.text.secondary
+  },
+  [`& .${classes.button}`]: {
+    margin: '1rem'
+  },
+  [`& .${classes.listItem}`]: {
+    color: theme.palette.text.primary
+  }
+}));
 
 type WalletSettingsProps = {
   closeTab?: () => void;
 };
 
 const WalletSettings: React.FC<WalletSettingsProps> = ({ closeTab }) => {
-  const classes = useStyles();
-
   const [walletSettings, setWallSettings] = React.useState({
     hideEmptyToken: false,
     hiddenToken: false,
@@ -134,7 +139,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ closeTab }) => {
   }
 
   return (
-    <Grid container className={classes.root}>
+    <Root container className={classes.root}>
       <Grid item xs={12} className={classes.header}>
         <Typography color="secondary" variant="h4">
           Crypto Assets
@@ -192,7 +197,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ closeTab }) => {
           })}
         </List>
       </Grid>
-    </Grid>
+    </Root>
   );
 };
 

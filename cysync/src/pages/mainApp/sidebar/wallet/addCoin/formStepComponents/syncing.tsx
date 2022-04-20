@@ -1,6 +1,5 @@
 import CircularProgress from '@mui/material/CircularProgress';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
@@ -18,24 +17,29 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      padding: '2rem 4rem',
-      minHeight: '15rem'
-    },
-    center: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    }
-  })
-);
+const PREFIX = 'AddCoinSyncing';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  center: `${PREFIX}-center`
+};
+
+const Root = styled('div')(() => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    padding: '2rem 4rem',
+    minHeight: '15rem'
+  },
+  [`& .${classes.center}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  }
+}));
 
 const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
   const { coinAdder } = useAddCoinContext();
@@ -52,10 +56,8 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
     }
   }, [coinAdder.addCoinCompleted]);
 
-  const classes = useStyles();
-
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <Typography
         style={{ marginBottom: '10px' }}
         color="textSecondary"
@@ -93,7 +95,7 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
           </Typography>
         </div>
       )}
-    </div>
+    </Root>
   );
 };
 

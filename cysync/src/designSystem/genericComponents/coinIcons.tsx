@@ -1,6 +1,6 @@
 import { ERC20TOKENS } from '@cypherock/communication';
-import { styled } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
+import { styled } from '@mui/material/styles';
 import React from 'react';
 
 import btc from '../../../node_modules/cryptocurrency-icons/svg/color/btc.svg';
@@ -147,7 +147,8 @@ const CoinIcons: React.FC<CoinIconsProps> = ({ initial, size, style }) => {
           classes={{
             root: classes.root2,
             img: classes.img2
-          }} />
+          }}
+        />
       );
     }
     return <StyledModAvatar style={style} alt={coinInitial} src={src} />;

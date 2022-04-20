@@ -1,12 +1,10 @@
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { Grid } from '@mui/material';
 import MIconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import { Theme, useTheme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -20,29 +18,36 @@ import {
 } from '../../../../../../utils/auth';
 import logger from '../../../../../../utils/logger';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    inputs: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      height: 'auto',
-      width: '100%'
-    },
-    buttons: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    error: {
-      color: theme.palette.error.main
-    },
-    marginTopBottom: {
-      margin: '0.5rem 0rem'
-    }
-  })
-);
+const PREFIX = 'RemovePassword';
+
+const classes = {
+  inputs: `${PREFIX}-inputs`,
+  buttons: `${PREFIX}-buttons`,
+  error: `${PREFIX}-error`,
+  marginTopBottom: `${PREFIX}-marginTopBottom`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.inputs}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 'auto',
+    width: '100%'
+  },
+  [`& .${classes.buttons}`]: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.error}`]: {
+    color: theme.palette.error.main
+  },
+  [`& .${classes.marginTopBottom}`]: {
+    margin: '0.5rem 0rem'
+  }
+}));
 
 interface State {
   oldPassword: string;
@@ -55,7 +60,6 @@ type Props = {
 };
 
 const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const lockscreen = useLockscreen();
   const snackbar = useSnackbar();
@@ -158,7 +162,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
       confirmButtonDisabled={isLoading}
       rejectButtonDisabled={isLoading}
       restComponents={
-        <Grid
+        <Root
           item
           xs={7}
           style={{
@@ -217,7 +221,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
               {error}
             </Typography>
           )}
-        </Grid>
+        </Root>
       }
     />
   );

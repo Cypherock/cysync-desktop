@@ -1,14 +1,14 @@
-import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
-import CircularProgress from '@mui/material/CircularProgress';
-import Grid from '@mui/material/Grid';
-import InputAdornment from '@mui/material/InputAdornment';
-import { useTheme } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import InputAdornment from '@mui/material/InputAdornment';
+import { styled } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import BigNumber from 'bignumber.js';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -43,11 +43,7 @@ const classes = {
   headerButtons: `${PREFIX}-headerButtons`
 };
 
-const StyledGrid = styled(Grid)((
-  {
-    theme
-  }
-) => ({
+const StyledGrid = styled(Grid)(({ theme }) => ({
   [`& .${classes.head}`]: {
     height: '5rem'
   },

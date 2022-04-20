@@ -2,12 +2,11 @@ import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
+import { styled, Theme } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import createStyles from '@mui/styles/createStyles';
+import withStyles from '@mui/styles/withStyles';
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -113,25 +112,32 @@ const StyledListItem = withStyles(theme => ({
   }
 }))(ListItem);
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    flexGrow: 1,
-    maxWidth: '200px',
-    background: theme.palette.primary.light,
-    border: `0px solid ${theme.palette.text.secondary}`,
-    height: '100%',
-    borderRadius: '1rem',
-    position: 'relative'
-  },
-  divider: {
+const PREFIX = 'Sidebar';
+
+const classes = {
+  divider: `${PREFIX}-divider`,
+  support: `${PREFIX}-support`,
+  walletCollapse: `${PREFIX}-walletCollapse`,
+  walletScroll: `${PREFIX}-walletScroll`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  flexGrow: 1,
+  maxWidth: '200px',
+  background: theme.palette.primary.light,
+  border: `0px solid ${theme.palette.text.secondary}`,
+  height: '100%',
+  borderRadius: '1rem',
+  position: 'relative',
+  [`& .${classes.divider}`]: {
     background: '#1E2328',
     margin: `0.6rem 0.8rem`
   },
-  support: {
+  [`& .${classes.support}`]: {
     position: 'absolute',
     bottom: 0
   },
-  walletCollapse: {
+  [`& .${classes.walletCollapse}`]: {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-end',
@@ -141,7 +147,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     position: 'relative',
     paddingBottom: '1.5rem'
   },
-  walletScroll: {
+  [`& .${classes.walletScroll}`]: {
     maxHeight: '100px',
     overflowY: 'auto',
     overflowX: 'hidden',
@@ -178,8 +184,7 @@ const TabValues = [
   }
 ];
 
-const Index = () => {
-  const classes = useStyles();
+const Sidebar = () => {
   const { allWallets: walletData } = useWallets();
 
   const feedback = useFeedback();
@@ -207,10 +212,7 @@ const Index = () => {
     navigate(`${Routes.wallet.index}/${wallet.walletId}`);
   };
 
-  const handleChange = (
-    _event: React.ChangeEvent<{}> | undefined,
-    val: number
-  ) => {
+  const handleChange = (_event: React.ChangeEvent | undefined, val: number) => {
     setValue(val);
     const tab = TabValues.find(elem => elem.tab === val);
 
@@ -253,7 +255,7 @@ const Index = () => {
   };
 
   return (
-    <div className={classes.root}>
+    <Root>
       <StyledTabs
         value={value}
         onChange={handleChange}
@@ -320,8 +322,8 @@ const Index = () => {
       <StyledButton className={classes.support} onClick={handleOpen}>
         Support
       </StyledButton>
-    </div>
+    </Root>
   );
 };
 
-export default Index;
+export default Sidebar;

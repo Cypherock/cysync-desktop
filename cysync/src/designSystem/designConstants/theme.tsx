@@ -1,9 +1,9 @@
-import { DeprecatedThemeOptions } from '@mui/material/styles';
+import { ThemeOptions } from '@mui/material/styles';
 
 import colors from './colors';
 import typography from './typography';
 
-const theme: DeprecatedThemeOptions = {
+const theme: ThemeOptions = {
   palette: {
     mode: 'dark',
     primary: {

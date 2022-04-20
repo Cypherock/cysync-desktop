@@ -5,15 +5,14 @@ import {
   EthCoinData
 } from '@cypherock/communication';
 import { EthereumWallet } from '@cypherock/wallet';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
-import { Theme } from '@mui/material/styles';
+import { styled, Theme } from '@mui/material/styles';
 import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
 import withStyles from '@mui/styles/withStyles';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import { clipboard } from 'electron';
@@ -61,48 +60,55 @@ const QontoConnector = withStyles((theme: Theme) =>
   })
 )(StepConnector);
 
-const useQontoStepIconStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      color: theme.palette.text.primary,
-      display: 'flex',
-      height: 22,
-      alignItems: 'center'
-    },
-    active: {
-      color: theme.palette.secondary.main
-    },
-    outerCircle: {
-      border: `1px solid ${theme.palette.secondary.main}`,
-      padding: 4,
-      borderRadius: '50%'
-    },
-    notActiveCircle: {
-      border: `1px solid ${theme.palette.text.secondary}`
-    },
-    circle: {
-      width: 20,
-      height: 20,
-      borderRadius: '50%',
-      backgroundColor: 'none',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    activeCircle: {
-      background: theme.palette.secondary.main
-    },
-    completed: {
-      color: theme.palette.secondary.light,
-      zIndex: 1,
-      fontSize: 28
-    },
-    text: {},
-    activeText: {
-      color: theme.palette.primary.main
-    }
-  })
-);
+const STEP_PREFIX = 'WalletSend-Step';
+
+const stepClasses = {
+  active: `${STEP_PREFIX}-active`,
+  outerCircle: `${STEP_PREFIX}-outerCircle`,
+  notActiveCircle: `${STEP_PREFIX}-notActiveCircle`,
+  circle: `${STEP_PREFIX}-circle`,
+  activeCircle: `${STEP_PREFIX}-activeCircle`,
+  completed: `${STEP_PREFIX}-completed`,
+  activeText: `${STEP_PREFIX}-activeText`
+};
+
+const StepRoot = styled('div')(({ theme }) => ({
+  color: theme.palette.text.primary,
+  display: 'flex',
+  height: 22,
+  alignItems: 'center',
+  [`&.${stepClasses.active}`]: {
+    color: theme.palette.secondary.main
+  },
+  [`& .${stepClasses.outerCircle}`]: {
+    border: `1px solid ${theme.palette.secondary.main}`,
+    padding: 4,
+    borderRadius: '50%'
+  },
+  [`& .${stepClasses.notActiveCircle}`]: {
+    border: `1px solid ${theme.palette.text.secondary}`
+  },
+  [`& .${stepClasses.circle}`]: {
+    width: 20,
+    height: 20,
+    borderRadius: '50%',
+    backgroundColor: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  [`& .${stepClasses.activeCircle}`]: {
+    background: theme.palette.secondary.main
+  },
+  [`& .${stepClasses.completed}`]: {
+    color: theme.palette.secondary.light,
+    zIndex: 1,
+    fontSize: 28
+  },
+  [`& .${stepClasses.activeText}`]: {
+    color: theme.palette.primary.main
+  }
+}));
 
 type Props = {
   active?: boolean | undefined;
@@ -111,35 +117,36 @@ type Props = {
 };
 
 const QontoStepIcon: React.FC<Props> = ({ active, completed, icon }) => {
-  const classes = useQontoStepIconStyles();
   return (
-    <div
-      className={clsx(classes.root, {
-        [classes.active]: active
+    <StepRoot
+      className={clsx({
+        [stepClasses.active]: active
       })}
     >
       {completed ? (
-        <CheckCircleIcon className={classes.completed} />
+        <CheckCircleIcon className={stepClasses.completed} />
       ) : (
         <div
-          className={clsx(classes.outerCircle, {
-            [classes.notActiveCircle]: !active
+          className={clsx(stepClasses.outerCircle, {
+            [stepClasses.notActiveCircle]: !active
           })}
         >
           <div
-            className={clsx(classes.circle, {
-              [classes.activeCircle]: active
+            className={clsx(stepClasses.circle, {
+              [stepClasses.activeCircle]: active
             })}
           >
             <span
-              className={clsx(classes.text, { [classes.activeText]: active })}
+              className={clsx({
+                [stepClasses.activeText]: active
+              })}
             >
               {icon}
             </span>
           </div>
         </div>
       )}
-    </div>
+    </StepRoot>
   );
 };
 
@@ -169,26 +176,37 @@ const StyledStepLabel = withStyles((theme: Theme) =>
   })
 )(StepLabel);
 
-const useStyles = makeStyles(theme => ({
-  root: {
+const PREFIX = 'WalletSend';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  backButton: `${PREFIX}-backButton`,
+  instructions: `${PREFIX}-instructions`,
+  stepRoot: `${PREFIX}-stepRoot`,
+  stepperRoot: `${PREFIX}-stepperRoot`,
+  stepLabel: `${PREFIX}-stepLabel`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
     width: '100%'
   },
-  backButton: {
+  [`& .${classes.backButton}`]: {
     marginRight: theme.spacing(1)
   },
-  instructions: {
+  [`& .${classes.instructions}`]: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1)
   },
-  stepRoot: {
+  [`& .${classes.stepRoot}`]: {
     padding: 20,
     paddingLeft: 50,
     paddingRight: 50
   },
-  stepperRoot: {
-    background: theme.palette.primary.light
+  [`& .${classes.stepperRoot}`]: {
+    background: 'rgba(0,0,0,0)'
   },
-  stepLabel: {
+  [`& .${classes.stepLabel}`]: {
     color: theme.palette.primary.light
   }
 }));
@@ -199,7 +217,6 @@ type StepperProps = {
 };
 
 const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
-  const classes = useStyles();
   const { sendTransaction } = useSendTransactionContext();
   const [activeStep, setActiveStep] = useState(0);
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -544,7 +561,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   };
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <ErrorBox
         open={!!sendTransaction.errorMessage}
         handleClose={handleErrorBoxClose}
@@ -606,7 +623,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
           }}
         />
       </div>
-    </div>
+    </Root>
   );
 };
 

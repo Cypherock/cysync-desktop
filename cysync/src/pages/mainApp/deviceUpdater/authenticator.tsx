@@ -1,12 +1,10 @@
+import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import Grid from '@mui/material/Grid';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 
@@ -22,59 +20,67 @@ import { hexToVersion, inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
 import DynamicTextView from '../sidebar/settings/tabViews/deviceHealth/dynamicTextView';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    container: {
-      padding: '20px'
-    },
-    flex: {
-      display: 'flex',
-      flexDirection: 'row'
-    },
-    alignCenterCenter: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: '5rem'
-    },
-    error: {
-      color: 'red'
-    },
-    success: {
-      display: 'flex',
-      alignItems: 'center'
-    },
-    errorButtons: {
-      display: 'flex',
-      justifyContent: 'space-around',
-      width: '100%'
-    },
-    center: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    },
-    rootCenter: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    primaryColor: {
-      color: theme.palette.secondary.dark
-    }
-  })
-);
+const PREFIX = 'DeviceUpdater-Authenticator';
+
+const classes = {
+  container: `${PREFIX}-container`,
+  flex: `${PREFIX}-flex`,
+  alignCenterCenter: `${PREFIX}-alignCenterCenter`,
+  error: `${PREFIX}-error`,
+  success: `${PREFIX}-success`,
+  errorButtons: `${PREFIX}-errorButtons`,
+  center: `${PREFIX}-center`,
+  rootCenter: `${PREFIX}-rootCenter`,
+  primaryColor: `${PREFIX}-primaryColor`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  padding: '20px',
+  [`& .${classes.flex}`]: {
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  [`& .${classes.alignCenterCenter}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: '5rem'
+  },
+  [`& .${classes.error}`]: {
+    color: 'red'
+  },
+  [`& .${classes.success}`]: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  [`& .${classes.errorButtons}`]: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    width: '100%'
+  },
+  [`& .${classes.center}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  },
+  [`& .${classes.rootCenter}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.primaryColor}`]: {
+    color: theme.palette.secondary.dark
+  }
+}));
 
 type Props = {
   handleClose: () => void;
 };
 
 const Authenticator: React.FC<Props> = ({ handleClose }) => {
-  const classes = useStyles();
-
   const {
     internalDeviceConnection: deviceConnection,
     devicePacketVersion,
@@ -128,7 +134,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
   }, [verified, completed]);
 
   return (
-    <Grid className={classes.container} container>
+    <Root container>
       {completed && verified === 2 ? (
         <Grid container>
           <Grid item xs={1} />
@@ -238,7 +244,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
           ) : null}
         </>
       )}
-    </Grid>
+    </Root>
   );
 };
 

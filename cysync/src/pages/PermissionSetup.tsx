@@ -1,10 +1,10 @@
-import { Button } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import Grid from '@mui/material/Grid';
-import withTheme from '@mui/styles/withTheme';
-import Typography from '@mui/material/Typography';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import UsbIcon from '@mui/icons-material/Usb';
+import { Button } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+import withTheme from '@mui/styles/withTheme';
 import OS from 'os';
 import React, { useEffect, useState } from 'react';
 
@@ -59,8 +59,6 @@ const StyledGrid = styled(Grid)({
 });
 
 const PermissionSetup = () => {
-
-
   const [hasPermission, setHasPermission] = useState({
     permission: false,
     restart: true

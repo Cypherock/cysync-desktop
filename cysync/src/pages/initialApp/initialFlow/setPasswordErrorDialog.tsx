@@ -1,7 +1,5 @@
 import Button from '@mui/material/Button';
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -10,36 +8,37 @@ import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../designSystem/iconGroups/errorExclamation';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      minWidth: '20rem'
-    },
-    button: {
-      background: '#71624C',
-      color: theme.palette.text.primary,
-      padding: '0.5rem 4rem',
-      fontWeight: 700,
-      margin: '2rem',
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
+const PREFIX = 'SetPasswordErrorDialog';
+
+const classes = {
+  button: `${PREFIX}-button`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  minWidth: '20rem',
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: theme.palette.text.primary,
+    padding: '0.5rem 4rem',
+    fontWeight: 700,
+    margin: '2rem',
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  }
+}));
 
 interface ErrorBoxContentProps {
   handleClose: () => void;
 }
 
 const ErrorBoxContent: React.FC<ErrorBoxContentProps> = ({ handleClose }) => {
-  const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <Root>
       <Icon size={55} viewBox="0 0 55 55" iconGroup={<ErrorExclamation />} />
       <Typography
         color="textPrimary"
@@ -61,7 +60,7 @@ const ErrorBoxContent: React.FC<ErrorBoxContentProps> = ({ handleClose }) => {
       >
         Try Again
       </Button>
-    </div>
+    </Root>
   );
 };
 

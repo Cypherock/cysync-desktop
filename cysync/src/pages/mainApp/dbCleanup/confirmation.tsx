@@ -1,6 +1,5 @@
 import Grid from '@mui/material/Grid';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -11,25 +10,26 @@ import CustomButton from '../../../designSystem/designComponents/buttons/button'
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    container: {
-      padding: '20px'
-    },
-    errorButtons: {
-      display: 'flex',
-      justifyContent: 'space-around',
-      width: '100%'
-    }
-  })
-);
+const PREFIX = 'DbCleanup-Confirmation';
+
+const classes = {
+  errorButtons: `${PREFIX}-errorButtons`
+};
+
+const Root = styled(Grid)(() => ({
+  padding: '20px',
+  [`& .${classes.errorButtons}`]: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    width: '100%'
+  }
+}));
 
 type Props = {
   handleClose: () => void;
 };
 
 const Confirmation: React.FC<Props> = ({ handleClose }) => {
-  const classes = useStyles();
   const navigate = useNavigate();
 
   const onPositiveClick = () => {
@@ -44,7 +44,7 @@ const Confirmation: React.FC<Props> = ({ handleClose }) => {
   };
 
   return (
-    <Grid className={classes.container} container>
+    <Root container>
       <Grid item xs={12}>
         <Typography
           variant="h4"
@@ -68,7 +68,7 @@ const Confirmation: React.FC<Props> = ({ handleClose }) => {
           Go to Settings
         </CustomButton>
       </div>
-    </Grid>
+    </Root>
   );
 };
 

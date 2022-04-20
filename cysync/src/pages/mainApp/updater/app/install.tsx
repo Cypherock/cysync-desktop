@@ -1,6 +1,4 @@
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -9,28 +7,30 @@ import success from '../../../../assets/icons/generic/success.png';
 import Button from '../../../../designSystem/designComponents/buttons/button';
 import ModAvatar from '../../../../designSystem/designComponents/icons/AvatarIcon';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    successContainer: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '20rem'
-    },
-    button: {
-      background: '#71624C',
-      color: theme.palette.text.primary,
-      textTransform: 'none',
-      padding: '0.5rem 1.5rem',
-      marginBottom: '1rem',
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
+const PREFIX = 'UpdaterAppInstall';
+
+const classes = {
+  button: `${PREFIX}-button`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minHeight: '20rem',
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: theme.palette.text.primary,
+    textTransform: 'none',
+    padding: '0.5rem 1.5rem',
+    marginBottom: '1rem',
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  }
+}));
 
 interface UpdateInstallComponentProps {
   onInstall: () => void;
@@ -39,9 +39,8 @@ interface UpdateInstallComponentProps {
 const UpdateInstallComponent: React.FC<UpdateInstallComponentProps> = ({
   onInstall
 }) => {
-  const classes = useStyles();
   return (
-    <div className={classes.successContainer}>
+    <Root>
       <ModAvatar src={success} alt="success" />
       <Typography
         color="textPrimary"
@@ -57,7 +56,7 @@ const UpdateInstallComponent: React.FC<UpdateInstallComponentProps> = ({
       >
         Install
       </Button>
-    </div>
+    </Root>
   );
 };
 

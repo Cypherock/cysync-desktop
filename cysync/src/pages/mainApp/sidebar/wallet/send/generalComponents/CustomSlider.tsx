@@ -1,45 +1,48 @@
 import { COINS } from '@cypherock/communication';
 import Slider from '@mui/material/Slider';
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
+import { styled, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import createStyles from '@mui/styles/createStyles';
+import withStyles from '@mui/styles/withStyles';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { useCurrentCoin } from '../../../../../../store/provider';
 
-const dotStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    innerCircle: {
-      height: 12,
-      width: 12,
-      borderRadius: 6,
-      background: theme.palette.secondary.dark
-    },
-    currentValue: {
-      marginTop: 20,
-      width: 200,
-      textAlign: 'center',
-      position: 'absolute',
-      color: theme.palette.text.secondary
-    }
-  })
-);
+const DOT_PREFIX = 'CustomSliderDot';
+
+const dotClasses = {
+  innerCircle: `${DOT_PREFIX}-innerCircle`,
+  currentValue: `${DOT_PREFIX}-currentValue`
+};
+
+const DotRoot = styled('span')(({ theme }) => ({
+  [`& .${dotClasses.innerCircle}`]: {
+    height: 12,
+    width: 12,
+    borderRadius: 6,
+    background: theme.palette.secondary.dark
+  },
+  [`& .${dotClasses.currentValue}`]: {
+    marginTop: 20,
+    width: 200,
+    textAlign: 'center',
+    position: 'absolute',
+    color: theme.palette.text.secondary
+  }
+}));
 
 const Dot = (props: any) => {
-  const classes = dotStyles();
   const { coinDetails } = useCurrentCoin();
   return (
-    <span {...props}>
-      <span className={classes.currentValue}>
+    <DotRoot {...props}>
+      <span className={dotClasses.currentValue}>
         {`${props['aria-valuenow']} ${
           (COINS[coinDetails.coin.toLowerCase()] || { fees: '0' }).fees
         }`}
       </span>
-      <span className={classes.innerCircle} />
-    </span>
+      <span className={dotClasses.innerCircle} />
+    </DotRoot>
   );
 };
 
@@ -100,23 +103,28 @@ const IOSSlider = withStyles((theme: Theme) =>
   })
 )(Slider);
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      padding: '0rem 0.5rem'
-    },
-    labels: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      '& span': {
-        color: theme.palette.text.secondary,
-        fontSize: 16
-      }
+const PREFIX = 'CustomSlider';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  labels: `${PREFIX}-labels`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '0rem 0.5rem'
+  },
+  [`& .${classes.labels}`]: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    '& span': {
+      color: theme.palette.text.secondary,
+      fontSize: 16
     }
-  })
-);
+  }
+}));
 
 type CustomSliderProps = {
   handleTransactionFeeChangeSlider: (e: any) => void;
@@ -129,14 +137,12 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
   mediumFee,
   fee
 }) => {
-  const classes = useStyles();
-
   const handleChange = (_e: any, v: any) => {
     handleTransactionFeeChangeSlider(v);
   };
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <div className={classes.labels}>
         <Typography color="textSecondary">Minimum</Typography>
         <Typography color="textSecondary">Average</Typography>
@@ -151,7 +157,7 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
         step={1}
         onChange={handleChange}
       />
-    </div>
+    </Root>
   );
 };
 

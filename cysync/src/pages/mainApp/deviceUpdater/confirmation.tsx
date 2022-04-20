@@ -1,6 +1,5 @@
 import Grid from '@mui/material/Grid';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -10,18 +9,21 @@ import { useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    container: {
-      padding: '20px'
-    },
-    errorButtons: {
-      display: 'flex',
-      justifyContent: 'space-around',
-      width: '100%'
-    }
-  })
-);
+const PREFIX = 'DeviceUpdater-Confirmation';
+
+const classes = {
+  container: `${PREFIX}-container`,
+  errorButtons: `${PREFIX}-errorButtons`
+};
+
+const Root = styled(Grid)(() => ({
+  padding: '20px',
+  [`& .${classes.errorButtons}`]: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    width: '100%'
+  }
+}));
 
 type Props = {
   handleClose: (val: boolean) => void;
@@ -34,7 +36,6 @@ const Confirmation: React.FC<Props> = ({
   state,
   updateRequiredType
 }) => {
-  const classes = useStyles();
   const { retryConnection } = useConnection();
 
   const getHeading = () => {
@@ -176,7 +177,7 @@ const Confirmation: React.FC<Props> = ({
   };
 
   return (
-    <Grid className={classes.container} container>
+    <Root container>
       <Grid item xs={12}>
         <Typography
           variant="h4"
@@ -207,7 +208,7 @@ const Confirmation: React.FC<Props> = ({
           {getPositiveBtnText()}
         </CustomButton>
       </div>
-    </Grid>
+    </Root>
   );
 };
 

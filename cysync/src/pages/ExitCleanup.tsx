@@ -1,6 +1,6 @@
 import { CancelFlow } from '@cypherock/protocols';
-import { styled } from '@mui/material/styles';
 import { Backdrop, CircularProgress } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { ipcRenderer } from 'electron';
 import React, { useEffect, useState } from 'react';
 

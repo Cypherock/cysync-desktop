@@ -72,7 +72,8 @@ const AvatarIcon: React.FC<AvatarIconProps> = (props: any) => {
           classes={{
             root: classes.root2,
             img: classes.img2
-          }} />
+          }}
+        />
       );
     if (size === 'xsmall')
       return (
@@ -83,7 +84,8 @@ const AvatarIcon: React.FC<AvatarIconProps> = (props: any) => {
           classes={{
             root: classes.root3,
             img: classes.img3
-          }} />
+          }}
+        />
       );
   }
 

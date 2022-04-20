@@ -1,6 +1,6 @@
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import Snackbar, { SnackbarProps } from '@mui/material/Snackbar';
 import { styled } from '@mui/material/styles';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import PropTypes from 'prop-types';
 import React from 'react';
 
