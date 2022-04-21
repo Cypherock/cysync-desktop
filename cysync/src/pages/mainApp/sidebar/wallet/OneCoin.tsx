@@ -52,24 +52,22 @@ const classes = {
 };
 
 const Root = styled(Grid)(({ theme }) => ({
+  background: theme.palette.primary.light,
+  borderRadius: 5,
+  minHeight: 50,
+  margin: '10px 0px',
+  marginRight: '10px',
+  padding: '5px 0px',
+  cursor: 'pointer',
+  '&:hover': {
+    background: '#343a42'
+  },
   [`&.${classes.loading}`]: {
     opacity: 0.6
   },
   [`& .${classes.mainContainer}`]: {
     marginBottom: '10px',
     width: '100%'
-  },
-  [`& .${classes.root}`]: {
-    background: theme.palette.primary.light,
-    borderRadius: 5,
-    minHeight: 50,
-    margin: '10px 0px',
-    marginRight: '10px',
-    padding: '5px 0px',
-    cursor: 'pointer',
-    '&:hover': {
-      background: '#343a42'
-    }
   },
   [`& .${classes.icon}`]: {
     margin: '0px !important'
@@ -255,7 +253,10 @@ const OneCoin: React.FC<OneCoinProps> = ({
           className={classes.alignStartCenter}
           style={{ paddingLeft: '1rem' }}
         >
-          <CoinIcons initial={initial.toUpperCase()} />
+          <CoinIcons
+            initial={initial.toUpperCase()}
+            style={{ marginRight: '10px' }}
+          />
           <Typography color="textPrimary">{name}</Typography>
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>

@@ -66,7 +66,11 @@ const UpdateInfoComponent: React.FC<UpdateInfoComponentProps> = ({
         Update
       </Button>
       <MUIButton onClick={knowMore}>
-        <Typography variant="body1" className={classes.knowMoreText}>
+        <Typography
+          variant="body1"
+          color="textPrimary"
+          className={classes.knowMoreText}
+        >
           Know more
         </Typography>
       </MUIButton>

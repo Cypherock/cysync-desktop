@@ -3,7 +3,29 @@ const colors = {
     darker: '#DAA147',
     mainColor: '#060606',
     lighter: '#2E3035',
-    outline: '#060606'
+    outline: '#060606',
+    dark: '#C78D4E'
+  },
+  secondary: {
+    light: '#161C23',
+    main: '#0A1018',
+    contrastText: '#ccc'
+  },
+  info: {
+    main: '#8484F1',
+    dark: '#4848F6'
+  },
+  warning: {
+    main: '#ff9800',
+    dark: '#f57c00'
+  },
+  text: {
+    primary: '#CCCCCC',
+    secondary: '#838282'
+  },
+  background: {
+    paper: '#161C23',
+    default: '#0B1018'
   },
   systemColors: {
     textAndBackground: {

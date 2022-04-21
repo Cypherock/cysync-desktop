@@ -1,6 +1,6 @@
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import { styled } from '@mui/material/styles';
+import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -10,8 +10,6 @@ import NotificationItem from './notificationItem';
 const PREFIX = 'NotificationList';
 
 const classes = {
-  root: `${PREFIX}-root`,
-  text: `${PREFIX}-text`,
   mainContainer: `${PREFIX}-mainContainer`,
   btnContainer: `${PREFIX}-btnContainer`,
   list: `${PREFIX}-list`,
@@ -51,19 +49,25 @@ const Root = styled('div')(() => ({
 
   [`& .${classes.noneText}`]: {
     opacity: '0.6'
-  },
-
-  [`& .${classes.root}`]: {
-    backgroundColor: '#474848'
-  },
-
-  [`& .${classes.text}`]: {
-    textTransform: 'none',
-    fontWeight: 'bold'
   }
 }));
 
-const CustomButton = Button;
+const buttonTheme = createTheme({
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#474848',
+          color: '#cccccc'
+        },
+        text: {
+          textTransform: 'none',
+          fontWeight: 'bold'
+        }
+      }
+    }
+  }
+});
 
 type Props = {
   notifications: any[];
@@ -100,22 +104,20 @@ const NotificationList: React.FC<Props> = ({
       </div>
 
       <div className={classes.btnContainer}>
-        <CustomButton
-          fullWidth
-          size="large"
-          onClick={onNextPage}
-          disabled={isLoading || !hasNextPage}
-          classes={{
-            root: classes.root,
-            text: classes.text
-          }}
-        >
-          {isLoading ? (
-            <CircularProgress color="secondary" size={20} />
-          ) : (
-            <div>Load more</div>
-          )}
-        </CustomButton>
+        <ThemeProvider theme={buttonTheme}>
+          <Button
+            fullWidth
+            size="large"
+            onClick={onNextPage}
+            disabled={isLoading || !hasNextPage}
+          >
+            {isLoading ? (
+              <CircularProgress color="secondary" size={20} />
+            ) : (
+              <div>Load more</div>
+            )}
+          </Button>
+        </ThemeProvider>
       </div>
     </Root>
   );

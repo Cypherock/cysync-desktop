@@ -346,7 +346,10 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
             className={classes.alignStartCenter}
             style={{ paddingLeft: '1rem' }}
           >
-            <CoinIcons initial={initial.toUpperCase()} />
+            <CoinIcons
+              initial={initial.toUpperCase()}
+              style={{ marginRight: '10px' }}
+            />
             <Typography color="textPrimary">{name}</Typography>
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>

@@ -1,5 +1,4 @@
 import { StyledEngineProvider, Theme, ThemeProvider } from '@mui/material';
-import { createTheme } from '@mui/material/styles';
 import 'electron-disable-file-drop';
 import React from 'react';
 import { render } from 'react-dom';
@@ -22,8 +21,6 @@ declare module '@mui/styles/defaultTheme' {
 const instance = Analytics.Instance;
 instance.setup();
 
-const cySyncTheme = createTheme(theme);
-
 WebFont.load({
   google: {
     families: ['Lato', 'Droid Sans', 'Roboto']
@@ -33,7 +30,7 @@ WebFont.load({
 document.addEventListener('DOMContentLoaded', () =>
   render(
     <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={cySyncTheme}>
+      <ThemeProvider theme={theme}>
         <I18nProvider>
           <ErrorBoundary>
             <PermissionSetup />

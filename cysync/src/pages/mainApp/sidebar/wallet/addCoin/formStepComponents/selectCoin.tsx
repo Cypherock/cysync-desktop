@@ -241,7 +241,10 @@ const SelectCoin: React.FC<StepComponentProps> = ({
               )}
             >
               <div className={classes.flexRow}>
-                <CoinIcons initial={coin[0].toUpperCase()} />
+                <CoinIcons
+                  initial={coin[0].toUpperCase()}
+                  style={{ marginRight: '10px' }}
+                />
                 <Typography color="textPrimary">{name}</Typography>
               </div>
               <CustomCheckBox

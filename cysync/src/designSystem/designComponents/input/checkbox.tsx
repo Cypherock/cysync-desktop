@@ -11,14 +11,14 @@ const classes = {
   checkedIcon: `${PREFIX}-checkedIcon`
 };
 
-const Root = styled('span')(({ theme }) => ({
-  [`& .${classes.root}`]: {
+const Root = styled(Checkbox)(({ theme }) => ({
+  [`&.${classes.root}`]: {
     '&:hover': {
       backgroundColor: 'transparent'
     }
   },
 
-  [`&.${classes.icon}`]: {
+  [`& .${classes.icon}`]: {
     borderRadius: 3,
     width: 20,
     height: 20,
@@ -39,7 +39,7 @@ const Root = styled('span')(({ theme }) => ({
     }
   },
 
-  [`&.${classes.checkedIcon}`]: {
+  [`& .${classes.checkedIcon}`]: {
     border: `2px solid ${theme.palette.info.light}`,
     '&:before': {
       display: 'block',
@@ -58,11 +58,11 @@ const Root = styled('span')(({ theme }) => ({
 // Inspired by blueprintjs
 function StyledCheckbox(props: CheckboxProps) {
   return (
-    <Checkbox
+    <Root
       className={classes.root}
       disableRipple
       color="default"
-      checkedIcon={<Root className={clsx(classes.icon, classes.checkedIcon)} />}
+      checkedIcon={<span className={clsx(classes.icon, classes.checkedIcon)} />}
       icon={<span className={classes.icon} />}
       inputProps={{ 'aria-label': 'decorative checkbox' }}
       {...props}

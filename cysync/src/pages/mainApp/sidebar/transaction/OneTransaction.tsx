@@ -129,7 +129,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
             display: 'flex'
           }}
         >
-          <CoinIcons initial={initial} />
+          <CoinIcons initial={initial} style={{ marginRight: '10px' }} />
           <div
             className={clsx(classes.alignStartCenter, classes.flexColumn)}
             style={{ justifyContent: 'center' }}
@@ -194,7 +194,12 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
           </Typography>
         </Grid>
         <Grid item xs={2} className={classes.alignCenterCenter}>
-          <Button size="small" variant="outlined" onClick={onShowMore}>
+          <Button
+            size="small"
+            variant="outlined"
+            color="secondary"
+            onClick={onShowMore}
+          >
             Show More
           </Button>
         </Grid>

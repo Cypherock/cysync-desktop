@@ -33,8 +33,8 @@ const classes = {
   dialogButtonWrapper: `${PREFIX}-dialogButtonWrapper`
 };
 
-const StyledHashRouter = styled(HashRouter)(({ theme }) => ({
-  [`& .${classes.root}`]: {
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  [`&.${classes.root}`]: {
     background: theme.palette.background.default,
     width: '100%',
     height: '100%',
@@ -105,10 +105,10 @@ interface Props {
 
 const MainApp: React.FC<Props> = ({ handleLock }) => {
   return (
-    <StyledHashRouter>
+    <HashRouter>
       <WalletsProvider>
         <UpdateProvider>
-          <Grid container className={classes.root}>
+          <StyledGrid container className={classes.root}>
             <Grid container className={classes.navbar}>
               <Navbar handleLock={handleLock} />
             </Grid>
@@ -157,10 +157,10 @@ const MainApp: React.FC<Props> = ({ handleLock }) => {
             <Updater />
             <DeviceUpdater />
             <DbCleanup />
-          </Grid>
+          </StyledGrid>
         </UpdateProvider>
       </WalletsProvider>
-    </StyledHashRouter>
+    </HashRouter>
   );
 };
 

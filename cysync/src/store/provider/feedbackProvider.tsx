@@ -48,7 +48,7 @@ const classes = {
 };
 
 // TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
-const Root = styled('div')(({ theme }) => ({
+const Root = styled(Grid)(({ theme }) => ({
   [`& .${classes.option}`]: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.text.primary,
@@ -485,7 +485,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   };
 
   return (
-    <Root>
+    <>
       <DialogBox
         fullWidth
         maxWidth="sm"
@@ -493,7 +493,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         open={isOpen}
         handleClose={onClose}
         restComponents={
-          <Grid container>
+          <Root container>
             {!isSubmitted &&
               (isContact ? (
                 <Typography
@@ -783,13 +783,13 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                 <Grid item xs={1} />
               </Grid>
             )}
-          </Grid>
+          </Root>
         }
       />
       <FeedbackContext.Provider value={{ showFeedback }}>
         {children}
       </FeedbackContext.Provider>
-    </Root>
+    </>
   );
 };
 

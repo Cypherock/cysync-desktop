@@ -26,11 +26,11 @@ const classes = {
 const Root = styled('div')(() => ({
   [`&.${classes.root}`]: {
     display: 'flex',
-    flexdirection: 'column',
-    justifycontent: 'flex-start',
-    alignitems: 'flex-start',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
     padding: '2rem 4rem',
-    minheight: '15rem'
+    minHeight: '15rem'
   },
   [`& .${classes.center}`]: {
     display: 'flex',

@@ -2,10 +2,6 @@ import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import React from 'react';
 
-const ModAvatar = Avatar;
-const ModAvatarSmall = Avatar;
-const ModAvatarExtraSmall = Avatar;
-
 const PREFIX = 'AvatarIcon';
 
 const classes = {
@@ -17,19 +13,19 @@ const classes = {
   img3: `${PREFIX}-img3`
 };
 
-const StyledModAvatar = styled(ModAvatar)(() => ({
-  [`& .${classes.root}`]: {
+const StyledModAvatar = styled(Avatar)(() => ({
+  [`&.${classes.root}`]: {
     height: 'auto',
     width: 'auto',
     margin: '0px 10px'
   },
 
   [`& .${classes.img}`]: {
-    width: 'auto',
-    height: 'auto'
+    width: '120px',
+    height: '120px'
   },
 
-  [`& .${classes.root2}`]: {
+  [`&.${classes.root2}`]: {
     height: 'auto',
     width: 'auto',
     margin: '0px 10px'
@@ -40,7 +36,7 @@ const StyledModAvatar = styled(ModAvatar)(() => ({
     height: '60px'
   },
 
-  [`& .${classes.root3}`]: {
+  [`&.${classes.root3}`]: {
     height: 'auto',
     width: 'auto',
     margin: '0px 10px'
@@ -65,7 +61,7 @@ const AvatarIcon: React.FC<AvatarIconProps> = (props: any) => {
   if (size) {
     if (size === 'small')
       return (
-        <ModAvatarSmall
+        <StyledModAvatar
           src={src}
           alt={alt}
           {...props}
@@ -77,7 +73,7 @@ const AvatarIcon: React.FC<AvatarIconProps> = (props: any) => {
       );
     if (size === 'xsmall')
       return (
-        <ModAvatarExtraSmall
+        <StyledModAvatar
           src={src}
           alt={alt}
           {...props}
@@ -89,7 +85,17 @@ const AvatarIcon: React.FC<AvatarIconProps> = (props: any) => {
       );
   }
 
-  return <StyledModAvatar src={src} alt={alt} {...props} />;
+  return (
+    <StyledModAvatar
+      src={src}
+      alt={alt}
+      {...props}
+      classes={{
+        root: classes.root,
+        img: classes.img
+      }}
+    />
+  );
 };
 
 export default AvatarIcon;

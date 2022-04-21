@@ -15,8 +15,8 @@ const classes = {
   backdrop: `${PREFIX}-backdrop`
 };
 
-const StyledGlobalProvider = styled(GlobalProvider)(({ theme }) => ({
-  [`& .${classes.backdrop}`]: {
+const StyledBackdrop = styled(Backdrop)(({ theme }) => ({
+  [`&.${classes.backdrop}`]: {
     zIndex: theme.zIndex.drawer + 1
   }
 }));
@@ -31,9 +31,9 @@ const Root = () => {
 
   if (isLockscreenLoading) {
     return (
-      <Backdrop className={classes.backdrop} open={isLockscreenLoading}>
+      <StyledBackdrop className={classes.backdrop} open={isLockscreenLoading}>
         <CircularProgress color="secondary" />
-      </Backdrop>
+      </StyledBackdrop>
     );
   }
 
@@ -48,10 +48,10 @@ const Root = () => {
   }
 
   return (
-    <StyledGlobalProvider>
+    <GlobalProvider>
       <DeviceStatePrompt />
       <Internals />
-    </StyledGlobalProvider>
+    </GlobalProvider>
   );
 };
 

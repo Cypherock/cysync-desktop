@@ -50,7 +50,8 @@ const Root = styled(Grid)(({ theme }) => ({
     width: '100%',
     height: '100%',
     textTransform: 'none',
-    background: 'rgba(255,255,255,0.05)'
+    background: 'rgba(255,255,255,0.05)',
+    color: theme.palette.text.primary
   },
   [`& .${classes.walletButtons}`]: {
     display: 'flex',

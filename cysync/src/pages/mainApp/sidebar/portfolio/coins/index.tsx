@@ -86,7 +86,7 @@ const PortfolioCoins = ({
               ) : sortIndex === 2 ? (
                 <ExpandLessIcon color="secondary" />
               ) : (
-                <UnfoldMoreIcon />
+                <UnfoldMoreIcon style={{ color: '#ccc' }} />
               )
             }
           >
@@ -109,7 +109,7 @@ const PortfolioCoins = ({
               ) : sortIndex === 5 ? (
                 <ExpandLessIcon color="secondary" />
               ) : (
-                <UnfoldMoreIcon />
+                <UnfoldMoreIcon style={{ color: '#ccc' }} />
               )
             }
           >
@@ -132,7 +132,7 @@ const PortfolioCoins = ({
               ) : sortIndex === 1 ? (
                 <ExpandLessIcon color="secondary" />
               ) : (
-                <UnfoldMoreIcon />
+                <UnfoldMoreIcon style={{ color: '#ccc' }} />
               )
             }
             style={{ marginLeft: '-0.2rem' }}
@@ -156,7 +156,7 @@ const PortfolioCoins = ({
               ) : sortIndex === 7 ? (
                 <ExpandLessIcon color="secondary" />
               ) : (
-                <UnfoldMoreIcon />
+                <UnfoldMoreIcon style={{ color: '#ccc' }} />
               )
             }
             style={{ marginLeft: '-0.3rem' }}
@@ -180,7 +180,7 @@ const PortfolioCoins = ({
               ) : sortIndex === 9 ? (
                 <ExpandLessIcon color="secondary" />
               ) : (
-                <UnfoldMoreIcon />
+                <UnfoldMoreIcon style={{ color: '#ccc' }} />
               )
             }
             style={{ marginLeft: '-0.5rem' }}

@@ -6,8 +6,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import InputAdornment from '@mui/material/InputAdornment';
-import { styled } from '@mui/material/styles';
-import { useTheme } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import BigNumber from 'bignumber.js';
 import React, { useEffect, useState } from 'react';
@@ -31,7 +30,7 @@ import logger from '../../../../utils/logger';
 import OneTransaction from './OneTransaction';
 import TransactionDialog from './TransactionDialog';
 
-const PREFIX = 'Index';
+const PREFIX = 'Transaction';
 
 const classes = {
   head: `${PREFIX}-head`,
@@ -86,7 +85,7 @@ const StyledGrid = styled(Grid)(({ theme }) => ({
   }
 }));
 
-const Index = () => {
+const Transaction = () => {
   const location = useLocation();
 
   const {
@@ -241,13 +240,13 @@ const Index = () => {
   const getMainTxnContent = () => {
     if (isLoading) {
       return (
-        <StyledGrid container>
+        <Grid container>
           <Grid item xs={12}>
             <div className={classes.loaderContainer}>
               <CircularProgress color="secondary" />
             </div>
           </Grid>
-        </StyledGrid>
+        </Grid>
       );
     }
     if (totalTransactions > 0) {
@@ -370,7 +369,7 @@ const Index = () => {
   };
 
   return (
-    <Grid container>
+    <StyledGrid container>
       <DialogBox
         maxWidth={false}
         open={showTxn !== null}
@@ -461,8 +460,8 @@ const Index = () => {
         </Grid>
       </Grid>
       {getMainTxnContent()}
-    </Grid>
+    </StyledGrid>
   );
 };
 
-export default Index;
+export default Transaction;
