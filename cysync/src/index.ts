@@ -8,7 +8,8 @@ import {
   crashReporter,
   dialog,
   globalShortcut,
-  ipcMain
+  ipcMain,
+  screen
 } from 'electron';
 import { download } from 'electron-dl';
 import path from 'path';
@@ -174,12 +175,21 @@ const createWindow = async () => {
     }
 
     let { width, height, minWidth, minHeight } = getAppWindowSize();
+    const { deviceHeight, deviceWidth } = getAppWindowSize();
 
     if (width < 1100) {
-      width = 1100;
-      height = 800;
-      minWidth = 1100;
-      minHeight = 800;
+      if (deviceWidth < 1100) {
+        width = deviceWidth;
+        height = deviceHeight;
+      } else if (deviceHeight < 800) {
+        width = 1100;
+        height = deviceHeight;
+      } else {
+        width = 1100;
+        height = 800;
+      }
+      minHeight = height;
+      minWidth = width;
     }
 
     logger.info('New Window According to Aspect Ratio: ', width, height);
@@ -210,6 +220,11 @@ const createWindow = async () => {
         contextIsolation: false
       },
       icon: iconPath
+    });
+
+    mainWindow.on('show', () => {
+      console.log('size-w', screen.getPrimaryDisplay().workAreaSize);
+      console.log('size', screen.getPrimaryDisplay().size);
     });
 
     mainWindow.on('focus', () => {

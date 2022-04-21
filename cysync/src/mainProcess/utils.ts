@@ -114,6 +114,8 @@ export const getAppWindowSize = () => {
   }
 
   return {
+    deviceHeight: height,
+    deviceWidth: width,
     width: Math.floor(newWidth),
     height: Math.floor(newHeight),
     minWidth: Math.floor(width * 0.7),
