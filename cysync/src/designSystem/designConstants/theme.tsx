@@ -1,4 +1,4 @@
-import { ThemeOptions, createTheme } from '@mui/material/styles';
+import { createTheme, ThemeOptions } from '@mui/material/styles';
 
 import colors from './colors';
 import typography from './typography';

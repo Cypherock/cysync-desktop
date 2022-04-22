@@ -7,7 +7,7 @@ const PREFIX = 'SwitchButton';
 
 const classes = {
   root: `${PREFIX}-root`,
-  label: `${PREFIX}-label`,
+  label: `${PREFIX}-label`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -19,7 +19,7 @@ const Root = styled('div')(({ theme }) => ({
   [`& .${classes.label}`]: {
     color: theme.palette.primary.contrastText,
     fontSize: 20
-  },
+  }
 }));
 
 const IOSSwitch = styled(Switch)(({ theme }) => ({

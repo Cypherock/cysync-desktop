@@ -19,7 +19,7 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+const RefAlert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
   ref
 ) {
@@ -51,9 +51,9 @@ const CustomSnackbar: React.FC<Props> = ({
         onClose={handleClose}
         anchorOrigin={anchorOrigin}
       >
-        <Alert onClose={handleClose} severity={severity}>
+        <RefAlert onClose={handleClose} severity={severity}>
           {text}
-        </Alert>
+        </RefAlert>
       </Snackbar>
     </Root>
   );

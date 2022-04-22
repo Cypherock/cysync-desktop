@@ -1,7 +1,8 @@
 import { Button, ButtonProps } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import colors from '../../designConstants/colors';
 import React from 'react';
+
+import colors from '../../designConstants/colors';
 
 const theme = createTheme({
   components: {

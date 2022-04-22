@@ -8,7 +8,7 @@ import Routes from '../../../../constants/routes';
 import CustomButton from '../../../../designSystem/designComponents/buttons/button';
 import DropMenu from '../../../../designSystem/designComponents/menu/DropMenu';
 import { usePortfolio } from '../../../../store/hooks';
-import { useWallets, useSnackbar } from '../../../../store/provider';
+import { useSnackbar, useWallets } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
 
