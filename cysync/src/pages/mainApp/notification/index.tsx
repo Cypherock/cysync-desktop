@@ -28,8 +28,8 @@ const Root = styled('div')(() => ({
     borderRadius: '50%',
     backgroundColor: '#DB953C',
     position: 'absolute',
-    top: '12px',
-    right: '12px'
+    top: '8px',
+    right: '8px'
   }
 }));
 

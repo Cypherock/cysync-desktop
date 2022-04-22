@@ -72,6 +72,7 @@ export const SnackbarProvider: React.FC = ({ children }) => {
           open={isOpen}
           severity={snackbarData.severity}
           handleClose={handleClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
           autoHideDuration={
             snackbarData.options
               ? snackbarData.options.autoHideDuration

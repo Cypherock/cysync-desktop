@@ -586,7 +586,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
           </Step>
         ))}
       </Stepper>
-      <div>
+      <div style={{ marginTop: '10px' }}>
         <CreateComponent
           component={stepsData[activeStep][1]}
           props={{

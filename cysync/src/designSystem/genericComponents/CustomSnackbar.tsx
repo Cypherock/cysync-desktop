@@ -19,9 +19,12 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-function Alert(props: AlertProps) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 interface Props {
   text: string;
@@ -29,6 +32,7 @@ interface Props {
   severity: AlertProps['severity'];
   handleClose?: (event?: React.SyntheticEvent, reason?: string) => void;
   autoHideDuration?: SnackbarProps['autoHideDuration'];
+  anchorOrigin?: SnackbarProps['anchorOrigin'];
 }
 
 const CustomSnackbar: React.FC<Props> = ({
@@ -36,6 +40,7 @@ const CustomSnackbar: React.FC<Props> = ({
   open,
   severity,
   handleClose,
+  anchorOrigin,
   autoHideDuration = 6000
 }) => {
   return (
@@ -44,6 +49,7 @@ const CustomSnackbar: React.FC<Props> = ({
         open={open}
         autoHideDuration={autoHideDuration}
         onClose={handleClose}
+        anchorOrigin={anchorOrigin}
       >
         <Alert onClose={handleClose} severity={severity}>
           {text}
