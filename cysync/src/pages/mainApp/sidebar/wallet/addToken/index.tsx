@@ -5,7 +5,7 @@ import DialogBox from '../../../../../designSystem/designComponents/dialog/dialo
 
 import AddTokenForm from './addTokenForm';
 
-function Index({ openAddToken, tokenList, handleClose, ethCoin }: any) {
+function AddToken({ openAddToken, tokenList, handleClose, ethCoin }: any) {
   return (
     <DialogBox
       fullWidth
@@ -26,11 +26,11 @@ function Index({ openAddToken, tokenList, handleClose, ethCoin }: any) {
   );
 }
 
-Index.propTypes = {
+AddToken.propTypes = {
   openAddToken: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
   tokenList: PropTypes.array.isRequired,
   ethCoin: PropTypes.string.isRequired
 };
 
-export default Index;
+export default AddToken;

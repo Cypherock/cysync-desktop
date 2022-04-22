@@ -35,7 +35,11 @@ interface Props {
   handleReset: () => void;
 }
 
-const Index: React.FC<Props> = ({ open, handleClose, handleReset }) => {
+const LockscreenIndex: React.FC<Props> = ({
+  open,
+  handleClose,
+  handleReset
+}) => {
   useEffect(() => {
     Analytics.Instance.screenView(Analytics.ScreenViews.LOCKSCREEN);
     logger.info('Opened lockscreen');
@@ -55,10 +59,10 @@ const Index: React.FC<Props> = ({ open, handleClose, handleReset }) => {
   );
 };
 
-Index.propTypes = {
+LockscreenIndex.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
   handleReset: PropTypes.func.isRequired
 };
 
-export default Index;
+export default LockscreenIndex;

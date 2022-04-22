@@ -15,7 +15,7 @@ import logger from '../../../../utils/logger';
 import Charts from './charts';
 import CoinAllocation from './coins';
 
-const Index = () => {
+const Portfolio = () => {
   const { allWallets } = useWallets();
 
   const theme = useTheme();
@@ -184,4 +184,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Portfolio;

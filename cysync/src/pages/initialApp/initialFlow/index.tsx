@@ -36,7 +36,7 @@ interface Props {
   handleSkipPassword: () => void;
 }
 
-const Index: React.FC<Props> = ({
+const InitialFlow: React.FC<Props> = ({
   open,
   handleClose,
   handleSnackbarOpen,
@@ -65,11 +65,11 @@ const Index: React.FC<Props> = ({
   );
 };
 
-Index.propTypes = {
+InitialFlow.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
   handleSnackbarOpen: PropTypes.func.isRequired,
   handleSkipPassword: PropTypes.func.isRequired
 };
 
-export default Index;
+export default InitialFlow;

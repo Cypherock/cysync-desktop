@@ -20,7 +20,7 @@ const ReceiveFormComponents = [
   ['Receive', Recieve]
 ];
 
-const Index = () => {
+const WalletReceive = () => {
   const { receiveForm, setReceiveForm, receiveTransaction } =
     useReceiveTransactionContext();
   const { setAddCoinFormOpen, setActiveStep, setXpubMissing } =
@@ -98,4 +98,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default WalletReceive;
