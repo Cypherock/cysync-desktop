@@ -584,6 +584,7 @@ export const usePortfolio: UsePortfolio = () => {
         .catch(error => {
           logger.error(error);
         });
+
       getAllCoinPriceHistory(timeActiveButton, currentWallet, true);
     }
   }, [doRefresh]);

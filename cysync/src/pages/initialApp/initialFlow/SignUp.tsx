@@ -1,37 +1,41 @@
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    content: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '80vh'
-    },
-    buttons: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      height: '15vh'
-    }
-  })
-);
+const PREFIX = 'InitialFlowSignup';
+
+const classes = {
+  content: `${PREFIX}-content`,
+  buttons: `${PREFIX}-buttons`
+};
+
+const Root = styled(Grid)(() => ({
+  [`& .${classes.content}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '80vh'
+  },
+  [`& .${classes.buttons}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: '15vh'
+  }
+}));
 
 interface SignUpProps {
   handleNext: () => void;
 }
 
 const SignUp: React.FC<SignUpProps> = ({ handleNext }) => {
-  const classes = useStyles();
   return (
-    <Grid container>
+    <Root container>
       <Grid item xs={3} />
       <Grid item xs={6} className={classes.content}>
         <Typography color="secondary" variant="h3" align="center" gutterBottom>
@@ -48,7 +52,7 @@ const SignUp: React.FC<SignUpProps> = ({ handleNext }) => {
         </div>
       </Grid>
       <Grid item xs={3} />
-    </Grid>
+    </Root>
   );
 };
 

@@ -1,19 +1,14 @@
 import { ALLCOINS as COINS } from '@cypherock/communication';
-import { Collapse } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme,
-  withStyles
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import { Collapse } from '@mui/material';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
+import { styled, Theme, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -56,83 +51,97 @@ import OneToken from './OneToken';
 import Recieve from './recieve';
 import Send from './send';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    mainContainer: {
-      marginBottom: '10px',
-      marginRight: '10px',
-      width: '100%'
-    },
-    root: {
-      background: theme.palette.primary.light,
-      borderRadius: '5px 5px 0 0',
-      minHeight: 50,
-      marginTop: '10px',
-      padding: '5px 0px 0px',
-      cursor: 'pointer',
-      '&:hover': {
-        background: '#343a42'
-      }
-    },
-    loading: {
-      opacity: 0.6
-    },
-    button: {},
-    buttonEther: {
-      fontSize: '0.7rem'
-    },
-    icon: {
-      margin: '0px !important'
-    },
-    divider: {
-      background: theme.palette.primary.dark,
-      height: '50%',
-      margin: '0px 10px'
-    },
-    actions: {
-      display: 'flex',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
-    },
-    alignStartCenter: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
-    },
-    alignCenterCenter: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    recieveButton: {
-      color: theme.palette.info.main
-    },
-    red: {
-      color: 'red'
-    },
-    orange: {
-      color: theme.palette.secondary.main
-    },
-    dialogRoot: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingBottom: '4rem'
-    },
-    ethererum: {
-      marginBottom: 5
-    },
-    rootButtonWrapper: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderTop: `1px solid rgba(33, 40, 35, 1)`
+const PREFIX = 'EthereumOneCoin';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  loading: `${PREFIX}-loading`,
+  buttonEther: `${PREFIX}-buttonEther`,
+  icon: `${PREFIX}-icon`,
+  divider: `${PREFIX}-divider`,
+  actions: `${PREFIX}-actions`,
+  alignStartCenter: `${PREFIX}-alignStartCenter`,
+  alignCenterCenter: `${PREFIX}-alignCenterCenter`,
+  recieveButton: `${PREFIX}-recieveButton`,
+  red: `${PREFIX}-red`,
+  orange: `${PREFIX}-orange`,
+  dialogRoot: `${PREFIX}-dialogRoot`,
+  ethererum: `${PREFIX}-ethererum`,
+  rootButtonWrapper: `${PREFIX}-rootButtonWrapper`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  marginBottom: '10px',
+  marginRight: '10px',
+  width: '100%',
+  [`& .${classes.root}`]: {
+    background: theme.palette.primary.light,
+    borderRadius: '5px 5px 0 0',
+    minHeight: 50,
+    marginTop: '10px',
+    padding: '5px 0px 0px',
+    cursor: 'pointer',
+    '&:hover': {
+      background: '#343a42'
     }
-  })
-);
+  },
+  [`& .${classes.loading}`]: {
+    opacity: 0.6
+  },
+  [`& .${classes.buttonEther}`]: {
+    fontSize: '0.7rem'
+  },
+  [`& .${classes.icon}`]: {
+    margin: '0px !important'
+  },
+  [`& .${classes.divider}`]: {
+    background: theme.palette.primary.dark,
+    height: '50%',
+    margin: '0px 10px'
+  },
+  [`& .${classes.actions}`]: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  },
+  [`& .${classes.alignStartCenter}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  },
+  [`& .${classes.alignCenterCenter}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.recieveButton}`]: {
+    color: theme.palette.info.main
+  },
+  [`& .${classes.red}`]: {
+    color: 'red'
+  },
+  [`& .${classes.orange}`]: {
+    color: theme.palette.secondary.main
+  },
+  [`& .${classes.dialogRoot}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: '4rem'
+  },
+  [`& .${classes.ethererum}`]: {
+    marginBottom: 5
+  },
+  [`& .${classes.rootButtonWrapper}`]: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderTop: `1px solid rgba(33, 40, 35, 1)`
+  }
+}));
 
 const CoinCardBtn = withStyles((theme: Theme) => ({
   root: {
@@ -160,7 +169,6 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
   deleteCoin,
   deleteHistory
 }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -271,7 +279,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
   };
 
   return (
-    <div className={classes.mainContainer}>
+    <Root>
       <DialogBoxConfirmation
         maxWidth="sm"
         fullScreen
@@ -338,7 +346,10 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
             className={classes.alignStartCenter}
             style={{ paddingLeft: '1rem' }}
           >
-            <CoinIcons initial={initial.toUpperCase()} />
+            <CoinIcons
+              initial={initial.toUpperCase()}
+              style={{ marginRight: '10px' }}
+            />
             <Typography color="textPrimary">{name}</Typography>
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
@@ -362,7 +373,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
             {!isEmpty ? (
               <Button
                 variant="text"
-                className={clsx(classes.button, classes.orange)}
+                className={clsx(classes.orange)}
                 onClick={handleSendFormOpen}
                 startIcon={
                   <Icon
@@ -378,7 +389,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
             ) : (
               <Button
                 variant="text"
-                className={clsx(classes.button, classes.orange)}
+                className={clsx(classes.orange)}
                 onClick={handleSendFormOpen}
                 startIcon={
                   <Icon
@@ -396,7 +407,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
             <Divider orientation="vertical" className={classes.divider} />
             <Button
               variant="text"
-              className={clsx(classes.button, classes.recieveButton)}
+              className={clsx(classes.recieveButton)}
               startIcon={
                 <Icon
                   className={classes.icon}
@@ -507,7 +518,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
           )}
         </>
       )}
-    </div>
+    </Root>
   );
 };
 

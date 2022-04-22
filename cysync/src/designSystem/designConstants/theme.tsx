@@ -1,35 +1,35 @@
-import { ThemeOptions } from '@material-ui/core/styles';
+import { createTheme, ThemeOptions } from '@mui/material/styles';
 
 import colors from './colors';
 import typography from './typography';
 
 const theme: ThemeOptions = {
   palette: {
-    type: 'dark',
+    mode: 'dark',
     primary: {
-      light: '#161C23',
-      main: '#0A1018',
-      contrastText: '#ccc'
+      light: colors.secondary.light,
+      main: colors.secondary.main,
+      contrastText: colors.secondary.contrastText
     },
     secondary: {
       main: colors.primary.darker,
-      dark: '#C78D4E'
+      dark: colors.primary.dark
     },
     info: {
-      main: '#8484F1',
-      dark: '#4848F6'
+      main: colors.info.main,
+      dark: colors.info.dark
     },
     warning: {
-      main: '#ff9800',
-      dark: '#f57c00'
+      main: colors.warning.main,
+      dark: colors.warning.dark
     },
     text: {
-      primary: '#CCCCCC',
-      secondary: '#838282'
+      primary: colors.text.primary,
+      secondary: colors.text.secondary
     },
     background: {
-      paper: '#161C23',
-      default: '#0B1018'
+      paper: colors.background.paper,
+      default: colors.background.default
     },
     contrastThreshold: 3,
     tonalOffset: 0.2
@@ -57,4 +57,4 @@ const theme: ThemeOptions = {
   }
 };
 
-export default theme;
+export default createTheme(theme);

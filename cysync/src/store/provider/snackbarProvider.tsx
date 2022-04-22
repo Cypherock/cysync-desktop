@@ -1,4 +1,4 @@
-import { AlertProps } from '@material-ui/lab/';
+import { AlertProps } from '@mui/lab/';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -72,6 +72,7 @@ export const SnackbarProvider: React.FC = ({ children }) => {
           open={isOpen}
           severity={snackbarData.severity}
           handleClose={handleClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
           autoHideDuration={
             snackbarData.options
               ? snackbarData.options.autoHideDuration

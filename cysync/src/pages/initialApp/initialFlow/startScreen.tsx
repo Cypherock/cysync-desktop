@@ -1,9 +1,9 @@
-import { IconButton } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ReportIcon from '@material-ui/icons/Report';
+import ReportIcon from '@mui/icons-material/Report';
+import { IconButton } from '@mui/material';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -13,57 +13,64 @@ import CySyncRound from '../../../designSystem/iconGroups/cySyncRound';
 import DevicePlain from '../../../designSystem/iconGroups/devicePlain';
 import { FeedbackState, useFeedback } from '../../../store/provider';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    content: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    middle: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      height: '80vh'
-    },
-    start: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-end',
-      alignItems: 'flex-end',
-      paddingBottom: 70,
-      marginRight: '-40px'
-    },
-    end: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-end',
-      alignItems: 'flex-start',
-      marginLeft: '-40px'
-    },
-    button: {
-      background: '#71624C',
-      color: theme.palette.text.primary,
-      padding: '0.5rem 4rem',
-      fontWeight: 700
-    },
-    report: {
-      position: 'absolute',
-      right: 20,
-      bottom: 20
-    }
-  })
-);
+const PREFIX = 'StartScreen';
+
+const classes = {
+  content: `${PREFIX}-content`,
+  middle: `${PREFIX}-middle`,
+  start: `${PREFIX}-start`,
+  end: `${PREFIX}-end`,
+  button: `${PREFIX}-button`,
+  report: `${PREFIX}-report`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.content}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.middle}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: '80vh'
+  },
+  [`& .${classes.start}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    paddingBottom: 70,
+    marginRight: '-40px'
+  },
+  [`& .${classes.end}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
+    marginLeft: '-40px'
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: theme.palette.text.primary,
+    padding: '0.5rem 4rem',
+    fontWeight: 700
+  },
+  [`& .${classes.report}`]: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20
+  }
+}));
 
 interface StartScreenProps {
   handleNext: () => void;
 }
 
 const StartScreen: React.FC<StartScreenProps> = ({ handleNext }) => {
-  const classes = useStyles();
-
   const { showFeedback } = useFeedback();
 
   const newFeedbackState: FeedbackState = {
@@ -88,7 +95,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ handleNext }) => {
   };
 
   return (
-    <Grid container>
+    <Root container>
       <Grid item xs={4} className={classes.start}>
         <Icon size={160} viewBox="0 0 160 131" iconGroup={<DevicePlain />} />
         <Typography
@@ -134,10 +141,11 @@ const StartScreen: React.FC<StartScreenProps> = ({ handleNext }) => {
         title="Report issue"
         onClick={handleFeedbackOpen}
         className={classes.report}
+        size="large"
       >
         <ReportIcon color="secondary" />
       </IconButton>
-    </Grid>
+    </Root>
   );
 };
 

@@ -1,20 +1,15 @@
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import Fab from '@material-ui/core/Fab';
-import Grid from '@material-ui/core/Grid';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme,
-  withStyles
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ArrawBackIcon from '@material-ui/icons/ArrowBack';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ArrawBackIcon from '@mui/icons-material/ArrowBack';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Fab from '@mui/material/Fab';
+import Grid from '@mui/material/Grid';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import { styled, Theme, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+import withStyles from '@mui/styles/withStyles';
 import React, { useEffect, useState } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
@@ -33,45 +28,50 @@ const IconButton = withStyles((theme: Theme) => ({
   }
 }))(Fab);
 
-const useStyles = makeStyles(theme =>
-  createStyles({
-    root: {},
-    wrapperContainer: {
-      background: '#0E121A',
-      padding: '1rem 1.5rem',
-      height: 'calc(100vh - 230px)',
-      width: '100%',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      paddingRight: '10px',
-      '&::-webkit-scrollbar': {
-        width: '8px',
-        background: theme.palette.primary.light
-      },
-      '&::-webkit-scrollbar-thumb': {
-        background: theme.palette.text.secondary
-      }
+const PREFIX = 'Settings';
+
+const classes = {
+  wrapperContainer: `${PREFIX}-wrapperContainer`,
+  listWrapper: `${PREFIX}-listWrapper`,
+  divider: `${PREFIX}-divider`,
+  listItem: `${PREFIX}-listItem`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.wrapperContainer}`]: {
+    background: '#0E121A',
+    padding: '1rem 1.5rem',
+    height: 'calc(100vh - 230px)',
+    width: '100%',
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    paddingRight: '10px',
+    '&::-webkit-scrollbar': {
+      width: '8px',
+      background: theme.palette.primary.light
     },
-    listWrapper: {
-      width: '100%'
-    },
-    divider: {
-      height: 3,
-      background: '#13171D',
-      margin: '0.5rem 0rem'
-    },
-    listItem: {
-      transition: 'all 0.3s ease-in',
-      '&:hover': {
-        cursor: 'pointer',
-        background: 'rgba(255,255,255,0.1)'
-      }
+    '&::-webkit-scrollbar-thumb': {
+      background: theme.palette.text.secondary
     }
-  })
-);
+  },
+  [`& .${classes.listWrapper}`]: {
+    width: '100%'
+  },
+  [`& .${classes.divider}`]: {
+    height: 3,
+    background: '#13171D',
+    margin: '0.5rem 0rem'
+  },
+  [`& .${classes.listItem}`]: {
+    transition: 'all 0.3s ease-in',
+    '&:hover': {
+      cursor: 'pointer',
+      background: 'rgba(255,255,255,0.1)'
+    }
+  }
+}));
 
 const Settings = () => {
-  const classes = useStyles();
   const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -112,7 +112,7 @@ const Settings = () => {
   };
 
   return (
-    <Grid container className={classes.root} spacing={2}>
+    <Root container spacing={2}>
       {location.pathname !== '/' ? (
         <Grid item xs={12}>
           <IconButton
@@ -181,7 +181,7 @@ const Settings = () => {
           </Routes>
         </Grid>
       </Grid>
-    </Grid>
+    </Root>
   );
 };
 

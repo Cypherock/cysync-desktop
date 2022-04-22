@@ -1,6 +1,6 @@
 import { ERC20TOKENS } from '@cypherock/communication';
-import { withStyles } from '@material-ui/core';
-import Avatar from '@material-ui/core/Avatar';
+import Avatar from '@mui/material/Avatar';
+import { styled } from '@mui/material/styles';
 import React from 'react';
 
 import btc from '../../../node_modules/cryptocurrency-icons/svg/color/btc.svg';
@@ -12,6 +12,15 @@ import ltc from '../../../node_modules/cryptocurrency-icons/svg/color/ltc.svg';
 import btct from '../../assets/icons/btct.svg';
 import ethr from '../../assets/icons/ethr.svg';
 
+const PREFIX = 'CoinIcons';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  img: `${PREFIX}-img`,
+  root2: `${PREFIX}-root2`,
+  img2: `${PREFIX}-img2`
+};
+
 // @ts-ignore
 const requestErc20ImageFile = require.context(
   '../../assets/erc20',
@@ -19,29 +28,66 @@ const requestErc20ImageFile = require.context(
   /.png$/
 );
 
-export const ModAvatar = withStyles(() => ({
-  root: {
+export const ModAvatar = styled(Avatar)(() => ({
+  [`& .${classes.root}`]: {
     height: 'auto',
     width: 'auto',
     margin: '0px 10px'
   },
-  img: {
+
+  [`& .${classes.img}`]: {
     width: '32px',
     height: '32px'
-  }
-}))(Avatar);
+  },
 
-export const SmallModAvatar = withStyles(() => ({
-  root: {
+  [`& .${classes.root2}`]: {
     height: 'auto',
     width: 'auto',
     margin: '0px 10px'
   },
-  img: {
+
+  [`& .${classes.img2}`]: {
     width: '20px',
     height: '20px'
   }
-}))(Avatar);
+}));
+
+export const SmallModAvatar = styled(Avatar)(() => ({
+  [`& .${classes.root2}`]: {
+    height: 'auto',
+    width: 'auto',
+    margin: '0px 10px'
+  },
+
+  [`& .${classes.img2}`]: {
+    width: '20px',
+    height: '20px'
+  }
+}));
+
+const StyledModAvatar = styled(ModAvatar)(() => ({
+  [`& .${classes.root}`]: {
+    height: 'auto',
+    width: 'auto',
+    margin: '0px 10px'
+  },
+
+  [`& .${classes.img}`]: {
+    width: '32px',
+    height: '32px'
+  },
+
+  [`& .${classes.root2}`]: {
+    height: 'auto',
+    width: 'auto',
+    margin: '0px 10px'
+  },
+
+  [`& .${classes.img2}`]: {
+    width: '20px',
+    height: '20px'
+  }
+}));
 
 type CoinIconsProps = {
   initial: string;
@@ -93,9 +139,19 @@ const CoinIcons: React.FC<CoinIconsProps> = ({ initial, size, style }) => {
     }
 
     if (csize === 'sm') {
-      return <SmallModAvatar style={style} alt={coinInitial} src={src} />;
+      return (
+        <SmallModAvatar
+          style={style}
+          alt={coinInitial}
+          src={src}
+          classes={{
+            root: classes.root2,
+            img: classes.img2
+          }}
+        />
+      );
     }
-    return <ModAvatar style={style} alt={coinInitial} src={src} />;
+    return <StyledModAvatar style={style} alt={coinInitial} src={src} />;
   };
 
   return handleGetIcon(initial, size);

@@ -1,5 +1,5 @@
-import Grow from '@material-ui/core/Grow';
-import Typography from '@material-ui/core/Typography';
+import Grow from '@mui/material/Grow';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 

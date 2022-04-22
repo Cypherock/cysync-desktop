@@ -1,21 +1,15 @@
 import { feedback as feedbackServer } from '@cypherock/server-wrapper';
-import { CircularProgress, createSvgIcon, Grid } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import FormControl from '@material-ui/core/FormControl';
-import InputBase from '@material-ui/core/InputBase';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme,
-  withStyles
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import AlertIcon from '@material-ui/icons/ReportProblemOutlined';
-import Alert from '@material-ui/lab/Alert';
+import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
+import { CircularProgress, createSvgIcon, Grid } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import FormControl from '@mui/material/FormControl';
+import InputBase from '@mui/material/InputBase';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import { styled, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
@@ -37,42 +31,39 @@ import { useLogFetcher } from '../hooks/flows/useLogFetcher';
 import { useConnection } from './connectionProvider';
 import { useSnackbar } from './snackbarProvider';
 
-const iconDropDown = createSvgIcon(
-  <path d="M7 10l5 5 5-5z" color="#FFF" />,
-  'Custom'
-);
+const PREFIX = 'FeedbackContext';
 
-const BootstrapInput = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      'label + &': {
-        marginTop: theme.spacing(3)
-      }
-    },
-    input: {
-      borderRadius: 4,
-      position: 'relative',
-      backgroundColor: theme.palette.background.paper,
-      fontSize: 16,
-      padding: '5px 26px 5px 12px'
-    }
-  })
-)(InputBase);
+const classes = {
+  root: `${PREFIX}-root`,
+  input: `${PREFIX}-input`,
+  option: `${PREFIX}-option`,
+  alignCenterCenter: `${PREFIX}-alignCenterCenter`,
+  dropmenu: `${PREFIX}-dropmenu`,
+  buttonGroup: `${PREFIX}-buttonGroup`,
+  padBottom: `${PREFIX}-padBottom`,
+  extras: `${PREFIX}-extras`,
+  loading: `${PREFIX}-loading`,
+  primaryColor: `${PREFIX}-primaryColor`,
+  errorColor: `${PREFIX}-errorColor`
+};
 
-const useStyles = makeStyles((theme: Theme) => ({
-  option: {
+// TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.option}`]: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.text.primary,
     padding: 10
   },
-  alignCenterCenter: {
+
+  [`& .${classes.alignCenterCenter}`]: {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: '5rem'
   },
-  dropmenu: {
+
+  [`& .${classes.dropmenu}`]: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
@@ -81,30 +72,43 @@ const useStyles = makeStyles((theme: Theme) => ({
     border: `1px solid ${theme.palette.text.secondary}`,
     borderRadius: 3
   },
-  buttonGroup: {
+
+  [`& .${classes.buttonGroup}`]: {
     display: 'flex',
     alignItems: 'flex-end',
     justifyContent: 'flex-end'
   },
-  padBottom: {
+
+  [`& .${classes.padBottom}`]: {
     marginBottom: 5
   },
-  extras: {
+
+  [`& .${classes.extras}`]: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-start',
     marginLeft: -10
   },
-  loading: {
+
+  [`& .${classes.loading}`]: {
     marginLeft: 10
   },
-  primaryColor: {
+
+  [`& .${classes.primaryColor}`]: {
     color: theme.palette.secondary.dark
   },
-  errorColor: {
+
+  [`& .${classes.errorColor}`]: {
     color: theme.palette.error.dark
   }
 }));
+
+const iconDropDown = createSvgIcon(
+  <path d="M7 10l5 5 5-5z" color="#FFF" />,
+  'Custom'
+);
+
+const BootstrapInput = InputBase;
 
 export interface FeedbackState {
   subject: string;
@@ -145,7 +149,6 @@ export const FeedbackContext: React.Context<FeedbackContextInterface> =
   React.createContext<FeedbackContextInterface>({} as FeedbackContextInterface);
 
 export const FeedbackProvider: React.FC = ({ children }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const snackbar = useSnackbar();
 
@@ -490,7 +493,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         open={isOpen}
         handleClose={onClose}
         restComponents={
-          <Grid container>
+          <Root container>
             {!isSubmitted &&
               (isContact ? (
                 <Typography
@@ -586,7 +589,14 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                       onChange={handleListItem}
                       IconComponent={iconDropDown}
                       name="category"
-                      input={<BootstrapInput />}
+                      input={
+                        <BootstrapInput
+                          classes={{
+                            root: classes.root,
+                            input: classes.input
+                          }}
+                        />
+                      }
                     >
                       {feedbackInput.categories.map(option => {
                         return (
@@ -773,7 +783,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                 <Grid item xs={1} />
               </Grid>
             )}
-          </Grid>
+          </Root>
         }
       />
       <FeedbackContext.Provider value={{ showFeedback }}>

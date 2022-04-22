@@ -1,11 +1,19 @@
-import { makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React from 'react';
 
 import { useConnection } from '../store/provider';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
+const PREFIX = 'InternetStatus';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  show: `${PREFIX}-show`,
+  hide: `${PREFIX}-hide`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
     width: '100%',
     backgroundColor: theme.palette.error.dark,
     color: theme.palette.error.contrastText,
@@ -15,22 +23,23 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: 'center',
     transition: 'opacity 0.3s, height 0.3s'
   },
-  show: {
+
+  [`&.${classes.show}`]: {
     opacity: '1',
     height: '25px'
   },
-  hide: {
+
+  [`&.${classes.hide}`]: {
     opacity: '0',
     height: '0'
   }
 }));
 
 const InternetStatus = () => {
-  const classes = useStyles();
   const { connected } = useConnection();
 
   return (
-    <div
+    <Root
       className={`${classes.root} ${
         connected !== false ? classes.hide : classes.show
       }`}
@@ -39,7 +48,7 @@ const InternetStatus = () => {
         No internet connection. Please connect to the internet for better
         experience.
       </Typography>
-    </div>
+    </Root>
   );
 };
 

@@ -1,6 +1,6 @@
-import Grid from '@material-ui/core/Grid';
-import { useTheme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@mui/material/Grid';
+import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,14 +8,14 @@ import Routes from '../../../../constants/routes';
 import CustomButton from '../../../../designSystem/designComponents/buttons/button';
 import DropMenu from '../../../../designSystem/designComponents/menu/DropMenu';
 import { usePortfolio } from '../../../../store/hooks';
-import { useWallets } from '../../../../store/provider';
+import { useSnackbar, useWallets } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
 
 import Charts from './charts';
 import CoinAllocation from './coins';
 
-const Index = () => {
+const Portfolio = () => {
   const { allWallets } = useWallets();
 
   const theme = useTheme();
@@ -65,9 +65,15 @@ const Index = () => {
     else setOpen(false);
   }, [allWallets]);
 
-  const onAddCoin = (walletId: string) => {
+  const onAddCoin = React.useCallback((walletId: string) => {
     navigate(`${Routes.wallet.index}/${walletId}`);
-  };
+  }, []);
+
+  const snackbar = useSnackbar();
+  const setSortIndexProxy = React.useCallback((val: number) => {
+    setSortIndex(val);
+    snackbar.showSnackbar('Text', 'info');
+  }, []);
 
   const onAddWallet = () => {
     setOpen(false);
@@ -171,11 +177,11 @@ const Index = () => {
         coins={coins}
         total={total}
         sortIndex={sortIndex}
-        setSortIndex={setSortIndex}
+        setSortIndex={setSortIndexProxy}
         handleRedirecttoAddCoin={onAddCoin}
       />
     </Grid>
   );
 };
 
-export default Index;
+export default Portfolio;

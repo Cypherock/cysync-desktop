@@ -1,7 +1,7 @@
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import withStyles from '@material-ui/core/styles/withStyles';
-import Typography from '@material-ui/core/Typography';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import { styled, Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 
@@ -29,59 +29,70 @@ const FormLabel = withStyles((theme: Theme) => ({
   }
 }))(FormControlLabel);
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '2rem 4rem',
-      paddingBottom: '5rem'
-    },
-    head: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    coinContainer: {
-      display: 'flex',
-      width: '100%',
-      flexDirection: 'column'
-    },
-    coinItem: {
-      display: 'flex',
-      width: '100%',
-      justifyContent: 'space-between',
-      margin: '0.3rem 0rem',
-      padding: '0.2rem 0rem',
-      borderRadius: '5px'
-    },
-    heading: {
-      color: 'grey',
-      marginLeft: '0.5rem'
-    },
-    button: {
-      background: '#71624C',
-      color: theme.palette.text.primary,
-      textTransform: 'none',
-      padding: '0.5rem 1.5rem',
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
-    },
-    flexRow: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    selectedItem: {
-      background: 'rgba(255,255,255,0.05)'
+const PREFIX = 'AddCoinSelect';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  head: `${PREFIX}-head`,
+  coinContainer: `${PREFIX}-coinContainer`,
+  coinItem: `${PREFIX}-coinItem`,
+  heading: `${PREFIX}-heading`,
+  button: `${PREFIX}-button`,
+  flexRow: `${PREFIX}-flexRow`,
+  selectedItem: `${PREFIX}-selectedItem`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '2rem 4rem',
+    paddingBottom: '5rem'
+  },
+  [`& .${classes.head}`]: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.coinContainer}`]: {
+    display: 'flex',
+    width: '100%',
+    flexDirection: 'column'
+  },
+  [`& .${classes.coinItem}`]: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'space-between',
+    margin: '0.3rem 0rem',
+    padding: '0.2rem 0rem',
+    borderRadius: '5px'
+  },
+  [`& .${classes.heading}`]: {
+    color: 'grey',
+    marginLeft: '0.5rem'
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: theme.palette.text.primary,
+    textTransform: 'none',
+    padding: '0.5rem 1.5rem',
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  },
+  [`& .${classes.flexRow}`]: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  [`& .${classes.selectedItem}`]: {
+    background: 'rgba(255,255,255,0.05)'
+  }
+}));
 
 const SelectCoin: React.FC<StepComponentProps> = ({
   coins,
@@ -90,8 +101,6 @@ const SelectCoin: React.FC<StepComponentProps> = ({
   isXpubMissing,
   handleNext
 }) => {
-  const classes = useStyles();
-
   const [allCoinSelected, setAllCoinSelected] = React.useState(false);
 
   const { selectedWallet } = useSelectedWallet();
@@ -201,7 +210,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
   };
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <div className={classes.head}>
         <Typography className={classes.heading}>Select coins</Typography>
         <FormLabel
@@ -232,7 +241,10 @@ const SelectCoin: React.FC<StepComponentProps> = ({
               )}
             >
               <div className={classes.flexRow}>
-                <CoinIcons initial={coin[0].toUpperCase()} />
+                <CoinIcons
+                  initial={coin[0].toUpperCase()}
+                  style={{ marginRight: '10px' }}
+                />
                 <Typography color="textPrimary">{name}</Typography>
               </div>
               <CustomCheckBox
@@ -258,7 +270,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
       >
         Continue
       </CustomButton>
-    </div>
+    </Root>
   );
 };
 

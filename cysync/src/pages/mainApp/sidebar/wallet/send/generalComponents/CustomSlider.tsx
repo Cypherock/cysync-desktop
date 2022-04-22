@@ -1,159 +1,168 @@
 import { COINS } from '@cypherock/communication';
-import Slider from '@material-ui/core/Slider';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Slider, { SliderProps, SliderThumb } from '@mui/material/Slider';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { useCurrentCoin } from '../../../../../../store/provider';
 
-const dotStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    innerCircle: {
-      height: 12,
-      width: 12,
-      borderRadius: 6,
-      background: theme.palette.secondary.dark
-    },
-    currentValue: {
-      marginTop: 20,
-      width: 200,
-      textAlign: 'center',
-      position: 'absolute',
-      color: theme.palette.text.secondary
-    }
-  })
-);
+const THUMB_PREFIX = 'CustomSliderThumb';
 
-const Dot = (props: any) => {
-  const classes = dotStyles();
+const thumbClasses = {
+  innerCircle: `${THUMB_PREFIX}-innerCircle`,
+  currentValue: `${THUMB_PREFIX}-currentValue`
+};
+
+const CustomSliderThumb = styled(SliderThumb)(({ theme }) => ({
+  [`& .${thumbClasses.innerCircle}`]: {
+    height: 12,
+    width: 12,
+    borderRadius: 6,
+    background: theme.palette.secondary.dark
+  },
+  [`& .${thumbClasses.currentValue}`]: {
+    marginTop: 35,
+    width: 200,
+    textAlign: 'center',
+    position: 'absolute',
+    color: theme.palette.text.secondary
+  }
+}));
+
+interface ThumbComponentProps extends React.HTMLAttributes<unknown> {
+  ownerState: {
+    value: number;
+    dragging: boolean;
+  };
+}
+
+function ThumbComponent(props: ThumbComponentProps) {
+  const { children, ...other } = props;
   const { coinDetails } = useCurrentCoin();
   return (
-    <span {...props}>
-      <span className={classes.currentValue}>
-        {`${props['aria-valuenow']} ${
+    <CustomSliderThumb {...other}>
+      {children}
+      <span className={thumbClasses.currentValue}>
+        {`${props.ownerState.value} ${
           (COINS[coinDetails.coin.toLowerCase()] || { fees: '0' }).fees
         }`}
       </span>
-      <span className={classes.innerCircle} />
-    </span>
+      <span className={thumbClasses.innerCircle} />
+    </CustomSliderThumb>
   );
-};
+}
 
 const BoxShadow =
   '0 3px 1px rgba(0,0,0,0.1),0 4px 8px rgba(0,0,0,0.13),0 0 0 1px rgba(0,0,0,0.02)';
 
-const IOSSlider = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      color: theme.palette.secondary.dark,
-      height: 2,
-      padding: '15px 0'
-    },
-    thumb: {
-      height: 18,
-      width: 18,
-      border: `1px solid ${theme.palette.secondary.dark}`,
-      padding: 2,
-      backgroundColor: theme.palette.primary.main,
-      boxShadow: BoxShadow,
-      marginTop: -8,
-      marginLeft: -8,
-      '&:focus, &:hover, &$active': {
-        boxShadow: `0 3px 1px rgba(255,154,76,0.1),0 4px 8px rgba(255,154,76,0.3),0 0 0 1px rgba(255,154,76,0.02)`,
-        // Reset on touch devices, it doesn't add specificity
-        '@media (hover: none)': {
-          boxShadow: BoxShadow
-        }
+const IOSSlider = styled(Slider)(({ theme }) => ({
+  color: theme.palette.secondary.dark,
+  height: 2,
+  padding: '15px 0',
+  '& .MuiSlider-thumb': {
+    height: 18,
+    width: 18,
+    border: `1px solid ${theme.palette.secondary.dark}`,
+    padding: 2,
+    backgroundColor: theme.palette.primary.main,
+    '&:focus, &:hover, &.Mui-active': {
+      boxShadow: `0 3px 1px rgba(255,154,76,0.1),0 4px 8px rgba(255,154,76,0.3),0 0 0 1px rgba(255,154,76,0.02)`,
+      // Reset on touch devices, it doesn't add specificity
+      '@media (hover: none)': {
+        boxShadow: BoxShadow
       }
-    },
-    active: {},
-    valueLabel: {
-      left: 'calc(-50% + 0px)',
-      top: 30,
-      '& *': {
-        background: 'transparent',
-        color: '#fff'
-      }
-    },
-    track: {
-      height: 2
-    },
-    rail: {
-      height: 2,
-      opacity: 0.5,
-      backgroundColor: theme.palette.secondary.main
-    },
-    mark: {
-      backgroundColor: '#bfbfbf',
-      height: 8,
-      width: 1,
-      marginTop: -3
-    },
-    markActive: {
+    }
+  },
+  '& .MuiSlider-valueLabel': {
+    left: 'calc(-50% + 0px)',
+    top: 30,
+    '& *': {
+      background: 'transparent',
+      color: '#fff'
+    }
+  },
+  '& .MuiSlider-track': {
+    height: 2
+  },
+  '& .MuiSlider-rail': {
+    height: 2,
+    opacity: 0.5,
+    backgroundColor: theme.palette.secondary.main
+  },
+  '& .MuiSlider-mark': {
+    backgroundColor: '#bfbfbf',
+    height: 8,
+    width: 1,
+    marginTop: -3,
+    '&.MuiSlider-markActive': {
       opacity: 1,
       backgroundColor: 'currentColor'
     }
-  })
-)(Slider);
+  }
+}));
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      padding: '0rem 0.5rem'
-    },
-    labels: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      '& span': {
-        color: theme.palette.text.secondary,
-        fontSize: 16
-      }
+const PREFIX = 'CustomSlider';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  labels: `${PREFIX}-labels`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '0rem 0.5rem'
+  },
+  [`& .${classes.labels}`]: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    '& span': {
+      color: theme.palette.text.secondary,
+      fontSize: 16
     }
-  })
-);
+  }
+}));
 
 type CustomSliderProps = {
   handleTransactionFeeChangeSlider: (e: any) => void;
   mediumFee: number;
   fee: number;
+  valueLabelDisplay?: SliderProps['valueLabelDisplay'];
+  valueLabelFormat?: SliderProps['valueLabelFormat'];
 };
 
 const CustomSlider: React.FC<CustomSliderProps> = ({
   handleTransactionFeeChangeSlider,
   mediumFee,
-  fee
+  fee,
+  valueLabelFormat,
+  valueLabelDisplay
 }) => {
-  const classes = useStyles();
-
   const handleChange = (_e: any, v: any) => {
     handleTransactionFeeChangeSlider(v);
   };
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <div className={classes.labels}>
         <Typography color="textSecondary">Minimum</Typography>
         <Typography color="textSecondary">Average</Typography>
         <Typography color="textSecondary">Maximum</Typography>
       </div>
       <IOSSlider
-        ThumbComponent={Dot}
         aria-label="ios slider"
         value={fee}
         min={1}
         max={mediumFee * 2}
         step={1}
         onChange={handleChange}
+        valueLabelDisplay={valueLabelDisplay}
+        valueLabelFormat={valueLabelFormat}
+        components={{ Thumb: ThumbComponent }}
       />
-    </div>
+    </Root>
   );
 };
 

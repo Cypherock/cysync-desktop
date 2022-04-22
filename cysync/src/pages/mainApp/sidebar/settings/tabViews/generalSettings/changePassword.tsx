@@ -1,15 +1,10 @@
-import { Grid } from '@material-ui/core';
-import MIconButton from '@material-ui/core/IconButton';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { Grid } from '@mui/material';
+import MIconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import { styled, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -25,29 +20,36 @@ import {
 } from '../../../../../../utils/auth';
 import logger from '../../../../../../utils/logger';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    inputs: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      height: 'auto',
-      width: '100%'
-    },
-    buttons: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    error: {
-      color: theme.palette.error.main
-    },
-    marginTopBottom: {
-      margin: '0.5rem 0rem'
-    }
-  })
-);
+const PREFIX = 'ChangePassword';
+
+const classes = {
+  inputs: `${PREFIX}-inputs`,
+  buttons: `${PREFIX}-buttons`,
+  error: `${PREFIX}-error`,
+  marginTopBottom: `${PREFIX}-marginTopBottom`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.inputs}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 'auto',
+    width: '100%'
+  },
+  [`& .${classes.buttons}`]: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.error}`]: {
+    color: theme.palette.error.main
+  },
+  [`& .${classes.marginTopBottom}`]: {
+    margin: '0.5rem 0rem'
+  }
+}));
 
 interface State {
   oldPassword: string;
@@ -68,7 +70,6 @@ const ChangePassword: React.FC<Props> = ({
   closeChangePassword,
   handleChangePasswordDialog
 }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const lockscreen = useLockscreen();
   const snackbar = useSnackbar();
@@ -198,7 +199,7 @@ const ChangePassword: React.FC<Props> = ({
       confirmButtonDisabled={isLoading}
       rejectButtonDisabled={isLoading}
       restComponents={
-        <Grid item xs={7} style={{ marginBottom: '6rem' }}>
+        <Root item xs={7} style={{ marginBottom: '6rem' }}>
           <Typography
             color="textPrimary"
             variant="h4"
@@ -312,7 +313,7 @@ const ChangePassword: React.FC<Props> = ({
           <Typography className={classes.error} align="center">
             {error}
           </Typography>
-        </Grid>
+        </Root>
       }
     />
   );

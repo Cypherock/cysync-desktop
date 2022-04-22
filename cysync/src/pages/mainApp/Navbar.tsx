@@ -1,11 +1,11 @@
-import { Button, Chip, Typography } from '@material-ui/core';
-import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
-import Tooltip from '@material-ui/core/Tooltip';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
-import LoadingIcon from '@material-ui/icons/Loop';
-import NotInterestedIcon from '@material-ui/icons/NotInterested';
-import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
-import WarningIcon from '@material-ui/icons/Warning';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import LoadingIcon from '@mui/icons-material/Loop';
+import NotInterestedIcon from '@mui/icons-material/NotInterested';
+import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Button, Chip, Typography } from '@mui/material';
+import { keyframes, styled, useTheme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
@@ -18,56 +18,75 @@ import logger from '../../utils/logger';
 
 import NotificationComponent from './notification';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    borderBottom: `0.1px solid ${theme.palette.primary.light}`,
-    display: 'flex',
-    justifyContent: 'space-between',
-    width: '100%',
-    height: '100%'
-  },
-  leftContent: {
-    padding: `0px 50px`,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  rightContent: {
-    padding: `0px 50px`,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  text: {
+const PREFIX = 'Navbar';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  leftContent: `${PREFIX}-leftContent`,
+  rightContent: `${PREFIX}-rightContent`,
+  text: `${PREFIX}-text`,
+  divider: `${PREFIX}-divider`,
+  clearFix: `${PREFIX}-clearFix`,
+  connectedStatus: `${PREFIX}-connectedStatus`,
+  loaderIcon: `${PREFIX}-loaderIcon`
+};
+
+const rotateKeyframe = keyframes`
+  0% {
+    transform: rotateZ(0deg);
+  }
+
+  100% {
+    transform: rotateZ(360deg);
+  }
+`;
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.text}`]: {
     marginLeft: 10
   },
-  divider: {
+
+  [`& .${classes.divider}`]: {
     background: theme.palette.text.secondary,
     height: '50%',
     margin: '0px 10px'
   },
-  clearFix: {
+
+  [`& .${classes.clearFix}`]: {
     margin: `0px !important`,
     padding: `0px !important`
   },
-  connectedStatus: {
+
+  [`& .${classes.connectedStatus}`]: {
     textTransform: 'none',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: '1rem'
   },
-  loaderIcon: {
-    animation: `$rotate 1500ms ${theme.transitions.easing.easeInOut}`,
-    animationIterationCount: 'infinite'
+
+  [`& .${classes.loaderIcon}`]: {
+    animation: `${rotateKeyframe} 1500ms ${theme.transitions.easing.easeInOut} infinite`
   },
-  '@keyframes rotate': {
-    '0%': {
-      transform: 'rotateZ(0deg)'
-    },
-    '100%': {
-      transform: 'rotateZ(360deg)'
-    }
+
+  [`&.${classes.root}`]: {
+    borderBottom: `0.1px solid ${theme.palette.primary.light}`,
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '100%',
+    height: '100%'
+  },
+  [`& .${classes.leftContent}`]: {
+    padding: `0px 50px`,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.rightContent}`]: {
+    padding: `0px 50px`,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 }));
 
@@ -76,7 +95,6 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const { isSyncing, isWaitingForConnection, reSync } = useSync();
   const { isPasswordSet } = useLockscreen();
@@ -435,7 +453,7 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
   };
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <div className={classes.leftContent}>
         <Icon
           size={74}
@@ -518,7 +536,7 @@ const Navbar: React.FC<NavbarProps> = ({ handleLock }) => {
           </CustomIconButton>
         )}
       </div>
-    </div>
+    </Root>
   );
 };
 

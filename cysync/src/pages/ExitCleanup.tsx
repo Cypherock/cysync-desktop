@@ -1,6 +1,6 @@
 import { CancelFlow } from '@cypherock/protocols';
-import { Backdrop, CircularProgress } from '@material-ui/core';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import { Backdrop, CircularProgress } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { ipcRenderer } from 'electron';
 import React, { useEffect, useState } from 'react';
 
@@ -8,14 +8,19 @@ import { passEnDb } from '../store/database';
 import { useConnection } from '../store/provider';
 import logger from '../utils/logger';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  backdrop: {
+const PREFIX = 'ExitCleanup';
+
+const classes = {
+  backdrop: `${PREFIX}-backdrop`
+};
+
+const StyledBackdrop = styled(Backdrop)(({ theme }) => ({
+  [`&.${classes.backdrop}`]: {
     zIndex: theme.zIndex.drawer + 1
   }
 }));
 
 const ExitCleanup = () => {
-  const classes = useStyles();
   const [isOpen, setIsOpen] = useState(false);
   const { internalDeviceConnection, devicePacketVersion, deviceSdkVersion } =
     useConnection();
@@ -61,9 +66,9 @@ const ExitCleanup = () => {
   }, []);
 
   return (
-    <Backdrop className={classes.backdrop} open={isOpen}>
+    <StyledBackdrop className={classes.backdrop} open={isOpen}>
       <CircularProgress color="secondary" />
-    </Backdrop>
+    </StyledBackdrop>
   );
 };
 

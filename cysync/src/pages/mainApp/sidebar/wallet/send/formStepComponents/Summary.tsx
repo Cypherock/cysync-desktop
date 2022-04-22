@@ -1,5 +1,5 @@
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useState } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
@@ -26,53 +26,63 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    },
-    summaryDetails: {
-      width: '70%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'flex-start',
-      minHeight: '15rem'
-    },
-    mainText: {
-      fontSize: '1.2rem',
-      color: theme.palette.primary.light,
-      marginBottom: '0.5rem'
-    },
-    divider: {
-      width: '100%',
-      borderTop: `1px solid ${theme.palette.text.secondary}`
-    },
-    footer: {
-      display: 'flex',
-      alignItems: 'flex-end',
-      width: '85%',
-      justifyContent: 'flex-end'
-    },
-    deviceContinueButton: {
-      width: '10rem',
-      height: '3rem',
-      marginTop: 15,
-      textTransform: 'none',
-      color: '#fff'
-    },
-    center: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    }
-  })
-);
+const PREFIX = 'WalletSendSummary';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  summaryDetails: `${PREFIX}-summaryDetails`,
+  mainText: `${PREFIX}-mainText`,
+  divider: `${PREFIX}-divider`,
+  footer: `${PREFIX}-footer`,
+  deviceContinueButton: `${PREFIX}-deviceContinueButton`,
+  center: `${PREFIX}-center`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  },
+  [`& .${classes.summaryDetails}`]: {
+    width: '70%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    minHeight: '15rem'
+  },
+  [`& .${classes.mainText}`]: {
+    fontSize: '1.2rem',
+    color: theme.palette.primary.light,
+    marginBottom: '0.5rem'
+  },
+  [`& .${classes.divider}`]: {
+    width: '100%',
+    borderTop: `1px solid ${theme.palette.text.secondary}`
+  },
+  [`& .${classes.footer}`]: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    width: '85%',
+    justifyContent: 'flex-end'
+  },
+  [`& .${classes.deviceContinueButton}`]: {
+    width: '10rem',
+    height: '3rem',
+    marginTop: 15,
+    textTransform: 'none',
+    color: '#fff'
+  },
+  [`& .${classes.center}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  }
+}));
 
 const Summary: React.FC<StepComponentProps> = ({
   handleNext,
@@ -82,8 +92,6 @@ const Summary: React.FC<StepComponentProps> = ({
   handleClose,
   activeButton
 }) => {
-  const classes = useStyles();
-
   const [broadcastError, setBroadcastError] = useState('');
   const [advanceError, setAdvanceError] = useState('');
 
@@ -178,7 +186,7 @@ const Summary: React.FC<StepComponentProps> = ({
   };
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       {broadcastError && (
         <ErrorDialog
           open={!!broadcastError}
@@ -274,7 +282,7 @@ const Summary: React.FC<StepComponentProps> = ({
           Send
         </CustomButton>
       </div>
-    </div>
+    </Root>
   );
 };
 

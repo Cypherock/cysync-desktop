@@ -1,6 +1,6 @@
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -9,18 +9,23 @@ import { useConnection } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    container: {
-      padding: '20px'
-    },
-    errorButtons: {
-      display: 'flex',
-      justifyContent: 'space-around',
-      width: '100%'
-    }
-  })
-);
+const PREFIX = 'DeviceErrorPopup';
+
+const classes = {
+  container: `${PREFIX}-container`,
+  errorButtons: `${PREFIX}-errorButtons`
+};
+
+const Root = styled(Grid)(() => ({
+  [`& .${classes.container}`]: {
+    padding: '20px'
+  },
+  [`& .${classes.errorButtons}`]: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    width: '100%'
+  }
+}));
 
 type Props = {
   handleClose: () => void;
@@ -28,7 +33,6 @@ type Props = {
 };
 
 const Popup: React.FC<Props> = ({ handleClose, state }) => {
-  const classes = useStyles();
   const { retryConnection } = useConnection();
 
   const getHeading = () => {
@@ -95,7 +99,7 @@ const Popup: React.FC<Props> = ({ handleClose, state }) => {
   };
 
   return (
-    <Grid className={classes.container} container>
+    <Root container>
       <Grid item xs={12}>
         <Typography
           variant="h4"
@@ -117,7 +121,6 @@ const Popup: React.FC<Props> = ({ handleClose, state }) => {
           <CustomButton
             onClick={onNegativeClick}
             variant="outlined"
-            color="default"
             style={{ margin: '1rem 0rem', textTransform: 'none' }}
           >
             {getNegativeBtnText()}
@@ -127,7 +130,7 @@ const Popup: React.FC<Props> = ({ handleClose, state }) => {
           {getPositiveBtnText()}
         </CustomButton>
       </div>
-    </Grid>
+    </Root>
   );
 };
 

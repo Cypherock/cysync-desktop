@@ -1,35 +1,42 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 
-const useStylesText = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '0.7rem 1rem',
-      borderRadius: '0.5rem',
-      background: '#13161A'
-    },
-    left: {
-      display: 'flex'
-    },
-    completed: {
-      color: theme.palette.info.light
-    },
-    inComplete: {
-      color: theme.palette.text.primary
-    }
-  })
-);
+const PREFIX = 'DynamicTextView';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  left: `${PREFIX}-left`,
+  completed: `${PREFIX}-completed`,
+  inComplete: `${PREFIX}-inComplete`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '0.7rem 1rem',
+    borderRadius: '0.5rem',
+    background: '#13161A'
+  },
+  [`& .${classes.left}`]: {
+    display: 'flex'
+  },
+  [`& .${classes.completed}`]: {
+    color: theme.palette.info.light
+  },
+  [`& .${classes.inComplete}`]: {
+    color: theme.palette.text.primary
+  }
+}));
 
 type DynamicTextViewProps = {
   state: -1 | 0 | 1 | 2;
@@ -37,8 +44,6 @@ type DynamicTextViewProps = {
 };
 
 const DynamicTextView: React.FC<DynamicTextViewProps> = ({ state, text }) => {
-  const classes = useStylesText();
-
   const stateIcon = () => {
     switch (state) {
       case 0:
@@ -71,7 +76,7 @@ const DynamicTextView: React.FC<DynamicTextViewProps> = ({ state, text }) => {
   };
 
   return (
-    <Grid container className={classes.root}>
+    <Root container className={classes.root}>
       <div className={classes.left}>
         <Icon
           size={20}
@@ -86,7 +91,7 @@ const DynamicTextView: React.FC<DynamicTextViewProps> = ({ state, text }) => {
         </Typography>
       </div>
       {stateIcon()}
-    </Grid>
+    </Root>
   );
 };
 

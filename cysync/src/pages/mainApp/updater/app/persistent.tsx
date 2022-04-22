@@ -1,40 +1,43 @@
-import Paper from '@material-ui/core/Paper';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Paper from '@mui/material/Paper';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import Button from '../../../../designSystem/designComponents/buttons/button';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    container: {
-      position: 'fixed',
-      top: 0,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      display: 'flex',
-      justifyContent: 'center'
-    },
-    content: {
-      maxWidth: '800px',
-      padding: '15px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    button: {
-      background: '#71624C',
-      color: theme.palette.text.primary,
-      textTransform: 'none',
-      padding: '0.5rem 1.5rem',
-      marginLeft: '1rem',
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
+const PREFIX = 'UpdaterAppPersistent';
+
+const classes = {
+  content: `${PREFIX}-content`,
+  button: `${PREFIX}-button`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  position: 'fixed',
+  top: 0,
+  left: '50%',
+  transform: 'translateX(-50%)',
+  display: 'flex',
+  justifyContent: 'center',
+  [`& .${classes.content}`]: {
+    maxWidth: '800px',
+    padding: '15px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: theme.palette.text.primary,
+    textTransform: 'none',
+    padding: '0.5rem 1.5rem',
+    marginLeft: '1rem',
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  }
+}));
 
 interface PersistentInfoProps {
   state: number;
@@ -47,8 +50,6 @@ const PersistentInfo: React.FC<PersistentInfoProps> = ({
   showPopup,
   close
 }) => {
-  const classes = useStyles();
-
   const getText = () => {
     switch (state) {
       case 0:
@@ -61,7 +62,7 @@ const PersistentInfo: React.FC<PersistentInfoProps> = ({
   };
 
   return (
-    <div className={classes.container}>
+    <Root>
       <Paper className={classes.content}>
         <Typography variant="subtitle1">{getText()}</Typography>
         {state === 0 ? null : (
@@ -77,7 +78,7 @@ const PersistentInfo: React.FC<PersistentInfoProps> = ({
           Close
         </Button>
       </Paper>
-    </div>
+    </Root>
   );
 };
 

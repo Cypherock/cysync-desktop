@@ -1,6 +1,6 @@
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -9,18 +9,21 @@ import { useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    container: {
-      padding: '20px'
-    },
-    errorButtons: {
-      display: 'flex',
-      justifyContent: 'space-around',
-      width: '100%'
-    }
-  })
-);
+const PREFIX = 'DeviceUpdater-Confirmation';
+
+const classes = {
+  container: `${PREFIX}-container`,
+  errorButtons: `${PREFIX}-errorButtons`
+};
+
+const Root = styled(Grid)(() => ({
+  padding: '20px',
+  [`& .${classes.errorButtons}`]: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    width: '100%'
+  }
+}));
 
 type Props = {
   handleClose: (val: boolean) => void;
@@ -33,7 +36,6 @@ const Confirmation: React.FC<Props> = ({
   state,
   updateRequiredType
 }) => {
-  const classes = useStyles();
   const { retryConnection } = useConnection();
 
   const getHeading = () => {
@@ -116,6 +118,7 @@ const Confirmation: React.FC<Props> = ({
         if (updateRequiredType === 'device') {
           return 'Yes';
         }
+        break;
       default:
         return 'Ok';
     }
@@ -174,7 +177,7 @@ const Confirmation: React.FC<Props> = ({
   };
 
   return (
-    <Grid className={classes.container} container>
+    <Root container>
       <Grid item xs={12}>
         <Typography
           variant="h4"
@@ -196,7 +199,6 @@ const Confirmation: React.FC<Props> = ({
           <CustomButton
             onClick={onNegativeClick}
             variant="outlined"
-            color="default"
             style={{ margin: '1rem 0rem', textTransform: 'none' }}
           >
             {getNegativeBtnText()}
@@ -206,7 +208,7 @@ const Confirmation: React.FC<Props> = ({
           {getPositiveBtnText()}
         </CustomButton>
       </div>
-    </Grid>
+    </Root>
   );
 };
 

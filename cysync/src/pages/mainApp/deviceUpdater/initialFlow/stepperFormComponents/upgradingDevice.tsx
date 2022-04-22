@@ -1,11 +1,11 @@
-import { IconButton } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ReportIcon from '@material-ui/icons/Report';
-import AlertIcon from '@material-ui/icons/ReportProblemOutlined';
-import Alert from '@material-ui/lab/Alert';
+import ReportIcon from '@mui/icons-material/Report';
+import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
+import { IconButton } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
 import success from '../../../../../assets/icons/generic/success.png';
@@ -27,50 +27,58 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    middle: {
-      minHeight: '20rem',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    progress: {
-      marginBottom: '3rem',
-      color: theme.palette.text.secondary
-    },
-    success: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    center: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    },
-    primaryColor: {
-      color: theme.palette.secondary.dark
-    },
-    report: {
-      position: 'absolute',
-      right: 20,
-      bottom: 20
-    },
-    errorButtons: {
-      display: 'flex',
-      justifyContent: 'space-around',
-      width: '100%'
-    }
-  })
-);
+const PREFIX = 'InitialFlowDeviceUpgrade';
+
+const classes = {
+  middle: `${PREFIX}-middle`,
+  progress: `${PREFIX}-progress`,
+  success: `${PREFIX}-success`,
+  center: `${PREFIX}-center`,
+  primaryColor: `${PREFIX}-primaryColor`,
+  report: `${PREFIX}-report`,
+  errorButtons: `${PREFIX}-errorButtons`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.middle}`]: {
+    minHeight: '20rem',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.progress}`]: {
+    marginBottom: '3rem',
+    color: theme.palette.text.secondary
+  },
+  [`& .${classes.success}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.center}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  },
+  [`& .${classes.primaryColor}`]: {
+    color: theme.palette.secondary.dark
+  },
+  [`& .${classes.report}`]: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20
+  },
+  [`& .${classes.errorButtons}`]: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    width: '100%'
+  }
+}));
 
 const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
-  const classes = useStyles();
-
   /**
    * Complete States:
    * -1: Error
@@ -178,7 +186,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
   };
 
   return (
-    <Grid container>
+    <Root container>
       <Grid item xs={2} />
       <Grid item xs={8} className={classes.middle}>
         {isCompleted === 0 && updateDownloaded !== 2 && (
@@ -340,10 +348,11 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
         title="Report issue"
         onClick={handleFeedbackOpen}
         className={classes.report}
+        size="large"
       >
         <ReportIcon color="secondary" />
       </IconButton>
-    </Grid>
+    </Root>
   );
 };
 

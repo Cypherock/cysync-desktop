@@ -1,13 +1,10 @@
-import Grid from '@material-ui/core/Grid';
-import Menu, { MenuProps } from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@mui/material/Grid';
+import Menu, { MenuProps } from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { keyframes, styled, Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+import createStyles from '@mui/styles/createStyles';
+import withStyles from '@mui/styles/withStyles';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,7 +32,6 @@ const StyledMenu = withStyles((theme: Theme) =>
 )((props: MenuProps) => (
   <Menu
     elevation={1}
-    getContentAnchorEl={null}
     anchorOrigin={{
       vertical: 'top',
       horizontal: 'right'
@@ -47,6 +43,9 @@ const StyledMenu = withStyles((theme: Theme) =>
     {...props}
   />
 ));
+{
+  /* getContentAnchorEl={null} */
+}
 
 const StyledMenuItem = withStyles(theme => ({
   root: {
@@ -61,46 +60,59 @@ const StyledMenuItem = withStyles(theme => ({
   }
 }))(MenuItem);
 
-const walletItemStyles = makeStyles({
-  walletItemRoot: {
+const PREFIX = 'WalletItem';
+
+const classes = {
+  walletItemRoot: `${PREFIX}-walletItemRoot`,
+  iconButton: `${PREFIX}-iconButton`,
+  menuClose: `${PREFIX}-menuClose`,
+  red: `${PREFIX}-red`,
+  dialogRoot: `${PREFIX}-dialogRoot`,
+  marquee: `${PREFIX}-marquee`,
+  marqueeContent: `${PREFIX}-marqueeContent`
+};
+
+const marqueeKeyframes = keyframes`
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-100%, 0); }
+`;
+
+const WalletItemRoot = styled(Grid)(() => ({
+  [`& .${classes.walletItemRoot}`]: {
     padding: `3px 0px`
   },
-  iconButton: {
+  [`& .${classes.iconButton}`]: {
     padding: 5,
     borderRadius: 0
   },
-  menuClose: {
+  [`& .${classes.menuClose}`]: {
     position: 'absolute',
     right: -3,
     top: -10,
     zIndex: 2
   },
-  red: {
+  [`& .${classes.red}`]: {
     color: 'red'
   },
-  dialogRoot: {
+  [`& .${classes.dialogRoot}`]: {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     paddingBottom: '4rem'
   },
-  marquee: {
+  [`& .${classes.marquee}`]: {
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     boxSizing: 'border-box'
   },
-  marqueeContent: {
+  [`& .${classes.marqueeContent}`]: {
     display: 'inline-block',
     paddingLeft: '100%',
     margin: '0',
-    animation: '$marquee 4s linear infinite'
-  },
-  '@keyframes marquee': {
-    '0%': { transform: 'translate(0, 0)' },
-    '100%': { transform: 'translate(-100%, 0)' }
+    animation: `${marqueeKeyframes} 4s linear infinite`
   }
-});
+}));
 
 interface WalletItemProps {
   title: string;
@@ -108,7 +120,6 @@ interface WalletItemProps {
 }
 
 const WalletItem = (props: WalletItemProps) => {
-  const classes = walletItemStyles();
   const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -155,7 +166,7 @@ const WalletItem = (props: WalletItemProps) => {
   const { walletDetails, title } = props;
 
   return (
-    <Grid container className={classes.walletItemRoot}>
+    <WalletItemRoot container className={classes.walletItemRoot}>
       <CustomizedDialog
         open={deleteOpen}
         handleClose={handleDeleteClose}
@@ -213,12 +224,12 @@ const WalletItem = (props: WalletItemProps) => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
-          <StyledMenuItem button disableRipple onClick={handleDeleteOpen}>
+          <StyledMenuItem disableRipple onClick={handleDeleteOpen}>
             Delete
           </StyledMenuItem>
         </StyledMenu>
       </Grid>
-    </Grid>
+    </WalletItemRoot>
   );
 };
 

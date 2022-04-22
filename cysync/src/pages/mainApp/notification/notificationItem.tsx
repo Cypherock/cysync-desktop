@@ -1,22 +1,25 @@
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import { SvgIconComponent } from '@material-ui/icons';
-import PlusIcon from '@material-ui/icons/ControlPoint';
-import DownloadIcon from '@material-ui/icons/GetApp';
+import { SvgIconComponent } from '@mui/icons-material';
+import PlusIcon from '@mui/icons-material/ControlPoint';
+import DownloadIcon from '@mui/icons-material/GetApp';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../constants/routes';
 
-const NotificationTypes = {
-  DEFAULT: 0,
-  APP_UPDATE: 1,
-  DEVICE_UPDATE: 2
+const PREFIX = 'NotificationItem';
+
+const classes = {
+  mainContainer: `${PREFIX}-mainContainer`,
+  title: `${PREFIX}-title`,
+  description: `${PREFIX}-description`,
+  date: `${PREFIX}-date`
 };
 
-const useStyles = makeStyles(() => ({
-  mainContainer: {
+const Root = styled('div')(() => ({
+  [`&.${classes.mainContainer}`]: {
     width: '100%',
     padding: '4px 10px',
     display: 'flex',
@@ -29,19 +32,38 @@ const useStyles = makeStyles(() => ({
       backgroundColor: '#3B434B'
     }
   },
-  title: {
+
+  [`& .${classes.title}`]: {
     fontWeight: '600'
   },
-  description: {
+
+  [`& .${classes.description}`]: {
     opacity: '0.6'
   },
-  date: {
+
+  [`& .${classes.date}`]: {
     opacity: '0.6'
   }
 }));
 
-const iconStyles = makeStyles(() => ({
-  container: {
+const NotificationTypes = {
+  DEFAULT: 0,
+  APP_UPDATE: 1,
+  DEVICE_UPDATE: 2
+};
+
+const ICON_PREFIX = 'NotificationAvatar';
+
+const iconClasses = {
+  container: `${ICON_PREFIX}-container`,
+  containerType0: `${ICON_PREFIX}-containerType0`,
+  containerType1: `${ICON_PREFIX}-containerType1`,
+  containerType2: `${ICON_PREFIX}-containerType2`,
+  icon: `${ICON_PREFIX}-icon`
+};
+
+const IconRoot = styled('div')(() => ({
+  [`&.${iconClasses.container}`]: {
     borderRadius: '50%',
     width: '50px',
     height: '50px',
@@ -50,16 +72,20 @@ const iconStyles = makeStyles(() => ({
     alignItems: 'center',
     marginRight: '10px'
   },
-  containerType0: {
+
+  [`&.${iconClasses.containerType0}`]: {
     backgroundColor: '#403D3A'
   },
-  containerType1: {
+
+  [`&.${iconClasses.containerType1}`]: {
     backgroundColor: '#DB953C'
   },
-  containerType2: {
+
+  [`&.${iconClasses.containerType2}`]: {
     backgroundColor: '#DB953C'
   },
-  icon: {
+
+  [`& .${iconClasses.icon}`]: {
     color: '#fff'
   }
 }));
@@ -69,18 +95,16 @@ type AvatarType = {
 };
 
 const NotificationAvatar: React.FC<AvatarType> = ({ type }) => {
-  const classes = iconStyles();
-
-  let containerClass: string = classes.containerType0;
+  let containerClass: string = iconClasses.containerType0;
   let IconComponent: SvgIconComponent = PlusIcon;
 
   switch (type) {
     case NotificationTypes.APP_UPDATE:
-      containerClass = classes.containerType1;
+      containerClass = iconClasses.containerType1;
       IconComponent = DownloadIcon;
       break;
     case NotificationTypes.DEVICE_UPDATE:
-      containerClass = classes.containerType2;
+      containerClass = iconClasses.containerType2;
       IconComponent = DownloadIcon;
       break;
     default:
@@ -88,9 +112,9 @@ const NotificationAvatar: React.FC<AvatarType> = ({ type }) => {
   }
 
   return (
-    <div className={`${classes.container} ${containerClass}`}>
-      <IconComponent className={classes.icon} />
-    </div>
+    <IconRoot className={`${iconClasses.container} ${containerClass}`}>
+      <IconComponent className={iconClasses.icon} />
+    </IconRoot>
   );
 };
 
@@ -109,7 +133,6 @@ type Props = {
 };
 
 const NotificationItem: React.FC<Props> = ({ notification, handleClose }) => {
-  const classes = useStyles();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
@@ -150,7 +173,7 @@ const NotificationItem: React.FC<Props> = ({ notification, handleClose }) => {
   };
 
   return (
-    <div
+    <Root
       onKeyDown={handleKeyDown}
       tabIndex={0}
       aria-label={title}
@@ -166,7 +189,7 @@ const NotificationItem: React.FC<Props> = ({ notification, handleClose }) => {
           <small>{date}</small>
         </Typography>
       </div>
-    </div>
+    </Root>
   );
 };
 

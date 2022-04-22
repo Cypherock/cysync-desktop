@@ -1,7 +1,7 @@
-import { DialogProps } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { DialogProps } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import React from 'react';
 
@@ -9,52 +9,62 @@ import ICONS from '../../iconGroups/iconConstants';
 import IconButton from '../buttons/customIconButton';
 import Icon from '../icons/Icon';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      height: '100vh'
-    },
-    mainView: {
-      background: theme.palette.primary.light,
-      padding: `20px 0px`,
-      positon: 'relative',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      minHeight: '10rem'
-    },
-    closeButton: {
-      position: 'absolute',
-      right: '10px',
-      top: '10px'
-    },
-    headingContainer: {
-      width: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '0px',
-      margin: '0px'
-    },
-    heading: {
-      fontSize: '1.5rem',
-      margin: '10px'
-    },
-    restContainer: {
-      width: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 0,
-      margin: 0
-    },
-    fullScreen: {
-      height: '100%',
-      padding: 0,
-      overflow: 'hidden !important'
-    }
-  })
-);
+const PREFIX = 'DialogBox';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  mainView: `${PREFIX}-mainView`,
+  closeButton: `${PREFIX}-closeButton`,
+  headingContainer: `${PREFIX}-headingContainer`,
+  heading: `${PREFIX}-heading`,
+  restContainer: `${PREFIX}-restContainer`,
+  fullScreen: `${PREFIX}-fullScreen`
+};
+
+const Root = styled(Dialog)(({ theme }) => ({
+  [`& .${classes.root}`]: {
+    height: '100vh'
+  },
+  [`& .${classes.mainView}`]: {
+    background: theme.palette.primary.light,
+    padding: `20px 0px`,
+    positon: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    minHeight: '10rem'
+  },
+  [`& .${classes.closeButton}`]: {
+    position: 'absolute',
+    right: '10px',
+    top: '10px'
+  },
+  [`& .${classes.headingContainer}`]: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '0px',
+    margin: '0px'
+  },
+  [`& .${classes.heading}`]: {
+    fontSize: '1.5rem',
+    margin: '10px'
+  },
+  [`& .${classes.restContainer}`]: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 0,
+    margin: 0
+  },
+  [`& .${classes.fullScreen}`]: {
+    height: '100%',
+    padding: 0,
+    overflow: 'hidden !important'
+  }
+}));
 
 export interface Props extends DialogProps {
   handleClose: () => void;
@@ -62,6 +72,7 @@ export interface Props extends DialogProps {
   restComponents?: string | undefined | JSX.Element | JSX.Element[];
   isClosePresent?: boolean | undefined;
   noBottomPadding?: boolean;
+  disableBackdropClick?: boolean;
 }
 
 const DialogBox: React.FC<Props> = ({
@@ -78,9 +89,8 @@ const DialogBox: React.FC<Props> = ({
   disableBackdropClick,
   ...rest
 }: Props) => {
-  const classes = useStyles();
   return (
-    <Dialog
+    <Root
       fullWidth={fullWidth}
       maxWidth={maxWidth}
       open={open}
@@ -89,7 +99,7 @@ const DialogBox: React.FC<Props> = ({
       TransitionComponent={TransitionComponent}
       fullScreen={fullScreen}
       className={classes.root}
-      disableBackdropClick={disableBackdropClick}
+      onBackdropClick={disableBackdropClick ? null : handleClose}
       {...rest}
     >
       <div
@@ -121,7 +131,7 @@ const DialogBox: React.FC<Props> = ({
         </div>
         <div className={classes.restContainer}>{restComponents}</div>
       </div>
-    </Dialog>
+    </Root>
   );
 };
 

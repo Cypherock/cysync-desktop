@@ -1,9 +1,9 @@
-import { createStyles, makeStyles, Theme, useTheme } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Grid from '@material-ui/core/Grid';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import Typography from '@material-ui/core/Typography';
-import SearchIcon from '@material-ui/icons/Search';
+import SearchIcon from '@mui/icons-material/Search';
+import { styled, useTheme } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import InputAdornment from '@mui/material/InputAdornment';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
@@ -19,71 +19,82 @@ import { useSelectedWallet, useSync } from '../../../../../store/provider';
 
 import initialTokens from './tokens';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '1rem 4rem',
-      paddingBottom: '5rem'
-    },
-    head: {
-      width: 'calc(100% - 10px)',
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    coinContainer: {
-      display: 'flex',
-      width: '100%',
-      flexDirection: 'column',
-      height: '500px'
-    },
-    coinItem: {
-      display: 'flex',
-      width: '100%',
-      justifyContent: 'space-between',
-      margin: '0.3rem 0rem',
-      padding: '0.2rem 0rem',
-      borderRadius: '5px'
-    },
-    heading: {
-      color: 'grey',
-      marginLeft: '0.5rem'
-    },
-    button: {
-      background: '#71624C',
-      color: theme.palette.text.primary,
-      textTransform: 'none',
-      padding: '0.5rem 1.5rem',
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
-    },
-    flexRow: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    selectedItem: {
-      background: 'rgba(255,255,255,0.05)'
-    },
-    loaderContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingTop: '4rem',
-      margin: '1rem 0rem 30rem 0rem'
+const PREFIX = 'AddTokenForm';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  head: `${PREFIX}-head`,
+  coinContainer: `${PREFIX}-coinContainer`,
+  coinItem: `${PREFIX}-coinItem`,
+  heading: `${PREFIX}-heading`,
+  button: `${PREFIX}-button`,
+  flexRow: `${PREFIX}-flexRow`,
+  selectedItem: `${PREFIX}-selectedItem`,
+  loaderContainer: `${PREFIX}-loaderContainer`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '1rem 4rem',
+    paddingBottom: '5rem'
+  },
+  [`& .${classes.head}`]: {
+    width: 'calc(100% - 10px)',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.coinContainer}`]: {
+    display: 'flex',
+    width: '100%',
+    flexDirection: 'column',
+    height: '500px'
+  },
+  [`& .${classes.coinItem}`]: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'space-between',
+    margin: '0.3rem 0rem',
+    padding: '0.2rem 0rem',
+    borderRadius: '5px'
+  },
+  [`& .${classes.heading}`]: {
+    color: 'grey',
+    marginLeft: '0.5rem'
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: theme.palette.text.primary,
+    textTransform: 'none',
+    padding: '0.5rem 1.5rem',
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  },
+  [`& .${classes.flexRow}`]: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  [`& .${classes.selectedItem}`]: {
+    background: 'rgba(255,255,255,0.05)'
+  },
+  [`& .${classes.loaderContainer}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: '4rem',
+    margin: '1rem 0rem 30rem 0rem'
+  }
+}));
 
 const AddTokenForm = ({ tokenList, ethCoin, handleClose }: any) => {
-  const classes = useStyles();
   const theme = useTheme();
 
   // Using JSON.parse to create a deep copy instead of passing by referrence
@@ -193,7 +204,7 @@ const AddTokenForm = ({ tokenList, ethCoin, handleClose }: any) => {
   };
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <Grid
         item
         xs={12}
@@ -263,7 +274,7 @@ const AddTokenForm = ({ tokenList, ethCoin, handleClose }: any) => {
       >
         Continue
       </CustomButton>
-    </div>
+    </Root>
   );
 };
 

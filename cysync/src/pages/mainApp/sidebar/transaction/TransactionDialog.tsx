@@ -3,16 +3,11 @@ import {
   bitcoin as bitcoinServer,
   eth as ethServer
 } from '@cypherock/server-wrapper';
-import Chip from '@material-ui/core/Chip';
-import Grid from '@material-ui/core/Grid';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import CopyIcon from '@material-ui/icons/FileCopyOutlined';
+import CopyIcon from '@mui/icons-material/FileCopyOutlined';
+import Chip from '@mui/material/Chip';
+import Grid from '@mui/material/Grid';
+import { styled, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import { shell } from 'electron';
 import PropTypes from 'prop-types';
@@ -32,73 +27,84 @@ import { useSnackbar } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 import logger from '../../../../utils/logger';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    container: {
-      padding: '0 25px',
-      minWidth: '300px'
-    },
-    dateTimeContainer: {
-      marginBottom: '20px'
-    },
-    dateText: {
-      fontWeight: 'bold'
-    },
-    timeText: {
-      fontWeight: 'lighter'
-    },
-    dataContainer: {
-      margin: '10px 0'
-    },
-    flex: {
-      display: 'flex',
-      alignItems: 'center'
-    },
-    flexCenter: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    button: {
-      background: '#71624C',
-      color: theme.palette.text.primary,
-      textTransform: 'none',
-      padding: '0.5rem 3.5rem',
-      marginBottom: '2rem',
-      marginTop: '20px',
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
-    },
-    blue: {
-      color: theme.palette.info.main
-    },
-    red: {
-      color: theme.palette.error.main
-    },
-    orange: {
-      color: theme.palette.secondary.main
-    },
-    inputOutputContainer: {
-      maxHeight: '400px',
-      overflowY: 'auto',
-      '&::-webkit-scrollbar': {
-        width: '4px',
-        background: theme.palette.primary.light
-      },
-      '&::-webkit-scrollbar-thumb': {
-        background: theme.palette.text.secondary
-      }
+const PREFIX = 'TransactionDialog';
+
+const classes = {
+  dateTimeContainer: `${PREFIX}-dateTimeContainer`,
+  dateText: `${PREFIX}-dateText`,
+  timeText: `${PREFIX}-timeText`,
+  dataContainer: `${PREFIX}-dataContainer`,
+  flex: `${PREFIX}-flex`,
+  flexCenter: `${PREFIX}-flexCenter`,
+  button: `${PREFIX}-button`,
+  blue: `${PREFIX}-blue`,
+  red: `${PREFIX}-red`,
+  orange: `${PREFIX}-orange`,
+  inputOutputContainer: `${PREFIX}-inputOutputContainer`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  padding: '0 25px',
+  minWidth: '300px',
+  [`& .${classes.dateTimeContainer}`]: {
+    marginBottom: '20px'
+  },
+  [`& .${classes.dateText}`]: {
+    fontWeight: 'bold'
+  },
+  [`& .${classes.timeText}`]: {
+    fontWeight: 'lighter'
+  },
+  [`& .${classes.dataContainer}`]: {
+    margin: '10px 0'
+  },
+  [`& .${classes.flex}`]: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  [`& .${classes.flexCenter}`]: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: theme.palette.text.primary,
+    textTransform: 'none',
+    padding: '0.5rem 3.5rem',
+    marginBottom: '2rem',
+    marginTop: '20px',
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  },
+  [`& .${classes.blue}`]: {
+    color: theme.palette.info.main
+  },
+  [`& .${classes.red}`]: {
+    color: theme.palette.error.main
+  },
+  [`& .${classes.orange}`]: {
+    color: theme.palette.secondary.main
+  },
+  [`& .${classes.inputOutputContainer}`]: {
+    maxHeight: '400px',
+    overflowY: 'auto',
+    '&::-webkit-scrollbar': {
+      width: '4px',
+      background: theme.palette.primary.light
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: theme.palette.text.secondary
+    }
+  }
+}));
 
 interface TransactionDialogProps {
   txn: DisplayTransaction;
 }
 
 const TransactionDialog: React.FC<TransactionDialogProps> = props => {
-  const classes = useStyles();
   const theme = useTheme();
   const { txn } = props;
   const snackbar = useSnackbar();
@@ -201,7 +207,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   if (!txn) return <></>;
 
   return (
-    <div className={classes.container}>
+    <Root>
       <div className={classes.dateTimeContainer}>
         <Typography className={classes.dateText} variant="body1">
           {txn.confirmed ? new Date(txn.confirmed).toLocaleDateString() : ''}
@@ -373,7 +379,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           Open in Browser
         </Button>
       </div>
-    </div>
+    </Root>
   );
 };
 

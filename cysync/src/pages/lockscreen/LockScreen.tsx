@@ -1,19 +1,14 @@
-import { CircularProgress } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
-import ReportIcon from '@material-ui/icons/Report';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ReportIcon from '@mui/icons-material/Report';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { CircularProgress } from '@mui/material';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import { styled, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React from 'react';
 
 import CustomizedDialog from '../../designSystem/designComponents/dialog/newDialogBox';
@@ -28,47 +23,58 @@ import { FeedbackState, useFeedback } from '../../store/provider';
 import { generateSinglePasswordHash, verifyPassword } from '../../utils/auth';
 import { triggerClearData } from '../../utils/clearData';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    content: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      minHeight: '50vh'
-    },
-    icon: {
-      position: 'absolute',
-      top: 10,
-      left: 20
-    },
-    inputFieldsContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-end'
-    },
-    submitButton: {
-      background: '#71624C',
-      color: '#FFFFFF',
-      padding: '0.3rem 3rem',
-      fontWeight: 700,
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
-    },
-    report: {
-      position: 'absolute',
-      right: 20,
-      bottom: 20
+const PREFIX = 'Lockscreen';
+const classes = {
+  container: `${PREFIX}-container`,
+  root: `${PREFIX}-root`,
+  content: `${PREFIX}-content`,
+  icon: `${PREFIX}-icon`,
+  inputFieldsContainer: `${PREFIX}-inputFieldsContainer`,
+  submitButton: `${PREFIX}-submitButton`,
+  report: `${PREFIX}-report`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  width: '100%',
+  height: '100%',
+  [`& .${classes.root}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.content}`]: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    minHeight: '50vh'
+  },
+  [`& .${classes.icon}`]: {
+    position: 'absolute',
+    top: 10,
+    left: 20
+  },
+  [`& .${classes.inputFieldsContainer}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end'
+  },
+  [`& .${classes.submitButton}`]: {
+    background: '#71624C',
+    color: '#FFFFFF',
+    padding: '0.3rem 3rem',
+    fontWeight: 700,
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  },
+  [`& .${classes.report}`]: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20
+  }
+}));
 
 interface State {
   password: string;
@@ -77,7 +83,6 @@ interface State {
 }
 
 const LockScreen = (props: any) => {
-  const classes = useStyles();
   const theme = useTheme();
 
   const [values, setValues] = React.useState<State>({
@@ -179,7 +184,7 @@ const LockScreen = (props: any) => {
   };
 
   return (
-    <>
+    <Root className={classes.container}>
       <CustomizedDialog
         open={confirmationDialog}
         handleClose={handleCloseConfirmation}
@@ -259,6 +264,7 @@ const LockScreen = (props: any) => {
                           aria-label="toggle password visibility"
                           onClick={handleClickShowPassword}
                           onMouseDown={handleMouseDownPassword}
+                          size="large"
                         >
                           {values.showPassword ? (
                             <Visibility
@@ -339,11 +345,12 @@ const LockScreen = (props: any) => {
           title="Report issue"
           onClick={handleFeedbackOpen}
           className={classes.report}
+          size="large"
         >
           <ReportIcon color="secondary" />
         </IconButton>
       </Grid>
-    </>
+    </Root>
   );
 };
 

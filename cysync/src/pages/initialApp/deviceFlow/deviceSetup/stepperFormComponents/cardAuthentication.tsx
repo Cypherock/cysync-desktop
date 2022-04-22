@@ -1,8 +1,8 @@
-import { IconButton } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ReportIcon from '@material-ui/icons/Report';
+import ReportIcon from '@mui/icons-material/Report';
+import { IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 
 import success from '../../../../../assets/icons/generic/success.png';
@@ -27,44 +27,50 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    middle: {
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '60vh',
-      justifyContent: 'center',
-      alignItems: 'flex-start'
-    },
-    success: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    },
-    bottomContainer: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    report: {
-      position: 'absolute',
-      right: 20,
-      bottom: 20
-    },
-    btnContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }
-  })
-);
+const PREFIX = 'DeviceSetupCardAuth';
+
+const classes = {
+  middle: `${PREFIX}-middle`,
+  success: `${PREFIX}-success`,
+  bottomContainer: `${PREFIX}-bottomContainer`,
+  report: `${PREFIX}-report`,
+  btnContainer: `${PREFIX}-btnContainer`
+};
+
+const Root = styled(Grid)(() => ({
+  [`& .${classes.middle}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '60vh',
+    justifyContent: 'center',
+    alignItems: 'flex-start'
+  },
+  [`& .${classes.success}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  },
+  [`& .${classes.bottomContainer}`]: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  [`& .${classes.report}`]: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20
+  },
+  [`& .${classes.btnContainer}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
+}));
 
 const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
-  const classes = useStyles();
-
   /**
    * -2 means authentication is remaining
    * -1 means all cards failed authentication
@@ -348,7 +354,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
   };
 
   return (
-    <Grid container>
+    <Root container>
       <Grid item xs={3} />
       <Grid item xs={6} className={classes.middle}>
         <Typography
@@ -476,10 +482,11 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
         title="Report issue"
         onClick={handleFeedbackOpen}
         className={classes.report}
+        size="large"
       >
         <ReportIcon color="secondary" />
       </IconButton>
-    </Grid>
+    </Root>
   );
 };
 

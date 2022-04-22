@@ -1,5 +1,5 @@
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
@@ -18,18 +18,13 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      padding: '3rem 10rem 6rem'
-    },
-    text: {}
-  })
-);
+const Root = styled('div')(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'flex-start',
+  alignItems: 'flex-start',
+  padding: '3rem 10rem 6rem'
+}));
 
 const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
   const { coinDetails } = useCurrentCoin();
@@ -88,11 +83,10 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
     if (receiveTransaction.pathSent) setOpen(false);
   }, [receiveTransaction.pathSent]);
 
-  const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <Root>
       <Backdrop open={open} />
-      <Typography className={classes.text} color="textSecondary">
+      <Typography color="textSecondary">
         Follow the instructions on Device
       </Typography>
       <TextView
@@ -154,7 +148,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
           stylex={{ marginTop: '0rem' }}
         />
       )}
-    </div>
+    </Root>
   );
 };
 

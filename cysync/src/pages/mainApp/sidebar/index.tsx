@@ -1,21 +1,24 @@
-import Button from '@material-ui/core/Button';
-import Collapse from '@material-ui/core/Collapse';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
+import Button from '@mui/material/Button';
+import Collapse from '@mui/material/Collapse';
+import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
 import {
-  createStyles,
-  makeStyles,
+  createTheme,
+  styled,
   Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
+  ThemeProvider
+} from '@mui/material/styles';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import createStyles from '@mui/styles/createStyles';
+import withStyles from '@mui/styles/withStyles';
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import Routes from '../../../constants/routes';
 import WalletItem from '../../../designSystem/designComponents/customComponents/walletItem';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
+import colors from '../../../designSystem/designConstants/colors';
 import LastTransaction from '../../../designSystem/iconGroups/lastTransaction';
 import Portfolio from '../../../designSystem/iconGroups/portfolio';
 import Settings from '../../../designSystem/iconGroups/settings';
@@ -23,49 +26,57 @@ import Tutorial from '../../../designSystem/iconGroups/tutorial';
 import Wallet from '../../../designSystem/iconGroups/wallet';
 import { useFeedback, useWallets, WalletInfo } from '../../../store/provider';
 
-const StyledTabs = withStyles({
-  root: {
-    marginTop: 50,
-    marginBottom: 50
-  },
-  indicator: {
-    display: 'flex',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-    '& > span': {
-      maxWidth: 20,
-      width: '100%',
-      backgroundColor: 'none'
-    }
-  }
-})(Tabs);
-
-const StyledTab = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      textTransform: 'none',
-      color: '#FFFFFF',
-      letterSpacing: 0.5,
-      minHeight: '30px',
-      fontWeight: theme.typography.fontWeightMedium,
-      fontSize: theme.typography.pxToRem(12),
-      marginRight: theme.spacing(1),
-      display: 'flex',
-      '&:focus': {
-        opacity: 1
+const customTheme = (defaultTheme: Theme) =>
+  createTheme({
+    ...defaultTheme,
+    components: {
+      ...defaultTheme.components,
+      MuiTabs: {
+        styleOverrides: {
+          root: {
+            marginTop: 50,
+            marginBottom: 50
+          },
+          indicator: {
+            display: 'flex',
+            justifyContent: 'center',
+            backgroundColor: 'transparent',
+            '& > span': {
+              maxWidth: 20,
+              width: '100%',
+              backgroundColor: 'none'
+            }
+          }
+        }
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            textTransform: 'none',
+            color: '#FFFFFF',
+            letterSpacing: 0.5,
+            minHeight: '30px',
+            fontWeight: defaultTheme.typography.fontWeightMedium,
+            fontSize: defaultTheme.typography.pxToRem(12),
+            marginRight: defaultTheme.spacing(1),
+            display: 'flex',
+            '&:focus': {
+              opacity: 1
+            },
+            '&.Mui-selected': {
+              borderLeft: `3px solid ${colors.primary.darker}`,
+              color: colors.primary.darker
+            }
+          },
+          wrapped: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'start'
+          }
+        }
       }
-    },
-    wrapper: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'start'
-    },
-    selected: {
-      borderLeft: `3px solid ${theme.palette.secondary.main}`,
-      color: theme.palette.secondary.main
     }
-  })
-)(Tab);
+  });
 
 const StyledButton = withStyles(() =>
   createStyles({
@@ -107,7 +118,8 @@ const StyledListItem = withStyles(theme => ({
   root: {
     padding: 3,
     paddingLeft: 7,
-    marginRight: 30
+    marginRight: 30,
+    cursor: 'pointer'
   },
   selected: {
     color: theme.palette.secondary.main,
@@ -115,25 +127,32 @@ const StyledListItem = withStyles(theme => ({
   }
 }))(ListItem);
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    flexGrow: 1,
-    maxWidth: '200px',
-    background: theme.palette.primary.light,
-    border: `0px solid ${theme.palette.text.secondary}`,
-    height: '100%',
-    borderRadius: '1rem',
-    position: 'relative'
-  },
-  divider: {
+const PREFIX = 'Sidebar';
+
+const classes = {
+  divider: `${PREFIX}-divider`,
+  support: `${PREFIX}-support`,
+  walletCollapse: `${PREFIX}-walletCollapse`,
+  walletScroll: `${PREFIX}-walletScroll`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  flexGrow: 1,
+  maxWidth: '200px',
+  background: theme.palette.primary.light,
+  border: `0px solid ${theme.palette.text.secondary}`,
+  height: '100%',
+  borderRadius: '1rem',
+  position: 'relative',
+  [`& .${classes.divider}`]: {
     background: '#1E2328',
     margin: `0.6rem 0.8rem`
   },
-  support: {
+  [`& .${classes.support}`]: {
     position: 'absolute',
     bottom: 0
   },
-  walletCollapse: {
+  [`& .${classes.walletCollapse}`]: {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-end',
@@ -143,7 +162,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     position: 'relative',
     paddingBottom: '1.5rem'
   },
-  walletScroll: {
+  [`& .${classes.walletScroll}`]: {
     maxHeight: '100px',
     overflowY: 'auto',
     overflowX: 'hidden',
@@ -180,8 +199,7 @@ const TabValues = [
   }
 ];
 
-const Index = () => {
-  const classes = useStyles();
+const Sidebar = () => {
   const { allWallets: walletData } = useWallets();
 
   const feedback = useFeedback();
@@ -209,10 +227,7 @@ const Index = () => {
     navigate(`${Routes.wallet.index}/${wallet.walletId}`);
   };
 
-  const handleChange = (
-    _event: React.ChangeEvent<{}> | undefined,
-    val: number
-  ) => {
+  const handleChange = (_event: React.ChangeEvent | undefined, val: number) => {
     setValue(val);
     const tab = TabValues.find(elem => elem.tab === val);
 
@@ -255,76 +270,86 @@ const Index = () => {
   };
 
   return (
-    <div className={classes.root}>
-      <StyledTabs
-        value={value}
-        onChange={handleChange}
-        orientation="vertical"
-        aria-label="side bar menu"
-      >
-        <StyledTab
-          label="Portfolio"
-          icon={
-            <Icon size={21} viewBox="0 0 24 21" iconGroup={<Portfolio />} />
-          }
-        />
-        <Divider className={classes.divider} />
-        <StyledTab
-          label="Wallets"
-          icon={<Icon size={21} viewBox="0 0 24 21" iconGroup={<Wallet />} />}
-        />
-        <Collapse
-          in={open}
-          timeout="auto"
-          unmountOnExit
-          className={classes.walletCollapse}
+    <ThemeProvider theme={customTheme}>
+      <Root>
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          orientation="vertical"
+          aria-label="side bar menu"
         >
-          <div className={classes.walletScroll}>
-            {walletData.map((wallet, index: number) => {
-              if (!wallet.name) return null;
-              return (
-                <StyledListItem
-                  button
-                  key={wallet.walletId}
-                  selected={walletIndex === index}
-                  onClick={() => handleWalletChange(wallet, index)}
-                >
-                  <WalletItem title={wallet.name} walletDetails={wallet} />
-                </StyledListItem>
-              );
-            })}
-          </div>
-          <StyledAddWalletButton onClick={onImportWallet}>
-            + Import Wallet
-          </StyledAddWalletButton>
-        </Collapse>
-        <Divider className={classes.divider} />
-        <StyledTab
-          label="Transactions"
-          icon={
-            <Icon
-              size={21}
-              viewBox="0 0 24 21"
-              iconGroup={<LastTransaction />}
-            />
-          }
-        />
-        <Divider className={classes.divider} />
-        <StyledTab
-          label="Tutorial"
-          icon={<Icon size={21} viewBox="0 0 24 21" iconGroup={<Tutorial />} />}
-        />
-        <Divider className={classes.divider} />
-        <StyledTab
-          label="Settings"
-          icon={<Icon size={21} viewBox="0 0 24 21" iconGroup={<Settings />} />}
-        />
-      </StyledTabs>
-      <StyledButton className={classes.support} onClick={handleOpen}>
-        Support
-      </StyledButton>
-    </div>
+          <Tab
+            label="Portfolio"
+            wrapped={true}
+            icon={
+              <Icon size={21} viewBox="0 0 24 21" iconGroup={<Portfolio />} />
+            }
+          />
+          <Divider className={classes.divider} />
+          <Tab
+            label="Wallets"
+            wrapped={true}
+            icon={<Icon size={21} viewBox="0 0 24 21" iconGroup={<Wallet />} />}
+          />
+          <Collapse
+            in={open}
+            timeout="auto"
+            unmountOnExit
+            className={classes.walletCollapse}
+          >
+            <div className={classes.walletScroll}>
+              {walletData.map((wallet, index: number) => {
+                if (!wallet.name) return null;
+                return (
+                  <StyledListItem
+                    key={wallet.walletId}
+                    selected={walletIndex === index}
+                    onClick={() => handleWalletChange(wallet, index)}
+                  >
+                    <WalletItem title={wallet.name} walletDetails={wallet} />
+                  </StyledListItem>
+                );
+              })}
+            </div>
+            <StyledAddWalletButton onClick={onImportWallet}>
+              + Import Wallet
+            </StyledAddWalletButton>
+          </Collapse>
+          <Divider className={classes.divider} />
+          <Tab
+            label="Transactions"
+            wrapped={true}
+            icon={
+              <Icon
+                size={21}
+                viewBox="0 0 24 21"
+                iconGroup={<LastTransaction />}
+              />
+            }
+          />
+          <Divider className={classes.divider} />
+          <Tab
+            label="Tutorial"
+            wrapped={true}
+            icon={
+              <Icon size={21} viewBox="0 0 24 21" iconGroup={<Tutorial />} />
+            }
+          />
+          <Divider className={classes.divider} />
+          <Tab
+            label="Settings"
+            wrapped={true}
+            icon={
+              <Icon size={21} viewBox="0 0 24 21" iconGroup={<Settings />} />
+            }
+          />
+        </Tabs>
+        <StyledButton className={classes.support} onClick={handleOpen}>
+          Support
+        </StyledButton>
+      </Root>
+    </ThemeProvider>
   );
 };
 
-export default Index;
+export default Sidebar;

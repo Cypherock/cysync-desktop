@@ -1,16 +1,11 @@
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import ListItemText from '@mui/material/ListItemText';
+import { styled, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -30,47 +25,54 @@ import logger from '../../../../../utils/logger';
 import ChangePassword from './generalSettings/changePassword';
 import RemovePasswordComponent from './generalSettings/removePassword';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {},
-    header: {
-      maxHeight: '3rem',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    listWrapper: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start'
-    },
-    divider: {
-      height: 3,
-      background: '#13171D',
-      margin: '0.3rem 0rem'
-    },
-    listItem: {
-      color: theme.palette.text.primary
-    },
-    button: {
-      background: '#71624C',
-      color: '#FFFFFF',
-      textTransform: 'none',
-      padding: '0.5rem 1.5rem',
-      '&:hover': {
-        background: theme.palette.secondary.dark
-      }
-    },
-    marginTopBottom: {
-      margin: '0.5rem 0rem'
+const PREFIX = 'GeneralSettings';
+
+const classes = {
+  header: `${PREFIX}-header`,
+  listWrapper: `${PREFIX}-listWrapper`,
+  divider: `${PREFIX}-divider`,
+  listItem: `${PREFIX}-listItem`,
+  button: `${PREFIX}-button`,
+  marginTopBottom: `${PREFIX}-marginTopBottom`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.header}`]: {
+    maxHeight: '3rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.listWrapper}`]: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start'
+  },
+  [`& .${classes.divider}`]: {
+    height: 3,
+    background: '#13171D',
+    margin: '0.3rem 0rem'
+  },
+  [`& .${classes.listItem}`]: {
+    color: theme.palette.text.primary
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    color: '#FFFFFF',
+    textTransform: 'none',
+    padding: '0.5rem 1.5rem',
+    '&:hover': {
+      background: theme.palette.secondary.dark
     }
-  })
-);
+  },
+  [`& .${classes.marginTopBottom}`]: {
+    margin: '0.5rem 0rem'
+  }
+}));
 
 const GeneralSettings = () => {
   const location = useLocation();
-  const classes = useStyles();
   const theme = useTheme();
 
   const [previousSetPassword, setPreviousSetPassword] = React.useState(
@@ -246,7 +248,7 @@ const GeneralSettings = () => {
   };
 
   return (
-    <div style={{ width: '100%' }}>
+    <Root style={{ width: '100%' }}>
       <DialogBoxConfirmation
         isClosePresent
         maxWidth="sm"
@@ -312,7 +314,7 @@ const GeneralSettings = () => {
           })}
         </List>
       </div>
-    </div>
+    </Root>
   );
 };
 

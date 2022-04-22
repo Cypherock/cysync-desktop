@@ -1,9 +1,19 @@
-import { TextField } from '@material-ui/core';
-import { Theme, withStyles } from '@material-ui/core/styles';
+import { TextField } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import React from 'react';
 
-const CssTextField = withStyles((theme: Theme) => ({
-  root: {
+const PREFIX = 'Input';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  root2: `${PREFIX}-root2`
+};
+
+const CssTextField = TextField;
+const LightCssTextField = TextField;
+
+const StyledCssTextField = styled(CssTextField)(({ theme }) => ({
+  [`& .${classes.root}`]: {
     '& label.Mui-focused': {
       color: theme.palette.text.primary
     },
@@ -24,10 +34,9 @@ const CssTextField = withStyles((theme: Theme) => ({
     '&&& $input': {
       padding: '15px 14px'
     }
-  }
-}))(TextField);
-const LightCssTextField = withStyles((theme: Theme) => ({
-  root: {
+  },
+
+  [`& .${classes.root2}`]: {
     '& label.Mui-focused': {
       color: theme.palette.text.primary
     },
@@ -47,14 +56,20 @@ const LightCssTextField = withStyles((theme: Theme) => ({
       }
     }
   }
-}))(TextField);
+}));
 
 const Input = (props: any) => {
   const { styleType } = props;
   return styleType === 'light' ? (
-    <LightCssTextField variant="outlined" {...props} />
+    <LightCssTextField
+      variant="outlined"
+      {...props}
+      classes={{
+        root: classes.root2
+      }}
+    />
   ) : (
-    <CssTextField variant="outlined" {...props} />
+    <StyledCssTextField variant="outlined" {...props} />
   );
 };
 

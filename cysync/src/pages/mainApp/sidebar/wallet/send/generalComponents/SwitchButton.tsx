@@ -1,11 +1,8 @@
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Switch, { SwitchClassKey, SwitchProps } from '@material-ui/core/Switch';
-import Typography from '@material-ui/core/Typography';
+import { styled, Theme } from '@mui/material/styles';
+import Switch, { SwitchClassKey, SwitchProps } from '@mui/material/Switch';
+import Typography from '@mui/material/Typography';
+import createStyles from '@mui/styles/createStyles';
+import withStyles from '@mui/styles/withStyles';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -24,7 +21,7 @@ const IOSSwitch = withStyles((theme: Theme) =>
       height: 18,
       padding: 0,
       paddingBottom: 2,
-      margin: `0px ${theme.spacing(1)}px `
+      margin: `0px ${theme.spacing(1)} `
     },
     switchBase: {
       padding: 1,
@@ -84,34 +81,23 @@ type SwitchButtonProps = {
   handleChange: () => void;
 };
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      display: 'flex',
-      alignItems: 'center'
-    },
-    sliderButton: {}
-  })
-);
+const Root = styled('div')(() => ({
+  display: 'flex',
+  alignItems: 'center'
+}));
 
 const SwitchButton: React.FC<SwitchButtonProps> = ({
   completed,
   label,
   handleChange
 }) => {
-  const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <Root>
       <Typography color="textSecondary" variant="caption">
         {label}
       </Typography>
-      <IOSSwitch
-        checked={completed}
-        onChange={handleChange}
-        name="checkedB"
-        className={classes.sliderButton}
-      />
-    </div>
+      <IOSSwitch checked={completed} onChange={handleChange} name="checkedB" />
+    </Root>
   );
 };
 
