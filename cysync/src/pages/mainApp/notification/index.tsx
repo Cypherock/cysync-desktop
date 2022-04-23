@@ -6,7 +6,7 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 
-import { useConnection, useNotifications } from '../../../store/provider';
+import { useNetwork, useNotifications } from '../../../store/provider';
 
 import NotificationList from './notificationList';
 
@@ -66,7 +66,7 @@ const Notification = () => {
     hasUnread,
     markAllRead
   } = useNotifications();
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
   const [initialFetch, setIntialFetch] = useState(false);
 
   useEffect(() => {

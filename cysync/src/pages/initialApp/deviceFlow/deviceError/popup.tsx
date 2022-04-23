@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import CustomButton from '../../../../designSystem/designComponents/buttons/button';
-import { useConnection } from '../../../../store/provider';
+import { useConnection, VerifyState } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
 
@@ -29,17 +29,16 @@ const Root = styled(Grid)(() => ({
 
 type Props = {
   handleClose: () => void;
-  state: number;
 };
 
-const Popup: React.FC<Props> = ({ handleClose, state }) => {
-  const { retryConnection } = useConnection();
+const Popup: React.FC<Props> = ({ handleClose }) => {
+  const { retryConnection, verifyState } = useConnection();
 
   const getHeading = () => {
-    switch (state) {
-      case 6:
+    switch (verifyState) {
+      case VerifyState.DEVICE_NOT_READY:
         return 'Looks like the device is not in the main menu.';
-      case 7:
+      case VerifyState.UNKNOWN_ERROR:
         return 'An unknown error occurred while connecting the device.';
       default:
         return 'An unknown error occurred while connecting the device.';
@@ -47,10 +46,10 @@ const Popup: React.FC<Props> = ({ handleClose, state }) => {
   };
 
   const getQuestion = () => {
-    switch (state) {
-      case 6:
+    switch (verifyState) {
+      case VerifyState.DEVICE_NOT_READY:
         return 'Please bring the device to the main menu and try again.';
-      case 7:
+      case VerifyState.UNKNOWN_ERROR:
         return 'Please reconnect the device and try again';
       default:
         return 'Please reconnect the device and try again';
@@ -58,20 +57,20 @@ const Popup: React.FC<Props> = ({ handleClose, state }) => {
   };
 
   const getPositiveBtnText = () => {
-    switch (state) {
-      case 6:
+    switch (verifyState) {
+      case VerifyState.DEVICE_NOT_READY:
         return 'Try again';
-      case 7:
+      case VerifyState.UNKNOWN_ERROR:
       default:
         return 'Ok';
     }
   };
 
   const getNegativeBtnText = () => {
-    switch (state) {
-      case 6:
+    switch (verifyState) {
+      case VerifyState.DEVICE_NOT_READY:
         return 'Cancel';
-      case 7:
+      case VerifyState.UNKNOWN_ERROR:
       default:
         return undefined;
     }
@@ -82,8 +81,8 @@ const Popup: React.FC<Props> = ({ handleClose, state }) => {
   };
 
   const onPositiveClick = () => {
-    switch (state) {
-      case 6:
+    switch (verifyState) {
+      case VerifyState.DEVICE_NOT_READY:
         logger.info('Retry device connection by user');
         Analytics.Instance.event(
           Analytics.Categories.RETRY_DEVICE_CONNECTION,
@@ -92,7 +91,7 @@ const Popup: React.FC<Props> = ({ handleClose, state }) => {
         retryConnection();
         handleClose();
         break;
-      case 7:
+      case VerifyState.UNKNOWN_ERROR:
       default:
         handleClose();
     }
@@ -135,7 +134,6 @@ const Popup: React.FC<Props> = ({ handleClose, state }) => {
 };
 
 Popup.propTypes = {
-  state: PropTypes.number.isRequired,
   handleClose: PropTypes.func.isRequired
 };
 

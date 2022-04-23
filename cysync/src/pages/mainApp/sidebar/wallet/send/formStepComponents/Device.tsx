@@ -6,7 +6,7 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import {
-  useConnection,
+  useNetwork,
   useSelectedWallet,
   useSendTransactionContext
 } from '../../../../../../store/provider';
@@ -83,7 +83,7 @@ const Device: React.FC<StepComponentProps> = ({ handleNext }) => {
 
   const { selectedWallet } = useSelectedWallet();
 
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   useEffect(() => {
     if (sendTransaction.cardsTapped) {

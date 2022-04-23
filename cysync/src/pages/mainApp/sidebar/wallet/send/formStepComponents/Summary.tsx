@@ -9,8 +9,8 @@ import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop'
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import { broadcastTxn } from '../../../../../../store/hooks/flows';
 import {
-  useConnection,
   useCurrentCoin,
+  useNetwork,
   useSelectedWallet,
   useSendTransactionContext,
   useSocket,
@@ -103,7 +103,7 @@ const Summary: React.FC<StepComponentProps> = ({
 
   const { token } = useTokenContext();
 
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   const coinAbbr = token ? token.coin : coinDetails.coin;
 

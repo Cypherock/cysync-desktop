@@ -14,7 +14,8 @@ import { useDeviceAuth } from '../../../../../store/hooks/flows';
 import {
   FeedbackState,
   useConnection,
-  useFeedback
+  useFeedback,
+  VerifyState
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../../../utils/compareVersion';
@@ -121,7 +122,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
       if (
         deviceConnection &&
         !inBackgroundProcess &&
-        [1, 2].includes(verifyState)
+        [VerifyState.IN_TEST_APP, VerifyState.IN_BOOTLOADER].includes(
+          verifyState
+        )
       ) {
         if (inBootloader) {
           setErrorMsg(
@@ -199,7 +202,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
       timeout = undefined;
     }
 
-    if (verifyState !== 1) {
+    if (verifyState !== VerifyState.IN_TEST_APP) {
       setErrorMsg('Please connect the device and try again.');
       return;
     }
@@ -232,7 +235,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
         </Typography>
         <DynamicTextView
           text="Connect X1 wallet"
-          state={verifyState === 1 ? 2 : 1}
+          state={verifyState === VerifyState.IN_TEST_APP ? 2 : 1}
         />
         <br />
         <DynamicTextView

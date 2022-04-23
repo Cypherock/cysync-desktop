@@ -28,7 +28,7 @@ import { getSystemInfo } from '../../utils/systemInfo';
 import getUUID from '../../utils/uuid';
 import { useLogFetcher } from '../hooks/flows/useLogFetcher';
 
-import { useConnection } from './connectionProvider';
+import { useConnection, VerifyState } from './connectionProvider';
 import { useSnackbar } from './snackbarProvider';
 
 const PREFIX = 'FeedbackContext';
@@ -410,7 +410,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   };
 
   const isDeviceConnected = () => {
-    return deviceConnection && [0, 1].includes(verifyState);
+    return (
+      deviceConnection &&
+      [VerifyState.VERIFIED, VerifyState.IN_TEST_APP].includes(verifyState)
+    );
   };
 
   const handleOk = () => {
@@ -466,18 +469,18 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   const getDeviceStateErrorMsg = () => {
     const defaultText = 'Looks like the device is not configured.';
     switch (verifyState) {
-      case -1:
+      case VerifyState.NOT_CONNECTED:
         return 'Please connect the device to attach device logs.';
-      case 2:
-      case 3:
+      case VerifyState.IN_BOOTLOADER:
+      case VerifyState.PARTIAL_STATE:
         return 'Looks like your device was disconnected while upgrading.';
-      case 4:
+      case VerifyState.NEW_DEVICE:
         return 'Looks like this device is connected for the first time.';
-      case 5:
+      case VerifyState.LAST_AUTH_FAILED:
         return 'Looks like the device authentication failed the last time.';
-      case 6:
+      case VerifyState.DEVICE_NOT_READY:
         return 'Looks like the device is not in the main menu.';
-      case 7:
+      case VerifyState.UNKNOWN_ERROR:
         return 'An unknown error occurred while connecting the device.';
       default:
         return defaultText;

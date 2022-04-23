@@ -49,7 +49,7 @@ const Index = () => {
       );
     }
 
-    return <Dashboard handleLock={handleLockScreenClickOpen} />;
+    return <Dashboard />;
   };
 
   return (
