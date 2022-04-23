@@ -15,7 +15,7 @@ import ModAvatar from '../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../designSystem/iconGroups/errorExclamation';
 import { useDeviceUpgrade } from '../../../store/hooks/flows';
-import { useConnection, useFeedback } from '../../../store/provider';
+import { useFeedback, useNetwork } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import DynamicTextView from '../sidebar/settings/tabViews/deviceHealth/dynamicTextView';
@@ -83,7 +83,7 @@ type Props = {
 };
 
 const Updater: React.FC<Props> = ({ handleClose }) => {
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   const {
     startDeviceUpdate,

@@ -1,7 +1,6 @@
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import clsx from 'clsx';
-import PropTypes from 'prop-types';
 import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
@@ -10,7 +9,7 @@ import { UpdateProvider, WalletsProvider } from '../../store/provider';
 
 import DbCleanup from './dbCleanup';
 import DeviceUpdater from './deviceUpdater';
-import Navbar from './Navbar';
+import Navbar from './navbar';
 import Sidebar from './sidebar';
 import Portfolio from './sidebar/portfolio';
 import Settings from './sidebar/settings';
@@ -99,18 +98,14 @@ const StyledGrid = styled(Grid)(({ theme }) => ({
   }
 }));
 
-interface Props {
-  handleLock: () => void;
-}
-
-const MainApp: React.FC<Props> = ({ handleLock }) => {
+const MainApp: React.FC = () => {
   return (
     <HashRouter>
       <WalletsProvider>
         <UpdateProvider>
           <StyledGrid container className={classes.root}>
             <Grid container className={classes.navbar}>
-              <Navbar handleLock={handleLock} />
+              <Navbar />
             </Grid>
             <Grid
               container
@@ -162,10 +157,6 @@ const MainApp: React.FC<Props> = ({ handleLock }) => {
       </WalletsProvider>
     </HashRouter>
   );
-};
-
-MainApp.propTypes = {
-  handleLock: PropTypes.func.isRequired
 };
 
 export default MainApp;

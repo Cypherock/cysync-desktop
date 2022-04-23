@@ -7,7 +7,7 @@ import TextView from '../../../../../../designSystem/designComponents/textCompon
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import {
   useAddCoinContext,
-  useConnection,
+  useNetwork,
   useSelectedWallet
 } from '../../../../../../store/provider';
 
@@ -42,7 +42,7 @@ const Root = styled('div')(() => ({
 
 const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
   const { coinAdder } = useAddCoinContext();
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   const { selectedWallet } = useSelectedWallet();
 

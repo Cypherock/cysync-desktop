@@ -2,7 +2,7 @@ import { shell } from 'electron';
 import React, { useEffect, useState } from 'react';
 
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
-import { useConnection } from '../../../store/provider';
+import { useConnection, VerifyState } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
@@ -27,11 +27,15 @@ const DeviceUpdatePopup = () => {
     setOpenVerifyPrompt(false);
     if (val) {
       let localUpdateType: UpdateType = 'update';
-      if ([3, 5].includes(verifyState)) {
+      if (
+        [VerifyState.PARTIAL_STATE, VerifyState.LAST_AUTH_FAILED].includes(
+          verifyState
+        )
+      ) {
         localUpdateType = 'auth';
-      } else if (verifyState === 1) {
+      } else if (verifyState === VerifyState.IN_TEST_APP) {
         localUpdateType = 'initial';
-      } else if (verifyState === 8) {
+      } else if (verifyState === VerifyState.UPDATE_REQUIRED) {
         if (updateRequiredType === 'device') {
           localUpdateType = 'update';
         } else {
@@ -111,7 +115,10 @@ const DeviceUpdatePopup = () => {
     );
   }
 
-  if (verifyState !== 0 && verifyState !== -1) {
+  if (
+    verifyState !== VerifyState.VERIFIED &&
+    verifyState !== VerifyState.NOT_CONNECTED
+  ) {
     return (
       <DialogBox
         fullWidth
@@ -121,7 +128,6 @@ const DeviceUpdatePopup = () => {
         isClosePresent
         restComponents={
           <ConfirmationComponent
-            state={verifyState}
             handleClose={onConfirmation}
             updateRequiredType={updateRequiredType}
           />

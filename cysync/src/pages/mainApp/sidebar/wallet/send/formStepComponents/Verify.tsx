@@ -10,8 +10,8 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import {
-  useConnection,
   useCurrentCoin,
+  useNetwork,
   useSendTransactionContext,
   useTokenContext
 } from '../../../../../../store/provider';
@@ -106,7 +106,7 @@ const Verify = (props: any) => {
 
   const { token } = useTokenContext();
 
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   const coinAbbr = token ? token.coin : coinDetails.coin;
 

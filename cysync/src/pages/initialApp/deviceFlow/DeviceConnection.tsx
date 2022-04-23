@@ -12,7 +12,8 @@ import DeviceWired from '../../../designSystem/iconGroups/deviceWired';
 import {
   FeedbackState,
   useConnection,
-  useFeedback
+  useFeedback,
+  VerifyState
 } from '../../../store/provider';
 import { inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
@@ -120,8 +121,16 @@ const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
   };
 
   useEffect(() => {
-    if (deviceConnection && !inBackgroundProcess && verifyState !== -1) {
-      if ([1, 2].includes(verifyState)) {
+    if (
+      deviceConnection &&
+      !inBackgroundProcess &&
+      verifyState !== VerifyState.NOT_CONNECTED
+    ) {
+      if (
+        [VerifyState.IN_TEST_APP, VerifyState.IN_BOOTLOADER].includes(
+          verifyState
+        )
+      ) {
         // When in bootloader or test app, start initialFlow
         logger.info('Device connected in bootloader mode or test app.');
         handleConnected();

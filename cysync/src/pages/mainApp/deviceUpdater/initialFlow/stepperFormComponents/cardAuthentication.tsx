@@ -14,7 +14,8 @@ import { useCardAuth } from '../../../../../store/hooks/flows';
 import {
   FeedbackState,
   useConnection,
-  useFeedback
+  useFeedback,
+  VerifyState
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../../../utils/compareVersion';
@@ -154,7 +155,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
     if (
       deviceConnection &&
       !inBackgroundProcess &&
-      [1, 2].includes(verifyState)
+      [VerifyState.IN_TEST_APP, VerifyState.IN_BOOTLOADER].includes(verifyState)
     ) {
       if (!connected) {
         return;
@@ -329,7 +330,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
     setShowRetry(false);
     setErrorMsg('');
 
-    if (verifyState !== 1) {
+    if (verifyState !== VerifyState.IN_TEST_APP) {
       setShowRetry(true);
       setErrorMsg('Please connect the device and try again.');
       return;

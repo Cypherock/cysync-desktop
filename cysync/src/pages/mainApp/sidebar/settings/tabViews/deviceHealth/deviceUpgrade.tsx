@@ -24,8 +24,8 @@ import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import { useDeviceUpgrade } from '../../../../../../store/hooks/flows';
 import {
   FeedbackState,
-  useConnection,
-  useFeedback
+  useFeedback,
+  useNetwork
 } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import {
@@ -271,7 +271,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   const [upgradeAvailable, setUpgradeAvailable] = React.useState(false);
   const [initialStart, setInitialStart] = React.useState(false);
 
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   const {
     startDeviceUpdate,

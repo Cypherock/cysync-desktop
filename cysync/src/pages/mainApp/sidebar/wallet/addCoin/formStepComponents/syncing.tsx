@@ -8,7 +8,7 @@ import TextView from '../../../../../../designSystem/designComponents/textCompon
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import {
   useAddCoinContext,
-  useConnection
+  useNetwork
 } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 
@@ -43,7 +43,7 @@ const Root = styled('div')(() => ({
 
 const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
   const { coinAdder } = useAddCoinContext();
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   useEffect(() => {
     if (coinAdder.addCoinCompleted) {

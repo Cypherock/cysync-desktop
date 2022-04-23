@@ -16,8 +16,8 @@ import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclam
 import { useDeviceUpgrade } from '../../../../../store/hooks/flows';
 import {
   FeedbackState,
-  useConnection,
-  useFeedback
+  useFeedback,
+  useNetwork
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import logger from '../../../../../utils/logger';
@@ -81,15 +81,7 @@ const Root = styled(Grid)(({ theme }) => ({
 const UpgradingDevice: React.FC<StepComponentProps> = ({
   handleDeviceConnected
 }) => {
-  /**
-   * Complete States:
-   * -1: Error
-   * 0: Downloading/Waiting for device confirmation
-   * 1: Updating
-   * 2: Completed successfully
-   */
-
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   const {
     startDeviceUpdate,

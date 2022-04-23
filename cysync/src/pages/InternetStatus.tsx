@@ -2,7 +2,7 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React from 'react';
 
-import { useConnection } from '../store/provider';
+import { useNetwork } from '../store/provider';
 
 const PREFIX = 'InternetStatus';
 
@@ -36,7 +36,7 @@ const Root = styled('div')(({ theme }) => ({
 }));
 
 const InternetStatus = () => {
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   return (
     <Root
