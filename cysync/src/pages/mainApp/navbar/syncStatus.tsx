@@ -44,17 +44,17 @@ const SyncStatus: React.FC<SyncStatusProps> = props => {
   };
 
   // Resync Button enabled after 15 minutes of last sync
-  let interval: NodeJS.Timeout | undefined;
+  const interval = React.useRef<NodeJS.Timeout | undefined>(undefined);
   useEffect(() => {
     if (!isSyncing && !resyncAvailable) {
-      interval = setTimeout(() => {
+      interval.current = setTimeout(() => {
         setResyncAvailable(true);
       }, 1000 * 60 * 15);
     }
     return () => {
-      if (interval) {
-        clearTimeout(interval);
-        interval = undefined;
+      if (interval.current) {
+        clearTimeout(interval.current);
+        interval.current = undefined;
       }
     };
   }, [isSyncing, resyncAvailable]);

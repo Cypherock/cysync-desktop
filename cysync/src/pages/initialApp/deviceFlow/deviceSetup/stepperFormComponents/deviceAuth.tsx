@@ -188,15 +188,15 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     });
   };
 
-  let timeout: NodeJS.Timeout | undefined;
+  const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const onRetry = () => {
     setErrorMsg('');
     setErrorMessage('');
     resetHooks();
 
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = undefined;
+    if (timeout.current) {
+      clearTimeout(timeout.current);
+      timeout.current = undefined;
     }
 
     if (verifyState !== VerifyState.IN_TEST_APP) {
@@ -204,7 +204,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
       return;
     }
 
-    timeout = setTimeout(() => {
+    timeout.current = setTimeout(() => {
       if (deviceConnection && firmwareVersion) {
         handleDeviceAuth({
           connection: deviceConnection,

@@ -4,7 +4,7 @@ import {
   PacketVersion
 } from '@cypherock/communication';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import SerialPort from 'serialport';
 
 import { inTestApp } from '../../utils/compareVersion';
@@ -379,9 +379,9 @@ export const ConnectionProvider: React.FC = ({ children }) => {
     }
   }, [verifyState]);
 
-  let notReadyCheckTimeout: NodeJS.Timeout | undefined;
+  const notReadyCheckTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
   useEffect(() => {
-    notReadyCheckTimeout = setTimeout(() => {
+    notReadyCheckTimeout.current = setTimeout(() => {
       if (isDeviceNotReady) {
         logger.info('Checking if device is ready now.');
         setIsDeviceNotReadyCheck(true);
@@ -392,9 +392,9 @@ export const ConnectionProvider: React.FC = ({ children }) => {
     }, 2000);
 
     return () => {
-      if (notReadyCheckTimeout) {
-        clearTimeout(notReadyCheckTimeout);
-        notReadyCheckTimeout = undefined;
+      if (notReadyCheckTimeout.current) {
+        clearTimeout(notReadyCheckTimeout.current);
+        notReadyCheckTimeout.current = undefined;
       }
     };
   }, [isDeviceNotReady]);
