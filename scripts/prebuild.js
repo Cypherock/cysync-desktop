@@ -132,11 +132,25 @@ const setVersion = async (buildType, tagName) => {
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, undefined, 2));
 };
 
+const setDependencies = () => {
+  const packageJsonPath = path.join(__dirname, "..", "cysync", "package.json");
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath));
+
+  if (process.platform === "darwin") {
+    packageJson.resolutions = {
+      "**/@electron-forge/maker-dmg/electron-installer-dmg/appdmg": "^0.6.4"
+    }
+  }
+
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, undefined, 2));
+}
+
 const run = async () => {
   try {
     const { buildType, tagName } = getArgs();
     setConfig(buildType);
     await setVersion(buildType, tagName);
+    setDependencies();
   } catch (error) {
     console.error(error);
     process.exit(1);
