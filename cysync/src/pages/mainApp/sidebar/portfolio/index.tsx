@@ -8,7 +8,7 @@ import Routes from '../../../../constants/routes';
 import CustomButton from '../../../../designSystem/designComponents/buttons/button';
 import DropMenu from '../../../../designSystem/designComponents/menu/DropMenu';
 import { usePortfolio } from '../../../../store/hooks';
-import { useSnackbar, useWallets } from '../../../../store/provider';
+import { useWallets } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
 
@@ -69,10 +69,8 @@ const Portfolio = () => {
     navigate(`${Routes.wallet.index}/${walletId}`);
   }, []);
 
-  const snackbar = useSnackbar();
   const setSortIndexProxy = React.useCallback((val: number) => {
     setSortIndex(val);
-    snackbar.showSnackbar('Text', 'info');
   }, []);
 
   const onAddWallet = () => {
