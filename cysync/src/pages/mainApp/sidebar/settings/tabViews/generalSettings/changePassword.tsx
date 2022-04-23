@@ -87,6 +87,12 @@ const ChangePassword: React.FC<Props> = ({
 
   const [error, setError] = React.useState('');
 
+  const resetState = () => {
+    setValues({ ...INITIAL_VALUES });
+    setIsLoading(false);
+    setError('');
+  };
+
   const handleChange =
     (prop: keyof State) => (event: React.ChangeEvent<HTMLInputElement>) => {
       setValues({ ...values, [prop]: event.target.value });
@@ -108,7 +114,7 @@ const ChangePassword: React.FC<Props> = ({
   };
 
   const closeDialogBox = () => {
-    setValues({ ...INITIAL_VALUES });
+    resetState();
     closeChangePassword();
   };
 
