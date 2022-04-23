@@ -74,6 +74,12 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
 
   const [error, setError] = React.useState('');
 
+  const resetState = () => {
+    setValues({ ...INITIAL_VALUES });
+    setIsLoading(false);
+    setError('');
+  };
+
   const handleChange =
     (prop: keyof State) => (event: React.ChangeEvent<HTMLInputElement>) => {
       setValues({ ...values, [prop]: event.target.value });
@@ -146,7 +152,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
   };
 
   const closeDialogBox = () => {
-    setValues({ ...INITIAL_VALUES });
+    resetState();
     onClose();
   };
 
