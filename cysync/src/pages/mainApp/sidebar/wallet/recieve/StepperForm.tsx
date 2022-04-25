@@ -1,6 +1,7 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
+import { StepIconProps } from '@mui/material/StepIcon';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { styled, Theme } from '@mui/material/styles';
@@ -91,13 +92,11 @@ const StepRoot = styled('div')(({ theme }) => ({
   }
 }));
 
-type Props = {
-  active?: boolean | undefined;
-  completed?: boolean | undefined;
-  icon?: JSX.Element;
-};
-
-const QontoStepIcon: React.FC<Props> = ({ active, completed, icon }) => {
+const QontoStepIcon: React.FC<StepIconProps> = ({
+  active,
+  completed,
+  icon
+}) => {
   return (
     <StepRoot
       className={clsx({
@@ -125,18 +124,6 @@ const QontoStepIcon: React.FC<Props> = ({ active, completed, icon }) => {
       )}
     </StepRoot>
   );
-};
-
-QontoStepIcon.propTypes = {
-  active: PropTypes.bool,
-  completed: PropTypes.bool,
-  icon: PropTypes.element
-};
-
-QontoStepIcon.defaultProps = {
-  active: undefined,
-  completed: undefined,
-  icon: undefined
 };
 
 const StyledStepLabel = withStyles((theme: Theme) =>

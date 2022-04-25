@@ -8,6 +8,7 @@ import { EthereumWallet } from '@cypherock/wallet';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
+import { StepIconProps } from '@mui/material/StepIcon';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { styled, Theme } from '@mui/material/styles';
@@ -110,13 +111,11 @@ const StepRoot = styled('div')(({ theme }) => ({
   }
 }));
 
-type Props = {
-  active?: boolean | undefined;
-  completed?: boolean | undefined;
-  icon?: JSX.Element;
-};
-
-const QontoStepIcon: React.FC<Props> = ({ active, completed, icon }) => {
+const QontoStepIcon: React.FC<StepIconProps> = ({
+  active,
+  completed,
+  icon
+}) => {
   return (
     <StepRoot
       className={clsx({
@@ -148,18 +147,6 @@ const QontoStepIcon: React.FC<Props> = ({ active, completed, icon }) => {
       )}
     </StepRoot>
   );
-};
-
-QontoStepIcon.propTypes = {
-  active: PropTypes.bool,
-  completed: PropTypes.bool,
-  icon: PropTypes.element
-};
-
-QontoStepIcon.defaultProps = {
-  active: undefined,
-  completed: undefined,
-  icon: undefined
 };
 
 const StyledStepLabel = withStyles((theme: Theme) =>
@@ -239,7 +226,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [batchRecipientData, addbatchRecipientData] = React.useState<
     BatchRecipientData[]
   >([
-    { id: 1, recipient: ' ', amount: 0.0, errorRecipient: '', errorAmount: '' }
+    { id: 1, recipient: ' ', amount: '0', errorRecipient: '', errorAmount: '' }
   ]);
 
   const [duplicateBatchAddresses, setDuplicateBatchAddresses] = useState<
@@ -348,7 +335,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     const newBatchRecipientData = batchRecipientData.map(data => {
       return {
         ...data,
-        amount: isMaxSend ? undefined : 0
+        amount: isMaxSend ? undefined : '0'
       };
     });
 
@@ -388,7 +375,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       {
         id: lastElementId + 1,
         recipient: '',
-        amount: 0.0,
+        amount: '0',
         errorRecipient: '',
         errorAmount: ''
       }
