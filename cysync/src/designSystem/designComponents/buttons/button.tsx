@@ -1,30 +1,33 @@
 import { Button, ButtonProps } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles';
 import React from 'react';
 
 import colors from '../../designConstants/colors';
 
-const theme = createTheme({
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          background: '#71624C',
-          color: '#FFFFFF',
-          textTransform: 'none',
-          '&:hover': {
-            background: colors.primary.dark
-          },
-          '&.Mui-disabled': {
-            backgroundColor: `${colors.text.secondary} !important`,
-            color: `${colors.secondary.main} !important`,
-            cursor: 'not-allowed !important'
+const theme = (prevTheme: ThemeOptions) =>
+  createTheme({
+    ...prevTheme,
+    components: {
+      ...prevTheme.components,
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            background: '#71624C',
+            color: '#FFFFFF',
+            textTransform: 'none',
+            '&:hover': {
+              background: colors.primary.dark
+            },
+            '&.Mui-disabled': {
+              backgroundColor: `${colors.text.secondary} !important`,
+              color: `${colors.secondary.main} !important`,
+              cursor: 'not-allowed !important'
+            }
           }
         }
       }
     }
-  }
-});
+  });
 
 const NewButton = (props: ButtonProps) => {
   const { color } = props;

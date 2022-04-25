@@ -94,10 +94,18 @@ const OneCoin: React.FC<OneCoinProps> = props => {
           style={{ marginRight: '10px' }}
         />
         <div className={classes.coinText}>
-          <Typography variant="body2" color="textPrimary">
+          <Typography
+            variant="body2"
+            color="textPrimary"
+            className={classes.bold}
+          >
             {coinInitial.toUpperCase()}
           </Typography>
-          <Typography color="textPrimary" style={{ fontSize: '0.6rem' }}>
+          <Typography
+            color="textPrimary"
+            style={{ fontSize: '0.6rem' }}
+            className={classes.bold}
+          >
             {coin.name.toUpperCase()}
           </Typography>
         </div>

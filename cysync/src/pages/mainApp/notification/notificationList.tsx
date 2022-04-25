@@ -1,6 +1,11 @@
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
+import {
+  createTheme,
+  styled,
+  ThemeOptions,
+  ThemeProvider
+} from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -52,22 +57,25 @@ const Root = styled('div')(() => ({
   }
 }));
 
-const buttonTheme = createTheme({
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#474848',
-          color: '#cccccc'
-        },
-        text: {
-          textTransform: 'none',
-          fontWeight: 'bold'
+const buttonTheme = (prevTheme: ThemeOptions) =>
+  createTheme({
+    ...prevTheme,
+    components: {
+      ...prevTheme.components,
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            backgroundColor: '#474848',
+            color: '#cccccc'
+          },
+          text: {
+            textTransform: 'none',
+            fontWeight: 'bold'
+          }
         }
       }
     }
-  }
-});
+  });
 
 type Props = {
   notifications: any[];

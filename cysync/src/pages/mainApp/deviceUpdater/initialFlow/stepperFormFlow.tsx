@@ -152,9 +152,7 @@ const classes = {
 };
 
 const Root = styled('div')(({ theme }) => ({
-  [`&.${classes.root}`]: {
-    width: '100%'
-  },
+  width: '100%',
   [`& .${classes.backButton}`]: {
     marginRight: theme.spacing(1)
   },
