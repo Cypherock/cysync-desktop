@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import Routes from '../../../constants/routes';
 import {
   addressDb,
+  erc20tokenDb,
   receiveAddressDb,
   transactionDb,
   walletDb,
@@ -143,6 +144,7 @@ const WalletItem = (props: WalletItemProps) => {
         walletId
       });
       await xpubDb.deleteWallet(walletId);
+      await erc20tokenDb.deleteWallet(walletId);
       await transactionDb.deleteWallet(walletId);
       navigate(Routes.wallet.index);
       setDeleteOpen(false);
