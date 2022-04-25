@@ -97,6 +97,11 @@ export const SyncProvider: React.FC = ({ children }) => {
   const maxRetries = 2;
 
   const { connected } = useNetwork();
+  const connectedRef = useRef<boolean | null>(connected);
+
+  useEffect(() => {
+    connectedRef.current = connected;
+  }, [connected]);
 
   const addToQueue = (item: SyncQueueItem) => {
     setSyncQueue(currentSyncQueue => {
@@ -1007,7 +1012,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     if (intervals.current.length === 0) {
       intervals.current.push(
         setInterval(async () => {
-          if (connected && process.env.IS_PRODUCTION === 'true') {
+          if (connectedRef.current && process.env.IS_PRODUCTION === 'true') {
             logger.info('Sync: Refresh triggered');
             try {
               addPriceRefresh({ isRefresh: true, module: 'refresh' });
@@ -1024,7 +1029,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       // Refresh after 15 mins
       intervals.current.push(
         setInterval(async () => {
-          if (connected && process.env.IS_PRODUCTION === 'true') {
+          if (connectedRef.current && process.env.IS_PRODUCTION === 'true') {
             logger.info('Sync: Refresh triggered for latest price');
             try {
               addLatestPriceRefresh({ isRefresh: true, module: 'refresh' });
