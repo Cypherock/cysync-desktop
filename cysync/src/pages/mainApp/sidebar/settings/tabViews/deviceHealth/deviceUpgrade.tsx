@@ -4,6 +4,7 @@ import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { Button, Grid } from '@mui/material';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
+import { StepIconProps } from '@mui/material/StepIcon';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { styled, Theme } from '@mui/material/styles';
@@ -11,7 +12,6 @@ import Typography from '@mui/material/Typography';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
-import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 
 import success from '../../../../../../assets/icons/generic/success.png';
@@ -114,13 +114,11 @@ const StepRoot = styled('div')(({ theme }) => ({
   }
 }));
 
-type Props = {
-  active?: boolean | undefined;
-  completed?: boolean | undefined;
-  icon?: JSX.Element;
-};
-
-const QontoStepIcon: React.FC<Props> = ({ active, completed, icon }) => {
+const QontoStepIcon: React.FC<StepIconProps> = ({
+  active,
+  completed,
+  icon
+}) => {
   return (
     <StepRoot
       className={clsx({
@@ -148,18 +146,6 @@ const QontoStepIcon: React.FC<Props> = ({ active, completed, icon }) => {
       )}
     </StepRoot>
   );
-};
-
-QontoStepIcon.propTypes = {
-  active: PropTypes.bool,
-  completed: PropTypes.bool,
-  icon: PropTypes.element
-};
-
-QontoStepIcon.defaultProps = {
-  active: undefined,
-  completed: undefined,
-  icon: undefined
 };
 
 const StyledStepLabel = withStyles((theme: Theme) =>

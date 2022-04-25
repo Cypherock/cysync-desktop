@@ -709,11 +709,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
           <Grid item xs={12}>
             {batchRecipientData.map((recipient: any, index) => {
               return (
-                <>
+                <div key={recipient.id}>
                   <BatchRecipient
                     handleDelete={handleDelete}
                     handleChange={handleInputChange}
-                    key={recipient.id}
                     id={recipient.id.toString()}
                     recipient={recipient}
                     handleCopyFromClipboard={handleCopyFromClipboard}
@@ -722,7 +721,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
                     allowDelete={batchRecipientData.length > 1}
                   />
                   {getDuplicateWarning(recipient.id.toString())}
-                </>
+                </div>
               );
             })}
           </Grid>

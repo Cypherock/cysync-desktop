@@ -27,7 +27,6 @@ export interface DisplayInputOutput extends InputOutput {
 
 export const DisplayInputOutputPropTypes = {
   displayValue: PropTypes.string.isRequired,
-  displayAmount: PropTypes.string.isRequired,
   address: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   isMine: PropTypes.bool.isRequired,

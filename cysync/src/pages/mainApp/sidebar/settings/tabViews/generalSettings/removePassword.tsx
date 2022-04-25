@@ -132,20 +132,19 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
     setIsLoading(false);
   };
 
-  let timeout: NodeJS.Timeout;
+  const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   React.useEffect(() => {
     if (isLoading) {
-      timeout = setTimeout(handleSetPassword, 0);
+      timeout.current = setTimeout(handleSetPassword, 0);
     }
-  }, [isLoading]);
 
-  React.useEffect(() => {
     return () => {
-      if (timeout) {
-        clearTimeout(timeout);
+      if (timeout.current) {
+        clearTimeout(timeout.current);
+        timeout.current = undefined;
       }
     };
-  }, []);
+  }, [isLoading]);
 
   const confirmChangePassword = async () => {
     setIsLoading(true);

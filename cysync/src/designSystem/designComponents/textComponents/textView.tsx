@@ -65,7 +65,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = props => {
   const { text, completed, stylex, inProgress, failed } = props;
   const theme = useTheme();
   return (
-    <Root variant="outlined" elevation={0} {...props} style={{ ...stylex }}>
+    <Root variant="outlined" elevation={0} style={{ ...stylex }}>
       <Icon
         className={classes.arrow}
         icon={ICONS.rightArrow}
@@ -106,13 +106,14 @@ const ToggleButton: React.FC<ToggleButtonProps> = props => {
 
 ToggleButton.propTypes = {
   text: PropTypes.string.isRequired,
-  failed: PropTypes.bool.isRequired,
   completed: PropTypes.bool.isRequired,
   inProgress: PropTypes.bool.isRequired,
+  failed: PropTypes.bool,
   stylex: PropTypes.object
 };
 
 ToggleButton.defaultProps = {
+  failed: undefined,
   stylex: {}
 };
 

@@ -325,7 +325,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
     });
   };
 
-  let timeout: NodeJS.Timeout | undefined;
+  const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const onRetry = () => {
     setShowRetry(false);
     setErrorMsg('');
@@ -348,12 +348,12 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
     }
     setCardsAuth(temp);
 
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = undefined;
+    if (timeout.current) {
+      clearTimeout(timeout.current);
+      timeout.current = undefined;
     }
 
-    timeout = setTimeout(() => {
+    timeout.current = setTimeout(() => {
       if (deviceConnection && firmwareVersion) {
         handleCardAuth({
           connection: deviceConnection,

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 export interface BatchRecipientData {
   id: number;
   recipient: string;
-  amount: number | undefined;
+  amount: string | undefined;
   errorRecipient: string;
   errorAmount: string;
 }
@@ -11,7 +11,7 @@ export interface BatchRecipientData {
 export const BatchRecipientPropType = {
   id: PropTypes.number.isRequired,
   recipient: PropTypes.string.isRequired,
-  amount: PropTypes.number,
+  amount: PropTypes.string,
   errorRecipient: PropTypes.string.isRequired,
   errorAmount: PropTypes.string.isRequired
 };

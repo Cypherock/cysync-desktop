@@ -1,5 +1,5 @@
 import Button from '@mui/material/Button';
-import Collapse from '@mui/material/Collapse';
+import Collapse, { CollapseProps } from '@mui/material/Collapse';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import {
@@ -8,7 +8,7 @@ import {
   Theme,
   ThemeProvider
 } from '@mui/material/styles';
-import Tab from '@mui/material/Tab';
+import Tab, { TabProps } from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
@@ -199,6 +199,32 @@ const TabValues = [
   }
 ];
 
+/**
+ * Custom components for Divider and Collapse is made because any component inside
+ * `Tabs` will receive `TabProps` by default. This causes errors when the component
+ * does not expect these props.
+ *
+ * Hence we create custom components that ignores such props.
+ */
+const CustomDivider = (props: TabProps) => {
+  return <Divider className={props.className} />;
+};
+
+const CustomCollapse = (props: Omit<TabProps, 'children'> & CollapseProps) => {
+  return (
+    <div>
+      <Collapse
+        className={props.className}
+        in={props.in}
+        timeout={props.timeout}
+        unmountOnExit={props.unmountOnExit}
+      >
+        {props.children}
+      </Collapse>
+    </div>
+  );
+};
+
 const Sidebar = () => {
   const { allWallets: walletData } = useWallets();
 
@@ -281,21 +307,24 @@ const Sidebar = () => {
           <Tab
             label="Portfolio"
             wrapped={true}
+            value={0}
             icon={
               <Icon size={21} viewBox="0 0 24 21" iconGroup={<Portfolio />} />
             }
           />
-          <Divider className={classes.divider} />
+          <CustomDivider value={1} className={classes.divider} />
           <Tab
             label="Wallets"
             wrapped={true}
+            value={2}
             icon={<Icon size={21} viewBox="0 0 24 21" iconGroup={<Wallet />} />}
           />
-          <Collapse
+          <CustomCollapse
             in={open}
             timeout="auto"
             unmountOnExit
             className={classes.walletCollapse}
+            value={3}
           >
             <div className={classes.walletScroll}>
               {walletData.map((wallet, index: number) => {
@@ -314,11 +343,12 @@ const Sidebar = () => {
             <StyledAddWalletButton onClick={onImportWallet}>
               + Import Wallet
             </StyledAddWalletButton>
-          </Collapse>
-          <Divider className={classes.divider} />
+          </CustomCollapse>
+          <CustomDivider value={4} className={classes.divider} />
           <Tab
             label="Transactions"
             wrapped={true}
+            value={5}
             icon={
               <Icon
                 size={21}
@@ -327,17 +357,19 @@ const Sidebar = () => {
               />
             }
           />
-          <Divider className={classes.divider} />
+          <CustomDivider value={6} className={classes.divider} />
           <Tab
             label="Tutorial"
+            value={7}
             wrapped={true}
             icon={
               <Icon size={21} viewBox="0 0 24 21" iconGroup={<Tutorial />} />
             }
           />
-          <Divider className={classes.divider} />
+          <CustomDivider value={8} className={classes.divider} />
           <Tab
             label="Settings"
+            value={9}
             wrapped={true}
             icon={
               <Icon size={21} viewBox="0 0 24 21" iconGroup={<Settings />} />

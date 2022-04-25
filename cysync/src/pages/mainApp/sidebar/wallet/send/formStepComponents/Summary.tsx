@@ -228,7 +228,8 @@ const Summary: React.FC<StepComponentProps> = ({
             text={
               !maxSend
                 ? `${batchRecipientData[0].amount} ~( $${formatDisplayAmount(
-                    (batchRecipientData[0].amount || 0) * parseFloat(coinPrice),
+                    parseFloat(batchRecipientData[0].amount || '0') *
+                      parseFloat(coinPrice),
                     2,
                     true
                   )}) `

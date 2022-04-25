@@ -127,31 +127,30 @@ const LockScreen = (props: any) => {
       });
       passEnDb.setPassHash(generateSinglePasswordHash(values.password.trim()));
       await loadDatabases();
+      setIsLoading(false);
       props.handleClose();
     } else {
       setValues({
         ...values,
         error: 'Please Enter Correct Password'
       });
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
-  let timeout: NodeJS.Timeout;
+  const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   React.useEffect(() => {
     if (isLoading) {
-      timeout = setTimeout(handleSubmit, 0);
+      timeout.current = setTimeout(handleSubmit, 0);
     }
-  }, [isLoading]);
 
-  React.useEffect(() => {
     return () => {
-      if (timeout) {
-        clearTimeout(timeout);
+      if (timeout.current) {
+        clearTimeout(timeout.current);
+        timeout.current = undefined;
       }
     };
-  }, []);
+  }, [isLoading]);
 
   const ENTER_KEY = 13;
   const handleKeyPress = (event: any) => {

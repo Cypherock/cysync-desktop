@@ -375,7 +375,38 @@ const Transaction = () => {
         open={showTxn !== null}
         handleClose={() => setShowTxn(null)}
         isClosePresent
-        restComponents={<TransactionDialog txn={showTxn} />}
+        restComponents={
+          <TransactionDialog
+            txn={
+              showTxn
+                ? {
+                    hash: showTxn.hash,
+                    total: showTxn.total,
+                    fees: showTxn.fees,
+                    amount: showTxn.amount,
+                    confirmations: showTxn.confirmations,
+                    walletId: showTxn.walletId,
+                    walletName: showTxn.walletName,
+                    coin: showTxn.coin,
+                    ethCoin: showTxn.ethCoin,
+                    status: showTxn.status,
+                    sentReceive: showTxn.sentReceive,
+                    confirmed: showTxn.confirmed,
+                    blockHeight: showTxn.blockHeight,
+                    displayAmount: showTxn.displayAmount,
+                    displayFees: showTxn.displayFees,
+                    displayTotal: showTxn.displayTotal,
+                    displayValue: showTxn.displayValue,
+                    isErc20: showTxn.isErc20,
+                    coinName: showTxn.coinName,
+                    coinDecimal: showTxn.coinDecimal,
+                    inputs: showTxn.inputs,
+                    outputs: showTxn.outputs
+                  }
+                : null
+            }
+          />
+        }
       />
       <Grid container className={classes.head}>
         <Grid
