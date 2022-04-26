@@ -194,6 +194,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
   }, [sync.modulesInExecutionQueue, walletId, initial]);
 
   const beforeAction = () => {
+    if (isEmpty) return false;
     if (isLoading) {
       snackbar.showSnackbar(
         `Please wait while we fetch the balance and latest price rates for ${name}`,
@@ -377,8 +378,6 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
             ) : (
               <Button
                 variant="text"
-                className={clsx(classes.orange)}
-                onClick={handleSendFormOpen}
                 startIcon={
                   <Icon
                     className={classes.icon}

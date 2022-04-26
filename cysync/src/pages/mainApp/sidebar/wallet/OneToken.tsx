@@ -157,13 +157,15 @@ const OneToken: React.FC<OneTokenProps> = ({
   };
 
   const onClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
-    navigate(
-      `${
-        Routes.transactions.index
-      }?coin=${initial.toLowerCase()}&wallet=${walletId}`
-    );
+    if (!isEmpty) {
+      event.stopPropagation();
+      event.nativeEvent.stopImmediatePropagation();
+      navigate(
+        `${
+          Routes.transactions.index
+        }?coin=${initial.toLowerCase()}&wallet=${walletId}`
+      );
+    }
   };
 
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -285,8 +287,6 @@ const OneToken: React.FC<OneTokenProps> = ({
           ) : (
             <Button
               variant="text"
-              className={clsx(classes.orange)}
-              onClick={handleSendFormOpen}
               startIcon={
                 <Icon
                   className={classes.icon}
