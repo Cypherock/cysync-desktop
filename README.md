@@ -1,6 +1,16 @@
 ## Introduction
 The CySync application allows you to securly communicate with the Cypherock X1 hardware wallet for a multitude of things, like signing a transaction, sending and receiving coins, and managing and upgrading the hardware wallet.
 
+### Responsible disclosure policy
+At cypherock, we believe that coordinated vulnerability disclosure is the right approach to better protect users. When submitting a vulnerability report, you enter a form of coorporation in which you allow cypherock the opportunity to diagnose and remedy the vulnerability before disclosing its details to third parties and/or general public. We will ensure that you get proper credits for all your works
+
+You should use PGP encrypted emails. Please use our [PGP public key](https://github.com/Cypherock/x1wallet_firmware/blob/main/0x70D75D95C3A16AA7.asc), as necessary. Start with a cleartext message with your public key, and we'll reply appropriately.
+
+Please include:
+- Code which reproduces the issue as a proof of concept.
+- Detailed description and potential impact of your bug.
+- Your name and link for attribution (or a comment if you don't want that).
+
 
 ## Table of contents
 1. [Prerequisites](#prerequisites)
