@@ -40,7 +40,6 @@ jobs:
 
   build-win:
     runs-on: windows-latest
-    needs: build-linux
 
     strategy:
       matrix:
