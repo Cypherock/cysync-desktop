@@ -6,8 +6,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
-import { AutoSizer, List } from 'react-virtualized';
+import React, { useEffect, useRef, useState } from 'react';
+import { AutoSizer, List, ListRowProps } from 'react-virtualized';
 
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
 import CustomCheckBox from '../../../../../designSystem/designComponents/input/checkbox';
@@ -17,7 +17,7 @@ import { erc20tokenDb } from '../../../../../store/database';
 import { useDebouncedFunction } from '../../../../../store/hooks';
 import { useSelectedWallet, useSync } from '../../../../../store/provider';
 
-import initialTokens from './tokens';
+import initialTokens, { IInitialToken } from './tokens';
 
 const PREFIX = 'AddTokenForm';
 
@@ -94,47 +94,54 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-const AddTokenForm = ({ tokenList, ethCoin, handleClose }: any) => {
+export interface AddTokenFormProps {
+  tokenList: string[];
+  ethCoin: string;
+  handleClose: () => void;
+}
+
+const AddTokenForm: React.FC<AddTokenFormProps> = ({
+  tokenList,
+  ethCoin,
+  handleClose
+}) => {
   const theme = useTheme();
 
   // Using JSON.parse to create a deep copy instead of passing by referrence
-  const [tokens, setTokens] = useState<any[]>(
+  // Using useRef because this variable will not change throught the lifecycle
+  // of this component.
+  const tokens = useRef<IInitialToken[]>(
     JSON.parse(JSON.stringify(initialTokens))
   );
+
+  const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
 
   const { selectedWallet } = useSelectedWallet();
 
   const [continueDisabled, setContinueDisabled] = useState(true);
 
   useEffect(() => {
-    if (tokenList.length === Object.keys(tokens).length) {
+    if (selectedTokens.length === 0) {
       setContinueDisabled(true);
+    } else {
+      setContinueDisabled(false);
     }
-  }, []);
+  }, [selectedTokens]);
 
-  const handleCoinChange = (e: any) => {
-    const newState = tokens;
-    for (let index = 0; index < newState.length; index += 1) {
-      const token = newState[index];
-      const prevState = token[2];
-      if (index === +e.target.name) {
-        token[2] = !prevState;
-      }
-    }
-    let noCoinSelected = true;
-    newState.forEach(token => {
-      if (token[2]) {
-        noCoinSelected = false;
+  const handleCoinSelect = (abbr: string) => {
+    setSelectedTokens(t => {
+      if (t.includes(abbr)) {
+        return t.filter(token => token !== abbr);
+      } else {
+        return [...t, abbr];
       }
     });
-    setContinueDisabled(noCoinSelected);
-    setTokens([...newState]);
   };
 
   const sync = useSync();
 
   const onContinue = () => {
-    const tokensToAdd = tokens.filter(token => token[2]).map(token => token[0]);
+    const tokensToAdd = [...selectedTokens];
     tokensToAdd.forEach(tokenName => {
       erc20tokenDb.insert({
         walletId: selectedWallet.walletId,
@@ -152,14 +159,14 @@ const AddTokenForm = ({ tokenList, ethCoin, handleClose }: any) => {
   };
 
   const [search, setSearch] = useState('');
-  const [searchResults, setSearchResults] = useState<any>([]);
+  const [searchResults, setSearchResults] = useState<IInitialToken[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = () => {
-    const results = tokens.filter(
+    const results = tokens.current.filter(
       token =>
-        token[0].toLowerCase().includes(search.toLowerCase()) ||
-        token[1].toLowerCase().includes(search.toLowerCase())
+        token.abbr.toLowerCase().includes(search.toLowerCase()) ||
+        token.name.toLowerCase().includes(search.toLowerCase())
     );
     setSearchResults(results);
     setIsLoading(false);
@@ -176,27 +183,32 @@ const AddTokenForm = ({ tokenList, ethCoin, handleClose }: any) => {
     setSearch(event.target.value.toLowerCase());
   };
 
-  const renderCoinRow = ({ index, key, style }: any) => {
-    const abbr = search ? searchResults[index][0] : tokens[index][0];
-    const name = search ? searchResults[index][1] : tokens[index][1];
-    const state = search ? !!searchResults[index][2] : !!tokens[index][2];
+  const renderCoinRow = ({ index, key, style }: ListRowProps) => {
+    const item = search ? searchResults[index] : tokens.current[index];
+    const { abbr, name } = item;
+    const wasAlreadyAdded = tokenList.includes(abbr);
+    const isSelected = wasAlreadyAdded || selectedTokens.includes(abbr);
+
     return (
       <div key={key} style={style}>
         <div
           className={clsx(
             classes.coinItem,
-            tokenList.includes(abbr) || state ? classes.selectedItem : ''
+            isSelected ? classes.selectedItem : ''
           )}
         >
           <div className={classes.flexRow}>
-            <CoinIcons initial={abbr.toUpperCase()} />
+            <CoinIcons
+              initial={abbr.toUpperCase()}
+              style={{ marginRight: '10px' }}
+            />
             <Typography color="textPrimary">{name}</Typography>
           </div>
           <CustomCheckBox
-            disabled={tokenList.includes(abbr)}
+            disabled={wasAlreadyAdded}
             name={index.toString()}
-            checked={tokenList.includes(abbr) || state}
-            onChange={handleCoinChange}
+            checked={isSelected}
+            onChange={() => handleCoinSelect(abbr)}
           />
         </div>
       </div>

@@ -5,7 +5,19 @@ import DialogBox from '../../../../../designSystem/designComponents/dialog/dialo
 
 import AddTokenForm from './addTokenForm';
 
-function AddToken({ openAddToken, tokenList, handleClose, ethCoin }: any) {
+export interface AddTokenProps {
+  openAddToken: boolean;
+  tokenList: string[];
+  ethCoin: string;
+  handleClose: () => void;
+}
+
+const AddToken: React.FC<AddTokenProps> = ({
+  openAddToken,
+  tokenList,
+  handleClose,
+  ethCoin
+}) => {
   return (
     <DialogBox
       fullWidth
@@ -24,7 +36,7 @@ function AddToken({ openAddToken, tokenList, handleClose, ethCoin }: any) {
       }
     />
   );
-}
+};
 
 AddToken.propTypes = {
   openAddToken: PropTypes.bool.isRequired,

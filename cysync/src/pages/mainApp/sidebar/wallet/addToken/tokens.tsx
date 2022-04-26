@@ -1,15 +1,18 @@
 import { ERC20TOKENS } from '@cypherock/communication';
 
-const initialTokens: Array<Array<string | boolean>> = [];
+export interface IInitialToken {
+  abbr: string;
+  name: string;
+}
+
+const initialTokens: IInitialToken[] = [];
 for (const [key, value] of Object.entries(ERC20TOKENS)) {
   if (value) {
-    const tempCoin = [key, value.name, false];
+    const tempCoin: IInitialToken = { abbr: key, name: value.name };
     initialTokens.push(tempCoin);
   }
 }
 
 export default initialTokens.sort((a, b) => {
-  if (a[1] > b[1]) return 1;
-  if (a[1] < b[1]) return -1;
-  return 0;
+  return a.name.localeCompare(b.name);
 });

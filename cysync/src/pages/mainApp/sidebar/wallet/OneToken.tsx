@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../../constants/routes';
 import CustomIconButton from '../../../../designSystem/designComponents/buttons/customIconButton';
-import DialogBoxConfirmation from '../../../../designSystem/designComponents/dialog/dialogBoxConfirmation';
+import CustomizedDialog from '../../../../designSystem/designComponents/dialog/newDialogBox';
 import PopOverText from '../../../../designSystem/designComponents/hover/popoverText';
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
@@ -191,34 +191,22 @@ const OneToken: React.FC<OneTokenProps> = ({
 
   return (
     <Root>
-      <DialogBoxConfirmation
-        maxWidth="sm"
-        fullScreen
+      <CustomizedDialog
         open={deleteOpen}
         handleClose={handleDeleteClose}
-        handleConfirmation={handleDeleteConfirmation}
-        isClosePresent
-        restComponents={
-          <div className={classes.dialogRoot}>
-            <Icon
-              viewBox="0 0 116 125"
-              size={120}
-              iconGroup={<DeleteCoinIcon />}
-            />
-            <Typography
-              color="error"
-              variant="h3"
-              gutterBottom
-              style={{ marginTop: '2rem' }}
-            >
-              Are you sure
-            </Typography>
-            <Typography color="textPrimary" style={{ marginBottom: '2rem' }}>
-              {`You want to delete ${name} ?`}
-            </Typography>
-          </div>
-        }
-      />
+        onYes={handleDeleteConfirmation}
+      >
+        <Icon viewBox="0 0 116 125" size={120} iconGroup={<DeleteCoinIcon />} />
+        <Typography
+          color="error"
+          variant="h3"
+          gutterBottom
+          style={{ marginTop: '2rem' }}
+        >
+          Are you sure
+        </Typography>
+        <Typography color="textPrimary">{`You want to delete ${name} ?`}</Typography>
+      </CustomizedDialog>
       <SendTransactionContext.Provider
         value={{ sendForm, setSendForm, sendTransaction }}
       >
