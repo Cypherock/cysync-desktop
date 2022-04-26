@@ -188,10 +188,10 @@
     nedb "^1.8.0"
     winston "^3.6.0"
 
-"@cypherock/protocols@3.0.1-beta.18":
-  version "3.0.1-beta.18"
-  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.18.tgz#a15e0fe9b9e04a9bf3f3d3d8aa982e27ba1a47ae"
-  integrity sha512-87bO+958nzOvuCGxv/PQmsDL4ne9UC5K1uDjVn85ZWFUFQfFNrJlMYtsmbVJFIh5ARACT6FDn//heZK/ynu2ow==
+"@cypherock/protocols@3.0.1-beta.19":
+  version "3.0.1-beta.19"
+  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.19.tgz#739f31d080bc748ed038e6e6facecce33af1b90a"
+  integrity sha512-LhgrgwVIW9q5B0C1lKL8A821c+esEsYsfrxNW2CJwDehiUo5aOUIyOYeWcAKVdlpnaVAG8xQ4+GIQ7IyTKcCFQ==
   dependencies:
     "@cypherock/communication" "3.0.1-beta.14"
     "@cypherock/database" "3.0.1-beta.13"
