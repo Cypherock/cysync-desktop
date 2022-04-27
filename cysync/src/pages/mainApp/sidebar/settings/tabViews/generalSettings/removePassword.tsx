@@ -104,7 +104,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
   const handleSetPassword = async () => {
     try {
       if (!values.oldPassword.trim()) {
-        setError('Please enter your old password.');
+        setError('Please enter your password.');
       } else {
         if (await verifyPassword(values.oldPassword.trim())) {
           setError('');
@@ -122,7 +122,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
             }
           );
         } else {
-          setError('Old Password is incorrect');
+          setError('Password is incorrect');
         }
       }
     } catch (error) {
