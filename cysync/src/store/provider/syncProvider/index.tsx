@@ -97,6 +97,11 @@ export const SyncProvider: React.FC = ({ children }) => {
   const maxRetries = 2;
 
   const { connected } = useNetwork();
+  const connectedRef = useRef<boolean | null>(connected);
+
+  useEffect(() => {
+    connectedRef.current = connected;
+  }, [connected]);
 
   const addToQueue = (item: SyncQueueItem) => {
     setSyncQueue(currentSyncQueue => {
@@ -1012,8 +1017,10 @@ export const SyncProvider: React.FC = ({ children }) => {
         setInterval(async () => {
           logger.info('Sync: Refresh triggered');
           try {
-            addPriceRefresh({ isRefresh: true, module: 'refresh' });
-            await notifications.getLatest();
+            if (connectedRef) {
+              addPriceRefresh({ isRefresh: true, module: 'refresh' });
+              await notifications.getLatest();
+            }
             await transactionDb.failExpiredTxn();
           } catch (error) {
             logger.error('Sync: Error in refresh');
