@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 import React from 'react';
 
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
-import { UsePortfolioValues } from '../../../../../store/hooks';
+import { CoinDetails, UsePortfolioValues } from '../../../../../store/hooks';
 
 import OneCoin from './OneCoin';
 
@@ -55,6 +55,18 @@ const PortfolioCoins = ({
   setSortIndex,
   handleRedirecttoAddCoin
 }: Props) => {
+  const calcCoinPortfolio = (coin: CoinDetails) => {
+    if (total > 0) {
+      const val = (
+        new BigNumber(coin.value).dividedBy(total).multipliedBy(100) || 0
+      ).toFixed(1);
+
+      return `${val}%`;
+    }
+
+    return '- -';
+  };
+
   return (
     <StyledGrid container className={classes.root}>
       <Grid container>
@@ -196,10 +208,7 @@ const PortfolioCoins = ({
               coinInitial={data.name}
               coinValue={data.value}
               coinPrice={new BigNumber(data.price).toFixed(2)}
-              coinPortfolio={`${(
-                new BigNumber(data.value).dividedBy(total).multipliedBy(100) ||
-                0
-              ).toFixed(1)}%`}
+              coinPortfolio={calcCoinPortfolio(data)}
               coinHolding={data.balance}
               decimal={data.decimal}
               key={data.name}
