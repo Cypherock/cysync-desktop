@@ -157,7 +157,8 @@ const OneCoin: React.FC<OneCoinProps> = ({
   };
 
   const [deleteOpen, setDeleteOpen] = React.useState(false);
-  const handleDeleteOpen = () => {
+  const handleDeleteOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeAction()) {
       setDeleteOpen(true);
     }
@@ -177,7 +178,8 @@ const OneCoin: React.FC<OneCoinProps> = ({
 
   const sendTransaction = useSendTransaction();
 
-  const handleSendFormOpen = () => {
+  const handleSendFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeAction() && beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
@@ -185,7 +187,8 @@ const OneCoin: React.FC<OneCoinProps> = ({
 
   const receiveTransaction = useReceiveTransaction();
 
-  const handleReceiveFormOpen = () => {
+  const handleReceiveFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeAction() && beforeNetworkAction()) setReceiveForm(true);
   };
 
@@ -275,7 +278,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
           <Button
             variant="text"
             className={!isEmpty ? clsx(classes.orange) : null}
-            onClick={prevent(handleSendFormOpen)}
+            onClick={handleSendFormOpen}
             startIcon={
               <Icon
                 className={classes.icon}
@@ -303,7 +306,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
                 color={theme.palette.info.main}
               />
             }
-            onClick={prevent(handleReceiveFormOpen)}
+            onClick={handleReceiveFormOpen}
           >
             Receive
           </Button>

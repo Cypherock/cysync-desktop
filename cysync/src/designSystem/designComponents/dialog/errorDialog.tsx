@@ -120,9 +120,10 @@ const Error = (props: any) => {
         {detailedText && (
           <>
             <CustomButton
-              onClick={prevent(() => {
+              onClick={(e: React.MouseEvent) => {
+                prevent(e);
                 setCollapseTab(!collapseTab);
-              })}
+              }}
               disabled={disableAction}
               style={{
                 borderRadius: '0 0 5px 5px',

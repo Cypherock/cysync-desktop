@@ -206,7 +206,8 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
   };
 
   const [deleteOpen, setDeleteOpen] = React.useState(false);
-  const handleDeleteOpen = () => {
+  const handleDeleteOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeAction()) {
       setDeleteOpen(true);
     }
@@ -234,7 +235,8 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
 
   const sendTransaction = useSendTransaction();
 
-  const handleSendFormOpen = () => {
+  const handleSendFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeAction() && beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
@@ -242,7 +244,8 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
 
   const receiveTransaction = useReceiveTransaction();
 
-  const handleReceiveFormOpen = () => {
+  const handleReceiveFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeAction() && beforeNetworkAction()) setReceiveForm(true);
   };
 
@@ -356,7 +359,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
             <Button
               variant="text"
               className={!isEmpty ? clsx(classes.orange) : null}
-              onClick={prevent(handleSendFormOpen)}
+              onClick={handleSendFormOpen}
               startIcon={
                 <Icon
                   className={classes.icon}
@@ -384,16 +387,13 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
                   color={theme.palette.info.main}
                 />
               }
-              onClick={prevent(handleReceiveFormOpen)}
+              onClick={handleReceiveFormOpen}
             >
               Receive
             </Button>
           </Grid>
           <Grid item xs={1} className={classes.alignCenterCenter}>
-            <CustomIconButton
-              title="Delete Coin"
-              onClick={prevent(handleDeleteOpen)}
-            >
+            <CustomIconButton title="Delete Coin" onClick={handleDeleteOpen}>
               <Icon size={20} viewBox="0 0 18 18" iconGroup={<Dustbin />} />
             </CustomIconButton>
           </Grid>
@@ -429,9 +429,10 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
                     );
                   })}
                   <CoinCardBtn
-                    onClick={prevent(() => {
+                    onClick={(e: React.MouseEvent) => {
+                      prevent(e);
                       if (setOpenAddToken) setOpenAddToken(true);
-                    })}
+                    }}
                     fullWidth
                     startIcon={<AddCircleIcon />}
                     style={{
@@ -448,7 +449,10 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
               </Grid>
               <Grid item xs={12} className={classes.rootButtonWrapper}>
                 <CoinCardBtn
-                  onClick={prevent(() => setCollapseTab(!collapseTab))}
+                  onClick={(e: React.MouseEvent) => {
+                    prevent(e);
+                    setCollapseTab(!collapseTab);
+                  }}
                   fullWidth
                   style={{
                     borderRadius: '0 0 5px 5px'
@@ -462,9 +466,10 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
           ) : (
             <Grid item xs={12} className={classes.rootButtonWrapper}>
               <CoinCardBtn
-                onClick={prevent(() => {
+                onClick={(e: React.MouseEvent) => {
+                  prevent(e);
                   if (setOpenAddToken) setOpenAddToken(true);
-                })}
+                }}
                 fullWidth
                 startIcon={<AddCircleIcon />}
                 style={{
