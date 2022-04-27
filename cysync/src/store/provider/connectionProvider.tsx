@@ -250,8 +250,6 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       setDevicePacketVersion(null);
       setInBackgroundProcess(true);
       debounceCheckIfIncomplete();
-    } else {
-      setInBackgroundProcess(false);
     }
   };
 
@@ -361,7 +359,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       setIsDeviceNotReadyCheck(false);
       setInBackgroundProcess(false);
     }
-  }, [authenticated, completed, errorMessage]);
+  }, [completed]);
 
   useEffect(() => {
     if (verifyState === VerifyState.VERIFIED) {

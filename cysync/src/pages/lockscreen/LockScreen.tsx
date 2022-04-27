@@ -120,19 +120,30 @@ const LockScreen = (props: any) => {
   };
 
   const handleSubmit = async () => {
-    if (await verifyPassword(values.password.trim())) {
+    const password = values.password.trim();
+
+    if (!password) {
+      setValues({
+        ...values,
+        error: 'Please enter a password'
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    if (await verifyPassword(password)) {
       setValues({
         ...values,
         error: ''
       });
-      passEnDb.setPassHash(generateSinglePasswordHash(values.password.trim()));
+      passEnDb.setPassHash(generateSinglePasswordHash(password));
       await loadDatabases();
       setIsLoading(false);
       props.handleClose();
     } else {
       setValues({
         ...values,
-        error: 'Please Enter Correct Password'
+        error: 'Please enter correct password'
       });
       setIsLoading(false);
     }
