@@ -143,7 +143,7 @@ const OneToken: React.FC<OneTokenProps> = ({
   const handleSendFormOpen = (event: React.MouseEvent) => {
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-    if (beforeNetworkAction()) setSendForm(true);
+    if (beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
   const [receiveForm, setReceiveForm] = useState(false);
@@ -157,15 +157,13 @@ const OneToken: React.FC<OneTokenProps> = ({
   };
 
   const onClick = (event: React.MouseEvent) => {
-    if (!isEmpty) {
-      event.stopPropagation();
-      event.nativeEvent.stopImmediatePropagation();
-      navigate(
-        `${
-          Routes.transactions.index
-        }?coin=${initial.toLowerCase()}&wallet=${walletId}`
-      );
-    }
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+    navigate(
+      `${
+        Routes.transactions.index
+      }?coin=${initial.toLowerCase()}&wallet=${walletId}`
+    );
   };
 
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -255,40 +253,26 @@ const OneToken: React.FC<OneTokenProps> = ({
           </Typography>
         </Grid>
         <Grid item xs={2} className={classes.actions}>
-          {!isEmpty ? (
-            <Button
-              variant="text"
-              className={clsx(classes.orange)}
-              onClick={handleSendFormOpen}
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={theme.palette.secondary.main}
-                />
-              }
-              style={{ fontSize: '0.9rem' }}
-            >
-              Send
-            </Button>
-          ) : (
-            <Button
-              variant="text"
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={theme.palette.grey[500]}
-                />
-              }
-              style={{ fontSize: '0.9rem' }}
-              disabled
-            >
-              Send
-            </Button>
-          )}
+          <Button
+            variant="text"
+            className={!isEmpty ? clsx(classes.orange) : null}
+            onClick={handleSendFormOpen}
+            startIcon={
+              <Icon
+                className={classes.icon}
+                viewBox="0 0 14 15"
+                icon={ICONS.walletSend}
+                color={
+                  !isEmpty
+                    ? theme.palette.secondary.main
+                    : theme.palette.grey[500]
+                }
+              />
+            }
+            style={{ fontSize: '0.9rem' }}
+          >
+            Send
+          </Button>
 
           <Divider orientation="vertical" className={classes.divider} />
           <Button

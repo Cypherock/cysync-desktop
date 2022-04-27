@@ -145,7 +145,6 @@ const OneCoin: React.FC<OneCoinProps> = ({
   }, [sync.modulesInExecutionQueue, walletId, initial]);
 
   const beforeAction = () => {
-    if (isEmpty) return false;
     if (isLoading) {
       snackbar.showSnackbar(
         `Please wait while we fetch the balance and latest price rates for ${name}`,
@@ -182,7 +181,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
   const handleSendFormOpen = (event: React.MouseEvent) => {
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-    if (beforeAction() && beforeNetworkAction()) setSendForm(true);
+    if (beforeAction() && beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
   const [receiveForm, setReceiveForm] = useState(false);
@@ -278,38 +277,25 @@ const OneCoin: React.FC<OneCoinProps> = ({
           <Typography color="textPrimary">{`$ ${price}`}</Typography>
         </Grid>
         <Grid item xs={2} className={classes.actions}>
-          {!isEmpty ? (
-            <Button
-              variant="text"
-              className={clsx(classes.orange)}
-              onClick={handleSendFormOpen}
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={theme.palette.secondary.main}
-                />
-              }
-            >
-              Send
-            </Button>
-          ) : (
-            <Button
-              variant="text"
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={theme.palette.grey[500]}
-                />
-              }
-              disabled
-            >
-              Send
-            </Button>
-          )}
+          <Button
+            variant="text"
+            className={!isEmpty ? clsx(classes.orange) : null}
+            onClick={handleSendFormOpen}
+            startIcon={
+              <Icon
+                className={classes.icon}
+                viewBox="0 0 14 15"
+                icon={ICONS.walletSend}
+                color={
+                  !isEmpty
+                    ? theme.palette.secondary.main
+                    : theme.palette.grey[500]
+                }
+              />
+            }
+          >
+            Send
+          </Button>
           <Divider orientation="vertical" className={classes.divider} />
           <Button
             variant="text"
