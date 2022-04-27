@@ -28,6 +28,7 @@ import {
   useConnection
 } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
+import prevent from '../../../../utils/preventPropagation';
 
 import Recieve from './recieve';
 import Send from './send';
@@ -140,9 +141,7 @@ const OneToken: React.FC<OneTokenProps> = ({
 
   const sendTransaction = useSendTransaction();
 
-  const handleSendFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleSendFormOpen = () => {
     if (beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
@@ -150,15 +149,11 @@ const OneToken: React.FC<OneTokenProps> = ({
 
   const receiveTransaction = useReceiveTransaction();
 
-  const handleReceiveFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleReceiveFormOpen = () => {
     if (beforeNetworkAction()) setReceiveForm(true);
   };
 
-  const onClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const onClick = () => {
     navigate(
       `${
         Routes.transactions.index
@@ -168,9 +163,7 @@ const OneToken: React.FC<OneTokenProps> = ({
 
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const handleDeleteOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleDeleteOpen = () => {
     setDeleteOpen(true);
   };
 
@@ -221,7 +214,7 @@ const OneToken: React.FC<OneTokenProps> = ({
         <Recieve />
       </ReceiveTransactionContext.Provider>
 
-      <Grid container onClick={onClick} className={classes.root}>
+      <Grid container onClick={prevent(onClick)} className={classes.root}>
         <Grid item xs={3} className={classes.alignStartCenter}>
           <Grid container className={classes.nameWrapper}>
             <CoinIcons initial={initial.toUpperCase()} size="sm" />
@@ -256,7 +249,7 @@ const OneToken: React.FC<OneTokenProps> = ({
           <Button
             variant="text"
             className={!isEmpty ? clsx(classes.orange) : null}
-            onClick={handleSendFormOpen}
+            onClick={prevent(handleSendFormOpen)}
             startIcon={
               <Icon
                 className={classes.icon}
@@ -286,14 +279,17 @@ const OneToken: React.FC<OneTokenProps> = ({
                 color={theme.palette.info.main}
               />
             }
-            onClick={handleReceiveFormOpen}
+            onClick={prevent(handleReceiveFormOpen)}
             style={{ fontSize: '0.9rem' }}
           >
             Receive
           </Button>
         </Grid>
         <Grid item xs={1} className={classes.alignCenterCenter}>
-          <CustomIconButton title="Delete Coin" onClick={handleDeleteOpen}>
+          <CustomIconButton
+            title="Delete Coin"
+            onClick={prevent(handleDeleteOpen)}
+          >
             <Icon size={20} viewBox="0 0 18 18" iconGroup={<Dustbin />} />
           </CustomIconButton>
         </Grid>

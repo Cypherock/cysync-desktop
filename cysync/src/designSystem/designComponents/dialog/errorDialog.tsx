@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import React from 'react';
 
 import { useFeedback } from '../../../store/provider/feedbackProvider';
+import prevent from '../../../utils/preventPropagation';
 import ErrorExclamation from '../../iconGroups/errorExclamation';
 import CustomButton from '../buttons/button';
 import Icon from '../icons/Icon';
@@ -119,11 +120,9 @@ const Error = (props: any) => {
         {detailedText && (
           <>
             <CustomButton
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                e.nativeEvent.stopImmediatePropagation();
+              onClick={prevent(() => {
                 setCollapseTab(!collapseTab);
-              }}
+              })}
               disabled={disableAction}
               style={{
                 borderRadius: '0 0 5px 5px',

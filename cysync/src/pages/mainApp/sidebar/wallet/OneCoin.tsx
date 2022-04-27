@@ -29,6 +29,7 @@ import {
   useSync
 } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
+import prevent from '../../../../utils/preventPropagation';
 
 import { OneCoinProps, OneCoinPropTypes } from './OneCoinProps';
 import Recieve from './recieve';
@@ -156,9 +157,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
   };
 
   const [deleteOpen, setDeleteOpen] = React.useState(false);
-  const handleDeleteOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleDeleteOpen = () => {
     if (beforeAction()) {
       setDeleteOpen(true);
     }
@@ -178,9 +177,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
 
   const sendTransaction = useSendTransaction();
 
-  const handleSendFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleSendFormOpen = () => {
     if (beforeAction() && beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
@@ -188,9 +185,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
 
   const receiveTransaction = useReceiveTransaction();
 
-  const handleReceiveFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleReceiveFormOpen = () => {
     if (beforeAction() && beforeNetworkAction()) setReceiveForm(true);
   };
 
@@ -280,7 +275,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
           <Button
             variant="text"
             className={!isEmpty ? clsx(classes.orange) : null}
-            onClick={handleSendFormOpen}
+            onClick={prevent(handleSendFormOpen)}
             startIcon={
               <Icon
                 className={classes.icon}
@@ -308,7 +303,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
                 color={theme.palette.info.main}
               />
             }
-            onClick={handleReceiveFormOpen}
+            onClick={prevent(handleReceiveFormOpen)}
           >
             Receive
           </Button>
