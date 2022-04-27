@@ -234,13 +234,13 @@ const OneToken: React.FC<OneTokenProps> = ({
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`${initial} ${formatDisplayAmount(holding, 4)}`}
+            text={`${formatDisplayAmount(holding, 4)} ${initial} `}
             color="textPrimary"
-            hoverText={`${initial} ${formatDisplayAmount(
+            hoverText={`${formatDisplayAmount(
               holding,
               decimal,
               true
-            )}`}
+            )} ${initial}`}
             style={{ fontSize: '0.9rem' }}
           />
         </Grid>

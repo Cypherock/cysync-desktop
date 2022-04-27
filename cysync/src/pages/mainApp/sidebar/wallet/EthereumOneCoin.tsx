@@ -343,13 +343,13 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
             <PopOverText
-              text={`${initial} ${formatDisplayAmount(holding, 4)}`}
+              text={`${formatDisplayAmount(holding, 4)} ${initial}`}
               color="textPrimary"
-              hoverText={`${initial} ${formatDisplayAmount(
+              hoverText={`${formatDisplayAmount(
                 holding,
                 decimal,
                 true
-              )}`}
+              )} ${initial}`}
             />
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
