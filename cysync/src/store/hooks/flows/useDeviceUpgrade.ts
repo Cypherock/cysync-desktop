@@ -10,11 +10,7 @@ import { ipcRenderer } from 'electron';
 import React, { useEffect } from 'react';
 import SerialPort from 'serialport';
 
-import {
-  getFirmwareHex,
-  hexToVersion,
-  inTestApp
-} from '../../../utils/compareVersion';
+import { getFirmwareHex, inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
 import {
   ConnectionContextInterface,
@@ -337,7 +333,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   const initiateDeviceAuth = async () => {
     try {
       logger.info('In Device update timeout');
-      const { connection } = await createPort();
+      const { connection, deviceState: newDeviceState } = await createPort();
 
       logger.info('Initiating auth');
       handleDeviceAuth({
@@ -347,9 +343,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         setIsInFlow: () => {
           // empty
         },
-        firmwareVersion: hexToVersion(latestVersion),
+        firmwareVersion: latestVersion,
         setDeviceSerial,
-        inTestApp: inTestApp(deviceState)
+        inTestApp: inTestApp(newDeviceState)
       });
     } catch (error) {
       retries.current += 1;
