@@ -1016,16 +1016,32 @@ export const SyncProvider: React.FC = ({ children }) => {
       intervals.current.push(
         setInterval(async () => {
           logger.info('Sync: Refresh triggered');
-          try {
-            if (connectedRef) {
-              addPriceRefresh({ isRefresh: true, module: 'refresh' });
-              await notifications.getLatest();
-            }
-            await transactionDb.failExpiredTxn();
-          } catch (error) {
-            logger.error('Sync: Error in refresh');
-            logger.error(error);
+          if (connectedRef) {
+            // Needs revamp
+            addPriceRefresh({ isRefresh: true, module: 'refresh' })
+              .then(() => {
+                logger.info('Sync: Price Refresh completed');
+              })
+              .catch(err => {
+                logger.error('Sync: Price Refresh failed', err);
+              });
+            notifications
+              .getLatest()
+              .then(() => {
+                logger.info('Sync: Notification Refresh completed');
+              })
+              .catch(err => {
+                logger.error('Sync: Notification Refresh failed', err);
+              });
           }
+          transactionDb
+            .failExpiredTxn()
+            .then(() => {
+              logger.info('Sync: Transaction Refresh completed');
+            })
+            .catch(err => {
+              logger.error('Sync: Transaction Refresh failed', err);
+            });
         }, 1000 * 60 * 60)
       );
 
