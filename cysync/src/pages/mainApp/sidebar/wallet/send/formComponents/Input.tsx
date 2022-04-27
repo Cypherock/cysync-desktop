@@ -145,6 +145,10 @@ const Input: React.FC<InputProps> = ({
 
         if (!isValid) {
           isChanged = false;
+        } else {
+          if (Number(newValArr[0]) === 0 && newValArr[0].length > 2) {
+            event.target.value = `0.${newValArr[1]}`;
+          }
         }
       }
     }
