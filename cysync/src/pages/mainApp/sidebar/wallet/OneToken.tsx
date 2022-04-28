@@ -28,6 +28,7 @@ import {
   useConnection
 } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
+import prevent from '../../../../utils/preventPropagation';
 
 import Recieve from './recieve';
 import Send from './send';
@@ -140,39 +141,33 @@ const OneToken: React.FC<OneTokenProps> = ({
 
   const sendTransaction = useSendTransaction();
 
-  const handleSendFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
-    if (beforeNetworkAction()) setSendForm(true);
+  const handleSendFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
+    if (beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
   const [receiveForm, setReceiveForm] = useState(false);
 
   const receiveTransaction = useReceiveTransaction();
 
-  const handleReceiveFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleReceiveFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeNetworkAction()) setReceiveForm(true);
   };
 
-  const onClick = (event: React.MouseEvent) => {
-    if (!isEmpty) {
-      event.stopPropagation();
-      event.nativeEvent.stopImmediatePropagation();
-      navigate(
-        `${
-          Routes.transactions.index
-        }?coin=${initial.toLowerCase()}&wallet=${walletId}`
-      );
-    }
+  const onClick = (e: React.MouseEvent) => {
+    prevent(e);
+    navigate(
+      `${
+        Routes.transactions.index
+      }?coin=${initial.toLowerCase()}&wallet=${walletId}`
+    );
   };
 
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const handleDeleteOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleDeleteOpen = (e: React.MouseEvent) => {
+    prevent(e);
     setDeleteOpen(true);
   };
 
@@ -255,40 +250,26 @@ const OneToken: React.FC<OneTokenProps> = ({
           </Typography>
         </Grid>
         <Grid item xs={2} className={classes.actions}>
-          {!isEmpty ? (
-            <Button
-              variant="text"
-              className={clsx(classes.orange)}
-              onClick={handleSendFormOpen}
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={theme.palette.secondary.main}
-                />
-              }
-              style={{ fontSize: '0.9rem' }}
-            >
-              Send
-            </Button>
-          ) : (
-            <Button
-              variant="text"
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={theme.palette.grey[500]}
-                />
-              }
-              style={{ fontSize: '0.9rem' }}
-              disabled
-            >
-              Send
-            </Button>
-          )}
+          <Button
+            variant="text"
+            className={!isEmpty ? clsx(classes.orange) : null}
+            onClick={handleSendFormOpen}
+            startIcon={
+              <Icon
+                className={classes.icon}
+                viewBox="0 0 14 15"
+                icon={ICONS.walletSend}
+                color={
+                  !isEmpty
+                    ? theme.palette.secondary.main
+                    : theme.palette.grey[500]
+                }
+              />
+            }
+            style={{ fontSize: '0.9rem' }}
+          >
+            Send
+          </Button>
 
           <Divider orientation="vertical" className={classes.divider} />
           <Button

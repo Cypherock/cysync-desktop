@@ -44,6 +44,7 @@ import {
   useSync
 } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
+import prevent from '../../../../utils/preventPropagation';
 
 import AddToken from './addToken';
 import { OneCoinProps, OneCoinPropTypes } from './OneCoinProps';
@@ -194,7 +195,6 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
   }, [sync.modulesInExecutionQueue, walletId, initial]);
 
   const beforeAction = () => {
-    if (isEmpty) return false;
     if (isLoading) {
       snackbar.showSnackbar(
         `Please wait while we fetch the balance and latest price rates for ${name}`,
@@ -206,9 +206,8 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
   };
 
   const [deleteOpen, setDeleteOpen] = React.useState(false);
-  const handleDeleteOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleDeleteOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeAction()) {
       setDeleteOpen(true);
     }
@@ -236,19 +235,17 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
 
   const sendTransaction = useSendTransaction();
 
-  const handleSendFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
-    if (beforeAction() && beforeNetworkAction()) setSendForm(true);
+  const handleSendFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
+    if (beforeAction() && beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
   const [receiveForm, setReceiveForm] = useState(false);
 
   const receiveTransaction = useReceiveTransaction();
 
-  const handleReceiveFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleReceiveFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeAction() && beforeNetworkAction()) setReceiveForm(true);
   };
 
@@ -359,38 +356,25 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
             <Typography color="textPrimary">{`$${price}`}</Typography>
           </Grid>
           <Grid item xs={2} className={classes.actions}>
-            {!isEmpty ? (
-              <Button
-                variant="text"
-                className={clsx(classes.orange)}
-                onClick={handleSendFormOpen}
-                startIcon={
-                  <Icon
-                    className={classes.icon}
-                    viewBox="0 0 14 15"
-                    icon={ICONS.walletSend}
-                    color={theme.palette.secondary.main}
-                  />
-                }
-              >
-                Send
-              </Button>
-            ) : (
-              <Button
-                variant="text"
-                startIcon={
-                  <Icon
-                    className={classes.icon}
-                    viewBox="0 0 14 15"
-                    icon={ICONS.walletSend}
-                    color={theme.palette.grey[500]}
-                  />
-                }
-                disabled
-              >
-                Send
-              </Button>
-            )}
+            <Button
+              variant="text"
+              className={!isEmpty ? clsx(classes.orange) : null}
+              onClick={handleSendFormOpen}
+              startIcon={
+                <Icon
+                  className={classes.icon}
+                  viewBox="0 0 14 15"
+                  icon={ICONS.walletSend}
+                  color={
+                    !isEmpty
+                      ? theme.palette.secondary.main
+                      : theme.palette.grey[500]
+                  }
+                />
+              }
+            >
+              Send
+            </Button>
             <Divider orientation="vertical" className={classes.divider} />
             <Button
               variant="text"
@@ -446,8 +430,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
                   })}
                   <CoinCardBtn
                     onClick={(e: React.MouseEvent) => {
-                      e.stopPropagation();
-                      e.nativeEvent.stopImmediatePropagation();
+                      prevent(e);
                       if (setOpenAddToken) setOpenAddToken(true);
                     }}
                     fullWidth
@@ -467,8 +450,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
               <Grid item xs={12} className={classes.rootButtonWrapper}>
                 <CoinCardBtn
                   onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    e.nativeEvent.stopImmediatePropagation();
+                    prevent(e);
                     setCollapseTab(!collapseTab);
                   }}
                   fullWidth
@@ -485,8 +467,7 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
             <Grid item xs={12} className={classes.rootButtonWrapper}>
               <CoinCardBtn
                 onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  e.nativeEvent.stopImmediatePropagation();
+                  prevent(e);
                   if (setOpenAddToken) setOpenAddToken(true);
                 }}
                 fullWidth
