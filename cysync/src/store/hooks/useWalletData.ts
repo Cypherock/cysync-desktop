@@ -109,9 +109,7 @@ export const useWalletData: UseWalletData = () => {
       case 2:
         setCoinData(
           [...coins].sort((a, b) => {
-            const numA = new BigNumber(a.coin);
-            const numB = new BigNumber(b.coin);
-            return numA.comparedTo(numB);
+            return a.coin.localeCompare(b.coin);
           })
         );
         break;
@@ -119,9 +117,7 @@ export const useWalletData: UseWalletData = () => {
       case 3:
         setCoinData(
           [...coins].sort((a, b) => {
-            const numA = new BigNumber(a.coin);
-            const numB = new BigNumber(b.coin);
-            return numB.comparedTo(numA);
+            return b.coin.localeCompare(a.coin);
           })
         );
         break;
