@@ -1,9 +1,9 @@
 /**
- * A pre-function to stop propagation of click events to its parent element.
+ * A pre-function to stop propagation of any React event to its parent element.
  *
- * @param fn React click event listener
+ * @param e React event
  */
-const prevent = (e: React.MouseEvent) => {
+const prevent = (e: React.SyntheticEvent) => {
   e.stopPropagation();
   e.nativeEvent.stopImmediatePropagation();
 };
