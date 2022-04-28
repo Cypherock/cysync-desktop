@@ -50,11 +50,11 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    const val = !lockscreen && passwordExists() && autolockTime !== -1;
+    const val = !lockscreen && isPasswordSet && autolockTime !== -1;
     if (val !== showIdleTimer) {
       setShowIdleTimer(val);
     }
-  }, [lockscreen, autolockTime]);
+  }, [lockscreen, isPasswordSet, autolockTime]);
 
   useEffect(() => {
     setLockscreenLoading(true);
