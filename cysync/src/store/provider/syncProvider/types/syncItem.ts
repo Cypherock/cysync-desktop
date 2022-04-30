@@ -23,4 +23,12 @@ export abstract class SyncItem {
     this.module = module;
     this.retries = 0;
   }
+
+  equals(_item: SyncItem) {
+    throw new Error('Please override this function');
+  }
+
+  clone() {
+    throw new Error('Please override this function');
+  }
 }

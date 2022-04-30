@@ -369,6 +369,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
       feedbackServer
         .send(data)
+        .request()
         .then(() => {
           logger.info('Feedback submitted');
           setSubmitted(true);

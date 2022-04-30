@@ -113,6 +113,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     logger.info('Initiating device update from settings');
     firmwareServer
       .getLatest()
+      .request()
       .then(response => {
         setLatestVersion(response.data.firmware.version);
         logger.verbose(

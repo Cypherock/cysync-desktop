@@ -18,4 +18,14 @@ export class LatestPriceSyncItem extends SyncItem {
 
     return false;
   }
+
+  clone() {
+    const newItem = new LatestPriceSyncItem({
+      coinType: this.coinType,
+      isRefresh: this.isRefresh,
+      module: this.module
+    });
+
+    return newItem;
+  }
 }

@@ -31,7 +31,7 @@ const reportCrash = async ({
   };
 
   if (process.env.NODE_ENV !== 'development') {
-    await feedbackServer.crashReport(data);
+    await feedbackServer.crashReport(data).request();
   }
 };
 

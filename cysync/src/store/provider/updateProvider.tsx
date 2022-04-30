@@ -74,7 +74,7 @@ export const UpdateProvider = ({ children }: any) => {
 
   const checkDeviceUpdate = async () => {
     try {
-      const response = await firmwareServer.getLatest();
+      const response = await firmwareServer.getLatest().request();
       if (response.data.firmware) {
         setDeviceVersion(response.data.firmware.version);
         setIsDeviceUpdateAvailable(true);

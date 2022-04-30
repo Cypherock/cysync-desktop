@@ -60,4 +60,20 @@ export class HistorySyncItem extends SyncItem {
 
     return false;
   }
+
+  clone() {
+    const newItem = new HistorySyncItem({
+      xpub: this.xpub,
+      zpub: this.zpub,
+      walletName: this.walletName,
+      walletId: this.walletId,
+      coinType: this.coinType,
+      module: this.module,
+      page: this.page,
+      afterBlock: this.afterBlock,
+      isRefresh: this.isRefresh
+    });
+
+    return newItem;
+  }
 }
