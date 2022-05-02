@@ -97,6 +97,11 @@ export const SyncProvider: React.FC = ({ children }) => {
   const maxRetries = 2;
 
   const { connected } = useNetwork();
+  const connectedRef = useRef<boolean | null>(connected);
+
+  useEffect(() => {
+    connectedRef.current = connected;
+  }, [connected]);
 
   const addToQueue = (item: SyncQueueItem) => {
     setSyncQueue(currentSyncQueue => {
@@ -1004,34 +1009,51 @@ export const SyncProvider: React.FC = ({ children }) => {
     setupInitial();
 
     // Refresh after 60 mins
-    if (intervals.current.length === 0) {
+    if (
+      intervals.current.length === 0 &&
+      process.env.IS_PRODUCTION === 'true'
+    ) {
       intervals.current.push(
         setInterval(async () => {
-          if (connected && process.env.IS_PRODUCTION === 'true') {
-            logger.info('Sync: Refresh triggered');
-            try {
-              addPriceRefresh({ isRefresh: true, module: 'refresh' });
-              await notifications.getLatest();
-              await transactionDb.failExpiredTxn();
-            } catch (error) {
-              logger.error('Sync: Error in refresh');
-              logger.error(error);
-            }
+          logger.info('Sync: Refresh triggered');
+          // Needs refactor
+          addPriceRefresh({ isRefresh: true, module: 'refresh' })
+            .then(() => {
+              logger.info('Sync: Price Refresh completed');
+            })
+            .catch(err => {
+              logger.error('Sync: Price Refresh failed', err);
+            });
+          if (connectedRef) {
+            notifications
+              .getLatest()
+              .then(() => {
+                logger.info('Sync: Notification Refresh completed');
+              })
+              .catch(err => {
+                logger.error('Sync: Notification Refresh failed', err);
+              });
           }
+          transactionDb
+            .failExpiredTxn()
+            .then(() => {
+              logger.info('Sync: Transaction Refresh completed');
+            })
+            .catch(err => {
+              logger.error('Sync: Transaction Refresh failed', err);
+            });
         }, 1000 * 60 * 60)
       );
 
       // Refresh after 15 mins
       intervals.current.push(
         setInterval(async () => {
-          if (connected && process.env.IS_PRODUCTION === 'true') {
-            logger.info('Sync: Refresh triggered for latest price');
-            try {
-              addLatestPriceRefresh({ isRefresh: true, module: 'refresh' });
-            } catch (error) {
-              logger.error('Sync: Error in refreshing latest price');
-              logger.error(error);
-            }
+          logger.info('Sync: Refresh triggered for latest price');
+          try {
+            addLatestPriceRefresh({ isRefresh: true, module: 'refresh' });
+          } catch (error) {
+            logger.error('Sync: Error in refreshing latest price');
+            logger.error(error);
           }
         }, 1000 * 60 * 15)
       );
