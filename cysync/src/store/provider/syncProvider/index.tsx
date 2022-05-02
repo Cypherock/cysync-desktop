@@ -645,6 +645,10 @@ export const SyncProvider: React.FC = ({ children }) => {
             isRefresh: true,
             module: item.module
           });
+          addLatestPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
+            isRefresh: true,
+            module: 'default'
+          });
         }
       }
     }
