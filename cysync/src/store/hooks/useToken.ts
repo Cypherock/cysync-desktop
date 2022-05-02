@@ -196,7 +196,7 @@ export const useToken: UseToken = () => {
 
   useEffect(() => {
     // We handle only Ethereum Mainnet ERC20 tokens
-    if (currentWalletId && currentEthCoin === 'eth')
+    if (currentWalletId && currentEthCoin)
       getAllTokensFromWallet(currentWalletId, currentEthCoin);
   }, [currentWalletId, currentEthCoin]);
 
