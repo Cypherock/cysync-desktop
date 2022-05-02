@@ -1016,15 +1016,15 @@ export const SyncProvider: React.FC = ({ children }) => {
       intervals.current.push(
         setInterval(async () => {
           logger.info('Sync: Refresh triggered');
+          // Needs refactor
+          addPriceRefresh({ isRefresh: true, module: 'refresh' })
+            .then(() => {
+              logger.info('Sync: Price Refresh completed');
+            })
+            .catch(err => {
+              logger.error('Sync: Price Refresh failed', err);
+            });
           if (connectedRef) {
-            // Needs revamp
-            addPriceRefresh({ isRefresh: true, module: 'refresh' })
-              .then(() => {
-                logger.info('Sync: Price Refresh completed');
-              })
-              .catch(err => {
-                logger.error('Sync: Price Refresh failed', err);
-              });
             notifications
               .getLatest()
               .then(() => {
