@@ -18,6 +18,8 @@ export interface UseTokenValues {
   tokenList: string[];
   setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
   setCurrentEthCoin: React.Dispatch<React.SetStateAction<string>>;
+  sortTokenData: (tokens: DisplayToken[], index: number) => void;
+  sortTokensByIndex: (index: number) => void;
 }
 
 export type UseToken = () => UseTokenValues;
@@ -94,6 +96,93 @@ export const useToken: UseToken = () => {
     });
   };
 
+  const sortTokenData: UseTokenValues['sortTokenData'] = (tokens, index) => {
+    switch (index) {
+      case 0:
+        setTokenData(
+          [...tokens].sort((a, b) => {
+            const numA = new BigNumber(a.displayValue);
+            const numB = new BigNumber(b.displayValue);
+            return numB.comparedTo(numA);
+          })
+        );
+        break;
+      case 1:
+        setTokenData(
+          [...tokens].sort((a, b) => {
+            const numA = new BigNumber(a.displayValue);
+            const numB = new BigNumber(b.displayValue);
+            return numA.comparedTo(numB);
+          })
+        );
+        break;
+      case 2:
+        setTokenData(
+          [...tokens].sort((a, b) => {
+            const tokenA = COINS[a.coin.toLowerCase()].name;
+            const tokenB = COINS[b.coin.toLowerCase()].name;
+            return tokenA.localeCompare(tokenB);
+          })
+        );
+        break;
+      case 3:
+        setTokenData(
+          [...tokens].sort((a, b) => {
+            const tokenA = COINS[a.coin.toLowerCase()].name;
+            const tokenB = COINS[b.coin.toLowerCase()].name;
+            return tokenB.localeCompare(tokenA);
+          })
+        );
+        break;
+      case 4:
+        setTokenData(
+          [...tokens].sort((a, b) => {
+            const numA = new BigNumber(a.displayBalance);
+            const numB = new BigNumber(b.displayBalance);
+            return numB.comparedTo(numA);
+          })
+        );
+        break;
+
+      case 5:
+        setTokenData(
+          [...tokens].sort((a, b) => {
+            const numA = new BigNumber(a.displayBalance);
+            const numB = new BigNumber(b.displayBalance);
+            return numA.comparedTo(numB);
+          })
+        );
+        break;
+
+      case 6:
+        setTokenData(
+          [...tokens].sort((a, b) => {
+            const numA = new BigNumber(a.displayPrice);
+            const numB = new BigNumber(b.displayPrice);
+            return numB.comparedTo(numA);
+          })
+        );
+        break;
+
+      case 7:
+        setTokenData(
+          [...tokens].sort((a, b) => {
+            const numA = new BigNumber(a.displayPrice);
+            const numB = new BigNumber(b.displayPrice);
+            return numA.comparedTo(numB);
+          })
+        );
+        break;
+      default:
+        break;
+    }
+  };
+
+  const sortTokensByIndex: UseTokenValues['sortTokensByIndex'] = index => {
+    if (tokenData.length === 0) return;
+    sortTokenData(tokenData, index);
+  };
+
   const getAllTokensFromWallet = async (walletId: string, ethCoin: string) => {
     const res = await erc20tokenDb.getByWalletId(walletId, ethCoin);
     const tokens: string[] = [];
@@ -101,11 +190,14 @@ export const useToken: UseToken = () => {
       tokens.push(coin.coin);
     });
     setTokenList(tokens);
-    setTokenData(await getTokensWithPrices(res));
+    const unsortedTokens = await getTokensWithPrices(res);
+    sortTokenData(unsortedTokens, 0);
   };
 
   useEffect(() => {
-    getAllTokensFromWallet(currentWalletId, currentEthCoin);
+    // We handle only Ethereum Mainnet ERC20 tokens
+    if (currentWalletId && currentEthCoin === 'eth')
+      getAllTokensFromWallet(currentWalletId, currentEthCoin);
   }, [currentWalletId, currentEthCoin]);
 
   useEffect(() => {
@@ -120,6 +212,7 @@ export const useToken: UseToken = () => {
     tokenData,
     tokenList,
     setCurrentWalletId,
-    setCurrentEthCoin
+    setCurrentEthCoin,
+    sortTokensByIndex
   } as UseTokenValues;
 };
