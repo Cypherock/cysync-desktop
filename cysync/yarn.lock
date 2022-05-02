@@ -188,15 +188,15 @@
     nedb "^1.8.0"
     winston "^3.6.0"
 
-"@cypherock/protocols@3.0.1-beta.19":
-  version "3.0.1-beta.19"
-  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.19.tgz#739f31d080bc748ed038e6e6facecce33af1b90a"
-  integrity sha512-LhgrgwVIW9q5B0C1lKL8A821c+esEsYsfrxNW2CJwDehiUo5aOUIyOYeWcAKVdlpnaVAG8xQ4+GIQ7IyTKcCFQ==
+"@cypherock/protocols@3.0.1-beta.20":
+  version "3.0.1-beta.20"
+  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.20.tgz#065ff2e21847c7df47da8527ef7f0d82ec903d5c"
+  integrity sha512-rR3RHRheI8IcmA3NMGlJjcnuTw6/iKWSSyrp/xdT1uq5kqUqm07bGhcK7G/vIm2Bx6AOw5iabipT3cQbJKrBIA==
   dependencies:
     "@cypherock/communication" "3.0.1-beta.14"
     "@cypherock/database" "3.0.1-beta.13"
     "@cypherock/server-wrapper" "1.0.1-beta.8"
-    "@cypherock/wallet" "3.0.1-beta.16"
+    "@cypherock/wallet" "3.0.1-beta.17"
     "@types/bignumber.js" "^5.0.0"
     bignumber.js "^9.0.2"
     winston "^3.5.1"
@@ -210,10 +210,10 @@
     node-cache "^5.1.2"
     winston "^3.5.1"
 
-"@cypherock/wallet@3.0.1-beta.16":
-  version "3.0.1-beta.16"
-  resolved "https://registry.yarnpkg.com/@cypherock/wallet/-/wallet-3.0.1-beta.16.tgz#00b5b65eab68f246bf6ae983dc5d7066111c7072"
-  integrity sha512-Jracix3DE7W8fUTHouJWFJ9HjX0TsU65HxK7HJwOlNRO9lX0zT8OKEnu+d123kraYig7W1Zm6nvby7y10+mfqw==
+"@cypherock/wallet@3.0.1-beta.17":
+  version "3.0.1-beta.17"
+  resolved "https://registry.yarnpkg.com/@cypherock/wallet/-/wallet-3.0.1-beta.17.tgz#a4b94b66189b78464f987068c82141421b52b4ce"
+  integrity sha512-JqacWEKyafvIU+RPlIZysSxacOqxrrQqoiOC9aE5BlU7AWrFKiG9R59i06BIMo0ObT/tBYQu6P9i67QvEibpZw==
   dependencies:
     "@bitauth/libauth" "^1.19.1"
     "@cypherock/communication" "3.0.1-beta.14"
