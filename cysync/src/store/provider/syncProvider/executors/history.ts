@@ -87,6 +87,7 @@ export const processResponses = async (
   options: {
     addToQueue: SyncProviderTypes['addToQueue'];
     addPriceSyncItemFromXpub: SyncProviderTypes['addPriceSyncItemFromXpub'];
+    addLatestPriceSyncItemFromXpub: SyncProviderTypes['addLatestPriceSyncItemFromXpub'];
   }
 ): Promise<any> => {
   const coin = COINS[item.coinType];
@@ -396,6 +397,10 @@ export const processResponses = async (
         options.addPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
           isRefresh: true,
           module: item.module
+        });
+        options.addLatestPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
+          isRefresh: true,
+          module: 'default'
         });
       }
     }

@@ -426,7 +426,8 @@ export const SyncProvider: React.FC = ({ children }) => {
     try {
       const executionResult = await executeBatch(items, {
         addToQueue,
-        addPriceSyncItemFromXpub
+        addPriceSyncItemFromXpub,
+        addLatestPriceSyncItemFromXpub
       });
 
       updateAllExecutedItems(executionResult);
