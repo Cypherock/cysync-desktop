@@ -430,6 +430,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                         deleteCoin={deleteCoinByXpub}
                         deleteHistory={deleteCoinHistory}
                         walletId={selectedWallet.walletId}
+                        sortIndex={sortIndex}
                       />
                     ) : (
                       <OneCoin

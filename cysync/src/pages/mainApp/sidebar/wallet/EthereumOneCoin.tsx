@@ -47,7 +47,7 @@ import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 import prevent from '../../../../utils/preventPropagation';
 
 import AddToken from './addToken';
-import { OneCoinProps, OneCoinPropTypes } from './OneCoinProps';
+import { EthereumOneCoinProps, EthereumOneCoinPropTypes } from './OneCoinProps';
 import OneToken from './OneToken';
 import Recieve from './recieve';
 import Send from './send';
@@ -158,7 +158,7 @@ const CoinCardBtn = withStyles((theme: Theme) => ({
   }
 }))(Button);
 
-const EthereumOneCoin: React.FC<OneCoinProps> = ({
+const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   initial,
   name,
   holding,
@@ -168,7 +168,8 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
   decimal,
   walletId,
   deleteCoin,
-  deleteHistory
+  deleteHistory,
+  sortIndex
 }) => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -182,8 +183,13 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
 
   const { beforeNetworkAction } = useConnection();
 
-  const { tokenData, tokenList, setCurrentEthCoin, setCurrentWalletId } =
-    useToken();
+  const {
+    tokenData,
+    tokenList,
+    setCurrentEthCoin,
+    setCurrentWalletId,
+    sortTokensByIndex
+  } = useToken();
 
   useEffect(() => {
     const key = `${walletId}-${initial.toLowerCase()}`;
@@ -193,6 +199,10 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
       setIsLoading(false);
     }
   }, [sync.modulesInExecutionQueue, walletId, initial]);
+
+  useEffect(() => {
+    sortTokensByIndex(sortIndex);
+  }, [sortIndex]);
 
   const beforeAction = () => {
     if (isLoading) {
@@ -490,6 +500,6 @@ const EthereumOneCoin: React.FC<OneCoinProps> = ({
   );
 };
 
-EthereumOneCoin.propTypes = OneCoinPropTypes;
+EthereumOneCoin.propTypes = EthereumOneCoinPropTypes;
 
 export default EthereumOneCoin;
