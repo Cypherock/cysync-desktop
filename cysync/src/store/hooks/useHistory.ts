@@ -106,7 +106,7 @@ export const useHistory: UseHistory = () => {
           throw new Error(`Cannot find ETH coin for token: ${newTxn.coin}`);
         }
         // the currency units correspond to ETH units and not the token decimals
-        feeCoinMultiplier = COINS.eth.multiplier;
+        feeCoinMultiplier = COINS[newTxn.ethCoin].multiplier;
         isErc20 = true;
       }
 
