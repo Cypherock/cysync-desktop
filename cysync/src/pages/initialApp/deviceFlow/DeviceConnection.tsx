@@ -10,10 +10,10 @@ import Icon from '../../../designSystem/designComponents/icons/Icon';
 import TextView from '../../../designSystem/designComponents/textComponents/textView';
 import DeviceWired from '../../../designSystem/iconGroups/deviceWired';
 import {
+  DeviceConnectionState,
   FeedbackState,
   useConnection,
-  useFeedback,
-  VerifyState
+  useFeedback
 } from '../../../store/provider';
 import { inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
@@ -108,7 +108,7 @@ const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
   const {
     internalDeviceConnection: deviceConnection,
     inBackgroundProcess,
-    verifyState,
+    deviceConnectionState,
     deviceState
   } = useConnection();
 
@@ -124,12 +124,13 @@ const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
     if (
       deviceConnection &&
       !inBackgroundProcess &&
-      verifyState !== VerifyState.NOT_CONNECTED
+      deviceConnectionState !== DeviceConnectionState.NOT_CONNECTED
     ) {
       if (
-        [VerifyState.IN_TEST_APP, VerifyState.IN_BOOTLOADER].includes(
-          verifyState
-        )
+        [
+          DeviceConnectionState.IN_TEST_APP,
+          DeviceConnectionState.IN_BOOTLOADER
+        ].includes(deviceConnectionState)
       ) {
         // When in bootloader or test app, start initialFlow
         logger.info('Device connected in bootloader mode or test app.');

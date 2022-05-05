@@ -247,7 +247,7 @@ const Root = styled(Grid)(({ theme }) => ({
   }
 }));
 
-const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
+const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   handleDeviceHealthTabClose,
   allowExit,
   setAllowExit
@@ -256,6 +256,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   const [connStatus, setConnStatus] = React.useState<-1 | 0 | 1 | 2>(1);
   const [upgradeAvailable, setUpgradeAvailable] = React.useState(false);
   const [initialStart, setInitialStart] = React.useState(false);
+  const [activeStep, setActiveStep] = React.useState(0);
 
   const { connected } = useNetwork();
 
@@ -271,7 +272,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     setIsCompleted,
     displayErrorMessage,
     setDisplayErrorMessage,
-    setIsDeviceUpdating,
     isApproved,
     isInternetSlow,
     updateDownloaded,
@@ -282,6 +282,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 
   const latestDeviceConnection = useRef<any>();
   const latestCompleted = useRef<boolean>();
+  const latestStep = useRef<number>();
 
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
@@ -292,17 +293,23 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   }, [isCompleted]);
 
   useEffect(() => {
+    latestStep.current = activeStep;
+  }, [activeStep]);
+
+  useEffect(() => {
     Analytics.Instance.event(
       Analytics.Categories.DEVICE_UPDATE,
       Analytics.Actions.OPEN
     );
     logger.info('Setting device update open');
-    setIsDeviceUpdating(true);
 
     return () => {
       setAllowExit(true);
-      setIsDeviceUpdating(false);
-      if (!latestCompleted.current && latestDeviceConnection.current) {
+      if (
+        latestStep.current !== 0 &&
+        !latestCompleted.current &&
+        latestDeviceConnection.current
+      ) {
         cancelDeviceUpgrade(latestDeviceConnection.current);
       }
       logger.info('Setting device update closed');
@@ -368,8 +375,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
       setAllowExit(true);
     }
   }, [isCompleted, isApproved]);
-
-  const [activeStep, setActiveStep] = React.useState(0);
 
   const handleNext = () => {
     if (activeStep <= 2) {
@@ -623,6 +628,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   );
 };
 
-DeviceAuth.propTypes = DeviceSettingItemPropTypes;
+DeviceUpgrade.propTypes = DeviceSettingItemPropTypes;
 
-export default DeviceAuth;
+export default DeviceUpgrade;

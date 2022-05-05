@@ -87,10 +87,10 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
 
   const {
     startDeviceUpdate,
+    setBlockNewConnection,
     isCompleted,
     displayErrorMessage,
     setDisplayErrorMessage,
-    setIsDeviceUpdating,
     isApproved,
     isInternetSlow,
     updateDownloaded,
@@ -100,6 +100,11 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
 
   const feedback = useFeedback();
 
+  const onClose = () => {
+    setBlockNewConnection(false);
+    handleClose();
+  };
+
   useEffect(() => {
     logger.info('Initiating device update from prompt');
     setDisplayErrorMessage('');
@@ -108,7 +113,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
 
     return () => {
       logger.info('Closed device update prompt');
-      setIsDeviceUpdating(false);
+      setBlockNewConnection(false);
     };
   }, []);
 
@@ -143,7 +148,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
             </Typography>
             <div style={{ display: 'flex' }}>
               <CustomButton
-                onClick={() => handleClose()}
+                onClick={onClose}
                 style={{
                   padding: '0.5rem 3rem',
                   margin: '0.5rem',
@@ -232,10 +237,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
                 </ListItem>
                 <div className={classes.errorButtons}>
                   <CustomButton
-                    onClick={() => {
-                      setIsDeviceUpdating(false);
-                      handleClose();
-                    }}
+                    onClick={onClose}
                     style={{ margin: '1rem 0rem' }}
                   >
                     Close

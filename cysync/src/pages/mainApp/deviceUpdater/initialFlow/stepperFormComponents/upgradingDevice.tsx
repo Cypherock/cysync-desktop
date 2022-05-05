@@ -88,6 +88,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     isCompleted,
     displayErrorMessage,
     setDisplayErrorMessage,
+    setBlockNewConnection,
     isInternetSlow,
     updateDownloaded,
     errorMessage,
@@ -98,6 +99,11 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const refreshComponent = () => {
     handleRetry();
+  };
+
+  const onClose = () => {
+    setBlockNewConnection(false);
+    handleClose();
   };
 
   useEffect(() => {
@@ -131,6 +137,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     startDeviceUpdate();
 
     return () => {
+      setBlockNewConnection(false);
       logger.info('Closed device update screen');
     };
   }, []);
@@ -148,7 +155,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
         Analytics.Actions.COMPLETED
       );
       logger.info('InitialDeviceUpdateInMain: Completed');
-      setTimeout(handleClose, 350);
+      setTimeout(onClose, 350);
     }
   }, [isCompleted]);
 
@@ -239,12 +246,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
               </Typography>
             </div>
             <div className={classes.errorButtons}>
-              <CustomButton
-                onClick={() => {
-                  handleClose();
-                }}
-                style={{ marginTop: '2rem' }}
-              >
+              <CustomButton onClick={onClose} style={{ marginTop: '2rem' }}>
                 Close
               </CustomButton>
               <CustomButton
