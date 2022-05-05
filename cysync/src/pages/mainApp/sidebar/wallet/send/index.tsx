@@ -26,7 +26,7 @@ const SenderData = [
   ['Confirmation', Confirmation]
 ];
 
-const Index = () => {
+const WalletSend = () => {
   const { sendForm, setSendForm, sendTransaction } =
     useSendTransactionContext();
 
@@ -101,4 +101,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default WalletSend;

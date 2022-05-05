@@ -1,12 +1,7 @@
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import { styled, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -17,48 +12,60 @@ import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      background: theme.palette.primary.light,
-      padding: '0.5rem 0rem 0.5rem 0rem',
-      borderRadius: 5,
-      minHeight: 50,
-      maxHeight: 60,
-      margin: `${theme.spacing(1)}px 0px`
-    },
-    alignStartCenter: {
-      display: 'flex',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
-    },
-    alignCenterCenter: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    flexColumn: {
-      flexDirection: 'column',
-      alignItems: 'flex-start'
-    },
-    capitalize: {
-      textTransform: 'uppercase'
-    },
-    clearFix: {
-      margin: `0px !important`,
-      padding: `0px !important`
-    },
-    blue: {
-      color: theme.palette.info.main
-    },
-    red: {
-      color: theme.palette.error.main
-    },
-    orange: {
-      color: theme.palette.secondary.main
-    }
-  })
-);
+const PREFIX = 'OneTransaction';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  alignStartCenter: `${PREFIX}-alignStartCenter`,
+  alignCenterCenter: `${PREFIX}-alignCenterCenter`,
+  flexColumn: `${PREFIX}-flexColumn`,
+  capitalize: `${PREFIX}-capitalize`,
+  clearFix: `${PREFIX}-clearFix`,
+  blue: `${PREFIX}-blue`,
+  red: `${PREFIX}-red`,
+  orange: `${PREFIX}-orange`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.root}`]: {
+    background: theme.palette.primary.light,
+    padding: '0.5rem 0rem 0.5rem 0rem',
+    borderRadius: 5,
+    minHeight: 50,
+    maxHeight: 60,
+    margin: `${theme.spacing(1)} 0px`
+  },
+  [`& .${classes.alignStartCenter}`]: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  },
+  [`& .${classes.alignCenterCenter}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.flexColumn}`]: {
+    flexDirection: 'column',
+    alignItems: 'flex-start'
+  },
+  [`& .${classes.capitalize}`]: {
+    textTransform: 'uppercase'
+  },
+  [`& .${classes.clearFix}`]: {
+    margin: `0px !important`,
+    padding: `0px !important`
+  },
+  [`& .${classes.blue}`]: {
+    color: theme.palette.info.main
+  },
+  [`& .${classes.red}`]: {
+    color: theme.palette.error.main
+  },
+  [`& .${classes.orange}`]: {
+    color: theme.palette.secondary.main
+  }
+}));
 
 interface OneTransactionProps {
   date: string;
@@ -75,7 +82,6 @@ interface OneTransactionProps {
 }
 
 const OneTransaction: React.FC<OneTransactionProps> = props => {
-  const classes = useStyles();
   const theme = useTheme();
   const {
     date,
@@ -114,7 +120,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
   };
 
   return (
-    <div style={{ marginRight: '10px' }}>
+    <Root style={{ marginRight: '10px' }}>
       <Grid container className={classes.root}>
         <Grid
           item
@@ -123,7 +129,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
             display: 'flex'
           }}
         >
-          <CoinIcons initial={initial} />
+          <CoinIcons initial={initial} style={{ marginRight: '10px' }} />
           <div
             className={clsx(classes.alignStartCenter, classes.flexColumn)}
             style={{ justifyContent: 'center' }}
@@ -188,12 +194,17 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
           </Typography>
         </Grid>
         <Grid item xs={2} className={classes.alignCenterCenter}>
-          <Button size="small" variant="outlined" onClick={onShowMore}>
+          <Button
+            size="small"
+            variant="outlined"
+            color="secondary"
+            onClick={onShowMore}
+          >
             Show More
           </Button>
         </Grid>
       </Grid>
-    </div>
+    </Root>
   );
 };
 

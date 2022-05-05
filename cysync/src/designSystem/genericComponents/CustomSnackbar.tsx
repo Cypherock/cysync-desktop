@@ -1,15 +1,17 @@
-import Snackbar, { SnackbarProps } from '@material-ui/core/Snackbar';
-import { makeStyles, Theme } from '@material-ui/core/styles';
-import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import Snackbar, { SnackbarProps } from '@mui/material/Snackbar';
+import { styled } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-function Alert(props: AlertProps) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
+const PREFIX = 'CustomSnackbar';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
+const classes = {
+  root: `${PREFIX}-root`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
     width: '100%',
     '& > * + *': {
       marginTop: theme.spacing(2)
@@ -17,12 +19,20 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
+const RefAlert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 interface Props {
   text: string;
   open: boolean;
   severity: AlertProps['severity'];
   handleClose?: (event?: React.SyntheticEvent, reason?: string) => void;
   autoHideDuration?: SnackbarProps['autoHideDuration'];
+  anchorOrigin?: SnackbarProps['anchorOrigin'];
 }
 
 const CustomSnackbar: React.FC<Props> = ({
@@ -30,22 +40,22 @@ const CustomSnackbar: React.FC<Props> = ({
   open,
   severity,
   handleClose,
+  anchorOrigin,
   autoHideDuration = 6000
 }) => {
-  const classes = useStyles();
-
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <Snackbar
         open={open}
         autoHideDuration={autoHideDuration}
         onClose={handleClose}
+        anchorOrigin={anchorOrigin}
       >
-        <Alert onClose={handleClose} severity={severity}>
+        <RefAlert onClose={handleClose} severity={severity}>
           {text}
-        </Alert>
+        </RefAlert>
       </Snackbar>
-    </div>
+    </Root>
   );
 };
 

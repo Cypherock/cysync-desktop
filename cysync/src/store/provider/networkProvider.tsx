@@ -26,20 +26,20 @@ export const NetworkProvider: React.FC = ({ children }) => {
 
   const snackbar = useSnackbar();
 
-  let webPing: NodeJS.Timeout | null;
+  const webPing = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   const onWebPing = async () => {
     try {
       await axios.get(getServerUrl());
-      if (webPing) {
-        clearTimeout(webPing);
+      if (webPing.current) {
+        clearTimeout(webPing.current);
       }
-      webPing = null;
+      webPing.current = undefined;
       setConnected(true);
     } catch (error) {
       setServerError(true);
       setConnected(false);
-      webPing = setTimeout(onWebPing, 2000);
+      webPing.current = setTimeout(onWebPing, 2000);
     }
   };
 
@@ -48,13 +48,13 @@ export const NetworkProvider: React.FC = ({ children }) => {
     setServerError(false);
     const condition = navigator.onLine ? 'online' : 'offline';
 
-    if (webPing) {
-      clearTimeout(webPing);
-      webPing = null;
+    if (webPing.current) {
+      clearTimeout(webPing.current);
+      webPing.current = null;
     }
 
     if (condition === 'online') {
-      webPing = setTimeout(onWebPing, 2000);
+      webPing.current = setTimeout(onWebPing, 2000);
       return;
     }
 

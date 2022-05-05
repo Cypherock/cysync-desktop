@@ -1,15 +1,10 @@
-import { Grid } from '@material-ui/core';
-import MIconButton from '@material-ui/core/IconButton';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { Grid } from '@mui/material';
+import MIconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import { styled, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -23,29 +18,36 @@ import {
 } from '../../../../../../utils/auth';
 import logger from '../../../../../../utils/logger';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    inputs: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      height: 'auto',
-      width: '100%'
-    },
-    buttons: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    error: {
-      color: theme.palette.error.main
-    },
-    marginTopBottom: {
-      margin: '0.5rem 0rem'
-    }
-  })
-);
+const PREFIX = 'RemovePassword';
+
+const classes = {
+  inputs: `${PREFIX}-inputs`,
+  buttons: `${PREFIX}-buttons`,
+  error: `${PREFIX}-error`,
+  marginTopBottom: `${PREFIX}-marginTopBottom`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.inputs}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 'auto',
+    width: '100%'
+  },
+  [`& .${classes.buttons}`]: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.error}`]: {
+    color: theme.palette.error.main
+  },
+  [`& .${classes.marginTopBottom}`]: {
+    margin: '0.5rem 0rem'
+  }
+}));
 
 interface State {
   oldPassword: string;
@@ -58,7 +60,6 @@ type Props = {
 };
 
 const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const lockscreen = useLockscreen();
   const snackbar = useSnackbar();
@@ -72,6 +73,12 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
   const [isLoading, setIsLoading] = React.useState(false);
 
   const [error, setError] = React.useState('');
+
+  const resetState = () => {
+    setValues({ ...INITIAL_VALUES });
+    setIsLoading(false);
+    setError('');
+  };
 
   const handleChange =
     (prop: keyof State) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +104,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
   const handleSetPassword = async () => {
     try {
       if (!values.oldPassword.trim()) {
-        setError('Please enter your old password.');
+        setError('Please enter your password.');
       } else {
         if (await verifyPassword(values.oldPassword.trim())) {
           setError('');
@@ -115,7 +122,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
             }
           );
         } else {
-          setError('Old Password is incorrect');
+          setError('Password is incorrect');
         }
       }
     } catch (error) {
@@ -125,27 +132,26 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
     setIsLoading(false);
   };
 
-  let timeout: NodeJS.Timeout;
+  const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   React.useEffect(() => {
     if (isLoading) {
-      timeout = setTimeout(handleSetPassword, 0);
+      timeout.current = setTimeout(handleSetPassword, 0);
     }
-  }, [isLoading]);
 
-  React.useEffect(() => {
     return () => {
-      if (timeout) {
-        clearTimeout(timeout);
+      if (timeout.current) {
+        clearTimeout(timeout.current);
+        timeout.current = undefined;
       }
     };
-  }, []);
+  }, [isLoading]);
 
   const confirmChangePassword = async () => {
     setIsLoading(true);
   };
 
   const closeDialogBox = () => {
-    setValues({ ...INITIAL_VALUES });
+    resetState();
     onClose();
   };
 
@@ -161,7 +167,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
       confirmButtonDisabled={isLoading}
       rejectButtonDisabled={isLoading}
       restComponents={
-        <Grid
+        <Root
           item
           xs={7}
           style={{
@@ -220,7 +226,7 @@ const RemovePassword: React.FC<Props> = ({ onClose, open }) => {
               {error}
             </Typography>
           )}
-        </Grid>
+        </Root>
       }
     />
   );

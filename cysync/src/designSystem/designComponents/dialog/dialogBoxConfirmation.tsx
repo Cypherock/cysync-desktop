@@ -1,7 +1,7 @@
-import { DialogProps } from '@material-ui/core';
-import { CircularProgress } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { DialogProps } from '@mui/material';
+import { CircularProgress } from '@mui/material';
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -9,30 +9,34 @@ import CustomButton from '../buttons/button';
 
 import DialogBox from './dialogBox';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {},
-    buttons: {
-      position: 'absolute',
-      bottom: 0,
-      marginBottom: '2rem',
-      width: '30%',
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between'
-    },
-    close: {
-      textTransform: 'none',
-      background: theme.palette.primary.light,
-      color: theme.palette.text.primary,
-      border: `1px solid ${theme.palette.text.secondary}`,
-      '&:hover': {
-        background: theme.palette.text.primary,
-        color: theme.palette.primary.main
-      }
+const PREFIX = 'DialogBoxConfirmation';
+
+const classes = {
+  buttons: `${PREFIX}-buttons`,
+  close: `${PREFIX}-close`
+};
+
+const Root = styled(DialogBox)(({ theme }) => ({
+  [`& .${classes.buttons}`]: {
+    position: 'absolute',
+    bottom: 0,
+    marginBottom: '2rem',
+    width: '30%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  [`& .${classes.close}`]: {
+    textTransform: 'none',
+    background: theme.palette.primary.light,
+    color: theme.palette.text.primary,
+    border: `1px solid ${theme.palette.text.secondary}`,
+    '&:hover': {
+      background: theme.palette.text.primary,
+      color: theme.palette.primary.main
     }
-  })
-);
+  }
+}));
 
 type Props = {
   open: boolean;
@@ -68,10 +72,8 @@ const DialogBoxConfirmation: React.FC<Props> = ({
   rejectButtonText,
   isLoading
 }) => {
-  const classes = useStyles();
-
   return (
-    <DialogBox
+    <Root
       fullWidth={fullScreen}
       maxWidth={maxWidth}
       dialogHeading={dialogHeading}

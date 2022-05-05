@@ -1,5 +1,5 @@
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
@@ -10,37 +10,41 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      width: 'fit-content',
-      padding: '3rem 10rem 3rem',
-      marginLeft: 'auto',
-      marginRight: 'auto'
-    },
-    addressContainer: {
-      background: 'rgba(0,0,0,0.2)',
-      minWidth: '92%',
-      padding: '1.5rem',
-      marginBottom: '1.5rem',
-      borderRadius: 10,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    copyButton: {
-      textTransform: 'none'
-    }
-  })
-);
+const PREFIX = 'WalletReceiveVerification';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  addressContainer: `${PREFIX}-addressContainer`,
+  copyButton: `${PREFIX}-copyButton`
+};
+
+const Root = styled('div')(() => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    width: 'fit-content',
+    padding: '3rem 10rem 3rem',
+    marginLeft: 'auto',
+    marginRight: 'auto'
+  },
+  [`& .${classes.addressContainer}`]: {
+    background: 'rgba(0,0,0,0.2)',
+    minWidth: '92%',
+    padding: '1.5rem',
+    marginBottom: '1.5rem',
+    borderRadius: 10,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.copyButton}`]: {
+    textTransform: 'none'
+  }
+}));
 
 const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
-  const classes = useStyles();
-
   const { receiveTransaction } = useReceiveTransactionContext();
 
   useEffect(() => {
@@ -51,7 +55,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
 
   const address = receiveTransaction.receiveAddress;
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <div className={classes.addressContainer}>
         <Typography color="secondary" variant="h4">
           {address}
@@ -63,7 +67,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
         inProgress={!receiveTransaction.verified}
         text="Please Match the Address on CypherRock X1"
       />
-    </div>
+    </Root>
   );
 };
 

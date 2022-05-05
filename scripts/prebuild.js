@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const os = require("os");
 const childProcess = require("child_process");
 
 const BRANCH_OR_TAG = process.env.GITHUB_REF_TYPE;
@@ -63,7 +64,7 @@ const setConfig = (buildType) => {
   const configPath = path.join(__dirname, "..", "cysync", "src", "config.json");
   fs.writeFileSync(
     configPath,
-    JSON.stringify(BUILD_TYPE_CONFIG[buildType], undefined, 2)
+    JSON.stringify(BUILD_TYPE_CONFIG[buildType], undefined, 2) + os.EOL
   );
 };
 
@@ -132,11 +133,29 @@ const setVersion = async (buildType, tagName) => {
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, undefined, 2));
 };
 
+const setDependencies = () => {
+  if (process.platform === "darwin") {
+    const packageJsonPath = path.join(__dirname, "..", "cysync", "package.json");
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath));
+
+    if (packageJson.hasOwnProperty("resolutions")) {
+      packageJson.resolutions["**/@electron-forge/maker-dmg/electron-installer-dmg/appdmg"] = "^0.6.4";
+    } else {
+      packageJson.resolutions = {
+        "**/@electron-forge/maker-dmg/electron-installer-dmg/appdmg": "^0.6.4"
+      };
+    }
+
+    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, undefined, 2) + os.EOL);
+  }
+}
+
 const run = async () => {
   try {
     const { buildType, tagName } = getArgs();
     setConfig(buildType);
     await setVersion(buildType, tagName);
+    setDependencies();
   } catch (error) {
     console.error(error);
     process.exit(1);

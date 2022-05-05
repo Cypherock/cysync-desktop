@@ -1,4 +1,4 @@
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import React from 'react';
 import IdleTimer from 'react-idle-timer';
 
@@ -49,7 +49,7 @@ const Index = () => {
       );
     }
 
-    return <Dashboard handleLock={handleLockScreenClickOpen} />;
+    return <Dashboard />;
   };
 
   return (

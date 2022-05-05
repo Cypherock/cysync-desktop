@@ -4,7 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import Routes from '../../../../constants/routes';
 import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
 import { deviceDb } from '../../../../store/database';
-import { useConnection, useUpdater } from '../../../../store/provider';
+import {
+  useConnection,
+  useUpdater,
+  VerifyState
+} from '../../../../store/provider';
 import { compareVersion } from '../../../../utils/compareVersion';
 import logger from '../../../../utils/logger';
 
@@ -20,7 +24,7 @@ const Updater = () => {
 
   useEffect(() => {
     // Only show when update is available and device has a valid connection
-    if (isDeviceUpdateAvailable && verifyState === 0) {
+    if (isDeviceUpdateAvailable && verifyState === VerifyState.VERIFIED) {
       const lastVersion = localStorage.getItem('last-device-version');
       if (deviceSerial !== null) {
         deviceDb

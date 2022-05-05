@@ -16,7 +16,7 @@ interface Props {
   handleClose: () => void;
 }
 
-const Index: React.FC<Props> = ({ handleClose }) => {
+const MainAppInitialFlow: React.FC<Props> = ({ handleClose }) => {
   return (
     <DeviceSetupFormFlow
       stepsData={deviceSetupData}
@@ -25,8 +25,8 @@ const Index: React.FC<Props> = ({ handleClose }) => {
   );
 };
 
-Index.propTypes = {
+MainAppInitialFlow.propTypes = {
   handleClose: PropTypes.func.isRequired
 };
 
-export default Index;
+export default MainAppInitialFlow;

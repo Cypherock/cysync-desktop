@@ -1,9 +1,9 @@
-import { IconButton } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ReportIcon from '@material-ui/icons/Report';
+import ReportIcon from '@mui/icons-material/Report';
+import { IconButton } from '@mui/material';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import { shell } from 'electron';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -11,41 +11,46 @@ import React from 'react';
 import TextView from '../../../designSystem/designComponents/textComponents/textView2';
 import { FeedbackState, useFeedback } from '../../../store/provider';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    content: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      height: '80vh'
-    },
-    textViewContainer: {
-      width: '100%'
-    },
-    button: {
-      background: '#71624C',
-      padding: '0.5rem 4rem',
-      fontWeight: 700,
-      fontFamily: 'Lato',
-      letterSpacing: 1,
-      color: '#FFF'
-    },
-    report: {
-      position: 'absolute',
-      right: 20,
-      bottom: 20
-    }
-  })
-);
+const PREFIX = 'StartOptions';
+
+const classes = {
+  content: `${PREFIX}-content`,
+  textViewContainer: `${PREFIX}-textViewContainer`,
+  button: `${PREFIX}-button`,
+  report: `${PREFIX}-report`
+};
+
+const Root = styled(Grid)(() => ({
+  [`& .${classes.content}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: '80vh'
+  },
+  [`& .${classes.textViewContainer}`]: {
+    width: '100%'
+  },
+  [`& .${classes.button}`]: {
+    background: '#71624C',
+    padding: '0.5rem 4rem',
+    fontWeight: 700,
+    fontFamily: 'Lato',
+    letterSpacing: 1,
+    color: '#FFF'
+  },
+  [`& .${classes.report}`]: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20
+  }
+}));
 
 interface StartOptionsProps {
   handleNext: () => void;
 }
 
 const StartOptions: React.FC<StartOptionsProps> = ({ handleNext }) => {
-  const classes = useStyles();
-
   const { showFeedback } = useFeedback();
 
   const newFeedbackState: FeedbackState = {
@@ -98,7 +103,7 @@ const StartOptions: React.FC<StartOptionsProps> = ({ handleNext }) => {
   };
 
   return (
-    <Grid container>
+    <Root container>
       <Grid item xs={3} />
       <Grid item xs={6} className={classes.content}>
         <Typography
@@ -139,10 +144,11 @@ const StartOptions: React.FC<StartOptionsProps> = ({ handleNext }) => {
         title="Report issue"
         onClick={handleFeedbackOpen}
         className={classes.report}
+        size="large"
       >
         <ReportIcon color="secondary" />
       </IconButton>
-    </Grid>
+    </Root>
   );
 };
 

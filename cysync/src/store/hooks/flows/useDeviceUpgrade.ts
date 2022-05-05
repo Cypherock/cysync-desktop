@@ -8,11 +8,7 @@ import { stmFirmware as firmwareServer } from '@cypherock/server-wrapper';
 import { ipcRenderer } from 'electron';
 import React, { useEffect } from 'react';
 
-import {
-  getFirmwareHex,
-  hexToVersion,
-  inTestApp
-} from '../../../utils/compareVersion';
+import { getFirmwareHex, inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
 import {
   ConnectionContextInterface,
@@ -92,7 +88,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   const [latestVersion, setLatestVersion] = React.useState('0.0.0');
   const [firmwarePath, setFirmwarePath] = React.useState('');
   const [isInternetSlow, setIsInternetSlow] = React.useState(false);
-  let internetSlowTimeout: NodeJS.Timeout | null = null;
+  const internetSlowTimeout = React.useRef<NodeJS.Timeout | undefined>(
+    undefined
+  );
 
   const startDeviceUpdate = () => {
     setApproved(0);
@@ -115,7 +113,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         logger.verbose(
           `Device update available for version: ${response.data.firmware.version}`
         );
-        internetSlowTimeout = setTimeout(() => {
+        internetSlowTimeout.current = setTimeout(() => {
           logger.verbose('Setting internet Slow.');
           setIsInternetSlow(true);
         }, 5000);
@@ -141,9 +139,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         setUpdateDownloaded(-1);
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
-        if (internetSlowTimeout !== null) {
-          clearTimeout(internetSlowTimeout);
-          internetSlowTimeout = null;
+        if (internetSlowTimeout.current) {
+          clearTimeout(internetSlowTimeout.current);
+          internetSlowTimeout.current = undefined;
         }
       });
 
@@ -151,9 +149,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       logger.info('Firmware downloaded successfully');
       setFirmwarePath(filePath);
       setUpdateDownloaded(2);
-      if (internetSlowTimeout !== null) {
-        clearTimeout(internetSlowTimeout);
-        internetSlowTimeout = null;
+      if (internetSlowTimeout.current) {
+        clearTimeout(internetSlowTimeout.current);
+        internetSlowTimeout.current = undefined;
       }
     });
 
@@ -323,7 +321,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
   // Trigger device auth when firmware version has changed,
   // update is completed and there is a device connection
-  let timeout: NodeJS.Timeout | undefined;
+  const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const retries = React.useRef<number>(1);
   const latestDeviceConnection = React.useRef<DeviceConnection | null>(null);
   const MAX_RETRIES = 3;
@@ -351,9 +349,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         setIsInFlow: () => {
           // empty
         },
-        firmwareVersion: hexToVersion(latestVersion),
+        firmwareVersion: latestVersion,
         setDeviceSerial,
-        inTestApp: inTestApp(deviceState)
+        inTestApp: inTestApp(latestDeviceConnection.current.deviceState)
       });
     } catch (error) {
       retries.current += 1;
@@ -370,12 +368,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         logger.warn('Error in device auth, retrying...');
         logger.error(error);
 
-        if (timeout) {
-          clearTimeout(timeout);
-          timeout = undefined;
+        if (timeout.current) {
+          clearTimeout(timeout.current);
+          timeout.current = undefined;
         }
 
-        timeout = setTimeout(initiateDeviceAuth, 2000);
+        timeout.current = setTimeout(initiateDeviceAuth, 2000);
       }
     }
   };
@@ -383,13 +381,13 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   useEffect(() => {
     if (isUpdated === 2) {
       logger.info('Device updated successfully, initiating device auth');
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = undefined;
+      if (timeout.current) {
+        clearTimeout(timeout.current);
+        timeout.current = undefined;
       }
 
       // Additional delay for device to become active
-      timeout = setTimeout(initiateDeviceAuth, 10000);
+      timeout.current = setTimeout(initiateDeviceAuth, 10000);
     }
   }, [isUpdated]);
 
@@ -412,12 +410,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         logger.warn('Error in device auth, retrying...');
         logger.warn(errorMessage);
 
-        if (timeout) {
-          clearTimeout(timeout);
-          timeout = undefined;
+        if (timeout.current) {
+          clearTimeout(timeout.current);
+          timeout.current = undefined;
         }
 
-        timeout = setTimeout(initiateDeviceAuth, 2000);
+        timeout.current = setTimeout(initiateDeviceAuth, 2000);
       }
     } else if (completed && verified === 2) {
       logger.info('Device auth completed');

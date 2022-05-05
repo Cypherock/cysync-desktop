@@ -1,81 +1,67 @@
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Switch, { SwitchClassKey, SwitchProps } from '@material-ui/core/Switch';
+import { styled } from '@mui/material/styles';
+import Switch from '@mui/material/Switch';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-interface Styles extends Partial<Record<SwitchClassKey, string>> {
-  focusVisible?: string;
-}
+const PREFIX = 'SwitchButton';
 
-interface Props extends SwitchProps {
-  classes: Styles;
-}
+const classes = {
+  root: `${PREFIX}-root`,
+  label: `${PREFIX}-label`
+};
 
-const IOSSwitch = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: 32,
-      height: 18,
-      padding: 0,
-      paddingBottom: 2,
-      margin: `0px 10px `
-    },
-    switchBase: {
-      padding: 1,
-      '&$checked': {
-        paddingTop: 1,
-        transform: 'translateX(15px)',
-        color: theme.palette.primary.main,
-        '& + $track': {
-          backgroundColor: theme.palette.primary.main,
-          opacity: 1,
-          border: `1px solid ${theme.palette.secondary.main}`
-        }
-      },
-      '&$focusVisible $thumb': {
-        color: theme.palette.secondary.main
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+
+  [`& .${classes.label}`]: {
+    color: theme.palette.primary.contrastText,
+    fontSize: 20
+  }
+}));
+
+const IOSSwitch = styled(Switch)(({ theme }) => ({
+  width: 32,
+  height: 18,
+  padding: 0,
+  paddingBottom: 2,
+  margin: `0px 10px `,
+  '& .MuiSwitch-switchBase': {
+    padding: 1,
+    '&.Mui-checked': {
+      paddingTop: 1,
+      transform: 'translateX(15px)',
+      color: theme.palette.primary.main,
+      '& + .MuiSwitch-track': {
+        backgroundColor: theme.palette.primary.main,
+        opacity: 1,
+        border: `1px solid ${theme.palette.secondary.main}`
       }
     },
-    thumb: {
-      width: 14,
-      height: 14,
-      marginTop: 1,
-      marginLeft: 1,
-      background: theme.palette.secondary.main
-    },
-    track: {
-      borderRadius: 18 / 2,
-      border: `1px solid ${theme.palette.secondary.light}`,
-      backgroundColor: theme.palette.primary.main,
-      opacity: 1,
-      transition: theme.transitions.create(['background-color', 'border'])
-    },
-    checked: {
-      padding: 0
-    },
-    focusVisible: {}
-  })
-)(({ classes, ...props }: Props) => {
-  return (
-    <Switch
-      focusVisibleClassName={classes.focusVisible}
-      disableRipple
-      classes={{
-        root: classes.root,
-        switchBase: classes.switchBase,
-        thumb: classes.thumb,
-        track: classes.track,
-        checked: classes.checked
-      }}
-      {...props}
-    />
-  );
-});
+    '& .Mui-focusVisible .MuiSwitch-thumb': {
+      color: theme.palette.secondary.main
+    }
+  },
+  '& .MuiSwitch-thumb': {
+    width: 14,
+    height: 14,
+    marginTop: 1,
+    marginLeft: 1,
+    background: theme.palette.secondary.main
+  },
+  '& .MuiSwitch-track': {
+    borderRadius: 18 / 2,
+    border: `1px solid ${theme.palette.secondary.light}`,
+    backgroundColor: theme.palette.primary.main,
+    opacity: 1,
+    transition: theme.transitions.create(['background-color', 'border'])
+  },
+  '&.Mui-checked': {
+    padding: 0
+  }
+}));
 
 type SwitchButtonProps = {
   completed: boolean;
@@ -84,35 +70,22 @@ type SwitchButtonProps = {
   name?: string;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  label: {
-    color: theme.palette.primary.contrastText,
-    fontSize: 20
-  },
-  sliderButton: {}
-}));
-
 const SwitchButton: React.FC<SwitchButtonProps> = ({
   completed,
   label,
   handleChange,
   name
 }: SwitchButtonProps) => {
-  const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <span className={classes.label}>{label}</span>
       <IOSSwitch
         checked={completed}
         onChange={handleChange}
         name={name}
-        className={classes.sliderButton}
+        focusVisibleClassName=".Mui-focusVisible"
       />
-    </div>
+    </Root>
   );
 };
 

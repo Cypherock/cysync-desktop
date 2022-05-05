@@ -1,7 +1,6 @@
-import { ThemeProvider } from '@material-ui/core';
-import { createTheme } from '@material-ui/core/styles';
+import { StyledEngineProvider, Theme, ThemeProvider } from '@mui/material';
 import 'electron-disable-file-drop';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { render } from 'react-dom';
 import 'react-virtualized/styles.css';
 import WebFont from 'webfontloader';
@@ -14,12 +13,13 @@ import { I18nProvider } from './store/provider';
 import Analytics from './utils/analytics';
 import './utils/errorHandler';
 
+declare module '@mui/styles/defaultTheme' {
+  /* tslint:disable-next-line */
+  interface DefaultTheme extends Theme {}
+}
+
 const instance = Analytics.Instance;
 instance.setup();
-
-const AppContainer = Fragment;
-
-const cySyncTheme = createTheme(theme);
 
 WebFont.load({
   google: {
@@ -29,15 +29,15 @@ WebFont.load({
 
 document.addEventListener('DOMContentLoaded', () =>
   render(
-    <AppContainer>
-      <ThemeProvider theme={cySyncTheme}>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
         <I18nProvider>
           <ErrorBoundary>
             <PermissionSetup />
           </ErrorBoundary>
         </I18nProvider>
       </ThemeProvider>
-    </AppContainer>,
+    </StyledEngineProvider>,
     document.getElementById('root')
   )
 );

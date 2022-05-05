@@ -1,13 +1,8 @@
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
+import { styled, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
@@ -15,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../../constants/routes';
 import CustomIconButton from '../../../../designSystem/designComponents/buttons/customIconButton';
-import DialogBoxConfirmation from '../../../../designSystem/designComponents/dialog/dialogBoxConfirmation';
+import CustomizedDialog from '../../../../designSystem/designComponents/dialog/newDialogBox';
 import PopOverText from '../../../../designSystem/designComponents/hover/popoverText';
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
@@ -33,72 +28,86 @@ import {
   useConnection
 } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
+import prevent from '../../../../utils/preventPropagation';
 
 import Recieve from './recieve';
 import Send from './send';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      background: theme.palette.primary.light,
-      minHeight: 50,
-      padding: '0px 0px 5px',
-      cursor: 'pointer',
-      '&:hover': {
-        background: '#343a42'
-      }
-    },
-    button: {},
-    icon: {
-      margin: '0px !important'
-    },
-    divider: {
-      background: theme.palette.primary.dark,
-      height: '50%',
-      margin: '0px 10px'
-    },
-    actions: {
-      display: 'flex',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
-    },
-    alignStartCenter: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
-    },
-    alignCenterCenter: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    recieveButton: {
-      color: theme.palette.info.main
-    },
-    red: {
-      color: theme.palette.error.main
-    },
-    orange: {
-      color: theme.palette.secondary.main
-    },
-    dialogRoot: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingBottom: '4rem'
-    },
-    nameWrapper: {
-      marginLeft: '3.5rem',
-      borderLeft: '1px solid rgba(33,40,35,1)',
-      display: 'flex',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
+const PREFIX = 'WalletOneToken';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  icon: `${PREFIX}-icon`,
+  divider: `${PREFIX}-divider`,
+  actions: `${PREFIX}-actions`,
+  alignStartCenter: `${PREFIX}-alignStartCenter`,
+  alignCenterCenter: `${PREFIX}-alignCenterCenter`,
+  recieveButton: `${PREFIX}-recieveButton`,
+  red: `${PREFIX}-red`,
+  orange: `${PREFIX}-orange`,
+  dialogRoot: `${PREFIX}-dialogRoot`,
+  nameWrapper: `${PREFIX}-nameWrapper`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.root}`]: {
+    background: theme.palette.primary.light,
+    minHeight: 50,
+    padding: '0px 0px 5px',
+    cursor: 'pointer',
+    '&:hover': {
+      background: '#343a42'
     }
-  })
-);
+  },
+  [`& .${classes.icon}`]: {
+    margin: '0px !important'
+  },
+  [`& .${classes.divider}`]: {
+    background: theme.palette.primary.dark,
+    height: '50%',
+    margin: '0px 10px'
+  },
+  [`& .${classes.actions}`]: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  },
+  [`& .${classes.alignStartCenter}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  },
+  [`& .${classes.alignCenterCenter}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.recieveButton}`]: {
+    color: theme.palette.info.main
+  },
+  [`& .${classes.red}`]: {
+    color: theme.palette.error.main
+  },
+  [`& .${classes.orange}`]: {
+    color: theme.palette.secondary.main
+  },
+  [`& .${classes.dialogRoot}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: '4rem'
+  },
+  [`& .${classes.nameWrapper}`]: {
+    marginLeft: '3.5rem',
+    borderLeft: '1px solid rgba(33,40,35,1)',
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  }
+}));
 
 interface OneTokenProps {
   initial: string;
@@ -123,7 +132,6 @@ const OneToken: React.FC<OneTokenProps> = ({
   walletId,
   ethCoin
 }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -133,25 +141,22 @@ const OneToken: React.FC<OneTokenProps> = ({
 
   const sendTransaction = useSendTransaction();
 
-  const handleSendFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
-    if (beforeNetworkAction()) setSendForm(true);
+  const handleSendFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
+    if (beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
   const [receiveForm, setReceiveForm] = useState(false);
 
   const receiveTransaction = useReceiveTransaction();
 
-  const handleReceiveFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleReceiveFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeNetworkAction()) setReceiveForm(true);
   };
 
-  const onClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const onClick = (e: React.MouseEvent) => {
+    prevent(e);
     navigate(
       `${
         Routes.transactions.index
@@ -161,9 +166,8 @@ const OneToken: React.FC<OneTokenProps> = ({
 
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const handleDeleteOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleDeleteOpen = (e: React.MouseEvent) => {
+    prevent(e);
     setDeleteOpen(true);
   };
 
@@ -181,35 +185,23 @@ const OneToken: React.FC<OneTokenProps> = ({
   };
 
   return (
-    <>
-      <DialogBoxConfirmation
-        maxWidth="sm"
-        fullScreen
+    <Root>
+      <CustomizedDialog
         open={deleteOpen}
         handleClose={handleDeleteClose}
-        handleConfirmation={handleDeleteConfirmation}
-        isClosePresent
-        restComponents={
-          <div className={classes.dialogRoot}>
-            <Icon
-              viewBox="0 0 116 125"
-              size={120}
-              iconGroup={<DeleteCoinIcon />}
-            />
-            <Typography
-              color="error"
-              variant="h3"
-              gutterBottom
-              style={{ marginTop: '2rem' }}
-            >
-              Are you sure
-            </Typography>
-            <Typography color="textPrimary" style={{ marginBottom: '2rem' }}>
-              {`You want to delete ${name} ?`}
-            </Typography>
-          </div>
-        }
-      />
+        onYes={handleDeleteConfirmation}
+      >
+        <Icon viewBox="0 0 116 125" size={120} iconGroup={<DeleteCoinIcon />} />
+        <Typography
+          color="error"
+          variant="h3"
+          gutterBottom
+          style={{ marginTop: '2rem' }}
+        >
+          Are you sure
+        </Typography>
+        <Typography color="textPrimary">{`You want to delete ${name} ?`}</Typography>
+      </CustomizedDialog>
       <SendTransactionContext.Provider
         value={{ sendForm, setSendForm, sendTransaction }}
       >
@@ -237,13 +229,13 @@ const OneToken: React.FC<OneTokenProps> = ({
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`${initial} ${formatDisplayAmount(holding, 4)}`}
+            text={`${formatDisplayAmount(holding, 4)} ${initial} `}
             color="textPrimary"
-            hoverText={`${initial} ${formatDisplayAmount(
+            hoverText={`${formatDisplayAmount(
               holding,
               decimal,
               true
-            )}`}
+            )} ${initial}`}
             style={{ fontSize: '0.9rem' }}
           />
         </Grid>
@@ -258,47 +250,31 @@ const OneToken: React.FC<OneTokenProps> = ({
           </Typography>
         </Grid>
         <Grid item xs={2} className={classes.actions}>
-          {!isEmpty ? (
-            <Button
-              variant="text"
-              className={clsx(classes.button, classes.orange)}
-              onClick={handleSendFormOpen}
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={theme.palette.secondary.main}
-                />
-              }
-              style={{ fontSize: '0.9rem' }}
-            >
-              Send
-            </Button>
-          ) : (
-            <Button
-              variant="text"
-              className={clsx(classes.button, classes.orange)}
-              onClick={handleSendFormOpen}
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={theme.palette.grey[500]}
-                />
-              }
-              style={{ fontSize: '0.9rem' }}
-              disabled
-            >
-              Send
-            </Button>
-          )}
+          <Button
+            variant="text"
+            className={!isEmpty ? clsx(classes.orange) : null}
+            onClick={handleSendFormOpen}
+            startIcon={
+              <Icon
+                className={classes.icon}
+                viewBox="0 0 14 15"
+                icon={ICONS.walletSend}
+                color={
+                  !isEmpty
+                    ? theme.palette.secondary.main
+                    : theme.palette.grey[500]
+                }
+              />
+            }
+            style={{ fontSize: '0.9rem' }}
+          >
+            Send
+          </Button>
 
           <Divider orientation="vertical" className={classes.divider} />
           <Button
             variant="text"
-            className={clsx(classes.button, classes.recieveButton)}
+            className={clsx(classes.recieveButton)}
             startIcon={
               <Icon
                 className={classes.icon}
@@ -319,7 +295,7 @@ const OneToken: React.FC<OneTokenProps> = ({
           </CustomIconButton>
         </Grid>
       </Grid>
-    </>
+    </Root>
   );
 };
 

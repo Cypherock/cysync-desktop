@@ -1,13 +1,8 @@
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
+import { styled, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -34,76 +29,89 @@ import {
   useSync
 } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
+import prevent from '../../../../utils/preventPropagation';
 
 import { OneCoinProps, OneCoinPropTypes } from './OneCoinProps';
 import Recieve from './recieve';
 import Send from './send';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    mainContainer: {
-      marginBottom: '10px',
-      width: '100%'
-    },
-    root: {
-      background: theme.palette.primary.light,
-      borderRadius: 5,
-      minHeight: 50,
-      margin: '10px 0px',
-      marginRight: '10px',
-      padding: '5px 0px',
-      cursor: 'pointer',
-      '&:hover': {
-        background: '#343a42'
-      }
-    },
-    loading: {
-      opacity: 0.6
-    },
-    button: {},
-    icon: {
-      margin: '0px !important'
-    },
-    divider: {
-      background: theme.palette.primary.dark,
-      height: '50%',
-      margin: '0px 10px'
-    },
-    actions: {
-      display: 'flex',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
-    },
-    alignStartCenter: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
-    },
-    alignCenterCenter: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    recieveButton: {
-      color: theme.palette.info.main
-    },
-    red: {
-      color: theme.palette.error.main
-    },
-    orange: {
-      color: theme.palette.secondary.main
-    },
-    dialogRoot: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingBottom: '4rem'
-    }
-  })
-);
+const PREFIX = 'WalletOneCoin';
+
+const classes = {
+  mainContainer: `${PREFIX}-mainContainer`,
+  root: `${PREFIX}-root`,
+  loading: `${PREFIX}-loading`,
+  icon: `${PREFIX}-icon`,
+  divider: `${PREFIX}-divider`,
+  actions: `${PREFIX}-actions`,
+  alignStartCenter: `${PREFIX}-alignStartCenter`,
+  alignCenterCenter: `${PREFIX}-alignCenterCenter`,
+  recieveButton: `${PREFIX}-recieveButton`,
+  red: `${PREFIX}-red`,
+  orange: `${PREFIX}-orange`,
+  dialogRoot: `${PREFIX}-dialogRoot`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  background: theme.palette.primary.light,
+  borderRadius: 5,
+  minHeight: 50,
+  margin: '10px 0px',
+  marginRight: '10px',
+  padding: '5px 0px',
+  cursor: 'pointer',
+  '&:hover': {
+    background: '#343a42'
+  },
+  [`&.${classes.loading}`]: {
+    opacity: 0.6
+  },
+  [`& .${classes.mainContainer}`]: {
+    marginBottom: '10px',
+    width: '100%'
+  },
+  [`& .${classes.icon}`]: {
+    margin: '0px !important'
+  },
+  [`& .${classes.divider}`]: {
+    background: theme.palette.primary.dark,
+    height: '50%',
+    margin: '0px 10px'
+  },
+  [`& .${classes.actions}`]: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  },
+  [`& .${classes.alignStartCenter}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  },
+  [`& .${classes.alignCenterCenter}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.recieveButton}`]: {
+    color: theme.palette.info.main
+  },
+  [`& .${classes.red}`]: {
+    color: theme.palette.error.main
+  },
+  [`& .${classes.orange}`]: {
+    color: theme.palette.secondary.main
+  },
+  [`& .${classes.dialogRoot}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: '4rem'
+  }
+}));
 
 const OneCoin: React.FC<OneCoinProps> = ({
   initial,
@@ -117,7 +125,6 @@ const OneCoin: React.FC<OneCoinProps> = ({
   deleteHistory,
   walletId
 }) => {
-  const classes = useStyles();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const sync = useSync();
@@ -150,9 +157,8 @@ const OneCoin: React.FC<OneCoinProps> = ({
   };
 
   const [deleteOpen, setDeleteOpen] = React.useState(false);
-  const handleDeleteOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleDeleteOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeAction()) {
       setDeleteOpen(true);
     }
@@ -172,19 +178,17 @@ const OneCoin: React.FC<OneCoinProps> = ({
 
   const sendTransaction = useSendTransaction();
 
-  const handleSendFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
-    if (beforeAction() && beforeNetworkAction()) setSendForm(true);
+  const handleSendFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
+    if (beforeAction() && beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
   const [receiveForm, setReceiveForm] = useState(false);
 
   const receiveTransaction = useReceiveTransaction();
 
-  const handleReceiveFormOpen = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
+  const handleReceiveFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
     if (beforeAction() && beforeNetworkAction()) setReceiveForm(true);
   };
 
@@ -236,10 +240,10 @@ const OneCoin: React.FC<OneCoinProps> = ({
         <Recieve />
       </ReceiveTransactionContext.Provider>
 
-      <Grid
+      <Root
         onClick={onClick}
         container
-        className={clsx({ [classes.root]: true, [classes.loading]: isLoading })}
+        className={clsx({ [classes.loading]: isLoading })}
       >
         <Grid
           item
@@ -247,7 +251,10 @@ const OneCoin: React.FC<OneCoinProps> = ({
           className={classes.alignStartCenter}
           style={{ paddingLeft: '1rem' }}
         >
-          <CoinIcons initial={initial.toUpperCase()} />
+          <CoinIcons
+            initial={initial.toUpperCase()}
+            style={{ marginRight: '10px' }}
+          />
           <Typography color="textPrimary">{name}</Typography>
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
@@ -268,44 +275,29 @@ const OneCoin: React.FC<OneCoinProps> = ({
           <Typography color="textPrimary">{`$ ${price}`}</Typography>
         </Grid>
         <Grid item xs={2} className={classes.actions}>
-          {!isEmpty ? (
-            <Button
-              variant="text"
-              className={clsx(classes.button, classes.orange)}
-              onClick={handleSendFormOpen}
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={theme.palette.secondary.main}
-                />
-              }
-            >
-              Send
-            </Button>
-          ) : (
-            <Button
-              variant="text"
-              className={clsx(classes.button, classes.orange)}
-              onClick={handleSendFormOpen}
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={theme.palette.grey[500]}
-                />
-              }
-              disabled
-            >
-              Send
-            </Button>
-          )}
+          <Button
+            variant="text"
+            className={!isEmpty ? clsx(classes.orange) : null}
+            onClick={handleSendFormOpen}
+            startIcon={
+              <Icon
+                className={classes.icon}
+                viewBox="0 0 14 15"
+                icon={ICONS.walletSend}
+                color={
+                  !isEmpty
+                    ? theme.palette.secondary.main
+                    : theme.palette.grey[500]
+                }
+              />
+            }
+          >
+            Send
+          </Button>
           <Divider orientation="vertical" className={classes.divider} />
           <Button
             variant="text"
-            className={clsx(classes.button, classes.recieveButton)}
+            className={clsx(classes.recieveButton)}
             startIcon={
               <Icon
                 className={classes.icon}
@@ -324,7 +316,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
             <Icon size={20} viewBox="0 0 18 18" iconGroup={<Dustbin />} />
           </CustomIconButton>
         </Grid>
-      </Grid>
+      </Root>
     </>
   );
 };

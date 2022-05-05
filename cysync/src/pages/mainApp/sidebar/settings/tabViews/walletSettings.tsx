@@ -1,12 +1,12 @@
-import { Grid } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { Grid } from '@mui/material';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import ListItemText from '@mui/material/ListItemText';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -15,39 +15,46 @@ import SwitchButton from '../../../../../designSystem/designComponents/buttons/s
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ICONS from '../../../../../designSystem/iconGroups/iconConstants';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      height: 'min-content'
-    },
-    header: {
-      maxHeight: '3rem',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    listWrapper: {
-      width: '100%'
-    },
-    divider: {
-      background: theme.palette.text.secondary
-    },
-    button: {
-      margin: '1rem'
-    },
-    listItem: {
-      color: theme.palette.text.primary
-    }
-  })
-);
+const PREFIX = 'WalletSettings';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  header: `${PREFIX}-header`,
+  listWrapper: `${PREFIX}-listWrapper`,
+  divider: `${PREFIX}-divider`,
+  button: `${PREFIX}-button`,
+  listItem: `${PREFIX}-listItem`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    height: 'min-content'
+  },
+  [`& .${classes.header}`]: {
+    maxHeight: '3rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.listWrapper}`]: {
+    width: '100%'
+  },
+  [`& .${classes.divider}`]: {
+    background: theme.palette.text.secondary
+  },
+  [`& .${classes.button}`]: {
+    margin: '1rem'
+  },
+  [`& .${classes.listItem}`]: {
+    color: theme.palette.text.primary
+  }
+}));
 
 type WalletSettingsProps = {
   closeTab?: () => void;
 };
 
 const WalletSettings: React.FC<WalletSettingsProps> = ({ closeTab }) => {
-  const classes = useStyles();
-
   const [walletSettings, setWallSettings] = React.useState({
     hideEmptyToken: false,
     hiddenToken: false,
@@ -132,7 +139,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ closeTab }) => {
   }
 
   return (
-    <Grid container className={classes.root}>
+    <Root container className={classes.root}>
       <Grid item xs={12} className={classes.header}>
         <Typography color="secondary" variant="h4">
           Crypto Assets
@@ -190,7 +197,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ closeTab }) => {
           })}
         </List>
       </Grid>
-    </Grid>
+    </Root>
   );
 };
 

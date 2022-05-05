@@ -1,15 +1,24 @@
-import { makeStyles, Theme } from '@material-ui/core';
-import Checkbox, { CheckboxProps } from '@material-ui/core/Checkbox';
+import Checkbox, { CheckboxProps } from '@mui/material/Checkbox';
+import { styled } from '@mui/material/styles';
 import clsx from 'clsx';
 import React from 'react';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
+const PREFIX = 'StyledCheckbox';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  icon: `${PREFIX}-icon`,
+  checkedIcon: `${PREFIX}-checkedIcon`
+};
+
+const Root = styled(Checkbox)(({ theme }) => ({
+  [`&.${classes.root}`]: {
     '&:hover': {
       backgroundColor: 'transparent'
     }
   },
-  icon: {
+
+  [`& .${classes.icon}`]: {
     borderRadius: 3,
     width: 20,
     height: 20,
@@ -29,7 +38,8 @@ const useStyles = makeStyles((theme: Theme) => ({
       boxShadow: 'none'
     }
   },
-  checkedIcon: {
+
+  [`& .${classes.checkedIcon}`]: {
     border: `2px solid ${theme.palette.info.light}`,
     '&:before': {
       display: 'block',
@@ -47,10 +57,8 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 // Inspired by blueprintjs
 function StyledCheckbox(props: CheckboxProps) {
-  const classes = useStyles();
-
   return (
-    <Checkbox
+    <Root
       className={classes.root}
       disableRipple
       color="default"

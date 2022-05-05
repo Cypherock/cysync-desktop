@@ -115,16 +115,16 @@ export const useTransactionData: UseTransactionData = () => {
 
       case 4:
         sortFunc = (a, b) => {
-          const numA = new BigNumber(a.amount);
-          const numB = new BigNumber(b.amount);
+          const numA = new BigNumber(a.displayAmount);
+          const numB = new BigNumber(b.displayAmount);
           return numB.comparedTo(numA);
         };
         break;
 
       case 5:
         sortFunc = (a, b) => {
-          const numA = new BigNumber(a.amount);
-          const numB = new BigNumber(b.amount);
+          const numA = new BigNumber(a.displayAmount);
+          const numB = new BigNumber(b.displayAmount);
           return numA.comparedTo(numB);
         };
         break;

@@ -1,16 +1,14 @@
-import Button from '@material-ui/core/Button';
-import Step from '@material-ui/core/Step';
-import StepConnector from '@material-ui/core/StepConnector';
-import StepLabel from '@material-ui/core/StepLabel';
-import Stepper from '@material-ui/core/Stepper';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import Button from '@mui/material/Button';
+import Step from '@mui/material/Step';
+import StepConnector from '@mui/material/StepConnector';
+import { StepIconProps } from '@mui/material/StepIcon';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
+import { styled, Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+import createStyles from '@mui/styles/createStyles';
+import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
@@ -53,98 +51,88 @@ const QontoConnector = withStyles((theme: Theme) =>
   })
 )(StepConnector);
 
-const useQontoStepIconStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      color: theme.palette.text.primary,
-      display: 'flex',
-      height: 22,
-      alignItems: 'center'
-    },
-    active: {
-      color: theme.palette.secondary.main
-    },
-    outerCircle: {
-      border: `1px solid ${theme.palette.secondary.main}`,
-      padding: 4,
-      borderRadius: '50%'
-    },
-    notActiveCircle: {
-      border: `1px solid ${theme.palette.text.secondary}`
-    },
-    circle: {
-      width: 20,
-      height: 20,
-      borderRadius: '50%',
-      backgroundColor: 'none',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    activeCircle: {
-      background: theme.palette.secondary.main
-    },
-    completed: {
-      color: theme.palette.secondary.light,
-      zIndex: 1,
-      fontSize: 28
-    },
-    text: {},
-    activeText: {
-      color: theme.palette.primary.main
-    }
-  })
-);
+const STEP_PREFIX = 'AddCoin-Step';
 
-type Props = {
-  active?: boolean | undefined;
-  completed?: boolean | undefined;
-  icon?: JSX.Element;
+const stepClasses = {
+  active: `${STEP_PREFIX}-active`,
+  outerCircle: `${STEP_PREFIX}-outerCircle`,
+  notActiveCircle: `${STEP_PREFIX}-notActiveCircle`,
+  circle: `${STEP_PREFIX}-circle`,
+  activeCircle: `${STEP_PREFIX}-activeCircle`,
+  completed: `${STEP_PREFIX}-completed`,
+  activeText: `${STEP_PREFIX}-activeText`
 };
 
-const QontoStepIcon: React.FC<Props> = ({ active, completed, icon }) => {
-  const classes = useQontoStepIconStyles();
+const StepRoot = styled('div')(({ theme }) => ({
+  color: theme.palette.text.primary,
+  display: 'flex',
+  height: 22,
+  alignItems: 'center',
+  [`&.${stepClasses.active}`]: {
+    color: theme.palette.secondary.main
+  },
+  [`& .${stepClasses.outerCircle}`]: {
+    border: `1px solid ${theme.palette.secondary.main}`,
+    padding: 4,
+    borderRadius: '50%'
+  },
+  [`& .${stepClasses.notActiveCircle}`]: {
+    border: `1px solid ${theme.palette.text.secondary}`
+  },
+  [`& .${stepClasses.circle}`]: {
+    width: 20,
+    height: 20,
+    borderRadius: '50%',
+    backgroundColor: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  [`& .${stepClasses.activeCircle}`]: {
+    background: theme.palette.secondary.main
+  },
+  [`& .${stepClasses.completed}`]: {
+    color: theme.palette.secondary.light,
+    zIndex: 1,
+    fontSize: 28
+  },
+  [`& .${stepClasses.activeText}`]: {
+    color: theme.palette.primary.main
+  }
+}));
+
+const QontoStepIcon: React.FC<StepIconProps> = ({
+  active,
+  completed,
+  icon
+}) => {
   return (
-    <div
-      className={clsx(classes.root, {
-        [classes.active]: active
+    <StepRoot
+      className={clsx({
+        [stepClasses.active]: active
       })}
     >
       {completed ? (
-        <CheckCircleIcon className={classes.completed} />
+        <CheckCircleIcon className={stepClasses.completed} />
       ) : (
         <div
-          className={clsx(classes.outerCircle, {
-            [classes.notActiveCircle]: !active
+          className={clsx(stepClasses.outerCircle, {
+            [stepClasses.notActiveCircle]: !active
           })}
         >
           <div
-            className={clsx(classes.circle, {
-              [classes.activeCircle]: active
+            className={clsx(stepClasses.circle, {
+              [stepClasses.activeCircle]: active
             })}
           >
-            <span
-              className={clsx(classes.text, { [classes.activeText]: active })}
-            >
+            <span className={clsx({ [stepClasses.activeText]: active })}>
               {icon}
             </span>
           </div>
         </div>
       )}
-    </div>
+    </StepRoot>
   );
-};
-
-QontoStepIcon.propTypes = {
-  active: PropTypes.bool,
-  completed: PropTypes.bool,
-  icon: PropTypes.element
-};
-
-QontoStepIcon.defaultProps = {
-  active: undefined,
-  completed: undefined,
-  icon: undefined
 };
 
 const StyledStepLabel = withStyles((theme: Theme) =>
@@ -161,29 +149,42 @@ const StyledStepLabel = withStyles((theme: Theme) =>
   })
 )(StepLabel);
 
-const useStyles = makeStyles(theme => ({
-  root: {
+const PREFIX = 'AddCoin';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  backButton: `${PREFIX}-backButton`,
+  instructions: `${PREFIX}-instructions`,
+  stepRoot: `${PREFIX}-stepRoot`,
+  stepperRoot: `${PREFIX}-stepperRoot`,
+  stepLabel: `${PREFIX}-stepLabel`,
+  successContainer: `${PREFIX}-successContainer`,
+  button: `${PREFIX}-button`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`&.${classes.root}`]: {
     width: '100%'
   },
-  backButton: {
+  [`& .${classes.backButton}`]: {
     marginRight: theme.spacing(1)
   },
-  instructions: {
+  [`& .${classes.instructions}`]: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1)
   },
-  stepRoot: {
+  [`& .${classes.stepRoot}`]: {
     padding: 20,
     paddingLeft: 50,
     paddingRight: 50
   },
-  stepperRoot: {
-    background: theme.palette.primary.light
+  [`& .${classes.stepperRoot}`]: {
+    background: 'rgba(0,0,0,0)'
   },
-  stepLabel: {
+  [`& .${classes.stepLabel}`]: {
     color: theme.palette.primary.light
   },
-  successContainer: {
+  [`& .${classes.successContainer}`]: {
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -191,7 +192,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'center',
     minHeight: '20rem'
   },
-  button: {
+  [`& .${classes.button}`]: {
     background: '#71624C',
     color: theme.palette.text.primary,
     textTransform: 'none',
@@ -214,8 +215,6 @@ const AddCoinForm: React.FC<StepperProps> = ({
   handleClose,
   coinsPresent
 }) => {
-  const classes = useStyles();
-
   const {
     activeStep,
     setActiveStep,
@@ -270,7 +269,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
   }, [coinAdder.errorMessage]);
 
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <ErrorBox
         open={!!coinAdder.errorMessage}
         handleClose={handleErrorBoxClose}
@@ -336,7 +335,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
           </div>
         </>
       )}
-    </div>
+    </Root>
   );
 };
 

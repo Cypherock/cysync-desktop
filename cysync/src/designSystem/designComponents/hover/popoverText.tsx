@@ -1,20 +1,25 @@
-import { TypographyProps } from '@material-ui/core';
-import Popover from '@material-ui/core/Popover';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { TypographyProps } from '@mui/material';
+import Popover from '@mui/material/Popover';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    popover: {
-      pointerEvents: 'none'
-    },
-    paper: {
-      padding: theme.spacing(1)
-    }
-  })
-);
+const PREFIX = 'PopOverText';
+
+const classes = {
+  popover: `${PREFIX}-popover`,
+  paper: `${PREFIX}-paper`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.popover}`]: {
+    pointerEvents: 'none'
+  },
+  [`& .${classes.paper}`]: {
+    padding: theme.spacing(1)
+  }
+}));
 
 type MouseOverProps = {
   text: string;
@@ -27,7 +32,6 @@ type MouseOverProps = {
 
 const PopOverText: React.FC<MouseOverProps> = props => {
   const { text, hoverText, variant, className } = props;
-  const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
   const handlePopoverOpen = (
@@ -43,7 +47,7 @@ const PopOverText: React.FC<MouseOverProps> = props => {
   const open = Boolean(anchorEl);
 
   return (
-    <div>
+    <Root>
       <Typography
         variant={variant}
         aria-owns={open ? 'mouse-over-popover' : undefined}
@@ -78,7 +82,7 @@ const PopOverText: React.FC<MouseOverProps> = props => {
       >
         <Typography variant="body2">{hoverText}</Typography>
       </Popover>
-    </div>
+    </Root>
   );
 };
 

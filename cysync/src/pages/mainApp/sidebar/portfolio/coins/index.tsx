@@ -1,28 +1,37 @@
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import BigNumber from 'bignumber.js';
+import { isEqual } from 'lodash';
 import React from 'react';
 
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
-import { UsePortfolioValues } from '../../../../../store/hooks';
+import { CoinDetails, UsePortfolioValues } from '../../../../../store/hooks';
 
 import OneCoin from './OneCoin';
 
-const useStyles = makeStyles({
-  root: {
+const PREFIX = 'index';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  coinMenuWrapper: `${PREFIX}-coinMenuWrapper`,
+  headerButtons: `${PREFIX}-headerButtons`
+};
+
+const StyledGrid = styled(Grid)({
+  [`&.${classes.root}`]: {
     marginTop: '1rem'
   },
-  coinMenuWrapper: {
+  [`& .${classes.coinMenuWrapper}`]: {
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center'
   },
-  headerButtons: {
+  [`& .${classes.headerButtons}`]: {
     padding: '0px',
     textTransform: 'none',
     fontSize: '1rem'
@@ -38,7 +47,7 @@ export interface Props {
   handleRedirecttoAddCoin: (walletId: string) => void;
 }
 
-const Index = ({
+const PortfolioCoins = ({
   currentWallet,
   coins,
   total,
@@ -46,10 +55,20 @@ const Index = ({
   setSortIndex,
   handleRedirecttoAddCoin
 }: Props) => {
-  const classes = useStyles();
+  const calcCoinPortfolio = (coin: CoinDetails) => {
+    if (total > 0) {
+      const val = (
+        new BigNumber(coin.value).dividedBy(total).multipliedBy(100) || 0
+      ).toFixed(1);
+
+      return `${val}%`;
+    }
+
+    return '- -';
+  };
 
   return (
-    <Grid container className={classes.root}>
+    <StyledGrid container className={classes.root}>
       <Grid container>
         <Grid item xs={6}>
           <Typography
@@ -79,7 +98,7 @@ const Index = ({
               ) : sortIndex === 2 ? (
                 <ExpandLessIcon color="secondary" />
               ) : (
-                <UnfoldMoreIcon />
+                <UnfoldMoreIcon style={{ color: '#ccc' }} />
               )
             }
           >
@@ -102,7 +121,7 @@ const Index = ({
               ) : sortIndex === 5 ? (
                 <ExpandLessIcon color="secondary" />
               ) : (
-                <UnfoldMoreIcon />
+                <UnfoldMoreIcon style={{ color: '#ccc' }} />
               )
             }
           >
@@ -125,7 +144,7 @@ const Index = ({
               ) : sortIndex === 1 ? (
                 <ExpandLessIcon color="secondary" />
               ) : (
-                <UnfoldMoreIcon />
+                <UnfoldMoreIcon style={{ color: '#ccc' }} />
               )
             }
             style={{ marginLeft: '-0.2rem' }}
@@ -149,7 +168,7 @@ const Index = ({
               ) : sortIndex === 7 ? (
                 <ExpandLessIcon color="secondary" />
               ) : (
-                <UnfoldMoreIcon />
+                <UnfoldMoreIcon style={{ color: '#ccc' }} />
               )
             }
             style={{ marginLeft: '-0.3rem' }}
@@ -173,7 +192,7 @@ const Index = ({
               ) : sortIndex === 9 ? (
                 <ExpandLessIcon color="secondary" />
               ) : (
-                <UnfoldMoreIcon />
+                <UnfoldMoreIcon style={{ color: '#ccc' }} />
               )
             }
             style={{ marginLeft: '-0.5rem' }}
@@ -189,10 +208,7 @@ const Index = ({
               coinInitial={data.name}
               coinValue={data.value}
               coinPrice={new BigNumber(data.price).toFixed(2)}
-              coinPortfolio={`${(
-                new BigNumber(data.value).dividedBy(total).multipliedBy(100) ||
-                0
-              ).toFixed(1)}%`}
+              coinPortfolio={calcCoinPortfolio(data)}
               coinHolding={data.balance}
               decimal={data.decimal}
               key={data.name}
@@ -218,8 +234,10 @@ const Index = ({
           Add Coins
         </CustomButton>
       )}
-    </Grid>
+    </StyledGrid>
   );
 };
 
-export default Index;
+export default React.memo(PortfolioCoins, (prevProps, nextProps) =>
+  isEqual(prevProps, nextProps)
+);

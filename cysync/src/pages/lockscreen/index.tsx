@@ -1,5 +1,5 @@
-import Slide from '@material-ui/core/Slide';
-import { TransitionProps } from '@material-ui/core/transitions';
+import Slide from '@mui/material/Slide';
+import { TransitionProps } from '@mui/material/transitions';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 
@@ -17,7 +17,16 @@ const TransitionRef = React.forwardRef<
   React.Ref<unknown>,
   CustomTransitionProps
 >(function Transition(props, ref) {
-  return <Slide direction="down" ref={ref} {...props} />;
+  return (
+    <Slide
+      direction="down"
+      in={props.in}
+      ref={ref}
+      unmountOnExit
+      children={props.children}
+      {...props}
+    />
+  );
 });
 
 interface Props {
@@ -26,7 +35,11 @@ interface Props {
   handleReset: () => void;
 }
 
-const Index: React.FC<Props> = ({ open, handleClose, handleReset }) => {
+const LockscreenIndex: React.FC<Props> = ({
+  open,
+  handleClose,
+  handleReset
+}) => {
   useEffect(() => {
     Analytics.Instance.screenView(Analytics.ScreenViews.LOCKSCREEN);
     logger.info('Opened lockscreen');
@@ -46,10 +59,10 @@ const Index: React.FC<Props> = ({ open, handleClose, handleReset }) => {
   );
 };
 
-Index.propTypes = {
+LockscreenIndex.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
   handleReset: PropTypes.func.isRequired
 };
 
-export default Index;
+export default LockscreenIndex;

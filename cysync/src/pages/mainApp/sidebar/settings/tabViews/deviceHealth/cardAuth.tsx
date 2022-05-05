@@ -1,18 +1,15 @@
-import { Grid } from '@material-ui/core';
-import Step from '@material-ui/core/Step';
-import StepConnector from '@material-ui/core/StepConnector';
-import StepLabel from '@material-ui/core/StepLabel';
-import Stepper from '@material-ui/core/Stepper';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  withStyles
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { Grid } from '@mui/material';
+import Step from '@mui/material/Step';
+import StepConnector from '@mui/material/StepConnector';
+import { StepIconProps } from '@mui/material/StepIcon';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
+import { styled, Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+import createStyles from '@mui/styles/createStyles';
+import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
-import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 
 import success from '../../../../../../assets/icons/generic/success.png';
@@ -60,98 +57,92 @@ const QontoConnector = withStyles((theme: Theme) =>
   })
 )(StepConnector);
 
-const useQontoStepIconStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      color: '#eaeaf0',
-      display: 'flex',
-      height: 22,
-      alignItems: 'center'
-    },
-    active: {
-      color: theme.palette.secondary.main
-    },
-    outerCircle: {
-      border: `1px solid ${theme.palette.secondary.main}`,
-      padding: 4,
-      borderRadius: '50%'
-    },
-    notActiveCircle: {
-      border: `1px solid #ccc`
-    },
-    circle: {
-      width: 20,
-      height: 20,
-      borderRadius: '50%',
-      backgroundColor: 'none',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    activeCircle: {
-      background: theme.palette.secondary.main
-    },
-    completed: {
-      color: theme.palette.secondary.light,
-      zIndex: 1,
-      fontSize: 28
-    },
-    text: {},
-    activeText: {
-      color: theme.palette.primary.main
-    }
-  })
-);
+const STEP_PREFIX = 'SettingsCardAuth-Step';
 
-type Props = {
-  active?: boolean | undefined;
-  completed?: boolean | undefined;
-  icon?: JSX.Element;
+const stepClasses = {
+  active: `${STEP_PREFIX}-active`,
+  outerCircle: `${STEP_PREFIX}-outerCircle`,
+  notActiveCircle: `${STEP_PREFIX}-notActiveCircle`,
+  circle: `${STEP_PREFIX}-circle`,
+  activeCircle: `${STEP_PREFIX}-activeCircle`,
+  completed: `${STEP_PREFIX}-completed`,
+  activeText: `${STEP_PREFIX}-activeText`
 };
 
-const QontoStepIcon: React.FC<Props> = ({ active, completed, icon }) => {
-  const classes = useQontoStepIconStyles();
+const StepRoot = styled('div')(({ theme }) => ({
+  color: '#eaeaf0',
+  display: 'flex',
+  height: 22,
+  alignItems: 'center',
+  [`& .${stepClasses.active}`]: {
+    color: theme.palette.secondary.main
+  },
+  [`& .${stepClasses.outerCircle}`]: {
+    border: `1px solid ${theme.palette.secondary.main}`,
+    padding: 4,
+    borderRadius: '50%'
+  },
+  [`& .${stepClasses.notActiveCircle}`]: {
+    border: `1px solid #ccc`
+  },
+  [`& .${stepClasses.circle}`]: {
+    width: 20,
+    height: 20,
+    borderRadius: '50%',
+    backgroundColor: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  [`& .${stepClasses.activeCircle}`]: {
+    background: theme.palette.secondary.main
+  },
+  [`& .${stepClasses.completed}`]: {
+    color: theme.palette.secondary.light,
+    zIndex: 1,
+    fontSize: 28
+  },
+  [`& .${stepClasses.activeText}`]: {
+    color: theme.palette.primary.main
+  }
+}));
+
+const QontoStepIcon: React.FC<StepIconProps> = ({
+  active,
+  completed,
+  icon
+}) => {
   return (
-    <div
-      className={clsx(classes.root, {
-        [classes.active]: active
+    <StepRoot
+      className={clsx({
+        [stepClasses.active]: active
       })}
     >
       {completed ? (
-        <CheckCircleIcon className={classes.completed} />
+        <CheckCircleIcon className={stepClasses.completed} />
       ) : (
         <div
-          className={clsx(classes.outerCircle, {
-            [classes.notActiveCircle]: !active
+          className={clsx(stepClasses.outerCircle, {
+            [stepClasses.notActiveCircle]: !active
           })}
         >
           <div
-            className={clsx(classes.circle, {
-              [classes.activeCircle]: active
+            className={clsx(stepClasses.circle, {
+              [stepClasses.activeCircle]: active
             })}
           >
             <span
-              className={clsx(classes.text, { [classes.activeText]: active })}
+              className={clsx({
+                [stepClasses.activeText]: active
+              })}
             >
               {icon}
             </span>
           </div>
         </div>
       )}
-    </div>
+    </StepRoot>
   );
-};
-
-QontoStepIcon.propTypes = {
-  active: PropTypes.bool,
-  completed: PropTypes.bool,
-  icon: PropTypes.element
-};
-
-QontoStepIcon.defaultProps = {
-  active: undefined,
-  completed: undefined,
-  icon: undefined
 };
 
 const StyledStepLabel = withStyles((theme: Theme) =>
@@ -168,64 +159,74 @@ const StyledStepLabel = withStyles((theme: Theme) =>
   })
 )(StepLabel);
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {},
-    header: {
-      maxHeight: '3rem',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    formWrapper: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    stepRoot: {
-      padding: 20,
-      paddingLeft: 50,
-      paddingRight: 50
-    },
-    stepperRoot: {
-      background: 'rgba(0,0,0,0)',
-      width: '90%'
-    },
-    stepLabel: {
-      color: theme.palette.primary.light
-    },
-    content: {
-      width: '50%'
-    },
-    error: {
-      color: 'red'
-    },
-    errorButtons: {
-      display: 'flex',
-      justifyContent: 'space-evenly',
-      width: '100%'
-    },
-    errorWrapper: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    center: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    }
-  })
-);
+const PREFIX = 'SettingsCardAuth';
+
+const classes = {
+  header: `${PREFIX}-header`,
+  formWrapper: `${PREFIX}-formWrapper`,
+  stepRoot: `${PREFIX}-stepRoot`,
+  stepperRoot: `${PREFIX}-stepperRoot`,
+  stepLabel: `${PREFIX}-stepLabel`,
+  content: `${PREFIX}-content`,
+  error: `${PREFIX}-error`,
+  errorButtons: `${PREFIX}-errorButtons`,
+  errorWrapper: `${PREFIX}-errorWrapper`,
+  center: `${PREFIX}-center`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.header}`]: {
+    maxHeight: '3rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.formWrapper}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.stepRoot}`]: {
+    padding: 20,
+    paddingLeft: 50,
+    paddingRight: 50
+  },
+  [`& .${classes.stepperRoot}`]: {
+    background: 'rgba(0,0,0,0)',
+    width: '90%'
+  },
+  [`& .${classes.stepLabel}`]: {
+    color: theme.palette.primary.light
+  },
+  [`& .${classes.content}`]: {
+    width: '50%'
+  },
+  [`& .${classes.error}`]: {
+    color: 'red'
+  },
+  [`& .${classes.errorButtons}`]: {
+    display: 'flex',
+    justifyContent: 'space-evenly',
+    width: '100%'
+  },
+  [`& .${classes.errorWrapper}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.center}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  }
+}));
 
 const CardAuth: React.FC<DeviceSettingItemProps> = ({
   handleDeviceHealthTabClose
 }) => {
-  const classes = useStyles();
-
   const [activeStep, setActiveStep] = useState(0);
 
   const {
@@ -329,7 +330,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
   };
 
   return (
-    <Grid container style={{ padding: '0.5rem 0rem' }}>
+    <Root container style={{ padding: '0.5rem 0rem' }}>
       <Grid item xs={12} className={classes.header}>
         <Typography color="secondary" variant="h5">
           X1 Card Authentication
@@ -402,7 +403,6 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
             <div className={classes.errorButtons}>
               <CustomButton
                 variant="outlined"
-                color="default"
                 onClick={handleDeviceHealthTabClose}
                 style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
               >
@@ -420,7 +420,6 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
             <div className={classes.errorButtons}>
               <CustomButton
                 variant="outlined"
-                color="default"
                 onClick={handleRetry}
                 style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
               >
@@ -471,7 +470,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
           )}
         </Grid>
       )}
-    </Grid>
+    </Root>
   );
 };
 

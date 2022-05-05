@@ -1,15 +1,10 @@
-import ListItem from '@material-ui/core/ListItem';
-import Menu, { MenuProps } from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme,
-  withStyles
-} from '@material-ui/core/styles';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ListItem from '@mui/material/ListItem';
+import Menu, { MenuProps } from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { styled, useTheme } from '@mui/material/styles';
+import withStyles from '@mui/styles/withStyles';
 import React from 'react';
 
 export const StyledMenu = withStyles(() => ({
@@ -20,7 +15,6 @@ export const StyledMenu = withStyles(() => ({
 }))((props: MenuProps) => (
   <Menu
     elevation={0}
-    getContentAnchorEl={null}
     anchorOrigin={{
       vertical: 'bottom',
       horizontal: 'center'
@@ -51,28 +45,32 @@ export const StyledMenuItem = withStyles(theme => ({
   }
 }))(MenuItem);
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    button: {
-      color: theme.palette.text.primary,
-      width: 'fit-content',
-      background: theme.palette.primary.light,
-      fontFamily: 'Lato',
-      fontSize: '0.9rem',
-      padding: '0px'
-    },
-    button2: {
-      color: '#FFFFFF',
-      background: '#1A2129 !important',
-      fontFamily: 'Lato',
-      fontSize: '0.9rem',
-      borderRadius: 5
-    }
-  })
-);
+const PREFIX = 'DropMenu';
+
+const classes = {
+  button: `${PREFIX}-button`,
+  button2: `${PREFIX}-button2`
+};
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.button}`]: {
+    color: theme.palette.text.primary,
+    width: 'fit-content',
+    background: theme.palette.primary.light,
+    fontFamily: 'Lato',
+    fontSize: '0.9rem',
+    padding: '0px'
+  },
+  [`& .${classes.button2}`]: {
+    color: '#FFFFFF',
+    background: '#1A2129 !important',
+    fontFamily: 'Lato',
+    fontSize: '0.9rem',
+    borderRadius: 5
+  }
+}));
 
 const DropMenu = (props: any) => {
-  const classes = useStyles();
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -96,7 +94,7 @@ const DropMenu = (props: any) => {
   const { style, stylex, startAdornment, options, index, bg } = props;
 
   return (
-    <div style={style}>
+    <Root style={style}>
       <ListItem
         button
         onClick={handleClickListItem}
@@ -139,7 +137,7 @@ const DropMenu = (props: any) => {
           </StyledMenuItem>
         ))}
       </StyledMenu>
-    </div>
+    </Root>
   );
 };
 

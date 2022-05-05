@@ -1,40 +1,49 @@
-import Grid from '@material-ui/core/Grid';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      padding: `1.5rem 0px`
-    },
-    iconItem: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    textItem: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start'
-    },
-    label: {
-      fontSize: '0.8rem',
-      color: theme.palette.text.secondary
-    },
-    text: {
-      fontSize: '1.1rem',
-      color: theme.palette.info.main
-    },
-    rightAligned: {
-      alignItems: 'flex-end'
-    }
-  })
-);
+const PREFIX = 'WalletSendBatchTxnReceiver';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  iconItem: `${PREFIX}-iconItem`,
+  textItem: `${PREFIX}-textItem`,
+  label: `${PREFIX}-label`,
+  text: `${PREFIX}-text`,
+  rightAligned: `${PREFIX}-rightAligned`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    padding: `1.5rem 0px`
+  },
+  [`& .${classes.iconItem}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.textItem}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start'
+  },
+  [`& .${classes.label}`]: {
+    fontSize: '0.8rem',
+    color: theme.palette.text.secondary
+  },
+  [`& .${classes.text}`]: {
+    fontSize: '1.1rem',
+    color: theme.palette.info.main
+  },
+  [`& .${classes.rightAligned}`]: {
+    alignItems: 'flex-end'
+  }
+}));
 
 type BatchTransactionRecieverViewProps = {
   recieverAddress: string | undefined;
@@ -46,9 +55,8 @@ type BatchTransactionRecieverViewProps = {
 const BatchTransactionRecieverView: React.FC<
   BatchTransactionRecieverViewProps
 > = ({ recieverAddress, amount, icon, coin }) => {
-  const classes = useStyles();
   return (
-    <Grid container className={classes.root}>
+    <Root container className={classes.root}>
       <Grid item xs={1} className={classes.iconItem}>
         {icon}
       </Grid>
@@ -70,7 +78,7 @@ const BatchTransactionRecieverView: React.FC<
           className={classes.text}
         >{`${amount} ${coin.toUpperCase()}`}</Typography>
       </Grid>
-    </Grid>
+    </Root>
   );
 };
 

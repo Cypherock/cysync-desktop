@@ -15,7 +15,7 @@ interface AddWalletFlowProps {
   walletSuccess: boolean;
 }
 
-const Index: React.FC<AddWalletFlowProps> = ({
+const AddWalletFlow: React.FC<AddWalletFlowProps> = ({
   open,
   handleClose,
   walletName,
@@ -41,15 +41,15 @@ const Index: React.FC<AddWalletFlowProps> = ({
   );
 };
 
-Index.propTypes = {
+AddWalletFlow.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
   walletName: PropTypes.string,
   walletSuccess: PropTypes.bool.isRequired
 };
 
-Index.defaultProps = {
+AddWalletFlow.defaultProps = {
   walletName: undefined
 };
 
-export default Index;
+export default AddWalletFlow;

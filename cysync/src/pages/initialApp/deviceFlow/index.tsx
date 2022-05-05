@@ -16,7 +16,7 @@ interface Props {
   handleDeviceConnected: () => void;
 }
 
-const Index: React.FC<Props> = ({ handleDeviceConnected }) => {
+const InitialDeviceFlow: React.FC<Props> = ({ handleDeviceConnected }) => {
   const [activeView, setActiveView] = useState(
     localStorage.getItem('tnc') ? 1 : 0
   );
@@ -95,8 +95,8 @@ const Index: React.FC<Props> = ({ handleDeviceConnected }) => {
   );
 };
 
-Index.propTypes = {
+InitialDeviceFlow.propTypes = {
   handleDeviceConnected: PropTypes.func.isRequired
 };
 
-export default Index;
+export default InitialDeviceFlow;

@@ -1,5 +1,5 @@
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
@@ -7,7 +7,7 @@ import TextView from '../../../../../../designSystem/designComponents/textCompon
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import {
   useAddCoinContext,
-  useConnection,
+  useNetwork,
   useSelectedWallet
 } from '../../../../../../store/provider';
 
@@ -16,28 +16,33 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      padding: '2rem 4rem',
-      minHeight: '15rem'
-    },
-    center: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    }
-  })
-);
+const PREFIX = 'AddCoinVerify';
+
+const classes = {
+  root: `${PREFIX}-root`,
+  center: `${PREFIX}-center`
+};
+
+const Root = styled('div')(() => ({
+  [`&.${classes.root}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    padding: '2rem 4rem',
+    minHeight: '15rem'
+  },
+  [`& .${classes.center}`]: {
+    display: 'flex',
+    justifycontent: 'center',
+    alignitems: 'center',
+    width: '100%'
+  }
+}));
 
 const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
   const { coinAdder } = useAddCoinContext();
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   const { selectedWallet } = useSelectedWallet();
 
@@ -47,10 +52,8 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
     }
   }, [coinAdder.cardTap]);
 
-  const classes = useStyles();
-
   return (
-    <div className={classes.root}>
+    <Root className={classes.root}>
       <Typography color="textSecondary" gutterBottom>
         Follow the Steps on Device
       </Typography>
@@ -102,7 +105,7 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
           </Typography>
         </div>
       )}
-    </div>
+    </Root>
   );
 };
 

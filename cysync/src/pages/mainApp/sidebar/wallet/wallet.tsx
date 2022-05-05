@@ -1,19 +1,14 @@
 import { ALLCOINS as COINS } from '@cypherock/communication';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme
-} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import SearchIcon from '@material-ui/icons/Search';
-import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SearchIcon from '@mui/icons-material/Search';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import InputAdornment from '@mui/material/InputAdornment';
+import { styled, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
@@ -31,76 +26,89 @@ import AddCoinForm from './addCoin';
 import EthereumOneCoin from './EthereumOneCoin';
 import OneCoin from './OneCoin';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    search: {
-      width: '50%',
-      marginRight: '1rem'
+const PREFIX = 'Wallet';
+
+const classes = {
+  search: `${PREFIX}-search`,
+  button: `${PREFIX}-button`,
+  walletButtons: `${PREFIX}-walletButtons`,
+  icon: `${PREFIX}-icon`,
+  coinDataContainer: `${PREFIX}-coinDataContainer`,
+  divider: `${PREFIX}-divider`,
+  totalFilter: `${PREFIX}-totalFilter`,
+  header: `${PREFIX}-header`,
+  alignCenterRight: `${PREFIX}-alignCenterRight`,
+  headerButtons: `${PREFIX}-headerButtons`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.search}`]: {
+    width: '50%',
+    marginRight: '1rem'
+  },
+  [`& .${classes.button}`]: {
+    width: '100%',
+    height: '100%',
+    textTransform: 'none',
+    background: 'rgba(255,255,255,0.05)',
+    color: theme.palette.text.primary
+  },
+  [`& .${classes.walletButtons}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    border: `1px solid ${theme.palette.primary.light}`,
+    borderRadius: 5,
+    height: '2.5rem',
+    width: '9rem'
+  },
+  [`& .${classes.icon}`]: {
+    margin: 0
+  },
+  [`& .${classes.coinDataContainer}`]: {
+    // 290px is coverd by the rest of the elements on the screen
+    maxHeight: 'calc(100vh - 290px)',
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    '&::-webkit-scrollbar': {
+      width: '8px',
+      background: theme.palette.primary.light
     },
-    button: {
-      width: '100%',
-      height: '100%',
-      textTransform: 'none',
-      background: 'rgba(255,255,255,0.05)'
-    },
-    walletButtons: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      border: `1px solid ${theme.palette.primary.light}`,
-      borderRadius: 5,
-      height: '2.5rem',
-      width: '9rem'
-    },
-    icon: {
-      margin: 0
-    },
-    coinDataContainer: {
-      // 290px is coverd by the rest of the elements on the screen
-      maxHeight: 'calc(100vh - 290px)',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      '&::-webkit-scrollbar': {
-        width: '8px',
-        background: theme.palette.primary.light
-      },
-      '&::-webkit-scrollbar-thumb': {
-        background: theme.palette.text.secondary
-      }
-    },
-    divider: {
-      backgroundColor: theme.palette.primary.light,
-      height: '50%',
-      margin: `0px 10px`
-    },
-    totalFilter: {
-      marginTop: 50,
-      borderBottom: `1px solid ${theme.palette.primary.light}`
-    },
-    header: {
-      marginTop: 30,
-      width: 'calc(100% - 18px)'
-    },
-    alignCenterRight: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end'
-    },
-    headerButtons: {
-      padding: '0px',
-      color: theme.palette.grey[500],
-      textTransform: 'none',
-      fontSize: '1rem'
+    '&::-webkit-scrollbar-thumb': {
+      background: theme.palette.text.secondary
     }
-  })
-);
+  },
+  [`& .${classes.divider}`]: {
+    backgroundColor: theme.palette.primary.light,
+    height: '50%',
+    margin: `0px 10px`
+  },
+  [`& .${classes.totalFilter}`]: {
+    marginTop: 50,
+    borderBottom: `1px solid ${theme.palette.primary.light}`
+  },
+  [`& .${classes.header}`]: {
+    marginTop: 30,
+    width: 'calc(100% - 18px)'
+  },
+  [`& .${classes.alignCenterRight}`]: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end'
+  },
+  [`& .${classes.headerButtons}`]: {
+    padding: '0px',
+    color: theme.palette.grey[500],
+    textTransform: 'none',
+    fontSize: '1rem'
+  }
+}));
 
 interface WalletViewProps {
   openAddCoinForm?: boolean;
 }
 
 const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
-  const classes = useStyles();
   const theme = useTheme();
 
   const {
@@ -179,7 +187,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
   }, [openAddCoinForm]);
 
   return (
-    <Grid container>
+    <Root container>
       <AddCoinForm
         handleClose={handleAddCoinFormClose}
         coinsPresent={coinsPresent}
@@ -421,6 +429,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                         deleteCoin={deleteCoinByXpub}
                         deleteHistory={deleteCoinHistory}
                         walletId={selectedWallet.walletId}
+                        sortIndex={sortIndex}
                       />
                     ) : (
                       <OneCoin
@@ -442,7 +451,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
           </Grid>
         </Grid>
       </div>
-    </Grid>
+    </Root>
   );
 };
 

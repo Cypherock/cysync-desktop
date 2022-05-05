@@ -446,7 +446,8 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       sendTransaction.on('sendMaxAmount', amt => {
         logger.info('SendTransaction: Send Max amount generated', {
-          coinType
+          coinType,
+          amt
         });
         setSendMaxAmount(Number(amt));
       });

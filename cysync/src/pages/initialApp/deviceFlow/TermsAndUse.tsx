@@ -1,9 +1,9 @@
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Grid from '@material-ui/core/Grid';
-import Link from '@material-ui/core/Link';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import { shell } from 'electron';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -11,46 +11,50 @@ import React from 'react';
 import CustomButton from '../../../designSystem/designComponents/buttons/button';
 import CustomCheckBox from '../../../designSystem/designComponents/input/checkbox';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    middle: {
-      padding: '2rem',
-      background: theme.palette.primary.light,
-      minWidth: '80vw',
-      height: '90vh',
-      margin: '0rem 1.5rem',
-      border: '1px solid grey',
-      borderRadius: '1rem',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    content: {
-      display: 'flex',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      overflowY: 'scroll',
-      maxWidth: '60%',
-      height: '60vh'
-    },
-    buttons: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      width: '60%'
-    }
-  })
-);
+const PREFIX = 'InitialTermsAndUse';
+
+const classes = {
+  middle: `${PREFIX}-middle`,
+  content: `${PREFIX}-content`,
+  buttons: `${PREFIX}-buttons`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.middle}`]: {
+    padding: '2rem',
+    background: theme.palette.primary.light,
+    minWidth: '80vw',
+    height: '90vh',
+    margin: '0rem 1.5rem',
+    border: '1px solid grey',
+    borderRadius: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  [`& .${classes.content}`]: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    overflowY: 'scroll',
+    maxWidth: '60%',
+    height: '60vh'
+  },
+  [`& .${classes.buttons}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '60%'
+  }
+}));
 
 interface TermsAndUseProps {
   handleNext: () => void;
 }
 
 const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
-  const classes = useStyles();
-
   const [agreement, setAgreement] = React.useState(false);
 
   const handleAgreementChange = () => {
@@ -63,7 +67,7 @@ const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
   };
 
   return (
-    <Grid container>
+    <Root container>
       <Grid item xs={12} className={classes.middle}>
         <Typography variant="h2" color="textPrimary" align="center">
           Terms of Use
@@ -102,7 +106,12 @@ const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
             <br />
             Your use of Cypherock Services is also subject to Cypherock’s
             Privacy Policy, which is available at
-            <Link href="#" onClick={openPrivacyPolicy} color="secondary">
+            <Link
+              href="#"
+              onClick={openPrivacyPolicy}
+              color="secondary"
+              underline="hover"
+            >
               {' '}
               https://cypherock.com/privacy.
             </Link>
@@ -998,7 +1007,7 @@ const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
           </CustomButton>
         </div>
       </Grid>
-    </Grid>
+    </Root>
   );
 };
 

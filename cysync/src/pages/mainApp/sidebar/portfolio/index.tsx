@@ -1,6 +1,6 @@
-import Grid from '@material-ui/core/Grid';
-import { useTheme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@mui/material/Grid';
+import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +15,7 @@ import logger from '../../../../utils/logger';
 import Charts from './charts';
 import CoinAllocation from './coins';
 
-const Index = () => {
+const Portfolio = () => {
   const { allWallets } = useWallets();
 
   const theme = useTheme();
@@ -65,9 +65,13 @@ const Index = () => {
     else setOpen(false);
   }, [allWallets]);
 
-  const onAddCoin = (walletId: string) => {
+  const onAddCoin = React.useCallback((walletId: string) => {
     navigate(`${Routes.wallet.index}/${walletId}`);
-  };
+  }, []);
+
+  const setSortIndexProxy = React.useCallback((val: number) => {
+    setSortIndex(val);
+  }, []);
 
   const onAddWallet = () => {
     setOpen(false);
@@ -171,11 +175,11 @@ const Index = () => {
         coins={coins}
         total={total}
         sortIndex={sortIndex}
-        setSortIndex={setSortIndex}
+        setSortIndex={setSortIndexProxy}
         handleRedirecttoAddCoin={onAddCoin}
       />
     </Grid>
   );
 };
 
-export default Index;
+export default Portfolio;

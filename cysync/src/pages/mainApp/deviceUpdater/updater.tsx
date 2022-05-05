@@ -1,11 +1,11 @@
-import Grid from '@material-ui/core/Grid';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListItemText from '@material-ui/core/ListItemText';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import AlertIcon from '@material-ui/icons/ReportProblemOutlined';
-import Alert from '@material-ui/lab/Alert';
+import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
+import Alert from '@mui/material/Alert';
+import Grid from '@mui/material/Grid';
+import ListItem from '@mui/material/ListItem';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemText from '@mui/material/ListItemText';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 
@@ -15,65 +15,75 @@ import ModAvatar from '../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../designSystem/iconGroups/errorExclamation';
 import { useDeviceUpgrade } from '../../../store/hooks/flows';
-import { useConnection, useFeedback } from '../../../store/provider';
+import { useFeedback, useNetwork } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import DynamicTextView from '../sidebar/settings/tabViews/deviceHealth/dynamicTextView';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    container: {
-      padding: '20px'
-    },
-    flex: {
-      display: 'flex',
-      flexDirection: 'row'
-    },
-    alignCenterCenter: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: '5rem'
-    },
-    error: {
-      color: 'red'
-    },
-    success: {
-      display: 'flex',
-      alignItems: 'center'
-    },
-    errorButtons: {
-      display: 'flex',
-      justifyContent: 'space-around',
-      width: '100%'
-    },
-    center: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    },
-    rootCenter: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    primaryColor: {
-      color: theme.palette.secondary.dark
-    }
-  })
-);
+const PREFIX = 'DeviceUpdater-Updater';
+
+const classes = {
+  container: `${PREFIX}-container`,
+  flex: `${PREFIX}-flex`,
+  alignCenterCenter: `${PREFIX}-alignCenterCenter`,
+  error: `${PREFIX}-error`,
+  success: `${PREFIX}success`,
+  errorButtons: `${PREFIX}-errorButtons`,
+  center: `${PREFIX}-center`,
+  rootCenter: `${PREFIX}-rootCenter`,
+  primaryColor: `${PREFIX}-primaryColor`
+};
+
+const Root = styled(Grid)(({ theme }) => ({
+  [`& .${classes.container}`]: {
+    padding: '20px'
+  },
+  [`& .${classes.flex}`]: {
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  [`& .${classes.alignCenterCenter}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: '5rem'
+  },
+  [`& .${classes.error}`]: {
+    color: 'red'
+  },
+  [`& .${classes.success}`]: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  [`& .${classes.errorButtons}`]: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    width: '100%'
+  },
+  [`& .${classes.center}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  },
+  [`& .${classes.rootCenter}`]: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.primaryColor}`]: {
+    color: theme.palette.secondary.dark
+  }
+}));
 
 type Props = {
   handleClose: () => void;
 };
 
 const Updater: React.FC<Props> = ({ handleClose }) => {
-  const classes = useStyles();
-
-  const { connected } = useConnection();
+  const { connected } = useNetwork();
 
   const {
     startDeviceUpdate,
@@ -117,7 +127,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
   }, [isCompleted, errorMessage]);
 
   return (
-    <Grid className={classes.container} container>
+    <Root className={classes.container} container>
       {isCompleted === 2 ? (
         <Grid container>
           <Grid item xs={1} />
@@ -244,7 +254,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
           ) : null}
         </>
       )}
-    </Grid>
+    </Root>
   );
 };
 

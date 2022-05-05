@@ -61,7 +61,7 @@ const SingleWalletView = () => {
   return <></>;
 };
 
-const Index: React.FC = () => {
+const Wallet: React.FC = () => {
   return (
     <Routes>
       <Route path={`/:walletId`} element={<SingleWalletView />} />
@@ -70,4 +70,4 @@ const Index: React.FC = () => {
   );
 };
 
-export default Index;
+export default Wallet;

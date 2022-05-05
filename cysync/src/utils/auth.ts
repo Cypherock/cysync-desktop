@@ -3,8 +3,8 @@ import crypto from 'crypto';
 
 import { passEnDb, Xpub, xpubDb } from '../store/database';
 
-export const bcryptPass = (pass: string): string => {
-  return bcrypt.hashSync(pass, 16);
+export const bcryptPass = async (pass: string): Promise<string> => {
+  return bcrypt.hash(pass, 16);
 };
 
 export const checkPassword = (password: string): string => {
@@ -94,8 +94,7 @@ export const generateSinglePasswordHash = (password: string) => {
 
 export const generatePasswordHash = async (password: string) => {
   const singleHash = generateSinglePasswordHash(password);
-
-  return { doubleHash: bcryptPass(singleHash), singleHash };
+  return { doubleHash: await bcryptPass(singleHash), singleHash };
 };
 
 export const verifyPassword = async (password: string) => {
