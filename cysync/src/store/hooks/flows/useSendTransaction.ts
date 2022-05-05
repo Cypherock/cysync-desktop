@@ -53,20 +53,24 @@ export const broadcastTxn = async (
   }
 
   if (coin instanceof EthCoinData) {
-    const resp = await Server.eth.transaction.broadcastTxn({
-      transaction: signedTxn,
-      network: coin.network
-    });
+    const resp = await Server.eth.transaction
+      .broadcastTxn({
+        transaction: signedTxn,
+        network: coin.network
+      })
+      .request();
     if (resp.status === 0) {
       throw new Error('brodcast-failed');
     }
     return resp.data.result.toUpperCase();
   }
 
-  const res = await Server.bitcoin.transaction.broadcastTxn({
-    transaction: signedTxn,
-    coinType
-  });
+  const res = await Server.bitcoin.transaction
+    .broadcastTxn({
+      transaction: signedTxn,
+      coinType
+    })
+    .request();
   return res.data.tx.hash;
 };
 
@@ -279,6 +283,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           contractAddress,
           amount
         })
+        .request()
         .then(res => {
           logger.info('EstimateGasLimit: Completed', { contractAddress });
           resolve(res.data);

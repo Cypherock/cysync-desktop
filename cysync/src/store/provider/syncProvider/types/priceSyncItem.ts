@@ -22,4 +22,15 @@ export class PriceSyncItem extends SyncItem {
 
     return false;
   }
+
+  clone() {
+    const newItem = new PriceSyncItem({
+      days: this.days,
+      coinType: this.coinType,
+      isRefresh: this.isRefresh,
+      module: this.module
+    });
+
+    return newItem;
+  }
 }

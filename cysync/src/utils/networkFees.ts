@@ -10,9 +10,11 @@ const getFees = async (coinType: string) => {
   }
 
   if (coin instanceof EthCoinData) {
-    const resp = await Server.eth.transaction.getFees({
-      network: coin.network
-    });
+    const resp = await Server.eth.transaction
+      .getFees({
+        network: coin.network
+      })
+      .request();
     const { result } = resp.data;
     const value = new BigNumber(result, 16);
 
@@ -41,7 +43,7 @@ const getFees = async (coinType: string) => {
     return fees;
   }
 
-  const res = await Server.bitcoin.transaction.getFees({ coinType });
+  const res = await Server.bitcoin.transaction.getFees({ coinType }).request();
   return Math.round(res.data.medium_fee_per_kb / 1024);
 };
 

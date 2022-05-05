@@ -23,4 +23,12 @@ export abstract class SyncItem {
     this.module = module;
     this.retries = 0;
   }
+
+  equals(_item: SyncItem) {
+    throw new Error('equals not implemented for this class');
+  }
+
+  clone() {
+    throw new Error('clone not implemented for this class');
+  }
 }

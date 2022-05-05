@@ -327,6 +327,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     if (authState === 1) {
       firmwareServer
         .getLatest()
+        .request()
         .then(response => {
           if (
             (firmwareVersion &&
