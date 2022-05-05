@@ -1,18 +1,16 @@
 import {
+  DeviceConnection,
   DeviceError,
-  DeviceErrorType,
-  PacketVersion
+  DeviceErrorType
 } from '@cypherock/communication';
 import { CardAuthenticator } from '@cypherock/protocols';
 import { useState } from 'react';
-import SerialPort from 'serialport';
 
 import { useI18n } from '../../../store/provider';
 import logger from '../../../utils/logger';
 
 export interface HandleCardAuthOptions {
-  connection: SerialPort;
-  packetVersion: PacketVersion;
+  connection: DeviceConnection;
   sdkVersion: string;
   setIsInFlow: (val: boolean) => void;
   firmwareVersion: string;
@@ -32,10 +30,7 @@ export interface UseCardAuthValues {
   setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
   completed: boolean;
   resetHooks: () => void;
-  cancelCardAuth: (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => void;
+  cancelCardAuth: (connection: DeviceConnection) => void;
 }
 
 export type UseCardAuth = (isInitial?: boolean) => UseCardAuthValues;
@@ -71,7 +66,6 @@ export const useCardAuth: UseCardAuth = isInitial => {
 
   const handleCardAuth = async ({
     connection,
-    packetVersion,
     sdkVersion,
     setIsInFlow,
     firmwareVersion,
@@ -187,7 +181,6 @@ export const useCardAuth: UseCardAuth = isInitial => {
        */
       await cardAuth.run({
         connection,
-        packetVersion,
         sdkVersion,
         firmwareVersion,
         cardNumber,
@@ -205,12 +198,9 @@ export const useCardAuth: UseCardAuth = isInitial => {
     }
   };
 
-  const cancelCardAuth = async (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => {
+  const cancelCardAuth = async (connection: DeviceConnection) => {
     return cardAuth
-      .cancel(connection, packetVersion)
+      .cancel(connection)
       .then(canclled => {
         if (canclled) {
           logger.info('CardAuth: Cancelled');

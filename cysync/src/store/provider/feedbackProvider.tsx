@@ -175,7 +175,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const {
     internalDeviceConnection: deviceConnection,
-    devicePacketVersion,
     deviceSdkVersion,
     firmwareVersion,
     deviceSerial,
@@ -262,7 +261,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       resetLogFetcherHooks();
       handleLogFetch({
         connection: deviceConnection,
-        packetVersion: devicePacketVersion,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
         firmwareVersion
@@ -446,7 +444,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       }
 
       if (deviceConnection) {
-        cancelLogFetcher(deviceConnection, devicePacketVersion);
+        cancelLogFetcher(deviceConnection);
       }
     }
 

@@ -83,7 +83,6 @@ type Props = {
 const Authenticator: React.FC<Props> = ({ handleClose }) => {
   const {
     internalDeviceConnection: deviceConnection,
-    devicePacketVersion,
     deviceSdkVersion,
     connected,
     firmwareVersion,
@@ -104,7 +103,6 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
     if (deviceConnection && firmwareVersion) {
       handleDeviceAuth({
         connection: deviceConnection,
-        packetVersion: devicePacketVersion,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
         firmwareVersion: hexToVersion(firmwareVersion),

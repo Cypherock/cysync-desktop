@@ -30,7 +30,7 @@ const WalletSend = () => {
   const { sendForm, setSendForm, sendTransaction } =
     useSendTransactionContext();
 
-  const { deviceConnection, devicePacketVersion } = useConnection();
+  const { deviceConnection } = useConnection();
 
   const { coinDetails } = useCurrentCoin();
   const { token } = useTokenContext();
@@ -50,7 +50,7 @@ const WalletSend = () => {
 
   const handleSendFormClose = (abort?: boolean) => {
     if (abort) {
-      sendTransaction.cancelSendTxn(deviceConnection, devicePacketVersion);
+      sendTransaction.cancelSendTxn(deviceConnection);
     }
     Analytics.Instance.event(
       Analytics.Categories.SEND_TXN,

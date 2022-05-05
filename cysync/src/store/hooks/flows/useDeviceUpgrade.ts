@@ -1,14 +1,12 @@
 import {
-  createPort,
+  DeviceConnection,
   DeviceError,
-  DeviceErrorType,
-  PacketVersion
+  DeviceErrorType
 } from '@cypherock/communication';
 import { DeviceUpdater } from '@cypherock/protocols';
 import { stmFirmware as firmwareServer } from '@cypherock/server-wrapper';
 import { ipcRenderer } from 'electron';
 import React, { useEffect } from 'react';
-import SerialPort from 'serialport';
 
 import { getFirmwareHex, inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
@@ -25,7 +23,6 @@ export interface UseDeviceUpgradeValues {
   handleRetry: () => void;
   handleDeviceUpgrade: () => Promise<void>;
   deviceConnection: ConnectionContextInterface['deviceConnection'];
-  devicePacketVersion: ConnectionContextInterface['devicePacketVersion'];
   inBackgroundProcess: ConnectionContextInterface['inBackgroundProcess'];
   firmwareVersion: ConnectionContextInterface['firmwareVersion'];
   deviceState: ConnectionContextInterface['deviceState'];
@@ -33,6 +30,7 @@ export interface UseDeviceUpgradeValues {
   setIsCompleted: React.Dispatch<React.SetStateAction<number>>;
   displayErrorMessage: string;
   setDisplayErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  isDeviceUpdating: boolean;
   setIsDeviceUpdating: React.Dispatch<React.SetStateAction<boolean>>;
   updateDownloaded: 0 | 1 | -1 | 2;
   beforeFlowStart: ConnectionContextInterface['beforeFlowStart'];
@@ -48,10 +46,7 @@ export interface UseDeviceUpgradeValues {
   latestVersion: string;
   setLatestVersion: React.Dispatch<React.SetStateAction<string>>;
   setUpdated: React.Dispatch<React.SetStateAction<number>>;
-  cancelDeviceUpgrade: (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => void;
+  cancelDeviceUpgrade: (connection: DeviceConnection) => void;
 }
 
 export type UseDeviceUpgrade = (isInitial?: boolean) => UseDeviceUpgradeValues;
@@ -69,12 +64,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   const {
     internalDeviceConnection: deviceConnection,
     deviceSdkVersion,
-    devicePacketVersion,
     deviceState,
     beforeFlowStart,
     firmwareVersion,
     inBootloader,
     setIsDeviceUpdating,
+    isDeviceUpdating,
     setDeviceSerial,
     inBackgroundProcess,
     setIsInFlow
@@ -177,18 +172,18 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     startDeviceUpdate();
   };
 
-  const cancelDeviceUpgrade = async (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => {
-    if (connection && connection.isOpen)
-      deviceUpdater
-        .cancel(connection, packetVersion)
-        .then(() => logger.info('DeviceUpgrade: Cancelled'))
-        .catch(e => {
-          logger.error('DeviceUpgrade: Error in flow cancel');
-          logger.error(e);
-        });
+  const cancelDeviceUpgrade = async (connection: DeviceConnection) => {
+    deviceUpdater
+      .cancel(connection)
+      .then(() => {
+        setIsDeviceUpdating(false);
+        logger.info('DeviceUpgrade: Cancelled');
+      })
+      .catch(e => {
+        setIsDeviceUpdating(false);
+        logger.error('DeviceUpgrade: Error in flow cancel');
+        logger.error(e);
+      });
   };
 
   const handleDeviceUpgrade = async () => {
@@ -286,6 +281,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
     try {
       setIsInFlow(true);
+      setIsDeviceUpdating(true);
       /**
        * Error will be thrown in rare conditions where the implementation
        * itself has broken.
@@ -293,7 +289,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       await deviceUpdater.run({
         connection: deviceConnection,
         sdkVersion: deviceSdkVersion,
-        packetVersion: devicePacketVersion,
         firmwareVersion: getFirmwareHex(latestVersion),
         firmwarePath,
         inBootloaderMode: inBootloader
@@ -328,24 +323,35 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   // update is completed and there is a device connection
   const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const retries = React.useRef<number>(1);
+  const latestDeviceConnection = React.useRef<DeviceConnection | null>(null);
   const MAX_RETRIES = 3;
+
+  useEffect(() => {
+    latestDeviceConnection.current = deviceConnection;
+  }, [deviceConnection]);
 
   const initiateDeviceAuth = async () => {
     try {
       logger.info('In Device update timeout');
-      const { connection, deviceState: newDeviceState } = await createPort();
+
+      if (!latestDeviceConnection.current) {
+        throw new Error('Device not connected');
+      }
 
       logger.info('Initiating auth');
+
+      await latestDeviceConnection.current.beforeOperation();
+      await latestDeviceConnection.current.selectPacketVersion();
+
       handleDeviceAuth({
-        connection,
+        connection: latestDeviceConnection.current,
         sdkVersion: deviceSdkVersion,
-        packetVersion: devicePacketVersion,
         setIsInFlow: () => {
           // empty
         },
         firmwareVersion: latestVersion,
         setDeviceSerial,
-        inTestApp: inTestApp(newDeviceState)
+        inTestApp: inTestApp(latestDeviceConnection.current.deviceState)
       });
     } catch (error) {
       retries.current += 1;
@@ -426,7 +432,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     handleDeviceAuth,
     cancelDeviceUpgrade,
     deviceConnection,
-    devicePacketVersion,
     inBackgroundProcess,
     firmwareVersion,
     deviceState,
@@ -448,6 +453,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     resetHooks,
     latestVersion,
     setLatestVersion,
-    setUpdated
+    setUpdated,
+    isDeviceUpdating
   } as UseDeviceUpgradeValues;
 };

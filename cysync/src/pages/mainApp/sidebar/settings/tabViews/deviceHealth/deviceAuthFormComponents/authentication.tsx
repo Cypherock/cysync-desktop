@@ -1,4 +1,3 @@
-import { PacketVersion } from '@cypherock/communication';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
@@ -23,7 +22,7 @@ interface Props {
   completed: boolean;
   confirmed: -1 | 0 | 1 | 2;
   verified: -1 | 0 | 1 | 2;
-  cancelDeviceAuth: (connection: any, packetVersion: PacketVersion) => void;
+  cancelDeviceAuth: (connection: any) => void;
 }
 
 const Authentication: React.FC<Props> = ({
@@ -39,11 +38,9 @@ const Authentication: React.FC<Props> = ({
 }) => {
   const {
     internalDeviceConnection: deviceConnection,
-    devicePacketVersion,
     deviceSdkVersion,
     firmwareVersion,
     deviceState,
-    setIsDeviceUpdating,
     setDeviceSerial,
     setIsInFlow
   } = useConnection();
@@ -53,7 +50,6 @@ const Authentication: React.FC<Props> = ({
     if (deviceConnection && firmwareVersion) {
       handleDeviceAuth({
         connection: deviceConnection,
-        packetVersion: devicePacketVersion,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
         firmwareVersion: hexToVersion(firmwareVersion),
@@ -64,7 +60,7 @@ const Authentication: React.FC<Props> = ({
     return () => {
       logger.info('Closed device authentication');
       if (!completed) {
-        cancelDeviceAuth(deviceConnection, devicePacketVersion);
+        cancelDeviceAuth(deviceConnection);
       }
     };
   }, []);
@@ -73,12 +69,10 @@ const Authentication: React.FC<Props> = ({
     if (verified === -1 || errorMessage) {
       logger.info('Device auth failed');
       setCompleted(-1);
-      setIsDeviceUpdating(false);
     } else if (completed && verified === 2) {
       logger.info('Device auth completed');
       setCompleted(2);
       resetHooks();
-      setIsDeviceUpdating(false);
     }
   }, [verified, completed]);
 

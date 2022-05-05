@@ -1,20 +1,18 @@
 import {
+  DeviceConnection,
   DeviceError,
-  DeviceErrorType,
-  PacketVersion
+  DeviceErrorType
 } from '@cypherock/communication';
 import { HardwareWallet } from '@cypherock/database';
 import { WalletAdder } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
-import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
 import { walletDb } from '../../database';
 import { useI18n, useWallets } from '../../provider';
 
 export interface HandleAddWalletOptions {
-  connection: SerialPort;
-  packetVersion: PacketVersion;
+  connection: DeviceConnection;
   sdkVersion: string;
   setIsInFlow: (val: boolean) => void;
 }
@@ -30,10 +28,7 @@ export interface UseAddWalletValues {
   completed: boolean;
   setCompleted: React.Dispatch<React.SetStateAction<boolean>>;
   resetHooks: () => void;
-  cancelAddWallet: (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => Promise<void>;
+  cancelAddWallet: (connection: DeviceConnection) => Promise<void>;
   walletId: string;
   updateName: () => Promise<void>;
   isNameDiff: boolean;
@@ -80,7 +75,6 @@ export const useAddWallet: UseAddWallet = () => {
 
   const handleAddWallet = async ({
     connection,
-    packetVersion,
     sdkVersion,
     setIsInFlow
   }: HandleAddWalletOptions) => {
@@ -217,7 +211,7 @@ export const useAddWallet: UseAddWallet = () => {
        * Error will be thrown in rare conditions where the implementation
        * itself has broken.
        */
-      await addWallet.run({ connection, packetVersion, sdkVersion });
+      await addWallet.run({ connection, sdkVersion });
       setIsInFlow(false);
       logger.info('AddWallet: Completed');
       setCompleted(true);
@@ -230,13 +224,10 @@ export const useAddWallet: UseAddWallet = () => {
     }
   };
 
-  const cancelAddWallet = async (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => {
+  const cancelAddWallet = async (connection: DeviceConnection) => {
     setIsCancelled(true);
     return addWallet
-      .cancel(connection, packetVersion)
+      .cancel(connection)
       .then(canclled => {
         if (canclled) {
           logger.info('AddWallet: Cancelled');

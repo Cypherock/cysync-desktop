@@ -22,8 +22,7 @@ const StyledBackdrop = styled(Backdrop)(({ theme }) => ({
 
 const ExitCleanup = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { internalDeviceConnection, devicePacketVersion, deviceSdkVersion } =
-    useConnection();
+  const { internalDeviceConnection, deviceSdkVersion } = useConnection();
 
   const cancelFlow = new CancelFlow();
 
@@ -33,7 +32,6 @@ const ExitCleanup = () => {
       try {
         await cancelFlow.run({
           connection: internalDeviceConnection,
-          packetVersion: devicePacketVersion,
           sdkVersion: deviceSdkVersion
         });
         passEnDb.destroyHash();

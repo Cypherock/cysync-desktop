@@ -9,7 +9,6 @@ const DeviceStatePrompt = () => {
   const [isCancelRunning, setIsCancelRunning] = useState(false);
   const {
     internalDeviceConnection,
-    devicePacketVersion,
     deviceSdkVersion,
     openErrorPrompt,
     setOpenErrorPrompt,
@@ -27,7 +26,6 @@ const DeviceStatePrompt = () => {
       try {
         await cancelFlow.run({
           connection: internalDeviceConnection,
-          packetVersion: devicePacketVersion,
           sdkVersion: deviceSdkVersion
         });
       } catch (error) {
