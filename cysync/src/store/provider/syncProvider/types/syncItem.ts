@@ -25,10 +25,10 @@ export abstract class SyncItem {
   }
 
   equals(_item: SyncItem) {
-    throw new Error('Please override this function');
+    throw new Error('equals not implemented for this class');
   }
 
   clone() {
-    throw new Error('Please override this function');
+    throw new Error('clone not implemented for this class');
   }
 }
