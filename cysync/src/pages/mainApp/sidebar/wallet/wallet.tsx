@@ -140,8 +140,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
     activeStep
   } = useAddCoinContext();
 
-  const { deviceConnection, devicePacketVersion, beforeNetworkAction } =
-    useConnection();
+  const { deviceConnection, beforeNetworkAction } = useConnection();
 
   const handleAddCoinFormOpen = () => {
     if (beforeNetworkAction()) {
@@ -153,7 +152,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
 
   const handleAddCoinFormClose = (abort?: boolean) => {
     if (abort && deviceConnection) {
-      coinAdder.cancelAddCoin(deviceConnection, devicePacketVersion);
+      coinAdder.cancelAddCoin(deviceConnection);
     }
     Analytics.Instance.event(
       Analytics.Categories.ADD_COIN,
@@ -430,6 +429,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                         deleteCoin={deleteCoinByXpub}
                         deleteHistory={deleteCoinHistory}
                         walletId={selectedWallet.walletId}
+                        sortIndex={sortIndex}
                       />
                     ) : (
                       <OneCoin

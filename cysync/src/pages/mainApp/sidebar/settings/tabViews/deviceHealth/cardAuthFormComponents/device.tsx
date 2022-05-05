@@ -27,7 +27,6 @@ const Device: React.FC<Props> = ({
   const {
     deviceConnection,
     deviceSdkVersion,
-    devicePacketVersion,
     firmwareVersion,
     setIsInFlow,
     deviceState
@@ -39,7 +38,6 @@ const Device: React.FC<Props> = ({
 
       handleCardAuth({
         connection: deviceConnection,
-        packetVersion: devicePacketVersion,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
         firmwareVersion: hexToVersion(firmwareVersion),

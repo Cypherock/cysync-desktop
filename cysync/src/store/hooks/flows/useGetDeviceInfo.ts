@@ -1,15 +1,13 @@
 import {
+  DeviceConnection,
   DeviceError,
-  DeviceErrorType,
-  PacketVersion,
-  PacketVersionMap
+  DeviceErrorType
 } from '@cypherock/communication';
 import {
   ALL_SUPPORTED_SDK_VERSIONS,
   GetDeviceInfo
 } from '@cypherock/protocols';
 import { useState } from 'react';
-import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
 import { deviceDb } from '../../database';
@@ -18,12 +16,11 @@ import { useI18n } from '../../provider';
 export type UpdateRequiredType = 'app' | 'device' | 'all' | undefined;
 
 export interface HandleGetDeviceInfoOptions {
-  connection: SerialPort;
+  connection: DeviceConnection;
   setIsInFlow: (val: boolean) => void;
   setFirmwareVersion: (val: string) => void;
   setDeviceSerial: (val: string) => void;
   setSdkVersion: (val: string) => void;
-  setPacketVersion: (val: PacketVersion) => void;
 }
 
 export interface UseGetDeviceInfoValues {
@@ -70,8 +67,7 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
     setIsInFlow,
     setFirmwareVersion,
     setDeviceSerial,
-    setSdkVersion,
-    setPacketVersion
+    setSdkVersion
   }: HandleGetDeviceInfoOptions) => {
     resetHooks();
 
@@ -113,11 +109,6 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
       } else {
         setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
       }
-    });
-
-    getDeviceInfo.on('packetVersion', (packetVersion: PacketVersion) => {
-      logger.info('GetDeviceInfo: Got packet version', { packetVersion });
-      setPacketVersion(packetVersion);
     });
 
     getDeviceInfo.on('sdkVersion', (sdkVersion: string) => {
@@ -188,7 +179,6 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
        */
       await getDeviceInfo.run({
         connection,
-        packetVersion: PacketVersionMap.v1,
         sdkVersion: '',
         deviceDB: deviceDb
       });

@@ -223,7 +223,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
     setIsAddCoinLoading
   } = useAddCoinContext();
 
-  const { deviceConnection, devicePacketVersion } = useConnection();
+  const { deviceConnection } = useConnection();
 
   const handleNext = () => {
     if (stepsData.length > activeStep) {
@@ -254,8 +254,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
     setIsAddCoinLoading(false);
     coinAdder.setErrorMessage('');
     setCoins(JSON.parse(JSON.stringify(initialCoins)));
-    if (deviceConnection)
-      coinAdder.cancelAddCoin(deviceConnection, devicePacketVersion);
+    if (deviceConnection) coinAdder.cancelAddCoin(deviceConnection);
     coinAdder.resetHooks();
     setActiveStep(0);
   };

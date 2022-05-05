@@ -1,13 +1,12 @@
 import {
   COINS,
+  DeviceConnection,
   DeviceError,
-  DeviceErrorType,
-  PacketVersion
+  DeviceErrorType
 } from '@cypherock/communication';
 import { CoinAdder } from '@cypherock/protocols';
 import newWallet from '@cypherock/wallet';
 import { useEffect, useState } from 'react';
-import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
 import { addressDb, Xpub, xpubDb } from '../../database';
@@ -24,8 +23,7 @@ export interface AddCoinStatus {
 }
 
 export interface HandleAddCoinOptions {
-  connection: SerialPort;
-  packetVersion: PacketVersion;
+  connection: DeviceConnection;
   sdkVersion: string;
   setIsInFlow: (val: boolean) => void;
   walletId: string;
@@ -50,10 +48,7 @@ export interface UseAddCoinValues {
   setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
   handleCoinAdd: (options: HandleAddCoinOptions) => Promise<void>;
   resetHooks: () => void;
-  cancelAddCoin: (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => Promise<void>;
+  cancelAddCoin: (connection: DeviceConnection) => Promise<void>;
   completed: boolean;
   detailedMessage: string;
   addCoinStatus: AddCoinStatus[];
@@ -253,7 +248,6 @@ export const useAddCoin: UseAddCoin = () => {
 
   const handleCoinAdd = async ({
     connection,
-    packetVersion,
     sdkVersion,
     setIsInFlow,
     walletId,
@@ -408,7 +402,6 @@ export const useAddCoin: UseAddCoin = () => {
        */
       await addCoin.run({
         connection,
-        packetVersion,
         sdkVersion,
         walletId,
         selectedCoins,
@@ -427,13 +420,10 @@ export const useAddCoin: UseAddCoin = () => {
     }
   };
 
-  const cancelAddCoin = async (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => {
+  const cancelAddCoin = async (connection: DeviceConnection) => {
     setIsCancelled(true);
     await addCoin
-      .cancel(connection, packetVersion)
+      .cancel(connection)
       .then(canclled => {
         if (canclled) {
           logger.info('AddCoin: Cancelled');

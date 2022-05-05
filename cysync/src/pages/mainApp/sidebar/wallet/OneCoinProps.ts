@@ -26,3 +26,12 @@ export const OneCoinPropTypes = {
   deleteHistory: PropTypes.func.isRequired,
   walletId: PropTypes.string.isRequired
 };
+
+export interface EthereumOneCoinProps extends OneCoinProps {
+  sortIndex: number;
+}
+
+export const EthereumOneCoinPropTypes = {
+  ...OneCoinPropTypes,
+  sortIndex: PropTypes.number.isRequired
+};

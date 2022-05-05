@@ -1,20 +1,18 @@
 import {
+  DeviceConnection,
   DeviceError,
-  DeviceErrorType,
-  PacketVersion
+  DeviceErrorType
 } from '@cypherock/communication';
 import { Device } from '@cypherock/database';
 import { DeviceAuthenticator } from '@cypherock/protocols';
 import { useState } from 'react';
-import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
 import { deviceDb } from '../../database';
 import { useI18n } from '../../provider';
 
 export interface HandleDeviceAuthOptions {
-  connection: SerialPort;
-  packetVersion: PacketVersion;
+  connection: DeviceConnection;
   sdkVersion: string;
   setIsInFlow: (val: boolean) => void;
   firmwareVersion: string;
@@ -30,10 +28,7 @@ export interface UseDeviceAuthValues {
   completed: boolean;
   confirmed: 0 | -1 | 1 | 2;
   resetHooks: () => void;
-  cancelDeviceAuth: (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => void;
+  cancelDeviceAuth: (connection: DeviceConnection) => void;
 }
 
 export type UseDeviceAuth = (isInitial?: boolean) => UseDeviceAuthValues;
@@ -81,7 +76,6 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
 
   const handleDeviceAuth = async ({
     connection,
-    packetVersion,
     sdkVersion,
     setIsInFlow,
     firmwareVersion,
@@ -189,7 +183,6 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
        */
       await deviceAuth.run({
         connection,
-        packetVersion,
         sdkVersion,
         firmwareVersion,
         mockAuth,
@@ -207,12 +200,9 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
     }
   };
 
-  const cancelDeviceAuth = async (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => {
+  const cancelDeviceAuth = async (connection: DeviceConnection) => {
     return deviceAuth
-      .cancel(connection, packetVersion)
+      .cancel(connection)
       .then(canclled => {
         if (canclled) {
           logger.info('DeviceAuth: Cancelled');

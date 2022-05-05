@@ -1,9 +1,9 @@
 import {
   ALLCOINS as COINS,
+  DeviceConnection,
   DeviceError,
   DeviceErrorType,
-  EthCoinData,
-  PacketVersion
+  EthCoinData
 } from '@cypherock/communication';
 import { InputOutput, Transaction } from '@cypherock/database';
 import { TransactionSender } from '@cypherock/protocols';
@@ -12,7 +12,6 @@ import { WalletError, WalletErrorType } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
-import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
 import { addressDb, transactionDb } from '../../database';
@@ -90,8 +89,7 @@ export const verifyAddress = (address: string, coin: string) => {
 };
 
 export interface HandleSendTransactionOptions {
-  connection: SerialPort;
-  packetVersion: PacketVersion;
+  connection: DeviceConnection;
   sdkVersion: string;
   setIsInFlow: (val: boolean) => void;
   walletId: string;
@@ -136,7 +134,7 @@ export interface UseSendTransactionValues {
   approxTotalFee: number;
   sendMaxAmount: number;
   resetHooks: () => void;
-  cancelSendTxn: (connection: SerialPort, packetVersion: PacketVersion) => void;
+  cancelSendTxn: (connection: DeviceConnection) => void;
   handleEstimateFee: (
     xpub: string,
     zpub: string | undefined,
@@ -306,7 +304,6 @@ export const useSendTransaction: UseSendTransaction = () => {
   const handleSendTransaction: UseSendTransactionValues['handleSendTransaction'] =
     async ({
       connection,
-      packetVersion,
       sdkVersion,
       setIsInFlow,
       walletId,
@@ -566,7 +563,6 @@ export const useSendTransaction: UseSendTransaction = () => {
          */
         await sendTransaction.run({
           connection,
-          packetVersion,
           sdkVersion,
           addressDB: addressDb,
           walletId,
@@ -592,13 +588,10 @@ export const useSendTransaction: UseSendTransaction = () => {
       }
     };
 
-  const cancelSendTxn = async (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => {
+  const cancelSendTxn = async (connection: DeviceConnection) => {
     setIsCancelled(true);
     return sendTransaction
-      .cancel(connection, packetVersion)
+      .cancel(connection)
       .then(canclled => {
         if (canclled) {
           logger.info('SendTransaction: Cancelled');

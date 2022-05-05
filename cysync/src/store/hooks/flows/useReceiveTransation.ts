@@ -1,20 +1,18 @@
 import {
   ALLCOINS as COINS,
+  DeviceConnection,
   DeviceError,
-  DeviceErrorType,
-  PacketVersion
+  DeviceErrorType
 } from '@cypherock/communication';
 import { TransactionReceiver } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
-import SerialPort from 'serialport';
 
 import logger from '../../../utils/logger';
 import { addressDb, receiveAddressDb } from '../../database';
 import { useI18n, useSocket } from '../../provider';
 
 export interface HandleReceiveTransactionOptions {
-  connection: SerialPort;
-  packetVersion: PacketVersion;
+  connection: DeviceConnection;
   sdkVersion: string;
   setIsInFlow: (val: boolean) => void;
   walletId: string;
@@ -42,11 +40,7 @@ export interface UseReceiveTransactionValues {
   completed: boolean;
   setCompleted: React.Dispatch<React.SetStateAction<boolean>>;
   resetHooks: () => void;
-  cancelReceiveTxn: (
-    connection: SerialPort,
-
-    packetVersion: PacketVersion
-  ) => void;
+  cancelReceiveTxn: (connection: DeviceConnection) => void;
   coinsConfirmed: boolean;
 }
 
@@ -102,7 +96,6 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const handleReceiveTransaction: UseReceiveTransactionValues['handleReceiveTransaction'] =
     async ({
       connection,
-      packetVersion,
       sdkVersion,
       setIsInFlow,
       walletId,
@@ -301,7 +294,6 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
          */
         await receiveTransaction.run({
           connection,
-          packetVersion,
           sdkVersion,
           addressDB: addressDb,
           walletId,
@@ -324,13 +316,10 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       }
     };
 
-  const cancelReceiveTxn = async (
-    connection: SerialPort,
-    packetVersion: PacketVersion
-  ) => {
+  const cancelReceiveTxn = async (connection: DeviceConnection) => {
     setIsCancelled(true);
     return receiveTransaction
-      .cancel(connection, packetVersion)
+      .cancel(connection)
       .then(canclled => {
         if (canclled) {
           logger.info('ReceiveAddress: Cancelled');

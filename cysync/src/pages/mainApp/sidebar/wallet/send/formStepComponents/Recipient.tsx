@@ -378,13 +378,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const { sendTransaction } = useSendTransactionContext();
 
-  const {
-    deviceConnection,
-    devicePacketVersion,
-    deviceSdkVersion,
-    beforeFlowStart,
-    setIsInFlow
-  } = useConnection();
+  const { deviceConnection, deviceSdkVersion, beforeFlowStart, setIsInFlow } =
+    useConnection();
 
   const [mediumFee, setMediumFee] = useState(transactionFee);
   const [isMediumFeeLoading, setIsMediumFeeLoading] = useState(false);
@@ -490,7 +485,6 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
       sendTransaction.handleSendTransaction({
         connection: deviceConnection,
-        packetVersion: devicePacketVersion,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
         walletId,

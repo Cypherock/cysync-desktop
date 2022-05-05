@@ -248,14 +248,12 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
 
   const stepLen = 2;
 
-  const { deviceConnection, devicePacketVersion, connected } = useConnection();
+  const { deviceConnection, connected } = useConnection();
   const latestDeviceConnection = useRef<any>();
-  const latestPacketVersion = useRef<any>();
   const latestCompleted = useRef<boolean>();
 
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
-    latestPacketVersion.current = devicePacketVersion;
   }, [deviceConnection]);
 
   useEffect(() => {
@@ -276,10 +274,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
       );
       logger.info('Settings Card auth form closed');
       if (!latestCompleted.current && latestDeviceConnection.current) {
-        cancelCardAuth(
-          latestDeviceConnection.current,
-          latestPacketVersion.current
-        );
+        cancelCardAuth(latestDeviceConnection.current);
       }
     };
   }, []);

@@ -31,13 +31,8 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
 
   const { selectedWallet } = useSelectedWallet();
 
-  const {
-    deviceConnection,
-    devicePacketVersion,
-    deviceSdkVersion,
-    beforeFlowStart,
-    setIsInFlow
-  } = useConnection();
+  const { deviceConnection, deviceSdkVersion, beforeFlowStart, setIsInFlow } =
+    useConnection();
 
   const { receiveTransaction } = useReceiveTransactionContext();
 
@@ -54,7 +49,6 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
     receiveTransaction
       .handleReceiveTransaction({
         connection: deviceConnection,
-        packetVersion: devicePacketVersion,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
         walletId: selectedWallet.walletId,
