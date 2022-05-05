@@ -69,11 +69,17 @@ const BootloaderCheck = (props: any) => {
     updateDownloaded,
     latestVersion,
     setUpdated,
-    setIsCompleted
+    setIsCompleted,
+    setBlockNewConnection
   } = useDeviceUpgrade(true);
 
   const refreshComponent = () => {
     handleRetry();
+  };
+
+  const onClose = () => {
+    setBlockNewConnection(false);
+    props.handlePrev();
   };
 
   useEffect(() => {
@@ -93,6 +99,10 @@ const BootloaderCheck = (props: any) => {
     }
 
     startDeviceUpdate();
+
+    return () => {
+      setBlockNewConnection(false);
+    };
   }, []);
 
   useEffect(() => {
@@ -122,7 +132,7 @@ const BootloaderCheck = (props: any) => {
         Analytics.Categories.BOOTLOADER_CHECK,
         Analytics.Actions.COMPLETED
       );
-      setTimeout(() => props.handlePrev(), 3000);
+      setTimeout(onClose, 3000);
     }
   }, [isCompleted]);
 

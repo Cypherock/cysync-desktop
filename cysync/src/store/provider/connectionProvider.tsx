@@ -24,11 +24,13 @@ export interface ConnectionContextInterface {
   inBootloader: boolean;
   isDeviceUpdating: boolean;
   setIsDeviceUpdating: React.Dispatch<React.SetStateAction<boolean>>;
+  blockNewConnection: boolean;
+  setBlockNewConnection: React.Dispatch<React.SetStateAction<boolean>>;
   internalDeviceConnection: DeviceConnection | null;
   isReady: boolean;
-  verifyState: VerifyState;
-  openVerifyPrompt: boolean;
-  setOpenVerifyPrompt: React.Dispatch<React.SetStateAction<boolean>>;
+  deviceConnectionState: DeviceConnectionState;
+  openMisconfiguredPrompt: boolean;
+  setOpenMisconfiguredPrompt: React.Dispatch<React.SetStateAction<boolean>>;
   openErrorPrompt: boolean;
   setOpenErrorPrompt: React.Dispatch<React.SetStateAction<boolean>>;
   beforeFlowStart: (useInternal?: boolean) => boolean;
@@ -47,6 +49,7 @@ export interface ConnectionContextInterface {
   openCancelFlowPrompt: boolean;
   setOpenCancelFlowPrompt: React.Dispatch<React.SetStateAction<boolean>>;
   updateRequiredType: UpdateRequiredType;
+  isDeviceAvailable: boolean;
 }
 
 export const ConnectionContext: React.Context<ConnectionContextInterface> =
@@ -54,7 +57,7 @@ export const ConnectionContext: React.Context<ConnectionContextInterface> =
     {} as ConnectionContextInterface
   );
 
-export enum VerifyState {
+export enum DeviceConnectionState {
   NOT_CONNECTED,
   VERIFIED,
   IN_TEST_APP,
@@ -77,18 +80,18 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   const snackbar = useSnackbar();
 
   const [isDeviceUpdating, setIsDeviceUpdating] = useState(false);
+  const [blockNewConnection, setBlockNewConnection] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [inBackgroundProcess, setInBackgroundProcess] = useState(false);
   const [openErrorPrompt, setOpenErrorPrompt] = useState(false);
   const [openCancelFlowPrompt, setOpenCancelFlowPrompt] = useState(false);
-  const [openVerifyPrompt, setOpenVerifyPrompt] = useState(false);
+  const [openMisconfiguredPrompt, setOpenMisconfiguredPrompt] = useState(false);
   const [deviceSerial, setDeviceSerial] = useState<string | null>(null);
   const [deviceSdkVersion, setDeviceSdkVersion] = useState<string | null>(null);
   const [isInFlow, setIsInFlow] = useState(false);
 
-  const [verifyState, setVerifyState] = useState<VerifyState>(
-    VerifyState.NOT_CONNECTED
-  );
+  const [deviceConnectionState, setDeviceConnectionState] =
+    useState<DeviceConnectionState>(DeviceConnectionState.NOT_CONNECTED);
   const [updateRequiredType, setUpdateRequiredType] =
     useState<UpdateRequiredType>(undefined);
   const [deviceConnectionStatus, setDeviceConnectionStatus] = useState(false);
@@ -148,14 +151,14 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   }, []);
 
   const checkIfIncomplete = () => {
-    if (internalDeviceConnection && deviceState && !isDeviceUpdating) {
+    if (internalDeviceConnection && deviceState && !blockNewConnection) {
       setFirmwareVersion(undefined);
       setInBackgroundProcess(true);
       setDeviceSerial(null);
       setDeviceSdkVersion(null);
       if (inBootloader) {
         logger.info('Device in bootloader');
-        setVerifyState(VerifyState.IN_BOOTLOADER);
+        setDeviceConnectionState(DeviceConnectionState.IN_BOOTLOADER);
         setUpdateRequiredType(undefined);
         setIsDeviceNotReadyCheck(false);
         setInBackgroundProcess(false);
@@ -197,11 +200,10 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       createPort()
         .then(
           ({ connection, inBootloader: inB, deviceState: rawDeviceState }) => {
-            setVerifyState(VerifyState.NOT_CONNECTED);
+            setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
             setUpdateRequiredType(undefined);
             setInBootloader(inB);
             setDeviceState(rawDeviceState);
-            setInBackgroundProcess(true);
             setInternalDeviceConnection(connection);
             logger.info('Connected device info', {
               inB,
@@ -212,7 +214,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         )
         .catch(e => {
           logger.error('Error in connecting to device', e);
-          setVerifyState(VerifyState.NOT_CONNECTED);
+          setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
           setUpdateRequiredType(undefined);
           if (internalDeviceConnection) {
             internalDeviceConnection.destroy();
@@ -225,7 +227,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       setIsInFlow(false);
       setIsDeviceNotReady(false);
       setUpdateRequiredType(undefined);
-      setVerifyState(VerifyState.NOT_CONNECTED);
+      setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
       if (internalDeviceConnection) {
         internalDeviceConnection.destroy();
       }
@@ -237,8 +239,8 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   const retryConnection = () => {
     setIsDeviceNotReady(false);
     setUpdateRequiredType(undefined);
-    setVerifyState(VerifyState.NOT_CONNECTED);
-    if (internalDeviceConnection && !isDeviceUpdating) {
+    setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
+    if (internalDeviceConnection && !blockNewConnection) {
       setFirmwareVersion(undefined);
       setDeviceSerial(null);
       setDeviceSdkVersion(null);
@@ -249,7 +251,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     retryConnection();
-  }, [internalDeviceConnection, inBootloader, isDeviceUpdating]);
+  }, [internalDeviceConnection, inBootloader, blockNewConnection]);
 
   useEffect(() => {
     if (completed && deviceState && inTestApp(deviceState)) {
@@ -262,13 +264,13 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         });
         setUpdateRequiredType(undefined);
         if (isNotReady) {
-          setVerifyState(VerifyState.DEVICE_NOT_READY);
+          setDeviceConnectionState(DeviceConnectionState.DEVICE_NOT_READY);
           setIsDeviceNotReady(true);
         } else if (isUpdateRequired) {
           setUpdateRequiredType(isUpdateRequired);
-          setVerifyState(VerifyState.UPDATE_REQUIRED);
+          setDeviceConnectionState(DeviceConnectionState.UPDATE_REQUIRED);
         } else {
-          setVerifyState(VerifyState.UNKNOWN_ERROR);
+          setDeviceConnectionState(DeviceConnectionState.UNKNOWN_ERROR);
         }
         setIsDeviceNotReadyCheck(false);
         setInBackgroundProcess(false);
@@ -284,7 +286,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
 
         setErrorMessage('');
         resetHooks();
-        setVerifyState(VerifyState.IN_TEST_APP);
+        setDeviceConnectionState(DeviceConnectionState.IN_TEST_APP);
         setInBackgroundProcess(false);
       }
       return;
@@ -302,31 +304,31 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       setUpdateRequiredType(undefined);
       // Allow connection in `isNewDevice` & `lastAuthFailed` states if app is in debug mode.
       if (!deviceConnectionStatus) {
-        setVerifyState(VerifyState.NOT_CONNECTED);
+        setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
       } else if (isNewDevice) {
         if (process.env.BUILD_TYPE !== 'debug') {
-          setVerifyState(VerifyState.NEW_DEVICE);
+          setDeviceConnectionState(DeviceConnectionState.NEW_DEVICE);
         } else {
           logger.info('Allowing new device in debug build');
           allowConnection = true;
         }
       } else if (lastAuthFailed) {
         if (process.env.BUILD_TYPE !== 'debug') {
-          setVerifyState(VerifyState.LAST_AUTH_FAILED);
+          setDeviceConnectionState(DeviceConnectionState.LAST_AUTH_FAILED);
         } else {
           logger.info('Allowing device with lastAuthFailed in debug build');
           allowConnection = true;
         }
       } else if (isNotReady) {
-        setVerifyState(VerifyState.DEVICE_NOT_READY);
+        setDeviceConnectionState(DeviceConnectionState.DEVICE_NOT_READY);
         setIsDeviceNotReady(true);
       } else if (isUpdateRequired) {
         setUpdateRequiredType(isUpdateRequired);
-        setVerifyState(VerifyState.UPDATE_REQUIRED);
+        setDeviceConnectionState(DeviceConnectionState.UPDATE_REQUIRED);
       } else if (errorMessage) {
-        setVerifyState(VerifyState.UNKNOWN_ERROR);
+        setDeviceConnectionState(DeviceConnectionState.UNKNOWN_ERROR);
       } else {
-        setVerifyState(VerifyState.PARTIAL_STATE);
+        setDeviceConnectionState(DeviceConnectionState.PARTIAL_STATE);
       }
 
       if (!allowConnection) {
@@ -348,7 +350,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       setErrorMessage('');
       resetHooks();
       setDeviceConnection(internalDeviceConnection);
-      setVerifyState(VerifyState.VERIFIED);
+      setDeviceConnectionState(DeviceConnectionState.VERIFIED);
       setUpdateRequiredType(undefined);
       setIsDeviceNotReadyCheck(false);
       setInBackgroundProcess(false);
@@ -356,20 +358,23 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   }, [completed]);
 
   useEffect(() => {
-    if (verifyState === VerifyState.VERIFIED) {
+    if (deviceConnectionState === DeviceConnectionState.VERIFIED) {
       setIsReady(true);
     } else {
       setIsReady(false);
     }
 
     if (
-      [VerifyState.NOT_CONNECTED, VerifyState.VERIFIED].includes(verifyState)
+      [
+        DeviceConnectionState.NOT_CONNECTED,
+        DeviceConnectionState.VERIFIED
+      ].includes(deviceConnectionState)
     ) {
-      setOpenVerifyPrompt(false);
+      setOpenMisconfiguredPrompt(false);
     } else {
-      setOpenVerifyPrompt(true);
+      setOpenMisconfiguredPrompt(true);
     }
-  }, [verifyState]);
+  }, [deviceConnectionState]);
 
   const notReadyCheckTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
   useEffect(() => {
@@ -416,21 +421,21 @@ export const ConnectionProvider: React.FC = ({ children }) => {
 
     if (isReady) return true;
 
-    if (verifyState === VerifyState.NOT_CONNECTED) {
+    if (deviceConnectionState === DeviceConnectionState.NOT_CONNECTED) {
       setOpenErrorPrompt(true);
     } else {
-      setOpenVerifyPrompt(true);
+      setOpenMisconfiguredPrompt(true);
     }
     return false;
   };
 
-  const externalSetIsDeviceUpdating = (val: boolean) => {
+  const externalSetBlockNewConnection = (val: boolean) => {
     // Refresh connection status when device is done updating
     if (!val) {
       setDeviceConnectionStatus(false);
     }
 
-    setIsDeviceUpdating(val);
+    setBlockNewConnection(val);
   };
 
   return (
@@ -441,12 +446,12 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         firmwareVersion,
         inBootloader,
         isDeviceUpdating,
-        setIsDeviceUpdating: externalSetIsDeviceUpdating,
+        setIsDeviceUpdating,
         internalDeviceConnection,
         isReady,
-        verifyState,
-        openVerifyPrompt,
-        setOpenVerifyPrompt,
+        deviceConnectionState,
+        openMisconfiguredPrompt,
+        setOpenMisconfiguredPrompt,
         openErrorPrompt,
         setOpenErrorPrompt,
         beforeFlowStart,
@@ -464,7 +469,10 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         setIsInFlow,
         openCancelFlowPrompt,
         setOpenCancelFlowPrompt,
-        updateRequiredType
+        updateRequiredType,
+        blockNewConnection,
+        setBlockNewConnection: externalSetBlockNewConnection,
+        isDeviceAvailable: deviceConnectionStatus
       }}
     >
       {children}

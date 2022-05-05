@@ -12,10 +12,10 @@ import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
 import { useDeviceAuth } from '../../../../../store/hooks/flows';
 import {
+  DeviceConnectionState,
   FeedbackState,
   useConnection,
-  useFeedback,
-  VerifyState
+  useFeedback
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../../../utils/compareVersion';
@@ -79,7 +79,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     firmwareVersion,
     deviceState,
     setDeviceSerial,
-    verifyState,
+    deviceConnectionState,
     setIsInFlow
   } = useConnection();
   const [errorMsg, setErrorMsg] = React.useState('');
@@ -118,9 +118,10 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
       if (
         deviceConnection &&
         !inBackgroundProcess &&
-        [VerifyState.IN_TEST_APP, VerifyState.IN_BOOTLOADER].includes(
-          verifyState
-        )
+        [
+          DeviceConnectionState.IN_TEST_APP,
+          DeviceConnectionState.IN_BOOTLOADER
+        ].includes(deviceConnectionState)
       ) {
         if (inBootloader) {
           setErrorMsg(
@@ -197,7 +198,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
       timeout.current = undefined;
     }
 
-    if (verifyState !== VerifyState.IN_TEST_APP) {
+    if (deviceConnectionState !== DeviceConnectionState.IN_TEST_APP) {
       setErrorMsg('Please connect the device and try again.');
       return;
     }
@@ -229,7 +230,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
         </Typography>
         <DynamicTextView
           text="Connect X1 wallet"
-          state={verifyState === VerifyState.IN_TEST_APP ? 2 : 1}
+          state={
+            deviceConnectionState === DeviceConnectionState.IN_TEST_APP ? 2 : 1
+          }
         />
         <br />
         <DynamicTextView

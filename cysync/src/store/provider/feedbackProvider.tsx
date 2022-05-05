@@ -28,7 +28,7 @@ import { getSystemInfo } from '../../utils/systemInfo';
 import getUUID from '../../utils/uuid';
 import { useLogFetcher } from '../hooks/flows/useLogFetcher';
 
-import { useConnection, VerifyState } from './connectionProvider';
+import { DeviceConnectionState, useConnection } from './connectionProvider';
 import { useSnackbar } from './snackbarProvider';
 
 const PREFIX = 'FeedbackContext';
@@ -178,7 +178,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     deviceSdkVersion,
     firmwareVersion,
     deviceSerial,
-    verifyState,
+    deviceConnectionState,
     beforeFlowStart,
     setIsInFlow
   } = useConnection();
@@ -411,7 +411,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   const isDeviceConnected = () => {
     return (
       deviceConnection &&
-      [VerifyState.VERIFIED, VerifyState.IN_TEST_APP].includes(verifyState)
+      [
+        DeviceConnectionState.VERIFIED,
+        DeviceConnectionState.IN_TEST_APP
+      ].includes(deviceConnectionState)
     );
   };
 
@@ -467,19 +470,19 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const getDeviceStateErrorMsg = () => {
     const defaultText = 'Looks like the device is not configured.';
-    switch (verifyState) {
-      case VerifyState.NOT_CONNECTED:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.NOT_CONNECTED:
         return 'Please connect the device to attach device logs.';
-      case VerifyState.IN_BOOTLOADER:
-      case VerifyState.PARTIAL_STATE:
+      case DeviceConnectionState.IN_BOOTLOADER:
+      case DeviceConnectionState.PARTIAL_STATE:
         return 'Looks like your device was disconnected while upgrading.';
-      case VerifyState.NEW_DEVICE:
+      case DeviceConnectionState.NEW_DEVICE:
         return 'Looks like this device is connected for the first time.';
-      case VerifyState.LAST_AUTH_FAILED:
+      case DeviceConnectionState.LAST_AUTH_FAILED:
         return 'Looks like the device authentication failed the last time.';
-      case VerifyState.DEVICE_NOT_READY:
+      case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Looks like the device is not in the main menu.';
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
         return 'An unknown error occurred while connecting the device.';
       default:
         return defaultText;

@@ -8,7 +8,7 @@ import Tooltip from '@mui/material/Tooltip';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { useConnection, VerifyState } from '../../../store/provider';
+import { DeviceConnectionState, useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
@@ -55,11 +55,13 @@ export enum ConnectionStatus {
 const DeviceConnectionStatus: React.FC<DeviceConnectionStatusProps> = props => {
   const theme = useTheme();
   const {
-    verifyState,
+    deviceConnectionState,
     inBackgroundProcess,
-    setOpenVerifyPrompt,
+    setOpenMisconfiguredPrompt,
     isDeviceUpdating,
-    isDeviceNotReadyCheck
+    isDeviceNotReadyCheck,
+    blockNewConnection,
+    isDeviceAvailable
   } = useConnection();
 
   const getConnectionState = (): ConnectionStatus => {
@@ -69,23 +71,35 @@ const DeviceConnectionStatus: React.FC<DeviceConnectionStatusProps> = props => {
       return ConnectionStatus.UPDATING;
     } else if (inBackgroundProcess) {
       return ConnectionStatus.CONNECTING;
-    } else if (verifyState === VerifyState.NOT_CONNECTED) {
+    } else if (blockNewConnection) {
+      if (isDeviceAvailable) {
+        return ConnectionStatus.CONNECTED;
+      } else {
+        return ConnectionStatus.NOT_CONNECTED;
+      }
+    } else if (deviceConnectionState === DeviceConnectionState.NOT_CONNECTED) {
       return ConnectionStatus.NOT_CONNECTED;
-    } else if (verifyState === VerifyState.VERIFIED) {
+    } else if (deviceConnectionState === DeviceConnectionState.VERIFIED) {
       return ConnectionStatus.CONNECTED;
-    } else if (verifyState === VerifyState.IN_TEST_APP) {
+    } else if (deviceConnectionState === DeviceConnectionState.IN_TEST_APP) {
       return ConnectionStatus.IN_TEST_APP;
-    } else if (verifyState === VerifyState.IN_BOOTLOADER) {
+    } else if (deviceConnectionState === DeviceConnectionState.IN_BOOTLOADER) {
       return ConnectionStatus.IN_BOOTLOADER;
-    } else if (verifyState === VerifyState.PARTIAL_STATE) {
+    } else if (deviceConnectionState === DeviceConnectionState.PARTIAL_STATE) {
       return ConnectionStatus.PARTIAL_STATE;
-    } else if (verifyState === VerifyState.NEW_DEVICE) {
+    } else if (deviceConnectionState === DeviceConnectionState.NEW_DEVICE) {
       return ConnectionStatus.NEW_DEVICE;
-    } else if (verifyState === VerifyState.LAST_AUTH_FAILED) {
+    } else if (
+      deviceConnectionState === DeviceConnectionState.LAST_AUTH_FAILED
+    ) {
       return ConnectionStatus.LAST_AUTH_FAILED;
-    } else if (verifyState === VerifyState.DEVICE_NOT_READY) {
+    } else if (
+      deviceConnectionState === DeviceConnectionState.DEVICE_NOT_READY
+    ) {
       return ConnectionStatus.DEVICE_NOT_READY;
-    } else if (verifyState === VerifyState.UPDATE_REQUIRED) {
+    } else if (
+      deviceConnectionState === DeviceConnectionState.UPDATE_REQUIRED
+    ) {
       return ConnectionStatus.UPDATE_REQUIRED;
     } else {
       return ConnectionStatus.UNKNOWN_ERROR;
@@ -93,10 +107,12 @@ const DeviceConnectionStatus: React.FC<DeviceConnectionStatusProps> = props => {
   };
 
   const connectedState = React.useMemo(getConnectionState, [
-    verifyState,
+    deviceConnectionState,
     inBackgroundProcess,
     isDeviceUpdating,
-    isDeviceNotReadyCheck
+    isDeviceNotReadyCheck,
+    isDeviceAvailable,
+    blockNewConnection
   ]);
 
   const getDeviceConnectedIcon = () => {
@@ -326,7 +342,7 @@ const DeviceConnectionStatus: React.FC<DeviceConnectionStatusProps> = props => {
               Analytics.Categories.NAVBAR_DEVICE_CONNECTED,
               Analytics.Actions.CLICKED
             );
-            setOpenVerifyPrompt(true);
+            setOpenMisconfiguredPrompt(true);
           }}
           className={classes.connectedStatus}
         >

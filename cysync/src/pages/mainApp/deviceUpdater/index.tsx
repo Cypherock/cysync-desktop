@@ -2,7 +2,7 @@ import { shell } from 'electron';
 import React, { useEffect, useState } from 'react';
 
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
-import { useConnection, VerifyState } from '../../../store/provider';
+import { DeviceConnectionState, useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
@@ -17,25 +17,28 @@ const DeviceUpdatePopup = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [updateType, setUpdateType] = useState<UpdateType>('update');
   const {
-    verifyState,
-    openVerifyPrompt,
-    setOpenVerifyPrompt,
+    deviceConnectionState,
+    openMisconfiguredPrompt,
+    setOpenMisconfiguredPrompt,
     updateRequiredType
   } = useConnection();
 
   const onConfirmation = (val: boolean) => {
-    setOpenVerifyPrompt(false);
+    setOpenMisconfiguredPrompt(false);
     if (val) {
       let localUpdateType: UpdateType = 'update';
       if (
-        [VerifyState.PARTIAL_STATE, VerifyState.LAST_AUTH_FAILED].includes(
-          verifyState
-        )
+        [
+          DeviceConnectionState.PARTIAL_STATE,
+          DeviceConnectionState.LAST_AUTH_FAILED
+        ].includes(deviceConnectionState)
       ) {
         localUpdateType = 'auth';
-      } else if (verifyState === VerifyState.IN_TEST_APP) {
+      } else if (deviceConnectionState === DeviceConnectionState.IN_TEST_APP) {
         localUpdateType = 'initial';
-      } else if (verifyState === VerifyState.UPDATE_REQUIRED) {
+      } else if (
+        deviceConnectionState === DeviceConnectionState.UPDATE_REQUIRED
+      ) {
         if (updateRequiredType === 'device') {
           localUpdateType = 'update';
         } else {
@@ -84,14 +87,14 @@ const DeviceUpdatePopup = () => {
   };
 
   useEffect(() => {
-    if (openVerifyPrompt) {
+    if (openMisconfiguredPrompt) {
       Analytics.Instance.event(
         Analytics.Categories.PARTIAL_DEVICE_UPDATE,
         Analytics.Actions.PROMPT
       );
       logger.info('Device update prompt open');
     }
-  }, [openVerifyPrompt]);
+  }, [openMisconfiguredPrompt]);
 
   if (isOpen) {
     return (
@@ -116,15 +119,15 @@ const DeviceUpdatePopup = () => {
   }
 
   if (
-    verifyState !== VerifyState.VERIFIED &&
-    verifyState !== VerifyState.NOT_CONNECTED
+    deviceConnectionState !== DeviceConnectionState.VERIFIED &&
+    deviceConnectionState !== DeviceConnectionState.NOT_CONNECTED
   ) {
     return (
       <DialogBox
         fullWidth
         maxWidth="md"
-        open={openVerifyPrompt}
-        handleClose={() => setOpenVerifyPrompt(false)}
+        open={openMisconfiguredPrompt}
+        handleClose={() => setOpenMisconfiguredPrompt(false)}
         isClosePresent
         restComponents={
           <ConfirmationComponent
