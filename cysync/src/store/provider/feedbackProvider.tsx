@@ -590,6 +590,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     <Select
                       labelId="select-category"
                       id="category-select"
+                      sx={{
+                        paddingLeft: '14px'
+                      }}
                       value={feedbackInput.category}
                       onChange={handleListItem}
                       IconComponent={iconDropDown}

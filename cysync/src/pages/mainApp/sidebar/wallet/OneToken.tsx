@@ -105,7 +105,8 @@ const Root = styled('div')(({ theme }) => ({
     borderLeft: '1px solid rgba(33,40,35,1)',
     display: 'flex',
     justifyContent: 'flex-start',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingRight: '10px'
   }
 }));
 
@@ -220,7 +221,7 @@ const OneToken: React.FC<OneTokenProps> = ({
 
       <Grid container onClick={onClick} className={classes.root}>
         <Grid item xs={3} className={classes.alignStartCenter}>
-          <Grid container className={classes.nameWrapper}>
+          <Grid wrap="nowrap" container className={classes.nameWrapper}>
             <CoinIcons initial={initial.toUpperCase()} size="sm" />
             <Typography color="textPrimary" style={{ fontSize: '0.9rem' }}>
               {name}
