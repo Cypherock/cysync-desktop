@@ -144,13 +144,13 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
     const tokensToAdd = [...selectedTokens];
     tokensToAdd.forEach(tokenName => {
       erc20tokenDb.insert({
-        walletId: selectedWallet.walletId,
+        walletId: selectedWallet.id,
         coin: tokenName,
         ethCoin: ethCoin.toLowerCase(),
         balance: '0'
       });
       sync.addTokenTask(
-        selectedWallet.walletId,
+        selectedWallet.id,
         tokenName,
         ethCoin.toLowerCase()
       );

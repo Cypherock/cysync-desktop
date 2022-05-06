@@ -14,7 +14,7 @@ import {
   erc20tokenDb,
   receiveAddressDb,
   transactionDb,
-  walletDb,
+  walletDb2,
   xpubDb
 } from '../../../store/database';
 import logger from '../../../utils/logger';
@@ -146,7 +146,7 @@ const WalletItem = (props: WalletItemProps) => {
       const {
         walletDetails: { walletId }
       } = props;
-      await walletDb.delete(walletId);
+      await walletDb2.delete(walletId);
       const allXpubs = await xpubDb.getByWalletId(walletId);
       allXpubs.map(async xpub => {
         await addressDb.deleteAll({ xpub: xpub.xpub });

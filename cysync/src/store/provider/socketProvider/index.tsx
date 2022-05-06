@@ -10,7 +10,7 @@ import {
   addressDb,
   receiveAddressDb,
   transactionDb,
-  walletDb,
+  walletDb2,
   xpubDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
@@ -265,11 +265,11 @@ export const SocketProvider: React.FC = ({ children }) => {
       currentSocket.on('receivedTransaction', async (payload: any) => {
         try {
           logger.info('Received receive txn hook', { payload });
-          if (payload && payload.walletId && payload.coinType) {
-            const wallet = await walletDb.getByID(payload.walletId);
-            if (wallet && wallet.length > 0) {
+          if (payload && payload.id && payload.coinType) {
+            const wallet = await walletDb2.get(payload.id);
+            if (wallet) {
               const xpub = await xpubDb.getByWalletIdandCoin(
-                payload.walletId,
+                payload.id,
                 payload.coinType
               );
 
@@ -278,7 +278,7 @@ export const SocketProvider: React.FC = ({ children }) => {
                   txn: payload,
                   xpub: xpub.xpub,
                   addresses: [],
-                  walletId: payload.walletId,
+                  walletId: payload.id,
                   coinType: payload.coinType,
                   addressDB: addressDb
                 });
@@ -358,9 +358,9 @@ export const SocketProvider: React.FC = ({ children }) => {
               deleteAllPortfolioCache();
 
               // Update balance when confirmed
-              if (payload.walletId) {
+              if (payload.id) {
                 const xpub = await xpubDb.getByWalletIdandCoin(
-                  payload.walletId,
+                  payload.id,
                   payload.coinType
                 );
 

@@ -235,7 +235,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
       await transactionDb.deleteByCoin(walletId, token);
     });
     await erc20tokenDb.deleteAll({
-      walletId: selectedWallet.walletId,
+      walletId: selectedWallet.id,
       ethCoin: coinDetails.coin
     });
     setDeleteOpen(false);
@@ -272,13 +272,13 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   };
 
   useEffect(() => {
-    setCurrentWalletId(selectedWallet.walletId);
+    setCurrentWalletId(selectedWallet.id);
     setCurrentEthCoin(coinDetails.coin);
-  }, [selectedWallet.walletId]);
+  }, [selectedWallet.id]);
 
   useEffect(() => {
     setCollapseTab(false);
-  }, [selectedWallet.walletId]);
+  }, [selectedWallet.id]);
 
   const [openAddToken, setOpenAddToken] = useState(false);
 

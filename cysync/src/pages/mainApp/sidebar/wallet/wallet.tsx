@@ -128,7 +128,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
 
   useEffect(() => {
     if (selectedWallet) {
-      setCurrentWalletId(selectedWallet.walletId);
+      setCurrentWalletId(selectedWallet.id);
     }
   }, [selectedWallet]);
 
@@ -428,7 +428,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                         isEmpty={coin.isEmpty}
                         deleteCoin={deleteCoinByXpub}
                         deleteHistory={deleteCoinHistory}
-                        walletId={selectedWallet.walletId}
+                        walletId={selectedWallet.id}
                         sortIndex={sortIndex}
                       />
                     ) : (
@@ -442,7 +442,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                         isEmpty={coin.isEmpty}
                         deleteCoin={deleteCoinByXpub}
                         deleteHistory={deleteCoinHistory}
-                        walletId={selectedWallet.walletId}
+                        walletId={selectedWallet.id}
                       />
                     )}
                   </CurrentCoinContext.Provider>

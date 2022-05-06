@@ -3,22 +3,15 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { erc20tokenDb, walletDb, xpubDb } from '../database';
+import { erc20tokenDb, walletDb2, Wallet2, xpubDb } from '../database';
 
 export interface Coin {
   name: string;
   abbr: string;
 }
 
-export interface WalletInfo {
-  walletId: string;
-  name: string;
-  passwordSet: boolean;
-  passphraseSet: boolean;
-}
-
 export interface WalletsContextInterface {
-  allWallets: WalletInfo[];
+  allWallets: Wallet2[];
   allCoins: Coin[];
   getAll: () => void;
 }
@@ -27,10 +20,11 @@ export const WalletsContext: React.Context<WalletsContextInterface> =
   React.createContext<WalletsContextInterface>({} as WalletsContextInterface);
 
 export const WalletsProvider: React.FC = ({ children }) => {
-  const [allWallets, setAllWallets] = useState<WalletInfo[]>([
+  const [allWallets, setAllWallets] = useState<Wallet2[]>([
     {
       // UI breaks if the list is empty, hence dummy empty wallet. WalletID is null specially for Portfolio, to differenciate between initial state (walletId is 'null') and no wallets (walletId is '')
-      walletId: 'null',
+      id: 'null',
+      device: '',
       name: '',
       passwordSet: true,
       passphraseSet: false
@@ -42,13 +36,14 @@ export const WalletsProvider: React.FC = ({ children }) => {
   const getAll = async () => {
     try {
       logger.verbose('Getting all wallets and xpub data');
-      const walletRes = await walletDb.getAll();
+      const walletRes = await walletDb2.getAll();
 
       if (walletRes.length !== 0) setAllWallets(walletRes);
       else {
         setAllWallets([
           {
-            walletId: '',
+            id: '',
+            device: '',
             name: '',
             passwordSet: true,
             passphraseSet: false
@@ -101,9 +96,9 @@ export const WalletsProvider: React.FC = ({ children }) => {
   useEffect(() => {
     logger.verbose('Adding all wallet & xpub DB listners.');
 
-    walletDb.emitter.on('insert', onUpdate);
-    walletDb.emitter.on('update', onUpdate);
-    walletDb.emitter.on('delete', onUpdate);
+    walletDb2.emitter.on('insert', onUpdate);
+    walletDb2.emitter.on('update', onUpdate);
+    walletDb2.emitter.on('delete', onUpdate);
 
     xpubDb.emitter.on('insert', onUpdate);
     xpubDb.emitter.on('delete', onUpdate);
@@ -113,9 +108,9 @@ export const WalletsProvider: React.FC = ({ children }) => {
 
     return () => {
       logger.verbose('Removed all wallet & xpub DB listners.');
-      walletDb.emitter.removeListener('insert', onUpdate);
-      walletDb.emitter.removeListener('update', onUpdate);
-      walletDb.emitter.removeListener('delete', onUpdate);
+      walletDb2.emitter.removeListener('insert', onUpdate);
+      walletDb2.emitter.removeListener('update', onUpdate);
+      walletDb2.emitter.removeListener('delete', onUpdate);
 
       xpubDb.emitter.removeListener('insert', onUpdate);
       xpubDb.emitter.removeListener('delete', onUpdate);

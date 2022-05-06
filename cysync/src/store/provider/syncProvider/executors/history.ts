@@ -112,10 +112,7 @@ export const processResponses = async (
 
     let balance = new BigNumber(response.data.balance);
     const unconfirmedBalance = new BigNumber(response.data.unconfirmedBalance);
-    const xpub = await xpubDb.getByWalletIdandCoin(
-      item.walletId,
-      item.coinType
-    );
+    const xpub = await xpubDb.getByWalletIdandCoin(item.walletId, item.coinType);
 
     if (!xpub) {
       logger.warn('Cannot find xpub while fetching txn', { item });

@@ -155,7 +155,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
           setCoinVerified(false);
           receiveTransaction.onNewReceiveAddr(
             addr,
-            selectedWallet.walletId,
+            selectedWallet.id,
             coinDetails.coin
           );
           return null;

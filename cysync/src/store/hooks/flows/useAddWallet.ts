@@ -3,13 +3,13 @@ import {
   DeviceError,
   DeviceErrorType
 } from '@cypherock/communication';
-import { HardwareWallet } from '@cypherock/database';
+import { Wallet2 } from '@cypherock/database';
 import { WalletAdder } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { walletDb } from '../../database';
-import { useI18n, useWallets } from '../../provider';
+import { walletDb2 } from '../../database';
+import { useI18n, useWallets, useConnection } from '../../provider';
 
 export interface HandleAddWalletOptions {
   connection: DeviceConnection;
@@ -53,6 +53,7 @@ export const useAddWallet: UseAddWallet = () => {
 
   const wallets = useWallets();
   const { langStrings } = useI18n();
+  const { deviceSerial } = useConnection();
 
   const resetHooks = () => {
     setDeviceConnected(false);
@@ -134,7 +135,7 @@ export const useAddWallet: UseAddWallet = () => {
       }
     });
 
-    addWallet.on('walletDetails', async (walletDetails: HardwareWallet) => {
+    addWallet.on('walletDetails', async (walletDetails: Wallet2) => {
       try {
         if (walletDetails === null) {
           logger.info('AddWallet: Rejected from device');
@@ -150,12 +151,11 @@ export const useAddWallet: UseAddWallet = () => {
           return;
         }
 
-        const walletWithSameId = await walletDb.getAll({
-          walletId: walletDetails.walletId
-        });
+        const walletWithSameId = await walletDb2.get(walletDetails.id);
+        console.log("walletwithsameid", walletWithSameId);
 
-        if (walletWithSameId && walletWithSameId.length > 0) {
-          const duplicateWallet = walletWithSameId[0];
+        if (walletWithSameId) {
+          const duplicateWallet = walletWithSameId;
 
           if (duplicateWallet.name === walletDetails.name) {
             logger.info('AddWallet: Duplicate wallet found');
@@ -163,7 +163,7 @@ export const useAddWallet: UseAddWallet = () => {
           } else {
             logger.info('AddWallet: Same wallet found with different name');
             setWalletName(walletDetails.name);
-            setWalletId(walletDetails.walletId);
+            setWalletId(walletDetails.id);
             setPasswordSet(walletDetails.passwordSet);
             setPassphraseSet(walletDetails.passphraseSet);
             setIsNameDiff(true);
@@ -174,12 +174,12 @@ export const useAddWallet: UseAddWallet = () => {
 
           return;
         }
-
-        walletDb
+        walletDetails.device = deviceSerial;
+        walletDb2
           .insert(walletDetails)
           .then(() => {
             setWalletName(walletDetails.name);
-            setWalletId(walletDetails.walletId);
+            setWalletId(walletDetails.id);
             setPasswordSet(walletDetails.passwordSet);
             setPassphraseSet(walletDetails.passphraseSet);
             setCompleted(true);
@@ -246,19 +246,17 @@ export const useAddWallet: UseAddWallet = () => {
         throw new Error('New Wallet details are missing');
       }
 
-      const walletWithSameId = await walletDb.getAll({
-        walletId
-      });
+      const walletWithSameId = await walletDb2.get(walletId);
 
-      if (!(walletWithSameId && walletWithSameId.length > 0)) {
+      if (!(walletWithSameId)) {
         throw new Error('Could not find wallet with same ID');
       }
 
-      const duplicateWallet = { ...walletWithSameId[0] };
+      const duplicateWallet = { ...walletWithSameId };
       duplicateWallet.name = walletName;
       duplicateWallet.passphraseSet = passphraseSet;
       duplicateWallet.passwordSet = passwordSet;
-      await walletDb.update(duplicateWallet);
+      await walletDb2.update(duplicateWallet.id, duplicateWallet);
       setIsNameDiff(false);
       setErrorMessage('');
       setWalletSuccess(true);

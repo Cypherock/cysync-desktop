@@ -1,3 +1,4 @@
+import { Wallet2 } from '@cypherock/database';
 import React, { useEffect, useState } from 'react';
 import {
   Route,
@@ -11,8 +12,7 @@ import RouteLinks from '../../../../constants/routes';
 import {
   AddCoinProvider,
   SelectedWalletContext,
-  useWallets,
-  WalletInfo
+  useWallets
 } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
@@ -28,10 +28,10 @@ const SingleWalletView = () => {
   const navigate = useNavigate();
   const { allWallets } = useWallets();
   const [currentWalletDetails, setCurrentWalletDetails] =
-    useState<WalletInfo | null>(null);
+    useState<Wallet2 | null>(null);
 
   useEffect(() => {
-    const wallet = allWallets.find(elem => elem.walletId === walletId);
+    const wallet = allWallets.find(elem => elem.id === walletId);
     if (wallet) {
       setCurrentWalletDetails(wallet);
     } else {

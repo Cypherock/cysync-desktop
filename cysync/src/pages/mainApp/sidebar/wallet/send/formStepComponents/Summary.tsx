@@ -122,7 +122,7 @@ const Summary: React.FC<StepComponentProps> = ({
         setOpen(false);
         sendTransaction.setHash(res);
         sendTransaction.onTxnBroadcast({
-          walletId: selectedWallet.walletId,
+          walletId: selectedWallet.id,
           coin: coinDetails.coin,
           txHash: res,
           token: token ? token.coin : undefined
@@ -130,7 +130,7 @@ const Summary: React.FC<StepComponentProps> = ({
         addTxnConfirmAddressHook(
           res,
           coinDetails.coin,
-          selectedWallet.walletId
+          selectedWallet.id
         );
         handleNext();
         Analytics.Instance.event(
