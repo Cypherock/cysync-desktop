@@ -10,7 +10,7 @@ import {
 import { useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { deviceDb } from '../../database';
+import { deviceDb2 } from '../../database';
 import { useI18n } from '../../provider';
 
 export type UpdateRequiredType = 'app' | 'device' | 'all' | undefined;
@@ -180,7 +180,7 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
       await getDeviceInfo.run({
         connection,
         sdkVersion: '',
-        deviceDB: deviceDb
+        deviceDB: deviceDb2
       });
       setIsInFlow(false);
       logger.info('GetDeviceInfo: Completed.');

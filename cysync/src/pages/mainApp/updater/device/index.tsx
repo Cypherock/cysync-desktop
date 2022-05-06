@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../../constants/routes';
 import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
-import { deviceDb } from '../../../../store/database';
+import { deviceDb2 } from '../../../../store/database';
 import {
   useConnection,
   useUpdater,
@@ -27,8 +27,8 @@ const Updater = () => {
     if (isDeviceUpdateAvailable && verifyState === VerifyState.VERIFIED) {
       const lastVersion = localStorage.getItem('last-device-version');
       if (deviceSerial !== null) {
-        deviceDb
-          .getBySerial(deviceSerial)
+        deviceDb2
+          .get(deviceSerial)
           .then(device => {
             if (!device) {
               return;

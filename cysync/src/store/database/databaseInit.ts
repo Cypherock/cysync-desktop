@@ -1,6 +1,7 @@
 import {
   AddressDB,
   DeviceDB,
+  DeviceDb2,
   Erc20DB,
   LatestPriceDB,
   NotificationDB,
@@ -9,6 +10,7 @@ import {
   ReceiveAddressDB,
   TransactionDB,
   WalletDB,
+  WalletDb2,
   XpubDB
 } from '@cypherock/database';
 
@@ -28,6 +30,9 @@ export const addressDb = new AddressDB(dbPath);
 export const receiveAddressDb = new ReceiveAddressDB(dbPath);
 export const notificationDb = new NotificationDB(dbPath);
 export const deviceDb = new DeviceDB(dbPath);
+
+export const deviceDb2 = new DeviceDb2();
+export const walletDb2 = new WalletDb2();
 
 /**
  * Loads the data from disk. To be used only for encrypted databases.
