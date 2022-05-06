@@ -6,6 +6,7 @@ import { getPortfolioCache } from '../../utils/cache';
 import logger from '../../utils/logger';
 import {
   erc20tokenDb,
+  getLatestPriceForCoin,
   priceDb,
   Transaction,
   transactionDb,
@@ -384,7 +385,6 @@ export const usePortfolio: UsePortfolio = () => {
 
         const res = await priceDb.getPrice(coinType, 7);
 
-        let latestPrice = 0;
         if (res && res.data) {
           const latestUnitPrices = res.data;
           if (!latestUnitPrices[latestUnitPrices.length - 1]) {
@@ -392,10 +392,10 @@ export const usePortfolio: UsePortfolio = () => {
               latestUnitPrices,
               coinType
             });
-          } else {
-            latestPrice = latestUnitPrices[latestUnitPrices.length - 1][1];
           }
         }
+
+        const latestPrice = await getLatestPriceForCoin(coinType);
 
         const balance = totalBalance.dividedBy(coin.multiplier);
 
