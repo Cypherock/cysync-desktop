@@ -3,8 +3,8 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
 import {
-  ERC20Token,
-  erc20tokenDb,
+  Token2,
+  tokenDb,
   getLatestPriceForCoin,
   priceDb
 } from '../database';
@@ -44,21 +44,21 @@ export const useToken: UseToken = () => {
     priceDb.emitter.on('insert', onChange);
     priceDb.emitter.on('update', onChange);
 
-    erc20tokenDb.emitter.on('insert', onChange);
-    erc20tokenDb.emitter.on('update', onChange);
-    erc20tokenDb.emitter.on('delete', onChange);
+    tokenDb.emitter.on('insert', onChange);
+    tokenDb.emitter.on('update', onChange);
+    tokenDb.emitter.on('delete', onChange);
 
     return () => {
       priceDb.emitter.removeListener('insert', onChange);
       priceDb.emitter.removeListener('update', onChange);
 
-      erc20tokenDb.emitter.removeListener('insert', onChange);
-      erc20tokenDb.emitter.removeListener('update', onChange);
-      erc20tokenDb.emitter.removeListener('delete', onChange);
+      tokenDb.emitter.removeListener('insert', onChange);
+      tokenDb.emitter.removeListener('update', onChange);
+      tokenDb.emitter.removeListener('delete', onChange);
     };
   }, []);
 
-  const getTokensWithPrices = async (tokens: ERC20Token[]) => {
+  const getTokensWithPrices = async (tokens: Token2[]) => {
     const tokensWithPrice: DisplayToken[] = [];
     for (const coin of tokens) {
       const coinObj = COINS[coin.coin.toLowerCase()];
@@ -71,13 +71,13 @@ export const useToken: UseToken = () => {
         isEmpty: true,
         displayPrice: '0',
         displayValue: '0',
-        displayBalance: '0'
+        displayBalance: '0',
       };
       const balance = new BigNumber(coin.balance || 0).dividedBy(
         coinObj.multiplier
       );
 
-      const price = await getLatestPriceForCoin(coin.coin);
+      const price = await getLatestPriceForCoin(coin.slug);
       const value = balance.multipliedBy(price);
 
       coinWithPrice.displayBalance = balance.toString();
@@ -184,10 +184,10 @@ export const useToken: UseToken = () => {
   };
 
   const getAllTokensFromWallet = async (walletId: string, ethCoin: string) => {
-    const res = await erc20tokenDb.getByWalletId(walletId, ethCoin);
+    const res = await tokenDb.getAll({ walletId, coin: ethCoin });
     const tokens: string[] = [];
     res.forEach(coin => {
-      tokens.push(coin.coin);
+      tokens.push(coin.slug);
     });
     setTokenList(tokens);
     const unsortedTokens = await getTokensWithPrices(res);

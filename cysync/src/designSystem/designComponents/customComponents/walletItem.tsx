@@ -12,7 +12,7 @@ import Routes from '../../../constants/routes';
 import {
   addressDb,
   coinDb,
-  erc20tokenDb,
+  tokenDb,
   receiveAddressDb,
   transactionDb,
   Wallet2,
@@ -156,7 +156,7 @@ const WalletItem = (props: WalletItemProps) => {
         walletId
       });
       await coinDb.delete({ walletId });
-      await erc20tokenDb.deleteWallet(walletId);
+      await tokenDb.delete({walletId});
       await transactionDb.deleteWallet(walletId);
       navigate(Routes.wallet.index);
       setDeleteOpen(false);

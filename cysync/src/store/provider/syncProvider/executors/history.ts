@@ -19,12 +19,7 @@ import {
 import BigNumber from 'bignumber.js';
 
 import logger from '../../../../utils/logger';
-import {
-  addressDb,
-  erc20tokenDb,
-  transactionDb,
-  coinDb
-} from '../../../database';
+import { addressDb, tokenDb, transactionDb, coinDb } from '../../../database';
 import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
 
 export const getRequestsMetadata = (
@@ -375,17 +370,19 @@ export const processResponses = async (
     }
 
     for (const tokenName of erc20Tokens) {
-      const token = await erc20tokenDb.getOne({
+      const token = await tokenDb.getOne({
         walletId: item.walletId,
-        coin: tokenName.toLowerCase(),
-        ethCoin: item.coinType
+        slug: tokenName.toLowerCase(),
+        coin: item.coinType
       });
       if (!token) {
-        erc20tokenDb.insert({
+        tokenDb.insert({
           walletId: item.walletId,
-          coin: tokenName.toLowerCase(),
-          ethCoin: item.coinType,
-          balance: '0'
+          slug: tokenName.toLowerCase(),
+          coin: item.coinType,
+          balance: '0',
+          price: '0',
+          networkId: -1
         });
         options.addToQueue(
           new BalanceSyncItem({

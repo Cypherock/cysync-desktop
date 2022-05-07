@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
-import { erc20tokenDb, priceDb, transactionDb, coinDb, Coin2 } from '../../database';
+import { tokenDb, priceDb, transactionDb, coinDb, Coin2 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
@@ -458,7 +458,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     module = 'default'
   }) => {
     const allXpubs = await coinDb.getAll();
-    const tokens = await erc20tokenDb.getAll();
+    const tokens = await tokenDb.getAll();
 
     for (const xpub of allXpubs) {
       addBalanceSyncItemFromXpub(xpub, { isRefresh, module });
@@ -471,7 +471,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         slug: token.coin
       });
       if (!ethXpub) {
-        logger.warn('EthCoin does not exist', { ethCoin: token.ethCoin });
+        logger.warn('EthCoin does not exist', { ethCoin: token.coin });
         return;
       }
       addToQueue(
@@ -479,7 +479,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           xpub: ethXpub.xpub,
           walletId: token.walletId,
           coinType: token.coin,
-          ethCoin: token.ethCoin,
+          ethCoin: token.coin,
           module,
           isRefresh
         })
@@ -489,7 +489,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const addPriceRefresh = async ({ isRefresh = false, module = 'default' }) => {
     const allXpubs = await coinDb.getAll();
-    const tokens = await erc20tokenDb.getAll();
+    const tokens = await tokenDb.getAll();
 
     for (const xpub of allXpubs) {
       addPriceSyncItemFromXpub(xpub, { isRefresh, module });
@@ -508,7 +508,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     module = 'default'
   }) => {
     const allXpubs = await coinDb.getAll();
-    const tokens = await erc20tokenDb.getAll();
+    const tokens = await tokenDb.getAll();
 
     for (const xpub of allXpubs) {
       addLatestPriceSyncItemFromXpub(xpub, { isRefresh, module });

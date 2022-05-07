@@ -17,7 +17,7 @@ import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import DeleteCoinIcon from '../../../../designSystem/iconGroups/deleteCoin';
 import Dustbin from '../../../../designSystem/iconGroups/dustbin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
-import { erc20tokenDb } from '../../../../store/database';
+import { tokenDb } from '../../../../store/database';
 import {
   useReceiveTransaction,
   useSendTransaction
@@ -176,10 +176,10 @@ const OneToken: React.FC<OneTokenProps> = ({
   };
 
   const handleDeleteConfirmation = () => {
-    erc20tokenDb.deleteAll({
+    tokenDb.delete({
       walletId,
-      coin: initial.toLowerCase(),
-      ethCoin: ethCoin.toLowerCase()
+      slug: initial.toLowerCase(),
+      coin: ethCoin.toLowerCase()
     });
     setDeleteOpen(false);
   };

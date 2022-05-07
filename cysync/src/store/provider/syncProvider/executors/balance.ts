@@ -12,7 +12,7 @@ import {
 import { generateEthAddressFromXpub } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
-import { erc20tokenDb, coinDb } from '../../../database';
+import { tokenDb, coinDb } from '../../../database';
 import { BalanceSyncItem } from '../types';
 
 export const getRequestsMetadata = (
@@ -98,9 +98,9 @@ export const processResponses = async (
       const balanceRes = responses[0];
 
       const balance = new BigNumber(balanceRes.data);
-      await erc20tokenDb.updateBalance(
-        item.coinType,
+      await tokenDb.updateBalance(
         item.walletId,
+        item.coinType,
         balance.toString()
       );
     } else {

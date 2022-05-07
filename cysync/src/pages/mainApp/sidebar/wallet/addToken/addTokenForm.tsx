@@ -13,7 +13,7 @@ import CustomButton from '../../../../../designSystem/designComponents/buttons/b
 import CustomCheckBox from '../../../../../designSystem/designComponents/input/checkbox';
 import Input from '../../../../../designSystem/designComponents/input/input';
 import CoinIcons from '../../../../../designSystem/genericComponents/coinIcons';
-import { erc20tokenDb } from '../../../../../store/database';
+import { tokenDb } from '../../../../../store/database';
 import { useDebouncedFunction } from '../../../../../store/hooks';
 import { useSelectedWallet, useSync } from '../../../../../store/provider';
 
@@ -143,11 +143,13 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
   const onContinue = () => {
     const tokensToAdd = [...selectedTokens];
     tokensToAdd.forEach(tokenName => {
-      erc20tokenDb.insert({
+      tokenDb.insert({
         walletId: selectedWallet.id,
-        coin: tokenName,
-        ethCoin: ethCoin.toLowerCase(),
-        balance: '0'
+        slug: tokenName,
+        coin: ethCoin.toLowerCase(),
+        balance: '0',
+        networkId: -1,
+        price: '0',
       });
       sync.addTokenTask(
         selectedWallet.id,

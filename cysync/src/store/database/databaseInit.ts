@@ -12,7 +12,8 @@ import {
   TransactionDB,
   WalletDB,
   WalletDb2,
-  XpubDB
+  XpubDB,
+  TokenDb2
 } from '@cypherock/database';
 
 import { getAnalyticsId } from '../../utils/analytics';
@@ -35,7 +36,7 @@ export const deviceDb = new DeviceDB(dbPath);
 export const deviceDb2 = new DeviceDb2();
 export const walletDb2 = new WalletDb2();
 export const coinDb = new CoinDb2();
-
+export const tokenDb = new TokenDb2();
 /**
  * Loads the data from disk. To be used only for encrypted databases.
  */

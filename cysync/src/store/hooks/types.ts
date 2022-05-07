@@ -1,5 +1,5 @@
 import {
-  ERC20Token,
+  Token2,
   InputOutput,
   Transaction,
   Coin2
@@ -14,7 +14,7 @@ export interface DisplayCoin extends Coin2 {
   isEmpty: boolean;
 }
 
-export interface DisplayToken extends ERC20Token {
+export interface DisplayToken extends Token2 {
   displayValue: string;
   displayPrice: string;
   displayBalance: string;

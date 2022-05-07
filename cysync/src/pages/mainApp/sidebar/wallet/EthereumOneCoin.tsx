@@ -24,7 +24,7 @@ import Dustbin from '../../../../designSystem/iconGroups/dustbin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
 import {
   addressDb,
-  erc20tokenDb,
+  tokenDb,
   receiveAddressDb,
   transactionDb
 } from '../../../../store/database';
@@ -234,9 +234,9 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
       await receiveAddressDb.deleteAll({ walletId, coinType: token });
       await transactionDb.deleteByCoin(walletId, token);
     });
-    await erc20tokenDb.deleteAll({
+    await tokenDb.delete({
       walletId: selectedWallet.id,
-      ethCoin: coinDetails.slug
+      coin: coinDetails.slug
     });
     setDeleteOpen(false);
   };
@@ -416,19 +416,19 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
               <Grid item xs={12}>
                 <Collapse in={collapseTab} timeout="auto" unmountOnExit>
                   {tokenData.map(token => {
-                    const coin = COINS[token.coin];
-                    if (!coin) {
+                    const tokenData = COINS[token.slug];
+                    if (!tokenData) {
                       throw new Error(`Cannot find coinType: ${token.coin}`);
                     }
                     return (
-                      <React.Fragment key={token.coin}>
+                      <React.Fragment key={token.slug}>
                         <TokenContext.Provider value={{ token }}>
                           <OneToken
-                            initial={token.coin.toUpperCase()}
-                            name={coin.name}
+                            initial={token.slug.toUpperCase()}
+                            name={tokenData.name}
                             holding={token.displayBalance}
                             price={token.displayPrice}
-                            decimal={coin.decimal}
+                            decimal={tokenData.decimal}
                             value={token.displayValue}
                             isEmpty={token.isEmpty}
                             walletId={walletId}
