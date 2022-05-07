@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
 import { walletDb2 } from '../../database';
-import { useI18n, useWallets, useConnection } from '../../provider';
+import { useConnection, useI18n, useWallets } from '../../provider';
 
 export interface HandleAddWalletOptions {
   connection: DeviceConnection;
@@ -151,8 +151,9 @@ export const useAddWallet: UseAddWallet = () => {
           return;
         }
 
-        const walletWithSameId = await walletDb2.getOne({id: walletDetails.id});
-        console.log("walletwithsameid", walletWithSameId);
+        const walletWithSameId = await walletDb2.getOne({
+          id: walletDetails.id
+        });
 
         if (walletWithSameId) {
           const duplicateWallet = walletWithSameId;
@@ -246,9 +247,9 @@ export const useAddWallet: UseAddWallet = () => {
         throw new Error('New Wallet details are missing');
       }
 
-      const walletWithSameId = await walletDb2.getOne({id: walletId});
+      const walletWithSameId = await walletDb2.getOne({ id: walletId });
 
-      if (!(walletWithSameId)) {
+      if (!walletWithSameId) {
         throw new Error('Could not find wallet with same ID');
       }
 

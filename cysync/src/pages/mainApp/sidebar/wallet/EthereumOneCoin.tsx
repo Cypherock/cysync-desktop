@@ -274,7 +274,6 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   useEffect(() => {
     setCurrentWalletId(selectedWallet.id);
     setCurrentEthCoin(coinDetails.slug);
-    console.log("walletid", selectedWallet.id);
   }, [selectedWallet.id]);
 
   useEffect(() => {

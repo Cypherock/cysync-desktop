@@ -15,6 +15,7 @@ import {
   erc20tokenDb,
   receiveAddressDb,
   transactionDb,
+  Wallet2,
   walletDb2
 } from '../../../store/database';
 import logger from '../../../utils/logger';
@@ -117,7 +118,7 @@ const WalletItemRoot = styled(Grid)(() => ({
 
 interface WalletItemProps {
   title: string;
-  walletDetails: any;
+  walletDetails: Wallet2;
 }
 
 const WalletItem = (props: WalletItemProps) => {
@@ -144,17 +145,17 @@ const WalletItem = (props: WalletItemProps) => {
   const handleDeleteConfirmation = async () => {
     try {
       const {
-        walletDetails: { walletId }
+        walletDetails: { id: walletId }
       } = props;
-      await walletDb2.delete({id: walletId});
-      const coins = await coinDb.getAll({walletId});
+      await walletDb2.delete({ id: walletId });
+      const coins = await coinDb.getAll({ walletId });
       coins.map(async coin => {
         await addressDb.deleteAll({ xpub: coin.xpub });
       });
       await receiveAddressDb.deleteAll({
         walletId
       });
-      await coinDb.delete({walletId});
+      await coinDb.delete({ walletId });
       await erc20tokenDb.deleteWallet(walletId);
       await transactionDb.deleteWallet(walletId);
       navigate(Routes.wallet.index);
