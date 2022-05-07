@@ -345,6 +345,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     total,
     buttonDisabled,
     addBatchTransaction,
+    isButtonLoading,
     estimateGasLimit,
     setEstimateGasLimit,
     duplicateBatchAddresses
@@ -381,7 +382,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const { deviceConnection, deviceSdkVersion, beforeFlowStart, setIsInFlow } =
     useConnection();
 
-  const [mediumFee, setMediumFee] = useState(transactionFee);
+  const intTransactionFee = parseInt(transactionFee, 10) || 0;
+  const [mediumFee, setMediumFee] = useState(intTransactionFee);
   const [isMediumFeeLoading, setIsMediumFeeLoading] = useState(false);
   const [mediumFeeError, setMediumFeeError] = useState(false);
 
@@ -498,7 +500,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           coinDetails.coin,
           token
         ),
-        fees: transactionFee,
+        fees: intTransactionFee,
         isSendAll: maxSend,
         data: {
           gasLimit,
@@ -545,7 +547,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           <CustomSlider
             handleTransactionFeeChangeSlider={handleTransactionFeeChangeSlider}
             mediumFee={mediumFee}
-            fee={transactionFee}
+            fee={intTransactionFee}
           />
           {mediumFeeError && getFeeErrorInfo()}
         </>
@@ -560,7 +562,6 @@ const Recipient: React.FC<StepComponentProps> = props => {
           }`}
           onChange={handleTransactionFeeChange}
           type="number"
-          min="1"
           value={transactionFee}
         />
         {mediumFeeError && getFeeErrorInfo()}
@@ -751,7 +752,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           </Typography>
         </div>
         {getFeeInput()}
-        {transactionFee < lowFeePercentage * mediumFee && (
+        {intTransactionFee < lowFeePercentage * mediumFee && (
           <div style={{ textAlign: 'center' }}>
             <Typography
               className="text"
@@ -834,13 +835,15 @@ const Recipient: React.FC<StepComponentProps> = props => {
           </div>
         )}
         <CustomButton
-          disabled={buttonDisabled || sendTransaction.estimationError}
+          disabled={
+            buttonDisabled || isButtonLoading || sendTransaction.estimationError
+          }
           className={recipientContinueButton}
           onClick={() => {
             handleCheckAddress();
           }}
         >
-          {buttonDisabled ? <CircularProgress size={25} /> : 'Continue'}
+          {isButtonLoading ? <CircularProgress size={25} /> : 'Continue'}
         </CustomButton>
       </div>
     </Root>
