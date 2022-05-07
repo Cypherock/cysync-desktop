@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { erc20tokenDb, walletDb2, Wallet2, xpubDb } from '../database';
+import { erc20tokenDb, walletDb2, Wallet2, coinDb } from '../database';
 
 export interface Coin {
   name: string;
@@ -55,11 +55,11 @@ export const WalletsProvider: React.FC = ({ children }) => {
     }
 
     try {
-      const xpubRes = await xpubDb.getAll();
+      const coins = await coinDb.getAll();
       const erc20Res = await erc20tokenDb.getAll();
       const coinTypeList = new Set<string>();
-      for (const xpub of xpubRes) {
-        coinTypeList.add(xpub.coin);
+      for (const coin of coins) {
+        coinTypeList.add(coin.slug);
       }
 
       for (const erc of erc20Res) {
@@ -100,8 +100,8 @@ export const WalletsProvider: React.FC = ({ children }) => {
     walletDb2.emitter.on('update', onUpdate);
     walletDb2.emitter.on('delete', onUpdate);
 
-    xpubDb.emitter.on('insert', onUpdate);
-    xpubDb.emitter.on('delete', onUpdate);
+    coinDb.emitter.on('insert', onUpdate);
+    coinDb.emitter.on('delete', onUpdate);
 
     erc20tokenDb.emitter.on('insert', onUpdate);
     erc20tokenDb.emitter.on('delete', onUpdate);
@@ -112,8 +112,8 @@ export const WalletsProvider: React.FC = ({ children }) => {
       walletDb2.emitter.removeListener('update', onUpdate);
       walletDb2.emitter.removeListener('delete', onUpdate);
 
-      xpubDb.emitter.removeListener('insert', onUpdate);
-      xpubDb.emitter.removeListener('delete', onUpdate);
+      coinDb.emitter.removeListener('insert', onUpdate);
+      coinDb.emitter.removeListener('delete', onUpdate);
 
       erc20tokenDb.emitter.removeListener('insert', onUpdate);
       erc20tokenDb.emitter.removeListener('delete', onUpdate);

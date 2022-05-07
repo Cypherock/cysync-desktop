@@ -170,7 +170,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
 
   const handleDeleteConfirmation = async () => {
     await deleteHistory(coinDetails);
-    await deleteCoin(coinDetails.xpub, coinDetails.coin, walletId);
+    await deleteCoin(coinDetails.xpub, coinDetails.slug, walletId);
     setDeleteOpen(false);
   };
 

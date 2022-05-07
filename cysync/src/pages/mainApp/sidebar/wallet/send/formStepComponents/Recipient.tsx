@@ -373,7 +373,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.coin : coinDetails.coin;
+  const coinAbbr = token ? token.coin : coinDetails.slug;
   const coinPrice = token ? token.displayPrice : coinDetails.displayPrice;
 
   const { sendTransaction } = useSendTransactionContext();
@@ -398,7 +398,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
       }
     }
 
-    return prevInfo[coinDetails.coin];
+    return prevInfo[coinDetails.slug];
   };
 
   const lowFeePercentage = 0.5;
@@ -416,13 +416,13 @@ const Recipient: React.FC<StepComponentProps> = props => {
       }
     }
 
-    prevInfo[coinDetails.coin] = fees;
+    prevInfo[coinDetails.slug] = fees;
     localStorage.setItem('mediumFees', JSON.stringify(prevInfo));
   };
 
   useEffect(() => {
     setIsMediumFeeLoading(true);
-    getFees(coinDetails.coin)
+    getFees(coinDetails.slug)
       .then(res => {
         logger.info(`Medium Fee is ${res}`);
         setMediumFee(res + 2);
@@ -447,7 +447,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   let validatedAddresses: any[any] = [];
 
-  const isEthereum = (ALLCOINS[coinDetails.coin] || { isEth: false }).isEth;
+  const isEthereum = (ALLCOINS[coinDetails.slug] || { isEth: false }).isEth;
 
   const handleCheckAddress = () => {
     let isValid = true;
@@ -455,11 +455,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
     for (const recipient of batchRecipientData) {
       const { recipient: recipient1, id } = recipient;
-      let { coin } = coinDetails;
+      let { slug } = coinDetails;
       if (isEthereum) {
-        coin = 'eth';
+        slug = 'eth';
       }
-      const addressValid = verifyAddress(recipient1.trim(), coin);
+      const addressValid = verifyAddress(recipient1.trim(), slug);
       if (!addressValid) {
         isValid = false;
       }
@@ -492,10 +492,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
         passphraseExists: passphraseSet,
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
-        coinType: coinDetails.coin,
+        coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
           batchRecipientData,
-          coinDetails.coin,
+          coinDetails.slug,
           token
         ),
         fees: transactionFee,
@@ -556,7 +556,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
       <>
         <Input
           placeHolder={`Enter transaction fees in ${
-            COINS[coinDetails.coin.toLowerCase()].fees
+            COINS[coinDetails.slug.toLowerCase()].fees
           }`}
           onChange={handleTransactionFeeChange}
           type="number"
@@ -790,7 +790,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
                 <small>TRANSACTION FEE:</small>
                 {` ~${formatDisplayAmount(sendTransaction.approxTotalFee)} `}
                 <span className="amountCurrency">
-                  {coinDetails.coin.toUpperCase()}
+                  {coinDetails.slug.toUpperCase()}
                   &nbsp;&nbsp;&nbsp;
                 </span>
                 <span style={{ fontSize: '0.7rem' }}>

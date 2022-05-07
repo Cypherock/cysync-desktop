@@ -145,18 +145,18 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.coin : coinDetails.coin;
+  const coinAbbr = token ? token.coin : coinDetails.slug;
 
   React.useEffect(() => {
     if (!coinAddress || !receiveTransaction.verified) {
-      getReceiveAddress(coinDetails.coin, coinDetails.xpub, coinDetails.zpub)
+      getReceiveAddress(coinDetails.slug, coinDetails.xpub, coinDetails.zpub)
         .then(addr => {
           setCoinAddress(addr);
           setCoinVerified(false);
           receiveTransaction.onNewReceiveAddr(
             addr,
             selectedWallet.id,
-            coinDetails.coin
+            coinDetails.slug
           );
           return null;
         })

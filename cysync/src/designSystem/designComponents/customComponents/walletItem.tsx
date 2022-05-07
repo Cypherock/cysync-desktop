@@ -11,11 +11,11 @@ import { useNavigate } from 'react-router-dom';
 import Routes from '../../../constants/routes';
 import {
   addressDb,
+  coinDb,
   erc20tokenDb,
   receiveAddressDb,
   transactionDb,
-  walletDb2,
-  xpubDb
+  walletDb2
 } from '../../../store/database';
 import logger from '../../../utils/logger';
 import DeleteWalletIcon from '../../iconGroups/deleteWallet';
@@ -147,14 +147,14 @@ const WalletItem = (props: WalletItemProps) => {
         walletDetails: { walletId }
       } = props;
       await walletDb2.delete({id: walletId});
-      const allXpubs = await xpubDb.getByWalletId(walletId);
-      allXpubs.map(async xpub => {
-        await addressDb.deleteAll({ xpub: xpub.xpub });
+      const coins = await coinDb.getAll({walletId});
+      coins.map(async coin => {
+        await addressDb.deleteAll({ xpub: coin.xpub });
       });
       await receiveAddressDb.deleteAll({
         walletId
       });
-      await xpubDb.deleteWallet(walletId);
+      await coinDb.delete({walletId});
       await erc20tokenDb.deleteWallet(walletId);
       await transactionDb.deleteWallet(walletId);
       navigate(Routes.wallet.index);

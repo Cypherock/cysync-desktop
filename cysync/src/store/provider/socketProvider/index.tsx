@@ -11,7 +11,7 @@ import {
   receiveAddressDb,
   transactionDb,
   walletDb2,
-  xpubDb
+  coinDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
@@ -268,27 +268,27 @@ export const SocketProvider: React.FC = ({ children }) => {
           if (payload && payload.id && payload.coinType) {
             const wallet = await walletDb2.getOne({id: payload.id});
             if (wallet) {
-              const xpub = await xpubDb.getByWalletIdandCoin(
-                payload.id,
-                payload.coinType
-              );
+              const coin = await coinDb.getOne({
+                walletId: payload.id,
+                slug: payload.coinType
+              });
 
-              if (xpub) {
+              if (coin) {
                 transactionDb.insertFromFullTxn({
                   txn: payload,
-                  xpub: xpub.xpub,
+                  xpub: coin.xpub,
                   addresses: [],
                   walletId: payload.id,
                   coinType: payload.coinType,
                   addressDB: addressDb
                 });
                 if (payload.tokenAbbr) {
-                  addBalanceSyncItemFromXpub(xpub, {
+                  addBalanceSyncItemFromXpub(coin, {
                     isRefresh: true,
                     token: payload.tokenAbbr as string
                   });
                 } else {
-                  addBalanceSyncItemFromXpub(xpub, {
+                  addBalanceSyncItemFromXpub(coin, {
                     isRefresh: true
                   });
                 }
@@ -303,10 +303,10 @@ export const SocketProvider: React.FC = ({ children }) => {
                     `Updating balances of ${allTxWithSameHash.length} txn via receive address hook`
                   );
                   for (const tx of allTxWithSameHash) {
-                    const txXpub = await xpubDb.getByWalletIdandCoin(
-                      tx.walletId,
-                      tx.ethCoin || tx.coin
-                    );
+                    const txXpub = await coinDb.getOne({
+                      walletId: tx.walletId,
+                      slug: tx.ethCoin || tx.coin
+                    });
                     if (txXpub) {
                       if (payload.tokenAbbr) {
                         addBalanceSyncItemFromXpub(txXpub, {
@@ -359,10 +359,10 @@ export const SocketProvider: React.FC = ({ children }) => {
 
               // Update balance when confirmed
               if (payload.id) {
-                const xpub = await xpubDb.getByWalletIdandCoin(
-                  payload.id,
-                  payload.coinType
-                );
+                const xpub = await coinDb.getOne({
+                  walletId: payload.id,
+                  slug: payload.coinType
+                });
 
                 if (xpub) {
                   logger.verbose(
@@ -407,12 +407,12 @@ export const SocketProvider: React.FC = ({ children }) => {
       if (addressDetails.xpub) {
         xpub = addressDetails.xpub;
 
-        const walletDetailsList = await xpubDb.getAll({
+        const walletDetailsList = await coinDb.getOne({
           xpub: addressDetails.xpub
         });
 
-        if (walletDetailsList && walletDetailsList.length > 0) {
-          walletId = walletDetailsList[0].walletId;
+        if (walletDetailsList) {
+          walletId = walletDetailsList.walletId;
         }
       }
     }
@@ -497,15 +497,15 @@ export const SocketProvider: React.FC = ({ children }) => {
             payload.txn.confirmations && payload.txn.confirmation > 0;
 
           for (const address of allAddresses) {
-            const xpub = await xpubDb.getByWalletIdandCoin(
-              address.walletId,
-              payload.coinType
-            );
+            const coin = await coinDb.getOne({
+              walletId: address.walletId,
+              slug: payload.coinType
+            });
 
-            if (xpub) {
+            if (coin) {
               transactionDb.insertFromBlockbookTxn({
                 txn: payload.txn,
-                xpub: xpub.xpub,
+                xpub: coin.xpub,
                 addresses: [],
                 walletId: address.walletId,
                 coinType: payload.coinType,
@@ -513,7 +513,7 @@ export const SocketProvider: React.FC = ({ children }) => {
               });
 
               if (isConfirmed) {
-                addBalanceSyncItemFromXpub(xpub, {
+                addBalanceSyncItemFromXpub(coin, {
                   isRefresh: true
                 });
               }
@@ -549,16 +549,16 @@ export const SocketProvider: React.FC = ({ children }) => {
             logger.info(`Updating balances of ${walletIdSet.size} coins`);
 
             for (const walletId of walletIdSet) {
-              const allXpub = await xpubDb.getAll({
-                coin: payload.coinType,
+              const coins = await coinDb.getAll({
+                slug: payload.coinType,
                 walletId
               });
 
-              for (const xpub of allXpub) {
-                addBalanceSyncItemFromXpub(xpub, {
+              for (const coin of coins) {
+                addBalanceSyncItemFromXpub(coin, {
                   isRefresh: true
                 });
-                addHistorySyncItemFromXpub(xpub, {
+                addHistorySyncItemFromXpub(coin, {
                   isRefresh: true
                 });
               }

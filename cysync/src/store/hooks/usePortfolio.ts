@@ -9,7 +9,7 @@ import {
   priceDb,
   Transaction,
   transactionDb,
-  xpubDb
+  coinDb
 } from '../database';
 
 import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';
@@ -88,9 +88,9 @@ export const usePortfolio: UsePortfolio = () => {
     priceDb.emitter.on('insert', debouncedRefreshFromDB);
     priceDb.emitter.on('update', debouncedRefreshFromDB);
 
-    xpubDb.emitter.on('update', debouncedRefreshFromDB);
-    xpubDb.emitter.on('delete', debouncedRefreshFromDB);
-    xpubDb.emitter.on('delete', debouncedRefreshFromDB);
+    coinDb.emitter.on('update', debouncedRefreshFromDB);
+    coinDb.emitter.on('delete', debouncedRefreshFromDB);
+    coinDb.emitter.on('delete', debouncedRefreshFromDB);
 
     transactionDb.emitter.on('insert', debouncedRefreshFromDB);
     transactionDb.emitter.on('update', debouncedRefreshFromDB);
@@ -105,9 +105,9 @@ export const usePortfolio: UsePortfolio = () => {
       priceDb.emitter.removeListener('insert', debouncedRefreshFromDB);
       priceDb.emitter.removeListener('update', debouncedRefreshFromDB);
 
-      xpubDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      xpubDb.emitter.removeListener('delete', debouncedRefreshFromDB);
-      xpubDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      coinDb.emitter.removeListener('update', debouncedRefreshFromDB);
+      coinDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      coinDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
       transactionDb.emitter.removeListener('insert', debouncedRefreshFromDB);
       transactionDb.emitter.removeListener('update', debouncedRefreshFromDB);
@@ -146,10 +146,10 @@ export const usePortfolio: UsePortfolio = () => {
         if (token) totalBalance = new BigNumber(token.balance);
         else return null;
       } else {
-        const xpub = await xpubDb.getByWalletIdandCoin(wallet, coinType);
-        if (xpub)
+        const coin = await coinDb.getOne({ walletId: wallet, slug: coinType });
+        if (coin)
           totalBalance = new BigNumber(
-            xpub.totalBalance ? xpub.totalBalance.balance : 0
+            coin.totalBalance ? coin.totalBalance : 0
           );
         else return null;
       }
@@ -171,11 +171,11 @@ export const usePortfolio: UsePortfolio = () => {
           totalBalance = totalBalance.plus(token.balance);
         }
       } else {
-        const allCoins = await xpubDb.getByCoin(coinType);
-        if (!allCoins || allCoins.length === 0) return null;
-        for (const xpub of allCoins) {
+        const allCoins = await coinDb.getAll({ slug: coinType });
+        if (allCoins.length === 0) return null;
+        for (const coin of allCoins) {
           totalBalance = totalBalance.plus(
-            xpub.totalBalance ? xpub.totalBalance.balance : 0
+            coin.totalBalance ? coin.totalBalance : 0
           );
         }
       }
@@ -355,10 +355,10 @@ export const usePortfolio: UsePortfolio = () => {
             if (token) totalBalance = new BigNumber(token.balance);
             else continue;
           } else {
-            const xpub = await xpubDb.getByWalletIdandCoin(walletId, coinType);
+            const xpub = await coinDb.getOne({ walletId, slug: coinType });
             if (xpub)
               totalBalance = new BigNumber(
-                xpub.totalBalance ? xpub.totalBalance.balance : 0
+                xpub.totalBalance ? xpub.totalBalance : 0
               );
             else continue;
           }
@@ -369,11 +369,11 @@ export const usePortfolio: UsePortfolio = () => {
             totalBalance = totalBalance.plus(token.balance);
           }
         } else {
-          const coinsFromDB = await xpubDb.getByCoin(coinType);
-          if (coinsFromDB.length === 0) continue;
-          for (const c of coinsFromDB) {
+          const coins = await coinDb.getAll({ slug: coinType });
+          if (coins.length === 0) continue;
+          for (const coin of coins) {
             totalBalance = totalBalance.plus(
-              c.totalBalance ? c.totalBalance.balance : 0
+              coin.totalBalance ? coin.totalBalance : 0
             );
           }
         }

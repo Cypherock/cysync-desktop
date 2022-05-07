@@ -1,5 +1,5 @@
 import { ALLCOINS as COINS, Erc20CoinData } from '@cypherock/communication';
-import { Xpub } from '@cypherock/database';
+import { Coin2 } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';
@@ -15,7 +15,7 @@ export interface UseHistoryGetAllParams {
 
 export interface UseHistoryValues {
   getAll: (params: UseHistoryGetAllParams) => Promise<DisplayTransaction[]>;
-  deleteCoinHistory: (xpub: Xpub) => Promise<void>;
+  deleteCoinHistory: (coin: Coin2) => Promise<void>;
 }
 
 export type UseHistory = () => UseHistoryValues;
@@ -141,8 +141,8 @@ export const useHistory: UseHistory = () => {
     return latestTransactionsWithPrice;
   };
 
-  const deleteCoinHistory = (xpub: Xpub) => {
-    return transactionDb.deleteByCoin(xpub.walletId, xpub.coin);
+  const deleteCoinHistory = (coin: Coin2) => {
+    return transactionDb.deleteByCoin(coin.walletId, coin.slug);
   };
 
   return {

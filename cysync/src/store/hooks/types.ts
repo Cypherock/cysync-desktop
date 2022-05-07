@@ -2,12 +2,12 @@ import {
   ERC20Token,
   InputOutput,
   Transaction,
-  Xpub
-} from '@cypherock/database';
+  Coin2
+} from '../database/databaseInit';
 import BigNumber from 'bignumber.js';
 import PropTypes from 'prop-types';
 
-export interface DisplayCoin extends Xpub {
+export interface DisplayCoin extends Coin2 {
   displayValue: string;
   displayPrice: string;
   displayBalance: string;

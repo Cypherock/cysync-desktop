@@ -52,7 +52,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
         walletId: selectedWallet.id,
-        coinType: coinDetails.coin,
+        coinType: coinDetails.slug,
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
         contractAbbr: token ? token.coin : undefined,

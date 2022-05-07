@@ -1,4 +1,4 @@
-import { Xpub } from '@cypherock/database';
+import { Coin2 } from '@cypherock/database';
 import PropTypes from 'prop-types';
 
 export interface OneCoinProps {
@@ -10,7 +10,7 @@ export interface OneCoinProps {
   decimal: number;
   isEmpty: boolean;
   deleteCoin: (xpub: string, coin: string, walletId: string) => Promise<void>;
-  deleteHistory: (xpub: Xpub) => Promise<void>;
+  deleteHistory: (coin: Coin2) => Promise<void>;
   walletId: string;
 }
 

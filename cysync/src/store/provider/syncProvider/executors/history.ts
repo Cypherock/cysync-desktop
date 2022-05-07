@@ -4,7 +4,7 @@ import {
   ERC20TOKENS,
   EthCoinData
 } from '@cypherock/communication';
-import { Transaction, Xpub } from '@cypherock/database';
+import { Transaction, Coin2 } from '@cypherock/database';
 import {
   batch as batchServer,
   eth as ethServer,
@@ -23,7 +23,7 @@ import {
   addressDb,
   erc20tokenDb,
   transactionDb,
-  xpubDb
+  coinDb
 } from '../../../database';
 import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
 
@@ -112,43 +112,49 @@ export const processResponses = async (
 
     let balance = new BigNumber(response.data.balance);
     const unconfirmedBalance = new BigNumber(response.data.unconfirmedBalance);
-    const xpub = await xpubDb.getByWalletIdandCoin(item.walletId, item.coinType);
+    const coin = await coinDb.getOne({
+      walletId: item.walletId,
+      slug: item.coinType
+    });
 
-    if (!xpub) {
+    if (!coin) {
       logger.warn('Cannot find xpub while fetching txn', { item });
     } else {
       if (item.zpub) {
-        await xpubDb.updateZpubBalance(item.xpub, item.coinType, {
-          balance: balance.toString(),
-          unconfirmedBalance: unconfirmedBalance.toString()
-        });
-        if (xpub.xpubBalance) {
-          if (xpub.xpubBalance.balance) {
-            balance = balance.plus(xpub.xpubBalance.balance);
-          }
-          if (xpub.xpubBalance.unconfirmedBalance) {
-            balance = balance.plus(xpub.xpubBalance.unconfirmedBalance);
-          }
+        await coinDb.updateZpubBalance(
+          item.xpub,
+          item.coinType,
+          balance.toString(),
+          unconfirmedBalance.toString()
+        );
+        if (coin.xpubBalance) {
+          balance = balance.plus(coin.xpubBalance);
+        }
+        if (coin.xpubUnconfirmedBalance) {
+          balance = balance.plus(coin.xpubUnconfirmedBalance);
         }
       } else {
-        await xpubDb.updateBalance(item.xpub, item.coinType, {
-          balance: balance.toString(),
-          unconfirmedBalance: unconfirmedBalance.toString()
-        });
-        if (xpub.zpubBalance) {
-          if (xpub.zpubBalance.balance) {
-            balance = balance.plus(xpub.zpubBalance.balance);
-          }
-          if (xpub.zpubBalance.unconfirmedBalance) {
-            balance = balance.plus(xpub.zpubBalance.unconfirmedBalance);
-          }
+        await coinDb.updateXpubBalance(
+          item.xpub,
+          item.coinType,
+          balance.toString(),
+          unconfirmedBalance.toString()
+        );
+
+        if (coin.zpubBalance) {
+          balance = balance.plus(coin.zpubBalance);
+        }
+        if (coin.zpubUnconfirmedBalance) {
+          balance = balance.plus(coin.zpubUnconfirmedBalance);
         }
       }
 
-      await xpubDb.updateTotalBalance(item.xpub, item.coinType, {
-        balance: balance.toString(),
-        unconfirmedBalance: unconfirmedBalance.toString()
-      });
+      await coinDb.updateTotalBalance(
+        item.xpub,
+        item.coinType,
+        balance.toString(),
+        unconfirmedBalance.toString()
+      );
     }
 
     if (response.data.transactions) {
@@ -391,11 +397,11 @@ export const processResponses = async (
             isRefresh: true
           })
         );
-        options.addPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
+        options.addPriceSyncItemFromXpub({ slug: tokenName } as Coin2, {
           isRefresh: true,
           module: item.module
         });
-        options.addLatestPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
+        options.addLatestPriceSyncItemFromXpub({ slug: tokenName } as Coin2, {
           isRefresh: true,
           module: 'default'
         });

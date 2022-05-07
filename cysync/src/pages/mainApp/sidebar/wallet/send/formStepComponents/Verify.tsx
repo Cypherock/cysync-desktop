@@ -108,7 +108,7 @@ const Verify = (props: any) => {
 
   const { connected } = useNetwork();
 
-  const coinAbbr = token ? token.coin : coinDetails.coin;
+  const coinAbbr = token ? token.coin : coinDetails.slug;
 
   const { sendTransaction } = useSendTransactionContext();
 
@@ -192,7 +192,7 @@ const Verify = (props: any) => {
               label="Transaction Fees"
               text={`~ ${
                 sendTransaction.totalFees
-              } ${coinDetails.coin.toUpperCase()} ( $${formatDisplayAmount(
+              } ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
                 sendTransaction.totalFees *
                   parseFloat(coinDetails.displayPrice),
                 2,
@@ -239,7 +239,7 @@ const Verify = (props: any) => {
                 label="Transaction Fees"
                 text={`~ ${
                   sendTransaction.totalFees
-                } ${coinDetails.coin.toUpperCase()} ~( $${
+                } ${coinDetails.slug.toUpperCase()} ~( $${
                   sendTransaction.totalFees *
                   parseFloat(coinDetails.displayPrice)
                 })`}

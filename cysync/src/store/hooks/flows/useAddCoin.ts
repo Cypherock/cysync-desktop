@@ -9,7 +9,7 @@ import newWallet from '@cypherock/wallet';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { addressDb, Xpub, xpubDb } from '../../database';
+import { addressDb, coinDb, Coin2 } from '../../database';
 import { useI18n, useSync } from '../../provider';
 
 function sleep(ms: number) {
@@ -17,7 +17,7 @@ function sleep(ms: number) {
 }
 
 export interface AddCoinStatus {
-  xpub: Xpub;
+  coin: Coin2;
   name: string;
   status: -1 | 0 | 1 | 2;
 }
@@ -123,17 +123,17 @@ export const useAddCoin: UseAddCoin = () => {
   };
 
   // This starts the adding coin task in a queue similar to `syncProvider`.
-  const setUpCoinWallets = async (xpubList: Xpub[]) => {
+  const setUpCoinWallets = async (coinList: Coin2[]) => {
     const coinStatus: AddCoinStatus[] = [];
 
     let i = 0;
-    for (const xpub of xpubList) {
-      const coin = COINS[xpub.coin];
-      if (!coin) {
-        throw new Error(`Cannot find coinType: ${xpub.coin}`);
+    for (const coin of coinList) {
+      const coinData = COINS[coin.slug];
+      if (!coinData) {
+        throw new Error(`Cannot find coinType: ${coin.slug}`);
       }
 
-      coinStatus.push({ xpub, name: coin.name, status: i === 0 ? 1 : 0 });
+      coinStatus.push({ coin, name: coinData.name, status: i === 0 ? 1 : 0 });
       i += 1;
     }
 
@@ -155,16 +155,16 @@ export const useAddCoin: UseAddCoin = () => {
 
     if (addCoinIndex > -1 && addCoinIndex < coinStatus.length) {
       const currentCoin = coinStatus[addCoinIndex];
-      const { xpub } = currentCoin;
+      const { coin } = currentCoin;
       try {
         const wallet = newWallet({
-          coinType: xpub.coin,
-          xpub: xpub.xpub,
-          zpub: xpub.zpub,
+          coinType: coin.slug,
+          xpub: coin.xpub,
+          zpub: coin.zpub,
           addressDB: addressDb
         });
         await wallet.setupNewWallet();
-        await xpubDb.insert(xpub);
+        await coinDb.insert(coin);
         coinStatus[addCoinIndex].status = 2;
       } catch (error) {
         coinStatus[addCoinIndex].status = -1;
@@ -172,7 +172,7 @@ export const useAddCoin: UseAddCoin = () => {
         logger.error(error);
         const remainingCoins = addCoinStatus
           .slice(addCoinIndex)
-          .map(elem => elem.xpub.coin);
+          .map(elem => elem.coin.slug);
         if (error.isAxiosError && !error.response) {
           latestAllNetFailedCoins = [...allNetFailedCoins, ...remainingCoins];
           latestAllFailedCoins = [...allFailedCoins, ...remainingCoins];
@@ -182,8 +182,8 @@ export const useAddCoin: UseAddCoin = () => {
           await sleep(1000);
           isFailed = true;
         } else {
-          latestAllInternalFailedCoins = [...allInternalFailedCoins, xpub.coin];
-          latestAllFailedCoins = [...allFailedCoins, xpub.coin];
+          latestAllInternalFailedCoins = [...allInternalFailedCoins, coin.slug];
+          latestAllFailedCoins = [...allFailedCoins, coin.slug];
 
           setAllInternalFailedCoins(latestAllInternalFailedCoins);
           setAllFailedCoins(latestAllFailedCoins);
@@ -224,8 +224,8 @@ export const useAddCoin: UseAddCoin = () => {
 
       const filteredXpubList = coinStatus.filter(elem => elem.status === 2);
       for (const coin of filteredXpubList) {
-        sync.addCoinTask(coin.xpub, {
-          module: `${coin.xpub.walletId}-${coin.xpub.coin}`
+        sync.addCoinTask(coin.coin, {
+          module: `${coin.coin.walletId}-${coin.coin.slug}`
         });
       }
 

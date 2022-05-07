@@ -1,5 +1,6 @@
 import {
   AddressDB,
+  CoinDb2,
   DeviceDB,
   DeviceDb2,
   Erc20DB,
@@ -33,6 +34,7 @@ export const deviceDb = new DeviceDB(dbPath);
 
 export const deviceDb2 = new DeviceDb2();
 export const walletDb2 = new WalletDb2();
+export const coinDb = new CoinDb2();
 
 /**
  * Loads the data from disk. To be used only for encrypted databases.
@@ -40,5 +42,6 @@ export const walletDb2 = new WalletDb2();
 export const loadDatabases = async () => {
   await xpubDb.loadData();
 };
+
 
 export * from '@cypherock/database';
