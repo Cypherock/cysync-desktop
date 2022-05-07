@@ -207,6 +207,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const { sendTransaction } = useSendTransactionContext();
   const [activeStep, setActiveStep] = useState(0);
   const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [maximum, setMaximum] = React.useState(false);
   const [gasLimit, setGasLimit] = React.useState(21000);
   const [estimateGasLimit, setEstimateGasLimit] = React.useState(true);
@@ -237,7 +238,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [total, setTotal] = React.useState(0);
 
   // Set a constant fee default value for each coin in case the api call fails. Regularly update the file.
-  const [transactionFee, setTransactionFee] = React.useState(75);
+  const [transactionFee, setTransactionFee] = React.useState('75');
 
   const { coinDetails } = useCurrentCoin();
   const { token } = useTokenContext();
@@ -274,7 +275,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       coinDetails.zpub,
       coinDetails.coin,
       changeFormatOfOutputList(batchRecipientData, coinDetails.coin, token),
-      transactionFee,
+      parseInt(transactionFee, 10) || 0,
       maxSend,
       {
         gasLimit,
@@ -292,14 +293,19 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       !(
         estimateGasLimit &&
         coin instanceof EthCoinData &&
-        token &&
         batchRecipientData.length > 0 &&
         batchRecipientData[0].recipient.length === 42
       )
     ) {
       return;
     }
-    setButtonDisabled(true);
+
+    if (!token) {
+      setGasLimit(21000);
+      return;
+    }
+
+    setIsButtonLoading(true);
     const wallet = new EthereumWallet(coinDetails.xpub, coin);
     const fromAddress = wallet.address;
     const toAddress = batchRecipientData[0].recipient.trim();
@@ -326,7 +332,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     if (estimatedLimit) {
       setGasLimit(estimatedLimit);
     }
-    setButtonDisabled(false);
+    setIsButtonLoading(false);
   };
 
   const debouncedCaclGasLimit = useDebouncedFunction(triggerCalcGasLimit, 500);
@@ -357,6 +363,11 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   useEffect(() => {
     debouncedCaclFee();
+    if (!transactionFee || (parseInt(transactionFee, 10) || 0) <= 0) {
+      setButtonDisabled(true);
+    } else {
+      setButtonDisabled(false);
+    }
   }, [transactionFee, batchRecipientData]);
 
   useEffect(() => {
@@ -530,11 +541,11 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   };
 
   const handleTransactionFeeChange = (e: any) => {
-    setTransactionFee(+e.target.value);
+    setTransactionFee(e.target.value);
   };
 
   const handleTransactionFeeChangeSlider = (fee: number) => {
-    setTransactionFee(fee);
+    setTransactionFee(fee.toString());
   };
 
   const handleNext = () => {
@@ -606,7 +617,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
             handleClose,
             estimateGasLimit,
             setEstimateGasLimit,
-            duplicateBatchAddresses
+            duplicateBatchAddresses,
+            isButtonLoading
           }}
         />
       </div>
