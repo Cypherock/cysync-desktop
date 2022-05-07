@@ -266,7 +266,7 @@ export const SocketProvider: React.FC = ({ children }) => {
         try {
           logger.info('Received receive txn hook', { payload });
           if (payload && payload.id && payload.coinType) {
-            const wallet = await walletDb2.get(payload.id);
+            const wallet = await walletDb2.getOne({id: payload.id});
             if (wallet) {
               const xpub = await xpubDb.getByWalletIdandCoin(
                 payload.id,

@@ -146,7 +146,7 @@ const WalletItem = (props: WalletItemProps) => {
       const {
         walletDetails: { walletId }
       } = props;
-      await walletDb2.delete(walletId);
+      await walletDb2.delete({id: walletId});
       const allXpubs = await xpubDb.getByWalletId(walletId);
       allXpubs.map(async xpub => {
         await addressDb.deleteAll({ xpub: xpub.xpub });

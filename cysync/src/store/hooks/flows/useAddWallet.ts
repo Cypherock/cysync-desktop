@@ -151,7 +151,7 @@ export const useAddWallet: UseAddWallet = () => {
           return;
         }
 
-        const walletWithSameId = await walletDb2.get(walletDetails.id);
+        const walletWithSameId = await walletDb2.getOne({id: walletDetails.id});
         console.log("walletwithsameid", walletWithSameId);
 
         if (walletWithSameId) {
@@ -246,7 +246,7 @@ export const useAddWallet: UseAddWallet = () => {
         throw new Error('New Wallet details are missing');
       }
 
-      const walletWithSameId = await walletDb2.get(walletId);
+      const walletWithSameId = await walletDb2.getOne({id: walletId});
 
       if (!(walletWithSameId)) {
         throw new Error('Could not find wallet with same ID');
