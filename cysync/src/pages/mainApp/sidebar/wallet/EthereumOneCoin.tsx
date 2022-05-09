@@ -25,7 +25,7 @@ import ICONS from '../../../../designSystem/iconGroups/iconConstants';
 import {
   sendAddressDb,
   tokenDb,
-  receiveAddressDb,
+  receiveAddressDb2,
   transactionDb
 } from '../../../../store/database';
 import { useToken } from '../../../../store/hooks';
@@ -231,7 +231,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
     await deleteCoin(coinDetails.xpub, coinDetails.slug, walletId);
     tokenList.map(async token => {
       await sendAddressDb.delete({  coinType: token, walletId });
-      await receiveAddressDb.deleteAll({ walletId, coinType: token });
+      await receiveAddressDb2.delete({ walletId, coinType: token });
       await transactionDb.deleteByCoin(walletId, token);
     });
     await tokenDb.delete({

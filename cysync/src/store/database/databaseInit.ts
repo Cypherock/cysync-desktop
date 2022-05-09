@@ -14,7 +14,8 @@ import {
   WalletDb2,
   XpubDB,
   TokenDb2,
-  SendAddressDb
+  SendAddressDb,
+  ReceiveAddressDb2
 } from '@cypherock/database';
 
 import { getAnalyticsId } from '../../utils/analytics';
@@ -39,6 +40,7 @@ export const walletDb2 = new WalletDb2();
 export const coinDb = new CoinDb2();
 export const tokenDb = new TokenDb2();
 export const sendAddressDb = new SendAddressDb();
+export const receiveAddressDb2 = new ReceiveAddressDb2();
 /**
  * Loads the data from disk. To be used only for encrypted databases.
  */

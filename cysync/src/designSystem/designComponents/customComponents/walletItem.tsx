@@ -13,7 +13,7 @@ import {
   sendAddressDb,
   coinDb,
   tokenDb,
-  receiveAddressDb,
+  receiveAddressDb2,
   transactionDb,
   Wallet2,
   walletDb2
@@ -149,7 +149,7 @@ const WalletItem = (props: WalletItemProps) => {
       } = props;
       await walletDb2.delete({ id: walletId });
       await sendAddressDb.delete({ walletId});
-      await receiveAddressDb.deleteAll({
+      await receiveAddressDb2.delete({
         walletId
       });
       await coinDb.delete({ walletId });

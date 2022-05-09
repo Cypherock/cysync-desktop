@@ -8,7 +8,7 @@ import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
   sendAddressDb,
-  receiveAddressDb,
+  receiveAddressDb2,
   transactionDb,
   walletDb2,
   coinDb,
@@ -205,7 +205,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       }
     }
 
-    const allReceiveAddr = await receiveAddressDb.getAll();
+    const allReceiveAddr = await receiveAddressDb2.getAll();
 
     for (const receiveAddr of allReceiveAddr) {
       const coin = COINS[receiveAddr.coinType];
@@ -241,7 +241,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       }
     }
 
-    const allReceiveAddr = await receiveAddressDb.getAll();
+    const allReceiveAddr = await receiveAddressDb2.getAll();
 
     for (const receiveAddr of allReceiveAddr) {
       const coin = COINS[receiveAddr.coinType];

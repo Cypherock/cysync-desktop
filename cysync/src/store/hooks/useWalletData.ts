@@ -7,7 +7,7 @@ import {
   coinDb,
   getLatestPriceForCoin,
   priceDb,
-  receiveAddressDb,
+  receiveAddressDb2,
   Coin2
 } from '../database';
 
@@ -190,7 +190,7 @@ export const useWalletData: UseWalletData = () => {
     walletId: string
   ) => {
     await sendAddressDb.delete({ walletId, coinType: coin });
-    await receiveAddressDb.deleteAll({ walletId, coinType: coin });
+    await receiveAddressDb2.delete({ walletId, coinType: coin });
     await coinDb.delete({xpub, slug: coin});
     return getAllCoinsFromWallet();
   };
