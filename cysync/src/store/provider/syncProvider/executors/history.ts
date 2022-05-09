@@ -117,7 +117,7 @@ export const processResponses = async (
     } else {
       if (item.zpub) {
         await coinDb.updateZpubBalance(
-          item.xpub,
+          item.zpub,
           item.coinType,
           balance.toString(),
           unconfirmedBalance.toString()

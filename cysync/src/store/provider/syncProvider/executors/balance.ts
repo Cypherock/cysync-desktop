@@ -83,8 +83,14 @@ export const processResponses = async (
     const balanceRes = responses[0];
 
     const balance = new BigNumber(balanceRes.data);
+    console.log('coin balance: ', item, balance.toString());
 
-    await coinDb.updateXpubBalance(item.xpub, item.coinType, balance.toString(), '0');
+    await coinDb.updateTotalBalance(
+      item.xpub,
+      item.coinType,
+      balance.toString(),
+      '0'
+    );
   } else if (coin instanceof Erc20CoinData) {
     if (!item.ethCoin) {
       throw new Error(
@@ -98,6 +104,7 @@ export const processResponses = async (
       const balanceRes = responses[0];
 
       const balance = new BigNumber(balanceRes.data);
+      console.log('update token', item, balance);
       await tokenDb.updateBalance(
         item.walletId,
         item.coinType,
