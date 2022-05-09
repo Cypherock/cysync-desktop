@@ -313,7 +313,15 @@ const OneCoin: React.FC<OneCoinProps> = ({
         </Grid>
         <Grid item xs={1} className={classes.alignCenterCenter}>
           <CustomIconButton title="Delete Coin" onClick={handleDeleteOpen}>
-            <Icon size={20} viewBox="0 0 18 18" iconGroup={<Dustbin />} />
+            <Icon
+              style={{
+                display: 'inline-block',
+                verticalAlign: 'middle'
+              }}
+              size={20}
+              viewBox="0 0 18 18"
+              iconGroup={<Dustbin />}
+            />
           </CustomIconButton>
         </Grid>
       </Root>
