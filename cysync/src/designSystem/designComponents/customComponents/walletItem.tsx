@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../constants/routes';
 import {
-  addressDb,
+  sendAddressDb,
   coinDb,
   tokenDb,
   receiveAddressDb,
@@ -148,10 +148,7 @@ const WalletItem = (props: WalletItemProps) => {
         walletDetails: { id: walletId }
       } = props;
       await walletDb2.delete({ id: walletId });
-      const coins = await coinDb.getAll({ walletId });
-      coins.map(async coin => {
-        await addressDb.deleteAll({ xpub: coin.xpub });
-      });
+      await sendAddressDb.delete({ walletId});
       await receiveAddressDb.deleteAll({
         walletId
       });

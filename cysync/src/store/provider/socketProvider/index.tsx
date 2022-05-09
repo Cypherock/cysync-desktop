@@ -7,11 +7,12 @@ import io, { Socket } from 'socket.io-client';
 import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
-  addressDb,
+  sendAddressDb,
   receiveAddressDb,
   transactionDb,
   walletDb2,
-  coinDb
+  coinDb,
+  addressDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
@@ -401,20 +402,14 @@ export const SocketProvider: React.FC = ({ children }) => {
     let walletId: string | undefined;
     let xpub: string | undefined;
 
-    const addressDetailsList = await addressDb.getAll({ address, coinType });
-    if (addressDetailsList && addressDetailsList.length > 0) {
-      const addressDetails = addressDetailsList[0];
-      if (addressDetails.xpub) {
-        xpub = addressDetails.xpub;
-
-        const walletDetailsList = await coinDb.getOne({
-          xpub: addressDetails.xpub
-        });
-
-        if (walletDetailsList) {
-          walletId = walletDetailsList.walletId;
-        }
-      }
+    const addressDetails = await sendAddressDb.getOne({ address, coinType });
+    if (addressDetails) {
+      walletId = addressDetails.walletId;
+      const coinDetails = await coinDb.getOne({
+        walletId,
+        slug: coinType
+      });
+      xpub = coinDetails.xpub;
     }
 
     return { xpub, walletId };

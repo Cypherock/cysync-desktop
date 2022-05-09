@@ -14,7 +14,7 @@ import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { addressDb, transactionDb } from '../../database';
+import { coinDb, sendAddressDb, transactionDb } from '../../database';
 import { useI18n } from '../../provider';
 
 export const changeFormatOfOutputList = (
@@ -241,8 +241,18 @@ export const useSendTransaction: UseSendTransaction = () => {
         setSendMaxAmount(Number(amt));
       });
 
+      const { walletId } = await coinDb.getOne({ xpub: xpub, slug: coinType });
       sendTransaction
-        .calcApproxFee(xpub, zpub, coinType, outputList, fees, isSendAll, data)
+        .calcApproxFee(
+          xpub,
+          zpub,
+          walletId,
+          coinType,
+          outputList,
+          fees,
+          isSendAll,
+          data
+        )
         .then(() => {
           setEstimationError(false);
           logger.info('EstimateFee: Completed', { coinType });
@@ -564,7 +574,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         await sendTransaction.run({
           connection,
           sdkVersion,
-          addressDB: addressDb,
+          sendAddressDB: sendAddressDb,
           walletId,
           pinExists,
           passphraseExists,

@@ -11,7 +11,7 @@ import QRCode from 'qrcode';
 import React, { useState } from 'react';
 
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
-import { addressDb } from '../../../../../../store/database';
+import { sendAddressDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
   useReceiveTransactionContext,
@@ -104,7 +104,8 @@ const Root = styled('div')(({ theme }) => ({
 const getReceiveAddress = async (
   coinType: string,
   xpub: string,
-  zpub?: string
+  walletId: string,
+  zpub?: string,
 ) => {
   let receiveAddress = '';
   let w;
@@ -116,12 +117,12 @@ const getReceiveAddress = async (
   }
 
   if (coin.isEth) {
-    w = wallet({ coinType, xpub, zpub, addressDB: addressDb });
+    w = wallet({ coinType, xpub, walletId, zpub, sendAddressDB: sendAddressDb });
     receiveAddress = (await w.newReceiveAddress()).toUpperCase();
     // To make the first x in lowercase
     receiveAddress = `0x${receiveAddress.slice(2)}`;
   } else {
-    w = wallet({ coinType, xpub, zpub, addressDB: addressDb });
+    w = wallet({ coinType, xpub, walletId, zpub, sendAddressDB: sendAddressDb });
     receiveAddress = await w.newReceiveAddress();
   }
   return receiveAddress;
@@ -149,7 +150,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   React.useEffect(() => {
     if (!coinAddress || !receiveTransaction.verified) {
-      getReceiveAddress(coinDetails.slug, coinDetails.xpub, coinDetails.zpub)
+      getReceiveAddress(coinDetails.slug, coinDetails.xpub, coinDetails.walletId, coinDetails.zpub, )
         .then(addr => {
           setCoinAddress(addr);
           setCoinVerified(false);

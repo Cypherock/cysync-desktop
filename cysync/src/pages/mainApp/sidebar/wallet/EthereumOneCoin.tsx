@@ -23,7 +23,7 @@ import DeleteCoinIcon from '../../../../designSystem/iconGroups/deleteCoin';
 import Dustbin from '../../../../designSystem/iconGroups/dustbin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
 import {
-  addressDb,
+  sendAddressDb,
   tokenDb,
   receiveAddressDb,
   transactionDb
@@ -230,7 +230,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
     await deleteHistory(coinDetails);
     await deleteCoin(coinDetails.xpub, coinDetails.slug, walletId);
     tokenList.map(async token => {
-      await addressDb.deleteAll({ xpub: coinDetails.xpub, coinType: token });
+      await sendAddressDb.delete({  coinType: token, walletId });
       await receiveAddressDb.deleteAll({ walletId, coinType: token });
       await transactionDb.deleteByCoin(walletId, token);
     });
