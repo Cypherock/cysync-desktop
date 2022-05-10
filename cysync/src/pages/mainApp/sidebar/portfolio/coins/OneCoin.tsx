@@ -77,7 +77,7 @@ const OneCoin: React.FC<OneCoinProps> = props => {
   const color = ['#DB953C', '#328332', '#F3BA2F'];
 
   const onClick = () => {
-    navigate(`${Routes.transactions.index}?coin=${coinInitial.toLowerCase()}`);
+    navigate(`${Routes.transactions.index}?slug=${coinInitial.toLowerCase()}`);
   };
 
   const coin = COINS[coinInitial];

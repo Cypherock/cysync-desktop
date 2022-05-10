@@ -63,7 +63,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
       }
 
       for (const erc of erc20Res) {
-        coinTypeList.add(erc.coin);
+        coinTypeList.add(erc.slug);
       }
 
       const coinList: Coin[] = [];

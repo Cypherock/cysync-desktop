@@ -122,9 +122,10 @@ const Transaction = () => {
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    const coin = query.get('coin');
+    const coin = query.get('slug');
     const walletId = query.get('wallet');
-
+    console.log('query', location.search , allCoins);
+    
     if (coin) {
       const index = allCoins.findIndex(
         elem => elem.abbr.toLowerCase() === coin.toLowerCase()
@@ -218,7 +219,7 @@ const Transaction = () => {
           date={new Date(data.confirmed).toLocaleDateString()}
           time={new Date(data.confirmed).toLocaleTimeString()}
           walletName={data.walletName}
-          initial={data.coin.toUpperCase()}
+          initial={data.slug.toUpperCase()}
           amount={data.displayAmount}
           value={new BigNumber(data.displayValue).toFixed(2)}
           result={data.sentReceive}

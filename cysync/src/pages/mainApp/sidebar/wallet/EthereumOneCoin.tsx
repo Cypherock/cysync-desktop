@@ -266,7 +266,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
       navigate(
         `${
           Routes.transactions.index
-        }?coin=${initial.toLowerCase()}&wallet=${walletId}`
+        }?slug=${initial.toLowerCase()}&wallet=${walletId}`
       );
     }
   };

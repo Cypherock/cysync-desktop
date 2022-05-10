@@ -1,5 +1,6 @@
 import { ALLCOINS as COINS, Erc20CoinData } from '@cypherock/communication';
 import { Coin2 } from '@cypherock/database';
+import { TxQueryOptions } from '@cypherock/database/dist/dbs2/transaction';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';
@@ -26,12 +27,12 @@ export const useHistory: UseHistory = () => {
     walletId,
     coinType
   }) => {
-    const query: any = { excludeFees: true, sinceDate };
+    const query : TxQueryOptions = { excludeFees: true, sinceDate };
     if (walletId) {
-      query.id = walletId;
+      query.walletId = walletId;
     }
     if (coinType) {
-      query.coin = coinType;
+      query.slug = coinType;
     }
     const res = await transactionDb2.getAllTXns(query, {
       sort: 'confirmed',
@@ -42,14 +43,14 @@ export const useHistory: UseHistory = () => {
 
     const allUniqueCoins = new Set<string>();
     for (const txn of res) {
-      allUniqueCoins.add(txn.coin);
+      allUniqueCoins.add(txn.slug);
     }
 
     const latestPrices = await getLatestPriceForCoins([...allUniqueCoins]);
 
     // Make all the conversions here. [ex: Satoshi to BTC]
     for (const txn of res) {
-      const coin = COINS[txn.coin.toLowerCase()];
+      const coin = COINS[txn.slug.toLowerCase()];
       const newTxn: DisplayTransaction = {
         ...txn,
         coinDecimal: coin.decimal,
@@ -66,7 +67,7 @@ export const useHistory: UseHistory = () => {
       let outputs: DisplayInputOutput[] = [];
 
       if (!coin) {
-        logger.warn(`Cannot find coinType: ${newTxn.coin}`);
+        logger.warn(`Cannot find coinType: ${newTxn.slug}`);
         continue;
       }
 
@@ -115,7 +116,7 @@ export const useHistory: UseHistory = () => {
       const total = new BigNumber(txn.total || 0).dividedBy(coin.multiplier);
 
       const value = amount.multipliedBy(
-        latestPrices[txn.coin.toLowerCase()] || 0
+        latestPrices[txn.slug.toLowerCase()] || 0
       );
 
       newTxn.displayAmount = amount.toString();
