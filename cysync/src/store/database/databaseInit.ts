@@ -9,14 +9,14 @@ import {
   PassEncrypt,
   PriceDB,
   ReceiveAddressDB,
+  ReceiveAddressDb2,
+  SendAddressDb,
+  TokenDb2,
   TransactionDB,
+  TransactionDb2,
   WalletDB,
   WalletDb2,
-  XpubDB,
-  TokenDb2,
-  SendAddressDb,
-  ReceiveAddressDb2,
-  TransactionDb2
+  XpubDB
 } from '@cypherock/database';
 
 import { getAnalyticsId } from '../../utils/analytics';
@@ -38,7 +38,7 @@ export const deviceDb = new DeviceDB(dbPath);
 
 export const deviceDb2 = new DeviceDb2();
 export const walletDb2 = new WalletDb2();
-export const coinDb = new CoinDb2();
+export const coinDb = new CoinDb2(passEnDb);
 export const tokenDb = new TokenDb2();
 export const sendAddressDb = new SendAddressDb();
 export const receiveAddressDb2 = new ReceiveAddressDb2();
@@ -49,6 +49,5 @@ export const transactionDb2 = new TransactionDb2();
 export const loadDatabases = async () => {
   await xpubDb.loadData();
 };
-
 
 export * from '@cypherock/database';
