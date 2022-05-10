@@ -5,7 +5,7 @@ import {
   DeviceErrorType,
   EthCoinData
 } from '@cypherock/communication';
-import { InputOutput, Transaction } from '@cypherock/database';
+import { InputOutput2, Transaction2 , IOtype } from '@cypherock/database';
 import { TransactionSender } from '@cypherock/protocols';
 import Server from '@cypherock/server-wrapper';
 import { WalletError, WalletErrorType } from '@cypherock/wallet';
@@ -14,7 +14,7 @@ import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { coinDb, sendAddressDb, transactionDb } from '../../database';
+import { coinDb, sendAddressDb, transactionDb2 } from '../../database';
 import { useI18n } from '../../provider';
 
 export const changeFormatOfOutputList = (
@@ -630,11 +630,11 @@ export const useSendTransaction: UseSendTransaction = () => {
         throw new Error(`Cannot find coinType: ${coin}`);
       }
 
-      let tx: Transaction;
+      let tx: Transaction2;
       let amount = new BigNumber(0);
       let fees = new BigNumber(0);
-      const formattedInputs: InputOutput[] = [];
-      const formattedOutputs: InputOutput[] = [];
+      const formattedInputs: InputOutput2[] = [];
+      const formattedOutputs: InputOutput2[] = [];
 
       if (totalFees) {
         fees = new BigNumber(totalFees).multipliedBy(coinObj.multiplier);
@@ -646,9 +646,10 @@ export const useSendTransaction: UseSendTransaction = () => {
           amount = amount.plus(new BigNumber(input.value));
           formattedInputs.push({
             address: input.address,
-            index: i,
+            indexNumber: i,
             value: String(input.value),
-            isMine: input.isMine
+            isMine: input.isMine,
+            type: IOtype.INPUT
           });
           i += 1;
         }
@@ -662,9 +663,10 @@ export const useSendTransaction: UseSendTransaction = () => {
           }
           formattedOutputs.push({
             address: output.address,
-            index: i,
+            indexNumber: i,
             value: String(output.value),
-            isMine: output.isMine
+            isMine: output.isMine,
+            type: IOtype.OUTPUT
           });
           i += 1;
         }
@@ -683,31 +685,31 @@ export const useSendTransaction: UseSendTransaction = () => {
           total: amount.toString(),
           fees: fees.toString(),
           walletId,
-          coin: token.toLowerCase(),
+          slug: token.toLowerCase(),
           confirmations: 0,
           status: 0,
           sentReceive: 'SENT',
           confirmed: new Date(),
           blockHeight: -1,
-          ethCoin: coin,
+          coin: coin,
           inputs: formattedInputs,
           outputs: formattedOutputs
         };
-        const feeTxn: Transaction = {
+        const feeTxn: Transaction2 = {
           hash: txHash.toLowerCase(),
           amount: fees.toString(),
           total: fees.toString(),
           fees: '0',
           walletId,
-          coin: coin.toLowerCase(),
+          slug: coin.toLowerCase(),
           confirmations: 0,
           status: 0,
           sentReceive: 'FEES',
           confirmed: new Date(),
           blockHeight: -1,
-          ethCoin: coin
+          coin: coin
         };
-        transactionDb.insert(feeTxn);
+        transactionDb2.insert(feeTxn);
       } else {
         tx = {
           hash: txHash.toLowerCase(),
@@ -715,7 +717,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
           walletId,
-          coin: coin.toLowerCase(),
+          slug: coin.toLowerCase(),
           confirmations: 0,
           status: 0,
           sentReceive: 'SENT',
@@ -725,7 +727,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputs: formattedOutputs
         };
       }
-      transactionDb.insert(tx);
+      transactionDb2.insert(tx);
     } catch (error) {
       logger.error('Error in onTxnBroadcast');
       logger.error(error);

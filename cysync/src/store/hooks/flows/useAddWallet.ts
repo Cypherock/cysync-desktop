@@ -257,7 +257,7 @@ export const useAddWallet: UseAddWallet = () => {
       duplicateWallet.name = walletName;
       duplicateWallet.passphraseSet = passphraseSet;
       duplicateWallet.passwordSet = passwordSet;
-      await walletDb2.update(duplicateWallet.id, duplicateWallet);
+      await walletDb2.update(duplicateWallet, {id: duplicateWallet.id});
       setIsNameDiff(false);
       setErrorMessage('');
       setWalletSuccess(true);

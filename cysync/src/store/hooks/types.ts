@@ -1,8 +1,9 @@
 import {
   Token2,
-  InputOutput,
-  Transaction,
-  Coin2
+  InputOutput2,
+  Transaction2,
+  Coin2,
+  IOtype
 } from '../database/databaseInit';
 import BigNumber from 'bignumber.js';
 import PropTypes from 'prop-types';
@@ -21,7 +22,7 @@ export interface DisplayToken extends Token2 {
   isEmpty: boolean;
 }
 
-export interface DisplayInputOutput extends InputOutput {
+export interface DisplayInputOutput extends InputOutput2 {
   displayValue: string;
 }
 
@@ -30,11 +31,12 @@ export const DisplayInputOutputPropTypes = {
   address: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   isMine: PropTypes.bool.isRequired,
-  index: PropTypes.number.isRequired
+  indexNumber: PropTypes.number.isRequired,
+  type: PropTypes.oneOf(Object.values(IOtype)).isRequired
 };
 
 export interface DisplayTransaction
-  extends Omit<Transaction, 'inputs' | 'outputs'> {
+  extends Omit<Transaction2, 'inputs' | 'outputs'> {
   displayAmount: string;
   displayFees: string;
   displayTotal: string;
@@ -54,8 +56,8 @@ export const DisplayTransactionPropTypes = {
   confirmations: PropTypes.number.isRequired,
   walletId: PropTypes.string.isRequired,
   walletName: PropTypes.string,
-  coin: PropTypes.string.isRequired,
-  ethCoin: PropTypes.string,
+  slug: PropTypes.string.isRequired,
+  coin: PropTypes.string,
   status: PropTypes.number.isRequired,
   sentReceive: PropTypes.any.isRequired,
   confirmed: PropTypes.any.isRequired,

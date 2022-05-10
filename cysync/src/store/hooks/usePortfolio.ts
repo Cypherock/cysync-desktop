@@ -7,8 +7,8 @@ import logger from '../../utils/logger';
 import {
   tokenDb,
   priceDb,
-  Transaction,
-  transactionDb,
+  Transaction2,
+  transactionDb2,
   coinDb
 } from '../database';
 
@@ -92,9 +92,9 @@ export const usePortfolio: UsePortfolio = () => {
     coinDb.emitter.on('delete', debouncedRefreshFromDB);
     coinDb.emitter.on('delete', debouncedRefreshFromDB);
 
-    transactionDb.emitter.on('insert', debouncedRefreshFromDB);
-    transactionDb.emitter.on('update', debouncedRefreshFromDB);
-    transactionDb.emitter.on('delete', debouncedRefreshFromDB);
+    transactionDb2.emitter.on('insert', debouncedRefreshFromDB);
+    transactionDb2.emitter.on('update', debouncedRefreshFromDB);
+    transactionDb2.emitter.on('delete', debouncedRefreshFromDB);
 
     return () => {
       tokenDb.emitter.removeListener('insert', debouncedRefreshFromDB);
@@ -109,9 +109,9 @@ export const usePortfolio: UsePortfolio = () => {
       coinDb.emitter.removeListener('delete', debouncedRefreshFromDB);
       coinDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
-      transactionDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      transactionDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      transactionDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      transactionDb2.emitter.removeListener('insert', debouncedRefreshFromDB);
+      transactionDb2.emitter.removeListener('update', debouncedRefreshFromDB);
+      transactionDb2.emitter.removeListener('delete', debouncedRefreshFromDB);
     };
   }, []);
 
@@ -135,7 +135,7 @@ export const usePortfolio: UsePortfolio = () => {
     const computedPrices = JSON.parse(
       JSON.stringify(latestUnitPrices)
     ) as number[][];
-    let transactionHistory: Transaction[] = [];
+    let transactionHistory: Transaction2[] = [];
 
     if (wallet && wallet !== 'null') {
       if (coin.isErc20Token) {
@@ -154,14 +154,14 @@ export const usePortfolio: UsePortfolio = () => {
         else return null;
       }
 
-      transactionHistory = await transactionDb.getAll(
+      transactionHistory = await transactionDb2.getAllTXns(
         {
           walletId: wallet,
           coin: coinType,
           excludeFailed: true,
           excludePending: true
         },
-        { sort: 'confirmed', order: 'd' }
+        { sort: 'confirmed', order: 'desc' }
       );
     } else {
       if (coin.isErc20Token) {
@@ -180,9 +180,9 @@ export const usePortfolio: UsePortfolio = () => {
         }
       }
 
-      transactionHistory = await transactionDb.getAll(
+      transactionHistory = await transactionDb2.getAllTXns(
         { coin: coinType, excludeFailed: true, excludePending: true },
-        { sort: 'confirmed', order: 'd' }
+        { sort: 'confirmed', order: 'desc' }
       );
     }
 

@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
-import { transactionDb } from '../database';
+import { transactionDb2 } from '../database';
 
 import { DisplayTransaction } from './types';
 import { useDebouncedFunction } from './useDebounce';
@@ -64,14 +64,14 @@ export const useTransactionData: UseTransactionData = () => {
   );
 
   useEffect(() => {
-    transactionDb.emitter.on('insert', debouncedRefreshFromDB);
-    transactionDb.emitter.on('update', debouncedRefreshFromDB);
-    transactionDb.emitter.on('delete', debouncedRefreshFromDB);
+    transactionDb2.emitter.on('insert', debouncedRefreshFromDB);
+    transactionDb2.emitter.on('update', debouncedRefreshFromDB);
+    transactionDb2.emitter.on('delete', debouncedRefreshFromDB);
 
     return () => {
-      transactionDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      transactionDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      transactionDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      transactionDb2.emitter.removeListener('insert', debouncedRefreshFromDB);
+      transactionDb2.emitter.removeListener('update', debouncedRefreshFromDB);
+      transactionDb2.emitter.removeListener('delete', debouncedRefreshFromDB);
     };
   }, []);
 

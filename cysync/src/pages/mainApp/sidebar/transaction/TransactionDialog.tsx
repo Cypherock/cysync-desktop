@@ -113,15 +113,15 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   const [ethCoinPrice, setEthCoinPrice] = useState(0);
 
   useEffect(() => {
-    if (txn && txn.coin) {
-      getLatestPriceForCoin(txn.coin.toLowerCase())
+    if (txn && txn.slug) {
+      getLatestPriceForCoin(txn.slug.toLowerCase())
         .then(price => {
           setCoinPrice(price);
         })
         .catch(logger.error);
 
-      if (txn.ethCoin) {
-        getLatestPriceForCoin(txn.ethCoin.toLowerCase())
+      if (txn.coin) {
+        getLatestPriceForCoin(txn.coin.toLowerCase())
           .then(price => {
             setEthCoinPrice(price);
           })
@@ -141,8 +141,8 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   };
 
   const getFeeCoinName = () => {
-    if (txn.isErc20 && txn.ethCoin) {
-      return txn.ethCoin.toUpperCase();
+    if (txn.isErc20 && txn.coin) {
+      return txn.coin.toUpperCase();
     }
 
     return txn.coin.toUpperCase();
@@ -157,11 +157,11 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   };
 
   const openTxn = () => {
-    if (txn.ethCoin) {
-      const coin = ETHCOINS[txn.ethCoin];
+    if (txn.coin) {
+      const coin = ETHCOINS[txn.coin];
 
       if (!coin) {
-        logger.error('Invalid ETH COIN in txn: ' + txn.ethCoin);
+        logger.error('Invalid ETH COIN in txn: ' + txn.coin);
         return;
       }
 
@@ -283,7 +283,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             Sender
           </Typography>
           {(txn.inputs || [])
-            .sort((a, b) => a.index - b.index)
+            .sort((a, b) => a.indexNumber - b.indexNumber)
             .map((elem, i) => (
               <div key={elem.address} style={{ marginBottom: '10px' }}>
                 {elem.isMine && (
@@ -322,7 +322,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             Receiver
           </Typography>
           {(txn.outputs || [])
-            .sort((a, b) => a.index - b.index)
+            .sort((a, b) => a.indexNumber - b.indexNumber)
             .map((elem, i) => (
               <div key={elem.address} style={{ marginBottom: '10px' }}>
                 {elem.isMine && (

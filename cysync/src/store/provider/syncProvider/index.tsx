@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
-import { tokenDb, priceDb, transactionDb, coinDb, Coin2 } from '../../database';
+import { tokenDb, priceDb, transactionDb2, coinDb, Coin2 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
@@ -116,7 +116,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           .createHash('sha256')
           .update(coin.xpub)
           .digest('base64');
-        const transactionHistory = await transactionDb.getAll(
+        const transactionHistory = await transactionDb2.getAllTXns(
           {
             walletId: coin.walletId,
             walletName,
@@ -125,7 +125,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             excludePending: true,
             minConfirmations: 6
           },
-          { sort: 'blockHeight', order: 'd', limit: 1 }
+          { sort: 'blockHeight', order: 'desc', limit: 1 }
         );
         const newItem = new HistorySyncItem({
           xpub: coin.xpub,
@@ -148,7 +148,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             .createHash('sha256')
             .update(coin.zpub)
             .digest('base64');
-          const ztransactionHistory = await transactionDb.getAll(
+          const ztransactionHistory = await transactionDb2.getAllTXns(
             {
               walletId: coin.walletId,
               walletName: zwalletName,
@@ -157,7 +157,7 @@ export const SyncProvider: React.FC = ({ children }) => {
               excludePending: true,
               minConfirmations: 6
             },
-            { sort: 'blockHeight', order: 'd', limit: 1 }
+            { sort: 'blockHeight', order: 'desc', limit: 1 }
           );
           const newZItem = new HistorySyncItem({
             xpub: coin.xpub,
@@ -584,7 +584,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const intervals = useRef<NodeJS.Timeout[]>([]);
   useEffect(() => {
-    transactionDb.failExpiredTxn();
+    transactionDb2.failExpiredTxn();
     setupInitial();
 
     // Refresh after 60 mins
@@ -613,7 +613,7 @@ export const SyncProvider: React.FC = ({ children }) => {
                 logger.error('Sync: Notification Refresh failed', err);
               });
           }
-          transactionDb
+          transactionDb2
             .failExpiredTxn()
             .then(() => {
               logger.info('Sync: Transaction Refresh completed');

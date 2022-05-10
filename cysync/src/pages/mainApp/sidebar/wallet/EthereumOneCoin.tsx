@@ -26,7 +26,7 @@ import {
   sendAddressDb,
   tokenDb,
   receiveAddressDb2,
-  transactionDb
+  transactionDb2
 } from '../../../../store/database';
 import { useToken } from '../../../../store/hooks';
 import {
@@ -232,7 +232,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
     tokenList.map(async token => {
       await sendAddressDb.delete({  coinType: token, walletId });
       await receiveAddressDb2.delete({ walletId, coinType: token });
-      await transactionDb.deleteByCoin(walletId, token);
+      await transactionDb2.delete({walletId, slug: token});
     });
     await tokenDb.delete({
       walletId: selectedWallet.id,

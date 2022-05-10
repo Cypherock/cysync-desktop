@@ -3,7 +3,7 @@ import { Coin2 } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';
-import { getLatestPriceForCoins, transactionDb, walletDb2 } from '../database';
+import { getLatestPriceForCoins, transactionDb2, walletDb2 } from '../database';
 
 import { DisplayInputOutput, DisplayTransaction } from './types';
 
@@ -33,9 +33,9 @@ export const useHistory: UseHistory = () => {
     if (coinType) {
       query.coin = coinType;
     }
-    const res = await transactionDb.getAll(query, {
+    const res = await transactionDb2.getAllTXns(query, {
       sort: 'confirmed',
-      order: 'd'
+      order: 'desc'
     });
     const allWallets = await walletDb2.getAll();
     const latestTransactionsWithPrice: DisplayTransaction[] = [];
@@ -101,12 +101,12 @@ export const useHistory: UseHistory = () => {
       let feeCoinMultiplier = coin.multiplier;
       let isErc20 = false;
 
-      if (COINS[newTxn.coin.toLowerCase()] instanceof Erc20CoinData) {
-        if (!newTxn.ethCoin || !COINS[newTxn.ethCoin]) {
+      if (COINS[newTxn.slug.toLowerCase()] instanceof Erc20CoinData) {
+        if (!newTxn.coin || !COINS[newTxn.coin]) {
           throw new Error(`Cannot find ETH coin for token: ${newTxn.coin}`);
         }
         // the currency units correspond to ETH units and not the token decimals
-        feeCoinMultiplier = COINS[newTxn.ethCoin].multiplier;
+        feeCoinMultiplier = COINS[newTxn.coin].multiplier;
         isErc20 = true;
       }
 
@@ -142,7 +142,7 @@ export const useHistory: UseHistory = () => {
   };
 
   const deleteCoinHistory = (coin: Coin2) => {
-    return transactionDb.deleteByCoin(coin.walletId, coin.slug);
+    return transactionDb2.delete({ walletId: coin.walletId, slug: coin.slug });
   };
 
   return {

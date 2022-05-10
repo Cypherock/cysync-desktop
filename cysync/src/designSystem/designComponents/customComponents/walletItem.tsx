@@ -14,7 +14,7 @@ import {
   coinDb,
   tokenDb,
   receiveAddressDb2,
-  transactionDb,
+  transactionDb2,
   Wallet2,
   walletDb2
 } from '../../../store/database';
@@ -154,7 +154,7 @@ const WalletItem = (props: WalletItemProps) => {
       });
       await coinDb.delete({ walletId });
       await tokenDb.delete({walletId});
-      await transactionDb.deleteWallet(walletId);
+      await transactionDb2.delete({walletId});
       navigate(Routes.wallet.index);
       setDeleteOpen(false);
       handleClose();
