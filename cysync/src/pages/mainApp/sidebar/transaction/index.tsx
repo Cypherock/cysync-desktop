@@ -124,7 +124,6 @@ const Transaction = () => {
     const query = new URLSearchParams(location.search);
     const coin = query.get('slug');
     const walletId = query.get('wallet');
-    console.log('query', location.search , allCoins);
     
     if (coin) {
       const index = allCoins.findIndex(

@@ -83,7 +83,6 @@ export const processResponses = async (
     const balanceRes = responses[0];
 
     const balance = new BigNumber(balanceRes.data);
-    console.log('coin balance: ', item, balance.toString());
 
     await coinDb.updateTotalBalance(
       item.xpub,
@@ -104,7 +103,6 @@ export const processResponses = async (
       const balanceRes = responses[0];
 
       const balance = new BigNumber(balanceRes.data);
-      console.log('update token', item, balance);
       await tokenDb.updateBalance(
         item.walletId,
         item.coinType,

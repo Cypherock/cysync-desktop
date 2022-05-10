@@ -161,17 +161,6 @@ export const processResponses = async (
 
     if (response.data.transactions) {
       for (const txn of response.data.transactions) {
-        console.log({
-          txn,
-          xpub: item.xpub,
-          addresses: response.data.tokens
-            ? response.data.tokens.map((elem: any) => elem.name)
-            : [],
-          walletId: item.walletId,
-          coinType: item.coinType,
-          sendAddressDB: sendAddressDb,
-          walletName: item.walletName
-        });
         try {
           await transactionDb2.insertFromBlockbookTxn({
             txn,
@@ -186,7 +175,6 @@ export const processResponses = async (
           });
           // No need to retry if the inserting fails because it'll produce the same error.
         } catch (error) {
-          console.log(error);
           logger.error(
             'Error while inserting transaction in DB : insertFromBlockbookTxn'
           );

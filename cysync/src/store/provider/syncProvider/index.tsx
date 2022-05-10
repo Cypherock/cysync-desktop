@@ -202,7 +202,6 @@ export const SyncProvider: React.FC = ({ children }) => {
   const addBalanceSyncItemFromXpub: SyncProviderTypes['addBalanceSyncItemFromXpub'] =
     (coin: Coin2, { token, module = 'default', isRefresh = false }) => {
       const coinData = COINS[coin.slug];
-      console.log('balance sync', coin.slug);
 
       if (!coinData) {
         logger.warn('Xpub with invalid coin found', {
