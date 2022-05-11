@@ -805,7 +805,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               </Typography>
             </div>
             <Typography variant="caption" color="secondary">
-              TOTAL
+              {token ? 'AMOUNT' : 'TOTAL'}
             </Typography>
             <Typography variant="caption" color="secondary" className="amount">
               {token
