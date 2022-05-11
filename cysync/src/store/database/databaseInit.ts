@@ -6,6 +6,7 @@ import {
   Erc20DB,
   LatestPriceDB,
   NotificationDB,
+  NotificationDb2,
   PassEncrypt,
   PriceDB,
   ReceiveAddressDB,
@@ -43,6 +44,7 @@ export const tokenDb = new TokenDb2();
 export const sendAddressDb = new SendAddressDb();
 export const receiveAddressDb2 = new ReceiveAddressDb2();
 export const transactionDb2 = new TransactionDb2();
+export const notificationDb2 = new NotificationDb2();
 /**
  * Loads the data from disk. To be used only for encrypted databases.
  */

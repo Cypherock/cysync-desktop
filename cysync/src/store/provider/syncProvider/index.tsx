@@ -578,7 +578,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     await addHistoryRefresh({ isRefresh: true });
     await addPriceRefresh({ isRefresh: true });
     await addLatestPriceRefresh({ isRefresh: true });
-    await notifications.getLatest();
+    await notifications.updateLatest();
   };
 
   const intervals = useRef<NodeJS.Timeout[]>([]);
@@ -604,7 +604,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             });
           if (connectedRef) {
             notifications
-              .getLatest()
+              .updateLatest()
               .then(() => {
                 logger.info('Sync: Notification Refresh completed');
               })
