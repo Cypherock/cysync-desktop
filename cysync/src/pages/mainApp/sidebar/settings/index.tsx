@@ -111,20 +111,26 @@ const Settings = () => {
     navigate(SettingsMenuItems[index].route);
   };
 
+  const isRootPage = React.useMemo(
+    () => location.pathname === RouteLinks.settings.index,
+    [location]
+  );
+
   return (
     <Root container spacing={2}>
-      {location.pathname !== '/' ? (
-        <Grid item xs={12}>
-          <IconButton
-            disabled={!allowExit}
-            onClick={closeTab}
-            size="medium"
-            color="primary"
-          >
-            <ArrawBackIcon />
-          </IconButton>
-        </Grid>
-      ) : null}
+      <Grid item xs={12}>
+        <IconButton
+          disabled={!allowExit || isRootPage}
+          onClick={closeTab}
+          size="medium"
+          color="primary"
+          sx={{
+            opacity: isRootPage ? 0 : 1
+          }}
+        >
+          <ArrawBackIcon />
+        </IconButton>
+      </Grid>
       <Grid item xs={12}>
         <Typography
           style={{ color: theme.palette.secondary.dark }}
