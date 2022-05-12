@@ -10,6 +10,7 @@ import {
 } from '@mui/material/styles';
 import Tab, { TabProps } from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import Tooltip from '@mui/material/Tooltip';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import React, { useEffect } from 'react';
@@ -97,22 +98,15 @@ const StyledButton = withStyles(() =>
   })
 )(Button);
 
-const StyledAddWalletButton = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      textTransform: 'none',
-      color: theme.palette.text.primary,
-      fontSize: '0.6rem',
-      padding: `0px 16px`,
-      border: `1px dashed ${theme.palette.text.secondary}`,
-      background: theme.palette.primary.light,
-      borderRadius: '1rem',
-      position: 'absolute',
-      bottom: 0,
-      right: 30
-    }
-  })
-)(Button);
+const StyledAddWalletButton = styled(Button)(({ theme }) => ({
+  textTransform: 'none',
+  color: theme.palette.text.primary,
+  fontSize: '0.6rem',
+  padding: `0px 16px`,
+  border: `1px dashed ${theme.palette.text.secondary}`,
+  background: theme.palette.primary.light,
+  borderRadius: '1rem'
+}));
 
 const StyledListItem = withStyles(theme => ({
   root: {
@@ -133,7 +127,8 @@ const classes = {
   divider: `${PREFIX}-divider`,
   support: `${PREFIX}-support`,
   walletCollapse: `${PREFIX}-walletCollapse`,
-  walletScroll: `${PREFIX}-walletScroll`
+  walletScroll: `${PREFIX}-walletScroll`,
+  importWalletContainer: `${PREFIX}-importWalletContainer`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -157,12 +152,12 @@ const Root = styled('div')(({ theme }) => ({
     flexDirection: 'column',
     justifyContent: 'flex-end',
     alignItems: 'stretch',
-    paddingLeft: '3rem',
     paddingRight: '0.5rem',
     position: 'relative',
     paddingBottom: '1.5rem'
   },
   [`& .${classes.walletScroll}`]: {
+    paddingLeft: '3rem',
     maxHeight: '100px',
     overflowY: 'auto',
     overflowX: 'hidden',
@@ -173,6 +168,12 @@ const Root = styled('div')(({ theme }) => ({
     '&::-webkit-scrollbar-thumb': {
       background: theme.palette.text.secondary
     }
+  },
+  [`& .${classes.importWalletContainer}`]: {
+    marginTop: '10px',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center'
   }
 }));
 
@@ -340,9 +341,24 @@ const Sidebar = () => {
                 );
               })}
             </div>
-            <StyledAddWalletButton onClick={onImportWallet}>
-              + Import Wallet
-            </StyledAddWalletButton>
+            <div className={classes.importWalletContainer}>
+              {walletData.length >= 4 ? (
+                <Tooltip title="You cannot add more than 4 wallets">
+                  <span style={{ margin: 'auto' }}>
+                    <StyledAddWalletButton
+                      disabled={true}
+                      onClick={onImportWallet}
+                    >
+                      + Import Wallet
+                    </StyledAddWalletButton>
+                  </span>
+                </Tooltip>
+              ) : (
+                <StyledAddWalletButton onClick={onImportWallet}>
+                  + Import Wallet
+                </StyledAddWalletButton>
+              )}
+            </div>
           </CustomCollapse>
           <CustomDivider value={4} className={classes.divider} />
           <Tab

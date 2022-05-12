@@ -162,11 +162,7 @@ const ApexChart = (props: any) => {
     <Root className={classes.root}>
       <div className={classes.mapNavigation}>
         <DropMenu
-          options={coinList.map((item: any) =>
-            item.replace(/\w+/g, (w: any) => {
-              return w[0].toUpperCase() + w.slice(1).toLowerCase();
-            })
-          )}
+          options={coinList.map((item: any) => item.toUpperCase())}
           handleMenuItemSelectionChange={handleMenuItemSelectionChange}
           index={coinIndex}
           bg={false}
