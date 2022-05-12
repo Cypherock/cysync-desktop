@@ -44,7 +44,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
     setIsLoading(true);
     try {
       logger.info('Fetching latest notifications from server');
-      const lastNotification = await NotificationDB.getLast();
+      const lastNotification = await NotificationDB.getLastId();
       const res = await NotificationServer.getAllLatest(lastNotification?._id).request();
       if (res.data.notifications.length > 0) {        
         const notificationsData = res.data.notifications.map((notification: Notification2) => ({
@@ -53,15 +53,12 @@ export const NotificationProvider: React.FC = ({ children }) => {
           description: notification.description,
           type: notification.type,
           isRead: false,
-          createdAt: new Date(notification.createdAt),
-          updatedAt: new Date(notification.updatedAt),
+          createdAt: notification.createdAt,
+          updatedAt: notification.updatedAt
         }));
-        await NotificationDB.insertMany(notificationsData);
+        await NotificationDB.db.bulkDocs(notificationsData);
       }
-      const allNotifications = await NotificationDB.getAll({}, {
-        sort: '_id',
-        order: 'desc'
-      })
+      const allNotifications = await NotificationDB.getAll(perPageLimit + 1);
       setHasNextPage(allNotifications.length > perPageLimit);
       setNotifications(allNotifications.slice(0, perPageLimit));
       } catch (error) {
@@ -81,14 +78,11 @@ export const NotificationProvider: React.FC = ({ children }) => {
       if (notifications.length > 0)
         lastNotif = notifications[notifications.length - 1];
 
-      const nextNotifications = await NotificationDB.getAll({}, {
-        sort: '_id',
-        order: 'desc',
-      }, ' AND _id < ?', [lastNotif?._id]);
-
-      setNotifications([...notifications, ...nextNotifications.slice(0, perPageLimit)]);
+      const nextNotifications = await NotificationDB.getNext(lastNotif?._id, perPageLimit + 1);
 
       setHasNextPage(nextNotifications.length > perPageLimit);
+      setNotifications([...notifications, ...nextNotifications.slice(0, perPageLimit)]);
+
     } catch (error) {
       logger.error('Error in fetching next page notifications');
       logger.error(error);
