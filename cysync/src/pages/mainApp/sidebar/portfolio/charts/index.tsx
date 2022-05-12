@@ -136,11 +136,11 @@ const PortfolioCharts = ({
                 series={
                   coinIndex !== 0 ? [coinHolding[coinIndex - 1]] : coinHolding
                 }
-                labels={coinList.slice(1)}
+                labels={
+                  coinIndex !== 0 ? [coinList[coinIndex]] : coinList.slice(1)
+                }
                 currentCoinLabel={
-                  coinList[coinIndex]
-                    ? coinList[coinIndex].toUpperCase()
-                    : 'All Coins'
+                  coinIndex > 0 ? coinList[coinIndex].toUpperCase() : 'ALL'
                 }
               />
             </div>

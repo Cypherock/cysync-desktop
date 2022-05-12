@@ -254,7 +254,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         <Typography color="textSecondary">Amount</Typography>
         <div className={classes.flex}>
           <CoinIcons
-            style={{ marginLeft: '0' }}
+            style={{ marginLeft: '0', marginRight: '10px' }}
             initial={txn.coin.toUpperCase()}
           />
           <Typography>
@@ -267,7 +267,10 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
       <div className={classes.dataContainer}>
         <Typography color="textSecondary">Fees</Typography>
         <div className={classes.flex}>
-          <CoinIcons style={{ marginLeft: '0' }} initial={getFeeCoinName()} />
+          <CoinIcons
+            style={{ marginLeft: '0', marginRight: '10px' }}
+            initial={getFeeCoinName()}
+          />
           <Typography>{`${getFeeCoinName()} ${formatCoins(
             txn.displayFees
           )} ($${getFeePrice()})`}</Typography>

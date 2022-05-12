@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import InputAdornment from '@mui/material/InputAdornment';
 import { styled, useTheme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
@@ -23,6 +24,7 @@ import {
 import Analytics from '../../../../utils/analytics';
 
 import AddCoinForm from './addCoin';
+import allCoins from './addCoin/coins';
 import EthereumOneCoin from './EthereumOneCoin';
 import OneCoin from './OneCoin';
 
@@ -186,6 +188,8 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
     }
   }, [openAddCoinForm]);
 
+  const canAddMoreCoins = allCoins.length !== coinsPresent.length;
+
   return (
     <Root container>
       <AddCoinForm
@@ -279,15 +283,32 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
             styleType="light"
           />
           <div className={classes.walletButtons}>
-            <Button
-              variant="text"
-              disableRipple
-              className={classes.button}
-              startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
-              onClick={handleAddCoinFormOpen}
-            >
-              ADD COIN
-            </Button>
+            {!canAddMoreCoins ? (
+              <Tooltip title="All coins are already added">
+                <span style={{ width: '100%', height: '100%' }}>
+                  <Button
+                    variant="text"
+                    disableRipple
+                    className={classes.button}
+                    startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
+                    onClick={handleAddCoinFormOpen}
+                    disabled={true}
+                  >
+                    ADD COIN
+                  </Button>
+                </span>
+              </Tooltip>
+            ) : (
+              <Button
+                variant="text"
+                disableRipple
+                className={classes.button}
+                startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
+                onClick={handleAddCoinFormOpen}
+              >
+                ADD COIN
+              </Button>
+            )}
           </div>
         </Grid>
       </Grid>
