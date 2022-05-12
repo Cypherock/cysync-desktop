@@ -56,7 +56,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
           createdAt: notification.createdAt,
           updatedAt: notification.updatedAt
         }));
-        await NotificationDB.db.bulkDocs(notificationsData);
+        await NotificationDB.insertMany(notificationsData);
       }
       const allNotifications = await NotificationDB.getAll(perPageLimit + 1);
       setHasNextPage(allNotifications.length > perPageLimit);

@@ -3,7 +3,7 @@ import {
   DeviceError,
   DeviceErrorType
 } from '@cypherock/communication';
-import { Device } from '@cypherock/database';
+import { Device2 } from '@cypherock/database';
 import { DeviceAuthenticator } from '@cypherock/protocols';
 import { useState } from 'react';
 
@@ -62,7 +62,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       if (!deviceSerial) {
         throw new Error('Device serial not found.');
       }
-      const device: Device = {
+      const device: Device2 = {
         serial: deviceSerial,
         version: firmwareVersion,
         isAuth: auth

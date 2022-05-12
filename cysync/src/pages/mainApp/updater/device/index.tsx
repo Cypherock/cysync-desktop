@@ -28,7 +28,7 @@ const Updater = () => {
       const lastVersion = localStorage.getItem('last-device-version');
       if (deviceSerial !== null) {
         deviceDb2
-          .getOne({serial: deviceSerial})
+          .getBySerial(deviceSerial)
           .then(device => {
             if (!device) {
               return;
