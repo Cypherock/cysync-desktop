@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../../constants/routes';
 import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
-import { deviceDb } from '../../../../store/database';
 import {
   DeviceConnectionState,
   useConnection,
   useUpdater
 } from '../../../../store/provider';
-import { compareVersion } from '../../../../utils/compareVersion';
+import { compareVersion, hexToVersion } from '../../../../utils/compareVersion';
 import logger from '../../../../utils/logger';
 
 import UpdateInfoComponent from './info';
@@ -20,7 +19,7 @@ const Updater = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
-  const { deviceSerial, deviceConnectionState } = useConnection();
+  const { firmwareVersion, deviceConnectionState } = useConnection();
 
   useEffect(() => {
     // Only show when update is available and device has a valid connection
@@ -29,34 +28,30 @@ const Updater = () => {
       deviceConnectionState === DeviceConnectionState.VERIFIED
     ) {
       const lastVersion = localStorage.getItem('last-device-version');
-      if (deviceSerial !== null) {
-        deviceDb
-          .getBySerial(deviceSerial)
-          .then(device => {
-            if (!device) {
-              return;
+      if (firmwareVersion) {
+        const currectDeviceVersion = hexToVersion(firmwareVersion);
+        if (compareVersion(deviceVersion, currectDeviceVersion)) {
+          if (lastVersion) {
+            if (compareVersion(deviceVersion, lastVersion)) {
+              setIsOpen(true);
+              logger.info(
+                `Device New Update Prompt: Latest Version: ${deviceVersion}, Current Device Version: ${currectDeviceVersion}, Last New Version Shown: ${lastVersion}`
+              );
             }
-
-            if (compareVersion(deviceVersion, device.version)) {
-              if (lastVersion) {
-                if (compareVersion(deviceVersion, lastVersion)) {
-                  setIsOpen(true);
-                  logger.info(
-                    `Device New Update Prompt: Latest Version: ${deviceVersion}, Current Device Version: ${device.version}, Last New Version Shown: ${lastVersion}`
-                  );
-                }
-              } else {
-                setIsOpen(true);
-                logger.info(
-                  `Device New Update Prompt: Latest Version: ${deviceVersion}, Current Device Version: ${device.version}`
-                );
-              }
-            }
-          })
-          .catch(error => logger.error(error));
+          } else {
+            setIsOpen(true);
+            logger.info(
+              `Device New Update Prompt: Latest Version: ${deviceVersion}, Current Device Version: ${currectDeviceVersion}`
+            );
+          }
+        } else {
+          logger.info(
+            `Device firmware already latest: ${currectDeviceVersion}`
+          );
+        }
       }
     }
-  }, [isDeviceUpdateAvailable, deviceSerial, deviceConnectionState]);
+  }, [isDeviceUpdateAvailable, deviceConnectionState]);
 
   const finalizeDontShow = () => {
     if (dontShowAgain) {
