@@ -4,7 +4,7 @@ import {
   pricing as pricingServer
 } from '@cypherock/server-wrapper';
 
-import { priceDb } from '../../../database';
+import { priceHistoryDb } from '../../../database';
 import { PriceSyncItem } from '../types';
 
 export const getRequestsMetadata = (
@@ -30,5 +30,9 @@ export const processResponses = async (
 
   const res = responses[0];
 
-  await priceDb.insert(item.coinType, item.days, res.data.data.entries);
+  await priceHistoryDb.insert({
+    slug: item.coinType,
+    interval: item.days,
+    data: res.data.data.entries
+  });
 };

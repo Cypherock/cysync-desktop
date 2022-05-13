@@ -145,7 +145,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
       return txn.coin.toUpperCase();
     }
 
-    return txn.coin.toUpperCase();
+    return txn.slug.toUpperCase();
   };
 
   const getFeePrice = () => {
@@ -174,7 +174,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
     } else {
       shell.openExternal(
         bitcoinServer.transaction.getOpenTxnLink({
-          coinType: txn.coin.toLowerCase(),
+          coinType: txn.slug.toLowerCase(),
           txHash: txn.hash
         })
       );
@@ -255,10 +255,10 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         <div className={classes.flex}>
           <CoinIcons
             style={{ marginLeft: '0' }}
-            initial={txn.coin.toUpperCase()}
+            initial={txn.slug.toUpperCase()}
           />
           <Typography>
-            {`${txn.coin.toUpperCase()} ${formatCoins(
+            {`${txn.slug.toUpperCase()} ${formatCoins(
               txn.displayAmount
             )} ($${getPriceForCoin(txn.displayAmount)})`}
           </Typography>
@@ -307,7 +307,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {`${txn.coin.toUpperCase()} ${formatCoins(
+                      {`${txn.slug.toUpperCase()} ${formatCoins(
                         elem.displayValue
                       )}`}
                     </Typography>
@@ -346,7 +346,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {`${txn.coin.toUpperCase()} ${formatCoins(
+                      {`${txn.slug.toUpperCase()} ${formatCoins(
                         elem.displayValue
                       )}`}
                     </Typography>

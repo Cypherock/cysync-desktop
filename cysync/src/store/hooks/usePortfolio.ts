@@ -6,10 +6,10 @@ import { getPortfolioCache } from '../../utils/cache';
 import logger from '../../utils/logger';
 import {
   tokenDb,
-  priceDb,
   Transaction2,
   transactionDb2,
-  coinDb
+  coinDb,
+  priceHistoryDb
 } from '../database';
 
 import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';
@@ -84,9 +84,9 @@ export const usePortfolio: UsePortfolio = () => {
     tokenDb.emitter.on('update', debouncedRefreshFromDB);
     tokenDb.emitter.on('delete', debouncedRefreshFromDB);
 
-    priceDb.emitter.on('insert', debouncedRefreshFromDB);
-    priceDb.emitter.on('insert', debouncedRefreshFromDB);
-    priceDb.emitter.on('update', debouncedRefreshFromDB);
+    priceHistoryDb.emitter.on('insert', debouncedRefreshFromDB);
+    priceHistoryDb.emitter.on('insert', debouncedRefreshFromDB);
+    priceHistoryDb.emitter.on('update', debouncedRefreshFromDB);
 
     coinDb.emitter.on('update', debouncedRefreshFromDB);
     coinDb.emitter.on('delete', debouncedRefreshFromDB);
@@ -101,9 +101,9 @@ export const usePortfolio: UsePortfolio = () => {
       tokenDb.emitter.removeListener('update', debouncedRefreshFromDB);
       tokenDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
-      priceDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      priceDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      priceDb.emitter.removeListener('update', debouncedRefreshFromDB);
+      priceHistoryDb.emitter.removeListener('insert', debouncedRefreshFromDB);
+      priceHistoryDb.emitter.removeListener('insert', debouncedRefreshFromDB);
+      priceHistoryDb.emitter.removeListener('update', debouncedRefreshFromDB);
 
       coinDb.emitter.removeListener('update', debouncedRefreshFromDB);
       coinDb.emitter.removeListener('delete', debouncedRefreshFromDB);
@@ -126,7 +126,10 @@ export const usePortfolio: UsePortfolio = () => {
     }
 
     let totalBalance = new BigNumber(0);
-    const allPrices = await priceDb.getPrice(coinType, days);
+    const allPrices = await priceHistoryDb.getOne({
+      slug: coinType,
+      interval: days
+    });
     if (!allPrices) {
       return null;
     }
@@ -154,18 +157,15 @@ export const usePortfolio: UsePortfolio = () => {
         else return null;
       }
 
-      transactionHistory = await transactionDb2.getAllTXns(
-        {
-          walletId: wallet,
-          coin: coinType,
-          excludeFailed: true,
-          excludePending: true
-        },
-        { sort: 'confirmed', order: 'desc' }
-      );
+      transactionHistory = await transactionDb2.getAllTxns({
+        walletId: wallet,
+        coin: coinType,
+        excludeFailed: true,
+        excludePending: true
+      });
     } else {
       if (coin.isErc20Token) {
-        const tokens = await tokenDb.getAll({slug: coinType});
+        const tokens = await tokenDb.getAll({ slug: coinType });
         if (tokens.length === 0) return null;
         for (const token of tokens) {
           totalBalance = totalBalance.plus(token.balance);
@@ -180,10 +180,11 @@ export const usePortfolio: UsePortfolio = () => {
         }
       }
 
-      transactionHistory = await transactionDb2.getAllTXns(
-        { coin: coinType, excludeFailed: true, excludePending: true },
-        { sort: 'confirmed', order: 'desc' }
-      );
+      transactionHistory = await transactionDb2.getAllTxns({
+        coin: coinType,
+        excludeFailed: true,
+        excludePending: true
+      });
     }
 
     let prevTransactionIndex: number | null = null;
@@ -363,7 +364,7 @@ export const usePortfolio: UsePortfolio = () => {
             else continue;
           }
         } else if (coin.isErc20Token) {
-          const tokens = await tokenDb.getAll({slug: coinType});
+          const tokens = await tokenDb.getAll({ slug: coinType });
           if (tokens.length === 0) continue;
           for (const token of tokens) {
             totalBalance = totalBalance.plus(token.balance);
@@ -382,7 +383,7 @@ export const usePortfolio: UsePortfolio = () => {
           setHasCoins(true);
         }
 
-        const res = await priceDb.getPrice(coinType, 7);
+        const res = await priceHistoryDb.getOne({ slug: coinType, interval: 7 });
 
         let latestPrice = 0;
         if (res && res.data) {

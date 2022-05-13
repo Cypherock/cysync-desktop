@@ -189,7 +189,7 @@ export const SocketProvider: React.FC = ({ children }) => {
   ) => {
     logger.info('Adding initial socket hooks');
 
-    const allPendingTxns = await transactionDb2.getAllTXns({ statusMessage: 'PENDING' });
+    const allPendingTxns = await transactionDb2.getAllTxns({ status: 'PENDING' });
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
@@ -225,7 +225,7 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket?: BlockbookSocket
   ) => {
     logger.info('Adding initial blockbook web subscriptions');
-    const allPendingTxns = await transactionDb2.getAllTXns({ statusMessage: 'PENDING' });
+    const allPendingTxns = await transactionDb2.getAllTxns({ status: 'PENDING' });
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
@@ -527,9 +527,9 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket.on('block', async (payload: any) => {
       try {
         if (payload && payload.coinType) {
-          const pendingTxns = await transactionDb2.getAllTXns({
+          const pendingTxns = await transactionDb2.getAllTxns({
             coin: payload.coinType,
-            statusMessage: 'PENDING'
+            status: 'PENDING'
           });
 
           if (pendingTxns && pendingTxns.length > 0) {

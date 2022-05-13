@@ -6,7 +6,7 @@ import {
   Token2,
   tokenDb,
   getLatestPriceForCoin,
-  priceDb
+  priceHistoryDb
 } from '../database';
 
 import { DisplayToken } from './types';
@@ -41,16 +41,16 @@ export const useToken: UseToken = () => {
   const onChange = useDebouncedFunction(onDBChange, 800);
 
   useEffect(() => {
-    priceDb.emitter.on('insert', onChange);
-    priceDb.emitter.on('update', onChange);
+    priceHistoryDb.emitter.on('insert', onChange);
+    priceHistoryDb.emitter.on('update', onChange);
 
     tokenDb.emitter.on('insert', onChange);
     tokenDb.emitter.on('update', onChange);
     tokenDb.emitter.on('delete', onChange);
 
     return () => {
-      priceDb.emitter.removeListener('insert', onChange);
-      priceDb.emitter.removeListener('update', onChange);
+      priceHistoryDb.emitter.removeListener('insert', onChange);
+      priceHistoryDb.emitter.removeListener('update', onChange);
 
       tokenDb.emitter.removeListener('insert', onChange);
       tokenDb.emitter.removeListener('update', onChange);

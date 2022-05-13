@@ -34,10 +34,7 @@ export const useHistory: UseHistory = () => {
     if (coinType) {
       query.slug = coinType;
     }
-    const res = await transactionDb2.getAllTXns(query, {
-      sort: 'confirmed',
-      order: 'desc'
-    });
+    const res = await transactionDb2.getAllTxns(query);
     const allWallets = await walletDb2.getAll();
     const latestTransactionsWithPrice: DisplayTransaction[] = [];
 

@@ -218,7 +218,7 @@ const Transaction = () => {
           date={new Date(data.confirmed).toLocaleDateString()}
           time={new Date(data.confirmed).toLocaleTimeString()}
           walletName={data.walletName}
-          initial={data.slug.toUpperCase()}
+          initial={data.slug?.toUpperCase()}
           amount={data.displayAmount}
           value={new BigNumber(data.displayValue).toFixed(2)}
           result={data.sentReceive}

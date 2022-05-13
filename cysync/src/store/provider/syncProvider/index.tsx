@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
-import { tokenDb, priceDb, transactionDb2, coinDb, Coin2 } from '../../database';
+import { tokenDb, transactionDb2, coinDb, Coin2, priceHistoryDb } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
@@ -116,7 +116,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           .createHash('sha256')
           .update(coin.xpub)
           .digest('base64');
-        const transactionHistory = await transactionDb2.getAllTXns(
+        const topBlock = await transactionDb2.getTopBlock(
           {
             walletId: coin.walletId,
             walletName,
@@ -124,9 +124,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             excludeFailed: true,
             excludePending: true,
             minConfirmations: 6
-          },
-          { sort: 'blockHeight', order: 'desc', limit: 1 }
-        );
+          });
         const newItem = new HistorySyncItem({
           xpub: coin.xpub,
           walletName,
@@ -134,11 +132,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           coinType: coinData.abbr,
           isRefresh,
           module,
-          afterBlock:
-            transactionHistory.length > 0 &&
-            transactionHistory[0].blockHeight > 0
-              ? transactionHistory[0].blockHeight
-              : undefined,
+          afterBlock: topBlock,
           page: 1
         });
         addToQueue(newItem);
@@ -148,7 +142,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             .createHash('sha256')
             .update(coin.zpub)
             .digest('base64');
-          const ztransactionHistory = await transactionDb2.getAllTXns(
+          const topBlock = await transactionDb2.getTopBlock(
             {
               walletId: coin.walletId,
               walletName: zwalletName,
@@ -156,9 +150,7 @@ export const SyncProvider: React.FC = ({ children }) => {
               excludeFailed: true,
               excludePending: true,
               minConfirmations: 6
-            },
-            { sort: 'blockHeight', order: 'desc', limit: 1 }
-          );
+            });
           const newZItem = new HistorySyncItem({
             xpub: coin.xpub,
             zpub: coin.zpub,
@@ -167,11 +159,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             coinType: coinData.abbr,
             isRefresh,
             module,
-            afterBlock:
-              ztransactionHistory.length > 0 &&
-              ztransactionHistory[0].blockHeight > 0
-                ? ztransactionHistory[0].blockHeight
-                : undefined,
+            afterBlock: topBlock,
             page: 1
           });
           addToQueue(newZItem);
@@ -264,7 +252,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         for (const days of [7, 30, 365] as Array<
           PriceSyncItemOptions['days']
         >) {
-          const oldPrices = await priceDb.getPrice(coinData.abbr, days);
+          const oldPrices = await priceHistoryDb.getOne({slug: coinData.abbr, interval: days});
           let addNew = true;
 
           // Check if the prices and old enough and then only add to sync

@@ -6,7 +6,7 @@ import {
   sendAddressDb,
   coinDb,
   getLatestPriceForCoin,
-  priceDb,
+  priceHistoryDb,
   receiveAddressDb2,
   Coin2
 } from '../database';
@@ -202,16 +202,16 @@ export const useWalletData: UseWalletData = () => {
   const onChange = useDebouncedFunction(onDBChange, 800);
 
   useEffect(() => {
-    priceDb.emitter.on('insert', onChange);
-    priceDb.emitter.on('update', onChange);
+    priceHistoryDb.emitter.on('insert', onChange);
+    priceHistoryDb.emitter.on('update', onChange);
 
     coinDb.emitter.on('insert', onChange);
     coinDb.emitter.on('update', onChange);
     coinDb.emitter.on('delete', onChange);
 
     return () => {
-      priceDb.emitter.removeListener('insert', onChange);
-      priceDb.emitter.removeListener('update', onChange);
+      priceHistoryDb.emitter.removeListener('insert', onChange);
+      priceHistoryDb.emitter.removeListener('update', onChange);
 
       coinDb.emitter.removeListener('insert', onChange);
       coinDb.emitter.removeListener('update', onChange);
