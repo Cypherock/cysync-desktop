@@ -145,9 +145,9 @@ const WalletItem = (props: WalletItemProps) => {
   const handleDeleteConfirmation = async () => {
     try {
       const {
-        walletDetails: { id: walletId }
+        walletDetails: { _id: walletId }
       } = props;
-      await walletDb2.delete({ id: walletId });
+      await walletDb2.deleteById(walletId);
       await sendAddressDb.delete({ walletId});
       await receiveAddressDb2.delete({
         walletId

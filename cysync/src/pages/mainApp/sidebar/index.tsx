@@ -251,7 +251,7 @@ const Sidebar = () => {
 
   const handleWalletChange = (wallet: Wallet2, index: number) => {
     setWalletIndex(index);
-    navigate(`${Routes.wallet.index}/${wallet.id}`);
+    navigate(`${Routes.wallet.index}/${wallet._id}`);
   };
 
   const handleChange = (_event: React.ChangeEvent | undefined, val: number) => {
@@ -281,7 +281,7 @@ const Sidebar = () => {
       if (pathTab.tab === 2) {
         const pathArr = location.pathname.split('/');
         const walletId = pathArr[pathArr.length - 1];
-        const index = walletData.findIndex(elem => elem.id === walletId);
+        const index = walletData.findIndex(elem => elem._id === walletId);
         setWalletIndex(index);
       }
 
@@ -332,7 +332,7 @@ const Sidebar = () => {
                 if (!wallet.name) return null;
                 return (
                   <StyledListItem
-                    key={wallet.id}
+                    key={wallet._id}
                     selected={walletIndex === index}
                     onClick={() => handleWalletChange(wallet, index)}
                   >

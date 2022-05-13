@@ -23,7 +23,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
   const [allWallets, setAllWallets] = useState<Wallet2[]>([
     {
       // UI breaks if the list is empty, hence dummy empty wallet. WalletID is null specially for Portfolio, to differenciate between initial state (walletId is 'null') and no wallets (walletId is '')
-      id: 'null',
+      _id: 'null',
       device: '',
       name: '',
       passwordSet: true,
@@ -37,12 +37,13 @@ export const WalletsProvider: React.FC = ({ children }) => {
     try {
       logger.verbose('Getting all wallets and xpub data');
       const walletRes = await walletDb2.getAll();
+      console.log('walletRes', walletRes);
 
       if (walletRes.length !== 0) setAllWallets(walletRes);
       else {
         setAllWallets([
           {
-            id: '',
+            _id: '',
             device: '',
             name: '',
             passwordSet: true,

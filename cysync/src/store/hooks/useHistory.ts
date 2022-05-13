@@ -129,7 +129,7 @@ export const useHistory: UseHistory = () => {
 
       newTxn.isErc20 = isErc20;
 
-      const wallet = allWallets.find(ob => ob.id === newTxn.walletId);
+      const wallet = allWallets.find(ob => ob._id === newTxn.walletId);
       if (!wallet) {
         logger.warn(`Cannot find wallet with name: ${newTxn.walletId}`);
       } else {

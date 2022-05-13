@@ -151,9 +151,8 @@ export const useAddWallet: UseAddWallet = () => {
           return;
         }
 
-        const walletWithSameId = await walletDb2.getOne({
-          id: walletDetails.id
-        });
+        const walletWithSameId = await walletDb2.getById(walletDetails._id);
+        console.log('walletwithssameid', walletWithSameId);
 
         if (walletWithSameId) {
           const duplicateWallet = walletWithSameId;
@@ -164,7 +163,7 @@ export const useAddWallet: UseAddWallet = () => {
           } else {
             logger.info('AddWallet: Same wallet found with different name');
             setWalletName(walletDetails.name);
-            setWalletId(walletDetails.id);
+            setWalletId(walletDetails._id);
             setPasswordSet(walletDetails.passwordSet);
             setPassphraseSet(walletDetails.passphraseSet);
             setIsNameDiff(true);
@@ -180,7 +179,7 @@ export const useAddWallet: UseAddWallet = () => {
           .insert(walletDetails)
           .then(() => {
             setWalletName(walletDetails.name);
-            setWalletId(walletDetails.id);
+            setWalletId(walletDetails._id);
             setPasswordSet(walletDetails.passwordSet);
             setPassphraseSet(walletDetails.passphraseSet);
             setCompleted(true);
@@ -247,7 +246,7 @@ export const useAddWallet: UseAddWallet = () => {
         throw new Error('New Wallet details are missing');
       }
 
-      const walletWithSameId = await walletDb2.getOne({ id: walletId });
+      const walletWithSameId = await walletDb2.getById(walletId);
 
       if (!walletWithSameId) {
         throw new Error('Could not find wallet with same ID');
@@ -257,7 +256,7 @@ export const useAddWallet: UseAddWallet = () => {
       duplicateWallet.name = walletName;
       duplicateWallet.passphraseSet = passphraseSet;
       duplicateWallet.passwordSet = passwordSet;
-      await walletDb2.update(duplicateWallet, {id: duplicateWallet.id});
+      await walletDb2.update(walletWithSameId);
       setIsNameDiff(false);
       setErrorMessage('');
       setWalletSuccess(true);

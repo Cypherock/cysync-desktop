@@ -368,7 +368,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const { coinDetails } = useCurrentCoin();
 
   const {
-    selectedWallet: { passwordSet, passphraseSet, id }
+    selectedWallet: { passwordSet, passphraseSet, _id }
   } = useSelectedWallet();
 
   const { token } = useTokenContext();
@@ -487,7 +487,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         connection: deviceConnection,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
-        walletId: id,
+        walletId: _id,
         pinExists: passwordSet,
         passphraseExists: passphraseSet,
         xpub: coinDetails.xpub,

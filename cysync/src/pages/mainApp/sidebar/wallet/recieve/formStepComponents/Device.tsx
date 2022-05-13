@@ -51,7 +51,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         connection: deviceConnection,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
-        walletId: selectedWallet.id,
+        walletId: selectedWallet._id,
         coinType: coinDetails.slug,
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,

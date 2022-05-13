@@ -136,7 +136,7 @@ const Transaction = () => {
     }
 
     if (walletId) {
-      const index = allWallets.findIndex(elem => elem.id === walletId);
+      const index = allWallets.findIndex(elem => elem._id === walletId);
       if (index !== -1) {
         setCurrentWallet(walletId);
         setWalletIndex(index + 1);
@@ -200,7 +200,7 @@ const Transaction = () => {
   const handleWalletChange = (selectedIndex: number) => {
     setWalletIndex(selectedIndex);
     if (selectedIndex === 0) setCurrentWallet(undefined);
-    else setCurrentWallet(allWallets[selectedIndex - 1].id);
+    else setCurrentWallet(allWallets[selectedIndex - 1]._id);
   };
 
   const handleCoinChange = (selectedIndex: number) => {

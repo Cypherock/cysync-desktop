@@ -31,7 +31,7 @@ const SingleWalletView = () => {
     useState<Wallet2 | null>(null);
 
   useEffect(() => {
-    const wallet = allWallets.find(elem => elem.id === walletId);
+    const wallet = allWallets.find(elem => elem._id === walletId);
     if (wallet) {
       setCurrentWalletDetails(wallet);
     } else {

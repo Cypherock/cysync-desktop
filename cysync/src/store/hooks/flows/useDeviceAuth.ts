@@ -63,6 +63,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
         throw new Error('Device serial not found.');
       }
       const device: Device2 = {
+        _id: deviceSerial,
         serial: deviceSerial,
         version: firmwareVersion,
         isAuth: auth
