@@ -127,6 +127,7 @@
     "styled-components": "^5.3.3",
     "sudo-prompt": "^9.2.1",
     "systeminformation": "^5.11.2",
+    "transform-pouch": "^2.0.0",
     "universal-analytics": "^0.5.3",
     "update-electron-app": "^2.0.1",
     "uuid": "^8.3.2",
