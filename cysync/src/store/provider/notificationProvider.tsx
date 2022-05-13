@@ -58,7 +58,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
         }));
         await NotificationDB.insertMany(notificationsData);
       }
-      const allNotifications = await NotificationDB.getAll(perPageLimit + 1);
+      const allNotifications = await NotificationDB.get(perPageLimit + 1);
       setHasNextPage(allNotifications.length > perPageLimit);
       setNotifications(allNotifications.slice(0, perPageLimit));
       } catch (error) {
