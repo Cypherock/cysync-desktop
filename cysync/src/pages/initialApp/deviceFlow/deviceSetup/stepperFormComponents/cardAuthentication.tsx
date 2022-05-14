@@ -12,10 +12,10 @@ import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
 import { useCardAuth } from '../../../../../store/hooks/flows';
 import {
+  DeviceConnectionState,
   FeedbackState,
   useConnection,
-  useFeedback,
-  VerifyState
+  useFeedback
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../../../utils/compareVersion';
@@ -108,7 +108,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     inBootloader,
     firmwareVersion,
     inBackgroundProcess,
-    verifyState,
+    deviceConnectionState,
     setIsInFlow,
     deviceState
   } = useConnection();
@@ -144,7 +144,10 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     if (
       deviceConnection &&
       !inBackgroundProcess &&
-      [VerifyState.IN_TEST_APP, VerifyState.IN_BOOTLOADER].includes(verifyState)
+      [
+        DeviceConnectionState.IN_TEST_APP,
+        DeviceConnectionState.IN_BOOTLOADER
+      ].includes(deviceConnectionState)
     ) {
       if (inBootloader) {
         setShowRetry(false);
@@ -312,7 +315,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     setShowRetry(false);
     setErrorMsg('');
 
-    if (verifyState !== VerifyState.IN_TEST_APP) {
+    if (deviceConnectionState !== DeviceConnectionState.IN_TEST_APP) {
       setShowRetry(true);
       setErrorMsg('Please connect the device and try again.');
       return;

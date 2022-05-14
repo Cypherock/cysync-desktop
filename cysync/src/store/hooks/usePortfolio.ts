@@ -9,7 +9,8 @@ import {
   Transaction2,
   transactionDb2,
   coinDb,
-  priceHistoryDb
+  priceHistoryDb,
+  getLatestPriceForCoin
 } from '../database';
 
 import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';
@@ -385,7 +386,6 @@ export const usePortfolio: UsePortfolio = () => {
 
         const res = await priceHistoryDb.getOne({ slug: coinType, interval: 7 });
 
-        let latestPrice = 0;
         if (res && res.data) {
           const latestUnitPrices = res.data;
           if (!latestUnitPrices[latestUnitPrices.length - 1]) {
@@ -393,10 +393,10 @@ export const usePortfolio: UsePortfolio = () => {
               latestUnitPrices,
               coinType
             });
-          } else {
-            latestPrice = latestUnitPrices[latestUnitPrices.length - 1][1];
           }
         }
+
+        const latestPrice = await getLatestPriceForCoin(coinType);
 
         const balance = totalBalance.dividedBy(coin.multiplier);
 

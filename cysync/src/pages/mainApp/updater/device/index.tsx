@@ -5,9 +5,9 @@ import Routes from '../../../../constants/routes';
 import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
 import { deviceDb2 } from '../../../../store/database';
 import {
+  DeviceConnectionState,
   useConnection,
-  useUpdater,
-  VerifyState
+  useUpdater
 } from '../../../../store/provider';
 import { compareVersion } from '../../../../utils/compareVersion';
 import logger from '../../../../utils/logger';
@@ -20,11 +20,14 @@ const Updater = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
-  const { deviceSerial, verifyState } = useConnection();
+  const { deviceSerial, deviceConnectionState } = useConnection();
 
   useEffect(() => {
     // Only show when update is available and device has a valid connection
-    if (isDeviceUpdateAvailable && verifyState === VerifyState.VERIFIED) {
+    if (
+      isDeviceUpdateAvailable &&
+      deviceConnectionState === DeviceConnectionState.VERIFIED
+    ) {
       const lastVersion = localStorage.getItem('last-device-version');
       if (deviceSerial !== null) {
         deviceDb2
@@ -53,7 +56,7 @@ const Updater = () => {
           .catch(error => logger.error(error));
       }
     }
-  }, [isDeviceUpdateAvailable, deviceSerial, verifyState]);
+  }, [isDeviceUpdateAvailable, deviceSerial, deviceConnectionState]);
 
   const finalizeDontShow = () => {
     if (dontShowAgain) {

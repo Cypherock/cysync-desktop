@@ -5,7 +5,10 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import CustomButton from '../../../../designSystem/designComponents/buttons/button';
-import { useConnection, VerifyState } from '../../../../store/provider';
+import {
+  DeviceConnectionState,
+  useConnection
+} from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
 
@@ -32,13 +35,13 @@ type Props = {
 };
 
 const Popup: React.FC<Props> = ({ handleClose }) => {
-  const { retryConnection, verifyState } = useConnection();
+  const { retryConnection, deviceConnectionState } = useConnection();
 
   const getHeading = () => {
-    switch (verifyState) {
-      case VerifyState.DEVICE_NOT_READY:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Looks like the device is not in the main menu.';
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
         return 'An unknown error occurred while connecting the device.';
       default:
         return 'An unknown error occurred while connecting the device.';
@@ -46,10 +49,10 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
   };
 
   const getQuestion = () => {
-    switch (verifyState) {
-      case VerifyState.DEVICE_NOT_READY:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Please bring the device to the main menu and try again.';
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
         return 'Please reconnect the device and try again';
       default:
         return 'Please reconnect the device and try again';
@@ -57,20 +60,20 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
   };
 
   const getPositiveBtnText = () => {
-    switch (verifyState) {
-      case VerifyState.DEVICE_NOT_READY:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Try again';
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
       default:
         return 'Ok';
     }
   };
 
   const getNegativeBtnText = () => {
-    switch (verifyState) {
-      case VerifyState.DEVICE_NOT_READY:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Cancel';
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
       default:
         return undefined;
     }
@@ -81,8 +84,8 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
   };
 
   const onPositiveClick = () => {
-    switch (verifyState) {
-      case VerifyState.DEVICE_NOT_READY:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.DEVICE_NOT_READY:
         logger.info('Retry device connection by user');
         Analytics.Instance.event(
           Analytics.Categories.RETRY_DEVICE_CONNECTION,
@@ -91,7 +94,7 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
         retryConnection();
         handleClose();
         break;
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
       default:
         handleClose();
     }

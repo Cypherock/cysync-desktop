@@ -30,7 +30,7 @@ export interface StepComponentProps {
   feeType: boolean;
   batchRecipientData: BatchRecipientData[];
   total: number;
-  transactionFee: number;
+  transactionFee: string;
   addBatchTransaction: () => void;
   handleDelete: (e: any) => void;
   handleInputChange: (e: any) => void;
@@ -48,6 +48,7 @@ export interface StepComponentProps {
   verifyRecipientAmount: () => boolean;
   setTransactionFee: (val: number) => void;
   buttonDisabled: boolean;
+  isButtonLoading: boolean;
   gasLimit: number;
   setGasLimit: (val: number) => void;
   handleCopyFromClipboard: (id: string) => void;
@@ -68,7 +69,7 @@ export const StepComponentPropTypes = {
   batchRecipientData: PropTypes.arrayOf(PropTypes.exact(BatchRecipientPropType))
     .isRequired,
   total: PropTypes.number.isRequired,
-  transactionFee: PropTypes.number.isRequired,
+  transactionFee: PropTypes.string.isRequired,
   addBatchTransaction: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
   handleInputChange: PropTypes.func.isRequired,
@@ -81,6 +82,7 @@ export const StepComponentPropTypes = {
   handleVerificationErrors: PropTypes.func.isRequired,
   setTransactionFee: PropTypes.func.isRequired,
   buttonDisabled: PropTypes.bool.isRequired,
+  isButtonLoading: PropTypes.bool.isRequired,
   gasLimit: PropTypes.number.isRequired,
   setGasLimit: PropTypes.func.isRequired,
   handleCopyFromClipboard: PropTypes.func.isRequired,

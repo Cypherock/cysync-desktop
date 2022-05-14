@@ -95,11 +95,17 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
     errorMessage,
     latestVersion,
     setUpdated,
-    setIsCompleted
+    setIsCompleted,
+    setBlockNewConnection
   } = useDeviceUpgrade(true);
 
   const refreshComponent = () => {
     handleRetry();
+  };
+
+  const onClose = () => {
+    setBlockNewConnection(false);
+    handleDeviceConnected();
   };
 
   useEffect(() => {
@@ -133,6 +139,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
     startDeviceUpdate();
 
     return () => {
+      setBlockNewConnection(false);
       logger.info('Closed device update screen');
     };
   }, []);
@@ -150,7 +157,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
         Analytics.Actions.COMPLETED
       );
       logger.info('InitialDeviceUpdate: Completed');
-      setTimeout(handleDeviceConnected, 350);
+      setTimeout(onClose, 350);
     }
   }, [isCompleted]);
 

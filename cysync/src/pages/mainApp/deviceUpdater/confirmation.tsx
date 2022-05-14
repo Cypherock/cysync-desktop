@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import CustomButton from '../../../designSystem/designComponents/buttons/button';
-import { useConnection, VerifyState } from '../../../store/provider';
+import { DeviceConnectionState, useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
@@ -31,26 +31,26 @@ type Props = {
 };
 
 const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
-  const { retryConnection, verifyState } = useConnection();
+  const { retryConnection, deviceConnectionState } = useConnection();
 
   const getHeading = () => {
     const defaultText = 'Looks like the device is not configured.';
-    switch (verifyState) {
-      case VerifyState.IN_TEST_APP:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.IN_TEST_APP:
         return 'Looks like the device is not configured.';
-      case VerifyState.IN_BOOTLOADER:
+      case DeviceConnectionState.IN_BOOTLOADER:
         return 'Looks like your device was disconnected while upgrading.';
-      case VerifyState.PARTIAL_STATE:
+      case DeviceConnectionState.PARTIAL_STATE:
         return 'Looks like your device is not authenticated.';
-      case VerifyState.NEW_DEVICE:
+      case DeviceConnectionState.NEW_DEVICE:
         return 'Looks like this device is connected for the first time.';
-      case VerifyState.LAST_AUTH_FAILED:
+      case DeviceConnectionState.LAST_AUTH_FAILED:
         return 'Looks like the device authentication failed the last time.';
-      case VerifyState.DEVICE_NOT_READY:
+      case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Looks like the device is not in the main menu.';
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
         return 'An unknown error occurred while connecting the device.';
-      case VerifyState.UPDATE_REQUIRED:
+      case DeviceConnectionState.UPDATE_REQUIRED:
         if (updateRequiredType === 'app') {
           return 'The current version of CySync is not compatible with the device connected.';
         }
@@ -67,22 +67,22 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
 
   const getQuestion = () => {
     const defaultText = 'Do you want to configure it now?';
-    switch (verifyState) {
-      case VerifyState.IN_TEST_APP:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.IN_TEST_APP:
         return 'Do you want to configure it now?';
-      case VerifyState.IN_BOOTLOADER:
+      case DeviceConnectionState.IN_BOOTLOADER:
         return 'Do you want to complete the upgrade now?';
-      case VerifyState.PARTIAL_STATE:
+      case DeviceConnectionState.PARTIAL_STATE:
         return 'Do you want to complete the authentication now?';
-      case VerifyState.NEW_DEVICE:
+      case DeviceConnectionState.NEW_DEVICE:
         return 'Do you want to setup the device now?';
-      case VerifyState.LAST_AUTH_FAILED:
+      case DeviceConnectionState.LAST_AUTH_FAILED:
         return 'Do you want to retry the authentication now?';
-      case VerifyState.DEVICE_NOT_READY:
+      case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Please bring the device to the main menu and try again.';
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
         return 'Please reconnect the device and try again';
-      case VerifyState.UPDATE_REQUIRED:
+      case DeviceConnectionState.UPDATE_REQUIRED:
         if (updateRequiredType === 'app') {
           return 'Please update CySync from https://cypherock.com/gs';
         }
@@ -98,18 +98,18 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
   };
 
   const getPositiveBtnText = () => {
-    switch (verifyState) {
-      case VerifyState.IN_TEST_APP:
-      case VerifyState.IN_BOOTLOADER:
-      case VerifyState.PARTIAL_STATE:
-      case VerifyState.NEW_DEVICE:
-      case VerifyState.LAST_AUTH_FAILED:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.IN_TEST_APP:
+      case DeviceConnectionState.IN_BOOTLOADER:
+      case DeviceConnectionState.PARTIAL_STATE:
+      case DeviceConnectionState.NEW_DEVICE:
+      case DeviceConnectionState.LAST_AUTH_FAILED:
         return 'Yes';
-      case VerifyState.DEVICE_NOT_READY:
+      case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Try again';
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
         return 'Ok';
-      case VerifyState.UPDATE_REQUIRED:
+      case DeviceConnectionState.UPDATE_REQUIRED:
         if (updateRequiredType === 'device') {
           return 'Yes';
         }
@@ -120,18 +120,18 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
   };
 
   const getNegativeBtnText = () => {
-    switch (verifyState) {
-      case VerifyState.IN_TEST_APP:
-      case VerifyState.IN_BOOTLOADER:
-      case VerifyState.PARTIAL_STATE:
-      case VerifyState.NEW_DEVICE:
-      case VerifyState.LAST_AUTH_FAILED:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.IN_TEST_APP:
+      case DeviceConnectionState.IN_BOOTLOADER:
+      case DeviceConnectionState.PARTIAL_STATE:
+      case DeviceConnectionState.NEW_DEVICE:
+      case DeviceConnectionState.LAST_AUTH_FAILED:
         return 'No';
-      case VerifyState.DEVICE_NOT_READY:
+      case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Cancel';
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
         return undefined;
-      case VerifyState.UPDATE_REQUIRED:
+      case DeviceConnectionState.UPDATE_REQUIRED:
         return 'Cancel';
       default:
         return undefined;
@@ -143,15 +143,15 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
   };
 
   const onPositiveClick = () => {
-    switch (verifyState) {
-      case VerifyState.IN_TEST_APP:
-      case VerifyState.IN_BOOTLOADER:
-      case VerifyState.PARTIAL_STATE:
-      case VerifyState.NEW_DEVICE:
-      case VerifyState.LAST_AUTH_FAILED:
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.IN_TEST_APP:
+      case DeviceConnectionState.IN_BOOTLOADER:
+      case DeviceConnectionState.PARTIAL_STATE:
+      case DeviceConnectionState.NEW_DEVICE:
+      case DeviceConnectionState.LAST_AUTH_FAILED:
         handleClose(true);
         break;
-      case VerifyState.DEVICE_NOT_READY:
+      case DeviceConnectionState.DEVICE_NOT_READY:
         logger.info('Retry device connection by user');
         Analytics.Instance.event(
           Analytics.Categories.RETRY_DEVICE_CONNECTION,
@@ -160,10 +160,10 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
         retryConnection();
         handleClose(false);
         break;
-      case VerifyState.UNKNOWN_ERROR:
+      case DeviceConnectionState.UNKNOWN_ERROR:
         handleClose(false);
         break;
-      case VerifyState.UPDATE_REQUIRED:
+      case DeviceConnectionState.UPDATE_REQUIRED:
         handleClose(true);
         break;
       default:
