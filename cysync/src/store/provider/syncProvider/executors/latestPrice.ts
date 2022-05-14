@@ -29,6 +29,7 @@ export const processResponses = async (
   }
 
   const res = responses[0];
+  console.log('latestPrice', res, item, ERC20TOKENS[item.coinType.toLowerCase()]);
 
   if (ERC20TOKENS[item.coinType.toLowerCase()])
     await tokenDb.findAndUpdate(
