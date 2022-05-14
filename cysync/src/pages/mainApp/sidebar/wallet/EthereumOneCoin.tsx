@@ -476,7 +476,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
                     borderRadius: '0 0 5px 5px'
                   }}
                 >
-                  Show Token
+                  {collapseTab ? 'Hide Tokens' : 'Show Tokens'}
                   {collapseTab ? <ExpandLess /> : <ExpandMore />}
                 </CoinCardBtn>
               </Grid>

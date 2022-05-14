@@ -7,8 +7,8 @@ import Chart from 'react-apexcharts';
 import formatDisplayAmount from '../../../../../utils/formatDisplayAmount';
 
 type chartProps = {
-  series: any[];
-  labels: any[];
+  series: number[];
+  labels: string[];
   hasCoins: boolean;
   currentCoinLabel: string;
 };
@@ -38,6 +38,13 @@ const Donut: React.FC<chartProps> = ({
     dataLabels: {
       enabled: true
     },
+    tooltip: {
+      y: {
+        formatter(val) {
+          return `$ ${formatDisplayAmount(val, 2, true)}`;
+        }
+      }
+    },
     plotOptions: {
       pie: {
         customScale: 0.85,
@@ -50,19 +57,10 @@ const Donut: React.FC<chartProps> = ({
             show: true,
             name: {
               show: true,
-              offsetY: -1,
-              formatter(val: any) {
-                return val;
-              }
+              offsetY: 5
             },
             value: {
-              show: true,
-              color: theme.palette.text.primary,
-              fontSize: '15',
-              offsetY: -2,
-              formatter(val: any) {
-                return `$ ${formatDisplayAmount(val, 2, true)}`;
-              }
+              show: false
             },
             total: {
               show: true,
