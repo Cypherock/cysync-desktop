@@ -149,7 +149,7 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
         coin: ethCoin.toLowerCase(),
         balance: '0',
         networkId: -1,
-        price: '0',
+        price: 0,
       });
       sync.addTokenTask(
         selectedWallet._id,

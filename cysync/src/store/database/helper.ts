@@ -1,16 +1,20 @@
-import { ALLCOINS } from '@cypherock/communication';
+import { ALLCOINS, ERC20TOKENS } from '@cypherock/communication';
 
 import logger from '../../utils/logger';
 
-import { coinDb } from './databaseInit';
+import { coinDb, tokenDb } from './databaseInit';
 
 export const getLatestPriceForCoin = async (coin: string) => {
   if (ALLCOINS[coin] && ALLCOINS[coin].isTest) return 0;
 
-  const res = await coinDb.getOne({ slug: coin });
+  let res;
+  if (ERC20TOKENS[coin.toLowerCase()])
+    res = await tokenDb.getOne({ slug: coin });
+  else res = await coinDb.getOne({ slug: coin });
+  
   if (!res) {
     logger.warn(`Cannot find price for coin ${coin}`);
-  return 0;
+    return 0;
   }
   return res.price;
 };
