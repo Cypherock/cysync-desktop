@@ -168,14 +168,16 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
       shell.openExternal(
         ethServer.transaction.getOpenTxnLink({
           network: coin.network,
-          txHash: txn.hash
+          txHash: txn.hash,
+          isConfirmed: txn.confirmations && txn.confirmations > 0
         })
       );
     } else {
       shell.openExternal(
         bitcoinServer.transaction.getOpenTxnLink({
           coinType: txn.coin.toLowerCase(),
-          txHash: txn.hash
+          txHash: txn.hash,
+          isConfirmed: txn.confirmations && txn.confirmations > 0
         })
       );
     }

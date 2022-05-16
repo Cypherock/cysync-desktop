@@ -15,6 +15,7 @@ import Routes from '../../../../../../constants/routes';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import CustomIconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import AvatarIcon from '../../../../../../designSystem/designComponents/icons/AvatarIcon';
+import { transactionDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
   useSendTransactionContext,
@@ -141,7 +142,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
       });
   }, [sendTransaction.hash]);
 
-  const handleExternalLink = () => {
+  const handleExternalLink = async () => {
     const coin = COINS[coinDetails.coin];
 
     if (!coin) {
@@ -149,18 +150,36 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
       return;
     }
 
+    if (!sendTransaction.hash) {
+      logger.error('Transaction hash not found in open external link');
+      return;
+    }
+
+    const txns = await transactionDb.getAll({ hash: sendTransaction.hash });
+
+    if (txns.length <= 0) {
+      logger.error(
+        'No transaction found with the txn hash: ' + sendTransaction.hash
+      );
+      return;
+    }
+
+    const isConfirmed = txns[0].confirmations && txns[0].confirmations > 0;
+
     if (coin instanceof EthCoinData) {
       shell.openExternal(
         Server.eth.transaction.getOpenTxnLink({
           network: coin.network,
-          txHash: sendTransaction.hash
+          txHash: sendTransaction.hash,
+          isConfirmed
         })
       );
     } else {
       shell.openExternal(
         Server.bitcoin.transaction.getOpenTxnLink({
           coinType: coinDetails.coin,
-          txHash: sendTransaction.hash
+          txHash: sendTransaction.hash,
+          isConfirmed
         })
       );
     }
