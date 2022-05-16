@@ -455,7 +455,6 @@ export const SyncProvider: React.FC = ({ children }) => {
     for (const token of tokens) {
       const ethXpub = await coinDb.getOne({
         walletId: token.walletId,
-        // networkId: token.networkId,
         slug: token.coin
       });
       if (!ethXpub) {
