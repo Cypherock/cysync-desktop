@@ -3,13 +3,20 @@ import React, { useEffect, useState } from 'react';
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import {
   addressDb,
+  coinDb,
   deviceDb,
+  deviceDb2,
   erc20tokenDb,
   notificationDb,
-  priceDb,
-  receiveAddressDb,
+  notificationDb2,
+  priceHistoryDb,
+  receiveAddressDb2,
+  sendAddressDb,
+  tokenDb,
   transactionDb,
+  transactionDb2,
   walletDb,
+  walletDb2,
   xpubDb
 } from '../../../store/database';
 import Analytics from '../../../utils/analytics';
@@ -27,40 +34,40 @@ const DBCleaupPopup = () => {
 
       const promiseList = [
         {
-          name: 'History',
-          promise: transactionDb.hasIncompatableData.bind(transactionDb)
+          name: 'Transaction',
+          promise: transactionDb2.hasIncompatableData.bind(transactionDb2)
         },
         {
-          name: 'Xpub',
-          promise: xpubDb.hasIncompatableData.bind(xpubDb)
+          name: 'Price History',
+          promise: priceHistoryDb.hasIncompatableData.bind(priceHistoryDb)
+        },
+        {
+          name: 'Coin',
+          promise: coinDb.hasIncompatableData.bind(coinDb)
         },
         {
           name: 'Wallet',
-          promise: walletDb.hasIncompatableData.bind(walletDb)
-        },
-        {
-          name: 'Prices',
-          promise: priceDb.hasIncompatableData.bind(priceDb)
+          promise: walletDb2.hasIncompatableData.bind(walletDb2)
         },
         {
           name: 'ERC20 Tokens',
-          promise: erc20tokenDb.hasIncompatableData.bind(erc20tokenDb)
+          promise: tokenDb.hasIncompatableData.bind(tokenDb)
         },
         {
           name: 'Addresses',
-          promise: addressDb.hasIncompatableData.bind(addressDb)
+          promise: sendAddressDb.hasIncompatableData.bind(sendAddressDb)
         },
         {
           name: 'Receive Address',
-          promise: receiveAddressDb.hasIncompatableData.bind(receiveAddressDb)
+          promise: receiveAddressDb2.hasIncompatableData.bind(receiveAddressDb2)
         },
         {
           name: 'Notification',
-          promise: notificationDb.hasIncompatableData.bind(notificationDb)
+          promise: notificationDb2.hasIncompatableData.bind(notificationDb2)
         },
         {
           name: 'Device',
-          promise: deviceDb.hasIncompatableData.bind(deviceDb)
+          promise: deviceDb2.hasIncompatableData.bind(deviceDb2)
         }
       ];
 
