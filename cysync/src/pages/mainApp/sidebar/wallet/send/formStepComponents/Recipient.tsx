@@ -427,9 +427,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
     getFees(coinDetails.slug)
       .then(res => {
         logger.info(`Medium Fee is ${res}`);
-        setMediumFee(res + 2);
-        setTransactionFee(res + 2);
-        storeCurrentMedimFee(res + 2);
+        setMediumFee(res);
+        setTransactionFee(res);
+        storeCurrentMedimFee(res);
       })
       .catch(e => {
         logger.error('Error in fetching medium fees');

@@ -1,6 +1,5 @@
 import { COINS, EthCoinData } from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
-import BigNumber from 'bignumber.js';
 
 const getFees = async (coinType: string) => {
   const coin = COINS[coinType];
@@ -15,22 +14,14 @@ const getFees = async (coinType: string) => {
         network: coin.network
       })
       .request();
-    const { result } = resp.data;
-    const value = new BigNumber(result, 16);
+    const { FastGasPrice: result } = resp.data; //Available options: FastGasPrice, SafeGasPrice, ProposedGasPrice
+    const fees = parseInt(result, 10);
 
-    if (value.isNaN()) {
+    if (isNaN(fees)) {
       throw new Error(
         `Received NaN from API. Data: ${JSON.stringify(resp.data)}`
       );
     }
-
-    if (value.isLessThanOrEqualTo(0)) {
-      throw new Error(
-        `'0' Medium fee returned from server: ${JSON.stringify(resp.data)}`
-      );
-    }
-
-    const fees = value.dividedBy(1000000000).integerValue().toNumber();
 
     if (fees <= 0) {
       throw new Error(
