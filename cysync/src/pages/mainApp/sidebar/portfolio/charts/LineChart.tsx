@@ -2,7 +2,7 @@ import Button from '@mui/material/Button';
 import { styled, useTheme } from '@mui/material/styles';
 import { ApexOptions } from 'apexcharts';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useState } from 'react';
 import Chart from 'react-apexcharts';
 
 import DropMenu from '../../../../../designSystem/designComponents/menu/DropMenu';
@@ -50,6 +50,32 @@ const Root = styled('div')(({ theme }) => ({
 
 const ApexChart = (props: any) => {
   const theme = useTheme();
+  const [chartWidth, setChartWidth] = useState(600);
+
+  window.addEventListener('resize', () => {
+    console.log(window.innerWidth, chartWidth);
+    if (window.innerWidth <= 1090 && chartWidth !== 600) 
+    setChartWidth(600);
+    else if (window.innerWidth > 1090 && window.innerWidth <= 1200 && chartWidth !== 650) 
+    setChartWidth(650);
+    else if (window.innerWidth > 1200 && window.innerWidth <= 1350 && chartWidth !== 700) 
+    setChartWidth(700);
+    else if (window.innerWidth > 1350 && window.innerWidth <= 1600  && chartWidth !== 800) 
+    setChartWidth(800);   
+  })
+  
+  const getChartComponent = () => {
+
+    return (
+      <Chart
+        options={options}
+        series={series}
+        type="area"
+        width={chartWidth}
+        height={230}
+      />  
+    )
+  }
 
   const {
     timeActiveButton,
@@ -200,13 +226,7 @@ const ApexChart = (props: any) => {
           </Button>
         </div>
       </div>
-      <Chart
-        options={options}
-        series={series}
-        type="area"
-        width={700}
-        height={230}
-      />
+      {getChartComponent()}
     </Root>
   );
 };
