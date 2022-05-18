@@ -2,22 +2,15 @@ import React, { useEffect, useState } from 'react';
 
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import {
-  addressDb,
   coinDb,
   deviceDb,
-  deviceDb2,
-  erc20tokenDb,
   notificationDb,
-  notificationDb2,
   priceHistoryDb,
-  receiveAddressDb2,
+  receiveAddressDb,
   sendAddressDb,
   tokenDb,
   transactionDb,
-  transactionDb2,
-  walletDb,
-  walletDb2,
-  xpubDb
+  walletDb
 } from '../../../store/database';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
