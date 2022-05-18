@@ -1,4 +1,4 @@
-import { Wallet2 } from '@cypherock/database';
+import { Wallet as WalletModel } from '@cypherock/database';
 import Button from '@mui/material/Button';
 import Collapse, { CollapseProps } from '@mui/material/Collapse';
 import Divider from '@mui/material/Divider';
@@ -250,7 +250,7 @@ const Sidebar = () => {
     }
   }, [value]);
 
-  const handleWalletChange = (wallet: Wallet2, index: number) => {
+  const handleWalletChange = (wallet: WalletModel, index: number) => {
     setWalletIndex(index);
     navigate(`${Routes.wallet.index}/${wallet._id}`);
   };

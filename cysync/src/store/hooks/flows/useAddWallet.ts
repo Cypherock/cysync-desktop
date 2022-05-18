@@ -3,12 +3,12 @@ import {
   DeviceError,
   DeviceErrorType
 } from '@cypherock/communication';
-import { Wallet2 } from '@cypherock/database';
+import { Wallet } from '@cypherock/database';
 import { WalletAdder } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { walletDb2 } from '../../database';
+import { walletDb } from '../../database';
 import { useConnection, useI18n, useWallets } from '../../provider';
 
 export interface HandleAddWalletOptions {
@@ -135,7 +135,7 @@ export const useAddWallet: UseAddWallet = () => {
       }
     });
 
-    addWallet.on('walletDetails', async (walletDetails: Wallet2) => {
+    addWallet.on('walletDetails', async (walletDetails: Wallet) => {
       try {
         if (walletDetails === null) {
           logger.info('AddWallet: Rejected from device');
@@ -151,7 +151,7 @@ export const useAddWallet: UseAddWallet = () => {
           return;
         }
 
-        const walletWithSameId = await walletDb2.getById(walletDetails._id);
+        const walletWithSameId = await walletDb.getById(walletDetails._id);
         console.log('walletwithssameid', walletWithSameId);
 
         if (walletWithSameId) {
@@ -175,7 +175,7 @@ export const useAddWallet: UseAddWallet = () => {
           return;
         }
         walletDetails.device = deviceSerial;
-        walletDb2
+        walletDb
           .insert(walletDetails)
           .then(() => {
             setWalletName(walletDetails.name);
@@ -246,7 +246,7 @@ export const useAddWallet: UseAddWallet = () => {
         throw new Error('New Wallet details are missing');
       }
 
-      const walletWithSameId = await walletDb2.getById(walletId);
+      const walletWithSameId = await walletDb.getById(walletId);
 
       if (!walletWithSameId) {
         throw new Error('Could not find wallet with same ID');
@@ -256,7 +256,7 @@ export const useAddWallet: UseAddWallet = () => {
       duplicateWallet.name = walletName;
       duplicateWallet.passphraseSet = passphraseSet;
       duplicateWallet.passwordSet = passwordSet;
-      await walletDb2.update(walletWithSameId);
+      await walletDb.update(walletWithSameId);
       setIsNameDiff(false);
       setErrorMessage('');
       setWalletSuccess(true);

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
-import { tokenDb, transactionDb2, coinDb, Coin2, priceHistoryDb } from '../../database';
+import { tokenDb, transactionDb, coinDb, Coin, priceHistoryDb } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
@@ -35,7 +35,7 @@ export interface SyncContextInterface {
   isSyncing: boolean;
   isWaitingForConnection: boolean;
   modulesInExecutionQueue: string[];
-  addCoinTask: (coin: Coin2, options: { module: string }) => void;
+  addCoinTask: (coin: Coin, options: { module: string }) => void;
   addTokenTask: (
     walletId: string,
     tokenName: string,
@@ -43,11 +43,11 @@ export interface SyncContextInterface {
   ) => Promise<void>;
   reSync: () => void;
   addBalanceSyncItemFromXpub: (
-    coin: Coin2,
+    coin: Coin,
     options: { token?: string; module?: string; isRefresh?: boolean }
   ) => void;
   addHistorySyncItemFromXpub: (
-    coin: Coin2,
+    coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
 }
@@ -95,7 +95,7 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const addHistorySyncItemFromXpub: SyncProviderTypes['addHistorySyncItemFromXpub'] =
-    async (coin: Coin2, { module = 'default', isRefresh = false }) => {
+    async (coin: Coin, { module = 'default', isRefresh = false }) => {
       const coinData = COINS[coin.slug];
 
       if (!coinData) {
@@ -116,7 +116,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           .createHash('sha256')
           .update(coin.xpub)
           .digest('base64');
-        const topBlock = await transactionDb2.getTopBlock(
+        const topBlock = await transactionDb.getTopBlock(
           {
             walletId: coin.walletId,
             walletName,
@@ -142,7 +142,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             .createHash('sha256')
             .update(coin.zpub)
             .digest('base64');
-          const topBlock = await transactionDb2.getTopBlock(
+          const topBlock = await transactionDb.getTopBlock(
             {
               walletId: coin.walletId,
               walletName: zwalletName,
@@ -188,7 +188,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     };
 
   const addBalanceSyncItemFromXpub: SyncProviderTypes['addBalanceSyncItemFromXpub'] =
-    (coin: Coin2, { token, module = 'default', isRefresh = false }) => {
+    (coin: Coin, { token, module = 'default', isRefresh = false }) => {
       const coinData = COINS[coin.slug];
 
       if (!coinData) {
@@ -236,7 +236,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     };
 
   const addPriceSyncItemFromXpub: SyncProviderTypes['addPriceSyncItemFromXpub'] =
-    async (coin: Coin2, { module = 'default', isRefresh = false }) => {
+    async (coin: Coin, { module = 'default', isRefresh = false }) => {
       const coinName = coin.slug;
 
       const coinData = ALLCOINS[coinName];
@@ -283,7 +283,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     };
 
   const addLatestPriceSyncItemFromXpub: SyncProviderTypes['addLatestPriceSyncItemFromXpub'] =
-    (coin: Coin2, { module = 'default', isRefresh = false }) => {
+    (coin: Coin, { module = 'default', isRefresh = false }) => {
       const coinName = coin.slug;
 
       const coinData = ALLCOINS[coinName];
@@ -483,7 +483,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
 
     for (const token of tokens) {
-      addPriceSyncItemFromXpub({ slug: token.coin } as Coin2, {
+      addPriceSyncItemFromXpub({ slug: token.coin } as Coin, {
         isRefresh,
         module
       });
@@ -502,14 +502,14 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
 
     for (const token of tokens) {
-      addLatestPriceSyncItemFromXpub({ slug: token.coin } as Coin2, {
+      addLatestPriceSyncItemFromXpub({ slug: token.coin } as Coin, {
         isRefresh,
         module
       });
     }
   };
 
-  const addCoinTask = (coin: Coin2, { module = 'default' }) => {
+  const addCoinTask = (coin: Coin, { module = 'default' }) => {
     addBalanceSyncItemFromXpub(coin, { module, isRefresh: true });
     addHistorySyncItemFromXpub(coin, { module, isRefresh: true });
     addPriceSyncItemFromXpub(coin, { module, isRefresh: true });
@@ -536,11 +536,11 @@ export const SyncProvider: React.FC = ({ children }) => {
         isRefresh: true
       })
     );
-    addPriceSyncItemFromXpub({ slug: tokenName } as Coin2, {
+    addPriceSyncItemFromXpub({ slug: tokenName } as Coin, {
       isRefresh: true,
       module: 'default'
     });
-    addLatestPriceSyncItemFromXpub({ slug: tokenName } as Coin2, {
+    addLatestPriceSyncItemFromXpub({ slug: tokenName } as Coin, {
       isRefresh: true,
       module: 'default'
     });
@@ -570,7 +570,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const intervals = useRef<NodeJS.Timeout[]>([]);
   useEffect(() => {
-    transactionDb2.failExpiredTxn();
+    transactionDb.failExpiredTxn();
     setupInitial();
 
     // Refresh after 60 mins
@@ -599,7 +599,7 @@ export const SyncProvider: React.FC = ({ children }) => {
                 logger.error('Sync: Notification Refresh failed', err);
               });
           }
-          transactionDb2
+          transactionDb
             .failExpiredTxn()
             .then(() => {
               logger.info('Sync: Transaction Refresh completed');

@@ -20,11 +20,11 @@ import BigNumber from 'bignumber.js';
 import logger from '../../../../utils/logger';
 import {
   tokenDb,
-  transactionDb2,
+  transactionDb,
   coinDb,
   sendAddressDb,
-  Coin2,
-  Transaction2,
+  Coin,
+  Transaction,
   IOtype
 } from '../../../database';
 import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
@@ -162,7 +162,7 @@ export const processResponses = async (
     if (response.data.transactions) {
       for (const txn of response.data.transactions) {
         try {
-          await transactionDb2.insertFromBlockbookTxn({
+          await transactionDb.insertFromBlockbookTxn({
             txn,
             xpub: item.xpub,
             addresses: response.data.tokens
@@ -202,7 +202,7 @@ export const processResponses = async (
       throw new Error('Did not find responses while processing');
     }
 
-    const history: Transaction2[] = [];
+    const history: Transaction[] = [];
     const erc20Tokens = new Set<string>();
 
     const address = generateEthAddressFromXpub(item.xpub);
@@ -222,7 +222,7 @@ export const processResponses = async (
       const fromAddr = formatEthAddress(ele.from);
       const toAddr = formatEthAddress(ele.to);
 
-      const txn: Transaction2 = {
+      const txn: Transaction = {
         hash: ele.hash,
         amount: String(ele.value),
         fees: fees.toString(),
@@ -314,7 +314,7 @@ export const processResponses = async (
         );
 
         erc20Tokens.add(ele.tokenSymbol.toLowerCase());
-        const txn: Transaction2 = {
+        const txn: Transaction = {
           hash: ele.hash as string,
           amount: String(ele.value),
           fees: fees.toString(),
@@ -374,7 +374,7 @@ export const processResponses = async (
 
     for (const txn of history) {
       try {
-        await transactionDb2.insert(txn);
+        await transactionDb.insert(txn);
         // No need to retry if the inserting fails because it'll produce the same error.
       } catch (error) {
         logger.error('Error while inserting transaction in DB : insert');
@@ -406,11 +406,11 @@ export const processResponses = async (
             isRefresh: true
           })
         );
-        options.addPriceSyncItemFromXpub({ slug: tokenName } as Coin2, {
+        options.addPriceSyncItemFromXpub({ slug: tokenName } as Coin, {
           isRefresh: true,
           module: item.module
         });
-        options.addLatestPriceSyncItemFromXpub({ slug: tokenName } as Coin2, {
+        options.addLatestPriceSyncItemFromXpub({ slug: tokenName } as Coin, {
           isRefresh: true,
           module: 'default'
         });

@@ -13,10 +13,10 @@ import {
   sendAddressDb,
   coinDb,
   tokenDb,
-  receiveAddressDb2,
-  transactionDb2,
-  Wallet2,
-  walletDb2
+  receiveAddressDb,
+  transactionDb,
+  Wallet,
+  walletDb
 } from '../../../store/database';
 import logger from '../../../utils/logger';
 import DeleteWalletIcon from '../../iconGroups/deleteWallet';
@@ -118,7 +118,7 @@ const WalletItemRoot = styled(Grid)(() => ({
 
 interface WalletItemProps {
   title: string;
-  walletDetails: Wallet2;
+  walletDetails: Wallet;
 }
 
 const WalletItem = (props: WalletItemProps) => {
@@ -147,14 +147,14 @@ const WalletItem = (props: WalletItemProps) => {
       const {
         walletDetails: { _id: walletId }
       } = props;
-      await walletDb2.deleteById(walletId);
+      await walletDb.deleteById(walletId);
       await sendAddressDb.delete({ walletId});
-      await receiveAddressDb2.delete({
+      await receiveAddressDb.delete({
         walletId
       });
       await coinDb.delete({ walletId });
       await tokenDb.delete({walletId});
-      await transactionDb2.delete({walletId});
+      await transactionDb.delete({walletId});
       navigate(Routes.wallet.index);
       setDeleteOpen(false);
       handleClose();

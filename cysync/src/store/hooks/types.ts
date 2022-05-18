@@ -1,28 +1,28 @@
 import {
-  Token2,
-  InputOutput2,
-  Transaction2,
-  Coin2,
+  Token,
+  InputOutput,
+  Transaction,
+  Coin,
   IOtype
 } from '../database/databaseInit';
 import BigNumber from 'bignumber.js';
 import PropTypes from 'prop-types';
 
-export interface DisplayCoin extends Coin2 {
+export interface DisplayCoin extends Coin {
   displayValue: string;
   displayPrice: string;
   displayBalance: string;
   isEmpty: boolean;
 }
 
-export interface DisplayToken extends Token2 {
+export interface DisplayToken extends Token {
   displayValue: string;
   displayPrice: string;
   displayBalance: string;
   isEmpty: boolean;
 }
 
-export interface DisplayInputOutput extends InputOutput2 {
+export interface DisplayInputOutput extends InputOutput {
   displayValue: string;
 }
 
@@ -36,7 +36,7 @@ export const DisplayInputOutputPropTypes = {
 };
 
 export interface DisplayTransaction
-  extends Omit<Transaction2, 'inputs' | 'outputs'> {
+  extends Omit<Transaction, 'inputs' | 'outputs'> {
   displayAmount: string;
   displayFees: string;
   displayTotal: string;

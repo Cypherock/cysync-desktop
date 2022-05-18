@@ -8,9 +8,9 @@ import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
   sendAddressDb,
-  receiveAddressDb2,
-  transactionDb2,
-  walletDb2,
+  receiveAddressDb,
+  transactionDb,
+  walletDb,
   coinDb,
 } from '../../database';
 import { useNetwork } from '../networkProvider';
@@ -189,7 +189,7 @@ export const SocketProvider: React.FC = ({ children }) => {
   ) => {
     logger.info('Adding initial socket hooks');
 
-    const allPendingTxns = await transactionDb2.getAllTxns({ status: 'PENDING' });
+    const allPendingTxns = await transactionDb.getAllTxns({ status: 'PENDING' });
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
@@ -204,7 +204,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       }
     }
 
-    const allReceiveAddr = await receiveAddressDb2.getAll();
+    const allReceiveAddr = await receiveAddressDb.getAll();
 
     for (const receiveAddr of allReceiveAddr) {
       const coin = COINS[receiveAddr.coinType];
@@ -225,7 +225,7 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket?: BlockbookSocket
   ) => {
     logger.info('Adding initial blockbook web subscriptions');
-    const allPendingTxns = await transactionDb2.getAllTxns({ status: 'PENDING' });
+    const allPendingTxns = await transactionDb.getAllTxns({ status: 'PENDING' });
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
@@ -240,7 +240,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       }
     }
 
-    const allReceiveAddr = await receiveAddressDb2.getAll();
+    const allReceiveAddr = await receiveAddressDb.getAll();
 
     for (const receiveAddr of allReceiveAddr) {
       const coin = COINS[receiveAddr.coinType];
@@ -266,7 +266,7 @@ export const SocketProvider: React.FC = ({ children }) => {
         try {
           logger.info('Received receive txn hook', { payload });
           if (payload && payload.id && payload.coinType) {
-            const wallet = await walletDb2.getById(payload.id);
+            const wallet = await walletDb.getById(payload.id);
             if (wallet) {
               const coin = await coinDb.getOne({
                 walletId: payload.id,
@@ -274,7 +274,7 @@ export const SocketProvider: React.FC = ({ children }) => {
               });
 
               if (coin) {
-                transactionDb2.insertFromFullTxn({
+                transactionDb.insertFromFullTxn({
                   txn: payload,
                   xpub: coin.xpub,
                   addresses: [],
@@ -294,8 +294,8 @@ export const SocketProvider: React.FC = ({ children }) => {
                 }
 
                 // Update the confirmation if the database has a txn with same hash
-                await transactionDb2.updateConfirmations(payload);
-                const allTxWithSameHash = await transactionDb2.getAll({
+                await transactionDb.updateConfirmations(payload);
+                const allTxWithSameHash = await transactionDb.getAll({
                   hash: payload.hash
                 });
                 if (allTxWithSameHash && allTxWithSameHash.length > 0) {
@@ -345,7 +345,7 @@ export const SocketProvider: React.FC = ({ children }) => {
         try {
           logger.info('Received txn confirmation hook', { payload });
           if (payload && payload.hash && payload.coinType) {
-            const confirmations = await transactionDb2.updateConfirmations(
+            const confirmations = await transactionDb.updateConfirmations(
               payload
             );
             logger.info('Txn confirmed', {
@@ -497,7 +497,7 @@ export const SocketProvider: React.FC = ({ children }) => {
             });
 
             if (coin) {
-              transactionDb2.insertFromBlockbookTxn({
+              transactionDb.insertFromBlockbookTxn({
                 txn: payload.txn,
                 xpub: coin.xpub,
                 addresses: [],
@@ -527,7 +527,7 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket.on('block', async (payload: any) => {
       try {
         if (payload && payload.coinType) {
-          const pendingTxns = await transactionDb2.getAllTxns({
+          const pendingTxns = await transactionDb.getAllTxns({
             coin: payload.coinType,
             status: 'PENDING'
           });

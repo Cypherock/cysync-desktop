@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { tokenDb, walletDb2, Wallet2, coinDb } from '../database';
+import { tokenDb, walletDb, Wallet, coinDb } from '../database';
 
 export interface Coin {
   name: string;
@@ -11,7 +11,7 @@ export interface Coin {
 }
 
 export interface WalletsContextInterface {
-  allWallets: Wallet2[];
+  allWallets: Wallet[];
   allCoins: Coin[];
   getAll: () => void;
 }
@@ -20,7 +20,7 @@ export const WalletsContext: React.Context<WalletsContextInterface> =
   React.createContext<WalletsContextInterface>({} as WalletsContextInterface);
 
 export const WalletsProvider: React.FC = ({ children }) => {
-  const [allWallets, setAllWallets] = useState<Wallet2[]>([
+  const [allWallets, setAllWallets] = useState<Wallet[]>([
     {
       // UI breaks if the list is empty, hence dummy empty wallet. WalletID is null specially for Portfolio, to differenciate between initial state (walletId is 'null') and no wallets (walletId is '')
       _id: 'null',
@@ -36,7 +36,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
   const getAll = async () => {
     try {
       logger.verbose('Getting all wallets and xpub data');
-      const walletRes = await walletDb2.getAll();
+      const walletRes = await walletDb.getAll();
       console.log('walletRes', walletRes);
 
       if (walletRes.length !== 0) setAllWallets(walletRes);
@@ -97,9 +97,9 @@ export const WalletsProvider: React.FC = ({ children }) => {
   useEffect(() => {
     logger.verbose('Adding all wallet & xpub DB listners.');
 
-    walletDb2.emitter.on('insert', onUpdate);
-    walletDb2.emitter.on('update', onUpdate);
-    walletDb2.emitter.on('delete', onUpdate);
+    walletDb.emitter.on('insert', onUpdate);
+    walletDb.emitter.on('update', onUpdate);
+    walletDb.emitter.on('delete', onUpdate);
 
     coinDb.emitter.on('insert', onUpdate);
     coinDb.emitter.on('delete', onUpdate);
@@ -109,9 +109,9 @@ export const WalletsProvider: React.FC = ({ children }) => {
 
     return () => {
       logger.verbose('Removed all wallet & xpub DB listners.');
-      walletDb2.emitter.removeListener('insert', onUpdate);
-      walletDb2.emitter.removeListener('update', onUpdate);
-      walletDb2.emitter.removeListener('delete', onUpdate);
+      walletDb.emitter.removeListener('insert', onUpdate);
+      walletDb.emitter.removeListener('update', onUpdate);
+      walletDb.emitter.removeListener('delete', onUpdate);
 
       coinDb.emitter.removeListener('insert', onUpdate);
       coinDb.emitter.removeListener('delete', onUpdate);

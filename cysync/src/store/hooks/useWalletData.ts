@@ -7,8 +7,8 @@ import {
   coinDb,
   getLatestPriceForCoin,
   priceHistoryDb,
-  receiveAddressDb2,
-  Coin2
+  receiveAddressDb,
+  Coin
 } from '../database';
 
 import { DisplayCoin } from './types';
@@ -17,7 +17,7 @@ import { useDebouncedFunction } from './useDebounce';
 export interface UseWalletDataValues {
   coinData: DisplayCoin[];
   setCoinData: React.Dispatch<React.SetStateAction<DisplayCoin[]>>;
-  insert: (coin: Coin2) => Promise<void>;
+  insert: (coin: Coin) => Promise<void>;
   coinsPresent: string[];
   deleteCoinByXpub: (
     xpub: string,
@@ -46,11 +46,11 @@ export const useWalletData: UseWalletData = () => {
   // Using doRefresh mechanish because hooks state change do not work with event listeners.
   const [doRefresh, setDoRefresh] = useState(false);
 
-  const insert = (coin: Coin2) => {
+  const insert = (coin: Coin) => {
     coinDb.insert(coin);
   };
 
-  const getCoinsWithPrices = async (coins: Coin2[]) => {
+  const getCoinsWithPrices = async (coins: Coin[]) => {
     const mappedCoins: DisplayCoin[] = [];
 
     for (const coin of coins) {
@@ -64,7 +64,7 @@ export const useWalletData: UseWalletData = () => {
         isEmpty: true,
         displayValue: '0',
         displayPrice: '0',
-        displayBalance: '0',
+        displayBalance: '0'
       };
       const balance = new BigNumber(
         coin.totalBalance ? coin.totalBalance : 0
@@ -173,7 +173,7 @@ export const useWalletData: UseWalletData = () => {
 
   const getAllCoinsFromWallet = async () => {
     if (currentWalletId) {
-      const res = await coinDb.getAll({walletId: currentWalletId});
+      const res = await coinDb.getAll({ walletId: currentWalletId });
       const coinList: string[] = [];
       res.forEach(coin => {
         coinList.push(coin.slug);
@@ -190,8 +190,8 @@ export const useWalletData: UseWalletData = () => {
     walletId: string
   ) => {
     await sendAddressDb.delete({ walletId, coinType: coin });
-    await receiveAddressDb2.delete({ walletId, coinType: coin });
-    await coinDb.delete({xpub, slug: coin});
+    await receiveAddressDb.delete({ walletId, coinType: coin });
+    await coinDb.delete({ xpub, slug: coin });
     return getAllCoinsFromWallet();
   };
 

@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
 import {
-  Token2,
+  Token,
   tokenDb,
   getLatestPriceForCoin,
   priceHistoryDb
@@ -58,7 +58,7 @@ export const useToken: UseToken = () => {
     };
   }, []);
 
-  const getTokensWithPrices = async (tokens: Token2[]) => {
+  const getTokensWithPrices = async (tokens: Token[]) => {
     const tokensWithPrice: DisplayToken[] = [];
     for (const token of tokens) {
       const coinObj = COINS[token.slug.toLowerCase()];
@@ -71,7 +71,7 @@ export const useToken: UseToken = () => {
         isEmpty: true,
         displayPrice: '0',
         displayValue: '0',
-        displayBalance: '0',
+        displayBalance: '0'
       };
       const balance = new BigNumber(token.balance || 0).dividedBy(
         coinObj.multiplier

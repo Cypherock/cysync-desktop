@@ -1,10 +1,9 @@
 import { ALLCOINS as COINS, Erc20CoinData } from '@cypherock/communication';
-import { Coin2 } from '@cypherock/database';
-import { TxQueryOptions } from '@cypherock/database/dist/dbs2/transaction';
+import { TxQueryOptions, Coin } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';
-import { getLatestPriceForCoins, transactionDb2, walletDb2 } from '../database';
+import { getLatestPriceForCoins, transactionDb, walletDb } from '../database';
 
 import { DisplayInputOutput, DisplayTransaction } from './types';
 
@@ -16,7 +15,7 @@ export interface UseHistoryGetAllParams {
 
 export interface UseHistoryValues {
   getAll: (params: UseHistoryGetAllParams) => Promise<DisplayTransaction[]>;
-  deleteCoinHistory: (coin: Coin2) => Promise<void>;
+  deleteCoinHistory: (coin: Coin) => Promise<void>;
 }
 
 export type UseHistory = () => UseHistoryValues;
@@ -27,15 +26,15 @@ export const useHistory: UseHistory = () => {
     walletId,
     coinType
   }) => {
-    const query : TxQueryOptions = { excludeFees: true, sinceDate };
+    const query: TxQueryOptions = { excludeFees: true, sinceDate };
     if (walletId) {
       query.walletId = walletId;
     }
     if (coinType) {
       query.slug = coinType;
     }
-    const res = await transactionDb2.getAllTxns(query);
-    const allWallets = await walletDb2.getAll();
+    const res = await transactionDb.getAllTxns(query);
+    const allWallets = await walletDb.getAll();
     const latestTransactionsWithPrice: DisplayTransaction[] = [];
 
     const allUniqueCoins = new Set<string>();
@@ -139,8 +138,8 @@ export const useHistory: UseHistory = () => {
     return latestTransactionsWithPrice;
   };
 
-  const deleteCoinHistory = (coin: Coin2) => {
-    return transactionDb2.delete({ walletId: coin.walletId, slug: coin.slug });
+  const deleteCoinHistory = (coin: Coin) => {
+    return transactionDb.delete({ walletId: coin.walletId, slug: coin.slug });
   };
 
   return {

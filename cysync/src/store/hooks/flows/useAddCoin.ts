@@ -9,7 +9,7 @@ import newWallet from '@cypherock/wallet';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { sendAddressDb, coinDb, Coin2 } from '../../database';
+import { sendAddressDb, coinDb, Coin } from '../../database';
 import { useI18n, useSync } from '../../provider';
 
 function sleep(ms: number) {
@@ -17,7 +17,7 @@ function sleep(ms: number) {
 }
 
 export interface AddCoinStatus {
-  coin: Coin2;
+  coin: Coin;
   name: string;
   status: -1 | 0 | 1 | 2;
 }
@@ -123,7 +123,7 @@ export const useAddCoin: UseAddCoin = () => {
   };
 
   // This starts the adding coin task in a queue similar to `syncProvider`.
-  const setUpCoinWallets = async (coinList: Coin2[]) => {
+  const setUpCoinWallets = async (coinList: Coin[]) => {
     const coinStatus: AddCoinStatus[] = [];
 
     let i = 0;

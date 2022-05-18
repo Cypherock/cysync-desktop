@@ -1,4 +1,4 @@
-import { Wallet2 } from '@cypherock/database';
+import { Wallet } from '@cypherock/database';
 import React, { useEffect, useState } from 'react';
 import {
   Route,
@@ -28,7 +28,7 @@ const SingleWalletView = () => {
   const navigate = useNavigate();
   const { allWallets } = useWallets();
   const [currentWalletDetails, setCurrentWalletDetails] =
-    useState<Wallet2 | null>(null);
+    useState<Wallet | null>(null);
 
   useEffect(() => {
     const wallet = allWallets.find(elem => elem._id === walletId);

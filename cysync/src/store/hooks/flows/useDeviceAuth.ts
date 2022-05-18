@@ -3,12 +3,12 @@ import {
   DeviceError,
   DeviceErrorType
 } from '@cypherock/communication';
-import { Device2 } from '@cypherock/database';
+import { Device } from '@cypherock/database';
 import { DeviceAuthenticator } from '@cypherock/protocols';
 import { useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { deviceDb2 } from '../../database';
+import { deviceDb } from '../../database';
 import { useI18n } from '../../provider';
 
 export interface HandleDeviceAuthOptions {
@@ -62,13 +62,13 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       if (!deviceSerial) {
         throw new Error('Device serial not found.');
       }
-      const device: Device2 = {
+      const device: Device = {
         _id: deviceSerial,
         serial: deviceSerial,
         version: firmwareVersion,
         isAuth: auth
       };
-      deviceDb2.insert(device);
+      deviceDb.insert(device);
     } catch (error) {
       logger.error('Error while inserting device auth data');
       logger.error(error);

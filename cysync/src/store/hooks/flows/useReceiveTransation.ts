@@ -8,7 +8,7 @@ import { TransactionReceiver } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { sendAddressDb, receiveAddressDb2 } from '../../database';
+import { sendAddressDb, receiveAddressDb } from '../../database';
 import { useI18n, useSocket } from '../../provider';
 
 export interface HandleReceiveTransactionOptions {
@@ -90,7 +90,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   ) => {
     logger.info('New receive address', { coinType, walletId, addr });
     addReceiveAddressHook(addr, walletId, coinType);
-    receiveAddressDb2.insert({ address: addr, walletId, coinType });
+    receiveAddressDb.insert({ address: addr, walletId, coinType });
   };
 
   const handleReceiveTransaction: UseReceiveTransactionValues['handleReceiveTransaction'] =

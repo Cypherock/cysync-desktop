@@ -5,7 +5,7 @@ import {
   DeviceErrorType,
   EthCoinData
 } from '@cypherock/communication';
-import { InputOutput2, Transaction2 , IOtype } from '@cypherock/database';
+import { InputOutput, Transaction, IOtype } from '@cypherock/database';
 import { TransactionSender } from '@cypherock/protocols';
 import Server from '@cypherock/server-wrapper';
 import { WalletError, WalletErrorType } from '@cypherock/wallet';
@@ -14,7 +14,7 @@ import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { coinDb, sendAddressDb, transactionDb2 } from '../../database';
+import { coinDb, sendAddressDb, transactionDb } from '../../database';
 import { useI18n } from '../../provider';
 
 export const changeFormatOfOutputList = (
@@ -630,11 +630,11 @@ export const useSendTransaction: UseSendTransaction = () => {
         throw new Error(`Cannot find coinType: ${coin}`);
       }
 
-      let tx: Transaction2;
+      let tx: Transaction;
       let amount = new BigNumber(0);
       let fees = new BigNumber(0);
-      const formattedInputs: InputOutput2[] = [];
-      const formattedOutputs: InputOutput2[] = [];
+      const formattedInputs: InputOutput[] = [];
+      const formattedOutputs: InputOutput[] = [];
 
       if (totalFees) {
         fees = new BigNumber(totalFees).multipliedBy(coinObj.multiplier);
@@ -695,7 +695,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           inputs: formattedInputs,
           outputs: formattedOutputs
         };
-        const feeTxn: Transaction2 = {
+        const feeTxn: Transaction = {
           hash: txHash.toLowerCase(),
           amount: fees.toString(),
           total: fees.toString(),
@@ -709,7 +709,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           blockHeight: -1,
           coin: coin
         };
-        transactionDb2.insert(feeTxn);
+        transactionDb.insert(feeTxn);
       } else {
         tx = {
           hash: txHash.toLowerCase(),
@@ -727,7 +727,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputs: formattedOutputs
         };
       }
-      transactionDb2.insert(tx);
+      transactionDb.insert(tx);
     } catch (error) {
       logger.error('Error in onTxnBroadcast');
       logger.error(error);

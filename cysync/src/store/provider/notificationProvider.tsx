@@ -2,11 +2,11 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import logger from '../../utils/logger';
-import { Notification2, notificationDb2 as NotificationDB } from '../database';
+import { Notification, notificationDb as NotificationDB } from '../database';
 import { notification as NotificationServer } from '@cypherock/server-wrapper';
 
 export interface NotificationContextInterface {
-  data: Notification2[];
+  data: Notification[];
   hasNextPage: boolean;
   isLoading: boolean;
   updateLatest: () => Promise<void>;
@@ -47,7 +47,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
       const lastNotification = await NotificationDB.getLastId();
       const res = await NotificationServer.getAllLatest(lastNotification?._id).request();
       if (res.data.notifications.length > 0) {        
-        const notificationsData = res.data.notifications.map((notification: Notification2) => ({
+        const notificationsData = res.data.notifications.map((notification: Notification) => ({
           _id: notification._id,
           title: notification.title,
           description: notification.description,
@@ -73,7 +73,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
     setIsLoading(true);
     try {
       logger.info('Fetching next page notifications');
-      let lastNotif: Notification2 | undefined;
+      let lastNotif: Notification | undefined;
 
       if (notifications.length > 0)
         lastNotif = notifications[notifications.length - 1];

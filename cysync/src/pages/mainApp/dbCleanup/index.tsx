@@ -28,7 +28,7 @@ const DBCleaupPopup = () => {
       const promiseList = [
         {
           name: 'Transaction',
-          promise: transactionDb2.hasIncompatableData.bind(transactionDb2)
+          promise: transactionDb.hasIncompatableData.bind(transactionDb)
         },
         {
           name: 'Price History',
@@ -40,7 +40,7 @@ const DBCleaupPopup = () => {
         },
         {
           name: 'Wallet',
-          promise: walletDb2.hasIncompatableData.bind(walletDb2)
+          promise: walletDb.hasIncompatableData.bind(walletDb)
         },
         {
           name: 'ERC20 Tokens',
@@ -52,15 +52,15 @@ const DBCleaupPopup = () => {
         },
         {
           name: 'Receive Address',
-          promise: receiveAddressDb2.hasIncompatableData.bind(receiveAddressDb2)
+          promise: receiveAddressDb.hasIncompatableData.bind(receiveAddressDb)
         },
         {
           name: 'Notification',
-          promise: notificationDb2.hasIncompatableData.bind(notificationDb2)
+          promise: notificationDb.hasIncompatableData.bind(notificationDb)
         },
         {
           name: 'Device',
-          promise: deviceDb2.hasIncompatableData.bind(deviceDb2)
+          promise: deviceDb.hasIncompatableData.bind(deviceDb)
         }
       ];
 
