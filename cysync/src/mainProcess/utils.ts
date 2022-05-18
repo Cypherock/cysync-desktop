@@ -100,26 +100,31 @@ export const installExtensions = async () => {
 };
 
 export const getAppWindowSize = () => {
-  const widthRatio = 11;
-  const heightRatio = 8;
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const widthRatio = 11,
+    heightRatio = 8,
+    minHeight = 800,
+    minWidth = 1100;
+  const { width: deviceWidth, height: deviceHeight } =
+    screen.getPrimaryDisplay().workAreaSize;
+  let reductionFactor = 1;
+  let newHeight = 0,
+    newWidth = 0;
 
-  let newHeight: number = height * 0.7;
-  let newWidth = 0;
+  const differenceFactor = (deviceWidth - minWidth) / deviceWidth;
 
-  newWidth = (widthRatio * newHeight) / heightRatio;
+  if (differenceFactor > 0.3) reductionFactor = 0.7;
+  else if (differenceFactor > 0.2) reductionFactor = 0.8;
+  else if (differenceFactor > 0.1) reductionFactor = 0.9;
 
-  if (width < newWidth) {
-    newHeight = (newWidth * heightRatio) / widthRatio;
-  }
+  newWidth = deviceWidth * reductionFactor;
+  newHeight = (newWidth * heightRatio) / widthRatio;
+  if (newHeight > deviceHeight) newHeight = deviceHeight;
 
   return {
-    deviceHeight: height,
-    deviceWidth: width,
-    width: Math.floor(newWidth),
-    height: Math.floor(newHeight),
-    minWidth: Math.floor(width * 0.7),
-    minHeight: Math.floor(height * 0.7)
+    width: newWidth,
+    height: newHeight,
+    minWidth,
+    minHeight
   };
 };
 

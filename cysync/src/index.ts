@@ -174,23 +174,7 @@ const createWindow = async () => {
       await installExtensions();
     }
 
-    let { width, height, minWidth, minHeight } = getAppWindowSize();
-    const { deviceHeight, deviceWidth } = getAppWindowSize();
-
-    if (width < 1100) {
-      if (deviceWidth < 1100) {
-        width = deviceWidth;
-        height = deviceHeight;
-      } else if (deviceHeight < 800) {
-        width = 1100;
-        height = deviceHeight;
-      } else {
-        width = 1100;
-        height = 800;
-      }
-      minHeight = height;
-      minWidth = width;
-    }
+    const { width, height, minWidth, minHeight } = getAppWindowSize();
 
     logger.info('New Window According to Aspect Ratio: ', width, height);
 
