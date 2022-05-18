@@ -2,7 +2,15 @@ const config = {
   packagerConfig: {
     asr: true,
     icon: 'src/icon',
-    appCopyright: 'Cypherock'
+    appCopyright: 'Cypherock',
+    appBundleId: 'com.hodl.cypherock',
+    osxSign: {
+      identity: 'Apple Distribution: HODL Tech Private Limited (664633TYV2)',
+      'hardened-runtime': true,
+      entitlements: 'entitlements.plist',
+      'entitlements-inherit': 'entitlements.plist',
+      'signature-flags': 'library'
+    }
   },
   makers: [
     {
@@ -17,7 +25,7 @@ const config = {
       name: '@electron-forge/maker-dmg',
       platforms: ['darwin'],
       config: {
-        name: 'Cypherock CySync',
+        // name: 'Cypherock CySync',
         contents: [
           {
             x: 500,
@@ -54,6 +62,9 @@ const config = {
         productName: 'Cypherock CySync',
         name: 'cypherock-cysync'
       }
+    },
+    {
+      name: '@electron-forge/maker-zip'
     }
   ],
   plugins: [

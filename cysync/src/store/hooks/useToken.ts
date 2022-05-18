@@ -30,6 +30,7 @@ export const useToken: UseToken = () => {
 
   const [currentWalletId, setCurrentWalletId] = useState('');
   const [currentEthCoin, setCurrentEthCoin] = useState('');
+  const [sortIndex, setSortIndex] = useState(0);
 
   // Using doRefresh mechanish because hooks state change do not work with event listeners.
   const [doRefresh, setDoRefresh] = useState(false);
@@ -57,7 +58,10 @@ export const useToken: UseToken = () => {
       tokenDb.emitter.removeListener('delete', onChange);
     };
   }, []);
-
+  useEffect(() => {
+    sortTokenData(tokenData, sortIndex);
+  }, [sortIndex]);
+  
   const getTokensWithPrices = async (tokens: Token[]) => {
     const tokensWithPrice: DisplayToken[] = [];
     for (const token of tokens) {
@@ -181,7 +185,7 @@ export const useToken: UseToken = () => {
 
   const sortTokensByIndex: UseTokenValues['sortTokensByIndex'] = index => {
     if (tokenData.length === 0) return;
-    sortTokenData(tokenData, index);
+    if (index !== sortIndex) setSortIndex(index);
   };
 
   const getAllTokensFromWallet = async (walletId: string, ethCoin: string) => {
@@ -192,7 +196,7 @@ export const useToken: UseToken = () => {
     });
     setTokenList(tokens);
     const unsortedTokens = await getTokensWithPrices(res);
-    sortTokenData(unsortedTokens, 0);
+    sortTokenData(unsortedTokens, sortIndex);
   };
 
   useEffect(() => {
