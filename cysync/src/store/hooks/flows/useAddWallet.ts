@@ -152,7 +152,6 @@ export const useAddWallet: UseAddWallet = () => {
         }
 
         const walletWithSameId = await walletDb.getById(walletDetails._id);
-        console.log('walletwithssameid', walletWithSameId);
 
         if (walletWithSameId) {
           const duplicateWallet = walletWithSameId;

@@ -77,7 +77,6 @@ export const resetDesktopApplication = (): void => {
 export const passChangeEffect = async (singleHash: string) => {
   if (singleHash) await coinDb.encryptSecrets(singleHash);
   else await coinDb.decryptSecrets();
-  console.log('passChangeEffect', singleHash);
 };
 
 export const generateSinglePasswordHash = (password: string) => {

@@ -163,15 +163,12 @@ export const useTransactionData: UseTransactionData = () => {
       const date = new Date();
       sinceDate = new Date(date.getTime() - days * 24 * 60 * 60 * 1000);
     }
-    console.log('query', sinceDate, currentWallet, currentCoin);
     try {
       const txns = await getAll({
         sinceDate,
         walletId: currentWallet,
         coinType: currentCoin
       });
-
-      console.log('txns', txns);
 
       sortFromTxns(txns, sortIndex);
     } catch (e) {

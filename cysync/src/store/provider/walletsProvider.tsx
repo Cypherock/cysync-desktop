@@ -37,7 +37,6 @@ export const WalletsProvider: React.FC = ({ children }) => {
     try {
       logger.verbose('Getting all wallets and xpub data');
       const walletRes = await walletDb.getAll();
-      console.log('walletRes', walletRes);
 
       if (walletRes.length !== 0) setAllWallets(walletRes);
       else {
