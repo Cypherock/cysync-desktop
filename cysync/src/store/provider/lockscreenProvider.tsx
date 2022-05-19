@@ -1,3 +1,4 @@
+import { ipcRenderer } from 'electron';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
@@ -49,11 +50,20 @@ export const LockscreenProvider: React.FC = ({ children }) => {
     setDeviceConnected(true);
   };
 
+  const onDesktopLock = () => {
+    setLockScreen(true);
+  };
+
   useEffect(() => {
     const val = !lockscreen && isPasswordSet && autolockTime !== -1;
     if (val !== showIdleTimer) {
       setShowIdleTimer(val);
+      ipcRenderer.on('lock-screen', onDesktopLock);
     }
+
+    return () => {
+      ipcRenderer.removeListener('lock-screen', onDesktopLock);
+    };
   }, [lockscreen, isPasswordSet, autolockTime]);
 
   useEffect(() => {
