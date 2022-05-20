@@ -50,33 +50,9 @@ const Root = styled('div')(({ theme }) => ({
 
 const ApexChart = (props: any) => {
   const theme = useTheme();
-  const [chartWidth, setChartWidth] = useState(550);
 
-  const updateDimensions = () => {
-    if (window.innerWidth <= 980 && chartWidth !== 550) setChartWidth(550);
-    else if (window.innerWidth > 980  && window.innerWidth <= 1090 && chartWidth !== 600) setChartWidth(600);
-    else if (window.innerWidth > 1090 && window.innerWidth <= 1200 && chartWidth !== 650) setChartWidth(650);
-    else if (window.innerWidth > 1200 && window.innerWidth <= 1350 && chartWidth !== 700) setChartWidth(700);
-    else if (window.innerWidth > 1350 && window.innerWidth <= 1600 && chartWidth !== 800) setChartWidth(800);
-  };
 
-  useEffect(() => {
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
-  }, []);
 
-  const getChartComponent = () => {
-    return (
-      <Chart
-        options={options}
-        series={series}
-        type="area"
-        width={chartWidth}
-        height={230}
-      />
-    );
-  };
 
   const {
     timeActiveButton,
@@ -97,6 +73,8 @@ const ApexChart = (props: any) => {
 
   const options: ApexOptions = {
     chart: {
+      width: '550px',
+      height: '230px',
       background: theme.palette.primary.main,
       type: 'area',
       dropShadow: {
@@ -182,7 +160,54 @@ const ApexChart = (props: any) => {
           return `$ ${formatDisplayAmount(value, 2, true)}`;
         }
       }
-    }
+    },
+    responsive: [
+      {
+        breakpoint: 980,
+        options: {
+          chart: {
+            width: "550px",
+            height: "200px"
+          },
+        }
+      },
+      {
+        breakpoint: 1090,
+        options: {
+          chart: {
+            width: "600px",
+            height: "210px"
+          },
+        }
+      },
+      {
+        breakpoint: 1200,
+        options: {
+          chart: {
+            width: "650px",
+            height: "220px"
+          },
+        }            
+      },
+      {
+        breakpoint: 1350,
+        options: {
+          chart: {
+            width: "700px",
+            height: "230px"
+          },
+        }
+      },
+      {
+        breakpoint: 1600,
+        options: {
+          chart: {
+            width: "800px",
+            height: "250px"
+          },
+        }
+      }
+    ]
   };
 
   return (
@@ -227,7 +252,11 @@ const ApexChart = (props: any) => {
           </Button>
         </div>
       </div>
-      {getChartComponent()}
+      <Chart
+        options={options}
+        series={series}
+        type="area"
+      />
     </Root>
   );
 };

@@ -120,24 +120,23 @@ export const getAppWindowSize = () => {
   // Calculate the new window sizes
   newWidth = deviceWidth * reductionFactor;
   newHeight = (newWidth * heightRatio) / widthRatio;
-  
-  // When only the height is bigger, use the device height
+
+  // When only the calculated height is bigger than the device height
   if (newHeight > deviceHeight) {
     newHeight = deviceHeight;
     minHeight = deviceHeight;
   }
 
-  // When the width is too small, use the device width
+  // When the calculated width cant be accomodated
   if (newWidth < minWidth) {
-    if (newWidth < minWidth) {
-      newWidth = deviceWidth;
-      newHeight = deviceHeight;
-    } else if (newHeight < minHeight) {
-      newWidth = minWidth;
-      newHeight = deviceHeight;
-    }
-    minHeight = newHeight;
+    newWidth = deviceWidth;
     minWidth = newWidth;
+  }
+
+  // When the calculated height cant be accomodated
+  if (newHeight < minHeight) {
+    newHeight = minHeight;
+    minHeight = newHeight;
   }
 
   return {
