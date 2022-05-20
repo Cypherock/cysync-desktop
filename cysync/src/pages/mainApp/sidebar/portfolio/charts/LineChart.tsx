@@ -2,7 +2,7 @@ import Button from '@mui/material/Button';
 import { styled, useTheme } from '@mui/material/styles';
 import { ApexOptions } from 'apexcharts';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Chart from 'react-apexcharts';
 
 import DropMenu from '../../../../../designSystem/designComponents/menu/DropMenu';
@@ -51,6 +51,9 @@ const Root = styled('div')(({ theme }) => ({
 const ApexChart = (props: any) => {
   const theme = useTheme();
 
+
+
+
   const {
     timeActiveButton,
     setTimeActive,
@@ -70,6 +73,8 @@ const ApexChart = (props: any) => {
 
   const options: ApexOptions = {
     chart: {
+      width: '550px',
+      height: '230px',
       background: theme.palette.primary.main,
       type: 'area',
       dropShadow: {
@@ -155,7 +160,54 @@ const ApexChart = (props: any) => {
           return `$ ${formatDisplayAmount(value, 2, true)}`;
         }
       }
-    }
+    },
+    responsive: [
+      {
+        breakpoint: 980,
+        options: {
+          chart: {
+            width: "550px",
+            height: "200px"
+          },
+        }
+      },
+      {
+        breakpoint: 1090,
+        options: {
+          chart: {
+            width: "600px",
+            height: "210px"
+          },
+        }
+      },
+      {
+        breakpoint: 1200,
+        options: {
+          chart: {
+            width: "650px",
+            height: "220px"
+          },
+        }            
+      },
+      {
+        breakpoint: 1350,
+        options: {
+          chart: {
+            width: "700px",
+            height: "230px"
+          },
+        }
+      },
+      {
+        breakpoint: 1600,
+        options: {
+          chart: {
+            width: "800px",
+            height: "250px"
+          },
+        }
+      }
+    ]
   };
 
   return (
@@ -204,8 +256,6 @@ const ApexChart = (props: any) => {
         options={options}
         series={series}
         type="area"
-        width={700}
-        height={230}
       />
     </Root>
   );

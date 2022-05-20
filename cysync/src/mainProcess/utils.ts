@@ -100,24 +100,50 @@ export const installExtensions = async () => {
 };
 
 export const getAppWindowSize = () => {
-  const widthRatio = 11;
-  const heightRatio = 8;
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const widthRatio = 11,
+    heightRatio = 8,
+    MIN_REDUCTION_FACTOR = 0.7,
+    MAX_REDUCTION_FACTOR = 1;
+  let minHeight = 720,
+    minWidth = 990;
+  const { width: deviceWidth, height: deviceHeight } =
+    screen.getPrimaryDisplay().workAreaSize;
+  let newHeight = 0,
+    newWidth = 0;
 
-  let newHeight: number = height * 0.7;
-  let newWidth = 0;
+  // Calculate the optimal reduction factor for the window size
+  const reductionFactor = Math.max(
+    Math.min(minWidth / deviceWidth, MAX_REDUCTION_FACTOR),
+    MIN_REDUCTION_FACTOR
+  );
 
-  newWidth = (widthRatio * newHeight) / heightRatio;
+  // Calculate the new window sizes
+  newWidth = deviceWidth * reductionFactor;
+  newHeight = (newWidth * heightRatio) / widthRatio;
 
-  if (width < newWidth) {
-    newHeight = (newWidth * heightRatio) / widthRatio;
+  // When only the calculated height is bigger than the device height
+  if (newHeight > deviceHeight) {
+    newHeight = deviceHeight;
+    minHeight = deviceHeight;
+  }
+
+  // When the calculated width cant be accomodated
+  if (newWidth < minWidth) {
+    newWidth = deviceWidth;
+    minWidth = newWidth;
+  }
+
+  // When the calculated height cant be accomodated
+  if (newHeight < minHeight) {
+    newHeight = minHeight;
+    minHeight = newHeight;
   }
 
   return {
     width: Math.floor(newWidth),
     height: Math.floor(newHeight),
-    minWidth: Math.floor(width * 0.7),
-    minHeight: Math.floor(height * 0.7)
+    minWidth,
+    minHeight
   };
 };
 
