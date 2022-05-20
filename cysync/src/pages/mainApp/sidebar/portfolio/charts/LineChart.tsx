@@ -50,28 +50,14 @@ const Root = styled('div')(({ theme }) => ({
 
 const ApexChart = (props: any) => {
   const theme = useTheme();
-  const [chartWidth, setChartWidth] = useState(600);
+  const [chartWidth, setChartWidth] = useState(550);
 
   const updateDimensions = () => {
-    if (window.innerWidth <= 1090 && chartWidth !== 600) setChartWidth(600);
-    else if (
-      window.innerWidth > 1090 &&
-      window.innerWidth <= 1200 &&
-      chartWidth !== 650
-    )
-      setChartWidth(650);
-    else if (
-      window.innerWidth > 1200 &&
-      window.innerWidth <= 1350 &&
-      chartWidth !== 700
-    )
-      setChartWidth(700);
-    else if (
-      window.innerWidth > 1350 &&
-      window.innerWidth <= 1600 &&
-      chartWidth !== 800
-    )
-      setChartWidth(800);
+    if (window.innerWidth <= 980 && chartWidth !== 550) setChartWidth(550);
+    else if (window.innerWidth > 980  && window.innerWidth <= 1090 && chartWidth !== 600) setChartWidth(600);
+    else if (window.innerWidth > 1090 && window.innerWidth <= 1200 && chartWidth !== 650) setChartWidth(650);
+    else if (window.innerWidth > 1200 && window.innerWidth <= 1350 && chartWidth !== 700) setChartWidth(700);
+    else if (window.innerWidth > 1350 && window.innerWidth <= 1600 && chartWidth !== 800) setChartWidth(800);
   };
 
   useEffect(() => {

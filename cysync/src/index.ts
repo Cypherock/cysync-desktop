@@ -8,8 +8,7 @@ import {
   crashReporter,
   dialog,
   globalShortcut,
-  ipcMain,
-  screen
+  ipcMain
 } from 'electron';
 import { download } from 'electron-dl';
 import path from 'path';
@@ -204,11 +203,6 @@ const createWindow = async () => {
         contextIsolation: false
       },
       icon: iconPath
-    });
-
-    mainWindow.on('show', () => {
-      console.log('size-w', screen.getPrimaryDisplay().workAreaSize);
-      console.log('size', screen.getPrimaryDisplay().size);
     });
 
     mainWindow.on('focus', () => {
