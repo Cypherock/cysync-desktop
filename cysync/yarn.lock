@@ -173,13 +173,13 @@
     uuid "^8.3.2"
     winston "^3.5.1"
 
-"@cypherock/database@3.0.1-beta.17":
-  version "3.0.1-beta.17"
-  resolved "https://registry.yarnpkg.com/@cypherock/database/-/database-3.0.1-beta.17.tgz#24094d7f1499e3a8c115a09067bcd24d906be9a8"
-  integrity sha512-G8QKRH1gi5BYgAGNTLMVKDqqikOV3GZ/rkMSNw0fiUEg6ehCDR3UKTDRUhJQs2Uv+1D6bSdlfCcLJbnpqj6iqg==
+"@cypherock/database@3.0.1-beta.18":
+  version "3.0.1-beta.18"
+  resolved "https://registry.yarnpkg.com/@cypherock/database/-/database-3.0.1-beta.18.tgz#5957e9b12c59b9c52973ceb44e50847123f34d5e"
+  integrity sha512-6X6X0LUYSMoH41+gQGLZdLpLfeUNN/0O6i886OftmZt60qL+94WcM5oBrZQesf27/EU9EmLItpTklzjg++uZ3Q==
   dependencies:
     "@cypherock/communication" "3.0.1-beta.16"
-    "@cypherock/server-wrapper" "1.0.1-beta.10"
+    "@cypherock/server-wrapper" "1.0.1-beta.11"
     "@types/bignumber.js" "^5.0.0"
     aes-js "^3.1.2"
     bignumber.js "^9.0.2"
@@ -189,37 +189,37 @@
     nedb "^1.8.0"
     winston "^3.6.0"
 
-"@cypherock/protocols@3.0.1-beta.24":
-  version "3.0.1-beta.24"
-  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.24.tgz#081fb08130a846ad7cb505161079ce56c671e71d"
-  integrity sha512-JYTTY+tu1LWSdJq07ooCvvz+o+V/fsWbWVxGvUXoYmy27uFSf67krJjUiIzxq+j3dEbZYkCCr7gshLQQF4WtlQ==
+"@cypherock/protocols@3.0.1-beta.25":
+  version "3.0.1-beta.25"
+  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.25.tgz#6c1b05d1b6297a892ee6e40f6badfd3b3b5d9fc6"
+  integrity sha512-4R7Z1GJA+OLvzJ9gVe1zf7JlnA4eySQuX3tFEZeuIUL6Y3PYl1xED8RzGyr4SvXZHudMu/L+mJcVF1OU9cdMig==
   dependencies:
     "@cypherock/communication" "3.0.1-beta.16"
-    "@cypherock/database" "3.0.1-beta.17"
-    "@cypherock/server-wrapper" "1.0.1-beta.10"
-    "@cypherock/wallet" "3.0.1-beta.21"
+    "@cypherock/database" "3.0.1-beta.18"
+    "@cypherock/server-wrapper" "1.0.1-beta.11"
+    "@cypherock/wallet" "3.0.1-beta.22"
     "@types/bignumber.js" "^5.0.0"
     bignumber.js "^9.0.2"
     winston "^3.5.1"
 
-"@cypherock/server-wrapper@1.0.1-beta.10":
-  version "1.0.1-beta.10"
-  resolved "https://registry.yarnpkg.com/@cypherock/server-wrapper/-/server-wrapper-1.0.1-beta.10.tgz#d5ddd4927152e8157e641de5da45a56c1d77f9e6"
-  integrity sha512-4p+NcAMWRLvr8bzEiuQw+Fl2JzRyji6JMacTLG8iINhzhtyL1R8b2y10C9MT2lc5vVS4eRjQ+xnneFWvaUGP8A==
+"@cypherock/server-wrapper@1.0.1-beta.11":
+  version "1.0.1-beta.11"
+  resolved "https://registry.yarnpkg.com/@cypherock/server-wrapper/-/server-wrapper-1.0.1-beta.11.tgz#d61414cfd40f7e20067f03ce59387cff2e45398e"
+  integrity sha512-G8K/8nLnf/4+FsOm3HoNCqujSOqM4AvW3dU6cunKKXEGOLgrhDTQORbL7Y7nYqN8pIrpVeAIwhj5nXxaCRb0Gg==
   dependencies:
     axios "^0.25.0"
     node-cache "^5.1.2"
     winston "^3.5.1"
 
-"@cypherock/wallet@3.0.1-beta.21":
-  version "3.0.1-beta.21"
-  resolved "https://registry.yarnpkg.com/@cypherock/wallet/-/wallet-3.0.1-beta.21.tgz#a1d134df308eeabf49d092a263e3480f0c1fe32b"
-  integrity sha512-dD3k5Bm+zazFFg9s2gI1BhX+9nLHHrCeXoRZ3uFqCXk6h8POOoC+Qtlk7fTGMI8xjteHvqMoa4WgG4wTVOuD2w==
+"@cypherock/wallet@3.0.1-beta.22":
+  version "3.0.1-beta.22"
+  resolved "https://registry.yarnpkg.com/@cypherock/wallet/-/wallet-3.0.1-beta.22.tgz#d5ad0337dbc9c489ff8805c99b99d900216dd44a"
+  integrity sha512-/jtwEbAbcCFDtx7Fsq7lkbNBqX1I/e+2qaumRAWND1sgMsi2J3p0Lq4F7sfxIlhNOnPCJoEPGSOejao7siLaBQ==
   dependencies:
     "@bitauth/libauth" "^1.19.1"
     "@cypherock/communication" "3.0.1-beta.16"
-    "@cypherock/database" "3.0.1-beta.17"
-    "@cypherock/server-wrapper" "1.0.1-beta.10"
+    "@cypherock/database" "3.0.1-beta.18"
+    "@cypherock/server-wrapper" "1.0.1-beta.11"
     "@ethereumjs/common" "^2.6.2"
     "@ethereumjs/tx" "^3.5.0"
     "@types/bignumber.js" "^5.0.0"

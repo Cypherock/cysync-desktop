@@ -70,6 +70,8 @@ const ApexChart = (props: any) => {
 
   const options: ApexOptions = {
     chart: {
+      width: '550px',
+      height: '230px',
       background: theme.palette.primary.main,
       type: 'area',
       dropShadow: {
@@ -155,7 +157,54 @@ const ApexChart = (props: any) => {
           return `$ ${formatDisplayAmount(value, 2, true)}`;
         }
       }
-    }
+    },
+    responsive: [
+      {
+        breakpoint: 980,
+        options: {
+          chart: {
+            width: '550px',
+            height: '200px'
+          }
+        }
+      },
+      {
+        breakpoint: 1090,
+        options: {
+          chart: {
+            width: '600px',
+            height: '210px'
+          }
+        }
+      },
+      {
+        breakpoint: 1200,
+        options: {
+          chart: {
+            width: '650px',
+            height: '220px'
+          }
+        }
+      },
+      {
+        breakpoint: 1350,
+        options: {
+          chart: {
+            width: '700px',
+            height: '230px'
+          }
+        }
+      },
+      {
+        breakpoint: 1600,
+        options: {
+          chart: {
+            width: '800px',
+            height: '250px'
+          }
+        }
+      }
+    ]
   };
 
   return (
@@ -200,13 +249,7 @@ const ApexChart = (props: any) => {
           </Button>
         </div>
       </div>
-      <Chart
-        options={options}
-        series={series}
-        type="area"
-        width={700}
-        height={230}
-      />
+      <Chart options={options} series={series} type="area" />
     </Root>
   );
 };
