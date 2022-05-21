@@ -15,11 +15,13 @@ export interface LockscreenContextInterface {
   lockscreen: boolean;
   isLockscreenLoading: boolean;
   handleLockScreenClose: () => void;
+  handleLockScreenClickOpen: () => void;
   handleSkipPassword: () => void;
   isInitialFlow: boolean;
   handleInitialFlowClose: () => void;
   handleInitialFlowOpen: () => void;
   autoLock: boolean;
+  setAutoLock: (autoLock: boolean) => void;
   isDeviceConnected: boolean;
   isPasswordSet: boolean;
   setIsPasswordSet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -49,6 +51,12 @@ export const LockscreenProvider: React.FC = ({ children }) => {
 
   const onDesktopLock = () => {
     setLockScreen(true);
+  };
+
+  const handleLockScreenClickOpen = () => {
+    if (!lockscreen) {
+      setLockScreen(true);
+    }
   };
 
   useEffect(() => {
@@ -109,11 +117,13 @@ export const LockscreenProvider: React.FC = ({ children }) => {
         lockscreen,
         isLockscreenLoading,
         handleLockScreenClose,
+        handleLockScreenClickOpen,
         handleSkipPassword,
         isInitialFlow,
         handleInitialFlowClose,
         handleInitialFlowOpen,
         autoLock,
+        setAutoLock,
         isDeviceConnected,
         handleDeviceConnected,
         isPasswordSet,
