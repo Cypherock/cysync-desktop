@@ -100,16 +100,19 @@ export const installExtensions = async () => {
 };
 
 export const getAppWindowSize = () => {
-  const widthRatio = 11,
-    heightRatio = 8,
-    MIN_REDUCTION_FACTOR = 0.7,
-    MAX_REDUCTION_FACTOR = 1;
-  let minHeight = 720,
-    minWidth = 990;
+  const widthRatio = 11;
+  const heightRatio = 8;
+  const MIN_REDUCTION_FACTOR = 0.7;
+  const MAX_REDUCTION_FACTOR = 1;
+
+  let minHeight = 720;
+  let minWidth = 990;
+
   const { width: deviceWidth, height: deviceHeight } =
     screen.getPrimaryDisplay().workAreaSize;
-  let newHeight = 0,
-    newWidth = 0;
+
+  let newHeight = 0;
+  let newWidth = 0;
 
   // Calculate the optimal reduction factor for the window size
   const reductionFactor = Math.max(

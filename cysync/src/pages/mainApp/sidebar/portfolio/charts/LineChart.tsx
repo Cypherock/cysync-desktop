@@ -2,7 +2,7 @@ import Button from '@mui/material/Button';
 import { styled, useTheme } from '@mui/material/styles';
 import { ApexOptions } from 'apexcharts';
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Chart from 'react-apexcharts';
 
 import DropMenu from '../../../../../designSystem/designComponents/menu/DropMenu';
@@ -50,9 +50,6 @@ const Root = styled('div')(({ theme }) => ({
 
 const ApexChart = (props: any) => {
   const theme = useTheme();
-
-
-
 
   const {
     timeActiveButton,
@@ -166,45 +163,45 @@ const ApexChart = (props: any) => {
         breakpoint: 980,
         options: {
           chart: {
-            width: "550px",
-            height: "200px"
-          },
+            width: '550px',
+            height: '200px'
+          }
         }
       },
       {
         breakpoint: 1090,
         options: {
           chart: {
-            width: "600px",
-            height: "210px"
-          },
+            width: '600px',
+            height: '210px'
+          }
         }
       },
       {
         breakpoint: 1200,
         options: {
           chart: {
-            width: "650px",
-            height: "220px"
-          },
-        }            
+            width: '650px',
+            height: '220px'
+          }
+        }
       },
       {
         breakpoint: 1350,
         options: {
           chart: {
-            width: "700px",
-            height: "230px"
-          },
+            width: '700px',
+            height: '230px'
+          }
         }
       },
       {
         breakpoint: 1600,
         options: {
           chart: {
-            width: "800px",
-            height: "250px"
-          },
+            width: '800px',
+            height: '250px'
+          }
         }
       }
     ]
@@ -252,11 +249,7 @@ const ApexChart = (props: any) => {
           </Button>
         </div>
       </div>
-      <Chart
-        options={options}
-        series={series}
-        type="area"
-      />
+      <Chart options={options} series={series} type="area" />
     </Root>
   );
 };

@@ -13,18 +13,26 @@ function main() {
   const unifiedCommand = commands.join(' && ').split(' ');
 
   if (dir === 'cysync') {
-    spawn(unifiedCommand.shift(), unifiedCommand, {
+    const command = spawn(unifiedCommand.shift(), unifiedCommand, {
       cwd: `${__dirname}/cysync`,
       stdio: 'inherit',
       shell: true
+    });
+
+    command.on('close', code => {
+      process.exit(code);
     });
     return;
   }
 
   if (PACKAGES.find(pkg => pkg.name === dir)) {
-    spawn(commands.shift(), commands, {
+    const command = spawn(commands.shift(), commands, {
       cwd: `${__dirname}/packages/${dir}`,
       stdio: 'inherit'
+    });
+
+    command.on('close', code => {
+      process.exit(code);
     });
     return;
   }
@@ -38,9 +46,12 @@ function main() {
       individualCommands.push('cd ../..');
     });
     const sequence = individualCommands.join(' && ').split(' ');
-    spawn(sequence.shift(), sequence, {
+    const command = spawn(sequence.shift(), sequence, {
       shell: true,
       stdio: 'inherit'
+    });
+    command.on('close', code => {
+      process.exit(code);
     });
     return;
   }
@@ -56,9 +67,12 @@ function main() {
       individualCommands.push('cd ../..');
     });
     const sequence = individualCommands.join(' && ').split(' ');
-    spawn(sequence.shift(), sequence, {
+    const command = spawn(sequence.shift(), sequence, {
       shell: true,
       stdio: 'inherit'
+    });
+    command.on('close', code => {
+      process.exit(code);
     });
     return;
   }
