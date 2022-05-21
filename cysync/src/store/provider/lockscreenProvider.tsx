@@ -9,19 +9,17 @@ import {
   passwordExists,
   removePassword
 } from '../../utils/auth';
-import { getAutolockTime } from '../../utils/autolock';
+import { getAutoSleepLock } from '../../utils/autolock';
 
 export interface LockscreenContextInterface {
   lockscreen: boolean;
   isLockscreenLoading: boolean;
   handleLockScreenClose: () => void;
-  handleLockScreenClickOpen: () => void;
   handleSkipPassword: () => void;
   isInitialFlow: boolean;
   handleInitialFlowClose: () => void;
   handleInitialFlowOpen: () => void;
-  autolockTime: number;
-  showIdleTimer: boolean;
+  autoSleepLock: boolean;
   isDeviceConnected: boolean;
   isPasswordSet: boolean;
   setIsPasswordSet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -41,8 +39,7 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   const [isLockscreenLoading, setLockscreenLoading] = useState(true);
   const [lockscreen, setLockScreen] = useState(false);
   const [isInitialFlow, setInitialFlow] = useState(isFirstBoot());
-  const [autolockTime, setAutolockTime] = useState(-1);
-  const [showIdleTimer, setShowIdleTimer] = useState(false);
+  const [autoSleepLock, setAutoSleepLock] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(false);
 
   const handleDeviceConnected = () => {
@@ -55,21 +52,20 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    const val = !lockscreen && isPasswordSet && autolockTime !== -1;
-    if (val !== showIdleTimer) {
-      setShowIdleTimer(val);
+    const val = !lockscreen && isPasswordSet && autoSleepLock;
+    if (val) {
       ipcRenderer.on('lock-screen', onDesktopLock);
     }
 
     return () => {
       ipcRenderer.removeListener('lock-screen', onDesktopLock);
     };
-  }, [lockscreen, isPasswordSet, autolockTime]);
+  }, [lockscreen, isPasswordSet, autoSleepLock]);
 
   useEffect(() => {
     setLockscreenLoading(true);
-    const time = getAutolockTime();
-    setAutolockTime(time);
+    const autoLockFlag = getAutoSleepLock();
+    setAutoSleepLock(autoLockFlag);
 
     const hasPassword = passwordExists();
     if (!hasPassword) {
@@ -86,12 +82,6 @@ export const LockscreenProvider: React.FC = ({ children }) => {
     }
     setIsPasswordSet(hasPassword);
   }, []);
-
-  const handleLockScreenClickOpen = () => {
-    if (!lockscreen) {
-      setLockScreen(true);
-    }
-  };
 
   const handleLockScreenClose = () => {
     setLockScreen(false);
@@ -119,13 +109,11 @@ export const LockscreenProvider: React.FC = ({ children }) => {
         lockscreen,
         isLockscreenLoading,
         handleLockScreenClose,
-        handleLockScreenClickOpen,
         handleSkipPassword,
         isInitialFlow,
         handleInitialFlowClose,
         handleInitialFlowOpen,
-        autolockTime,
-        showIdleTimer,
+        autoSleepLock,
         isDeviceConnected,
         handleDeviceConnected,
         isPasswordSet,
