@@ -9,7 +9,7 @@ import {
   passwordExists,
   removePassword
 } from '../../utils/auth';
-import { getAutoSleepLock } from '../../utils/autolock';
+import { getAutoLock } from '../../utils/autolock';
 
 export interface LockscreenContextInterface {
   lockscreen: boolean;
@@ -19,7 +19,7 @@ export interface LockscreenContextInterface {
   isInitialFlow: boolean;
   handleInitialFlowClose: () => void;
   handleInitialFlowOpen: () => void;
-  autoSleepLock: boolean;
+  autoLock: boolean;
   isDeviceConnected: boolean;
   isPasswordSet: boolean;
   setIsPasswordSet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -39,7 +39,7 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   const [isLockscreenLoading, setLockscreenLoading] = useState(true);
   const [lockscreen, setLockScreen] = useState(false);
   const [isInitialFlow, setInitialFlow] = useState(isFirstBoot());
-  const [autoSleepLock, setAutoSleepLock] = useState(false);
+  const [autoLock, setAutoLock] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(false);
 
   const handleDeviceConnected = () => {
@@ -52,7 +52,7 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    const val = !lockscreen && isPasswordSet && autoSleepLock;
+    const val = !lockscreen && isPasswordSet && autoLock;
     if (val) {
       ipcRenderer.on('lock-screen', onDesktopLock);
     }
@@ -60,12 +60,12 @@ export const LockscreenProvider: React.FC = ({ children }) => {
     return () => {
       ipcRenderer.removeListener('lock-screen', onDesktopLock);
     };
-  }, [lockscreen, isPasswordSet, autoSleepLock]);
+  }, [lockscreen, isPasswordSet, autoLock]);
 
   useEffect(() => {
     setLockscreenLoading(true);
-    const autoLockFlag = getAutoSleepLock();
-    setAutoSleepLock(autoLockFlag);
+    const autoLockFlag = getAutoLock();
+    setAutoLock(autoLockFlag);
 
     const hasPassword = passwordExists();
     if (!hasPassword) {
@@ -113,7 +113,7 @@ export const LockscreenProvider: React.FC = ({ children }) => {
         isInitialFlow,
         handleInitialFlowClose,
         handleInitialFlowOpen,
-        autoSleepLock,
+        autoLock,
         isDeviceConnected,
         handleDeviceConnected,
         isPasswordSet,

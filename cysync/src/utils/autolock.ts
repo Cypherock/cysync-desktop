@@ -1,6 +1,6 @@
-export const getAutoSleepLock = () => {
-  return Boolean(localStorage.getItem('autoSleepLock'));
+export const getAutoLock = () => {
+  return Boolean(localStorage.getItem('autoLock'));
 };
-export const setAutoSleepLock = (flag: boolean) => {
-  localStorage.setItem('autoSleepLock', flag.toString());
+export const setAutoLock = (flag: boolean) => {
+  localStorage.setItem('autoLock', flag.toString());
 };
