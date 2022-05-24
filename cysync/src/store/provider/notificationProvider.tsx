@@ -1,9 +1,9 @@
+import { notification as NotificationServer } from '@cypherock/server-wrapper';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import logger from '../../utils/logger';
 import { Notification, notificationDb as NotificationDB } from '../database';
-import { notification as NotificationServer } from '@cypherock/server-wrapper';
 
 export interface NotificationContextInterface {
   data: Notification[];
@@ -45,23 +45,29 @@ export const NotificationProvider: React.FC = ({ children }) => {
     try {
       logger.info('Fetching latest notifications from server');
       const lastNotification = await NotificationDB.getLastId();
-      const res = await NotificationServer.getAllLatest(lastNotification?._id).request();
-      if (res.data.notifications.length > 0) {        
-        const notificationsData = res.data.notifications.map((notification: Notification) => ({
-          _id: notification._id,
-          title: notification.title,
-          description: notification.description,
-          type: notification.type,
-          isRead: false,
-          createdAt: notification.createdAt,
-          updatedAt: notification.updatedAt
-        }));
+      const res = await NotificationServer.get(
+        lastNotification?._id,
+        15,
+        'a'
+      ).request();
+      if (res.data.notifications.length > 0) {
+        const notificationsData = res.data.notifications.map(
+          (notification: Notification) => ({
+            _id: notification._id,
+            title: notification.title,
+            description: notification.description,
+            type: notification.type,
+            isRead: false,
+            createdAt: notification.createdAt,
+            updatedAt: notification.updatedAt
+          })
+        );
         await NotificationDB.insertMany(notificationsData);
       }
       const allNotifications = await NotificationDB.get(perPageLimit + 1);
       setHasNextPage(allNotifications.length > perPageLimit);
       setNotifications(allNotifications.slice(0, perPageLimit));
-      } catch (error) {
+    } catch (error) {
       logger.error('Error in fetching latest notifications');
       logger.error(error);
     } finally {
@@ -78,11 +84,16 @@ export const NotificationProvider: React.FC = ({ children }) => {
       if (notifications.length > 0)
         lastNotif = notifications[notifications.length - 1];
 
-      const nextNotifications = await NotificationDB.getNext(lastNotif?._id, perPageLimit + 1);
+      const nextNotifications = await NotificationDB.getNext(
+        lastNotif?._id,
+        perPageLimit + 1
+      );
 
       setHasNextPage(nextNotifications.length > perPageLimit);
-      setNotifications([...notifications, ...nextNotifications.slice(0, perPageLimit)]);
-
+      setNotifications([
+        ...notifications,
+        ...nextNotifications.slice(0, perPageLimit)
+      ]);
     } catch (error) {
       logger.error('Error in fetching next page notifications');
       logger.error(error);

@@ -65,8 +65,8 @@ export const LockscreenProvider: React.FC = ({ children }) => {
       setLockScreen(hasPassword);
     } else {
       setLockScreen(hasPassword);
-      setLockscreenLoading(false);
     }
+    setLockscreenLoading(false);
     setIsPasswordSet(hasPassword);
   }, []);
 
