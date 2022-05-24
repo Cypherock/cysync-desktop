@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../constants/routes';
 import {
-  sendAddressDb,
+  addressDb,
   coinDb,
   tokenDb,
   receiveAddressDb,
@@ -148,7 +148,7 @@ const WalletItem = (props: WalletItemProps) => {
         walletDetails: { _id: walletId }
       } = props;
       await walletDb.deleteById(walletId);
-      await sendAddressDb.delete({ walletId});
+      await addressDb.delete({ walletId});
       await receiveAddressDb.delete({
         walletId
       });

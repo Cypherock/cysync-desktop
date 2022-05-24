@@ -14,7 +14,7 @@ import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { coinDb, sendAddressDb, transactionDb } from '../../database';
+import { coinDb, addressDb, transactionDb } from '../../database';
 import { useI18n } from '../../provider';
 
 export const changeFormatOfOutputList = (
@@ -574,7 +574,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         await sendTransaction.run({
           connection,
           sdkVersion,
-          sendAddressDB: sendAddressDb,
+          addressDB: addressDb,
           walletId,
           pinExists,
           passphraseExists,

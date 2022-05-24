@@ -7,7 +7,7 @@ import {
   notificationDb,
   priceHistoryDb,
   receiveAddressDb,
-  sendAddressDb,
+  addressDb,
   tokenDb,
   transactionDb,
   walletDb
@@ -48,7 +48,7 @@ const DBCleaupPopup = () => {
         },
         {
           name: 'Addresses',
-          promise: sendAddressDb.hasIncompatableData.bind(sendAddressDb)
+          promise: addressDb.hasIncompatableData.bind(addressDb)
         },
         {
           name: 'Receive Address',

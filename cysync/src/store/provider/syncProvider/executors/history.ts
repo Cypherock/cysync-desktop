@@ -22,7 +22,7 @@ import {
   tokenDb,
   transactionDb,
   coinDb,
-  sendAddressDb,
+  addressDb,
   Coin,
   Transaction,
   IOtype
@@ -170,7 +170,7 @@ export const processResponses = async (
               : [],
             walletId: item.walletId,
             coinType: item.coinType,
-            sendAddressDB: sendAddressDb,
+            addressDB: addressDb,
             walletName: item.walletName
           });
           // No need to retry if the inserting fails because it'll produce the same error.

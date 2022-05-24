@@ -5,7 +5,7 @@ import {
   PassEncrypt,
   PriceHistoryDB,
   ReceiveAddressDB,
-  SendAddressDB,
+  AddressDB,
   TokenDB,
   TransactionDB,
   WalletDB
@@ -19,7 +19,7 @@ export const deviceDb = new DeviceDB();
 export const walletDb = new WalletDB();
 export const coinDb = new CoinDB(passEnDb);
 export const tokenDb = new TokenDB();
-export const sendAddressDb = new SendAddressDB();
+export const addressDb = new AddressDB();
 export const receiveAddressDb = new ReceiveAddressDB();
 export const transactionDb = new TransactionDB();
 export const notificationDb = new NotificationDB();

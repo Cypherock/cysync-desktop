@@ -9,7 +9,7 @@ import newWallet from '@cypherock/wallet';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { sendAddressDb, coinDb, Coin } from '../../database';
+import { addressDb, coinDb, Coin } from '../../database';
 import { useI18n, useSync } from '../../provider';
 
 function sleep(ms: number) {
@@ -162,7 +162,7 @@ export const useAddCoin: UseAddCoin = () => {
           xpub: coin.xpub,
           walletId: coin.walletId,
           zpub: coin.zpub,
-          sendAddressDB: sendAddressDb
+          addressDB: addressDb
         });
         await wallet.setupNewWallet();
         await coinDb.insert(coin);

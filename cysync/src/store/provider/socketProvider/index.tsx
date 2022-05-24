@@ -7,7 +7,7 @@ import io, { Socket } from 'socket.io-client';
 import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
-  sendAddressDb,
+  addressDb,
   receiveAddressDb,
   transactionDb,
   walletDb,
@@ -280,7 +280,7 @@ export const SocketProvider: React.FC = ({ children }) => {
                   addresses: [],
                   walletId: payload.id,
                   coinType: payload.coinType,
-                  sendAddressDB: sendAddressDb
+                  addressDB: addressDb
                 });
                 if (payload.tokenAbbr) {
                   addBalanceSyncItemFromXpub(coin, {
@@ -401,7 +401,7 @@ export const SocketProvider: React.FC = ({ children }) => {
     let walletId: string | undefined;
     let xpub: string | undefined;
 
-    const addressDetails = await sendAddressDb.getOne({ address, coinType });
+    const addressDetails = await addressDb.getOne({ address, coinType });
     if (addressDetails) {
       walletId = addressDetails.walletId;
       const coinDetails = await coinDb.getOne({
@@ -503,7 +503,7 @@ export const SocketProvider: React.FC = ({ children }) => {
                 addresses: [],
                 walletId: address.walletId,
                 coinType: payload.coinType,
-                sendAddressDB: sendAddressDb
+                addressDB: addressDb
               });
 
               if (isConfirmed) {

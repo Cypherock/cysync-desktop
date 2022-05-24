@@ -11,7 +11,7 @@ import QRCode from 'qrcode';
 import React, { useState } from 'react';
 
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
-import { sendAddressDb } from '../../../../../../store/database';
+import { addressDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
   useReceiveTransactionContext,
@@ -117,12 +117,12 @@ const getReceiveAddress = async (
   }
 
   if (coin.isEth) {
-    w = wallet({ coinType, xpub, walletId, zpub, sendAddressDB: sendAddressDb });
+    w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
     receiveAddress = (await w.newReceiveAddress()).toUpperCase();
     // To make the first x in lowercase
     receiveAddress = `0x${receiveAddress.slice(2)}`;
   } else {
-    w = wallet({ coinType, xpub, walletId, zpub, sendAddressDB: sendAddressDb });
+    w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
     receiveAddress = await w.newReceiveAddress();
   }
   return receiveAddress;

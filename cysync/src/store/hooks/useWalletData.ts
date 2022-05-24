@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
 import {
-  sendAddressDb,
+  addressDb,
   coinDb,
   getLatestPriceForCoin,
   priceHistoryDb,
@@ -189,7 +189,7 @@ export const useWalletData: UseWalletData = () => {
     coin: string,
     walletId: string
   ) => {
-    await sendAddressDb.delete({ walletId, coinType: coin });
+    await addressDb.delete({ walletId, coinType: coin });
     await receiveAddressDb.delete({ walletId, coinType: coin });
     await coinDb.delete({ xpub, slug: coin });
     return getAllCoinsFromWallet();
