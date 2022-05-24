@@ -5,6 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
 import { styled, useTheme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -147,19 +148,28 @@ const GeneralSettings = () => {
         </Button>
       )
     },
-    previousSetPassword
-      ? {
-          name: 'Auto Lock',
-          secondaryText: 'Lock the app automatically when desktop locks.',
-          element: (
+    {
+      name: 'Auto Lock',
+      secondaryText: 'Lock the app automatically when desktop locks.',
+      element: previousSetPassword ? (
+        <SwitchButton
+          name="toggleAutoLock"
+          completed={autoLock}
+          handleChange={handleAutoLockToggle}
+        />
+      ) : (
+        <Tooltip title="Set a password to enable this feature" placement="top">
+          <span style={{ width: '100%', height: '100%' }}>
             <SwitchButton
+              disabled
               name="toggleAutoLock"
               completed={autoLock}
               handleChange={handleAutoLockToggle}
             />
-          )
-        }
-      : null,
+          </span>
+        </Tooltip>
+      )
+    },
     {
       name: 'Clear Data',
       secondaryText: '(You will loose all the data stored in the CySync app)',
@@ -266,7 +276,6 @@ const GeneralSettings = () => {
       <div style={{ width: '100%' }}>
         <List className={classes.listWrapper}>
           {ListData.map(item => {
-            if (item === null) return;
             return (
               <div key={item.name}>
                 <ListItem>
