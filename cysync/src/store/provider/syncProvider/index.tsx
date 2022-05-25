@@ -9,7 +9,13 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
-import { tokenDb, transactionDb, coinDb, Coin, priceHistoryDb } from '../../database';
+import {
+  tokenDb,
+  transactionDb,
+  coinDb,
+  Coin,
+  priceHistoryDb
+} from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
@@ -103,11 +109,14 @@ export const SyncProvider: React.FC = ({ children }) => {
           coin,
           coinType: coin.slug
         });
-        logger.debug('Xpub with invalid coin found addHistorySyncItemFromXpub', {
-          coinData,
-          coinType: coin.slug,
-          coin
-        });
+        logger.debug(
+          'Xpub with invalid coin found addHistorySyncItemFromXpub',
+          {
+            coinData,
+            coinType: coin.slug,
+            coin
+          }
+        );
         return;
       }
 
@@ -116,15 +125,14 @@ export const SyncProvider: React.FC = ({ children }) => {
           .createHash('sha256')
           .update(coin.xpub)
           .digest('base64');
-        const topBlock = await transactionDb.getTopBlock(
-          {
-            walletId: coin.walletId,
-            walletName,
-            coin: coinData.abbr,
-            excludeFailed: true,
-            excludePending: true,
-            minConfirmations: 6
-          });
+        const topBlock = await transactionDb.getTopBlock({
+          walletId: coin.walletId,
+          walletName,
+          coin: coinData.abbr,
+          excludeFailed: true,
+          excludePending: true,
+          minConfirmations: 6
+        });
         const newItem = new HistorySyncItem({
           xpub: coin.xpub,
           walletName,
@@ -142,15 +150,14 @@ export const SyncProvider: React.FC = ({ children }) => {
             .createHash('sha256')
             .update(coin.zpub)
             .digest('base64');
-          const topBlock = await transactionDb.getTopBlock(
-            {
-              walletId: coin.walletId,
-              walletName: zwalletName,
-              coin: coinData.abbr,
-              excludeFailed: true,
-              excludePending: true,
-              minConfirmations: 6
-            });
+          const topBlock = await transactionDb.getTopBlock({
+            walletId: coin.walletId,
+            walletName: zwalletName,
+            coin: coinData.abbr,
+            excludeFailed: true,
+            excludePending: true,
+            minConfirmations: 6
+          });
           const newZItem = new HistorySyncItem({
             xpub: coin.xpub,
             zpub: coin.zpub,
@@ -196,11 +203,14 @@ export const SyncProvider: React.FC = ({ children }) => {
           coinData,
           coinType: coin.slug
         });
-        logger.debug('Xpub with invalid coin found addBalanceSyncItemFromXpub', {
-          coinData,
-          coinType: coin.slug,
-          coin
-        });
+        logger.debug(
+          'Xpub with invalid coin found addBalanceSyncItemFromXpub',
+          {
+            coinData,
+            coinType: coin.slug,
+            coin
+          }
+        );
         return;
       }
 
@@ -252,7 +262,10 @@ export const SyncProvider: React.FC = ({ children }) => {
         for (const days of [7, 30, 365] as Array<
           PriceSyncItemOptions['days']
         >) {
-          const oldPrices = await priceHistoryDb.getOne({slug: coinData.abbr, interval: days});
+          const oldPrices = await priceHistoryDb.getOne({
+            slug: coinData.abbr,
+            interval: days
+          });
           let addNew = true;
 
           // Check if the prices and old enough and then only add to sync
@@ -521,7 +534,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     tokenName: string,
     ethCoin: string
   ) => {
-    const ethXpub = await coinDb.getOne({walletId, slug: ethCoin});
+    const ethXpub = await coinDb.getOne({ walletId, slug: ethCoin });
     if (!ethXpub) {
       logger.warn('EthCoin does not exist', { walletId, ethCoin });
       return;

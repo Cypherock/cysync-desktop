@@ -61,7 +61,7 @@ export const useToken: UseToken = () => {
   useEffect(() => {
     sortTokenData(tokenData, sortIndex);
   }, [sortIndex]);
-  
+
   const getTokensWithPrices = async (tokens: Token[]) => {
     const tokensWithPrice: DisplayToken[] = [];
     for (const token of tokens) {

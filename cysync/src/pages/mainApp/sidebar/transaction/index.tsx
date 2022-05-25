@@ -124,7 +124,7 @@ const Transaction = () => {
     const query = new URLSearchParams(location.search);
     const coin = query.get('slug');
     const walletId = query.get('wallet');
-    
+
     if (coin) {
       const index = allCoins.findIndex(
         elem => elem.abbr.toLowerCase() === coin.toLowerCase()

@@ -11,7 +11,7 @@ export const getLatestPriceForCoin = async (coin: string) => {
   if (ERC20TOKENS[coin.toLowerCase()])
     res = await tokenDb.getOne({ slug: coin });
   else res = await coinDb.getOne({ slug: coin });
-  
+
   if (!res) {
     logger.warn(`Cannot find price for coin ${coin}`);
     return 0;

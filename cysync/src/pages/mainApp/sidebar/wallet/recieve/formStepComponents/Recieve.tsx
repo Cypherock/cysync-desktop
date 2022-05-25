@@ -105,7 +105,7 @@ const getReceiveAddress = async (
   coinType: string,
   xpub: string,
   walletId: string,
-  zpub?: string,
+  zpub?: string
 ) => {
   let receiveAddress = '';
   let w;
@@ -150,7 +150,12 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   React.useEffect(() => {
     if (!coinAddress || !receiveTransaction.verified) {
-      getReceiveAddress(coinDetails.slug, coinDetails.xpub, coinDetails.walletId, coinDetails.zpub, )
+      getReceiveAddress(
+        coinDetails.slug,
+        coinDetails.xpub,
+        coinDetails.walletId,
+        coinDetails.zpub
+      )
         .then(addr => {
           setCoinAddress(addr);
           setCoinVerified(false);

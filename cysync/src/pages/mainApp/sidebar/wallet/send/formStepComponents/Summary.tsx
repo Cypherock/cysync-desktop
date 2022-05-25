@@ -127,11 +127,7 @@ const Summary: React.FC<StepComponentProps> = ({
           txHash: res,
           token: token ? token.coin : undefined
         });
-        addTxnConfirmAddressHook(
-          res,
-          coinDetails.slug,
-          selectedWallet._id
-        );
+        addTxnConfirmAddressHook(res, coinDetails.slug, selectedWallet._id);
         handleNext();
         Analytics.Instance.event(
           Analytics.Categories.SEND_TXN,

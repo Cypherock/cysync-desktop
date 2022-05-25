@@ -11,7 +11,7 @@ import {
   receiveAddressDb,
   transactionDb,
   walletDb,
-  coinDb,
+  coinDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
@@ -189,7 +189,9 @@ export const SocketProvider: React.FC = ({ children }) => {
   ) => {
     logger.info('Adding initial socket hooks');
 
-    const allPendingTxns = await transactionDb.getAllTxns({ status: 'PENDING' });
+    const allPendingTxns = await transactionDb.getAllTxns({
+      status: 'PENDING'
+    });
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
@@ -225,7 +227,9 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket?: BlockbookSocket
   ) => {
     logger.info('Adding initial blockbook web subscriptions');
-    const allPendingTxns = await transactionDb.getAllTxns({ status: 'PENDING' });
+    const allPendingTxns = await transactionDb.getAllTxns({
+      status: 'PENDING'
+    });
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
