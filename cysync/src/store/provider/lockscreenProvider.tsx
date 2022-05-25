@@ -82,7 +82,7 @@ export const LockscreenProvider: React.FC = ({ children }) => {
     return () => {
       ipcRenderer.removeListener('lock-screen', onDesktopLock);
     };
-  }, [lockscreen, isPasswordSet, autoLock]);
+  }, []);
 
   useEffect(() => {
     setLockscreenLoading(true);
