@@ -9,7 +9,7 @@ import newWallet from '@cypherock/wallet';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { addressDb, coinDb, Coin } from '../../database';
+import { addressDb, Coin, coinDb } from '../../database';
 import { useI18n, useSync } from '../../provider';
 
 function sleep(ms: number) {

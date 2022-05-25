@@ -19,13 +19,13 @@ import BigNumber from 'bignumber.js';
 
 import logger from '../../../../utils/logger';
 import {
-  tokenDb,
-  transactionDb,
-  coinDb,
   addressDb,
   Coin,
+  coinDb,
+  IOtype,
+  tokenDb,
   Transaction,
-  IOtype
+  transactionDb
 } from '../../../database';
 import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
 

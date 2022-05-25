@@ -1,3 +1,4 @@
+import { ERC20TOKENS } from '@cypherock/communication';
 import {
   batch as batchServer,
   IRequestMetadata,
@@ -6,7 +7,6 @@ import {
 
 import { coinDb, tokenDb } from '../../../database';
 import { LatestPriceSyncItem } from '../types';
-import { ERC20TOKENS } from '@cypherock/communication';
 
 export const getRequestsMetadata = (
   item: LatestPriceSyncItem

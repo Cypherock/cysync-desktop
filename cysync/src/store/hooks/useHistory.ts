@@ -1,5 +1,5 @@
 import { ALLCOINS as COINS, Erc20CoinData } from '@cypherock/communication';
-import { TxQueryOptions, Coin } from '@cypherock/database';
+import { Coin, TxQueryOptions } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';

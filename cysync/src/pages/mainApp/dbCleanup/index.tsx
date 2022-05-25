@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import {
+  addressDb,
   coinDb,
   deviceDb,
   notificationDb,
   priceHistoryDb,
   receiveAddressDb,
-  addressDb,
   tokenDb,
   transactionDb,
   walletDb

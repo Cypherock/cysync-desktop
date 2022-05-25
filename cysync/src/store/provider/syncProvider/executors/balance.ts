@@ -12,7 +12,7 @@ import {
 import { generateEthAddressFromXpub } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
-import { tokenDb, coinDb } from '../../../database';
+import { coinDb, tokenDb } from '../../../database';
 import { BalanceSyncItem } from '../types';
 
 export const getRequestsMetadata = (

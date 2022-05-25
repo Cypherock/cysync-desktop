@@ -5,7 +5,7 @@ import {
   DeviceErrorType,
   EthCoinData
 } from '@cypherock/communication';
-import { InputOutput, Transaction, IOtype } from '@cypherock/database';
+import { InputOutput, IOtype, Transaction } from '@cypherock/database';
 import { TransactionSender } from '@cypherock/protocols';
 import Server from '@cypherock/server-wrapper';
 import { WalletError, WalletErrorType } from '@cypherock/wallet';
@@ -14,7 +14,7 @@ import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { coinDb, addressDb, transactionDb } from '../../database';
+import { addressDb, coinDb, transactionDb } from '../../database';
 import { useI18n } from '../../provider';
 
 export const changeFormatOfOutputList = (
@@ -241,7 +241,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         setSendMaxAmount(Number(amt));
       });
 
-      const { walletId } = await coinDb.getOne({ xpub: xpub, slug: coinType });
+      const { walletId } = await coinDb.getOne({ xpub, slug: coinType });
       sendTransaction
         .calcApproxFee(
           xpub,
@@ -691,7 +691,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           sentReceive: 'SENT',
           confirmed: new Date(),
           blockHeight: -1,
-          coin: coin,
+          coin,
           inputs: formattedInputs,
           outputs: formattedOutputs
         };
@@ -707,7 +707,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           sentReceive: 'FEES',
           confirmed: new Date(),
           blockHeight: -1,
-          coin: coin
+          coin
         };
         transactionDb.insert(feeTxn);
       } else {

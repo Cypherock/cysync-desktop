@@ -10,11 +10,11 @@ import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
 import {
-  tokenDb,
-  transactionDb,
-  coinDb,
   Coin,
-  priceHistoryDb
+  coinDb,
+  priceHistoryDb,
+  tokenDb,
+  transactionDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';

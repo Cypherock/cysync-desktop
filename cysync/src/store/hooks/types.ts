@@ -1,12 +1,13 @@
-import {
-  Token,
-  InputOutput,
-  Transaction,
-  Coin,
-  IOtype
-} from '../database/databaseInit';
 import BigNumber from 'bignumber.js';
 import PropTypes from 'prop-types';
+
+import {
+  Coin,
+  InputOutput,
+  IOtype,
+  Token,
+  Transaction
+} from '../database/databaseInit';
 
 export interface DisplayCoin extends Coin {
   displayValue: string;

@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 import { getPortfolioCache } from '../../utils/cache';
 import logger from '../../utils/logger';
 import {
+  coinDb,
+  getLatestPriceForCoin,
+  priceHistoryDb,
   tokenDb,
   Transaction,
-  transactionDb,
-  coinDb,
-  priceHistoryDb,
-  getLatestPriceForCoin
+  transactionDb
 } from '../database';
 
 import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';

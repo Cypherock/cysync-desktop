@@ -24,8 +24,8 @@ import Dustbin from '../../../../designSystem/iconGroups/dustbin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
 import {
   addressDb,
-  tokenDb,
   receiveAddressDb,
+  tokenDb,
   transactionDb
 } from '../../../../store/database';
 import { useToken } from '../../../../store/hooks';

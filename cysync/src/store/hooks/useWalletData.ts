@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 
 import {
   addressDb,
+  Coin,
   coinDb,
   getLatestPriceForCoin,
   priceHistoryDb,
-  receiveAddressDb,
-  Coin
+  receiveAddressDb
 } from '../database';
 
 import { DisplayCoin } from './types';

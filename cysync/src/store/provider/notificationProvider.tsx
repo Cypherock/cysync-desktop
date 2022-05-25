@@ -128,8 +128,11 @@ export const NotificationProvider: React.FC = ({ children }) => {
 
       if (notifications.length > 0)
         lastNotif = notifications[notifications.length - 1];
-      
-      const dbNotif = await NotificationDB.getLatest(perPageLimit, notifications.length);
+
+      const dbNotif = await NotificationDB.getLatest(
+        perPageLimit,
+        notifications.length
+      );
 
       let isInDb = true;
 

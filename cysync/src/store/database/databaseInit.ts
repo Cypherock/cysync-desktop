@@ -1,11 +1,11 @@
 import {
+  AddressDB,
   CoinDB,
   DeviceDB,
   NotificationDB,
   PassEncrypt,
   PriceHistoryDB,
   ReceiveAddressDB,
-  AddressDB,
   TokenDB,
   TransactionDB,
   WalletDB

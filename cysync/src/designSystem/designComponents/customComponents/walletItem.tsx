@@ -12,8 +12,8 @@ import Routes from '../../../constants/routes';
 import {
   addressDb,
   coinDb,
-  tokenDb,
   receiveAddressDb,
+  tokenDb,
   transactionDb,
   Wallet,
   walletDb

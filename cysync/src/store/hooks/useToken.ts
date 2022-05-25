@@ -3,10 +3,10 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
 import {
-  Token,
-  tokenDb,
   getLatestPriceForCoin,
-  priceHistoryDb
+  priceHistoryDb,
+  Token,
+  tokenDb
 } from '../database';
 
 import { DisplayToken } from './types';

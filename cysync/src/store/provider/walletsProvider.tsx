@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { tokenDb, walletDb, Wallet, coinDb } from '../database';
+import { coinDb, tokenDb, Wallet, walletDb } from '../database';
 
 export interface Coin {
   name: string;

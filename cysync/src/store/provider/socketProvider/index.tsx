@@ -8,10 +8,10 @@ import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
   addressDb,
+  coinDb,
   receiveAddressDb,
   transactionDb,
-  walletDb,
-  coinDb
+  walletDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
