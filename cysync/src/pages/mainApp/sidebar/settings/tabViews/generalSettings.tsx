@@ -5,20 +5,17 @@ import ListItem from '@mui/material/ListItem';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
 import { styled, useTheme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import SwitchButton from '../../../../../designSystem/designComponents/buttons/switchButton';
 import DialogBoxConfirmation from '../../../../../designSystem/designComponents/dialog/dialogBoxConfirmation';
-import DropMenu from '../../../../../designSystem/designComponents/menu/DropMenu';
+import { useLockscreen } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import { passwordExists } from '../../../../../utils/auth';
-import {
-  autolockOptions,
-  getAutolockIndex,
-  setAutolockIndex
-} from '../../../../../utils/autolock';
+import { setAutoLock as storeAutoLock } from '../../../../../utils/autolock';
 import { triggerClearData } from '../../../../../utils/clearData';
 import logger from '../../../../../utils/logger';
 
@@ -74,6 +71,7 @@ const Root = styled('div')(({ theme }) => ({
 const GeneralSettings = () => {
   const location = useLocation();
   const theme = useTheme();
+  const { autoLock, setAutoLock } = useLockscreen();
 
   const [previousSetPassword, setPreviousSetPassword] = React.useState(
     passwordExists()
@@ -87,22 +85,9 @@ const GeneralSettings = () => {
 
   const [removePasswordDialog, setRemovePasswordDialog] = React.useState(false);
 
-  const [index, setIndex] = React.useState({
-    currency: 0,
-    language: 0,
-    theme: 0,
-    autolock: 0
-  });
-
   useEffect(() => {
     Analytics.Instance.screenView(Analytics.ScreenViews.GENERAL_SETTINGS);
     logger.info('In general settings');
-
-    const autolockIndex = getAutolockIndex();
-
-    if (autolockIndex !== 0) {
-      setIndex({ ...index, autolock: autolockIndex });
-    }
 
     if (location.search) {
       const query = new URLSearchParams(location.search);
@@ -112,23 +97,10 @@ const GeneralSettings = () => {
     }
   }, []);
 
-  const handleListItemClick = (Lindex: number, type: string) => {
-    if (type) {
-      setIndex({
-        ...index,
-        [type]: Lindex
-      });
-
-      switch (type) {
-        case 'autolock':
-          setAutolockIndex(Lindex);
-          break;
-        default:
-          break;
-      }
-    } else {
-      setIndex({ ...index });
-    }
+  const handleAutoLockToggle = () => {
+    const newAutoLock = !autoLock;
+    setAutoLock(newAutoLock);
+    storeAutoLock(newAutoLock);
   };
 
   const handleDisableProvisionClick = () => {
@@ -177,15 +149,25 @@ const GeneralSettings = () => {
       )
     },
     {
-      name: 'Auto-Lock',
-      secondaryText: 'Lock the app automatically after inactivity.',
-      element: (
-        <DropMenu
-          options={[...autolockOptions]}
-          type="autolock"
-          index={index.autolock}
-          handleMenuItemSelectionChange={handleListItemClick}
+      name: 'Auto Lock',
+      secondaryText: 'Lock the app automatically when desktop locks.',
+      element: previousSetPassword ? (
+        <SwitchButton
+          name="toggleAutoLock"
+          completed={autoLock}
+          handleChange={handleAutoLockToggle}
         />
+      ) : (
+        <Tooltip title="Set a password to enable this feature" placement="top">
+          <span style={{ width: '100%', height: '100%' }}>
+            <SwitchButton
+              disabled
+              name="toggleAutoLock"
+              completed={autoLock}
+              handleChange={handleAutoLockToggle}
+            />
+          </span>
+        </Tooltip>
       )
     },
     {

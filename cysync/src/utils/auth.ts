@@ -44,19 +44,6 @@ export const setPasswordHash = (hash: string): void => {
   localStorage.setItem('passwordHash', hash);
 };
 
-/**
- * @param autoLockTime : is in minutes
- */
-export const setAutoLockTime = (autoLockTime: number): void => {
-  localStorage.setItem('autoLock', String(autoLockTime));
-};
-
-export const getAutoLockTime = (): number => {
-  const time = localStorage.getItem('autoLock');
-  if (time) return parseInt(time, 10);
-  return 25 * 60 * 1000;
-};
-
 export const isFirstBoot = (): boolean => {
   return !localStorage.getItem('firstBoot');
 };

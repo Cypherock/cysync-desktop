@@ -1,5 +1,6 @@
+import { ipcRenderer } from 'electron';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { loadDatabases } from '../../store/database';
 import {
@@ -8,7 +9,7 @@ import {
   passwordExists,
   removePassword
 } from '../../utils/auth';
-import { getAutolockTime } from '../../utils/autolock';
+import { getAutoLock } from '../../utils/autolock';
 
 export interface LockscreenContextInterface {
   lockscreen: boolean;
@@ -19,8 +20,8 @@ export interface LockscreenContextInterface {
   isInitialFlow: boolean;
   handleInitialFlowClose: () => void;
   handleInitialFlowOpen: () => void;
-  autolockTime: number;
-  showIdleTimer: boolean;
+  autoLock: boolean;
+  setAutoLock: (autoLock: boolean) => void;
   isDeviceConnected: boolean;
   isPasswordSet: boolean;
   setIsPasswordSet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -40,26 +41,53 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   const [isLockscreenLoading, setLockscreenLoading] = useState(true);
   const [lockscreen, setLockScreen] = useState(false);
   const [isInitialFlow, setInitialFlow] = useState(isFirstBoot());
-  const [autolockTime, setAutolockTime] = useState(-1);
-  const [showIdleTimer, setShowIdleTimer] = useState(false);
+  const [autoLock, setAutoLock] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(false);
+
+  const lockscreenRef = useRef<boolean | null>(lockscreen);
+  const isPasswordSetRef = useRef<boolean | null>(isPasswordSet);
+  const autoLockRef = useRef<boolean | null>(autoLock);
+  useEffect(() => {
+    lockscreenRef.current = lockscreen;
+  }, [lockscreen]);
+  useEffect(() => {
+    isPasswordSetRef.current = isPasswordSet;
+  }, [isPasswordSet]);
+  useEffect(() => {
+    autoLockRef.current = autoLock;
+  }, [autoLock]);
 
   const handleDeviceConnected = () => {
     localStorage.setItem('initialFlow', 'true');
     setDeviceConnected(true);
   };
 
-  useEffect(() => {
-    const val = !lockscreen && isPasswordSet && autolockTime !== -1;
-    if (val !== showIdleTimer) {
-      setShowIdleTimer(val);
+  const onDesktopLock = () => {
+    const val =
+      !lockscreenRef.current && isPasswordSetRef.current && autoLockRef.current;
+    if (val) {
+      setLockScreen(true);
     }
-  }, [lockscreen, isPasswordSet, autolockTime]);
+  };
+
+  const handleLockScreenClickOpen = () => {
+    if (!lockscreen) {
+      setLockScreen(true);
+    }
+  };
+
+  useEffect(() => {
+    ipcRenderer.on('lock-screen', onDesktopLock);
+
+    return () => {
+      ipcRenderer.removeListener('lock-screen', onDesktopLock);
+    };
+  }, []);
 
   useEffect(() => {
     setLockscreenLoading(true);
-    const time = getAutolockTime();
-    setAutolockTime(time);
+    const autoLockFlag = getAutoLock();
+    setAutoLock(autoLockFlag);
 
     const hasPassword = passwordExists();
     if (!hasPassword) {
@@ -76,12 +104,6 @@ export const LockscreenProvider: React.FC = ({ children }) => {
     }
     setIsPasswordSet(hasPassword);
   }, []);
-
-  const handleLockScreenClickOpen = () => {
-    if (!lockscreen) {
-      setLockScreen(true);
-    }
-  };
 
   const handleLockScreenClose = () => {
     setLockScreen(false);
@@ -114,8 +136,8 @@ export const LockscreenProvider: React.FC = ({ children }) => {
         isInitialFlow,
         handleInitialFlowClose,
         handleInitialFlowOpen,
-        autolockTime,
-        showIdleTimer,
+        autoLock,
+        setAutoLock,
         isDeviceConnected,
         handleDeviceConnected,
         isPasswordSet,

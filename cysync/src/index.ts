@@ -8,7 +8,8 @@ import {
   crashReporter,
   dialog,
   globalShortcut,
-  ipcMain
+  ipcMain,
+  powerMonitor
 } from 'electron';
 import { download } from 'electron-dl';
 import path from 'path';
@@ -203,6 +204,12 @@ const createWindow = async () => {
         contextIsolation: false
       },
       icon: iconPath
+    });
+
+    powerMonitor.on('lock-screen', () => {
+      if (mainWindow) {
+        mainWindow.webContents.send('lock-screen');
+      }
     });
 
     mainWindow.on('focus', () => {

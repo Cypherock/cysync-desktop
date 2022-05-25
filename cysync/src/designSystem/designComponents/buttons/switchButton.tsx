@@ -68,18 +68,21 @@ type SwitchButtonProps = {
   handleChange: (event: any) => void | any;
   label?: string;
   name?: string;
+  disabled?: boolean;
 };
 
 const SwitchButton: React.FC<SwitchButtonProps> = ({
   completed,
   label,
   handleChange,
-  name
+  name,
+  disabled = false
 }: SwitchButtonProps) => {
   return (
     <Root className={classes.root}>
       <span className={classes.label}>{label}</span>
       <IOSSwitch
+        disabled={disabled}
         checked={completed}
         onChange={handleChange}
         name={name}
