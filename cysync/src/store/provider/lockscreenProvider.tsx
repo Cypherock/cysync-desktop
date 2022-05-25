@@ -50,7 +50,7 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   };
 
   const onDesktopLock = () => {
-    setLockScreen(true);
+    if (!lockscreen && isPasswordSet) setLockScreen(true);
   };
 
   const handleLockScreenClickOpen = () => {
