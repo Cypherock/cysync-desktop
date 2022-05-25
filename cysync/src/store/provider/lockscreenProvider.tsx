@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { loadDatabases } from '../../store/database';
 import {
@@ -44,13 +44,30 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   const [autoLock, setAutoLock] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(false);
 
+  const lockscreenRef = useRef<boolean | null>(lockscreen);
+  const isPasswordSetRef = useRef<boolean | null>(isPasswordSet);
+  const autoLockRef = useRef<boolean | null>(autoLock);
+  useEffect(() => {
+    lockscreenRef.current = lockscreen;
+  }, [lockscreen]);
+  useEffect(() => {
+    isPasswordSetRef.current = isPasswordSet;
+  }, [isPasswordSet]);
+  useEffect(() => {
+    autoLockRef.current = autoLock;
+  }, [autoLock]);
+
   const handleDeviceConnected = () => {
     localStorage.setItem('initialFlow', 'true');
     setDeviceConnected(true);
   };
 
   const onDesktopLock = () => {
-    if (!lockscreen && isPasswordSet) setLockScreen(true);
+    const val =
+      !lockscreenRef.current && isPasswordSetRef.current && autoLockRef.current;
+    if (val) {
+      setLockScreen(true);
+    }
   };
 
   const handleLockScreenClickOpen = () => {
@@ -60,10 +77,7 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    const val = !lockscreen && isPasswordSet && autoLock;
-    if (val) {
-      ipcRenderer.on('lock-screen', onDesktopLock);
-    }
+    ipcRenderer.on('lock-screen', onDesktopLock);
 
     return () => {
       ipcRenderer.removeListener('lock-screen', onDesktopLock);
