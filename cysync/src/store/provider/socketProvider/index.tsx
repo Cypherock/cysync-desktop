@@ -43,7 +43,7 @@ export const SocketProvider: React.FC = ({ children }) => {
   const [blockbookSocket, setBlockbookSocket] = useState<
     BlockbookSocket | undefined
   >(undefined);
-  const { addBalanceSyncItemFromXpub, addHistorySyncItemFromXpub } = useSync();
+  const { addBalanceSyncItemFromCoin, addHistorySyncItemFromCoin } = useSync();
 
   const addReceiveAddressHookFromSocket = (
     address: string,
@@ -287,12 +287,12 @@ export const SocketProvider: React.FC = ({ children }) => {
                   addressDB: addressDb
                 });
                 if (payload.tokenAbbr) {
-                  addBalanceSyncItemFromXpub(coin, {
+                  addBalanceSyncItemFromCoin(coin, {
                     isRefresh: true,
                     token: payload.tokenAbbr as string
                   });
                 } else {
-                  addBalanceSyncItemFromXpub(coin, {
+                  addBalanceSyncItemFromCoin(coin, {
                     isRefresh: true
                   });
                 }
@@ -313,12 +313,12 @@ export const SocketProvider: React.FC = ({ children }) => {
                     });
                     if (txXpub) {
                       if (payload.tokenAbbr) {
-                        addBalanceSyncItemFromXpub(txXpub, {
+                        addBalanceSyncItemFromCoin(txXpub, {
                           isRefresh: true,
                           token: payload.tokenAbbr as string
                         });
                       } else {
-                        addBalanceSyncItemFromXpub(txXpub, {
+                        addBalanceSyncItemFromCoin(txXpub, {
                           isRefresh: true
                         });
                       }
@@ -373,12 +373,12 @@ export const SocketProvider: React.FC = ({ children }) => {
                     'Txn confirm hook changed state from pending to confirmed'
                   );
                   if (payload.tokenAbbr) {
-                    addBalanceSyncItemFromXpub(xpub, {
+                    addBalanceSyncItemFromCoin(xpub, {
                       isRefresh: true,
                       token: payload.tokenAbbr as string
                     });
                   } else {
-                    addBalanceSyncItemFromXpub(xpub, {
+                    addBalanceSyncItemFromCoin(xpub, {
                       isRefresh: true
                     });
                   }
@@ -511,7 +511,7 @@ export const SocketProvider: React.FC = ({ children }) => {
               });
 
               if (isConfirmed) {
-                addBalanceSyncItemFromXpub(coin, {
+                addBalanceSyncItemFromCoin(coin, {
                   isRefresh: true
                 });
               }
@@ -553,10 +553,10 @@ export const SocketProvider: React.FC = ({ children }) => {
               });
 
               for (const coin of coins) {
-                addBalanceSyncItemFromXpub(coin, {
+                addBalanceSyncItemFromCoin(coin, {
                   isRefresh: true
                 });
-                addHistorySyncItemFromXpub(coin, {
+                addHistorySyncItemFromCoin(coin, {
                   isRefresh: true
                 });
               }

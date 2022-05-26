@@ -88,8 +88,8 @@ export const processResponses = async (
   responses: batchServer.IBatchResponse[],
   options: {
     addToQueue: SyncProviderTypes['addToQueue'];
-    addPriceSyncItemFromXpub: SyncProviderTypes['addPriceSyncItemFromXpub'];
-    addLatestPriceSyncItemFromXpub: SyncProviderTypes['addLatestPriceSyncItemFromXpub'];
+    addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'];
+    addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
   }
 ): Promise<any> => {
   const coin = COINS[item.coinType];
@@ -406,11 +406,11 @@ export const processResponses = async (
             isRefresh: true
           })
         );
-        options.addPriceSyncItemFromXpub({ slug: tokenName } as Coin, {
+        options.addPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
           isRefresh: true,
           module: item.module
         });
-        options.addLatestPriceSyncItemFromXpub({ slug: tokenName } as Coin, {
+        options.addLatestPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
           isRefresh: true,
           module: 'default'
         });

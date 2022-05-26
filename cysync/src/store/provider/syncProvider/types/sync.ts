@@ -13,19 +13,19 @@ export type SyncQueueItem =
 
 export interface SyncProviderTypes {
   addToQueue: (item: SyncQueueItem) => void;
-  addHistorySyncItemFromXpub: (
+  addHistorySyncItemFromCoin: (
     coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
-  addBalanceSyncItemFromXpub: (
+  addBalanceSyncItemFromCoin: (
     coin: Coin,
     options: { token?: string; module?: string; isRefresh?: boolean }
   ) => void;
-  addPriceSyncItemFromXpub: (
+  addPriceSyncItemFromCoin: (
     coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
-  addLatestPriceSyncItemFromXpub: (
+  addLatestPriceSyncItemFromCoin: (
     coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;

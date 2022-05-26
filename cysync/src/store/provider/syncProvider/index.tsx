@@ -48,11 +48,11 @@ export interface SyncContextInterface {
     ethCoin: string
   ) => Promise<void>;
   reSync: () => void;
-  addBalanceSyncItemFromXpub: (
+  addBalanceSyncItemFromCoin: (
     coin: Coin,
     options: { token?: string; module?: string; isRefresh?: boolean }
   ) => void;
-  addHistorySyncItemFromXpub: (
+  addHistorySyncItemFromCoin: (
     coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
@@ -100,7 +100,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     });
   };
 
-  const addHistorySyncItemFromXpub: SyncProviderTypes['addHistorySyncItemFromXpub'] =
+  const addHistorySyncItemFromCoin: SyncProviderTypes['addHistorySyncItemFromCoin'] =
     async (coin: Coin, { module = 'default', isRefresh = false }) => {
       const coinData = COINS[coin.slug];
 
@@ -110,7 +110,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           coinType: coin.slug
         });
         logger.debug(
-          'Xpub with invalid coin found addHistorySyncItemFromXpub',
+          'Xpub with invalid coin found addHistorySyncItemFromCoin',
           {
             coinData,
             coinType: coin.slug,
@@ -194,7 +194,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       }
     };
 
-  const addBalanceSyncItemFromXpub: SyncProviderTypes['addBalanceSyncItemFromXpub'] =
+  const addBalanceSyncItemFromCoin: SyncProviderTypes['addBalanceSyncItemFromCoin'] =
     (coin: Coin, { token, module = 'default', isRefresh = false }) => {
       const coinData = COINS[coin.slug];
 
@@ -204,7 +204,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           coinType: coin.slug
         });
         logger.debug(
-          'Xpub with invalid coin found addBalanceSyncItemFromXpub',
+          'Xpub with invalid coin found addBalanceSyncItemFromCoin',
           {
             coinData,
             coinType: coin.slug,
@@ -241,11 +241,11 @@ export const SyncProvider: React.FC = ({ children }) => {
         );
       } else {
         // If BTC fork, we get the balance from the txn api
-        addHistorySyncItemFromXpub(coin, { module, isRefresh });
+        addHistorySyncItemFromCoin(coin, { module, isRefresh });
       }
     };
 
-  const addPriceSyncItemFromXpub: SyncProviderTypes['addPriceSyncItemFromXpub'] =
+  const addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'] =
     async (coin: Coin, { module = 'default', isRefresh = false }) => {
       const coinName = coin.slug;
 
@@ -295,7 +295,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       }
     };
 
-  const addLatestPriceSyncItemFromXpub: SyncProviderTypes['addLatestPriceSyncItemFromXpub'] =
+  const addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'] =
     (coin: Coin, { module = 'default', isRefresh = false }) => {
       const coinName = coin.slug;
 
@@ -431,8 +431,8 @@ export const SyncProvider: React.FC = ({ children }) => {
     try {
       const executionResult = await executeBatch(items, {
         addToQueue,
-        addPriceSyncItemFromXpub,
-        addLatestPriceSyncItemFromXpub
+        addPriceSyncItemFromCoin,
+        addLatestPriceSyncItemFromCoin
       });
 
       updateAllExecutedItems(executionResult);
@@ -450,7 +450,7 @@ export const SyncProvider: React.FC = ({ children }) => {
   }) => {
     const allXpubs = await coinDb.getAll();
     for (const xpub of allXpubs) {
-      addHistorySyncItemFromXpub(xpub, { isRefresh, module });
+      addHistorySyncItemFromCoin(xpub, { isRefresh, module });
     }
   };
 
@@ -462,7 +462,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     const tokens = await tokenDb.getAll();
 
     for (const coin of coins) {
-      addBalanceSyncItemFromXpub(coin, { isRefresh, module });
+      addBalanceSyncItemFromCoin(coin, { isRefresh, module });
     }
 
     for (const token of tokens) {
@@ -492,11 +492,11 @@ export const SyncProvider: React.FC = ({ children }) => {
     const tokens = await tokenDb.getAll();
 
     for (const xpub of allXpubs) {
-      addPriceSyncItemFromXpub(xpub, { isRefresh, module });
+      addPriceSyncItemFromCoin(xpub, { isRefresh, module });
     }
 
     for (const token of tokens) {
-      addPriceSyncItemFromXpub({ slug: token.coin } as Coin, {
+      addPriceSyncItemFromCoin({ slug: token.coin } as Coin, {
         isRefresh,
         module
       });
@@ -511,11 +511,11 @@ export const SyncProvider: React.FC = ({ children }) => {
     const tokens = await tokenDb.getAll();
 
     for (const xpub of allXpubs) {
-      addLatestPriceSyncItemFromXpub(xpub, { isRefresh, module });
+      addLatestPriceSyncItemFromCoin(xpub, { isRefresh, module });
     }
 
     for (const token of tokens) {
-      addLatestPriceSyncItemFromXpub({ slug: token.coin } as Coin, {
+      addLatestPriceSyncItemFromCoin({ slug: token.coin } as Coin, {
         isRefresh,
         module
       });
@@ -523,10 +523,10 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const addCoinTask = (coin: Coin, { module = 'default' }) => {
-    addBalanceSyncItemFromXpub(coin, { module, isRefresh: true });
-    addHistorySyncItemFromXpub(coin, { module, isRefresh: true });
-    addPriceSyncItemFromXpub(coin, { module, isRefresh: true });
-    addLatestPriceSyncItemFromXpub(coin, { module, isRefresh: true });
+    addBalanceSyncItemFromCoin(coin, { module, isRefresh: true });
+    addHistorySyncItemFromCoin(coin, { module, isRefresh: true });
+    addPriceSyncItemFromCoin(coin, { module, isRefresh: true });
+    addLatestPriceSyncItemFromCoin(coin, { module, isRefresh: true });
   };
 
   const addTokenTask = async (
@@ -549,11 +549,11 @@ export const SyncProvider: React.FC = ({ children }) => {
         isRefresh: true
       })
     );
-    addPriceSyncItemFromXpub({ slug: tokenName } as Coin, {
+    addPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
       isRefresh: true,
       module: 'default'
     });
-    addLatestPriceSyncItemFromXpub({ slug: tokenName } as Coin, {
+    addLatestPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
       isRefresh: true,
       module: 'default'
     });
@@ -675,8 +675,8 @@ export const SyncProvider: React.FC = ({ children }) => {
         addCoinTask,
         addTokenTask,
         reSync,
-        addBalanceSyncItemFromXpub,
-        addHistorySyncItemFromXpub
+        addBalanceSyncItemFromCoin,
+        addHistorySyncItemFromCoin
       }}
     >
       {children}
