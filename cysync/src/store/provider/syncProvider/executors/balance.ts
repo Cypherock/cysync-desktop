@@ -84,12 +84,12 @@ export const processResponses = async (
 
     const balance = new BigNumber(balanceRes.data);
 
-    await coinDb.updateTotalBalance(
-      item.xpub,
-      item.coinType,
-      balance.toString(),
-      '0'
-    );
+    await coinDb.updateTotalBalance({
+      xpub: item.xpub,
+      slug: item.coinType,
+      totalBalance: balance.toString(),
+      totalUnconfirmedBalance: '0'
+    });
   } else if (coin instanceof Erc20CoinData) {
     if (!item.ethCoin) {
       throw new Error(
@@ -103,11 +103,11 @@ export const processResponses = async (
       const balanceRes = responses[0];
 
       const balance = new BigNumber(balanceRes.data);
-      await tokenDb.updateBalance(
-        item.walletId,
-        item.coinType,
-        balance.toString()
-      );
+      await tokenDb.updateBalance({
+        walletId: item.walletId,
+        slug: item.coinType,
+        balance: balance.toString()
+      });
     } else {
       throw new Error(
         'Invalid ethCoin found in balance sync item' + item.ethCoin

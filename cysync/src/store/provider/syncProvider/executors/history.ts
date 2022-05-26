@@ -123,12 +123,12 @@ export const processResponses = async (
       logger.warn('Cannot find xpub while fetching txn', { item });
     } else {
       if (item.zpub) {
-        await coinDb.updateZpubBalance(
-          item.zpub,
-          item.coinType,
-          balance.toString(),
-          unconfirmedBalance.toString()
-        );
+        await coinDb.updateZpubBalance({
+          zpub: item.zpub,
+          slug: item.coinType,
+          zpubBalance: balance.toString(),
+          zpubUnconfirmedBalance: unconfirmedBalance.toString()
+        });
         if (coin.xpubBalance) {
           balance = balance.plus(coin.xpubBalance);
         }
@@ -136,12 +136,12 @@ export const processResponses = async (
           balance = balance.plus(coin.xpubUnconfirmedBalance);
         }
       } else {
-        await coinDb.updateXpubBalance(
-          item.xpub,
-          item.coinType,
-          balance.toString(),
-          unconfirmedBalance.toString()
-        );
+        await coinDb.updateXpubBalance({
+          xpub: item.xpub,
+          slug: item.coinType,
+          xpubBalance: balance.toString(),
+          xpubUnconfirmedBalance: unconfirmedBalance.toString()
+        });
 
         if (coin.zpubBalance) {
           balance = balance.plus(coin.zpubBalance);
@@ -151,12 +151,12 @@ export const processResponses = async (
         }
       }
 
-      await coinDb.updateTotalBalance(
-        item.xpub,
-        item.coinType,
-        balance.toString(),
-        unconfirmedBalance.toString()
-      );
+      await coinDb.updateTotalBalance({
+        xpub: item.xpub,
+        slug: item.coinType,
+        totalBalance: balance.toString(),
+        totalUnconfirmedBalance: unconfirmedBalance.toString()
+      });
     }
 
     if (response.data.transactions) {
