@@ -12,6 +12,7 @@ import logger from '../../../utils/logger';
 import {
   Coin,
   coinDb,
+  getTopBlock,
   priceHistoryDb,
   tokenDb,
   transactionDb
@@ -125,7 +126,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           .createHash('sha256')
           .update(coin.xpub)
           .digest('base64');
-        const topBlock = await transactionDb.getTopBlock({
+        const topBlock = await getTopBlock({
           walletId: coin.walletId,
           walletName,
           slug: coinData.abbr
@@ -151,7 +152,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             .createHash('sha256')
             .update(coin.zpub)
             .digest('base64');
-          const topBlock = await transactionDb.getTopBlock({
+          const topBlock = await getTopBlock({
             walletId: coin.walletId,
             walletName: zwalletName,
             slug: coinData.abbr

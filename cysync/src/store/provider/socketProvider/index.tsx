@@ -12,7 +12,10 @@ import {
   receiveAddressDb,
   transactionDb,
   walletDb,
-  Status
+  Status,
+  updateConfirmations,
+  insertFromBlockbookTxn,
+  insertFromFullTxn
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
@@ -279,7 +282,7 @@ export const SocketProvider: React.FC = ({ children }) => {
               });
 
               if (coin) {
-                transactionDb.insertFromFullTxn({
+                insertFromFullTxn({
                   txn: payload,
                   xpub: coin.xpub,
                   addresses: [],
@@ -299,7 +302,7 @@ export const SocketProvider: React.FC = ({ children }) => {
                 }
 
                 // Update the confirmation if the database has a txn with same hash
-                await transactionDb.updateConfirmations(payload);
+                await updateConfirmations(payload);
                 const allTxWithSameHash = await transactionDb.getAll({
                   hash: payload.hash
                 });
@@ -350,7 +353,7 @@ export const SocketProvider: React.FC = ({ children }) => {
         try {
           logger.info('Received txn confirmation hook', { payload });
           if (payload && payload.hash && payload.coinType) {
-            const confirmations = await transactionDb.updateConfirmations(
+            const confirmations = await updateConfirmations(
               payload
             );
             logger.info('Txn confirmed', {
@@ -502,7 +505,7 @@ export const SocketProvider: React.FC = ({ children }) => {
             });
 
             if (coin) {
-              transactionDb.insertFromBlockbookTxn({
+              insertFromBlockbookTxn({
                 txn: payload.txn,
                 xpub: coin.xpub,
                 addresses: [],

@@ -26,7 +26,8 @@ import {
   tokenDb,
   Transaction,
   transactionDb,
-  SentReceive
+  SentReceive,
+  insertFromBlockbookTxn
 } from '../../../database';
 import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
 
@@ -163,7 +164,7 @@ export const processResponses = async (
     if (response.data.transactions) {
       for (const txn of response.data.transactions) {
         try {
-          await transactionDb.insertFromBlockbookTxn({
+          await insertFromBlockbookTxn({
             txn,
             xpub: item.xpub,
             addresses: response.data.tokens

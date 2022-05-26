@@ -1,9 +1,16 @@
 import { ALLCOINS as COINS, Erc20CoinData } from '@cypherock/communication';
-import { Coin, TxQuery, TxQueryOptions } from '@cypherock/database';
+import { Coin } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';
-import { getLatestPriceForCoins, transactionDb, walletDb } from '../database';
+import {
+  getAllTxns,
+  getLatestPriceForCoins,
+  transactionDb,
+  walletDb,
+  TxQuery,
+  TxQueryOptions
+} from '../database';
 
 import { DisplayInputOutput, DisplayTransaction } from './types';
 
@@ -34,7 +41,7 @@ export const useHistory: UseHistory = () => {
     if (coinType) {
       query.slug = coinType;
     }
-    const res = await transactionDb.getAll(query, options, {
+    const res = await getAllTxns(query, options, {
       field: 'confirmed',
       order: 'desc'
     });

@@ -11,7 +11,8 @@ import {
   tokenDb,
   Transaction,
   transactionDb,
-  SentReceive
+  SentReceive,
+  getAllTxns
 } from '../database';
 
 import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';
@@ -159,7 +160,7 @@ export const usePortfolio: UsePortfolio = () => {
         else return null;
       }
 
-      transactionHistory = await transactionDb.getAll(
+      transactionHistory = await getAllTxns(
         {
           walletId: wallet,
           coin: coinType
@@ -190,7 +191,7 @@ export const usePortfolio: UsePortfolio = () => {
         }
       }
 
-      transactionHistory = await transactionDb.getAll(
+      transactionHistory = await getAllTxns(
         {
           coin: coinType
         },
