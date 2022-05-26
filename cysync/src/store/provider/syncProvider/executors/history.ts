@@ -25,7 +25,8 @@ import {
   IOtype,
   tokenDb,
   Transaction,
-  transactionDb
+  transactionDb,
+  SentReceive
 } from '../../../database';
 import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
 
@@ -232,7 +233,8 @@ export const processResponses = async (
         slug: item.coinType,
         // 2 for failed, 1 for pass
         status: ele.isError === '0' ? 1 : 2,
-        sentReceive: address === fromAddr ? 'SENT' : 'RECEIVED',
+        sentReceive:
+          address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
         confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
         blockHeight: ele.blockNumber,
         coin: item.coinType,
@@ -272,7 +274,7 @@ export const processResponses = async (
           txn.amount = amount;
 
           // Even if the token transaction failed, the transaction fee is still deducted.
-          if (txn.sentReceive === 'SENT') {
+          if (txn.sentReceive === SentReceive.SENT) {
             history.push({
               hash: ele.hash as string,
               amount: fees.toString(),
@@ -282,7 +284,7 @@ export const processResponses = async (
               walletId: item.walletId,
               slug: item.coinType,
               status: 1,
-              sentReceive: 'FEES',
+              sentReceive: SentReceive.FEES,
               confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
               blockHeight: ele.blockNumber as number,
               coin: item.coinType
@@ -323,7 +325,8 @@ export const processResponses = async (
           walletId: item.walletId,
           slug: (ele.tokenSymbol as string).toLowerCase(),
           status: 1,
-          sentReceive: address === fromAddr ? 'SENT' : 'RECEIVED',
+          sentReceive:
+            address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
           confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
           blockHeight: ele.blockNumber as number,
           coin: item.coinType,
@@ -364,7 +367,7 @@ export const processResponses = async (
           walletId: item.walletId,
           slug: item.coinType,
           status: 1,
-          sentReceive: 'FEES',
+          sentReceive: SentReceive.FEES,
           confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
           blockHeight: ele.blockNumber as number,
           coin: item.coinType

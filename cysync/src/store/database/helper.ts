@@ -1,4 +1,5 @@
 import { ALLCOINS, ERC20TOKENS } from '@cypherock/communication';
+import { SentReceive } from '@cypherock/database';
 
 import logger from '../../utils/logger';
 
@@ -26,3 +27,11 @@ export const getLatestPriceForCoins = async (coins: string[]) => {
   }
   return latestPrices;
 };
+
+export const convertToDisplayValue = (value: SentReceive) => {
+  if (value === SentReceive.FEES)
+    return 'Fees';
+  if (value === SentReceive.SENT)
+    return 'Sent';
+  return 'Received';
+}

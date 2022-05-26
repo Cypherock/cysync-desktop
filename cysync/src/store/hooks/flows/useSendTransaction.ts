@@ -5,7 +5,7 @@ import {
   DeviceErrorType,
   EthCoinData
 } from '@cypherock/communication';
-import { InputOutput, IOtype, Transaction } from '@cypherock/database';
+import { InputOutput, IOtype, SentReceive, Transaction } from '@cypherock/database';
 import { TransactionSender } from '@cypherock/protocols';
 import Server from '@cypherock/server-wrapper';
 import { WalletError, WalletErrorType } from '@cypherock/wallet';
@@ -684,7 +684,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           slug: token.toLowerCase(),
           confirmations: 0,
           status: 0,
-          sentReceive: 'SENT',
+          sentReceive: SentReceive.SENT,
           confirmed: new Date(),
           blockHeight: -1,
           coin,
@@ -700,7 +700,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           slug: coin.toLowerCase(),
           confirmations: 0,
           status: 0,
-          sentReceive: 'FEES',
+          sentReceive: SentReceive.FEES,
           confirmed: new Date(),
           blockHeight: -1,
           coin
@@ -716,7 +716,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           slug: coin.toLowerCase(),
           confirmations: 0,
           status: 0,
-          sentReceive: 'SENT',
+          sentReceive: SentReceive.SENT,
           confirmed: new Date(),
           blockHeight: -1,
           inputs: formattedInputs,

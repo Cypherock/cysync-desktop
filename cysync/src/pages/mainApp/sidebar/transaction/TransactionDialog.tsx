@@ -18,7 +18,7 @@ import IconButton from '../../../../designSystem/designComponents/buttons/custom
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
-import { getLatestPriceForCoin } from '../../../../store/database';
+import { getLatestPriceForCoin, SentReceive } from '../../../../store/database';
 import {
   DisplayTransaction,
   DisplayTransactionPropTypes
@@ -185,7 +185,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
   const getResultIcon = () => {
     switch (txn.sentReceive) {
-      case 'SENT':
+      case SentReceive.SENT:
         return (
           <Icon
             viewBox="0 0 14 14"
@@ -193,7 +193,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             color={theme.palette.secondary.main}
           />
         );
-      case 'RECEIVED':
+      case SentReceive.RECEIVED:
         return (
           <Icon
             viewBox="0 0 14 14"
@@ -226,7 +226,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         <Typography color="textSecondary">Action</Typography>
         <Typography
           className={
-            !(txn.sentReceive === 'SENT') ? classes.blue : classes.orange
+            !(txn.sentReceive === SentReceive.SENT) ? classes.blue : classes.orange
           }
           variant="body2"
         >

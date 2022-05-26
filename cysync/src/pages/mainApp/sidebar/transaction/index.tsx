@@ -12,6 +12,7 @@ import BigNumber from 'bignumber.js';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AutoSizer, List } from 'react-virtualized';
+import { convertToDisplayValue } from '../../../../store/database';
 
 import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
@@ -221,7 +222,7 @@ const Transaction = () => {
           initial={data.slug?.toUpperCase()}
           amount={data.displayAmount}
           value={new BigNumber(data.displayValue).toFixed(2)}
-          result={data.sentReceive}
+          result={convertToDisplayValue(data.sentReceive)}
           decimal={data.coinDecimal}
           address={data.hash}
           onShowMore={() => setShowTxn(data)}

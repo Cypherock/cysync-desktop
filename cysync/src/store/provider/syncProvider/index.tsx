@@ -128,7 +128,8 @@ export const SyncProvider: React.FC = ({ children }) => {
         const topBlock = await transactionDb.getTopBlock({
           walletId: coin.walletId,
           walletName,
-          coin: coinData.abbr,
+          slug: coinData.abbr
+        }, {          
           excludeFailed: true,
           excludePending: true,
           minConfirmations: 6
@@ -153,7 +154,8 @@ export const SyncProvider: React.FC = ({ children }) => {
           const topBlock = await transactionDb.getTopBlock({
             walletId: coin.walletId,
             walletName: zwalletName,
-            coin: coinData.abbr,
+            slug: coinData.abbr
+          }, {
             excludeFailed: true,
             excludePending: true,
             minConfirmations: 6

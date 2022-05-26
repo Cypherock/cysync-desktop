@@ -10,7 +10,8 @@ import {
   priceHistoryDb,
   tokenDb,
   Transaction,
-  transactionDb
+  transactionDb,
+  SentReceive
 } from '../database';
 
 import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';
@@ -158,12 +159,20 @@ export const usePortfolio: UsePortfolio = () => {
         else return null;
       }
 
-      transactionHistory = await transactionDb.getAllTxns({
-        walletId: wallet,
-        coin: coinType,
-        excludeFailed: true,
-        excludePending: true
-      });
+      transactionHistory = await transactionDb.getAll(
+        {
+          walletId: wallet,
+          coin: coinType
+        },
+        {
+          excludeFailed: true,
+          excludePending: true
+        },
+        {
+          field: 'confirmed',
+          order: 'desc'
+        }
+      );
     } else {
       if (coin.isErc20Token) {
         const tokens = await tokenDb.getAll({ slug: coinType });
@@ -181,11 +190,19 @@ export const usePortfolio: UsePortfolio = () => {
         }
       }
 
-      transactionHistory = await transactionDb.getAllTxns({
-        coin: coinType,
-        excludeFailed: true,
-        excludePending: true
-      });
+      transactionHistory = await transactionDb.getAll(
+        {
+          coin: coinType
+        },
+        {
+          excludeFailed: true,
+          excludePending: true
+        },
+        {
+          field: 'confirmed',
+          order: 'desc'
+        }
+      );
     }
 
     let prevTransactionIndex: number | null = null;
@@ -215,7 +232,7 @@ export const usePortfolio: UsePortfolio = () => {
         if (transaction.confirmed) {
           const transactionTime = new Date(transaction.confirmed).getTime();
           if (computedPrices[i][0] <= transactionTime) {
-            if (transaction.sentReceive === 'SENT') {
+            if (transaction.sentReceive === SentReceive.SENT) {
               prevTransactionAmount = prevTransactionAmount.plus(
                 new BigNumber(transaction.amount)
               );
@@ -224,7 +241,7 @@ export const usePortfolio: UsePortfolio = () => {
                   new BigNumber(transaction.fees || 0)
                 );
               }
-            } else if (transaction.sentReceive === 'FEES') {
+            } else if (transaction.sentReceive === SentReceive.FEES) {
               prevTransactionAmount = prevTransactionAmount.plus(
                 new BigNumber(transaction.amount)
               );
