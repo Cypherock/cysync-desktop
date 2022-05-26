@@ -641,8 +641,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       }
 
       if (txnInputs) {
-        let i = 0;
-        for (const input of txnInputs) {
+        for (const [i, input] of txnInputs.entries()) {
           amount = amount.plus(new BigNumber(input.value));
           formattedInputs.push({
             address: input.address,
@@ -651,13 +650,11 @@ export const useSendTransaction: UseSendTransaction = () => {
             isMine: input.isMine,
             type: IOtype.INPUT
           });
-          i += 1;
         }
       }
 
       if (txnOutputs) {
-        let i = 0;
-        for (const output of txnOutputs) {
+        for (const [i, output] of txnOutputs.entries()) {
           if (output.isMine) {
             amount = amount.minus(new BigNumber(output.value));
           }
@@ -668,7 +665,6 @@ export const useSendTransaction: UseSendTransaction = () => {
             isMine: output.isMine,
             type: IOtype.OUTPUT
           });
-          i += 1;
         }
       }
 

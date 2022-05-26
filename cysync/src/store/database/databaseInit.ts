@@ -24,11 +24,5 @@ export const receiveAddressDb = new ReceiveAddressDB();
 export const transactionDb = new TransactionDB();
 export const notificationDb = new NotificationDB();
 export const priceHistoryDb = new PriceHistoryDB();
-/**
- * Loads the data from disk. To be used only for encrypted databases.
- */
-// export const loadDatabases = async () => {
-//   await coinDb.loadData();
-// };
 
 export * from '@cypherock/database';

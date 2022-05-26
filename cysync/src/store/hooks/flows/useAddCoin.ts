@@ -126,15 +126,13 @@ export const useAddCoin: UseAddCoin = () => {
   const setUpCoinWallets = async (coinList: Coin[]) => {
     const coinStatus: AddCoinStatus[] = [];
 
-    let i = 0;
-    for (const coin of coinList) {
+    for (const [i, coin] of coinList.entries()) {
       const coinData = COINS[coin.slug];
       if (!coinData) {
         throw new Error(`Cannot find coinType: ${coin.slug}`);
       }
 
       coinStatus.push({ coin, name: coinData.name, status: i === 0 ? 1 : 0 });
-      i += 1;
     }
 
     setAddCoinIndex(0);

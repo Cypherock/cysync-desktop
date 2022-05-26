@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
+import logger from '../../utils/logger';
 import { transactionDb } from '../database';
 
 import { DisplayTransaction } from './types';
@@ -172,7 +173,8 @@ export const useTransactionData: UseTransactionData = () => {
 
       sortFromTxns(txns, sortIndex);
     } catch (e) {
-      console.log(e);
+      logger.error('Error getting transactions from DB');
+      logger.error(e);
     }
   };
 
