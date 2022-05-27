@@ -113,7 +113,8 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
         if (updateRequiredType === 'device') {
           return 'Yes';
         }
-        break;
+
+        return 'Ok';
       default:
         return 'Ok';
     }
