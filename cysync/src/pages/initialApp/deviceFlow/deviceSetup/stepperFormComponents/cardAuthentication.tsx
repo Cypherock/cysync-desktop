@@ -215,6 +215,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
         setCurrentCard(incrementCurrentCard);
         resetHooks();
       } else {
+        temp[currentCard] = -1;
         setErrorMsg('Some internal error occurred');
         setShowRetry(true);
       }

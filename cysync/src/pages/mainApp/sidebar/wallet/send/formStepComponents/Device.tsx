@@ -119,14 +119,6 @@ const Device: React.FC<StepComponentProps> = ({ handleNext }) => {
               }
               text="Enter PIN and Tap any X1 Card"
             />
-            <TextView
-              completed={sendTransaction.cardsTapped}
-              inProgress={
-                sendTransaction.pinEntered && !sendTransaction.cardsTapped
-              }
-              text="Please tap another X1 Card"
-              stylex={{ marginTop: '0px' }}
-            />
           </>
         )}
 
