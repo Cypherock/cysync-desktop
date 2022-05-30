@@ -173,57 +173,62 @@
     uuid "^8.3.2"
     winston "^3.5.1"
 
-"@cypherock/database@3.0.1-beta.18":
-  version "3.0.1-beta.18"
-  resolved "https://registry.yarnpkg.com/@cypherock/database/-/database-3.0.1-beta.18.tgz#5957e9b12c59b9c52973ceb44e50847123f34d5e"
-  integrity sha512-6X6X0LUYSMoH41+gQGLZdLpLfeUNN/0O6i886OftmZt60qL+94WcM5oBrZQesf27/EU9EmLItpTklzjg++uZ3Q==
+"@cypherock/database@3.0.1-beta.20":
+  version "3.0.1-beta.20"
+  resolved "https://registry.yarnpkg.com/@cypherock/database/-/database-3.0.1-beta.20.tgz#533d99af4cf10b25553b6f539b6373d0b9495459"
+  integrity sha512-GuLUME9+MQ3WbY/hqN3FpotYFAwC2VdBjsd2Ha/UI5lJ0zSJ2wNhQdyRB/AD+xDxeex88gg7ZroPhTPCEnk7hw==
   dependencies:
     "@cypherock/communication" "3.0.1-beta.16"
-    "@cypherock/server-wrapper" "1.0.1-beta.11"
     "@types/bignumber.js" "^5.0.0"
+    "@types/pouchdb" "^6.4.0"
+    "@types/pouchdb-adapter-websql" "^6.1.4"
+    "@types/pouchdb-find" "^6.3.7"
+    "@types/transform-pouch" "^1.0.1"
+    "@types/websql" "^0.0.27"
     aes-js "^3.1.2"
     bignumber.js "^9.0.2"
     ethereum-input-data-decoder "^0.3.5"
     ethers "^5.5.4"
     events "^3.3.0"
     nedb "^1.8.0"
+    pouchdb "^7.3.0"
+    pouchdb-adapter-websql "^7.0.0"
+    pouchdb-find "^7.3.0"
+    transform-pouch "^2.0.0"
     winston "^3.6.0"
 
-"@cypherock/protocols@3.0.1-beta.25":
-  version "3.0.1-beta.25"
-  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.25.tgz#6c1b05d1b6297a892ee6e40f6badfd3b3b5d9fc6"
-  integrity sha512-4R7Z1GJA+OLvzJ9gVe1zf7JlnA4eySQuX3tFEZeuIUL6Y3PYl1xED8RzGyr4SvXZHudMu/L+mJcVF1OU9cdMig==
+"@cypherock/protocols@3.0.1-beta.26":
+  version "3.0.1-beta.26"
+  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.26.tgz#eae88a2b26a378ffa139dc0e6374d53eab213b13"
+  integrity sha512-7X10pQuMmaCmVNcJ42CsBHoEdEjYF26UV7tT9be0c8LkWZHspNx4qxnsV1ShskMNgCb87sMQeaZulCL0QCuVJA==
   dependencies:
     "@cypherock/communication" "3.0.1-beta.16"
-    "@cypherock/database" "3.0.1-beta.18"
-    "@cypherock/server-wrapper" "1.0.1-beta.11"
-    "@cypherock/wallet" "3.0.1-beta.22"
-    "@types/bignumber.js" "^5.0.0"
+    "@cypherock/database" "3.0.1-beta.20"
+    "@cypherock/server-wrapper" "1.0.1-beta.12"
+    "@cypherock/wallet" "3.0.1-beta.24"
     bignumber.js "^9.0.2"
     winston "^3.5.1"
 
-"@cypherock/server-wrapper@1.0.1-beta.11":
-  version "1.0.1-beta.11"
-  resolved "https://registry.yarnpkg.com/@cypherock/server-wrapper/-/server-wrapper-1.0.1-beta.11.tgz#d61414cfd40f7e20067f03ce59387cff2e45398e"
-  integrity sha512-G8K/8nLnf/4+FsOm3HoNCqujSOqM4AvW3dU6cunKKXEGOLgrhDTQORbL7Y7nYqN8pIrpVeAIwhj5nXxaCRb0Gg==
+"@cypherock/server-wrapper@1.0.1-beta.12":
+  version "1.0.1-beta.12"
+  resolved "https://registry.yarnpkg.com/@cypherock/server-wrapper/-/server-wrapper-1.0.1-beta.12.tgz#761c8695e4b551f0a790d073b4b6db2b3926eafd"
+  integrity sha512-a3CjqUsqUyaPLPumzNwfCRY5WVxueEMbwzZZu3kb/zAmCL26DLa16asyiU9UX45I47QdctWmGC7efM/5oRZMjg==
   dependencies:
     axios "^0.25.0"
     node-cache "^5.1.2"
     winston "^3.5.1"
 
-"@cypherock/wallet@3.0.1-beta.22":
-  version "3.0.1-beta.22"
-  resolved "https://registry.yarnpkg.com/@cypherock/wallet/-/wallet-3.0.1-beta.22.tgz#d5ad0337dbc9c489ff8805c99b99d900216dd44a"
-  integrity sha512-/jtwEbAbcCFDtx7Fsq7lkbNBqX1I/e+2qaumRAWND1sgMsi2J3p0Lq4F7sfxIlhNOnPCJoEPGSOejao7siLaBQ==
+"@cypherock/wallet@3.0.1-beta.24":
+  version "3.0.1-beta.24"
+  resolved "https://registry.yarnpkg.com/@cypherock/wallet/-/wallet-3.0.1-beta.24.tgz#1d8f595bf9b11e6243173501d5e9b29a56bb010d"
+  integrity sha512-iMWdFqzBbEJEKkivGkLxmoMvzh1uBRjtu+qhs/waD604LZG+LOwkb5TI7V4FWG+p8ghBA5qERcKM9GL/zFtjLw==
   dependencies:
     "@bitauth/libauth" "^1.19.1"
     "@cypherock/communication" "3.0.1-beta.16"
-    "@cypherock/database" "3.0.1-beta.18"
-    "@cypherock/server-wrapper" "1.0.1-beta.11"
+    "@cypherock/database" "3.0.1-beta.20"
+    "@cypherock/server-wrapper" "1.0.1-beta.12"
     "@ethereumjs/common" "^2.6.2"
     "@ethereumjs/tx" "^3.5.0"
-    "@types/bignumber.js" "^5.0.0"
-    "@types/bs58check" "^2.1.0"
     axios "^0.25.0"
     bech32 "^1.1.4"
     bignumber.js "^9.0.2"
@@ -1617,13 +1622,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/bs58check@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@types/bs58check/-/bs58check-2.1.0.tgz#7d25a8b88fe7a9e315d2647335ee3c43c8fdb0c0"
-  integrity sha512-OxsysnJQh82vy9DRbOcw9m2j/WiyqZLn0YBhKxdQ+aCwoHj+tWzyCgpwAkr79IfDXZKxc6h7k89T9pwS78CqTQ==
-  dependencies:
-    "@types/node" "*"
-
 "@types/cacheable-request@^6.0.1", "@types/cacheable-request@^6.0.2":
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/@types/cacheable-request/-/cacheable-request-6.0.2.tgz#c324da0197de0a98a2312156536ae262429ff6b9"
@@ -2137,6 +2135,13 @@
     "@types/react" "*"
     csstype "^3.0.2"
 
+"@types/transform-pouch@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/transform-pouch/-/transform-pouch-1.0.1.tgz#013466de23e1194b89660c135a26645f3d357332"
+  integrity sha512-BPtJDCurV6ZkUJPh+1QTIsuYkqn1fV0Lik8T6ce10S7KsLDy4WGyKb9YrkmoSbtfyPDrdWEkZOaur7k7vmKC+A==
+  dependencies:
+    "@types/pouchdb-core" "*"
+
 "@types/universal-analytics@^0.4.5":
   version "0.4.5"
   resolved "https://registry.yarnpkg.com/@types/universal-analytics/-/universal-analytics-0.4.5.tgz#6a4a88477a70f7ca1ce19caede561ca728149810"
@@ -2151,6 +2156,11 @@
   version "1.6.34"
   resolved "https://registry.yarnpkg.com/@types/webfontloader/-/webfontloader-1.6.34.tgz#3ad1530c3cf2827d3ed80679b4f8c688e6c6957c"
   integrity sha512-yNIPDl3P1yK/ag9C8CdleEhWrtU1myGr3cxb0yEBN/tkCYoGP5PbQa53mQCXcOLFAvBFzJJQfuEahOZ0ARakqw==
+
+"@types/websql@^0.0.27":
+  version "0.0.27"
+  resolved "https://registry.yarnpkg.com/@types/websql/-/websql-0.0.27.tgz#621a666a7f02018e7cbb4abab956a25736c27d71"
+  integrity sha512-bmJkLrp/S1G1m/MEcCFuRYjSpgFIWt1KoglSw4D9i3veQBR6v0BYFmp7snK1u3ri53AFdLaRR8qwIsOzw1h8LA==
 
 "@types/ws@^8.2.2":
   version "8.2.2"
@@ -2687,7 +2697,7 @@ argparse@^2.0.1:
 argsarray@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/argsarray/-/argsarray-0.0.1.tgz#6e7207b4ecdb39b0af88303fa5ae22bda8df61cb"
-  integrity sha1-bnIHtOzbObCviDA/pa4ivajfYcs=
+  integrity sha512-u96dg2GcAKtpTrBdDoFIM7PjcBA+6rSP0OR94MOReNRyUECL6MtQt5XXmRr4qrftYaef9+l5hcpO5te7sML1Cg==
 
 array-find-index@^1.0.1:
   version "1.0.2"
@@ -3675,7 +3685,7 @@ cliui@^7.0.2:
 clone-buffer@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/clone-buffer/-/clone-buffer-1.0.0.tgz#e3e25b207ac4e701af721e2cb5a16792cac3dc58"
-  integrity sha1-4+JbIHrE5wGvch4staFnksrD3Fg=
+  integrity sha512-KLLTJWrvwIP+OPfMn0x2PheDEP20RPUcGXj/ERegTgdmPEZylALQldygiqrPPu8P45uNuPs7ckmReLY6v/iA5g==
 
 clone-deep@^4.0.1:
   version "4.0.1"
@@ -4516,7 +4526,7 @@ dot-case@^3.0.4:
 double-ended-queue@2.1.0-0:
   version "2.1.0-0"
   resolved "https://registry.yarnpkg.com/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz#103d3527fd31528f40188130c841efdd78264e5c"
-  integrity sha1-ED01J/0xUo9AGIEwyEHv3XgmTlw=
+  integrity sha512-+BNfZ+deCo8hMNpDqDnvT+c0XpJ5cUa6mqYq89bho2Ifze4URTqRkcwR399hWoTrTkbZ/XJYDgP6rc7pRgffEQ==
 
 ds-store@^0.1.5:
   version "0.1.6"
@@ -4875,7 +4885,7 @@ end-of-stream@^1.1.0, end-of-stream@^1.4.1:
 end-stream@~0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/end-stream/-/end-stream-0.1.0.tgz#32003f3f438a2b0143168137f8fa6e9866c81ed5"
-  integrity sha1-MgA/P0OKKwFDFoE3+PpumGbIHtU=
+  integrity sha512-Brl10T8kYnc75IepKizW6Y9liyW8ikz1B7n/xoHrJxoVSSjoqPn30sb7XVFfQERK4QfUMYRGs9dhWwtt2eu6uA==
   dependencies:
     write-stream "~0.4.3"
 
@@ -7635,7 +7645,7 @@ level-supports@~1.0.0:
 level-write-stream@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/level-write-stream/-/level-write-stream-1.0.0.tgz#3f7fbb679a55137c0feb303dee766e12ee13c1dc"
-  integrity sha1-P3+7Z5pVE3wP6zA97nZuEu4Twdw=
+  integrity sha512-bBNKOEOMl8msO+uIM9YX/gUO6ckokZ/4pCwTm/lwvs46x6Xs8Zy0sn3Vh37eDqse4mhy4fOMIb/JsSM2nyQFtw==
   dependencies:
     end-stream "~0.1.0"
 
@@ -7963,7 +7973,7 @@ lru-cache@^6.0.0:
 ltgt@2.2.1, ltgt@^2.1.2:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.2.1.tgz#f35ca91c493f7b73da0e07495304f17b31f87ee5"
-  integrity sha1-81ypHEk/e3PaDgdJUwTxezH4fuU=
+  integrity sha512-AI2r85+4MquTw9ZYqabu4nMwy9Oftlfa/e/52t9IjtfG+mGBbTNdAoZ3RQKLHR6r0wQnwZnPIEh/Ya6XTWAKNA==
 
 lzma-native@^8.0.5:
   version "8.0.5"
