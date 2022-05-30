@@ -108,7 +108,6 @@ export const NotificationProvider: React.FC = ({ children }) => {
       }
 
       const latestNotifications = await NotificationDB.getLatest(perPageLimit);
-      console.log('latestNotifications', latestNotifications);
       setNotifications(latestNotifications);
       setHasNextPage(hasNext);
       setHasUnread(hasUnread);
