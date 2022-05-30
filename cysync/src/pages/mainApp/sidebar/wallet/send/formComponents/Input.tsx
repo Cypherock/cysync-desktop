@@ -171,6 +171,7 @@ const Input: React.FC<InputProps> = ({
         {optionalElement}
       </div>
       <ValidationTextField
+        onWheel={(e: any) => e.target.blur()}
         disabled={disabled}
         id={id}
         name={name}
