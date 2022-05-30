@@ -2,8 +2,8 @@ import { ALLCOINS, ERC20TOKENS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 
-import logger from '../../../utils/logger';
-import { transactionDb } from '../databaseInit';
+import logger from '../../../../utils/logger';
+import { transactionDb } from '../../databaseInit';
 import {
   AddressDB,
   InputOutput,
@@ -11,30 +11,7 @@ import {
   SentReceive,
   Status,
   Transaction
-} from '../index';
-
-export interface TxQuery {
-  hash?: string;
-  walletId?: string;
-  walletName?: string;
-  slug?: string;
-  coin?: string;
-  sentReceive?: SentReceive;
-  status?: Status;
-}
-export interface TxQueryOptions {
-  excludeFees?: boolean;
-  excludeFailed?: boolean;
-  excludePending?: boolean;
-  sinceDate?: Date;
-  minConfirmations?: number;
-}
-
-export const convertToDisplayValue = (value: SentReceive) => {
-  if (value === SentReceive.FEES) return 'Fees';
-  if (value === SentReceive.SENT) return 'Sent';
-  return 'Received';
-};
+} from '../../index';
 
 const isBtcFork = (coinStr: string) => {
   const coin = ALLCOINS[coinStr.toLowerCase()];
@@ -569,139 +546,4 @@ export const insertFromBlockbookTxn = async (transaction: {
 
     await transactionDb.insert(newTxn);
   }
-};
-
-export const updateConfirmations = async (txn: any) => {
-  if (!txn.hash) {
-    return 0;
-  }
-
-  if (txn.coinType === 'eth' || txn.coinType === 'ethr') {
-    transactionDb.findAndUpdate(
-      { hash: txn.hash.toLowerCase() },
-      {
-        status: txn.isError ? 2 : 1,
-        confirmations: txn.confirmations || 0
-      }
-    );
-
-    return txn.confirmations || 0;
-  } else {
-    let status = 0;
-    let hasConfirmation = false;
-
-    if (
-      txn.confirmations !== undefined &&
-      txn.confirmations.confirmations !== null
-    ) {
-      hasConfirmation = true;
-      if (txn.confirmations >= 1) {
-        status = 1;
-      }
-    }
-
-    if (hasConfirmation) {
-      const updatedValues: any = { confirmations: txn.confirmations, status };
-      if (txn.confirmed) {
-        updatedValues.confirmed = new Date(txn.confirmed);
-      }
-
-      if (txn.block_height) {
-        updatedValues.blockHeight = txn.block_height;
-      }
-
-      transactionDb.findAndUpdate({ hash: txn.hash }, updatedValues);
-      return updatedValues.confirmations;
-    } else if (txn.block_height) {
-      const allTx = await transactionDb.getAll({ hash: txn.hash });
-      if (allTx.length === 0) {
-        return 0;
-      }
-
-      const transaction = allTx[0];
-      if (
-        transaction &&
-        transaction.blockHeight &&
-        transaction.blockHeight !== -1
-      ) {
-        const confirmations = txn.block_height - transaction.blockHeight + 1;
-        transactionDb.findAndUpdate(
-          { hash: txn.hash },
-          { confirmations, status: confirmations >= 1 ? 1 : 0 }
-        );
-        return confirmations;
-      }
-    }
-  }
-
-  return 0;
-};
-
-/**
- * Gets all transactions from the local database.
- *
- * @return promise that resolves to a list of transactions
- */
-export const getAllTxns = async (
-  query: TxQuery,
-  options?: TxQueryOptions,
-  sorting?: {
-    field: string;
-    order: 'asc' | 'desc';
-    limit?: number;
-  }
-) => {
-  let dbQuery: any = {};
-  let innerQuery: any = {};
-  const andQuery: any = [];
-
-  if (options) {
-    if (options.excludeFees) {
-      delete options.excludeFees;
-      andQuery.push({ $not: { sentReceive: 'FEES' } });
-    }
-
-    if (options.excludeFailed) {
-      delete options.excludeFailed;
-      andQuery.push({ $not: { status: 2 } });
-    }
-
-    if (options.excludePending) {
-      delete options.excludePending;
-      andQuery.push({ $not: { status: 0 } });
-    }
-
-    if (options.sinceDate) {
-      innerQuery.confirmed = { $gt: options.sinceDate };
-      delete options.sinceDate;
-    }
-
-    if (options.minConfirmations) {
-      innerQuery.confirmations = { $gte: options.minConfirmations };
-      delete options.minConfirmations;
-    }
-  }
-  innerQuery = { ...innerQuery, ...query };
-  // Sort field must be a part of the selector
-  if (sorting?.field) innerQuery[sorting.field] = { $gte: null };
-
-  if (andQuery.length > 0) {
-    andQuery.push({ ...innerQuery });
-    dbQuery.$and = andQuery;
-  } else {
-    dbQuery = { ...innerQuery };
-  }
-
-  return transactionDb.executeQuery(dbQuery, sorting);
-};
-
-export const getTopBlock = async (query: TxQuery, options: TxQueryOptions) => {
-  const res = await getAllTxns(query, options, {
-    field: 'blockHeight',
-    order: 'desc',
-    limit: 1
-  });
-  if (res.length === 0) return undefined;
-  // return max block height
-  return res[0].blockHeight;
 };
