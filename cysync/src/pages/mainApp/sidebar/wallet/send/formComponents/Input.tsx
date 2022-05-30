@@ -146,8 +146,11 @@ const Input: React.FC<InputProps> = ({
         if (!isValid) {
           isChanged = false;
         } else {
-          if (Number(newValArr[0]) === 0 && newValArr[0].length > 2) {
-            event.target.value = `0.${newValArr[1]}`;
+          if (newValArr.length > 1) {
+            event.target.value = `${Number(newValArr[0])}.${newValArr[1]}`;
+          } else {
+            if (newVal.length <= 0) event.target.value = '';
+            else event.target.value = `${Number(newValArr[0])}`;
           }
         }
       }
@@ -168,6 +171,7 @@ const Input: React.FC<InputProps> = ({
         {optionalElement}
       </div>
       <ValidationTextField
+        onWheel={(e: any) => e.target.blur()}
         disabled={disabled}
         id={id}
         name={name}
