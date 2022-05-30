@@ -4,13 +4,19 @@ import {
   COINS,
   EthCoinData
 } from '@cypherock/communication';
-import { Xpub } from '@cypherock/database';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 
 import logger from '../../../utils/logger';
-import { erc20tokenDb, priceDb, transactionDb, xpubDb } from '../../database';
+import {
+  Coin,
+  coinDb,
+  getTopBlock,
+  priceHistoryDb,
+  tokenDb,
+  transactionDb
+} from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
@@ -36,19 +42,19 @@ export interface SyncContextInterface {
   isSyncing: boolean;
   isWaitingForConnection: boolean;
   modulesInExecutionQueue: string[];
-  addCoinTask: (xpub: Xpub, options: { module: string }) => void;
+  addCoinTask: (coin: Coin, options: { module: string }) => void;
   addTokenTask: (
     walletId: string,
     tokenName: string,
     ethCoin: string
   ) => Promise<void>;
   reSync: () => void;
-  addBalanceSyncItemFromXpub: (
-    xpub: Xpub,
+  addBalanceSyncItemFromCoin: (
+    coin: Coin,
     options: { token?: string; module?: string; isRefresh?: boolean }
   ) => void;
-  addHistorySyncItemFromXpub: (
-    xpub: Xpub,
+  addHistorySyncItemFromCoin: (
+    coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
 }
@@ -95,125 +101,119 @@ export const SyncProvider: React.FC = ({ children }) => {
     });
   };
 
-  const addHistorySyncItemFromXpub: SyncProviderTypes['addHistorySyncItemFromXpub'] =
-    async (xpub: Xpub, { module = 'default', isRefresh = false }) => {
-      const coin = COINS[xpub.coin];
+  const addHistorySyncItemFromCoin: SyncProviderTypes['addHistorySyncItemFromCoin'] =
+    async (coin: Coin, { module = 'default', isRefresh = false }) => {
+      const coinData = COINS[coin.slug];
 
-      if (!coin) {
+      if (!coinData) {
         logger.warn('Xpub with invalid coin found', {
           coin,
-          coinType: xpub.coin
+          coinType: coin.slug
         });
-        logger.debug('Xpub with invalid coin found', {
-          coin,
-          coinType: xpub.coin,
-          xpub
-        });
+        logger.debug(
+          'Xpub with invalid coin found addHistorySyncItemFromCoin',
+          {
+            coinData,
+            coinType: coin.slug,
+            coin
+          }
+        );
         return;
       }
 
-      if (coin instanceof BtcCoinData) {
+      if (coinData instanceof BtcCoinData) {
         const walletName = crypto
           .createHash('sha256')
-          .update(xpub.xpub)
+          .update(coin.xpub)
           .digest('base64');
-        const transactionHistory = await transactionDb.getAll(
-          {
-            walletId: xpub.walletId,
-            walletName,
-            coin: coin.abbr,
-            excludeFailed: true,
-            excludePending: true,
-            minConfirmations: 6
-          },
-          { sort: 'blockHeight', order: 'd', limit: 1 }
-        );
-        const newItem = new HistorySyncItem({
-          xpub: xpub.xpub,
+        const topBlock = await getTopBlock({
+          walletId: coin.walletId,
           walletName,
-          walletId: xpub.walletId,
-          coinType: coin.abbr,
+          slug: coinData.abbr
+        }, {          
+          excludeFailed: true,
+          excludePending: true,
+          minConfirmations: 6
+        });
+        const newItem = new HistorySyncItem({
+          xpub: coin.xpub,
+          walletName,
+          walletId: coin.walletId,
+          coinType: coinData.abbr,
           isRefresh,
           module,
-          afterBlock:
-            transactionHistory.length > 0 &&
-            transactionHistory[0].blockHeight > 0
-              ? transactionHistory[0].blockHeight
-              : undefined,
+          afterBlock: topBlock,
           page: 1
         });
         addToQueue(newItem);
 
-        if (xpub.zpub) {
+        if (coin.zpub) {
           const zwalletName = crypto
             .createHash('sha256')
-            .update(xpub.zpub)
+            .update(coin.zpub)
             .digest('base64');
-          const ztransactionHistory = await transactionDb.getAll(
-            {
-              walletId: xpub.walletId,
-              walletName: zwalletName,
-              coin: coin.abbr,
-              excludeFailed: true,
-              excludePending: true,
-              minConfirmations: 6
-            },
-            { sort: 'blockHeight', order: 'd', limit: 1 }
-          );
-          const newZItem = new HistorySyncItem({
-            xpub: xpub.xpub,
-            zpub: xpub.zpub,
+          const topBlock = await getTopBlock({
+            walletId: coin.walletId,
             walletName: zwalletName,
-            walletId: xpub.walletId,
-            coinType: coin.abbr,
+            slug: coinData.abbr
+          }, {
+            excludeFailed: true,
+            excludePending: true,
+            minConfirmations: 6
+          });
+          const newZItem = new HistorySyncItem({
+            xpub: coin.xpub,
+            zpub: coin.zpub,
+            walletName: zwalletName,
+            walletId: coin.walletId,
+            coinType: coinData.abbr,
             isRefresh,
             module,
-            afterBlock:
-              ztransactionHistory.length > 0 &&
-              ztransactionHistory[0].blockHeight > 0
-                ? ztransactionHistory[0].blockHeight
-                : undefined,
+            afterBlock: topBlock,
             page: 1
           });
           addToQueue(newZItem);
         }
-      } else if (coin instanceof EthCoinData) {
+      } else if (coinData instanceof EthCoinData) {
         const newItem = new HistorySyncItem({
-          xpub: xpub.xpub,
+          xpub: coin.xpub,
           walletName: '',
-          walletId: xpub.walletId,
-          coinType: coin.abbr,
+          walletId: coin.walletId,
+          coinType: coinData.abbr,
           isRefresh,
           module
         });
         addToQueue(newItem);
       } else {
         logger.warn('Xpub with invalid coin found', {
-          coin,
-          coinType: xpub.coin
+          coinData,
+          coinType: coin.slug
         });
         logger.debug('Xpub with invalid coin found', {
-          coin,
-          coinType: xpub.coin,
-          xpub
+          coinData,
+          coinType: coin.slug,
+          coin
         });
       }
     };
 
-  const addBalanceSyncItemFromXpub: SyncProviderTypes['addBalanceSyncItemFromXpub'] =
-    (xpub: Xpub, { token, module = 'default', isRefresh = false }) => {
-      const coin = COINS[xpub.coin];
+  const addBalanceSyncItemFromCoin: SyncProviderTypes['addBalanceSyncItemFromCoin'] =
+    (coin: Coin, { token, module = 'default', isRefresh = false }) => {
+      const coinData = COINS[coin.slug];
 
-      if (!coin) {
+      if (!coinData) {
         logger.warn('Xpub with invalid coin found', {
-          coin,
-          coinType: xpub.coin
+          coinData,
+          coinType: coin.slug
         });
-        logger.debug('Xpub with invalid coin found', {
-          coin,
-          coinType: xpub.coin,
-          xpub
-        });
+        logger.debug(
+          'Xpub with invalid coin found addBalanceSyncItemFromCoin',
+          {
+            coinData,
+            coinType: coin.slug,
+            coin
+          }
+        );
         return;
       }
 
@@ -221,38 +221,38 @@ export const SyncProvider: React.FC = ({ children }) => {
       if (token) {
         addToQueue(
           new BalanceSyncItem({
-            xpub: xpub.xpub,
-            walletId: xpub.walletId,
+            xpub: coin.xpub,
+            walletId: coin.walletId,
             coinType: token,
-            ethCoin: xpub.coin,
+            ethCoin: coin.slug,
             module,
             isRefresh
           })
         );
       }
 
-      if (coin.isEth) {
+      if (coinData.isEth) {
         addToQueue(
           new BalanceSyncItem({
-            xpub: xpub.xpub,
-            zpub: xpub.zpub,
-            walletId: xpub.walletId,
-            coinType: xpub.coin,
+            xpub: coin.xpub,
+            zpub: coin.zpub,
+            walletId: coin.walletId,
+            coinType: coin.slug,
             module,
             isRefresh
           })
         );
       } else {
         // If BTC fork, we get the balance from the txn api
-        addHistorySyncItemFromXpub(xpub, { module, isRefresh });
+        addHistorySyncItemFromCoin(coin, { module, isRefresh });
       }
     };
 
-  const addPriceSyncItemFromXpub: SyncProviderTypes['addPriceSyncItemFromXpub'] =
-    async (xpub: Xpub, { module = 'default', isRefresh = false }) => {
-      const coinName = xpub.coin;
+  const addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'] =
+    async (coin: Coin, { module = 'default', isRefresh = false }) => {
+      const coinName = coin.slug;
 
-      const coin = ALLCOINS[coinName];
+      const coinData = ALLCOINS[coinName];
 
       if (!coin) {
         logger.warn('Invalid coin in add price sync item', {
@@ -261,11 +261,14 @@ export const SyncProvider: React.FC = ({ children }) => {
         return;
       }
 
-      if (!coin.isTest) {
+      if (!coinData.isTest) {
         for (const days of [7, 30, 365] as Array<
           PriceSyncItemOptions['days']
         >) {
-          const oldPrices = await priceDb.getPrice(coin.abbr, days);
+          const oldPrices = await priceHistoryDb.getOne({
+            slug: coinData.abbr,
+            interval: days
+          });
           let addNew = true;
 
           // Check if the prices and old enough and then only add to sync
@@ -285,7 +288,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           if (addNew) {
             const newItem = new PriceSyncItem({
               days,
-              coinType: coin.abbr,
+              coinType: coinData.abbr,
               isRefresh,
               module
             });
@@ -295,11 +298,11 @@ export const SyncProvider: React.FC = ({ children }) => {
       }
     };
 
-  const addLatestPriceSyncItemFromXpub: SyncProviderTypes['addLatestPriceSyncItemFromXpub'] =
-    (xpub: Xpub, { module = 'default', isRefresh = false }) => {
-      const coinName = xpub.coin;
+  const addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'] =
+    (coin: Coin, { module = 'default', isRefresh = false }) => {
+      const coinName = coin.slug;
 
-      const coin = ALLCOINS[coinName];
+      const coinData = ALLCOINS[coinName];
 
       if (!coin) {
         logger.warn('Invalid coin in add latest price sync item', {
@@ -308,9 +311,9 @@ export const SyncProvider: React.FC = ({ children }) => {
         return;
       }
 
-      if (!coin.isTest) {
+      if (!coinData.isTest) {
         const newItem = new LatestPriceSyncItem({
-          coinType: coin.abbr,
+          coinType: coinData.abbr,
           isRefresh,
           module
         });
@@ -431,8 +434,8 @@ export const SyncProvider: React.FC = ({ children }) => {
     try {
       const executionResult = await executeBatch(items, {
         addToQueue,
-        addPriceSyncItemFromXpub,
-        addLatestPriceSyncItemFromXpub
+        addPriceSyncItemFromCoin,
+        addLatestPriceSyncItemFromCoin
       });
 
       updateAllExecutedItems(executionResult);
@@ -448,9 +451,9 @@ export const SyncProvider: React.FC = ({ children }) => {
     isRefresh = false,
     module = 'default'
   }) => {
-    const allXpubs = await xpubDb.getAll();
+    const allXpubs = await coinDb.getAll();
     for (const xpub of allXpubs) {
-      addHistorySyncItemFromXpub(xpub, { isRefresh, module });
+      addHistorySyncItemFromCoin(xpub, { isRefresh, module });
     }
   };
 
@@ -458,20 +461,20 @@ export const SyncProvider: React.FC = ({ children }) => {
     isRefresh = false,
     module = 'default'
   }) => {
-    const allXpubs = await xpubDb.getAll();
-    const tokens = await erc20tokenDb.getAll();
+    const coins = await coinDb.getAll();
+    const tokens = await tokenDb.getAll();
 
-    for (const xpub of allXpubs) {
-      addBalanceSyncItemFromXpub(xpub, { isRefresh, module });
+    for (const coin of coins) {
+      addBalanceSyncItemFromCoin(coin, { isRefresh, module });
     }
 
     for (const token of tokens) {
-      const ethXpub = await xpubDb.getByWalletIdandCoin(
-        token.walletId,
-        token.ethCoin
-      );
+      const ethXpub = await coinDb.getOne({
+        walletId: token.walletId,
+        slug: token.coin
+      });
       if (!ethXpub) {
-        logger.warn('EthCoin does not exist', { ethCoin: token.ethCoin });
+        logger.warn('EthCoin does not exist', { ethCoin: token.coin });
         return;
       }
       addToQueue(
@@ -479,7 +482,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           xpub: ethXpub.xpub,
           walletId: token.walletId,
           coinType: token.coin,
-          ethCoin: token.ethCoin,
+          ethCoin: token.coin,
           module,
           isRefresh
         })
@@ -488,15 +491,15 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const addPriceRefresh = async ({ isRefresh = false, module = 'default' }) => {
-    const allXpubs = await xpubDb.getAll();
-    const tokens = await erc20tokenDb.getAll();
+    const allXpubs = await coinDb.getAll();
+    const tokens = await tokenDb.getAll();
 
     for (const xpub of allXpubs) {
-      addPriceSyncItemFromXpub(xpub, { isRefresh, module });
+      addPriceSyncItemFromCoin(xpub, { isRefresh, module });
     }
 
     for (const token of tokens) {
-      addPriceSyncItemFromXpub({ coin: token.coin } as Xpub, {
+      addPriceSyncItemFromCoin({ slug: token.coin } as Coin, {
         isRefresh,
         module
       });
@@ -507,26 +510,26 @@ export const SyncProvider: React.FC = ({ children }) => {
     isRefresh = false,
     module = 'default'
   }) => {
-    const allXpubs = await xpubDb.getAll();
-    const tokens = await erc20tokenDb.getAll();
+    const allXpubs = await coinDb.getAll();
+    const tokens = await tokenDb.getAll();
 
     for (const xpub of allXpubs) {
-      addLatestPriceSyncItemFromXpub(xpub, { isRefresh, module });
+      addLatestPriceSyncItemFromCoin(xpub, { isRefresh, module });
     }
 
     for (const token of tokens) {
-      addLatestPriceSyncItemFromXpub({ coin: token.coin } as Xpub, {
+      addLatestPriceSyncItemFromCoin({ slug: token.coin } as Coin, {
         isRefresh,
         module
       });
     }
   };
 
-  const addCoinTask = (xpub: Xpub, { module = 'default' }) => {
-    addBalanceSyncItemFromXpub(xpub, { module, isRefresh: true });
-    addHistorySyncItemFromXpub(xpub, { module, isRefresh: true });
-    addPriceSyncItemFromXpub(xpub, { module, isRefresh: true });
-    addLatestPriceSyncItemFromXpub(xpub, { module, isRefresh: true });
+  const addCoinTask = (coin: Coin, { module = 'default' }) => {
+    addBalanceSyncItemFromCoin(coin, { module, isRefresh: true });
+    addHistorySyncItemFromCoin(coin, { module, isRefresh: true });
+    addPriceSyncItemFromCoin(coin, { module, isRefresh: true });
+    addLatestPriceSyncItemFromCoin(coin, { module, isRefresh: true });
   };
 
   const addTokenTask = async (
@@ -534,7 +537,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     tokenName: string,
     ethCoin: string
   ) => {
-    const ethXpub = await xpubDb.getByWalletIdandCoin(walletId, ethCoin);
+    const ethXpub = await coinDb.getOne({ walletId, slug: ethCoin });
     if (!ethXpub) {
       logger.warn('EthCoin does not exist', { walletId, ethCoin });
       return;
@@ -549,11 +552,11 @@ export const SyncProvider: React.FC = ({ children }) => {
         isRefresh: true
       })
     );
-    addPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
+    addPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
       isRefresh: true,
       module: 'default'
     });
-    addLatestPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
+    addLatestPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
       isRefresh: true,
       module: 'default'
     });
@@ -578,7 +581,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     await addHistoryRefresh({ isRefresh: true });
     await addPriceRefresh({ isRefresh: true });
     await addLatestPriceRefresh({ isRefresh: true });
-    await notifications.getLatest();
+    await notifications.updateLatest();
   };
 
   const intervals = useRef<NodeJS.Timeout[]>([]);
@@ -604,7 +607,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             });
           if (connectedRef) {
             notifications
-              .getLatest()
+              .updateLatest()
               .then(() => {
                 logger.info('Sync: Notification Refresh completed');
               })
@@ -675,8 +678,8 @@ export const SyncProvider: React.FC = ({ children }) => {
         addCoinTask,
         addTokenTask,
         reSync,
-        addBalanceSyncItemFromXpub,
-        addHistorySyncItemFromXpub
+        addBalanceSyncItemFromCoin,
+        addHistorySyncItemFromCoin
       }}
     >
       {children}

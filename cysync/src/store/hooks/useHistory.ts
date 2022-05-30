@@ -1,9 +1,16 @@
 import { ALLCOINS as COINS, Erc20CoinData } from '@cypherock/communication';
-import { Xpub } from '@cypherock/database';
+import { Coin } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';
-import { getLatestPriceForCoins, transactionDb, walletDb } from '../database';
+import {
+  getAllTxns,
+  getLatestPriceForCoins,
+  transactionDb,
+  walletDb,
+  TxQuery,
+  TxQueryOptions
+} from '../database';
 
 import { DisplayInputOutput, DisplayTransaction } from './types';
 
@@ -15,7 +22,7 @@ export interface UseHistoryGetAllParams {
 
 export interface UseHistoryValues {
   getAll: (params: UseHistoryGetAllParams) => Promise<DisplayTransaction[]>;
-  deleteCoinHistory: (xpub: Xpub) => Promise<void>;
+  deleteCoinHistory: (coin: Coin) => Promise<void>;
 }
 
 export type UseHistory = () => UseHistoryValues;
@@ -26,30 +33,31 @@ export const useHistory: UseHistory = () => {
     walletId,
     coinType
   }) => {
-    const query: any = { excludeFees: true, sinceDate };
+    const options: TxQueryOptions = { excludeFees: true, sinceDate };
+    const query: TxQuery = {};
     if (walletId) {
       query.walletId = walletId;
     }
     if (coinType) {
-      query.coin = coinType;
+      query.slug = coinType;
     }
-    const res = await transactionDb.getAll(query, {
-      sort: 'confirmed',
-      order: 'd'
+    const res = await getAllTxns(query, options, {
+      field: 'confirmed',
+      order: 'desc'
     });
     const allWallets = await walletDb.getAll();
     const latestTransactionsWithPrice: DisplayTransaction[] = [];
 
     const allUniqueCoins = new Set<string>();
     for (const txn of res) {
-      allUniqueCoins.add(txn.coin);
+      allUniqueCoins.add(txn.slug);
     }
 
     const latestPrices = await getLatestPriceForCoins([...allUniqueCoins]);
 
     // Make all the conversions here. [ex: Satoshi to BTC]
     for (const txn of res) {
-      const coin = COINS[txn.coin.toLowerCase()];
+      const coin = COINS[txn.slug.toLowerCase()];
       const newTxn: DisplayTransaction = {
         ...txn,
         coinDecimal: coin.decimal,
@@ -66,7 +74,7 @@ export const useHistory: UseHistory = () => {
       let outputs: DisplayInputOutput[] = [];
 
       if (!coin) {
-        logger.warn(`Cannot find coinType: ${newTxn.coin}`);
+        logger.warn(`Cannot find coinType: ${newTxn.slug}`);
         continue;
       }
 
@@ -101,12 +109,12 @@ export const useHistory: UseHistory = () => {
       let feeCoinMultiplier = coin.multiplier;
       let isErc20 = false;
 
-      if (COINS[newTxn.coin.toLowerCase()] instanceof Erc20CoinData) {
-        if (!newTxn.ethCoin || !COINS[newTxn.ethCoin]) {
+      if (COINS[newTxn.slug.toLowerCase()] instanceof Erc20CoinData) {
+        if (!newTxn.coin || !COINS[newTxn.coin]) {
           throw new Error(`Cannot find ETH coin for token: ${newTxn.coin}`);
         }
         // the currency units correspond to ETH units and not the token decimals
-        feeCoinMultiplier = COINS[newTxn.ethCoin].multiplier;
+        feeCoinMultiplier = COINS[newTxn.coin].multiplier;
         isErc20 = true;
       }
 
@@ -115,7 +123,7 @@ export const useHistory: UseHistory = () => {
       const total = new BigNumber(txn.total || 0).dividedBy(coin.multiplier);
 
       const value = amount.multipliedBy(
-        latestPrices[txn.coin.toLowerCase()] || 0
+        latestPrices[txn.slug.toLowerCase()] || 0
       );
 
       newTxn.displayAmount = amount.toString();
@@ -128,7 +136,7 @@ export const useHistory: UseHistory = () => {
 
       newTxn.isErc20 = isErc20;
 
-      const wallet = allWallets.find(ob => ob.walletId === newTxn.walletId);
+      const wallet = allWallets.find(ob => ob._id === newTxn.walletId);
       if (!wallet) {
         logger.warn(`Cannot find wallet with name: ${newTxn.walletId}`);
       } else {
@@ -141,8 +149,8 @@ export const useHistory: UseHistory = () => {
     return latestTransactionsWithPrice;
   };
 
-  const deleteCoinHistory = (xpub: Xpub) => {
-    return transactionDb.deleteByCoin(xpub.walletId, xpub.coin);
+  const deleteCoinHistory = (coin: Coin) => {
+    return transactionDb.delete({ walletId: coin.walletId, slug: coin.slug });
   };
 
   return {

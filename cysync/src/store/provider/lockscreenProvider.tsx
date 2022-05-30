@@ -2,7 +2,6 @@ import { ipcRenderer } from 'electron';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { loadDatabases } from '../../store/database';
 import {
   completeFirstBoot,
   isFirstBoot,
@@ -91,17 +90,11 @@ export const LockscreenProvider: React.FC = ({ children }) => {
 
     const hasPassword = passwordExists();
     if (!hasPassword) {
-      loadDatabases()
-        .then(() => {
-          setLockScreen(hasPassword);
-        })
-        .finally(() => {
-          setLockscreenLoading(false);
-        });
+      setLockScreen(hasPassword);
     } else {
       setLockScreen(hasPassword);
-      setLockscreenLoading(false);
     }
+    setLockscreenLoading(false);
     setIsPasswordSet(hasPassword);
   }, []);
 

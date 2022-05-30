@@ -12,7 +12,7 @@ import {
 import { generateEthAddressFromXpub } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
-import { erc20tokenDb, xpubDb } from '../../../database';
+import { coinDb, tokenDb } from '../../../database';
 import { BalanceSyncItem } from '../types';
 
 export const getRequestsMetadata = (
@@ -84,9 +84,11 @@ export const processResponses = async (
 
     const balance = new BigNumber(balanceRes.data);
 
-    await xpubDb.updateTotalBalance(item.xpub, item.coinType, {
-      balance: balance.toString(),
-      unconfirmedBalance: '0'
+    await coinDb.updateTotalBalance({
+      xpub: item.xpub,
+      slug: item.coinType,
+      totalBalance: balance.toString(),
+      totalUnconfirmedBalance: '0'
     });
   } else if (coin instanceof Erc20CoinData) {
     if (!item.ethCoin) {
@@ -101,11 +103,11 @@ export const processResponses = async (
       const balanceRes = responses[0];
 
       const balance = new BigNumber(balanceRes.data);
-      await erc20tokenDb.updateBalance(
-        item.coinType,
-        item.walletId,
-        balance.toString()
-      );
+      await tokenDb.updateBalance({
+        walletId: item.walletId,
+        slug: item.coinType,
+        balance: balance.toString()
+      });
     } else {
       throw new Error(
         'Invalid ethCoin found in balance sync item' + item.ethCoin

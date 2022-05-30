@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
+import logger from '../../utils/logger';
 import { transactionDb } from '../database';
 
 import { DisplayTransaction } from './types';
@@ -163,14 +164,18 @@ export const useTransactionData: UseTransactionData = () => {
       const date = new Date();
       sinceDate = new Date(date.getTime() - days * 24 * 60 * 60 * 1000);
     }
+    try {
+      const txns = await getAll({
+        sinceDate,
+        walletId: currentWallet,
+        coinType: currentCoin
+      });
 
-    const txns = await getAll({
-      sinceDate,
-      walletId: currentWallet,
-      coinType: currentCoin
-    });
-
-    sortFromTxns(txns, sortIndex);
+      sortFromTxns(txns, sortIndex);
+    } catch (e) {
+      logger.error('Error getting transactions from DB');
+      logger.error(e);
+    }
   };
 
   useEffect(() => {

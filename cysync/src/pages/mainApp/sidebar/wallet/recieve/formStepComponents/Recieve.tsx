@@ -104,6 +104,7 @@ const Root = styled('div')(({ theme }) => ({
 const getReceiveAddress = async (
   coinType: string,
   xpub: string,
+  walletId: string,
   zpub?: string
 ) => {
   let receiveAddress = '';
@@ -116,12 +117,12 @@ const getReceiveAddress = async (
   }
 
   if (coin.isEth) {
-    w = wallet({ coinType, xpub, zpub, addressDB: addressDb });
+    w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
     receiveAddress = (await w.newReceiveAddress()).toUpperCase();
     // To make the first x in lowercase
     receiveAddress = `0x${receiveAddress.slice(2)}`;
   } else {
-    w = wallet({ coinType, xpub, zpub, addressDB: addressDb });
+    w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
     receiveAddress = await w.newReceiveAddress();
   }
   return receiveAddress;
@@ -145,18 +146,23 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.coin : coinDetails.coin;
+  const coinAbbr = token ? token.coin : coinDetails.slug;
 
   React.useEffect(() => {
     if (!coinAddress || !receiveTransaction.verified) {
-      getReceiveAddress(coinDetails.coin, coinDetails.xpub, coinDetails.zpub)
+      getReceiveAddress(
+        coinDetails.slug,
+        coinDetails.xpub,
+        coinDetails.walletId,
+        coinDetails.zpub
+      )
         .then(addr => {
           setCoinAddress(addr);
           setCoinVerified(false);
           receiveTransaction.onNewReceiveAddr(
             addr,
-            selectedWallet.walletId,
-            coinDetails.coin
+            selectedWallet._id,
+            coinDetails.slug
           );
           return null;
         })

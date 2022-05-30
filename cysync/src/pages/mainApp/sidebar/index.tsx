@@ -1,3 +1,4 @@
+import { Wallet as WalletModel } from '@cypherock/database';
 import Button from '@mui/material/Button';
 import Collapse, { CollapseProps } from '@mui/material/Collapse';
 import Divider from '@mui/material/Divider';
@@ -25,7 +26,7 @@ import Portfolio from '../../../designSystem/iconGroups/portfolio';
 import Settings from '../../../designSystem/iconGroups/settings';
 import Tutorial from '../../../designSystem/iconGroups/tutorial';
 import Wallet from '../../../designSystem/iconGroups/wallet';
-import { useFeedback, useWallets, WalletInfo } from '../../../store/provider';
+import { useFeedback, useWallets } from '../../../store/provider';
 
 const customTheme = (defaultTheme: Theme) =>
   createTheme({
@@ -249,9 +250,9 @@ const Sidebar = () => {
     }
   }, [value]);
 
-  const handleWalletChange = (wallet: WalletInfo, index: number) => {
+  const handleWalletChange = (wallet: WalletModel, index: number) => {
     setWalletIndex(index);
-    navigate(`${Routes.wallet.index}/${wallet.walletId}`);
+    navigate(`${Routes.wallet.index}/${wallet._id}`);
   };
 
   const handleChange = (_event: React.ChangeEvent | undefined, val: number) => {
@@ -281,7 +282,7 @@ const Sidebar = () => {
       if (pathTab.tab === 2) {
         const pathArr = location.pathname.split('/');
         const walletId = pathArr[pathArr.length - 1];
-        const index = walletData.findIndex(elem => elem.walletId === walletId);
+        const index = walletData.findIndex(elem => elem._id === walletId);
         setWalletIndex(index);
       }
 
@@ -332,7 +333,7 @@ const Sidebar = () => {
                 if (!wallet.name) return null;
                 return (
                   <StyledListItem
-                    key={wallet.walletId}
+                    key={wallet._id}
                     selected={walletIndex === index}
                     onClick={() => handleWalletChange(wallet, index)}
                   >

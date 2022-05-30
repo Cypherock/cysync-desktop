@@ -1,9 +1,8 @@
+import { Wallet } from '@cypherock/database';
 import React from 'react';
 
-import { WalletInfo } from './walletsProvider';
-
 export interface SelectedWalletContextInterface {
-  selectedWallet: WalletInfo;
+  selectedWallet: Wallet;
 }
 
 export const SelectedWalletContext: React.Context<SelectedWalletContextInterface> =

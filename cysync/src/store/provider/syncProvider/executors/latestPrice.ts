@@ -1,10 +1,11 @@
+import { ERC20TOKENS } from '@cypherock/communication';
 import {
   batch as batchServer,
   IRequestMetadata,
   pricing as pricingServer
 } from '@cypherock/server-wrapper';
 
-import { latestPriceDb } from '../../../database';
+import { coinDb, tokenDb } from '../../../database';
 import { LatestPriceSyncItem } from '../types';
 
 export const getRequestsMetadata = (
@@ -29,5 +30,14 @@ export const processResponses = async (
 
   const res = responses[0];
 
-  await latestPriceDb.insert(item.coinType, res.data.data.price);
+  if (ERC20TOKENS[item.coinType.toLowerCase()])
+    await tokenDb.findAndUpdate(
+      { slug: item.coinType },
+      { price: res.data.data.price }
+    );
+  else
+    await coinDb.findAndUpdate(
+      { slug: item.coinType },
+      { price: res.data.data.price }
+    );
 };

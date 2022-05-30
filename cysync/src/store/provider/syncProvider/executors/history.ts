@@ -4,7 +4,6 @@ import {
   ERC20TOKENS,
   EthCoinData
 } from '@cypherock/communication';
-import { Transaction, Xpub } from '@cypherock/database';
 import {
   batch as batchServer,
   eth as ethServer,
@@ -21,9 +20,14 @@ import BigNumber from 'bignumber.js';
 import logger from '../../../../utils/logger';
 import {
   addressDb,
-  erc20tokenDb,
+  Coin,
+  coinDb,
+  IOtype,
+  tokenDb,
+  Transaction,
   transactionDb,
-  xpubDb
+  SentReceive,
+  insertFromBlockbookTxn
 } from '../../../database';
 import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
 
@@ -86,8 +90,8 @@ export const processResponses = async (
   responses: batchServer.IBatchResponse[],
   options: {
     addToQueue: SyncProviderTypes['addToQueue'];
-    addPriceSyncItemFromXpub: SyncProviderTypes['addPriceSyncItemFromXpub'];
-    addLatestPriceSyncItemFromXpub: SyncProviderTypes['addLatestPriceSyncItemFromXpub'];
+    addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'];
+    addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
   }
 ): Promise<any> => {
   const coin = COINS[item.coinType];
@@ -112,52 +116,55 @@ export const processResponses = async (
 
     let balance = new BigNumber(response.data.balance);
     const unconfirmedBalance = new BigNumber(response.data.unconfirmedBalance);
-    const xpub = await xpubDb.getByWalletIdandCoin(
-      item.walletId,
-      item.coinType
-    );
+    const coin = await coinDb.getOne({
+      walletId: item.walletId,
+      slug: item.coinType
+    });
 
-    if (!xpub) {
+    if (!coin) {
       logger.warn('Cannot find xpub while fetching txn', { item });
     } else {
       if (item.zpub) {
-        await xpubDb.updateZpubBalance(item.xpub, item.coinType, {
-          balance: balance.toString(),
-          unconfirmedBalance: unconfirmedBalance.toString()
+        await coinDb.updateZpubBalance({
+          zpub: item.zpub,
+          slug: item.coinType,
+          zpubBalance: balance.toString(),
+          zpubUnconfirmedBalance: unconfirmedBalance.toString()
         });
-        if (xpub.xpubBalance) {
-          if (xpub.xpubBalance.balance) {
-            balance = balance.plus(xpub.xpubBalance.balance);
-          }
-          if (xpub.xpubBalance.unconfirmedBalance) {
-            balance = balance.plus(xpub.xpubBalance.unconfirmedBalance);
-          }
+        if (coin.xpubBalance) {
+          balance = balance.plus(coin.xpubBalance);
+        }
+        if (coin.xpubUnconfirmedBalance) {
+          balance = balance.plus(coin.xpubUnconfirmedBalance);
         }
       } else {
-        await xpubDb.updateBalance(item.xpub, item.coinType, {
-          balance: balance.toString(),
-          unconfirmedBalance: unconfirmedBalance.toString()
+        await coinDb.updateXpubBalance({
+          xpub: item.xpub,
+          slug: item.coinType,
+          xpubBalance: balance.toString(),
+          xpubUnconfirmedBalance: unconfirmedBalance.toString()
         });
-        if (xpub.zpubBalance) {
-          if (xpub.zpubBalance.balance) {
-            balance = balance.plus(xpub.zpubBalance.balance);
-          }
-          if (xpub.zpubBalance.unconfirmedBalance) {
-            balance = balance.plus(xpub.zpubBalance.unconfirmedBalance);
-          }
+
+        if (coin.zpubBalance) {
+          balance = balance.plus(coin.zpubBalance);
+        }
+        if (coin.zpubUnconfirmedBalance) {
+          balance = balance.plus(coin.zpubUnconfirmedBalance);
         }
       }
 
-      await xpubDb.updateTotalBalance(item.xpub, item.coinType, {
-        balance: balance.toString(),
-        unconfirmedBalance: unconfirmedBalance.toString()
+      await coinDb.updateTotalBalance({
+        xpub: item.xpub,
+        slug: item.coinType,
+        totalBalance: balance.toString(),
+        totalUnconfirmedBalance: unconfirmedBalance.toString()
       });
     }
 
     if (response.data.transactions) {
       for (const txn of response.data.transactions) {
         try {
-          await transactionDb.insertFromBlockbookTxn({
+          await insertFromBlockbookTxn({
             txn,
             xpub: item.xpub,
             addresses: response.data.tokens
@@ -170,7 +177,9 @@ export const processResponses = async (
           });
           // No need to retry if the inserting fails because it'll produce the same error.
         } catch (error) {
-          logger.error('Error while inserting transaction in DB');
+          logger.error(
+            'Error while inserting transaction in DB : insertFromBlockbookTxn'
+          );
           logger.error(error);
         }
       }
@@ -222,27 +231,30 @@ export const processResponses = async (
         total: new BigNumber(ele.value).plus(fees).toString(),
         confirmations: ele.confirmations || 0,
         walletId: item.walletId,
-        coin: item.coinType,
+        slug: item.coinType,
         // 2 for failed, 1 for pass
         status: ele.isError === '0' ? 1 : 2,
-        sentReceive: address === fromAddr ? 'SENT' : 'RECEIVED',
+        sentReceive:
+          address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
         confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
         blockHeight: ele.blockNumber,
-        ethCoin: item.coinType,
+        coin: item.coinType,
         inputs: [
           {
             address: fromAddr,
             value: String(ele.value),
-            index: 0,
-            isMine: address === fromAddr
+            indexNumber: 0,
+            isMine: address === fromAddr,
+            type: IOtype.INPUT
           }
         ],
         outputs: [
           {
             address: toAddr,
             value: String(ele.value),
-            index: 0,
-            isMine: address === toAddr
+            indexNumber: 0,
+            isMine: address === toAddr,
+            type: IOtype.OUTPUT
           }
         ]
       };
@@ -263,7 +275,7 @@ export const processResponses = async (
           txn.amount = amount;
 
           // Even if the token transaction failed, the transaction fee is still deducted.
-          if (txn.sentReceive === 'SENT') {
+          if (txn.sentReceive === SentReceive.SENT) {
             history.push({
               hash: ele.hash as string,
               amount: fees.toString(),
@@ -271,12 +283,12 @@ export const processResponses = async (
               total: fees.toString(),
               confirmations: (ele.confirmations as number) || 0,
               walletId: item.walletId,
-              coin: item.coinType,
+              slug: item.coinType,
               status: 1,
-              sentReceive: 'FEES',
+              sentReceive: SentReceive.FEES,
               confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
               blockHeight: ele.blockNumber as number,
-              ethCoin: item.coinType
+              coin: item.coinType
             });
           }
         }
@@ -312,26 +324,29 @@ export const processResponses = async (
           total: String(ele.value),
           confirmations: (ele.confirmations as number) || 0,
           walletId: item.walletId,
-          coin: (ele.tokenSymbol as string).toLowerCase(),
+          slug: (ele.tokenSymbol as string).toLowerCase(),
           status: 1,
-          sentReceive: address === fromAddr ? 'SENT' : 'RECEIVED',
+          sentReceive:
+            address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
           confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
           blockHeight: ele.blockNumber as number,
-          ethCoin: item.coinType,
+          coin: item.coinType,
           inputs: [
             {
               address: fromAddr,
               value: String(ele.value),
-              index: 0,
-              isMine: address === fromAddr
+              indexNumber: 0,
+              isMine: address === fromAddr,
+              type: IOtype.INPUT
             }
           ],
           outputs: [
             {
               address: ele.to,
               value: String(ele.value),
-              index: 0,
-              isMine: address === toAddr
+              indexNumber: 0,
+              isMine: address === toAddr,
+              type: IOtype.OUTPUT
             }
           ]
         };
@@ -351,12 +366,12 @@ export const processResponses = async (
           total: amount.toString(),
           confirmations: (ele.confirmations as number) || 0,
           walletId: item.walletId,
-          coin: item.coinType,
+          slug: item.coinType,
           status: 1,
-          sentReceive: 'FEES',
+          sentReceive: SentReceive.FEES,
           confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
           blockHeight: ele.blockNumber as number,
-          ethCoin: item.coinType
+          coin: item.coinType
         });
       }
     }
@@ -366,23 +381,24 @@ export const processResponses = async (
         await transactionDb.insert(txn);
         // No need to retry if the inserting fails because it'll produce the same error.
       } catch (error) {
-        logger.error('Error while inserting transaction in DB');
+        logger.error('Error while inserting transaction in DB : insert');
         logger.error(error);
       }
     }
 
     for (const tokenName of erc20Tokens) {
-      const token = await erc20tokenDb.getOne({
+      const token = await tokenDb.getOne({
         walletId: item.walletId,
-        coin: tokenName.toLowerCase(),
-        ethCoin: item.coinType
+        slug: tokenName.toLowerCase(),
+        coin: item.coinType
       });
       if (!token) {
-        erc20tokenDb.insert({
+        tokenDb.insert({
           walletId: item.walletId,
-          coin: tokenName.toLowerCase(),
-          ethCoin: item.coinType,
-          balance: '0'
+          slug: tokenName.toLowerCase(),
+          coin: item.coinType,
+          balance: '0',
+          price: 0
         });
         options.addToQueue(
           new BalanceSyncItem({
@@ -394,11 +410,11 @@ export const processResponses = async (
             isRefresh: true
           })
         );
-        options.addPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
+        options.addPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
           isRefresh: true,
           module: item.module
         });
-        options.addLatestPriceSyncItemFromXpub({ coin: tokenName } as Xpub, {
+        options.addLatestPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
           isRefresh: true,
           module: 'default'
         });

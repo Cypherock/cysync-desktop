@@ -54,14 +54,14 @@ const Portfolio = () => {
       setCurrentWallet('');
     } else {
       setCoinIndex(0);
-      setCurrentWallet(allWallets[selectedIndex - 1].walletId);
+      setCurrentWallet(allWallets[selectedIndex - 1]._id);
     }
   };
 
   const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
-    if (allWallets[0].walletId === '') setOpen(true);
+    if (allWallets[0]._id === '') setOpen(true);
     else setOpen(false);
   }, [allWallets]);
 

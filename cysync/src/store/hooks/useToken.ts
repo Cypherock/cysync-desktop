@@ -3,10 +3,10 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
 import {
-  ERC20Token,
-  erc20tokenDb,
   getLatestPriceForCoin,
-  priceDb
+  priceHistoryDb,
+  Token,
+  tokenDb
 } from '../database';
 
 import { DisplayToken } from './types';
@@ -42,47 +42,46 @@ export const useToken: UseToken = () => {
   const onChange = useDebouncedFunction(onDBChange, 800);
 
   useEffect(() => {
-    priceDb.emitter.on('insert', onChange);
-    priceDb.emitter.on('update', onChange);
+    priceHistoryDb.emitter.on('insert', onChange);
+    priceHistoryDb.emitter.on('update', onChange);
 
-    erc20tokenDb.emitter.on('insert', onChange);
-    erc20tokenDb.emitter.on('update', onChange);
-    erc20tokenDb.emitter.on('delete', onChange);
+    tokenDb.emitter.on('insert', onChange);
+    tokenDb.emitter.on('update', onChange);
+    tokenDb.emitter.on('delete', onChange);
 
     return () => {
-      priceDb.emitter.removeListener('insert', onChange);
-      priceDb.emitter.removeListener('update', onChange);
+      priceHistoryDb.emitter.removeListener('insert', onChange);
+      priceHistoryDb.emitter.removeListener('update', onChange);
 
-      erc20tokenDb.emitter.removeListener('insert', onChange);
-      erc20tokenDb.emitter.removeListener('update', onChange);
-      erc20tokenDb.emitter.removeListener('delete', onChange);
+      tokenDb.emitter.removeListener('insert', onChange);
+      tokenDb.emitter.removeListener('update', onChange);
+      tokenDb.emitter.removeListener('delete', onChange);
     };
   }, []);
-
   useEffect(() => {
     sortTokenData(tokenData, sortIndex);
   }, [sortIndex]);
 
-  const getTokensWithPrices = async (tokens: ERC20Token[]) => {
+  const getTokensWithPrices = async (tokens: Token[]) => {
     const tokensWithPrice: DisplayToken[] = [];
-    for (const coin of tokens) {
-      const coinObj = COINS[coin.coin.toLowerCase()];
+    for (const token of tokens) {
+      const coinObj = COINS[token.slug.toLowerCase()];
       if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${coin.coin}`);
+        throw new Error(`Cannot find coinType: ${token.slug}`);
       }
 
       const coinWithPrice: DisplayToken = {
-        ...coin,
+        ...token,
         isEmpty: true,
         displayPrice: '0',
         displayValue: '0',
         displayBalance: '0'
       };
-      const balance = new BigNumber(coin.balance || 0).dividedBy(
+      const balance = new BigNumber(token.balance || 0).dividedBy(
         coinObj.multiplier
       );
 
-      const price = await getLatestPriceForCoin(coin.coin);
+      const price = await getLatestPriceForCoin(token.slug);
       const value = balance.multipliedBy(price);
 
       coinWithPrice.displayBalance = balance.toString();
@@ -189,10 +188,10 @@ export const useToken: UseToken = () => {
   };
 
   const getAllTokensFromWallet = async (walletId: string, ethCoin: string) => {
-    const res = await erc20tokenDb.getByWalletId(walletId, ethCoin);
+    const res = await tokenDb.getAll({ walletId, coin: ethCoin });
     const tokens: string[] = [];
-    res.forEach(coin => {
-      tokens.push(coin.coin);
+    res.forEach(token => {
+      tokens.push(token.slug);
     });
     setTokenList(tokens);
     const unsortedTokens = await getTokensWithPrices(res);

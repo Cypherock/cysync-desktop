@@ -130,7 +130,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
 
   useEffect(() => {
     if (selectedWallet) {
-      setCurrentWalletId(selectedWallet.walletId);
+      setCurrentWalletId(selectedWallet._id);
     }
   }, [selectedWallet]);
 
@@ -422,25 +422,25 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
           <Grid container className={classes.coinDataContainer}>
             {coinData
               .filter(coin => {
-                const coinObj = COINS[coin.coin];
+                const coinObj = COINS[coin.slug];
                 return (
                   (coinObj &&
                     coinObj.name
                       .toUpperCase()
                       .includes(search.toUpperCase())) ||
-                  coin.coin.toUpperCase().includes(search.toUpperCase())
+                  coin.slug.toUpperCase().includes(search.toUpperCase())
                 );
               })
               .map(coin => {
-                const coinObj = COINS[coin.coin];
+                const coinObj = COINS[coin.slug];
                 return (
                   <CurrentCoinContext.Provider
                     value={{ coinDetails: coin }}
-                    key={coin.coin}
+                    key={coin.slug}
                   >
                     {coinObj && coinObj.isEth ? (
                       <EthereumOneCoin
-                        initial={coin.coin.toUpperCase()}
+                        initial={coin.slug.toUpperCase()}
                         name={coinObj.name}
                         holding={coin.displayBalance}
                         value={coin.displayValue}
@@ -449,12 +449,12 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                         isEmpty={coin.isEmpty}
                         deleteCoin={deleteCoinByXpub}
                         deleteHistory={deleteCoinHistory}
-                        walletId={selectedWallet.walletId}
+                        walletId={selectedWallet._id}
                         sortIndex={sortIndex}
                       />
                     ) : (
                       <OneCoin
-                        initial={coin.coin.toUpperCase()}
+                        initial={coin.slug.toUpperCase()}
                         name={coinObj ? coinObj.name : ''}
                         holding={coin.displayBalance}
                         value={coin.displayValue}
@@ -463,7 +463,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                         isEmpty={coin.isEmpty}
                         deleteCoin={deleteCoinByXpub}
                         deleteHistory={deleteCoinHistory}
-                        walletId={selectedWallet.walletId}
+                        walletId={selectedWallet._id}
                       />
                     )}
                   </CurrentCoinContext.Provider>

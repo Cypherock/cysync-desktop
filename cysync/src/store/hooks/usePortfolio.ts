@@ -5,12 +5,14 @@ import { useEffect, useState } from 'react';
 import { getPortfolioCache } from '../../utils/cache';
 import logger from '../../utils/logger';
 import {
-  erc20tokenDb,
+  coinDb,
   getLatestPriceForCoin,
-  priceDb,
+  priceHistoryDb,
+  tokenDb,
   Transaction,
   transactionDb,
-  xpubDb
+  SentReceive,
+  getAllTxns
 } from '../database';
 
 import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';
@@ -81,34 +83,34 @@ export const usePortfolio: UsePortfolio = () => {
   const debouncedRefreshFromDB = useDebouncedFunction(refreshFromDB, 2000);
 
   useEffect(() => {
-    erc20tokenDb.emitter.on('insert', debouncedRefreshFromDB);
-    erc20tokenDb.emitter.on('update', debouncedRefreshFromDB);
-    erc20tokenDb.emitter.on('delete', debouncedRefreshFromDB);
+    tokenDb.emitter.on('insert', debouncedRefreshFromDB);
+    tokenDb.emitter.on('update', debouncedRefreshFromDB);
+    tokenDb.emitter.on('delete', debouncedRefreshFromDB);
 
-    priceDb.emitter.on('insert', debouncedRefreshFromDB);
-    priceDb.emitter.on('insert', debouncedRefreshFromDB);
-    priceDb.emitter.on('update', debouncedRefreshFromDB);
+    priceHistoryDb.emitter.on('insert', debouncedRefreshFromDB);
+    priceHistoryDb.emitter.on('insert', debouncedRefreshFromDB);
+    priceHistoryDb.emitter.on('update', debouncedRefreshFromDB);
 
-    xpubDb.emitter.on('update', debouncedRefreshFromDB);
-    xpubDb.emitter.on('delete', debouncedRefreshFromDB);
-    xpubDb.emitter.on('delete', debouncedRefreshFromDB);
+    coinDb.emitter.on('update', debouncedRefreshFromDB);
+    coinDb.emitter.on('delete', debouncedRefreshFromDB);
+    coinDb.emitter.on('delete', debouncedRefreshFromDB);
 
     transactionDb.emitter.on('insert', debouncedRefreshFromDB);
     transactionDb.emitter.on('update', debouncedRefreshFromDB);
     transactionDb.emitter.on('delete', debouncedRefreshFromDB);
 
     return () => {
-      erc20tokenDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      erc20tokenDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      erc20tokenDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      tokenDb.emitter.removeListener('insert', debouncedRefreshFromDB);
+      tokenDb.emitter.removeListener('update', debouncedRefreshFromDB);
+      tokenDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
-      priceDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      priceDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      priceDb.emitter.removeListener('update', debouncedRefreshFromDB);
+      priceHistoryDb.emitter.removeListener('insert', debouncedRefreshFromDB);
+      priceHistoryDb.emitter.removeListener('insert', debouncedRefreshFromDB);
+      priceHistoryDb.emitter.removeListener('update', debouncedRefreshFromDB);
 
-      xpubDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      xpubDb.emitter.removeListener('delete', debouncedRefreshFromDB);
-      xpubDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      coinDb.emitter.removeListener('update', debouncedRefreshFromDB);
+      coinDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      coinDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
       transactionDb.emitter.removeListener('insert', debouncedRefreshFromDB);
       transactionDb.emitter.removeListener('update', debouncedRefreshFromDB);
@@ -127,7 +129,10 @@ export const usePortfolio: UsePortfolio = () => {
     }
 
     let totalBalance = new BigNumber(0);
-    const allPrices = await priceDb.getPrice(coinType, days);
+    const allPrices = await priceHistoryDb.getOne({
+      slug: coinType,
+      interval: days
+    });
     if (!allPrices) {
       return null;
     }
@@ -140,50 +145,64 @@ export const usePortfolio: UsePortfolio = () => {
 
     if (wallet && wallet !== 'null') {
       if (coin.isErc20Token) {
-        const token = await erc20tokenDb.getByWalletIdandToken(
-          wallet,
-          coinType
-        );
+        const token = await tokenDb.getOne({
+          walletId: wallet,
+          slug: coinType
+        });
         if (token) totalBalance = new BigNumber(token.balance);
         else return null;
       } else {
-        const xpub = await xpubDb.getByWalletIdandCoin(wallet, coinType);
-        if (xpub)
+        const coin = await coinDb.getOne({ walletId: wallet, slug: coinType });
+        if (coin)
           totalBalance = new BigNumber(
-            xpub.totalBalance ? xpub.totalBalance.balance : 0
+            coin.totalBalance ? coin.totalBalance : 0
           );
         else return null;
       }
 
-      transactionHistory = await transactionDb.getAll(
+      transactionHistory = await getAllTxns(
         {
           walletId: wallet,
-          coin: coinType,
+          coin: coinType
+        },
+        {
           excludeFailed: true,
           excludePending: true
         },
-        { sort: 'confirmed', order: 'd' }
+        {
+          field: 'confirmed',
+          order: 'desc'
+        }
       );
     } else {
       if (coin.isErc20Token) {
-        const tokens = await erc20tokenDb.getByToken(coinType);
+        const tokens = await tokenDb.getAll({ slug: coinType });
         if (tokens.length === 0) return null;
         for (const token of tokens) {
           totalBalance = totalBalance.plus(token.balance);
         }
       } else {
-        const allCoins = await xpubDb.getByCoin(coinType);
-        if (!allCoins || allCoins.length === 0) return null;
-        for (const xpub of allCoins) {
+        const allCoins = await coinDb.getAll({ slug: coinType });
+        if (allCoins.length === 0) return null;
+        for (const coin of allCoins) {
           totalBalance = totalBalance.plus(
-            xpub.totalBalance ? xpub.totalBalance.balance : 0
+            coin.totalBalance ? coin.totalBalance : 0
           );
         }
       }
 
-      transactionHistory = await transactionDb.getAll(
-        { coin: coinType, excludeFailed: true, excludePending: true },
-        { sort: 'confirmed', order: 'd' }
+      transactionHistory = await getAllTxns(
+        {
+          coin: coinType
+        },
+        {
+          excludeFailed: true,
+          excludePending: true
+        },
+        {
+          field: 'confirmed',
+          order: 'desc'
+        }
       );
     }
 
@@ -214,7 +233,7 @@ export const usePortfolio: UsePortfolio = () => {
         if (transaction.confirmed) {
           const transactionTime = new Date(transaction.confirmed).getTime();
           if (computedPrices[i][0] <= transactionTime) {
-            if (transaction.sentReceive === 'SENT') {
+            if (transaction.sentReceive === SentReceive.SENT) {
               prevTransactionAmount = prevTransactionAmount.plus(
                 new BigNumber(transaction.amount)
               );
@@ -223,7 +242,7 @@ export const usePortfolio: UsePortfolio = () => {
                   new BigNumber(transaction.fees || 0)
                 );
               }
-            } else if (transaction.sentReceive === 'FEES') {
+            } else if (transaction.sentReceive === SentReceive.FEES) {
               prevTransactionAmount = prevTransactionAmount.plus(
                 new BigNumber(transaction.amount)
               );
@@ -349,32 +368,32 @@ export const usePortfolio: UsePortfolio = () => {
 
         if (walletId && walletId !== 'null') {
           if (coin.isErc20Token) {
-            const token = await erc20tokenDb.getByWalletIdandToken(
+            const token = await tokenDb.getOne({
               walletId,
-              coinType
-            );
+              slug: coinType
+            });
             if (token) totalBalance = new BigNumber(token.balance);
             else continue;
           } else {
-            const xpub = await xpubDb.getByWalletIdandCoin(walletId, coinType);
+            const xpub = await coinDb.getOne({ walletId, slug: coinType });
             if (xpub)
               totalBalance = new BigNumber(
-                xpub.totalBalance ? xpub.totalBalance.balance : 0
+                xpub.totalBalance ? xpub.totalBalance : 0
               );
             else continue;
           }
         } else if (coin.isErc20Token) {
-          const tokens = await erc20tokenDb.getByToken(coinType);
+          const tokens = await tokenDb.getAll({ slug: coinType });
           if (tokens.length === 0) continue;
           for (const token of tokens) {
             totalBalance = totalBalance.plus(token.balance);
           }
         } else {
-          const coinsFromDB = await xpubDb.getByCoin(coinType);
-          if (coinsFromDB.length === 0) continue;
-          for (const c of coinsFromDB) {
+          const coins = await coinDb.getAll({ slug: coinType });
+          if (coins.length === 0) continue;
+          for (const coin of coins) {
             totalBalance = totalBalance.plus(
-              c.totalBalance ? c.totalBalance.balance : 0
+              coin.totalBalance ? coin.totalBalance : 0
             );
           }
         }
@@ -383,7 +402,10 @@ export const usePortfolio: UsePortfolio = () => {
           setHasCoins(true);
         }
 
-        const res = await priceDb.getPrice(coinType, 7);
+        const res = await priceHistoryDb.getOne({
+          slug: coinType,
+          interval: 7
+        });
 
         if (res && res.data) {
           const latestUnitPrices = res.data;

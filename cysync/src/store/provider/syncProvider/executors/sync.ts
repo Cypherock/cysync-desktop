@@ -35,8 +35,8 @@ export interface ExecutionResult {
 
 export interface OptionParams {
   addToQueue: SyncProviderTypes['addToQueue'];
-  addPriceSyncItemFromXpub: SyncProviderTypes['addPriceSyncItemFromXpub'];
-  addLatestPriceSyncItemFromXpub: SyncProviderTypes['addLatestPriceSyncItemFromXpub'];
+  addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'];
+  addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
 }
 
 const getAllMetadata = (items: SyncQueueItem[]) => {
