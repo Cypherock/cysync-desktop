@@ -157,11 +157,11 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   };
 
   const openTxn = () => {
-    if (txn.coin) {
-      const coin = ETHCOINS[txn.coin];
+    if (ETHCOINS[txn.slug] || txn.isErc20) {
+      const coin = ETHCOINS[txn.slug];
 
       if (!coin) {
-        logger.error('Invalid ETH COIN in txn: ' + txn.coin);
+        logger.error('Invalid ETH COIN in txn: ' + txn.slug);
         return;
       }
 
