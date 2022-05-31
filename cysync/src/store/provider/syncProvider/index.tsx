@@ -122,19 +122,23 @@ export const SyncProvider: React.FC = ({ children }) => {
       }
 
       if (coinData instanceof BtcCoinData) {
+        let topBlock;
         const walletName = crypto
           .createHash('sha256')
           .update(coin.xpub)
           .digest('base64');
-        const topBlock = await getTopBlock({
-          walletId: coin.walletId,
-          walletName,
-          slug: coinData.abbr
-        }, {          
-          excludeFailed: true,
-          excludePending: true,
-          minConfirmations: 6
-        });
+        topBlock = await getTopBlock(
+          {
+            walletId: coin.walletId,
+            walletName,
+            slug: coinData.abbr
+          },
+          {
+            excludeFailed: true,
+            excludePending: true,
+            minConfirmations: 6
+          }
+        );
         const newItem = new HistorySyncItem({
           xpub: coin.xpub,
           walletName,
@@ -152,15 +156,18 @@ export const SyncProvider: React.FC = ({ children }) => {
             .createHash('sha256')
             .update(coin.zpub)
             .digest('base64');
-          const topBlock = await getTopBlock({
-            walletId: coin.walletId,
-            walletName: zwalletName,
-            slug: coinData.abbr
-          }, {
-            excludeFailed: true,
-            excludePending: true,
-            minConfirmations: 6
-          });
+          topBlock = await getTopBlock(
+            {
+              walletId: coin.walletId,
+              walletName: zwalletName,
+              slug: coinData.abbr
+            },
+            {
+              excludeFailed: true,
+              excludePending: true,
+              minConfirmations: 6
+            }
+          );
           const newZItem = new HistorySyncItem({
             xpub: coin.xpub,
             zpub: coin.zpub,

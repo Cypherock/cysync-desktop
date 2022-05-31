@@ -424,8 +424,8 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
               <Grid item xs={12}>
                 <Collapse in={collapseTab} timeout="auto" unmountOnExit>
                   {tokenData.map(token => {
-                    const tokenData = COINS[token.slug];
-                    if (!tokenData) {
+                    const oneTokenData = COINS[token.slug];
+                    if (!oneTokenData) {
                       throw new Error(`Cannot find coinType: ${token.coin}`);
                     }
                     return (
@@ -433,10 +433,10 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
                         <TokenContext.Provider value={{ token }}>
                           <OneToken
                             initial={token.slug.toUpperCase()}
-                            name={tokenData.name}
+                            name={oneTokenData.name}
                             holding={token.displayBalance}
                             price={token.displayPrice}
-                            decimal={tokenData.decimal}
+                            decimal={oneTokenData.decimal}
                             value={token.displayValue}
                             isEmpty={token.isEmpty}
                             walletId={walletId}

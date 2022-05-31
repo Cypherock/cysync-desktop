@@ -12,13 +12,13 @@ import BigNumber from 'bignumber.js';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AutoSizer, List } from 'react-virtualized';
-import { convertToDisplayValue } from '../../../../store/database';
 
 import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import Input from '../../../../designSystem/designComponents/input/input';
 import DropMenu from '../../../../designSystem/designComponents/menu/DropMenu';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
+import { convertToDisplayValue } from '../../../../store/database';
 import {
   DisplayTransaction,
   useDebouncedFunction,

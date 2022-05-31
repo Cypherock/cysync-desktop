@@ -22,12 +22,12 @@ import {
   addressDb,
   Coin,
   coinDb,
+  insertFromBlockbookTxn,
   IOtype,
+  SentReceive,
   tokenDb,
   Transaction,
-  transactionDb,
-  SentReceive,
-  insertFromBlockbookTxn
+  transactionDb
 } from '../../../database';
 import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
 
@@ -94,15 +94,15 @@ export const processResponses = async (
     addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
   }
 ): Promise<any> => {
-  const coin = COINS[item.coinType];
-  if (!coin) {
+  const coinData = COINS[item.coinType];
+  if (!coinData) {
     logger.warn('Invalid coin in sync queue', {
       coinType: item.coinType
     });
     return undefined;
   }
 
-  if (coin instanceof BtcCoinData) {
+  if (coinData instanceof BtcCoinData) {
     if (responses.length <= 0) {
       throw new Error('Did not find responses while processing');
     }
@@ -199,7 +199,7 @@ export const processResponses = async (
     return undefined;
   }
 
-  if (coin instanceof EthCoinData) {
+  if (coinData instanceof EthCoinData) {
     if (responses.length < 2) {
       throw new Error('Did not find responses while processing');
     }

@@ -226,7 +226,9 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         <Typography color="textSecondary">Action</Typography>
         <Typography
           className={
-            !(txn.sentReceive === SentReceive.SENT) ? classes.blue : classes.orange
+            !(txn.sentReceive === SentReceive.SENT)
+              ? classes.blue
+              : classes.orange
           }
           variant="body2"
         >

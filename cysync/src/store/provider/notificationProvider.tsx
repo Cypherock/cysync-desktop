@@ -52,7 +52,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
       ).request();
       let serverLatestNotif = [];
       let hasNext = false;
-      let hasUnread = false;
+      let unread = false;
 
       if (res.data.notifications) {
         serverLatestNotif = res.data.notifications;
@@ -85,23 +85,23 @@ export const NotificationProvider: React.FC = ({ children }) => {
 
       // Has new notifications if lengths are different
       if (dbNotif.length < serverLatestNotif.length) {
-        hasUnread = true;
+        unread = true;
       }
 
       // Has new notifications if first notifications are different
       if (
-        !hasUnread &&
+        !unread &&
         dbNotif.length > 0 &&
         serverLatestNotif.length > 0 &&
         dbNotif[0].dbId !== serverLatestNotif[0]._id
       ) {
-        hasUnread = true;
+        unread = true;
       }
 
-      if (!hasUnread) {
+      if (!unread) {
         for (const notif of dbNotif) {
           if (!notif.isRead) {
-            hasUnread = true;
+            unread = true;
             break;
           }
         }
@@ -110,7 +110,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
       const latestNotifications = await NotificationDB.getLatest(perPageLimit);
       setNotifications(latestNotifications);
       setHasNextPage(hasNext);
-      setHasUnread(hasUnread);
+      setHasUnread(unread);
     } catch (error) {
       logger.error('Error in fetching latest notifications');
       logger.error(error);

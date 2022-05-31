@@ -9,13 +9,13 @@ import logger from '../../../utils/logger';
 import {
   addressDb,
   coinDb,
-  receiveAddressDb,
-  transactionDb,
-  walletDb,
-  Status,
-  updateConfirmations,
   insertFromBlockbookTxn,
-  insertFromFullTxn
+  insertFromFullTxn,
+  receiveAddressDb,
+  Status,
+  transactionDb,
+  updateConfirmations,
+  walletDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
@@ -353,9 +353,7 @@ export const SocketProvider: React.FC = ({ children }) => {
         try {
           logger.info('Received txn confirmation hook', { payload });
           if (payload && payload.hash && payload.coinType) {
-            const confirmations = await updateConfirmations(
-              payload
-            );
+            const confirmations = await updateConfirmations(payload);
             logger.info('Txn confirmed', {
               hash: payload.hash,
               coinType: payload.coinType
