@@ -7,9 +7,9 @@ import {
   getAllTxns,
   getLatestPriceForCoins,
   transactionDb,
-  walletDb,
   TxQuery,
-  TxQueryOptions
+  TxQueryOptions,
+  walletDb
 } from '../database';
 
 import { DisplayInputOutput, DisplayTransaction } from './types';

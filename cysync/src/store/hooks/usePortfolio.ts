@@ -6,13 +6,13 @@ import { getPortfolioCache } from '../../utils/cache';
 import logger from '../../utils/logger';
 import {
   coinDb,
+  getAllTxns,
   getLatestPriceForCoin,
   priceHistoryDb,
+  SentReceive,
   tokenDb,
   Transaction,
-  transactionDb,
-  SentReceive,
-  getAllTxns
+  transactionDb
 } from '../database';
 
 import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';
@@ -123,8 +123,8 @@ export const usePortfolio: UsePortfolio = () => {
     days: number,
     wallet = ''
   ) => {
-    const coin = COINS[coinType];
-    if (!coin) {
+    const coinData = COINS[coinType];
+    if (!coinData) {
       throw new Error(`Cannot find coinType: ${coinType}`);
     }
 
@@ -144,7 +144,7 @@ export const usePortfolio: UsePortfolio = () => {
     let transactionHistory: Transaction[] = [];
 
     if (wallet && wallet !== 'null') {
-      if (coin.isErc20Token) {
+      if (coinData.isErc20Token) {
         const token = await tokenDb.getOne({
           walletId: wallet,
           slug: coinType
@@ -175,7 +175,7 @@ export const usePortfolio: UsePortfolio = () => {
         }
       );
     } else {
-      if (coin.isErc20Token) {
+      if (coinData.isErc20Token) {
         const tokens = await tokenDb.getAll({ slug: coinType });
         if (tokens.length === 0) return null;
         for (const token of tokens) {
@@ -237,7 +237,7 @@ export const usePortfolio: UsePortfolio = () => {
               prevTransactionAmount = prevTransactionAmount.plus(
                 new BigNumber(transaction.amount)
               );
-              if (!coin.isErc20Token) {
+              if (!coinData.isErc20Token) {
                 prevTransactionAmount = prevTransactionAmount.plus(
                   new BigNumber(transaction.fees || 0)
                 );
@@ -263,7 +263,7 @@ export const usePortfolio: UsePortfolio = () => {
 
       computedPrices[i][1] = balance
         .multipliedBy(computedPrices[i][1])
-        .dividedBy(coin.multiplier)
+        .dividedBy(coinData.multiplier)
         .toNumber();
     }
 
@@ -353,21 +353,21 @@ export const usePortfolio: UsePortfolio = () => {
       const setOfCoins: CoinDetails[] = [];
 
       for (const coinType of Object.keys(COINS)) {
-        const coin = COINS[coinType];
-        if (!coin) {
+        const coinData = COINS[coinType];
+        if (!coinData) {
           throw new Error(`Cannot find coinType: ${coinType}`);
         }
         let totalBalance = new BigNumber(0);
         const currentTempCoin: CoinDetails = {
           name: coinType,
-          decimal: coin.decimal,
+          decimal: coinData.decimal,
           balance: '0',
           value: '0',
           price: '0'
         };
 
         if (walletId && walletId !== 'null') {
-          if (coin.isErc20Token) {
+          if (coinData.isErc20Token) {
             const token = await tokenDb.getOne({
               walletId,
               slug: coinType
@@ -382,16 +382,16 @@ export const usePortfolio: UsePortfolio = () => {
               );
             else continue;
           }
-        } else if (coin.isErc20Token) {
+        } else if (coinData.isErc20Token) {
           const tokens = await tokenDb.getAll({ slug: coinType });
           if (tokens.length === 0) continue;
           for (const token of tokens) {
             totalBalance = totalBalance.plus(token.balance);
           }
         } else {
-          const coins = await coinDb.getAll({ slug: coinType });
-          if (coins.length === 0) continue;
-          for (const coin of coins) {
+          const coinsData = await coinDb.getAll({ slug: coinType });
+          if (coinsData.length === 0) continue;
+          for (const coin of coinsData) {
             totalBalance = totalBalance.plus(
               coin.totalBalance ? coin.totalBalance : 0
             );
@@ -419,7 +419,7 @@ export const usePortfolio: UsePortfolio = () => {
 
         const latestPrice = await getLatestPriceForCoin(coinType);
 
-        const balance = totalBalance.dividedBy(coin.multiplier);
+        const balance = totalBalance.dividedBy(coinData.multiplier);
 
         currentTempCoin.balance = balance.toString();
 
@@ -430,7 +430,7 @@ export const usePortfolio: UsePortfolio = () => {
         currentTempCoin.price = latestPrice.toString();
 
         // Don't add coins to holdings (This will not display the coin in chart)
-        if (!coin.isTest) {
+        if (!coinData.isTest) {
           allCoinholding.push(parseFloat(value.toFixed(3)));
         }
 
