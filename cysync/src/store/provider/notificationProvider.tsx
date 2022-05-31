@@ -1,3 +1,4 @@
+import { notification as NotificationServer } from '@cypherock/server-wrapper';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
@@ -8,7 +9,7 @@ export interface NotificationContextInterface {
   data: Notification[];
   hasNextPage: boolean;
   isLoading: boolean;
-  getLatest: () => Promise<void>;
+  updateLatest: () => Promise<void>;
   getNextPage: () => Promise<void>;
   hasUnread: boolean;
   markAllRead: () => Promise<void>;
@@ -39,14 +40,77 @@ export const NotificationProvider: React.FC = ({ children }) => {
     }
   };
 
-  const getLatest = async () => {
+  const updateLatest = async () => {
     setIsLoading(true);
     try {
-      logger.info('Fetching latest notifications');
-      const res = await NotificationDB.getLatest(perPageLimit);
-      setNotifications(res.notifications);
-      setHasNextPage(res.hasNext);
-      setHasUnread(res.hasUnread);
+      logger.info('Fetching latest notifications from server');
+      const dbNotif = await NotificationDB.getLatest(perPageLimit);
+
+      const res = await NotificationServer.get(
+        undefined,
+        perPageLimit
+      ).request();
+      let serverLatestNotif = [];
+      let hasNext = false;
+      let hasUnread = false;
+
+      if (res.data.notifications) {
+        serverLatestNotif = res.data.notifications;
+        hasNext = res.data.hasNext;
+      }
+
+      let prevNotif: Notification | undefined;
+      for (const notifData of serverLatestNotif) {
+        const notif: Notification = {
+          _id: notifData._id,
+          title: notifData.title,
+          description: notifData.description,
+          type: notifData.type,
+          createdAt: new Date(notifData.createdAt),
+          isRead: false
+        };
+
+        if (prevNotif) {
+          notif.prevDbId = prevNotif._id;
+        }
+
+        prevNotif = notif;
+
+        const isInDb = await NotificationDB.getById(notif._id);
+
+        if (!isInDb) {
+          await NotificationDB.insert(notif);
+        }
+      }
+
+      // Has new notifications if lengths are different
+      if (dbNotif.length < serverLatestNotif.length) {
+        hasUnread = true;
+      }
+
+      // Has new notifications if first notifications are different
+      if (
+        !hasUnread &&
+        dbNotif.length > 0 &&
+        serverLatestNotif.length > 0 &&
+        dbNotif[0].dbId !== serverLatestNotif[0]._id
+      ) {
+        hasUnread = true;
+      }
+
+      if (!hasUnread) {
+        for (const notif of dbNotif) {
+          if (!notif.isRead) {
+            hasUnread = true;
+            break;
+          }
+        }
+      }
+
+      const latestNotifications = await NotificationDB.getLatest(perPageLimit);
+      setNotifications(latestNotifications);
+      setHasNextPage(hasNext);
+      setHasUnread(hasUnread);
     } catch (error) {
       logger.error('Error in fetching latest notifications');
       logger.error(error);
@@ -59,20 +123,89 @@ export const NotificationProvider: React.FC = ({ children }) => {
     setIsLoading(true);
     try {
       logger.info('Fetching next page notifications');
-      let lastNotif: any;
+      let lastNotif: Notification | undefined;
 
       if (notifications.length > 0)
         lastNotif = notifications[notifications.length - 1];
 
-      const res = await NotificationDB.getAll(
-        lastNotif,
-        notifications.length,
-        perPageLimit
+      const dbNotif = await NotificationDB.getLatest(
+        perPageLimit,
+        notifications.length
       );
 
-      setNotifications([...notifications, ...res.notifications]);
+      let isInDb = true;
 
-      setHasNextPage(res.hasNext);
+      // Check if the data in DB is syncronized with the server
+      if (dbNotif.length > 0) {
+        if (dbNotif[0].prevDbId === lastNotif.dbId) {
+          let prevNotif = dbNotif[0];
+          for (let i = 1; i < dbNotif.length; i++) {
+            const notif = dbNotif[i];
+            if (notif.prevDbId !== prevNotif.dbId) {
+              isInDb = false;
+              break;
+            }
+
+            prevNotif = notif;
+          }
+        } else {
+          isInDb = false;
+        }
+      } else {
+        isInDb = false;
+      }
+
+      // Fetch from server if data is not syncronized.
+      if (!isInDb) {
+        const res = await NotificationServer.get(
+          lastNotif._id,
+          perPageLimit
+        ).request();
+        let serverLatestNotif = [];
+        let hasNext = false;
+
+        if (res.data.notifications) {
+          serverLatestNotif = res.data.notifications;
+          hasNext = res.data.hasNext;
+        }
+
+        const serverNotifications: Notification[] = [];
+        let prevNotif: Notification | undefined;
+        for (const notifData of serverLatestNotif) {
+          const notif: Notification = {
+            _id: notifData._id,
+            title: notifData.title,
+            description: notifData.description,
+            type: notifData.type,
+            createdAt: new Date(notifData.createdAt),
+            isRead: false
+          };
+
+          if (prevNotif) {
+            notif.prevDbId = prevNotif._id;
+          } else if (lastNotif) {
+            notif.prevDbId = lastNotif._id;
+          }
+
+          prevNotif = notif;
+
+          notifications.push(notif);
+
+          const alreadyPresent = await NotificationDB.getById(notif._id);
+
+          if (!alreadyPresent) {
+            await NotificationDB.insert(notif);
+          }
+        }
+
+        setNotifications([...notifications, ...serverNotifications]);
+        setHasNextPage(hasNext);
+      } else {
+        // If data is from database then always show `hasNext` to allow user to
+        // check from server at the end of the list.
+        setNotifications([...notifications, ...dbNotif]);
+        setHasNextPage(true);
+      }
     } catch (error) {
       logger.error('Error in fetching next page notifications');
       logger.error(error);
@@ -87,7 +220,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
         data: notifications,
         hasNextPage,
         isLoading,
-        getLatest,
+        updateLatest,
         getNextPage,
         hasUnread,
         markAllRead

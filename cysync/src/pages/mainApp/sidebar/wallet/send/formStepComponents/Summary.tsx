@@ -105,7 +105,7 @@ const Summary: React.FC<StepComponentProps> = ({
 
   const { connected } = useNetwork();
 
-  const coinAbbr = token ? token.coin : coinDetails.coin;
+  const coinAbbr = token ? token.coin : coinDetails.slug;
 
   const coinPrice = token ? token.displayPrice : coinDetails.displayPrice;
 
@@ -117,21 +117,17 @@ const Summary: React.FC<StepComponentProps> = ({
     setOpen(true);
     setBroadcastError('');
     setAdvanceError('');
-    broadcastTxn(sendTransaction.signedTxn, coinDetails.coin)
+    broadcastTxn(sendTransaction.signedTxn, coinDetails.slug)
       .then(res => {
         setOpen(false);
         sendTransaction.setHash(res);
         sendTransaction.onTxnBroadcast({
-          walletId: selectedWallet.walletId,
-          coin: coinDetails.coin,
+          walletId: selectedWallet._id,
+          coin: coinDetails.slug,
           txHash: res,
           token: token ? token.coin : undefined
         });
-        addTxnConfirmAddressHook(
-          res,
-          coinDetails.coin,
-          selectedWallet.walletId
-        );
+        addTxnConfirmAddressHook(res, coinDetails.slug, selectedWallet._id);
         handleNext();
         Analytics.Instance.event(
           Analytics.Categories.SEND_TXN,
@@ -253,7 +249,7 @@ const Summary: React.FC<StepComponentProps> = ({
           label="Transaction Fees"
           text={`~ ${
             sendTransaction.totalFees
-          } ${coinDetails.coin.toUpperCase()} ~( $${formatDisplayAmount(
+          } ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
             sendTransaction.totalFees * parseFloat(coinDetails.displayPrice),
             2,
             true

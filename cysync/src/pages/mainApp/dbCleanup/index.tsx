@@ -3,14 +3,14 @@ import React, { useEffect, useState } from 'react';
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import {
   addressDb,
+  coinDb,
   deviceDb,
-  erc20tokenDb,
   notificationDb,
-  priceDb,
+  priceHistoryDb,
   receiveAddressDb,
+  tokenDb,
   transactionDb,
-  walletDb,
-  xpubDb
+  walletDb
 } from '../../../store/database';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
@@ -27,24 +27,24 @@ const DBCleaupPopup = () => {
 
       const promiseList = [
         {
-          name: 'History',
+          name: 'Transaction',
           promise: transactionDb.hasIncompatableData.bind(transactionDb)
         },
         {
-          name: 'Xpub',
-          promise: xpubDb.hasIncompatableData.bind(xpubDb)
+          name: 'Price History',
+          promise: priceHistoryDb.hasIncompatableData.bind(priceHistoryDb)
+        },
+        {
+          name: 'Coin',
+          promise: coinDb.hasIncompatableData.bind(coinDb)
         },
         {
           name: 'Wallet',
           promise: walletDb.hasIncompatableData.bind(walletDb)
         },
         {
-          name: 'Prices',
-          promise: priceDb.hasIncompatableData.bind(priceDb)
-        },
-        {
           name: 'ERC20 Tokens',
-          promise: erc20tokenDb.hasIncompatableData.bind(erc20tokenDb)
+          promise: tokenDb.hasIncompatableData.bind(tokenDb)
         },
         {
           name: 'Addresses',

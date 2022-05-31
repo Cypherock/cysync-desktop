@@ -336,6 +336,8 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
         .getLatest()
         .request()
         .then(response => {
+          setLatestVersion(response.data.firmware.version);
+
           if (
             (firmwareVersion &&
               deviceState &&
@@ -346,12 +348,10 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             inTestApp(deviceState)
           ) {
             setUpgradeAvailable(true);
-            setLatestVersion(response.data.firmware.version);
           }
 
           if (process.env.BUILD_TYPE === 'debug') {
             setUpgradeAvailable(true);
-            setLatestVersion(response.data.firmware.version);
           }
 
           setAuthState(2);

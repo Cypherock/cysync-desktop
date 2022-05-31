@@ -11,11 +11,12 @@ import { useNavigate } from 'react-router-dom';
 import Routes from '../../../constants/routes';
 import {
   addressDb,
-  erc20tokenDb,
+  coinDb,
   receiveAddressDb,
+  tokenDb,
   transactionDb,
-  walletDb,
-  xpubDb
+  Wallet,
+  walletDb
 } from '../../../store/database';
 import logger from '../../../utils/logger';
 import DeleteWalletIcon from '../../iconGroups/deleteWallet';
@@ -117,7 +118,7 @@ const WalletItemRoot = styled(Grid)(() => ({
 
 interface WalletItemProps {
   title: string;
-  walletDetails: any;
+  walletDetails: Wallet;
 }
 
 const WalletItem = (props: WalletItemProps) => {
@@ -144,19 +145,16 @@ const WalletItem = (props: WalletItemProps) => {
   const handleDeleteConfirmation = async () => {
     try {
       const {
-        walletDetails: { walletId }
+        walletDetails: { _id: walletId }
       } = props;
-      await walletDb.delete(walletId);
-      const allXpubs = await xpubDb.getByWalletId(walletId);
-      allXpubs.map(async xpub => {
-        await addressDb.deleteAll({ xpub: xpub.xpub });
-      });
-      await receiveAddressDb.deleteAll({
+      await walletDb.deleteById(walletId);
+      await addressDb.delete({ walletId });
+      await receiveAddressDb.delete({
         walletId
       });
-      await xpubDb.deleteWallet(walletId);
-      await erc20tokenDb.deleteWallet(walletId);
-      await transactionDb.deleteWallet(walletId);
+      await coinDb.delete({ walletId });
+      await tokenDb.delete({ walletId });
+      await transactionDb.delete({ walletId });
       navigate(Routes.wallet.index);
       setDeleteOpen(false);
       handleClose();

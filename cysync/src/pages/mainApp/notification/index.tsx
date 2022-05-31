@@ -59,7 +59,7 @@ const Notification = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const {
     data,
-    getLatest,
+    updateLatest,
     getNextPage,
     hasNextPage,
     isLoading,
@@ -72,7 +72,7 @@ const Notification = () => {
   useEffect(() => {
     if (connected && !initialFetch) {
       setIntialFetch(true);
-      getLatest();
+      updateLatest();
     }
   }, [connected]);
 

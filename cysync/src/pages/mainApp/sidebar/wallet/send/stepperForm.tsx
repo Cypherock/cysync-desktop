@@ -263,7 +263,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   }, [sendTransaction.sendMaxAmount, batchRecipientData]);
 
   const triggerCalcFee = () => {
-    const coinAbbr = token ? token.coin : coinDetails.coin;
+    const coinAbbr = token ? token.coin : coinDetails.slug;
     const coin = COINS[coinAbbr];
     let contractAddress: string | undefined;
     if (token && coin instanceof Erc20CoinData) {
@@ -273,8 +273,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     sendTransaction.handleEstimateFee(
       coinDetails.xpub,
       coinDetails.zpub,
-      coinDetails.coin,
-      changeFormatOfOutputList(batchRecipientData, coinDetails.coin, token),
+      coinDetails.slug,
+      changeFormatOfOutputList(batchRecipientData, coinDetails.slug, token),
       parseInt(transactionFee, 10) || 0,
       maxSend,
       {
@@ -288,7 +288,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const debouncedCaclFee = useDebouncedFunction(triggerCalcFee, 500);
 
   const triggerCalcGasLimit = async () => {
-    const coin = COINS[coinDetails.coin];
+    const coin = COINS[coinDetails.slug];
     if (
       !(
         estimateGasLimit &&
@@ -349,7 +349,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   };
 
   useEffect(() => {
-    const coin = COINS[coinDetails.coin];
+    const coin = COINS[coinDetails.slug];
     if (coin instanceof EthCoinData) {
       debouncedCaclFee();
     }
@@ -476,7 +476,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       JSON.stringify(batchRecipientData)
     );
     let isValid = true;
-    const { isEth } = COINS[coinDetails.coin];
+    const { isEth } = COINS[coinDetails.slug];
     copyBatchRecipientData.forEach((elem, index) => {
       const amount = new BigNumber(
         elem.amount === undefined ? '' : elem.amount
@@ -510,7 +510,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       ) {
         if (!error) {
           copyRecipient.errorRecipient = `This is not a valid ${
-            COINS[coinDetails.coin].name
+            COINS[coinDetails.slug].name
           } address`;
         } else {
           copyRecipient.errorRecipient = '';

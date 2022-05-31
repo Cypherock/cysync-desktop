@@ -5,7 +5,7 @@ import {
   DeviceErrorType,
   EthCoinData
 } from '@cypherock/communication';
-import { InputOutput, Transaction } from '@cypherock/database';
+import { InputOutput, IOtype, SentReceive, Transaction } from '@cypherock/database';
 import { TransactionSender } from '@cypherock/protocols';
 import Server from '@cypherock/server-wrapper';
 import { WalletError, WalletErrorType } from '@cypherock/wallet';
@@ -14,7 +14,7 @@ import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
-import { addressDb, transactionDb } from '../../database';
+import { addressDb, coinDb, transactionDb } from '../../database';
 import { useI18n } from '../../provider';
 
 export const changeFormatOfOutputList = (
@@ -241,8 +241,18 @@ export const useSendTransaction: UseSendTransaction = () => {
         setSendMaxAmount(Number(amt));
       });
 
+      const { walletId } = await coinDb.getOne({ xpub, slug: coinType });
       sendTransaction
-        .calcApproxFee(xpub, zpub, coinType, outputList, fees, isSendAll, data)
+        .calcApproxFee(
+          xpub,
+          zpub,
+          walletId,
+          coinType,
+          outputList,
+          fees,
+          isSendAll,
+          data
+        )
         .then(() => {
           setEstimationError(false);
           logger.info('EstimateFee: Completed', { coinType });
@@ -631,32 +641,30 @@ export const useSendTransaction: UseSendTransaction = () => {
       }
 
       if (txnInputs) {
-        let i = 0;
-        for (const input of txnInputs) {
+        for (const [i, input] of txnInputs.entries()) {
           amount = amount.plus(new BigNumber(input.value));
           formattedInputs.push({
             address: input.address,
-            index: i,
+            indexNumber: i,
             value: String(input.value),
-            isMine: input.isMine
+            isMine: input.isMine,
+            type: IOtype.INPUT
           });
-          i += 1;
         }
       }
 
       if (txnOutputs) {
-        let i = 0;
-        for (const output of txnOutputs) {
+        for (const [i, output] of txnOutputs.entries()) {
           if (output.isMine) {
             amount = amount.minus(new BigNumber(output.value));
           }
           formattedOutputs.push({
             address: output.address,
-            index: i,
+            indexNumber: i,
             value: String(output.value),
-            isMine: output.isMine
+            isMine: output.isMine,
+            type: IOtype.OUTPUT
           });
-          i += 1;
         }
       }
 
@@ -673,13 +681,13 @@ export const useSendTransaction: UseSendTransaction = () => {
           total: amount.toString(),
           fees: fees.toString(),
           walletId,
-          coin: token.toLowerCase(),
+          slug: token.toLowerCase(),
           confirmations: 0,
           status: 0,
-          sentReceive: 'SENT',
+          sentReceive: SentReceive.SENT,
           confirmed: new Date(),
           blockHeight: -1,
-          ethCoin: coin,
+          coin,
           inputs: formattedInputs,
           outputs: formattedOutputs
         };
@@ -689,13 +697,13 @@ export const useSendTransaction: UseSendTransaction = () => {
           total: fees.toString(),
           fees: '0',
           walletId,
-          coin: coin.toLowerCase(),
+          slug: coin.toLowerCase(),
           confirmations: 0,
           status: 0,
-          sentReceive: 'FEES',
+          sentReceive: SentReceive.FEES,
           confirmed: new Date(),
           blockHeight: -1,
-          ethCoin: coin
+          coin
         };
         transactionDb.insert(feeTxn);
       } else {
@@ -705,10 +713,10 @@ export const useSendTransaction: UseSendTransaction = () => {
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
           walletId,
-          coin: coin.toLowerCase(),
+          slug: coin.toLowerCase(),
           confirmations: 0,
           status: 0,
-          sentReceive: 'SENT',
+          sentReceive: SentReceive.SENT,
           confirmed: new Date(),
           blockHeight: -1,
           inputs: formattedInputs,

@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 
 import {
   addressDb,
+  Coin,
+  coinDb,
   getLatestPriceForCoin,
-  priceDb,
-  receiveAddressDb,
-  Xpub,
-  xpubDb
+  priceHistoryDb,
+  receiveAddressDb
 } from '../database';
 
 import { DisplayCoin } from './types';
@@ -17,7 +17,7 @@ import { useDebouncedFunction } from './useDebounce';
 export interface UseWalletDataValues {
   coinData: DisplayCoin[];
   setCoinData: React.Dispatch<React.SetStateAction<DisplayCoin[]>>;
-  insert: (coin: Xpub) => Promise<void>;
+  insert: (coin: Coin) => Promise<void>;
   coinsPresent: string[];
   deleteCoinByXpub: (
     xpub: string,
@@ -46,17 +46,17 @@ export const useWalletData: UseWalletData = () => {
   // Using doRefresh mechanish because hooks state change do not work with event listeners.
   const [doRefresh, setDoRefresh] = useState(false);
 
-  const insert = (coin: Xpub) => {
-    return xpubDb.insert(coin);
+  const insert = (coin: Coin) => {
+    coinDb.insert(coin);
   };
 
-  const getCoinsWithPrices = async (coins: Xpub[]) => {
+  const getCoinsWithPrices = async (coins: Coin[]) => {
     const mappedCoins: DisplayCoin[] = [];
 
     for (const coin of coins) {
-      const coinObj = COINS[coin.coin.toLowerCase()];
+      const coinObj = COINS[coin.slug];
       if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${coin.coin}`);
+        throw new Error(`Cannot find coinType: ${coin.slug}`);
       }
 
       const coinWithPrice: DisplayCoin = {
@@ -67,12 +67,12 @@ export const useWalletData: UseWalletData = () => {
         displayBalance: '0'
       };
       const balance = new BigNumber(
-        coin.totalBalance ? coin.totalBalance.balance : 0
+        coin.totalBalance ? coin.totalBalance : 0
       ).dividedBy(coinObj.multiplier);
 
       coinWithPrice.displayBalance = balance.toString();
 
-      const latestPrice = await getLatestPriceForCoin(coin.coin);
+      const latestPrice = await getLatestPriceForCoin(coin.slug);
       const value = balance.multipliedBy(latestPrice || 0);
       coinWithPrice.displayValue = value.toFixed(2);
       coinWithPrice.displayPrice = latestPrice.toFixed(2) || '0';
@@ -109,7 +109,7 @@ export const useWalletData: UseWalletData = () => {
       case 2:
         setCoinData(
           [...coins].sort((a, b) => {
-            return a.coin.localeCompare(b.coin);
+            return a.slug.localeCompare(b.slug);
           })
         );
         break;
@@ -117,7 +117,7 @@ export const useWalletData: UseWalletData = () => {
       case 3:
         setCoinData(
           [...coins].sort((a, b) => {
-            return b.coin.localeCompare(a.coin);
+            return b.slug.localeCompare(a.slug);
           })
         );
         break;
@@ -173,10 +173,10 @@ export const useWalletData: UseWalletData = () => {
 
   const getAllCoinsFromWallet = async () => {
     if (currentWalletId) {
-      const res = await xpubDb.getByWalletId(currentWalletId);
+      const res = await coinDb.getAll({ walletId: currentWalletId });
       const coinList: string[] = [];
       res.forEach(coin => {
-        coinList.push(coin.coin);
+        coinList.push(coin.slug);
       });
       setCoinsPresent(coinList);
       const unsortedCoins = await getCoinsWithPrices(res);
@@ -189,9 +189,9 @@ export const useWalletData: UseWalletData = () => {
     coin: string,
     walletId: string
   ) => {
-    await addressDb.deleteAll({ xpub, coinType: coin });
-    await receiveAddressDb.deleteAll({ walletId, coinType: coin });
-    await xpubDb.delete(xpub, coin);
+    await addressDb.delete({ walletId, coinType: coin });
+    await receiveAddressDb.delete({ walletId, coinType: coin });
+    await coinDb.delete({ xpub, slug: coin });
     return getAllCoinsFromWallet();
   };
 
@@ -202,20 +202,20 @@ export const useWalletData: UseWalletData = () => {
   const onChange = useDebouncedFunction(onDBChange, 800);
 
   useEffect(() => {
-    priceDb.emitter.on('insert', onChange);
-    priceDb.emitter.on('update', onChange);
+    priceHistoryDb.emitter.on('insert', onChange);
+    priceHistoryDb.emitter.on('update', onChange);
 
-    xpubDb.emitter.on('insert', onChange);
-    xpubDb.emitter.on('update', onChange);
-    xpubDb.emitter.on('delete', onChange);
+    coinDb.emitter.on('insert', onChange);
+    coinDb.emitter.on('update', onChange);
+    coinDb.emitter.on('delete', onChange);
 
     return () => {
-      priceDb.emitter.removeListener('insert', onChange);
-      priceDb.emitter.removeListener('update', onChange);
+      priceHistoryDb.emitter.removeListener('insert', onChange);
+      priceHistoryDb.emitter.removeListener('update', onChange);
 
-      xpubDb.emitter.removeListener('insert', onChange);
-      xpubDb.emitter.removeListener('update', onChange);
-      xpubDb.emitter.removeListener('delete', onChange);
+      coinDb.emitter.removeListener('insert', onChange);
+      coinDb.emitter.removeListener('update', onChange);
+      coinDb.emitter.removeListener('delete', onChange);
     };
   }, []);
 

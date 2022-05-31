@@ -126,7 +126,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.coin : coinDetails.coin;
+  const coinAbbr = token ? token.coin : coinDetails.slug;
 
   const [imageData, setImageData] = React.useState('');
   const [isQRBuilding, setQRBuilding] = React.useState(true);
@@ -143,10 +143,10 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
   }, [sendTransaction.hash]);
 
   const handleExternalLink = async () => {
-    const coin = COINS[coinDetails.coin];
+    const coin = COINS[coinDetails.slug];
 
     if (!coin) {
-      logger.error('Invalid COIN in coinDetails: ' + coinDetails.coin);
+      logger.error('Invalid COIN in coinDetails: ' + coinDetails.slug);
       return;
     }
 
@@ -177,7 +177,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
     } else {
       shell.openExternal(
         Server.bitcoin.transaction.getOpenTxnLink({
-          coinType: coinDetails.coin,
+          coinType: coinDetails.slug,
           txHash: sendTransaction.hash,
           isConfirmed
         })

@@ -24,8 +24,8 @@ import Dustbin from '../../../../designSystem/iconGroups/dustbin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
 import {
   addressDb,
-  erc20tokenDb,
   receiveAddressDb,
+  tokenDb,
   transactionDb
 } from '../../../../store/database';
 import { useToken } from '../../../../store/hooks';
@@ -228,15 +228,15 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   };
   const handleDeleteConfirmation = async () => {
     await deleteHistory(coinDetails);
-    await deleteCoin(coinDetails.xpub, coinDetails.coin, walletId);
+    await deleteCoin(coinDetails.xpub, coinDetails.slug, walletId);
     tokenList.map(async token => {
-      await addressDb.deleteAll({ xpub: coinDetails.xpub, coinType: token });
-      await receiveAddressDb.deleteAll({ walletId, coinType: token });
-      await transactionDb.deleteByCoin(walletId, token);
+      await addressDb.delete({ coinType: token, walletId });
+      await receiveAddressDb.delete({ walletId, coinType: token });
+      await transactionDb.delete({ walletId, slug: token });
     });
-    await erc20tokenDb.deleteAll({
-      walletId: selectedWallet.walletId,
-      ethCoin: coinDetails.coin
+    await tokenDb.delete({
+      walletId: selectedWallet._id,
+      coin: coinDetails.slug
     });
     setDeleteOpen(false);
   };
@@ -266,19 +266,19 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
       navigate(
         `${
           Routes.transactions.index
-        }?coin=${initial.toLowerCase()}&wallet=${walletId}`
+        }?slug=${initial.toLowerCase()}&wallet=${walletId}`
       );
     }
   };
 
   useEffect(() => {
-    setCurrentWalletId(selectedWallet.walletId);
-    setCurrentEthCoin(coinDetails.coin);
-  }, [selectedWallet.walletId]);
+    setCurrentWalletId(selectedWallet._id);
+    setCurrentEthCoin(coinDetails.slug);
+  }, [selectedWallet._id]);
 
   useEffect(() => {
     setCollapseTab(false);
-  }, [selectedWallet.walletId]);
+  }, [selectedWallet._id]);
 
   const [openAddToken, setOpenAddToken] = useState(false);
 
@@ -424,19 +424,19 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
               <Grid item xs={12}>
                 <Collapse in={collapseTab} timeout="auto" unmountOnExit>
                   {tokenData.map(token => {
-                    const coin = COINS[token.coin];
-                    if (!coin) {
+                    const tokenData = COINS[token.slug];
+                    if (!tokenData) {
                       throw new Error(`Cannot find coinType: ${token.coin}`);
                     }
                     return (
-                      <React.Fragment key={token.coin}>
+                      <React.Fragment key={token.slug}>
                         <TokenContext.Provider value={{ token }}>
                           <OneToken
-                            initial={token.coin.toUpperCase()}
-                            name={coin.name}
+                            initial={token.slug.toUpperCase()}
+                            name={tokenData.name}
                             holding={token.displayBalance}
                             price={token.displayPrice}
-                            decimal={coin.decimal}
+                            decimal={tokenData.decimal}
                             value={token.displayValue}
                             isEmpty={token.isEmpty}
                             walletId={walletId}

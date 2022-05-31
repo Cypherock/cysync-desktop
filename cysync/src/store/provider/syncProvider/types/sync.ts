@@ -1,4 +1,4 @@
-import { Xpub } from '@cypherock/database';
+import { Coin } from '../../../../store/database/databaseInit';
 
 import { BalanceSyncItem } from './balanceSyncItem';
 import { HistorySyncItem } from './historySyncItem';
@@ -13,20 +13,20 @@ export type SyncQueueItem =
 
 export interface SyncProviderTypes {
   addToQueue: (item: SyncQueueItem) => void;
-  addHistorySyncItemFromXpub: (
-    xpub: Xpub,
+  addHistorySyncItemFromCoin: (
+    coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
-  addBalanceSyncItemFromXpub: (
-    xpub: Xpub,
+  addBalanceSyncItemFromCoin: (
+    coin: Coin,
     options: { token?: string; module?: string; isRefresh?: boolean }
   ) => void;
-  addPriceSyncItemFromXpub: (
-    xpub: Xpub,
+  addPriceSyncItemFromCoin: (
+    coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
-  addLatestPriceSyncItemFromXpub: (
-    xpub: Xpub,
+  addLatestPriceSyncItemFromCoin: (
+    coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
 }

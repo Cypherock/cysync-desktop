@@ -194,6 +194,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
       logger.error('CardAuth: Some error occurred.');
       logger.error(e);
       setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+      setCompleted(true);
       cardAuth.removeAllListeners();
     }
   };

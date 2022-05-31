@@ -1,4 +1,5 @@
 import {
+  createPort,
   DeviceConnection,
   DeviceError,
   DeviceErrorType
@@ -362,37 +363,38 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   // update is completed and there is a device connection
   const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const retries = React.useRef<number>(1);
-  const latestDeviceConnection = React.useRef<DeviceConnection | null>(null);
   const MAX_RETRIES = 3;
 
-  useEffect(() => {
-    latestDeviceConnection.current = deviceConnection;
-  }, [deviceConnection]);
-
   const initiateDeviceAuth = async () => {
+    let connection: DeviceConnection;
     try {
       logger.info('In Device update timeout');
 
-      if (!latestDeviceConnection.current) {
+      ({ connection } = await createPort());
+      if (!connection) {
         throw new Error('Device not connected');
       }
 
       logger.info('Initiating auth');
 
-      await latestDeviceConnection.current.beforeOperation();
-      await latestDeviceConnection.current.selectPacketVersion();
+      await connection.beforeOperation();
+      await connection.selectPacketVersion();
 
       handleDeviceAuth({
-        connection: latestDeviceConnection.current,
+        connection,
         sdkVersion: deviceSdkVersion,
         setIsInFlow: () => {
           // empty
         },
         firmwareVersion: latestVersion,
         setDeviceSerial,
-        inTestApp: inTestApp(latestDeviceConnection.current.deviceState)
+        inTestApp: inTestApp(connection.deviceState)
       });
     } catch (error) {
+      if (connection) {
+        connection.afterOperation().catch(logger.error);
+      }
+
       retries.current += 1;
 
       if (retries.current > MAX_RETRIES) {

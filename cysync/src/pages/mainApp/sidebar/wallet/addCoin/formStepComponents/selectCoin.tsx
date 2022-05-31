@@ -139,7 +139,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
         connection,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
-        walletId: selectedWallet.walletId,
+        walletId: selectedWallet._id,
         coinsFromGUI: coinsToAdd as any,
         pinExists: selectedWallet.passwordSet,
         passphraseExists: selectedWallet.passphraseSet,
@@ -198,7 +198,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
       connection,
       sdkVersion: deviceSdkVersion,
       setIsInFlow,
-      walletId: selectedWallet.walletId,
+      walletId: selectedWallet._id,
       coinsFromGUI: coins as any,
       pinExists: selectedWallet.passwordSet,
       passphraseExists: selectedWallet.passphraseSet

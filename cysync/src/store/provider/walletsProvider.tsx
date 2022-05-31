@@ -3,22 +3,15 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { erc20tokenDb, walletDb, xpubDb } from '../database';
+import { coinDb, tokenDb, Wallet, walletDb } from '../database';
 
 export interface Coin {
   name: string;
   abbr: string;
 }
 
-export interface WalletInfo {
-  walletId: string;
-  name: string;
-  passwordSet: boolean;
-  passphraseSet: boolean;
-}
-
 export interface WalletsContextInterface {
-  allWallets: WalletInfo[];
+  allWallets: Wallet[];
   allCoins: Coin[];
   getAll: () => void;
 }
@@ -27,10 +20,11 @@ export const WalletsContext: React.Context<WalletsContextInterface> =
   React.createContext<WalletsContextInterface>({} as WalletsContextInterface);
 
 export const WalletsProvider: React.FC = ({ children }) => {
-  const [allWallets, setAllWallets] = useState<WalletInfo[]>([
+  const [allWallets, setAllWallets] = useState<Wallet[]>([
     {
       // UI breaks if the list is empty, hence dummy empty wallet. WalletID is null specially for Portfolio, to differenciate between initial state (walletId is 'null') and no wallets (walletId is '')
-      walletId: 'null',
+      _id: 'null',
+      device: '',
       name: '',
       passwordSet: true,
       passphraseSet: false
@@ -48,7 +42,8 @@ export const WalletsProvider: React.FC = ({ children }) => {
       else {
         setAllWallets([
           {
-            walletId: '',
+            _id: '',
+            device: '',
             name: '',
             passwordSet: true,
             passphraseSet: false
@@ -60,15 +55,15 @@ export const WalletsProvider: React.FC = ({ children }) => {
     }
 
     try {
-      const xpubRes = await xpubDb.getAll();
-      const erc20Res = await erc20tokenDb.getAll();
+      const coins = await coinDb.getAll();
+      const erc20Res = await tokenDb.getAll();
       const coinTypeList = new Set<string>();
-      for (const xpub of xpubRes) {
-        coinTypeList.add(xpub.coin);
+      for (const coin of coins) {
+        coinTypeList.add(coin.slug);
       }
 
       for (const erc of erc20Res) {
-        coinTypeList.add(erc.coin);
+        coinTypeList.add(erc.slug);
       }
 
       const coinList: Coin[] = [];
@@ -105,11 +100,11 @@ export const WalletsProvider: React.FC = ({ children }) => {
     walletDb.emitter.on('update', onUpdate);
     walletDb.emitter.on('delete', onUpdate);
 
-    xpubDb.emitter.on('insert', onUpdate);
-    xpubDb.emitter.on('delete', onUpdate);
+    coinDb.emitter.on('insert', onUpdate);
+    coinDb.emitter.on('delete', onUpdate);
 
-    erc20tokenDb.emitter.on('insert', onUpdate);
-    erc20tokenDb.emitter.on('delete', onUpdate);
+    tokenDb.emitter.on('insert', onUpdate);
+    tokenDb.emitter.on('delete', onUpdate);
 
     return () => {
       logger.verbose('Removed all wallet & xpub DB listners.');
@@ -117,11 +112,11 @@ export const WalletsProvider: React.FC = ({ children }) => {
       walletDb.emitter.removeListener('update', onUpdate);
       walletDb.emitter.removeListener('delete', onUpdate);
 
-      xpubDb.emitter.removeListener('insert', onUpdate);
-      xpubDb.emitter.removeListener('delete', onUpdate);
+      coinDb.emitter.removeListener('insert', onUpdate);
+      coinDb.emitter.removeListener('delete', onUpdate);
 
-      erc20tokenDb.emitter.removeListener('insert', onUpdate);
-      erc20tokenDb.emitter.removeListener('delete', onUpdate);
+      tokenDb.emitter.removeListener('insert', onUpdate);
+      tokenDb.emitter.removeListener('delete', onUpdate);
     };
   }, []);
 

@@ -12,6 +12,7 @@ import BigNumber from 'bignumber.js';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AutoSizer, List } from 'react-virtualized';
+import { convertToDisplayValue } from '../../../../store/database';
 
 import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
@@ -122,7 +123,7 @@ const Transaction = () => {
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    const coin = query.get('coin');
+    const coin = query.get('slug');
     const walletId = query.get('wallet');
 
     if (coin) {
@@ -136,7 +137,7 @@ const Transaction = () => {
     }
 
     if (walletId) {
-      const index = allWallets.findIndex(elem => elem.walletId === walletId);
+      const index = allWallets.findIndex(elem => elem._id === walletId);
       if (index !== -1) {
         setCurrentWallet(walletId);
         setWalletIndex(index + 1);
@@ -200,7 +201,7 @@ const Transaction = () => {
   const handleWalletChange = (selectedIndex: number) => {
     setWalletIndex(selectedIndex);
     if (selectedIndex === 0) setCurrentWallet(undefined);
-    else setCurrentWallet(allWallets[selectedIndex - 1].walletId);
+    else setCurrentWallet(allWallets[selectedIndex - 1]._id);
   };
 
   const handleCoinChange = (selectedIndex: number) => {
@@ -218,10 +219,10 @@ const Transaction = () => {
           date={new Date(data.confirmed).toLocaleDateString()}
           time={new Date(data.confirmed).toLocaleTimeString()}
           walletName={data.walletName}
-          initial={data.coin.toUpperCase()}
+          initial={data.slug?.toUpperCase()}
           amount={data.displayAmount}
           value={new BigNumber(data.displayValue).toFixed(2)}
-          result={data.sentReceive}
+          result={convertToDisplayValue(data.sentReceive)}
           decimal={data.coinDecimal}
           address={data.hash}
           onShowMore={() => setShowTxn(data)}
@@ -387,8 +388,8 @@ const Transaction = () => {
                     confirmations: showTxn.confirmations,
                     walletId: showTxn.walletId,
                     walletName: showTxn.walletName,
+                    slug: showTxn.slug,
                     coin: showTxn.coin,
-                    ethCoin: showTxn.ethCoin,
                     status: showTxn.status,
                     sentReceive: showTxn.sentReceive,
                     confirmed: showTxn.confirmed,

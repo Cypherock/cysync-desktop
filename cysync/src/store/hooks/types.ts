@@ -1,20 +1,22 @@
-import {
-  ERC20Token,
-  InputOutput,
-  Transaction,
-  Xpub
-} from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 import PropTypes from 'prop-types';
 
-export interface DisplayCoin extends Xpub {
+import {
+  Coin,
+  InputOutput,
+  IOtype,
+  Token,
+  Transaction
+} from '../database/databaseInit';
+
+export interface DisplayCoin extends Coin {
   displayValue: string;
   displayPrice: string;
   displayBalance: string;
   isEmpty: boolean;
 }
 
-export interface DisplayToken extends ERC20Token {
+export interface DisplayToken extends Token {
   displayValue: string;
   displayPrice: string;
   displayBalance: string;
@@ -30,7 +32,8 @@ export const DisplayInputOutputPropTypes = {
   address: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   isMine: PropTypes.bool.isRequired,
-  index: PropTypes.number.isRequired
+  indexNumber: PropTypes.number.isRequired,
+  type: PropTypes.oneOf(Object.values(IOtype)).isRequired
 };
 
 export interface DisplayTransaction
@@ -54,8 +57,8 @@ export const DisplayTransactionPropTypes = {
   confirmations: PropTypes.number.isRequired,
   walletId: PropTypes.string.isRequired,
   walletName: PropTypes.string,
-  coin: PropTypes.string.isRequired,
-  ethCoin: PropTypes.string,
+  slug: PropTypes.string.isRequired,
+  coin: PropTypes.string,
   status: PropTypes.number.isRequired,
   sentReceive: PropTypes.any.isRequired,
   confirmed: PropTypes.any.isRequired,
