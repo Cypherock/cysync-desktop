@@ -4,7 +4,7 @@ import { Button, Typography } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { useSync } from '../../../store/provider';
 
@@ -36,28 +36,11 @@ export interface SyncStatusProps {
 const SyncStatus: React.FC<SyncStatusProps> = props => {
   const theme = useTheme();
   const { isSyncing, isWaitingForConnection, reSync } = useSync();
-  const [resyncAvailable, setResyncAvailable] = useState(isSyncing);
+  const resyncAvailable = true;
 
   const handleResync = () => {
     reSync();
-    setResyncAvailable(false);
   };
-
-  // Resync Button enabled after 15 minutes of last sync
-  const interval = React.useRef<NodeJS.Timeout | undefined>(undefined);
-  useEffect(() => {
-    if (!isSyncing && !resyncAvailable) {
-      interval.current = setTimeout(() => {
-        setResyncAvailable(true);
-      }, 1000 * 60 * 15);
-    }
-    return () => {
-      if (interval.current) {
-        clearTimeout(interval.current);
-        interval.current = undefined;
-      }
-    };
-  }, [isSyncing, resyncAvailable]);
 
   const getSyncIcon = () => {
     if (isSyncing && !isWaitingForConnection) {
