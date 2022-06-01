@@ -3,6 +3,7 @@ import { styled, Theme } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import withStyles from '@mui/styles/withStyles';
+import BigNumber from 'bignumber.js';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -125,11 +126,11 @@ const Input: React.FC<InputProps> = ({
     let isChanged = true;
     if (type === 'number') {
       if (min !== undefined) {
-        const minNum = Number(min);
-        const newVal = Number(event.target.value);
+        const minNum = new BigNumber(min);
+        const newVal = new BigNumber(event.target.value);
 
-        if (newVal < minNum) {
-          event.target.value = min;
+        if (newVal.lt(minNum)) {
+          event.target.value = minNum.toFixed();
         }
       }
 
@@ -146,11 +147,12 @@ const Input: React.FC<InputProps> = ({
         if (!isValid) {
           isChanged = false;
         } else {
+          const wholeNumber = new BigNumber(newValArr[0]).toFixed();
           if (newValArr.length > 1) {
-            event.target.value = `${Number(newValArr[0])}.${newValArr[1]}`;
+            event.target.value = `${wholeNumber}.${newValArr[1]}`;
           } else {
             if (newVal.length <= 0) event.target.value = '';
-            else event.target.value = `${Number(newValArr[0])}`;
+            else event.target.value = wholeNumber;
           }
         }
       }
