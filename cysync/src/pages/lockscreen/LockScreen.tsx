@@ -18,7 +18,7 @@ import CySync from '../../designSystem/iconGroups/cySync';
 import CySyncRound from '../../designSystem/iconGroups/cySyncRound';
 import ErrorExclamation from '../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../designSystem/iconGroups/iconConstants';
-import { passEnDb } from '../../store/database';
+import { initDatabases, passEnDb } from '../../store/database';
 import { FeedbackState, useFeedback } from '../../store/provider';
 import { generateSinglePasswordHash, verifyPassword } from '../../utils/auth';
 import { triggerClearData } from '../../utils/clearData';
@@ -137,6 +137,7 @@ const LockScreen = (props: any) => {
         error: ''
       });
       passEnDb.setPassHash(generateSinglePasswordHash(password));
+      await initDatabases();
       setIsLoading(false);
       props.handleClose();
     } else {

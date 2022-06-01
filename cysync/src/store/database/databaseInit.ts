@@ -26,3 +26,7 @@ export const notificationDb = new NotificationDB();
 export const priceHistoryDb = new PriceHistoryDB();
 
 export * from '@cypherock/database';
+
+export const initDatabases = async () => {
+  await transactionDb.intialise();
+};
