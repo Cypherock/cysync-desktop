@@ -18,7 +18,11 @@ import IconButton from '../../../../designSystem/designComponents/buttons/custom
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
-import { getLatestPriceForCoin, SentReceive } from '../../../../store/database';
+import {
+  convertToDisplayValue,
+  getLatestPriceForCoin,
+  SentReceive
+} from '../../../../store/database';
 import {
   DisplayTransaction,
   DisplayTransactionPropTypes
@@ -233,7 +237,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           variant="body2"
         >
           {getResultIcon()}
-          {txn.sentReceive}
+          {convertToDisplayValue(txn.sentReceive).toUpperCase()}
         </Typography>
       </div>
       <div className={classes.dataContainer}>
