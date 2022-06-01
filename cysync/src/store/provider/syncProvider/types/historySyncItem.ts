@@ -74,6 +74,8 @@ export class HistorySyncItem extends SyncItem {
       isRefresh: this.isRefresh
     });
 
+    newItem.retries = this.retries;
+
     return newItem;
   }
 }
