@@ -271,7 +271,7 @@ export const processResponses = async (
             amount = String(getEthAmountFromInput(ele.input));
           }
 
-          txn.coin = token.abbr;
+          txn.slug = token.abbr;
           txn.amount = amount;
 
           // Even if the token transaction failed, the transaction fee is still deducted.

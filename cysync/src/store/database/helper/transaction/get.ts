@@ -39,17 +39,17 @@ export const getAllTxns = async (
   if (options) {
     if (options.excludeFees) {
       delete options.excludeFees;
-      andQuery.push({ $not: { sentReceive: 'FEES' } });
+      andQuery.push({ $not: { sentReceive: SentReceive.FEES } });
     }
 
     if (options.excludeFailed) {
       delete options.excludeFailed;
-      andQuery.push({ $not: { status: 2 } });
+      andQuery.push({ $not: { status: Status.FAILURE } });
     }
 
     if (options.excludePending) {
       delete options.excludePending;
-      andQuery.push({ $not: { status: 0 } });
+      andQuery.push({ $not: { status: Status.PENDING } });
     }
 
     if (options.sinceDate) {
@@ -67,7 +67,9 @@ export const getAllTxns = async (
   if (sorting?.field) innerQuery[sorting.field] = { $gte: null };
 
   if (andQuery.length > 0) {
-    andQuery.push({ ...innerQuery });
+    for (const queryKey of Object.keys(innerQuery)) {
+      andQuery.push({ [queryKey]: innerQuery[queryKey] });
+    }
     dbQuery.$and = andQuery;
   } else {
     dbQuery = { ...innerQuery };
