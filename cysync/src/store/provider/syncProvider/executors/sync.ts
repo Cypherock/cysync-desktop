@@ -111,7 +111,7 @@ const getAllProcessResponses = async (
         if (res.isFailed) {
           // If the error is anything other than network error, no need to retry
           canRetry = true;
-          throw new Error(res.data);
+          throw new Error(JSON.stringify(res.data));
         }
       }
 

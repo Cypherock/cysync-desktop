@@ -54,6 +54,8 @@ export class BalanceSyncItem extends SyncItem {
       isRefresh: this.isRefresh
     });
 
+    newItem.retries = this.retries;
+
     return newItem;
   }
 }
