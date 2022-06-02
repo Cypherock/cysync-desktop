@@ -235,7 +235,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   >([]);
 
   // State Maintaining the Total of all
-  const [total, setTotal] = React.useState(0);
+  const [total, setTotal] = React.useState(new BigNumber(0));
 
   // Set a constant fee default value for each coin in case the api call fails. Regularly update the file.
   const [transactionFee, setTransactionFee] = React.useState('75');
@@ -246,15 +246,15 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   // Change the total according to the current state
   const handleTotal = () => {
     if (maxSend) {
-      setTotal(sendTransaction.sendMaxAmount);
+      setTotal(new BigNumber(sendTransaction.sendMaxAmount));
     } else {
-      let tempTotal = +0;
+      let tempTotal = new BigNumber(0);
       batchRecipientData.forEach(recipient => {
         if (recipient.amount) {
-          tempTotal = +tempTotal + +recipient.amount;
+          tempTotal = tempTotal.plus(new BigNumber(recipient.amount));
         }
       });
-      setTotal(tempTotal);
+      setTotal(new BigNumber(tempTotal));
     }
   };
 
