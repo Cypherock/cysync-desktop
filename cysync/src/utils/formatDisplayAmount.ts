@@ -10,11 +10,16 @@ import BigNumber from 'bignumber.js';
  * - Uses toPrecision or toFixed to round off
  */
 const formatDisplayAmount = (
-  amount: string | number,
+  amount: string | number | BigNumber,
   precision = 8,
   isFixed = false
 ) => {
-  if (amount === '0' || amount === 0) return '0';
+  if (
+    amount === '0' ||
+    amount === 0 ||
+    (typeof amount === 'object' && amount.toFixed() === '0')
+  )
+    return '0';
 
   let amountStr: string;
 

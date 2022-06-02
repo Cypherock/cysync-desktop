@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import PropTypes from 'prop-types';
 
 export interface BatchRecipientData {
@@ -29,7 +30,7 @@ export interface StepComponentProps {
   activeButton: number;
   feeType: boolean;
   batchRecipientData: BatchRecipientData[];
-  total: number;
+  total: BigNumber;
   transactionFee: string;
   addBatchTransaction: () => void;
   handleDelete: (e: any) => void;
@@ -68,7 +69,7 @@ export const StepComponentPropTypes = {
   feeType: PropTypes.bool.isRequired,
   batchRecipientData: PropTypes.arrayOf(PropTypes.exact(BatchRecipientPropType))
     .isRequired,
-  total: PropTypes.number.isRequired,
+  total: PropTypes.instanceOf(BigNumber).isRequired,
   transactionFee: PropTypes.string.isRequired,
   addBatchTransaction: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
