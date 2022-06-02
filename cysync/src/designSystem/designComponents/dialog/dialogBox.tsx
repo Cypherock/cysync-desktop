@@ -89,17 +89,28 @@ const DialogBox: React.FC<Props> = ({
   disableBackdropClick,
   ...rest
 }: Props) => {
+  const onClose: DialogProps['onClose'] = (_event, reason) => {
+    if (reason === 'backdropClick' && !disableBackdropClick) {
+      handleClose();
+      return;
+    }
+
+    if (reason === 'escapeKeyDown' && !rest.disableEscapeKeyDown) {
+      handleClose();
+      return;
+    }
+  };
+
   return (
     <Root
       fullWidth={fullWidth}
       maxWidth={maxWidth}
       open={open}
       scroll="body"
-      onClose={handleClose}
+      onClose={onClose}
       TransitionComponent={TransitionComponent}
       fullScreen={fullScreen}
       className={classes.root}
-      onBackdropClick={disableBackdropClick ? null : handleClose}
       {...rest}
     >
       <div
