@@ -29,4 +29,12 @@ export * from '@cypherock/database';
 
 export const initDatabases = async () => {
   await transactionDb.intialise();
+  await notificationDb.intialise();
+  await priceHistoryDb.intialise();
+  await deviceDb.intialise();
+  await walletDb.intialise();
+  await coinDb.intialise();
+  await tokenDb.intialise();
+  await addressDb.intialise();
+  await receiveAddressDb.intialise();
 };
