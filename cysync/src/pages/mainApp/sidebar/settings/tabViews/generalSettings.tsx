@@ -163,12 +163,13 @@ const GeneralSettings = () => {
             <SwitchButton
               disabled
               name="toggleAutoLock"
-              completed={autoLock}
+              completed={false}
               handleChange={handleAutoLockToggle}
             />
           </span>
         </Tooltip>
-      )
+      ),
+      disabled: !previousSetPassword
     },
     {
       name: 'Clear Data',
@@ -278,7 +279,7 @@ const GeneralSettings = () => {
           {ListData.map(item => {
             return (
               <div key={item.name}>
-                <ListItem>
+                <ListItem disabled={item.disabled}>
                   <ListItemText
                     className={classes.listItem}
                     primary={item.name}
