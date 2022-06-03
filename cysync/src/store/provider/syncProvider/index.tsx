@@ -584,10 +584,10 @@ export const SyncProvider: React.FC = ({ children }) => {
   const reSync = async () => {
     logger.info('Sync: ReSyncing items');
 
-    await addBalanceRefresh({ isRefresh: true });
-    await addHistoryRefresh({ isRefresh: true });
-    await addPriceRefresh({ isRefresh: true });
-    await addLatestPriceRefresh({ isRefresh: true });
+    await addBalanceRefresh({});
+    await addHistoryRefresh({});
+    await addPriceRefresh({});
+    await addLatestPriceRefresh({});
     await notifications.updateLatest();
   };
 
