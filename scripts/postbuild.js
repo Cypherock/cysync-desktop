@@ -65,6 +65,13 @@ const getGithubRepo = async () => {
   return config.GITHUB_REPO;
 };
 
+const getBuildVersion = async () => {
+  const configPath = path.join(__dirname, "..", "cysync", "src", "config.json");
+  const config = JSON.parse(fs.readFileSync(configPath));
+
+  return config.BUILD_VERSION;
+};
+
 const getReleaseName = (version) => {
   return `v${version}`;
 };
@@ -73,7 +80,7 @@ const getReleaseName = (version) => {
  * Updating a file intentionally to add a new commit every time a new version is
  * released.
  */
-const updateReleaseFile = async ({ releaseName, githubRepo }) => {
+const updateReleaseFile = async ({ releaseName, githubRepo, version }) => {
   let previousFileContent = "";
   let sha = "";
 
@@ -96,8 +103,7 @@ const updateReleaseFile = async ({ releaseName, githubRepo }) => {
     }
   }
 
-  let fileContent = `${previousFileContent}\n${releaseName}`;
-  fileContent = fileContent.trim();
+  let fileContent = `${version}`;
 
   const postData = {
     content: Buffer.from(fileContent, "utf-8").toString("base64"),
@@ -118,9 +124,11 @@ const updateReleaseFile = async ({ releaseName, githubRepo }) => {
 const createRelease = async ({ version, githubRepo, tagName, buildType }) => {
   const releaseName = getReleaseName(version);
 
+  const buildVersion = await getBuildVersion();
   const postData = {
     tag_name: releaseName,
     name: releaseName,
+    body: `Build Version: ${buildVersion}`,
   };
 
   if (["prod", "rc"].includes(buildType)) {
@@ -130,7 +138,11 @@ const createRelease = async ({ version, githubRepo, tagName, buildType }) => {
 
   // Only add releases file to non prod repos
   if (buildType !== "prod") {
-    await updateReleaseFile({ releaseName: postData.name, githubRepo });
+    await updateReleaseFile({
+      releaseName: postData.name,
+      githubRepo,
+      version,
+    });
   }
 
   const resp = await axios.post(

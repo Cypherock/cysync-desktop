@@ -24,6 +24,11 @@ const validateJsonConfig = () => {
     throw new Error('Invalid SERVER_ENV in json config');
   }
 
+  // Build version is just the commit hash
+  if (!jsonConfig.BUILD_VERSION) {
+    throw new Error('No BUILD_VERSION in json config');
+  }
+
   // When you want to enable production features on development (`yarn start`)
   if (typeof jsonConfig.SIMULATE_PRODUCTION !== 'boolean') {
     throw new Error('Invalid SIMULATE_PRODUCTION in json config');
@@ -58,6 +63,7 @@ const setConfig = () => {
   process.env.BUILD_TYPE = jsonConfig.BUILD_TYPE;
   process.env.SERVER_ENV = jsonConfig.SERVER_ENV;
   process.env.GITHUB_REPO = jsonConfig.GITHUB_REPO;
+  process.env.BUILD_VERSION = jsonConfig.BUILD_VERSION;
 
   if (process.env.NODE_ENV === 'production') {
     process.env.IS_PRODUCTION = 'true';
