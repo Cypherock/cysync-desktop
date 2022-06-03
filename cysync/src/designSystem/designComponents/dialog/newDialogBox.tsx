@@ -134,6 +134,7 @@ const CustomizedDialog: React.FC<CustomizedDialogsProps> = ({
       style={{
         maxWidth: 'auto'
       }}
+      onBackdropClick={null}
     >
       {heading && (
         <DialogTitle id="customized-dialog-title" onClose={handleClose}>

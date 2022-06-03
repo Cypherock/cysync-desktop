@@ -105,6 +105,7 @@
     "multicoin-address-validator": "^0.5.8",
     "nock": "^13.2.4",
     "node-cache": "^5.1.2",
+    "pouchdb-adapter-memory": "^7.3.0",
     "prop-types": "^15.8.1",
     "public-ip": "^5.0.0",
     "qrcode": "^1.5.0",
