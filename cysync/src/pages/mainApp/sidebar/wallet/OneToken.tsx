@@ -177,7 +177,7 @@ const OneToken: React.FC<OneTokenProps> = ({
   };
 
   const handleDeleteConfirmation = async () => {
-    tokenDb.delete({
+    await tokenDb.delete({
       walletId,
       slug: initial.toLowerCase(),
       coin: ethCoin.toLowerCase()
