@@ -370,7 +370,7 @@ export const insertFromBlockbookTxn = async (transaction: {
     const existingTxns = await transactionDb.getAll({
       hash: txn.txid,
       walletId,
-      coin: coinType
+      slug: coinType
     });
 
     if (existingTxns && existingTxns.length > 0) {
