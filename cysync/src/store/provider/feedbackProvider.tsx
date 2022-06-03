@@ -306,7 +306,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     if (feedbackInput.email.trim().length === 0) {
       checkArray.push(true);
     } else {
-      checkArray.push(false);
+      const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+      checkArray.push(!feedbackInput.email.trim().match(emailPattern));
     }
 
     if (feedbackInput.description.trim().length === 0) {
