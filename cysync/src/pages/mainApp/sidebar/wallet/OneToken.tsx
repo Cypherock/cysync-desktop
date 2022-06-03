@@ -176,13 +176,12 @@ const OneToken: React.FC<OneTokenProps> = ({
     setDeleteOpen(false);
   };
 
-  const handleDeleteConfirmation = () => {
+  const handleDeleteConfirmation = async () => {
     tokenDb.delete({
       walletId,
       slug: initial.toLowerCase(),
       coin: ethCoin.toLowerCase()
     });
-    setDeleteOpen(false);
   };
 
   return (

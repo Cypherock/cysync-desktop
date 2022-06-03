@@ -238,7 +238,6 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
       walletId: selectedWallet._id,
       coin: coinDetails.slug
     });
-    setDeleteOpen(false);
   };
 
   const [sendForm, setSendForm] = useState(false);
