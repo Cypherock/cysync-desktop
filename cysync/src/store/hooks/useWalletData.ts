@@ -192,7 +192,7 @@ export const useWalletData: UseWalletData = () => {
     await addressDb.delete({ walletId, coinType: coin });
     await receiveAddressDb.delete({ walletId, coinType: coin });
     await coinDb.delete({ xpub, slug: coin });
-    return getAllCoinsFromWallet();
+    refreshCoinsDebounced();
   };
 
   const onDBChange = () => {
@@ -200,6 +200,7 @@ export const useWalletData: UseWalletData = () => {
   };
 
   const onChange = useDebouncedFunction(onDBChange, 800);
+  const refreshCoinsDebounced = useDebouncedFunction(getAllCoinsFromWallet, 10);
 
   useEffect(() => {
     priceHistoryDb.emitter.on('insert', onChange);
@@ -226,7 +227,7 @@ export const useWalletData: UseWalletData = () => {
   useEffect(() => {
     if (doRefresh) {
       setDoRefresh(false);
-      getAllCoinsFromWallet();
+      refreshCoinsDebounced();
     }
   }, [doRefresh]);
 
