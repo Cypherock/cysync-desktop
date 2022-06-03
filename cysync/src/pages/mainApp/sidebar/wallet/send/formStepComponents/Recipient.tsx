@@ -8,6 +8,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
+import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
@@ -666,7 +667,13 @@ const Recipient: React.FC<StepComponentProps> = props => {
           />
           <Typography className={amountUSD}>
             {' '}
-            ~( ${formatDisplayAmount(total * parseFloat(coinPrice), 2, true)})
+            ~( $
+            {formatDisplayAmount(
+              total.multipliedBy(new BigNumber(coinPrice)),
+              2,
+              true
+            )}
+            )
           </Typography>
           {isEthereum && (
             <div style={{ marginTop: '10px' }}>
@@ -811,7 +818,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               {token
                 ? `${formatDisplayAmount(total)} `
                 : `${formatDisplayAmount(
-                    total + sendTransaction.approxTotalFee
+                    total.plus(new BigNumber(sendTransaction.approxTotalFee))
                   )} `}
               <span className="amountCurrency">
                 {coinAbbr.toUpperCase()}
@@ -820,13 +827,14 @@ const Recipient: React.FC<StepComponentProps> = props => {
               <span style={{ fontSize: '1rem' }}>
                 {token
                   ? `(~ $${formatDisplayAmount(
-                      total * parseFloat(token.displayPrice),
+                      total.multipliedBy(new BigNumber(token.displayPrice)),
                       2,
                       true
                     )})`
                   : `(~ $${formatDisplayAmount(
-                      (total + sendTransaction.approxTotalFee) *
-                        parseFloat(coinDetails.displayPrice),
+                      total
+                        .plus(new BigNumber(sendTransaction.approxTotalFee))
+                        .multipliedBy(new BigNumber(coinDetails.displayPrice)),
                       2,
                       true
                     )})`}

@@ -49,7 +49,7 @@ const Donut: React.FC<chartProps> = ({
       pie: {
         customScale: 0.85,
         dataLabels: {
-          offset: 25,
+          offset: 30,
           minAngleToShowLabel: 30
         },
         donut: {

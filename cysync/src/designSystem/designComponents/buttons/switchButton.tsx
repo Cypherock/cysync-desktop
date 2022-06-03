@@ -60,6 +60,9 @@ const IOSSwitch = styled(Switch)(({ theme }) => ({
   },
   '&.Mui-checked': {
     padding: 0
+  },
+  '& .Mui-disabled .MuiSwitch-thumb': {
+    opacity: 0.3
   }
 }));
 

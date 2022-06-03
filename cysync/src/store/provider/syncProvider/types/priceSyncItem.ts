@@ -31,6 +31,8 @@ export class PriceSyncItem extends SyncItem {
       module: this.module
     });
 
+    newItem.retries = this.retries;
+
     return newItem;
   }
 }

@@ -44,10 +44,7 @@ const InternetStatus = () => {
         connected !== false ? classes.hide : classes.show
       }`}
     >
-      <Typography>
-        No internet connection. Please connect to the internet for better
-        experience.
-      </Typography>
+      <Typography>Please check your internet connection.</Typography>
     </Root>
   );
 };
