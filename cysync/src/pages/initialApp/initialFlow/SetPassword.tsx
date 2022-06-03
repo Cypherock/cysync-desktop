@@ -246,6 +246,7 @@ const SetPassword: React.FC<SetPasswordProps> = ({
               value={values.password}
               placeholder="New Password"
               onChange={handleChange('password')}
+              onKeyDown={handleKeyPress}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
