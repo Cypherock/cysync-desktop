@@ -30,6 +30,7 @@ const AddCoin: React.FC<AddCoinProps> = ({ handleClose, coinsPresent }) => {
     coinAdder,
     isXpubMissing,
     isAddCoinLoading,
+    activeStep,
     setIsAddCoinLoading
   } = useAddCoinContext();
 
@@ -62,7 +63,9 @@ const AddCoin: React.FC<AddCoinProps> = ({ handleClose, coinsPresent }) => {
       maxWidth="sm"
       open={addCoinFormOpen}
       handleClose={() => handleClose(true)}
-      dialogHeading={isXpubMissing ? 'Configure Wallet' : 'Add Coin'}
+      dialogHeading={
+        isXpubMissing ? 'Configure Wallet' : activeStep === 4 ? '' : 'Add Coin'
+      }
       disableBackdropClick
       disableEscapeKeyDown={isAddCoinLoading}
       isClosePresent={!isAddCoinLoading}

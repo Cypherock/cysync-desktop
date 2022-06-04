@@ -163,7 +163,7 @@ export const usePortfolio: UsePortfolio = () => {
       transactionHistory = await getAllTxns(
         {
           walletId: wallet,
-          coin: coinType
+          slug: coinType
         },
         {
           excludeFailed: true,
@@ -193,7 +193,7 @@ export const usePortfolio: UsePortfolio = () => {
 
       transactionHistory = await getAllTxns(
         {
-          coin: coinType
+          slug: coinType
         },
         {
           excludeFailed: true,

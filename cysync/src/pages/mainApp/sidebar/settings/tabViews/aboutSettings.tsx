@@ -77,9 +77,28 @@ const AboutSettings = () => {
       name: 'Version',
       secondaryText: '',
       element: (
-        <Typography variant="body1" color="textPrimary">
-          {packageJson.version}
-        </Typography>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end'
+          }}
+        >
+          <Typography
+            style={{ textAlign: 'right' }}
+            variant="body1"
+            color="textPrimary"
+          >
+            {packageJson.version}
+          </Typography>
+          <Typography
+            style={{ textAlign: 'right' }}
+            variant="caption"
+            color="textSecondary"
+          >
+            Build Version: {process.env.BUILD_VERSION}
+          </Typography>
+        </div>
       )
     },
     {

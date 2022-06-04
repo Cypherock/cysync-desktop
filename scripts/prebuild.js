@@ -1,10 +1,16 @@
+const axios = require("axios");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
 const childProcess = require("child_process");
 
+const GITHUB_BASE_API = "https://api.github.com";
+const GITHUB_ACCESS_TOKEN = process.env.GH_ACCESS_TOKEN;
+
 const BRANCH_OR_TAG = process.env.GITHUB_REF_TYPE;
 const BRANCH_OR_TAG_NAME = process.env.GITHUB_REF_NAME;
+
+const RELEASE_FILE_NAME = "RELEASES.txt";
 
 const BUILD_TYPE_CONFIG = {
   dev: {
@@ -60,11 +66,75 @@ const getArgs = () => {
   return { buildType, tagName: name };
 };
 
-const setConfig = (buildType) => {
+// Gets the previos version and determines the next index
+const getReleaseIndex = async ({ githubRepo }) => {
+  let previousFileContent = "";
+
+  const packageJsonPath = path.join(__dirname, "..", "cysync", "package.json");
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath));
+
+  try {
+    const fileContentResp = await axios.get(
+      `${GITHUB_BASE_API}/repos/${githubRepo}/contents/${RELEASE_FILE_NAME}`,
+      { headers: { Authorization: `token ${GITHUB_ACCESS_TOKEN}` } }
+    );
+
+    if (!fileContentResp?.data?.content) {
+      throw new Error("Cannot find file content");
+    }
+    previousFileContent = Buffer.from(fileContentResp.data.content, "base64")
+      .toString()
+      .trim();
+    sha = fileContentResp.data.sha;
+  } catch (error) {
+    if (error?.response?.status !== 404) {
+      throw error;
+    }
+  }
+
+  let currentIndex = 1;
+
+  if (previousFileContent) {
+    const contentArr = previousFileContent.split("\n");
+    if (contentArr.length > 0) {
+      const version = contentArr[0];
+      const versionArr = version.split("-");
+      if (versionArr.length !== 2) {
+        throw new Error("Invalid version " + version);
+      }
+
+      const baseVersion = versionArr[0];
+      if (versionArr[1].split(".").length !== 2) {
+        throw new Error("Invalid version " + version);
+      }
+
+      if (baseVersion === packageJson.version) {
+        const index = versionArr[1].split(".")[1].trim();
+        if (!index || isNaN(index)) {
+          throw new Error("Invalid version " + version);
+        }
+
+        currentIndex = parseInt(index, 10) + 1;
+      }
+    }
+  }
+
+  return currentIndex;
+};
+
+const setConfig = async (buildType) => {
   const configPath = path.join(__dirname, "..", "cysync", "src", "config.json");
+  const commitHash = await getCommitHash();
   fs.writeFileSync(
     configPath,
-    JSON.stringify(BUILD_TYPE_CONFIG[buildType], undefined, 2) + os.EOL
+    JSON.stringify(
+      {
+        ...BUILD_TYPE_CONFIG[buildType],
+        BUILD_VERSION: commitHash.slice(0, 7),
+      },
+      undefined,
+      2
+    ) + os.EOL
   );
 };
 
@@ -109,18 +179,23 @@ const setVersion = async (buildType, tagName) => {
   }
 
   const usableVersion = usableVersionArr.join(".");
-  const commitHash = await getCommitHash();
+
+  const index = ["dev", "debug"].includes(buildType)
+    ? await getReleaseIndex({
+        githubRepo: BUILD_TYPE_CONFIG[buildType].GITHUB_REPO,
+      })
+    : 1;
 
   switch (buildType) {
     case "dev":
-      packageJson.version = `${usableVersion}-dev.${commitHash.slice(0, 6)}`;
+      packageJson.version = `${usableVersion}-dev.${index}`;
       break;
     case "debug":
-      packageJson.version = `${usableVersion}-debug.${commitHash.slice(0, 6)}`;
+      packageJson.version = `${usableVersion}-debug.${index}`;
       break;
     case "rc":
       let newName = tagName;
-      if (newName.startsWith('v')) {
+      if (newName.startsWith("v")) {
         newName = newName.slice(1);
       }
       packageJson.version = newName;
@@ -135,25 +210,35 @@ const setVersion = async (buildType, tagName) => {
 
 const setDependencies = () => {
   if (process.platform === "darwin") {
-    const packageJsonPath = path.join(__dirname, "..", "cysync", "package.json");
+    const packageJsonPath = path.join(
+      __dirname,
+      "..",
+      "cysync",
+      "package.json"
+    );
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath));
 
     if (packageJson.hasOwnProperty("resolutions")) {
-      packageJson.resolutions["**/@electron-forge/maker-dmg/electron-installer-dmg/appdmg"] = "^0.6.4";
+      packageJson.resolutions[
+        "**/@electron-forge/maker-dmg/electron-installer-dmg/appdmg"
+      ] = "^0.6.4";
     } else {
       packageJson.resolutions = {
-        "**/@electron-forge/maker-dmg/electron-installer-dmg/appdmg": "^0.6.4"
+        "**/@electron-forge/maker-dmg/electron-installer-dmg/appdmg": "^0.6.4",
       };
     }
 
-    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, undefined, 2) + os.EOL);
+    fs.writeFileSync(
+      packageJsonPath,
+      JSON.stringify(packageJson, undefined, 2) + os.EOL
+    );
   }
-}
+};
 
 const run = async () => {
   try {
     const { buildType, tagName } = getArgs();
-    setConfig(buildType);
+    await setConfig(buildType);
     await setVersion(buildType, tagName);
     setDependencies();
   } catch (error) {
