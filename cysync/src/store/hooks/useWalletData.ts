@@ -17,7 +17,6 @@ import { useDebouncedFunction } from './useDebounce';
 export interface UseWalletDataValues {
   coinData: DisplayCoin[];
   setCoinData: React.Dispatch<React.SetStateAction<DisplayCoin[]>>;
-  insert: (coin: Coin) => Promise<void>;
   coinsPresent: string[];
   deleteCoinByXpub: (
     xpub: string,
@@ -46,9 +45,9 @@ export const useWalletData: UseWalletData = () => {
   // Using doRefresh mechanish because hooks state change do not work with event listeners.
   const [doRefresh, setDoRefresh] = useState(false);
 
-  const insert = (coin: Coin) => {
-    coinDb.insert(coin);
-  };
+  // const insert = (coin: Coin) => {
+  //   coinDb.insert(coin);
+  // };
 
   const getCoinsWithPrices = async (coins: Coin[]) => {
     const mappedCoins: DisplayCoin[] = [];
@@ -238,7 +237,6 @@ export const useWalletData: UseWalletData = () => {
   return {
     coinData,
     setCoinData,
-    insert,
     coinsPresent,
     deleteCoinByXpub,
     setCurrentWalletId,
