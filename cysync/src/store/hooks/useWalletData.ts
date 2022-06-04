@@ -45,10 +45,6 @@ export const useWalletData: UseWalletData = () => {
   // Using doRefresh mechanish because hooks state change do not work with event listeners.
   const [doRefresh, setDoRefresh] = useState(false);
 
-  // const insert = (coin: Coin) => {
-  //   coinDb.insert(coin);
-  // };
-
   const getCoinsWithPrices = async (coins: Coin[]) => {
     const mappedCoins: DisplayCoin[] = [];
 
