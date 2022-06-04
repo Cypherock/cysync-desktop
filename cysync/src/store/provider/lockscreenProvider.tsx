@@ -9,6 +9,7 @@ import {
   removePassword
 } from '../../utils/auth';
 import { getAutoLock } from '../../utils/autolock';
+import { initDatabases } from '../database';
 
 export interface LockscreenContextInterface {
   lockscreen: boolean;
@@ -94,8 +95,10 @@ export const LockscreenProvider: React.FC = ({ children }) => {
     } else {
       setLockScreen(hasPassword);
     }
-    setLockscreenLoading(false);
-    setIsPasswordSet(hasPassword);
+    initDatabases().then(() => {
+      setLockscreenLoading(false);
+      setIsPasswordSet(hasPassword);
+    });
   }, []);
 
   const handleLockScreenClose = () => {

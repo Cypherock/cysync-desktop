@@ -222,7 +222,7 @@ const Transaction = () => {
           initial={data.slug?.toUpperCase()}
           amount={data.displayAmount}
           value={new BigNumber(data.displayValue).toFixed(2)}
-          result={convertToDisplayValue(data.sentReceive)}
+          result={convertToDisplayValue(data.sentReceive).toUpperCase()}
           decimal={data.coinDecimal}
           address={data.hash}
           onShowMore={() => setShowTxn(data)}

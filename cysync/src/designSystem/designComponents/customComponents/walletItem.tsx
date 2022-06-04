@@ -147,7 +147,6 @@ const WalletItem = (props: WalletItemProps) => {
       const {
         walletDetails: { _id: walletId }
       } = props;
-      await walletDb.deleteById(walletId);
       await addressDb.delete({ walletId });
       await receiveAddressDb.delete({
         walletId
@@ -155,9 +154,8 @@ const WalletItem = (props: WalletItemProps) => {
       await coinDb.delete({ walletId });
       await tokenDb.delete({ walletId });
       await transactionDb.delete({ walletId });
+      await walletDb.deleteById(walletId);
       navigate(Routes.wallet.index);
-      setDeleteOpen(false);
-      handleClose();
     } catch (error) {
       logger.error(error);
     }

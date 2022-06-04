@@ -1,4 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
+import { CircularProgress } from '@mui/material';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import MuiDialogActions from '@mui/material/DialogActions';
@@ -100,7 +101,7 @@ type CustomizedDialogsProps = {
   open: boolean;
   handleClose: () => any;
   heading?: string;
-  onYes: () => any;
+  onYes: () => Promise<any>;
   children: any;
 };
 
@@ -111,6 +112,19 @@ const CustomizedDialog: React.FC<CustomizedDialogsProps> = ({
   children,
   onYes
 }) => {
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleYes = async () => {
+    setIsLoading(true);
+    await onYes();
+    handleClose();
+  };
+
+  React.useEffect(() => {
+    return () => {
+      setIsLoading(false);
+    };
+  }, []);
   return (
     <Dialog
       onClose={handleClose}
@@ -120,6 +134,7 @@ const CustomizedDialog: React.FC<CustomizedDialogsProps> = ({
       style={{
         maxWidth: 'auto'
       }}
+      onBackdropClick={null}
     >
       {heading && (
         <DialogTitle id="customized-dialog-title" onClose={handleClose}>
@@ -131,8 +146,8 @@ const CustomizedDialog: React.FC<CustomizedDialogsProps> = ({
         <NoButton onClick={handleClose} id="newDialogNo">
           No
         </NoButton>
-        <YesButton onClick={onYes} variant="contained" id="newDialogYes">
-          Yes
+        <YesButton onClick={handleYes} variant="contained" id="newDialogYes">
+          {isLoading ? <CircularProgress size={20} color="secondary" /> : 'Yes'}
         </YesButton>
       </DialogActions>
     </Dialog>
