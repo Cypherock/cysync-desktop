@@ -95,6 +95,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   const [updateRequiredType, setUpdateRequiredType] =
     useState<UpdateRequiredType>(undefined);
   const [deviceConnectionStatus, setDeviceConnectionStatus] = useState(false);
+  const deviceConnectionStatusRef = useRef(false);
 
   // When the device is first connected, the internalDeviceConnection variable is set.
   // After that, some internal flow starts which decides if the device should be connected or not.
@@ -151,7 +152,12 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   }, []);
 
   const checkIfIncomplete = () => {
-    if (internalDeviceConnection && deviceState && !blockNewConnection) {
+    if (
+      internalDeviceConnection &&
+      deviceState &&
+      !blockNewConnection &&
+      deviceConnectionStatusRef.current
+    ) {
       setFirmwareVersion(undefined);
       setInBackgroundProcess(true);
       setDeviceSerial(null);
@@ -195,6 +201,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   );
 
   useEffect(() => {
+    deviceConnectionStatusRef.current = deviceConnectionStatus;
     if (deviceConnectionStatus && !internalDeviceConnection) {
       setIsDeviceNotReady(false);
       createPort()
