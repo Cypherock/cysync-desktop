@@ -160,6 +160,8 @@ export const insertFromFullTxn = async (transaction: {
     } else {
       sentReceive = SentReceive.SENT;
       totalValue = totalValue.plus(new BigNumber(txn.fees));
+      // In case of a self transaction
+      if (totalValue.isEqualTo(0)) totalValue = new BigNumber(txn.valueIn);
     }
 
     const newTxn: Transaction = {
