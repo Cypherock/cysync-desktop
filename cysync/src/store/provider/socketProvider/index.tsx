@@ -273,11 +273,11 @@ export const SocketProvider: React.FC = ({ children }) => {
       currentSocket.on('receivedTransaction', async (payload: any) => {
         try {
           logger.info('Received receive txn hook', { payload });
-          if (payload && payload.id && payload.coinType) {
-            const wallet = await walletDb.getById(payload.id);
+          if (payload && payload.walletId && payload.coinType) {
+            const wallet = await walletDb.getById(payload.walletId);
             if (wallet) {
               const coin = await coinDb.getOne({
-                walletId: payload.id,
+                walletId: payload.walletId,
                 slug: payload.coinType
               });
 
@@ -286,7 +286,7 @@ export const SocketProvider: React.FC = ({ children }) => {
                   txn: payload,
                   xpub: coin.xpub,
                   addresses: [],
-                  walletId: payload.id,
+                  walletId: payload.walletId,
                   coinType: payload.coinType,
                   addressDB: addressDb
                 });
@@ -364,9 +364,9 @@ export const SocketProvider: React.FC = ({ children }) => {
               deleteAllPortfolioCache();
 
               // Update balance when confirmed
-              if (payload.id) {
+              if (payload.walletId) {
                 const xpub = await coinDb.getOne({
-                  walletId: payload.id,
+                  walletId: payload.walletId,
                   slug: payload.coinType
                 });
 
