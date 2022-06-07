@@ -123,8 +123,8 @@ export const useToken: UseToken = () => {
       case 2:
         setTokenData(
           [...tokens].sort((a, b) => {
-            const tokenA = COINS[a.coin.toLowerCase()].name;
-            const tokenB = COINS[b.coin.toLowerCase()].name;
+            const tokenA = COINS[a.slug.toLowerCase()].name;
+            const tokenB = COINS[b.slug.toLowerCase()].name;
             return tokenA.localeCompare(tokenB);
           })
         );
@@ -132,8 +132,8 @@ export const useToken: UseToken = () => {
       case 3:
         setTokenData(
           [...tokens].sort((a, b) => {
-            const tokenA = COINS[a.coin.toLowerCase()].name;
-            const tokenB = COINS[b.coin.toLowerCase()].name;
+            const tokenA = COINS[a.slug.toLowerCase()].name;
+            const tokenB = COINS[b.slug.toLowerCase()].name;
             return tokenB.localeCompare(tokenA);
           })
         );
