@@ -35,7 +35,7 @@ const WalletSend = () => {
   const { coinDetails } = useCurrentCoin();
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.coin : coinDetails.slug;
+  const coinAbbr = token ? token.slug : coinDetails.slug;
 
   useEffect(() => {
     if (sendForm) {

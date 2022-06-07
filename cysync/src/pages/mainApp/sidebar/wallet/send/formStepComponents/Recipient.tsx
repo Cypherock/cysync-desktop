@@ -375,7 +375,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.coin : coinDetails.slug;
+  const coinAbbr = token ? token.slug : coinDetails.slug;
   const coinPrice = token ? token.displayPrice : coinDetails.displayPrice;
 
   const { sendTransaction } = useSendTransactionContext();
