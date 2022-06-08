@@ -494,7 +494,7 @@ export const SocketProvider: React.FC = ({ children }) => {
           );
 
           const isConfirmed =
-            payload.txn.confirmations && payload.txn.confirmation > 0;
+            payload.txn.confirmations && payload.txn.confirmations > 0;
 
           for (const address of allAddresses) {
             const coin = await coinDb.getOne({
@@ -531,10 +531,11 @@ export const SocketProvider: React.FC = ({ children }) => {
     });
 
     currentBlockbookSocket.on('block', async (payload: any) => {
+      logger.info('Received block from blockbookSocket', { payload });
       try {
         if (payload && payload.coinType) {
           const pendingTxns = await transactionDb.getAll({
-            coin: payload.coinType,
+            slug: payload.coinType,
             status: Status.PENDING
           });
 
