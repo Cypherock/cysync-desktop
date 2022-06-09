@@ -39,11 +39,13 @@ const Root = () => {
 
   if (lockscreen) {
     return (
-      <LockScreen
-        open={lockscreen}
-        handleClose={handleLockScreenClose}
-        handleReset={handleInitialFlowOpen}
-      />
+      <GlobalProvider>
+        <LockScreen
+          open={lockscreen}
+          handleClose={handleLockScreenClose}
+          handleReset={handleInitialFlowOpen}
+        />
+      </GlobalProvider>
     );
   }
 
