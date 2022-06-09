@@ -146,7 +146,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.coin : coinDetails.slug;
+  const coinAbbr = token ? token.slug : coinDetails.slug;
 
   React.useEffect(() => {
     if (!coinAddress || !receiveTransaction.verified) {

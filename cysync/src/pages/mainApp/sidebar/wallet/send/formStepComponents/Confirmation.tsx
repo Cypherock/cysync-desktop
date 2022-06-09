@@ -126,7 +126,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.coin : coinDetails.slug;
+  const coinAbbr = token ? token.slug : coinDetails.slug;
 
   const [imageData, setImageData] = React.useState('');
   const [isQRBuilding, setQRBuilding] = React.useState(true);

@@ -108,7 +108,7 @@ const Verify = (props: any) => {
 
   const { connected } = useNetwork();
 
-  const coinAbbr = token ? token.coin : coinDetails.slug;
+  const coinAbbr = token ? token.slug : coinDetails.slug;
 
   const { sendTransaction } = useSendTransactionContext();
 

@@ -263,7 +263,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   }, [sendTransaction.sendMaxAmount, batchRecipientData]);
 
   const triggerCalcFee = () => {
-    const coinAbbr = token ? token.coin : coinDetails.slug;
+    const coinAbbr = token ? token.slug : coinDetails.slug;
     const coin = COINS[coinAbbr];
     let contractAddress: string | undefined;
     if (token && coin instanceof Erc20CoinData) {
