@@ -310,7 +310,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     const fromAddress = wallet.address;
     const toAddress = batchRecipientData[0].recipient.trim();
     const { network } = coin;
-    const tokenData = ERC20TOKENS[token.coin];
+    const tokenData = ERC20TOKENS[token.slug];
     const contractAddress = tokenData.address;
     // According to our research, amount does not matter in estimating gas limit, small or large,
     let amount = 1;
