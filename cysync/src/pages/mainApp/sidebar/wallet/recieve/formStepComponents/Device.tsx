@@ -55,7 +55,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         coinType: coinDetails.slug,
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
-        contractAbbr: token ? token.coin : undefined,
+        contractAbbr: token ? token.slug : undefined,
         passphraseExists: selectedWallet.passphraseSet
       })
       .then(() => {
