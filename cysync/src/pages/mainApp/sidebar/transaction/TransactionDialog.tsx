@@ -262,7 +262,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         <Typography color="textSecondary">Amount</Typography>
         <div className={classes.flex}>
           <CoinIcons
-            style={{ marginLeft: '0' }}
+            style={{ marginLeft: '0', marginRight: '10px' }}
             initial={txn.slug.toUpperCase()}
           />
           <Typography>
