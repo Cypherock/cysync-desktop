@@ -6,6 +6,7 @@ import { useLockscreen } from '../store/provider';
 import GlobalProvider from '../store/provider/global';
 
 import DeviceStatePrompt from './deviceStatePrompt';
+import ExitCleanup from './ExitCleanup';
 import Internals from './index';
 import LockScreen from './lockscreen';
 
@@ -40,6 +41,7 @@ const Root = () => {
   if (lockscreen) {
     return (
       <GlobalProvider>
+        <ExitCleanup />
         <LockScreen
           open={lockscreen}
           handleClose={handleLockScreenClose}
