@@ -400,6 +400,38 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
                 {errorMsg}
               </Typography>
             </div>
+            {cardsStatus === -1 && (
+              <div className={classes.bottomContainer}>
+                <div className={classes.success}>
+                  <Icon
+                    size={50}
+                    viewBox="0 0 60 60"
+                    iconGroup={<ErrorExclamation />}
+                  />
+                  <Typography variant="body2" color="error">
+                    Validation failed on all cards
+                    <br />
+                    It is advised to contact cypherock immediately
+                  </Typography>
+                </div>
+              </div>
+            )}
+            {cardsStatus === 0 && (
+              <div className={classes.bottomContainer}>
+                <div className={classes.success}>
+                  <Icon
+                    size={50}
+                    viewBox="0 0 60 60"
+                    iconGroup={<ErrorExclamation />}
+                  />
+                  <Typography variant="body2" color="secondary">
+                    Validation failed on some cards
+                    <br />
+                    It is advised to contact cypherock immediately
+                  </Typography>
+                </div>
+              </div>
+            )}
             <div className={classes.btnContainer}>
               <CustomButton
                 onClick={() => {
@@ -419,74 +451,6 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
                   Retry
                 </CustomButton>
               )}
-              <CustomButton
-                onClick={() => {
-                  feedback.showFeedback({ isContact: true });
-                }}
-                style={{ margin: '1rem 0rem' }}
-              >
-                Contact Us
-              </CustomButton>
-            </div>
-          </div>
-        )}
-        {cardsStatus === -1 && (
-          <div className={classes.bottomContainer}>
-            <div className={classes.success}>
-              <Icon
-                size={50}
-                viewBox="0 0 60 60"
-                iconGroup={<ErrorExclamation />}
-              />
-              <Typography variant="body2" color="error">
-                Validation failed on all cards
-                <br />
-                It is advised to contact cypherock immediately
-              </Typography>
-            </div>
-            <div className={classes.btnContainer}>
-              <CustomButton
-                onClick={() => {
-                  handleClose();
-                }}
-                style={{ margin: '1rem 10px 1rem 0' }}
-              >
-                Close
-              </CustomButton>
-              <CustomButton
-                onClick={() => {
-                  feedback.showFeedback({ isContact: true });
-                }}
-                style={{ margin: '1rem 0rem' }}
-              >
-                Contact Us
-              </CustomButton>
-            </div>
-          </div>
-        )}
-        {cardsStatus === 0 && (
-          <div className={classes.bottomContainer}>
-            <div className={classes.success}>
-              <Icon
-                size={50}
-                viewBox="0 0 60 60"
-                iconGroup={<ErrorExclamation />}
-              />
-              <Typography variant="body2" color="secondary">
-                Validation failed on some cards
-                <br />
-                It is advised to contact cypherock immediately
-              </Typography>
-            </div>
-            <div className={classes.btnContainer}>
-              <CustomButton
-                onClick={() => {
-                  handleClose();
-                }}
-                style={{ margin: '1rem 10px 1rem 0' }}
-              >
-                Close
-              </CustomButton>
               <CustomButton
                 onClick={() => {
                   feedback.showFeedback({ isContact: true });

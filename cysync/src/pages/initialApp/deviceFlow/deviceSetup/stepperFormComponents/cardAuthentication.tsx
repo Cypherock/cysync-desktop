@@ -387,6 +387,38 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
                 {errorMsg}
               </Typography>
             </div>
+            {cardsStatus === -1 && (
+              <div className={classes.bottomContainer}>
+                <div className={classes.success}>
+                  <Icon
+                    size={50}
+                    viewBox="0 0 60 60"
+                    iconGroup={<ErrorExclamation />}
+                  />
+                  <Typography variant="body2" color="error">
+                    Validation failed on all cards
+                    <br />
+                    It is advised to contact cypherock immediately
+                  </Typography>
+                </div>
+              </div>
+            )}
+            {cardsStatus === 0 && (
+              <div className={classes.bottomContainer}>
+                <div className={classes.success}>
+                  <Icon
+                    size={50}
+                    viewBox="0 0 60 60"
+                    iconGroup={<ErrorExclamation />}
+                  />
+                  <Typography variant="body2" color="secondary">
+                    Validation failed on some cards
+                    <br />
+                    It is advised to contact cypherock immediately
+                  </Typography>
+                </div>
+              </div>
+            )}
             <div className={classes.btnContainer}>
               {showRetry && (
                 <CustomButton
@@ -407,54 +439,6 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
                 Contact Us
               </CustomButton>
             </div>
-          </div>
-        )}
-        {cardsStatus === -1 && (
-          <div className={classes.bottomContainer}>
-            <div className={classes.success}>
-              <Icon
-                size={50}
-                viewBox="0 0 60 60"
-                iconGroup={<ErrorExclamation />}
-              />
-              <Typography variant="body2" color="error">
-                Validation failed on all cards
-                <br />
-                It is advised to contact cypherock immediately
-              </Typography>
-            </div>
-            <CustomButton
-              onClick={() => {
-                feedback.showFeedback({ isContact: true });
-              }}
-              style={{ margin: '1rem 0rem' }}
-            >
-              Contact Us
-            </CustomButton>
-          </div>
-        )}
-        {cardsStatus === 0 && (
-          <div className={classes.bottomContainer}>
-            <div className={classes.success}>
-              <Icon
-                size={50}
-                viewBox="0 0 60 60"
-                iconGroup={<ErrorExclamation />}
-              />
-              <Typography variant="body2" color="secondary">
-                Validation failed on some cards
-                <br />
-                It is advised to contact cypherock immediately
-              </Typography>
-            </div>
-            <CustomButton
-              onClick={() => {
-                feedback.showFeedback({ isContact: true });
-              }}
-              style={{ margin: '1rem 0rem' }}
-            >
-              Contact Us
-            </CustomButton>
           </div>
         )}
         {cardsStatus === 1 && (
