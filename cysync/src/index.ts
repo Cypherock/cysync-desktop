@@ -165,7 +165,9 @@ const createWindow = async () => {
     globalShortcut.unregister('F5');
   });
 
-  logger.info(`Starting up Cysync with version ${packageJson.version}`);
+  logger.info(
+    `Starting up Cysync with Package Version: ${packageJson.version}, Build Version ${process.env.BUILD_VERSION}`
+  );
   logger.info('Opening loading screen');
   loading.once('show', async () => {
     if (
