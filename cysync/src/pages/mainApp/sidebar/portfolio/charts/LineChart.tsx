@@ -203,6 +203,15 @@ const ApexChart = (props: any) => {
             height: '250px'
           }
         }
+      },
+      {
+        breakpoint: 2100,
+        options: {
+          chart: {
+            width: '900px',
+            height: '300px'
+          }
+        }
       }
     ]
   };
