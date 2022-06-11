@@ -452,7 +452,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const isEthereum = (ALLCOINS[coinDetails.slug] || { isEth: false }).isEth;
 
-  const handleCheckAddress = () => {
+  const handleCheckAddresses = (skipEmpty = false) => {
     let isValid = true;
     validatedAddresses = [];
 
@@ -462,7 +462,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
       if (isEthereum) {
         slug = 'eth';
       }
-      const addressValid = verifyAddress(recipient1.trim(), slug);
+
+      let addressValid;
+      if (skipEmpty && recipient1.trim().length === 0) addressValid = true;
+      else addressValid = verifyAddress(recipient1.trim(), slug);
+
       if (!addressValid) {
         isValid = false;
       }
@@ -473,6 +477,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
       handleVerificationErrors(data[0], data[1], data[2]);
     }
 
+    return isValid;
+  };
+
+  const handleRecipientSubmit = () => {
+    const isValid = handleCheckAddresses();
     const isAmountValid = verifyRecipientAmount();
 
     if (isValid && isAmountValid) {
@@ -627,7 +636,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
             name="reciever_addr"
             id="1"
             label="Receiver's Address"
-            onChange={handleInputChange}
+            onChange={e => {
+              handleInputChange(e);
+              handleCheckAddresses(true);
+            }}
             value={batchRecipientData[0].recipient}
             error={batchRecipientData[0].errorRecipient.length !== 0}
             helperText={
@@ -714,7 +726,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
                 <div key={recipient.id}>
                   <BatchRecipient
                     handleDelete={handleDelete}
-                    handleChange={handleInputChange}
+                    handleChange={e => {
+                      handleInputChange(e);
+                      handleCheckAddresses(true);
+                    }}
                     id={recipient.id.toString()}
                     recipient={recipient}
                     handleCopyFromClipboard={handleCopyFromClipboard}
@@ -848,7 +863,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           }
           className={recipientContinueButton}
           onClick={() => {
-            handleCheckAddress();
+            handleRecipientSubmit();
           }}
         >
           {isButtonLoading ? <CircularProgress size={25} /> : 'Continue'}
