@@ -165,6 +165,9 @@ const createWindow = async () => {
     globalShortcut.unregister('F5');
   });
 
+  logger.info(
+    `Starting up Cysync with Package Version: ${packageJson.version}, Build Version ${process.env.BUILD_VERSION}`
+  );
   logger.info('Opening loading screen');
   loading.once('show', async () => {
     if (
@@ -176,7 +179,7 @@ const createWindow = async () => {
 
     const { width, height, minWidth, minHeight } = getAppWindowSize();
 
-    logger.info('New Window According to Aspect Ratio: ', width, height);
+    logger.info(`New Window According to Aspect Ratio: ${width}, ${height}`);
 
     logger.info('Opening main screen');
 
