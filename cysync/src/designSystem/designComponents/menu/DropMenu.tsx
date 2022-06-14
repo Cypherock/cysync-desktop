@@ -91,7 +91,7 @@ const DropMenu = (props: any) => {
     setAnchorEl(null);
   };
 
-  const { style, stylex, startAdornment, options, index, bg } = props;
+  const { style, stylex, startAdornment, options, index, bg, disabled } = props;
 
   return (
     <Root style={style}>
@@ -100,6 +100,7 @@ const DropMenu = (props: any) => {
         onClick={handleClickListItem}
         className={stylex === 2 ? classes.button2 : classes.button}
         style={{ background: bg ? '' : 'rgba(0,0,0,0)' }}
+        disabled={disabled}
       >
         {startAdornment || null}
         {options[index]}
@@ -132,6 +133,7 @@ const DropMenu = (props: any) => {
             selected={i === index}
             color="secondary"
             onClick={event => handleMenuItemClick(event, i)}
+            disabled={disabled}
           >
             {option.toUpperCase()}
           </StyledMenuItem>

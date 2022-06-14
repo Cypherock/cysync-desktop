@@ -2,6 +2,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -45,6 +46,7 @@ export interface Props {
   sortIndex: UsePortfolioValues['sortIndex'];
   setSortIndex: UsePortfolioValues['setSortIndex'];
   handleRedirecttoAddCoin: (walletId: string) => void;
+  isLoading: boolean;
 }
 
 const PortfolioCoins = ({
@@ -53,7 +55,8 @@ const PortfolioCoins = ({
   total,
   sortIndex,
   setSortIndex,
-  handleRedirecttoAddCoin
+  handleRedirecttoAddCoin,
+  isLoading
 }: Props) => {
   const calcCoinPortfolio = (coin: CoinDetails) => {
     if (total > 0) {
@@ -65,6 +68,62 @@ const PortfolioCoins = ({
     }
 
     return '- -';
+  };
+
+  const getMainContent = () => {
+    if (isLoading) {
+      return (
+        <Grid container>
+          <Grid item xs={12}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingTop: '4rem'
+              }}
+            >
+              <CircularProgress color="secondary" />
+            </div>
+          </Grid>
+        </Grid>
+      );
+    }
+
+    if (coins.length > 0) {
+      return coins.map((data, i: number) => {
+        return (
+          <OneCoin
+            coinInitial={data.name}
+            coinValue={data.value}
+            coinPrice={new BigNumber(data.price).toFixed(2)}
+            coinPortfolio={calcCoinPortfolio(data)}
+            coinHolding={data.balance}
+            decimal={data.decimal}
+            key={data.name}
+            index={i}
+          />
+        );
+      });
+    }
+    return (
+      <CustomButton
+        fullWidth
+        style={{
+          textTransform: 'none',
+          margin: '1rem 0rem',
+          padding: '0.8rem 0rem',
+          border: '1px solid rgba(255,255,255,0.1)',
+          background: 'rgba(0,0,0,0)'
+        }}
+        variant="outlined"
+        onClick={() => {
+          handleRedirecttoAddCoin(currentWallet);
+        }}
+      >
+        Add Coins
+      </CustomButton>
+    );
   };
 
   return (
@@ -201,39 +260,7 @@ const PortfolioCoins = ({
           </Button>
         </Grid>
       </Grid>
-      {coins.length > 0 ? (
-        coins.map((data, i: number) => {
-          return (
-            <OneCoin
-              coinInitial={data.name}
-              coinValue={data.value}
-              coinPrice={new BigNumber(data.price).toFixed(2)}
-              coinPortfolio={calcCoinPortfolio(data)}
-              coinHolding={data.balance}
-              decimal={data.decimal}
-              key={data.name}
-              index={i}
-            />
-          );
-        })
-      ) : (
-        <CustomButton
-          fullWidth
-          style={{
-            textTransform: 'none',
-            margin: '1rem 0rem',
-            padding: '0.8rem 0rem',
-            border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(0,0,0,0)'
-          }}
-          variant="outlined"
-          onClick={() => {
-            handleRedirecttoAddCoin(currentWallet);
-          }}
-        >
-          Add Coins
-        </CustomButton>
-      )}
+      {getMainContent()}
     </StyledGrid>
   );
 };
