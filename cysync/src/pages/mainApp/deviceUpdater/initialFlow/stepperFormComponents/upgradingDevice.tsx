@@ -1,6 +1,6 @@
 import ReportIcon from '@mui/icons-material/Report';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
@@ -36,9 +36,15 @@ const classes = {
   center: `${PREFIX}-center`,
   primaryColor: `${PREFIX}-primaryColor`,
   report: `${PREFIX}-report`,
-  errorButtons: `${PREFIX}-errorButtons`
+  errorButtons: `${PREFIX}-errorButtons`,
+  text: `${PREFIX}-text`
 };
 
+const StyledToolTip = styled(Tooltip)(() => ({
+  [`& .${classes.text}`]: {
+    marginLeft: 10
+  }
+}));
 const Root = styled(Grid)(({ theme }) => ({
   [`& .${classes.middle}`]: {
     minHeight: '20rem',
@@ -94,7 +100,8 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     errorMessage,
     latestVersion,
     setUpdated,
-    setIsCompleted
+    setIsCompleted,
+    inBackgroundProcess
   } = useDeviceUpgrade(true);
 
   const refreshComponent = () => {
@@ -249,12 +256,24 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
               <CustomButton onClick={onClose} style={{ marginTop: '2rem' }}>
                 Close
               </CustomButton>
-              <CustomButton
-                onClick={refreshComponent}
-                style={{ marginTop: '2rem' }}
+              <StyledToolTip
+                title={
+                  inBackgroundProcess || !deviceConnection
+                    ? 'Please wait while the device is connecting'
+                    : ''
+                }
               >
-                Try Again
-              </CustomButton>
+                {/* An extra div is required for tooltip to work on disabled button */}
+                <div style={{ display: 'inline-block' }}>
+                  <CustomButton
+                    onClick={refreshComponent}
+                    style={{ marginTop: '2rem' }}
+                    disabled={inBackgroundProcess || !deviceConnection}
+                  >
+                    Try Again
+                  </CustomButton>
+                </div>
+              </StyledToolTip>
               <CustomButton
                 onClick={handleFeedbackOpen}
                 style={{ marginTop: '2rem' }}
