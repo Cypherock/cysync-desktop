@@ -49,6 +49,7 @@ export interface UsePortfolioValues {
   series: CoinHistory[];
   setSeries: React.Dispatch<React.SetStateAction<CoinHistory[]>>;
   setAllCoinSeries: () => void;
+  isLoading: boolean;
 }
 
 export type UsePortfolio = () => UsePortfolioValues;
@@ -62,6 +63,7 @@ export const usePortfolio: UsePortfolio = () => {
     UsePortfolioValues['coinHolding']
   >([]);
   const [oldTotalPrice, setOldTotalPrice] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const [hasCoins, setHasCoins] = useState(false);
   const [coins, setCoins] = useState<UsePortfolioValues['coins']>([]);
   const [total, setTotal] = useState(0);
@@ -279,6 +281,7 @@ export const usePortfolio: UsePortfolio = () => {
     wallet = '',
     isRefresh = false
   ) => {
+    setIsLoading(true);
     const key = `${wallet}-${days}`;
     if (!isRefresh) {
       const cacheData:
@@ -342,6 +345,7 @@ export const usePortfolio: UsePortfolio = () => {
     setOldTotalPrice(prevTotal.toNumber());
     setCoinList(allCoinList);
     setCoinHistory(allCoinPriceHistory);
+    setIsLoading(false);
   };
 
   // returns a list of all coins with their balances and value (eg, if there are 2 bitcoins in 2 different wallet, it will return a value of total if wallet is null
@@ -686,6 +690,7 @@ export const usePortfolio: UsePortfolio = () => {
     setSinceLastTotalPrice,
     series,
     setSeries,
-    setAllCoinSeries
-  } as UsePortfolioValues;
+    setAllCoinSeries,
+    isLoading
+  };
 };

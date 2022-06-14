@@ -1,4 +1,5 @@
 import { Typography } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import React from 'react';
@@ -14,14 +15,16 @@ const PREFIX = 'PortfolioChart';
 const classes = {
   root: `${PREFIX}-root`,
   left: `${PREFIX}-left`,
-  right: `${PREFIX}-right`
+  right: `${PREFIX}-right`,
+  loadingOverlay: `${PREFIX}-loading-overlay`
 };
 
 const Root = styled(Grid)(({ theme }) => ({
   [`&.${classes.root}`]: {
     border: `1px solid ${theme.palette.primary.light}`,
     borderRadius: '1rem',
-    padding: '0.5rem 0rem'
+    padding: '0.5rem 0rem',
+    position: 'relative'
   },
   [`& .${classes.left}`]: {
     display: 'flex',
@@ -35,6 +38,19 @@ const Root = styled(Grid)(({ theme }) => ({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  [`& .${classes.loadingOverlay}`]: {
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0, 0.4)',
+    zIndex: 10,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: '4rem'
   }
 }));
 
@@ -50,6 +66,7 @@ export interface Props {
   sinceLastTotalPrice: UsePortfolioValues['sinceLastTotalPrice'];
   sinceText: UsePortfolioValues['sinceText'];
   series: UsePortfolioValues['series'];
+  isLoading: boolean;
 }
 
 const PortfolioCharts = ({
@@ -62,12 +79,18 @@ const PortfolioCharts = ({
   setCoinIndex,
   sinceLastTotalPrice,
   sinceText,
-  series
+  series,
+  isLoading
 }: Props) => {
   const theme = useTheme();
 
   return (
     <Root container className={classes.root}>
+      {isLoading && (
+        <div className={classes.loadingOverlay}>
+          <CircularProgress color="secondary" />
+        </div>
+      )}
       <Grid item xs={9} className={classes.left}>
         <LineChart
           coinList={coinList}
