@@ -138,6 +138,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         logger.verbose(
           `Device update available for version: ${response.data.firmware.version}`
         );
+        /**
+         * This check is to prevent restarting the whole upgrade process if the user
+         * disconnects the device right after the firmware upgrade but not before
+         * device auth is done. This is only done on Initial app of Cysync as we have
+         * global popups on Main app of Cysync to handle this.
+         */
         if (
           response.data.firmware.version === hexToVersion(firmwareVersion) &&
           deviceState === '02' &&
