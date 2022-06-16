@@ -256,7 +256,8 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputList,
           fees,
           isSendAll,
-          data
+          data,
+          transactionDb
         )
         .then(() => {
           setEstimationError(false);
@@ -580,6 +581,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           connection,
           sdkVersion,
           addressDB: addressDb,
+          transactionDB: transactionDb,
           walletId,
           pinExists,
           passphraseExists,
@@ -728,7 +730,11 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputs: formattedOutputs
         };
       }
-      transactionDb.insert(tx);
+      transactionDb.insert(tx).then(() => {
+        transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
+        logger.info('UTXOS blocked');
+        logger.info(txnInputs);
+      });
     } catch (error) {
       logger.error('Error in onTxnBroadcast');
       logger.error(error);
