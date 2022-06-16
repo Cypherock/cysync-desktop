@@ -112,7 +112,6 @@ const Transaction = () => {
 
   const theme = useTheme();
   const [weekIndex, setWeekIndex] = React.useState(3);
-  const [totalTransactions, setTotalTransactions] = useState(allTxn.length);
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<DisplayTransaction[]>([]);
 
@@ -148,14 +147,6 @@ const Transaction = () => {
       onInitialSetupDone();
     }
   }, [location.search]);
-
-  useEffect(() => {
-    if (search) {
-      setTotalTransactions(searchResults.length);
-    } else {
-      setTotalTransactions(allTxn.length);
-    }
-  }, [allTxn, searchResults, search]);
 
   const handleMenuItemWeekSelectionChange = (index: number) => {
     setWeekIndex(index);
@@ -238,6 +229,16 @@ const Transaction = () => {
     );
   };
 
+  const getTotalTxns = () => {
+    let totalTransactions = 0;
+    if (search) {
+      totalTransactions = searchResults.length;
+    } else {
+      totalTransactions = allTxn.length;
+    }
+    return totalTransactions;
+  };
+
   const getMainTxnContent = () => {
     if (isLoading) {
       return (
@@ -250,6 +251,9 @@ const Transaction = () => {
         </Grid>
       );
     }
+
+    const totalTransactions = getTotalTxns();
+
     if (totalTransactions > 0) {
       return (
         <div style={{ width: '100%' }}>
@@ -467,7 +471,7 @@ const Transaction = () => {
       <Grid container className={classes.transactionsInfo}>
         <Grid item xs={7} style={{ display: 'flex', alignItems: 'flex-end' }}>
           <Typography variant="body1" color="textSecondary">
-            {`Total Transactions - ${totalTransactions}`}
+            {`Total Transactions - ${getTotalTxns()}`}
           </Typography>
         </Grid>
         <Grid

@@ -24,6 +24,7 @@ const Portfolio = () => {
   const [index, setIndex] = React.useState(0);
   const {
     currentWallet,
+    isLoading,
     setCurrentWallet,
     coins,
     total,
@@ -155,6 +156,7 @@ const Portfolio = () => {
           handleMenuItemSelectionChange={handleMenuItemChange}
           index={index}
           bg={false}
+          disabled={isLoading}
         />
       </Grid>
       <Charts
@@ -169,6 +171,7 @@ const Portfolio = () => {
         sinceText={sinceText}
         sinceLastTotalPrice={sinceLastTotalPrice}
         series={series}
+        isLoading={isLoading}
       />
       <CoinAllocation
         currentWallet={currentWallet}
@@ -177,6 +180,7 @@ const Portfolio = () => {
         sortIndex={sortIndex}
         setSortIndex={setSortIndexProxy}
         handleRedirecttoAddCoin={onAddCoin}
+        isLoading={isLoading}
       />
     </Grid>
   );

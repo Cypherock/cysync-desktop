@@ -1,4 +1,6 @@
 import { Wallet } from '@cypherock/database';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
 import React, { useEffect, useState } from 'react';
 import {
   Route,
@@ -58,7 +60,22 @@ const SingleWalletView = () => {
     );
   }
 
-  return <></>;
+  return (
+    <Grid container>
+      <Grid item xs={12}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingTop: '4rem'
+          }}
+        >
+          <CircularProgress color="secondary" />
+        </div>
+      </Grid>
+    </Grid>
+  );
 };
 
 const Wallet: React.FC = () => {

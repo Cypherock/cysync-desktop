@@ -17,6 +17,7 @@ import { useDebouncedFunction } from './useDebounce';
 export interface UseWalletDataValues {
   coinData: DisplayCoin[];
   setCoinData: React.Dispatch<React.SetStateAction<DisplayCoin[]>>;
+  isLoading: boolean;
   coinsPresent: string[];
   deleteCoinByXpub: (
     xpub: string,
@@ -39,6 +40,7 @@ export const useWalletData: UseWalletData = () => {
   const [coinsPresent, setCoinsPresent] = useState<string[]>([]);
 
   const [currentWalletId, setCurrentWalletId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const [sortIndex, setSortIndex] = useState(0);
 
@@ -168,6 +170,7 @@ export const useWalletData: UseWalletData = () => {
 
   const getAllCoinsFromWallet = async () => {
     if (currentWalletId) {
+      setIsLoading(true);
       const res = await coinDb.getAll({ walletId: currentWalletId });
       const coinList: string[] = [];
       res.forEach(coin => {
@@ -176,6 +179,7 @@ export const useWalletData: UseWalletData = () => {
       setCoinsPresent(coinList);
       const unsortedCoins = await getCoinsWithPrices(res);
       sortCoinData(unsortedCoins, sortIndex);
+      setIsLoading(false);
     }
   };
 
@@ -237,10 +241,11 @@ export const useWalletData: UseWalletData = () => {
     deleteCoinByXpub,
     setCurrentWalletId,
     currentWalletId,
+    isLoading,
     refreshCoins,
     sortIndex,
     setSortIndex,
     sortCoinData,
     sortCoinsByIndex
-  } as UseWalletDataValues;
+  };
 };
