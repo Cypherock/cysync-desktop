@@ -24,6 +24,7 @@ import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import { useDeviceUpgrade } from '../../../../../../store/hooks/flows';
 import {
   FeedbackState,
+  useConnection,
   useFeedback,
   useNetwork
 } from '../../../../../../store/provider';
@@ -280,6 +281,8 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     setLatestVersion
   } = useDeviceUpgrade();
 
+  const { inBootloader } = useConnection();
+
   const latestDeviceConnection = useRef<any>();
   const latestCompleted = useRef<boolean>();
   const latestStep = useRef<number>();
@@ -351,6 +354,8 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
           }
 
           if (process.env.BUILD_TYPE === 'debug') {
+            setUpgradeAvailable(true);
+          } else if (inBootloader) {
             setUpgradeAvailable(true);
           }
 
