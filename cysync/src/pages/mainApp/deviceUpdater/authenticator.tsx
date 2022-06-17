@@ -97,7 +97,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
 
   const feedback = useFeedback();
 
-  useEffect(() => {
+  const startDeviceAuth = () => {
     logger.info('Initiating device auth from prompt');
 
     if (deviceConnection && firmwareVersion) {
@@ -110,6 +110,9 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
         inTestApp: inTestApp(deviceState)
       });
     }
+  };
+  useEffect(() => {
+    startDeviceAuth();
 
     return () => {
       logger.info('Closed device auth prompt');
@@ -227,6 +230,15 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
                     style={{ margin: '1rem 0rem' }}
                   >
                     Close
+                  </CustomButton>
+                  <CustomButton
+                    disabled={!(deviceConnection && firmwareVersion)}
+                    onClick={() => {
+                      startDeviceAuth();
+                    }}
+                    style={{ margin: '1rem 0rem' }}
+                  >
+                    Retry
                   </CustomButton>
                   <CustomButton
                     onClick={() => {
