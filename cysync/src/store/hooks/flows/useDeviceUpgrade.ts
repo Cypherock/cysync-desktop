@@ -9,7 +9,11 @@ import { stmFirmware as firmwareServer } from '@cypherock/server-wrapper';
 import { ipcRenderer } from 'electron';
 import React, { useEffect } from 'react';
 
-import { getFirmwareHex, inTestApp } from '../../../utils/compareVersion';
+import {
+  getFirmwareHex,
+  hexToVersion,
+  inTestApp
+} from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
 import {
   ConnectionContextInterface,
@@ -134,6 +138,21 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         logger.verbose(
           `Device update available for version: ${response.data.firmware.version}`
         );
+        /**
+         * This check is to prevent restarting the whole upgrade process if the user
+         * disconnects the device right after the firmware upgrade but not before
+         * device auth is done. This is only done on Initial app of Cysync as we have
+         * global popups on Main app of Cysync to handle this.
+         */
+        if (
+          response.data.firmware.version === hexToVersion(firmwareVersion) &&
+          deviceState === '02' &&
+          isInitial
+        ) {
+          logger.verbose(`Device already on the latest version`);
+          setUpdated(2);
+          return null;
+        }
         internetSlowTimeout.current = setTimeout(() => {
           logger.verbose('Setting internet Slow.');
           setIsInternetSlow(true);
@@ -422,7 +441,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
   useEffect(() => {
     if (isUpdated === 2) {
-      logger.info('Device updated successfully, initiating device auth');
+      logger.info('Device update process complete, initiating device auth');
       if (timeout.current) {
         clearTimeout(timeout.current);
         timeout.current = undefined;

@@ -1,10 +1,11 @@
 import compareVersions from 'compare-versions';
 
 export const hexToVersion = (hex: string) => {
-  return `${parseInt(hex.slice(0, 2), 16)}.${parseInt(
-    hex.slice(2, 4),
-    16
-  )}.${parseInt(hex.slice(4, 8), 16)}`;
+  if (hex)
+    return `${parseInt(hex.slice(0, 2), 16)}.${parseInt(
+      hex.slice(2, 4),
+      16
+    )}.${parseInt(hex.slice(4, 8), 16)}`;
 };
 
 export const compareVersion = (version: string, isGreaterThan: string) => {
