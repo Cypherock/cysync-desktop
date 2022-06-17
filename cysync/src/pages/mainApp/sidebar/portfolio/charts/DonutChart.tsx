@@ -90,7 +90,7 @@ const Donut: React.FC<chartProps> = ({
       options={options}
       series={series.length > 0 ? series : hasCoins ? [0] : []}
       type="donut"
-      width="70%"
+      width="80%"
     />
   );
 };
