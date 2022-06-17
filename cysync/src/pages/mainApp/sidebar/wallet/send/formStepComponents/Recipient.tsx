@@ -648,7 +648,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
                 : undefined
             }
             isClipboardPresent
-            handleCopyFromClipboard={handleCopyFromClipboard}
+            handleCopyFromClipboard={e => {
+              handleCopyFromClipboard(e);
+              handleCheckAddresses(true);
+            }}
           />
           <Input
             id="1"

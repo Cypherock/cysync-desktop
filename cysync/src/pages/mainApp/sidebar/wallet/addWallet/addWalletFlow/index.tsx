@@ -27,7 +27,7 @@ const AddWalletFlow: React.FC<AddWalletFlowProps> = ({
       maxWidth="sm"
       open={open}
       handleClose={() => handleClose(true)}
-      dialogHeading={walletSuccess ? 'Wallet added successfully' : 'Add wallet'}
+      dialogHeading={walletSuccess ? '' : 'Add wallet'}
       disableBackdropClick
       isClosePresent
       restComponents={
