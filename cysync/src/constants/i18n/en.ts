@@ -91,6 +91,7 @@ const en: I18nStrings = {
       `Request was rejected on the X1 Wallet\nPlease restart the process to send ${coin} on the CySync application`,
     SEND_TXN_INSUFFICIENT_BALANCE: (coin: string) =>
       `You do not have enough ${coin} to make this transaction`,
+    SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE: `This transaction requires UTXOs from your previous transaction. Wait for few minutes before retrying`,
     SEND_TXN_SIZE_TOO_LARGE: 'This transaction cannot be performed.'
   }
 };

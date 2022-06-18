@@ -802,8 +802,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               style={{ marginRight: '5px' }}
             />
             <Typography variant="body2" color="textSecondary" align="center">
-              Insufficient balance for this transaction, try adjusting the fees
-              or amount
+              {sendTransaction.estimationError}
             </Typography>
           </div>
         ) : (
@@ -859,7 +858,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
         )}
         <CustomButton
           disabled={
-            buttonDisabled || isButtonLoading || sendTransaction.estimationError
+            buttonDisabled ||
+            isButtonLoading ||
+            sendTransaction.estimationError !== undefined
           }
           className={recipientContinueButton}
           onClick={() => {
