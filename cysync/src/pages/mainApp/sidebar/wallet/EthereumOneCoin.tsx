@@ -66,6 +66,7 @@ const classes = {
   recieveButton: `${PREFIX}-recieveButton`,
   red: `${PREFIX}-red`,
   orange: `${PREFIX}-orange`,
+  grey: `${PREFIX}-grey`,
   dialogRoot: `${PREFIX}-dialogRoot`,
   ethererum: `${PREFIX}-ethererum`,
   rootButtonWrapper: `${PREFIX}-rootButtonWrapper`
@@ -125,6 +126,9 @@ const Root = styled('div')(({ theme }) => ({
   },
   [`& .${classes.orange}`]: {
     color: theme.palette.secondary.main
+  },
+  [`& .${classes.grey}`]: {
+    color: theme.palette.grey[500]
   },
   [`& .${classes.dialogRoot}`]: {
     display: 'flex',
@@ -367,7 +371,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
           <Grid item xs={2} className={classes.actions}>
             <Button
               variant="text"
-              className={!isEmpty ? clsx(classes.orange) : null}
+              className={!isEmpty ? clsx(classes.orange) : clsx(classes.grey)}
               onClick={handleSendFormOpen}
               startIcon={
                 <Icon

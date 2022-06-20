@@ -119,6 +119,8 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
             DeviceErrorType.CONNECTION_NOT_OPEN
           ].includes(err.errorType)
         ) {
+          setConfirmed(_confirmed => (_confirmed === 1 ? -1 : _confirmed));
+          setVerified(_verified => (_verified === 1 ? -1 : _verified));
           setErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
         } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
           setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);

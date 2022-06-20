@@ -69,6 +69,7 @@ const WalletReceive = () => {
         isClosePresent
         handleClose={handleClose}
         dialogHeading="Receive"
+        disableBackdropClick
         restComponents={
           <StepperForm
             stepsData={ReceiveFormComponents}
