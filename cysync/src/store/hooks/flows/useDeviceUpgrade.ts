@@ -399,6 +399,10 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       await connection.beforeOperation();
       await connection.selectPacketVersion();
 
+      logger.info('handleDeviceAuth Params', {
+        deviceState: connection.deviceState,
+        latestVersion
+      });
       handleDeviceAuth({
         connection,
         sdkVersion: deviceSdkVersion,
