@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS } from '@cypherock/communication';
+import { ALLCOINS as COINS, coinGroup } from '@cypherock/communication';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -458,7 +458,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                       value={{ coinDetails: coin }}
                       key={coin.slug}
                     >
-                      {coinObj && coinObj.isEth ? (
+                      {coinObj && coinObj.group === coinGroup.Ethereum ? (
                         <EthereumOneCoin
                           initial={coin.slug.toUpperCase()}
                           name={coinObj.name}

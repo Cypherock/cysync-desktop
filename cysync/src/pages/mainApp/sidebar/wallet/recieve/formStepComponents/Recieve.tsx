@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS } from '@cypherock/communication';
+import { ALLCOINS as COINS, coinGroup } from '@cypherock/communication';
 import wallet from '@cypherock/wallet';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -116,7 +116,7 @@ const getReceiveAddress = async (
     throw new Error(`Invalid coinType ${coinType}`);
   }
 
-  if (coin.isEth) {
+  if (coin.group === coinGroup.Ethereum) {
     w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
     receiveAddress = (await w.newReceiveAddress()).toUpperCase();
     // To make the first x in lowercase

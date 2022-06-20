@@ -1,5 +1,6 @@
 import {
   ALLCOINS as COINS,
+  coinGroup,
   Erc20CoinData,
   ERC20TOKENS,
   EthCoinData
@@ -476,7 +477,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       JSON.stringify(batchRecipientData)
     );
     let isValid = true;
-    const { isEth } = COINS[coinDetails.slug];
+    const isEthereum = COINS[coinDetails.slug].group === coinGroup.Ethereum;
     copyBatchRecipientData.forEach((elem, index) => {
       const amount = new BigNumber(
         elem.amount === undefined ? '' : elem.amount
@@ -484,7 +485,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       let error = '';
       if (amount.isNaN() || amount.isZero() || amount.isNegative()) {
         // Allow `0` amount transaction on ETH, and 0 amount is valid when it's a max send txn
-        if (!(amount.isZero() && isEth) && !maxSend) {
+        if (!(amount.isZero() && isEthereum) && !maxSend) {
           error = 'Please enter a valid amount.';
           isValid = false;
         }
