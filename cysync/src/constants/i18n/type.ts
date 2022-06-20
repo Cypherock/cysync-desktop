@@ -54,6 +54,7 @@ export interface I18nStrings {
 
     SEND_TXN_REJECTED: (coin: string) => string;
     SEND_TXN_INSUFFICIENT_BALANCE: (coin: string) => string;
+    SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE: string;
     SEND_TXN_SIZE_TOO_LARGE: string;
   };
 }

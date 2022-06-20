@@ -155,7 +155,7 @@ export interface UseSendTransactionValues {
     txHash: string;
     token?: string;
   }) => void;
-  estimationError: boolean;
+  estimationError: string;
 }
 
 export type UseSendTransaction = () => UseSendTransactionValues;
@@ -188,7 +188,7 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [approxTotalFee, setApproxTotalFees] = useState(0);
   const [sendMaxAmount, setSendMaxAmount] = useState(0);
   const [isCancelled, setIsCancelled] = useState(false);
-  const [estimationError, setEstimationError] = useState(false);
+  const [estimationError, setEstimationError] = useState(undefined);
 
   const { langStrings } = useI18n();
 
@@ -202,7 +202,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     setSignedTxn('');
     setCompleted(false);
     setMetadataSent(false);
-    setEstimationError(false);
+    setEstimationError(undefined);
     setTotalFees(0);
     setSendMaxAmount(0);
     sendTransaction.removeAllListeners();
@@ -229,7 +229,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         if (!hasInput) {
           setApproxTotalFees(0);
           setSendMaxAmount(0);
-          setEstimationError(false);
+          setEstimationError(undefined);
           return;
         }
       }
@@ -256,10 +256,11 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputList,
           fees,
           isSendAll,
-          data
+          data,
+          transactionDb
         )
         .then(() => {
-          setEstimationError(false);
+          setEstimationError(undefined);
           logger.info('EstimateFee: Completed', { coinType });
         })
         .catch(error => {
@@ -276,7 +277,18 @@ export const useSendTransaction: UseSendTransaction = () => {
               );
             }
           } else {
-            setEstimationError(true);
+            if (
+              error instanceof WalletError &&
+              error.errorType === WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE
+            )
+              setEstimationError(
+                langStrings.ERRORS.SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE
+              );
+            else if (error.errorType === WalletErrorType.INSUFFICIENT_FUNDS)
+              setEstimationError(
+                langStrings.ERRORS.SEND_TXN_INSUFFICIENT_BALANCE(coinType)
+              );
+            else setEstimationError(error.message);
           }
         });
     };
@@ -580,6 +592,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           connection,
           sdkVersion,
           addressDB: addressDb,
+          transactionDB: transactionDb,
           walletId,
           pinExists,
           passphraseExists,
@@ -728,7 +741,11 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputs: formattedOutputs
         };
       }
-      transactionDb.insert(tx);
+      transactionDb.insert(tx).then(() => {
+        transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
+        logger.info('UTXOS blocked');
+        logger.info(txnInputs);
+      });
     } catch (error) {
       logger.error('Error in onTxnBroadcast');
       logger.error(error);
