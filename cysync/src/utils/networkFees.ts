@@ -1,4 +1,4 @@
-import { COINS, EthCoinData } from '@cypherock/communication';
+import { COINS, EthCoinData, NearCoinData } from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
 
 const getFees = async (coinType: string) => {
@@ -32,6 +32,13 @@ const getFees = async (coinType: string) => {
     }
 
     return fees;
+  } else if (coin instanceof NearCoinData) {
+    const resp = await Server.near.transaction
+      .getFees({
+        network: coin.network
+      })
+      .request();
+    return Math.round(resp);
   }
 
   const res = await Server.bitcoin.transaction.getFees({ coinType }).request();
