@@ -4,7 +4,8 @@ import {
   DeviceConnection,
   DeviceError,
   DeviceErrorType,
-  EthCoinData
+  EthCoinData,
+  NearCoinData
 } from '@cypherock/communication';
 import {
   InputOutput,
@@ -69,15 +70,26 @@ export const broadcastTxn = async (
       throw new Error('brodcast-failed');
     }
     return resp.data.result.toUpperCase();
+  } else if (coin instanceof NearCoinData) {
+    const resp = await Server.near.transaction
+      .broadcastTxn({
+        transaction: signedTxn,
+        network: coin.network
+      })
+      .request();
+    if (resp.status === 0) {
+      throw new Error('brodcast-failed');
+    }
+    return resp.data.transaction.hash;
+  } else {
+    const res = await Server.bitcoin.transaction
+      .broadcastTxn({
+        transaction: signedTxn,
+        coinType
+      })
+      .request();
+    return res.data.tx.hash;
   }
-
-  const res = await Server.bitcoin.transaction
-    .broadcastTxn({
-      transaction: signedTxn,
-      coinType
-    })
-    .request();
-  return res.data.tx.hash;
 };
 
 export const verifyAddress = (address: string, coin: string) => {
@@ -86,7 +98,6 @@ export const verifyAddress = (address: string, coin: string) => {
   if (!coinDetails) {
     throw new Error(`Cannot find coin details for coin: ${coin}`);
   }
-
   return WAValidator.validate(
     address,
     coinDetails.validatorCoinName,

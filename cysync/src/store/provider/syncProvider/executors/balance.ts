@@ -2,14 +2,19 @@ import {
   ALLCOINS,
   COINS,
   Erc20CoinData,
-  EthCoinData
+  EthCoinData,
+  NearCoinData
 } from '@cypherock/communication';
 import {
   batch as batchServer,
   eth as ethServer,
-  IRequestMetadata
+  IRequestMetadata,
+  near as nearServer
 } from '@cypherock/server-wrapper';
-import { generateEthAddressFromXpub } from '@cypherock/wallet';
+import {
+  generateEthAddressFromXpub,
+  generateNearAddressFromXpub
+} from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
 import { coinDb, tokenDb } from '../../../database';
@@ -63,6 +68,20 @@ export const getRequestsMetadata = (
         'Invalid ethCoin found in balance sync item' + item.ethCoin
       );
     }
+  } else if (coin instanceof NearCoinData) {
+    const address = generateNearAddressFromXpub(item.xpub);
+    const balanceMetadata = nearServer.wallet
+      .getBalance(
+        {
+          address,
+          network: coin.network
+        },
+        item.isRefresh
+      )
+      .getMetadata();
+    return [balanceMetadata];
+  } else {
+    throw new Error('Invalid coin in balance sync item: ' + item.coinType);
   }
 };
 
@@ -113,5 +132,18 @@ export const processResponses = async (
         'Invalid ethCoin found in balance sync item' + item.ethCoin
       );
     }
+  } else if (coin instanceof NearCoinData) {
+    const balanceRes = responses[0];
+
+    const balance = new BigNumber(balanceRes.data);
+
+    await coinDb.updateTotalBalance({
+      xpub: item.xpub,
+      slug: item.coinType,
+      totalBalance: balance.toString(),
+      totalUnconfirmedBalance: '0'
+    });
+  } else {
+    throw new Error('Invalid coin in balance sync item: ' + item.coinType);
   }
 };

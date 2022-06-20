@@ -3,7 +3,8 @@ import {
   BtcCoinData,
   coinGroup,
   COINS,
-  EthCoinData
+  EthCoinData,
+  NearCoinData
 } from '@cypherock/communication';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
@@ -183,6 +184,16 @@ export const SyncProvider: React.FC = ({ children }) => {
           addToQueue(newZItem);
         }
       } else if (coinData instanceof EthCoinData) {
+        const newItem = new HistorySyncItem({
+          xpub: coin.xpub,
+          walletName: '',
+          walletId: coin.walletId,
+          coinType: coinData.abbr,
+          isRefresh,
+          module
+        });
+        addToQueue(newItem);
+      } else if (coinData instanceof NearCoinData) {
         const newItem = new HistorySyncItem({
           xpub: coin.xpub,
           walletName: '',
