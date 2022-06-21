@@ -299,13 +299,10 @@ export const useAddCoin: UseAddCoin = () => {
           setErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
         } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
           setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
-        } else if (
-          [
-            DeviceErrorType.WRITE_TIMEOUT,
-            DeviceErrorType.READ_TIMEOUT
-          ].includes(err.errorType)
-        ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
+        } else if (err.errorType === DeviceErrorType.WRITE_TIMEOUT) {
+          setErrorMessage(langStrings.ERRORS.DEVICE_WRITE_TIMEOUT);
+        } else if (err.errorType === DeviceErrorType.READ_TIMEOUT) {
+          setErrorMessage(langStrings.ERRORS.DEVICE_READ_TIMEOUT);
         } else {
           setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
         }

@@ -14,6 +14,7 @@ import {
   hexToVersion,
   inTestApp
 } from '../../../utils/compareVersion';
+import { formatErrorMessage } from '../../../utils/errorHandler';
 import logger from '../../../utils/logger';
 import {
   ConnectionContextInterface,
@@ -298,13 +299,10 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           );
         } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
           setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
-        } else if (
-          [
-            DeviceErrorType.WRITE_TIMEOUT,
-            DeviceErrorType.READ_TIMEOUT
-          ].includes(err.errorType)
-        ) {
-          setDisplayErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
+        } else if (err.errorType === DeviceErrorType.WRITE_TIMEOUT) {
+          setErrorMessage(langStrings.ERRORS.DEVICE_WRITE_TIMEOUT);
+        } else if (err.errorType === DeviceErrorType.READ_TIMEOUT) {
+          setErrorMessage(langStrings.ERRORS.DEVICE_READ_TIMEOUT);
         } else {
           setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
         }

@@ -7,7 +7,8 @@ export interface I18nStrings {
 
     DEVICE_NOT_CONNECTED: string;
     DEVICE_DISCONNECTED_IN_FLOW: string;
-    DEVICE_TIMEOUT_ERROR: string;
+    DEVICE_READ_TIMEOUT: string;
+    DEVICE_WRITE_TIMEOUT: string;
     DEVICE_NOT_READY: string;
     DEVICE_NOT_READY_IN_INITIAL: string;
     DEVICE_NOT_SUPPORTED: string;
