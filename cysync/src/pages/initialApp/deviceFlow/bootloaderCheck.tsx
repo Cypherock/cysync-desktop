@@ -12,7 +12,7 @@ import AvatarIcon from '../../../designSystem/designComponents/icons/AvatarIcon'
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../designSystem/iconGroups/errorExclamation';
 import { useDeviceUpgrade } from '../../../store/hooks/flows';
-import { useConnection } from '../../../store/provider';
+import { useConnection, useI18n } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
@@ -57,6 +57,7 @@ const Root = styled(Grid)(({ theme }) => ({
 
 const BootloaderCheck = (props: any) => {
   const { connected, inBootloader } = useConnection();
+  const { langStrings } = useI18n();
 
   const {
     startDeviceUpdate,
@@ -92,7 +93,7 @@ const BootloaderCheck = (props: any) => {
     logger.info('Initiating device update from bootloader check');
     if (!deviceConnection) {
       logger.info('Failed due to device not connected');
-      setDisplayErrorMessage('Please connect the device and try again.');
+      setDisplayErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
       setUpdated(-1);
       setIsCompleted(-1);
       return;

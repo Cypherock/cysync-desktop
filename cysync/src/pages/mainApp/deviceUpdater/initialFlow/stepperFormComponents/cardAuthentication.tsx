@@ -15,7 +15,8 @@ import {
   DeviceConnectionState,
   FeedbackState,
   useConnection,
-  useFeedback
+  useFeedback,
+  useI18n
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../../../utils/compareVersion';
@@ -133,6 +134,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
   } = useCardAuth(true);
 
   const feedback = useFeedback();
+  const { langStrings } = useI18n();
 
   useEffect(() => {
     Analytics.Instance.event(
@@ -332,7 +334,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
 
     if (deviceConnectionState !== DeviceConnectionState.IN_TEST_APP) {
       setShowRetry(true);
-      setErrorMsg('Please connect the device and try again.');
+      setErrorMsg(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
       return;
     }
 

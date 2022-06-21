@@ -1,5 +1,10 @@
 import { I18nStrings } from './type';
 
+// NOMENCLATURE
+// Cypherock X1 Device: The hardware device
+// Cypherock X1 Card: The 4 cards
+// Cypherock X1 Wallet: Cypherock X1 Device + Cypherock X1 Card
+
 const en: I18nStrings = {
   ERRORS: {
     UNKNOWN_FLOW_ERROR:
@@ -13,7 +18,7 @@ const en: I18nStrings = {
     DEVICE_NOT_CONNECTED:
       'Error Code: HD_INIT_1001 | Please connect the cypherock X1 wallet before proceeding with this process',
     DEVICE_DISCONNECTED_IN_FLOW:
-      'Hardware Wallet disconnected. Please reconnect the Cypherock X1 wallet',
+      'Error Code: HD_INIT_1002 | Device disconnected. Please reconnect the Cypherock X1 device and try again',
     DEVICE_TIMEOUT_ERROR:
       'Some internal error occurred\n This maybe due to inactivity on the Cypherock X1 wallet',
     DEVICE_NOT_READY:

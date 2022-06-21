@@ -17,6 +17,7 @@ import { useDeviceUpgrade } from '../../../../../store/hooks/flows';
 import {
   FeedbackState,
   useFeedback,
+  useI18n,
   useNetwork
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
@@ -104,6 +105,8 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     inBackgroundProcess
   } = useDeviceUpgrade(true);
 
+  const { langStrings } = useI18n();
+
   const refreshComponent = () => {
     handleRetry();
   };
@@ -133,7 +136,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     logger.info('Initiating device update from initial setup in main');
     if (!deviceConnection) {
       logger.info('Failed due to device not connected');
-      setDisplayErrorMessage('Please connect the device and try again.');
+      setDisplayErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
       setUpdated(-1);
       setIsCompleted(-1);
       return () => {

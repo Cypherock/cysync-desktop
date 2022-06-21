@@ -199,7 +199,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     }
 
     if (deviceConnectionState !== DeviceConnectionState.IN_TEST_APP) {
-      setErrorMsg('Please connect the device and try again.');
+      setErrorMsg(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
       return;
     }
 

@@ -34,6 +34,7 @@ import {
   hexToVersion,
   inTestApp
 } from '../../../../../../utils/compareVersion';
+import { formatErrorMessage } from '../../../../../../utils/errorHandler';
 import logger from '../../../../../../utils/logger';
 
 import Authentication from './deviceUpgradeFormComponents/authentication';
@@ -439,7 +440,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     attachDeviceLogs: false,
     categories: ['Report'],
     category: 'Report',
-    description: displayErrorMessage || errorMessage,
+    description: formatErrorMessage(displayErrorMessage || errorMessage),
     descriptionError: '',
     email: '',
     emailError: '',
@@ -565,7 +566,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             color="textSecondary"
             style={{ margin: '1rem 0rem 6rem' }}
           >
-            {displayErrorMessage}
+            {formatErrorMessage(displayErrorMessage, true)}
           </Typography>
           <div className={classes.errorButtons}>
             <CustomButton
