@@ -272,7 +272,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       if (isInitial) {
         setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL);
       } else {
-        setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY);
+        setDisplayErrorMessage(
+          formatErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY, true)
+        );
       }
 
       setUpdated(-1);

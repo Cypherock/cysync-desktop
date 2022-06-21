@@ -24,7 +24,7 @@ const en: I18nStrings = {
     DEVICE_WRITE_TIMEOUT:
       'Error Code: HD_COM_1005 | Write timeout: Did not receive ACK on time',
     DEVICE_NOT_READY:
-      'Please bring the device to the main menu before starting any process from the CySync App.',
+      'Error Code: HD_INIT_1003 | Please bring the device to the main menu before starting any process from the CySync App.',
     DEVICE_NOT_READY_IN_INITIAL:
       'Error connecting the device, please reconnect the device.',
     DEVICE_NOT_SUPPORTED:
