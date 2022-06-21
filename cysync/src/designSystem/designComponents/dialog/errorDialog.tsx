@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import React from 'react';
 
 import { useFeedback } from '../../../store/provider/feedbackProvider';
+import { formatErrorMessage } from '../../../utils/errorHandler';
 import prevent from '../../../utils/preventPropagation';
 import ErrorExclamation from '../../iconGroups/errorExclamation';
 import CustomButton from '../buttons/button';
@@ -115,7 +116,7 @@ const Error = (props: any) => {
           align="center"
           style={{ margin: '0.5rem 0', whiteSpace: 'pre-line' }}
         >
-          {text}
+          {formatErrorMessage(text)}
         </Typography>
         {detailedText && (
           <>
@@ -218,7 +219,7 @@ const errorDialog: React.FC<ErrorProps> = ({
         attachDeviceLogs: false,
         categories: ['Report'],
         category: 'Report',
-        description: text,
+        description: formatErrorMessage(text),
         descriptionError: '',
         email: '',
         emailError: '',

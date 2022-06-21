@@ -20,6 +20,7 @@ import {
   useNetwork
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
+import { formatErrorMessage } from '../../../../../utils/errorHandler';
 import logger from '../../../../../utils/logger';
 
 import {
@@ -244,7 +245,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
                 iconGroup={<ErrorExclamation />}
               />
               <Typography color="error" variant="h5">
-                {displayErrorMessage}
+                {formatErrorMessage(displayErrorMessage)}
               </Typography>
             </div>
             <div className={classes.errorButtons}>

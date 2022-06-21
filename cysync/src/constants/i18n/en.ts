@@ -11,7 +11,7 @@ const en: I18nStrings = {
       'Failed to communicate with the server. Please check your internet connection and try again later.',
 
     DEVICE_NOT_CONNECTED:
-      'Please connect the cypherock X1 wallet before proceeding with this process',
+      'Error Code: HD_INIT_1001 | Please connect the cypherock X1 wallet before proceeding with this process',
     DEVICE_DISCONNECTED_IN_FLOW:
       'Hardware Wallet disconnected. Please reconnect the Cypherock X1 wallet',
     DEVICE_TIMEOUT_ERROR:

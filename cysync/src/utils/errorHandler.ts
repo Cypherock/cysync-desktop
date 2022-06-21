@@ -21,5 +21,19 @@ const setErrorHandler = () => {
   };
 };
 
+/**
+ * A util function to format error messages.
+ * @param errorMsg The error message to format.
+ * @param onlySendText - If true, only the error message will be sent.
+ * @returns
+ */
+const formatErrorMessage = (errorMsg: string, onlySendText = false) => {
+  const error = errorMsg.split('|');
+  if (onlySendText) return error[1];
+  return error.join('\n');
+};
+
 // Run as soon as imported, to set the handler before other imports
 setErrorHandler();
+
+export { formatErrorMessage };
