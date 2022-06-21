@@ -383,8 +383,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const { deviceConnection, deviceSdkVersion, beforeFlowStart, setIsInFlow } =
     useConnection();
 
-  const intTransactionFee = parseInt(transactionFee, 10) || 0;
-  const [mediumFee, setMediumFee] = useState(intTransactionFee);
+  const floatTransactionFee = parseFloat(transactionFee) || 0;
+  const [mediumFee, setMediumFee] = useState(floatTransactionFee);
   const [isMediumFeeLoading, setIsMediumFeeLoading] = useState(false);
   const [mediumFeeError, setMediumFeeError] = useState(false);
 
@@ -404,6 +404,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     return prevInfo[coinDetails.slug];
   };
 
+  // TODO: This parameter should be dynamic as it depends on the coin and network congestion
   const lowFeePercentage = 0.5;
 
   // Stores mediumFee for the coin in localStorage
@@ -510,7 +511,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           coinDetails.slug,
           token
         ),
-        fees: intTransactionFee,
+        fees: floatTransactionFee,
         isSendAll: maxSend,
         data: {
           gasLimit,
@@ -557,7 +558,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           <CustomSlider
             handleTransactionFeeChangeSlider={handleTransactionFeeChangeSlider}
             mediumFee={mediumFee}
-            fee={intTransactionFee}
+            fee={floatTransactionFee}
           />
           {mediumFeeError && getFeeErrorInfo()}
         </>
@@ -777,7 +778,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           </Typography>
         </div>
         {getFeeInput()}
-        {intTransactionFee < lowFeePercentage * mediumFee && (
+        {floatTransactionFee < lowFeePercentage * mediumFee && (
           <div style={{ textAlign: 'center' }}>
             <Typography
               className="text"

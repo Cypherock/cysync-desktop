@@ -144,6 +144,8 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
     handleTransactionFeeChangeSlider(v);
   };
 
+  const step = mediumFee < 5 ? 0.1 : 0.2;
+
   return (
     <Root className={classes.root}>
       <div className={classes.labels}>
@@ -154,9 +156,9 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
       <IOSSlider
         aria-label="ios slider"
         value={fee}
-        min={1}
+        min={0}
         max={mediumFee * 2}
-        step={1}
+        step={step} // number of steps is dynamically calculated based on the mediumFee
         onChange={handleChange}
         valueLabelDisplay={valueLabelDisplay}
         valueLabelFormat={valueLabelFormat}
