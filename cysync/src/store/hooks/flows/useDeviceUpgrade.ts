@@ -123,7 +123,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     logger.info('Initiating device update from settings');
 
     if (!beforeFlowStart(true)) {
-      setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+      setDisplayErrorMessage(
+        formatErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED, true)
+      );
       setIsCompleted(-1);
       return;
     }
@@ -171,10 +173,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         logger.error('Error in getting firmware version');
         logger.error(error);
         if (error && error.response) {
-          setDisplayErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
+          setDisplayErrorMessage(
+            formatErrorMessage(langStrings.ERRORS.NETWORK_ERROR, true)
+          );
         } else {
           setDisplayErrorMessage(
-            langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE
+            formatErrorMessage(langStrings.ERRORS.NETWORK_UNREACHABLE, true)
           );
         }
         setUpdateDownloaded(-1);
@@ -235,7 +239,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   const handleDeviceUpgrade = async () => {
     if (!deviceConnection) {
       logger.error('Device is not connected');
-      setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+      setDisplayErrorMessage(
+        formatErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED, true)
+      );
       setUpdated(-1);
       setApproved(-1);
       setIsCompleted(-1);
@@ -302,19 +308,28 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           ].includes(err.errorType)
         ) {
           setDisplayErrorMessage(
-            langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW
+            formatErrorMessage(
+              langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW,
+              true
+            )
           );
         } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+          setDisplayErrorMessage(
+            formatErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED, true)
+          );
         } else if (err.errorType === DeviceErrorType.WRITE_TIMEOUT) {
           setErrorMessage(langStrings.ERRORS.DEVICE_WRITE_TIMEOUT);
         } else if (err.errorType === DeviceErrorType.READ_TIMEOUT) {
           setErrorMessage(langStrings.ERRORS.DEVICE_READ_TIMEOUT);
         } else {
-          setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+          setDisplayErrorMessage(
+            formatErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR, true)
+          );
         }
       } else {
-        setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        setDisplayErrorMessage(
+          formatErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR, true)
+        );
       }
       setUpdated(-1);
       setApproved(-1);
@@ -355,7 +370,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setIsInFlow(true);
       logger.error('DeviceUpgrade: Some error occurred.');
       logger.error(e);
-      setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+      setDisplayErrorMessage(
+        formatErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR, true)
+      );
       deviceUpdater.removeAllListeners();
       setIsDeviceUpdating(false);
       setBlockNewConnection(false);
@@ -370,7 +387,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     if (updateDownloaded === 2) {
       logger.info('Running device update');
       if (!beforeFlowStart(true)) {
-        setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+        setDisplayErrorMessage(
+          formatErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED)
+        );
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
         setBlockNewConnection(false);

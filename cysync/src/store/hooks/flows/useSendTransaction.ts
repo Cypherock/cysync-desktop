@@ -18,6 +18,7 @@ import BigNumber from 'bignumber.js';
 import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
 
+import { ErrorObject } from '../../../constants/i18n';
 import logger from '../../../utils/logger';
 import { addressDb, coinDb, transactionDb } from '../../database';
 import { useI18n } from '../../provider';
@@ -124,8 +125,8 @@ export interface UseSendTransactionValues {
   setDeviceConnected: React.Dispatch<React.SetStateAction<boolean>>;
   completed: boolean;
   setCompleted: React.Dispatch<React.SetStateAction<boolean>>;
-  errorMessage: string;
-  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  errorObj: ErrorObject;
+  setErrorObj: React.Dispatch<React.SetStateAction<ErrorObject>>;
   coinsConfirmed: boolean;
   metadataSent: boolean;
   verified: boolean;
@@ -177,8 +178,8 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [passphraseEntered, setPassphraseEntered] = useState(false);
   const [cardsTapped, setCardsTapped] = useState(false);
   const [signedTxn, setSignedTxn] = useState('');
-  const [externalErrorMsg, setExternalErrorMsg] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [externalErrorObj, setExternalErrorObj] = useState<ErrorObject>();
+  const [errorObj, setErrorObj] = useState<ErrorObject>();
   const [hash, setHash] = useState('');
   const [metadataSent, setMetadataSent] = useState(false);
   const sendTransaction = new TransactionSender();
@@ -210,8 +211,8 @@ export const useSendTransaction: UseSendTransaction = () => {
 
   const clearAll = () => {
     setIsCancelled(false);
-    setErrorMessage('');
-    setExternalErrorMsg('');
+    setErrorObj(undefined);
+    setExternalErrorObj(undefined);
     resetHooks();
   };
 
@@ -270,11 +271,9 @@ export const useSendTransaction: UseSendTransaction = () => {
           // insufficient for the calculation
           if (error.isAxiosError) {
             if (error.response) {
-              setErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
+              setErrorObj(langStrings.ERRORS.NETWORK_ERROR);
             } else {
-              setErrorMessage(
-                langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE
-              );
+              setErrorObj(langStrings.ERRORS.NETWORK_UNREACHABLE);
             }
           } else {
             if (
@@ -321,7 +320,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           // Don't show any other error because it may be due to
           // incorrect amount or address which the user may change.
           if (e.isAxiosError && !e.response) {
-            setErrorMessage(langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE);
+            setErrorObj(langStrings.ERRORS.NETWORK_FAILURE);
           }
           resolve(null);
         });
@@ -365,7 +364,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         logger.error('SendTransaction: Failed - Device not connected', {
           coinType
         });
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+        setErrorObj(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
         return;
       }
 
@@ -379,7 +378,7 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       sendTransaction.on('cardError', () => {
         logger.error('SendTransaction: Card Error', { coinType });
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        setErrorObj(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
       });
 
       sendTransaction.on('error', err => {
@@ -389,16 +388,16 @@ export const useSendTransaction: UseSendTransaction = () => {
           err instanceof WalletError &&
           err.errorType === WalletErrorType.INSUFFICIENT_FUNDS
         ) {
-          setErrorMessage(
+          setErrorObj(
             langStrings.ERRORS.SEND_TXN_INSUFFICIENT_BALANCE(
               COINS[coinType].name
             )
           );
         } else if (err.isAxiosError) {
           if (err.response) {
-            setErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
+            setErrorObj(langStrings.ERRORS.NETWORK_ERROR);
           } else {
-            setErrorMessage(langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE);
+            setErrorObj(langStrings.ERRORS.NETWORK_UNREACHABLE);
           }
         } else if (err instanceof DeviceError) {
           if (
@@ -407,29 +406,29 @@ export const useSendTransaction: UseSendTransaction = () => {
               DeviceErrorType.CONNECTION_NOT_OPEN
             ].includes(err.errorType)
           ) {
-            setErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
+            setErrorObj(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
           } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-            setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+            setErrorObj(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
           } else if (err.errorType === DeviceErrorType.WRITE_TIMEOUT) {
-            setErrorMessage(langStrings.ERRORS.DEVICE_WRITE_TIMEOUT);
+            setErrorObj(langStrings.ERRORS.DEVICE_WRITE_TIMEOUT);
           } else if (err.errorType === DeviceErrorType.READ_TIMEOUT) {
-            setErrorMessage(langStrings.ERRORS.DEVICE_READ_TIMEOUT);
+            setErrorObj(langStrings.ERRORS.DEVICE_READ_TIMEOUT);
           } else {
-            setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+            setErrorObj(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
           }
         } else {
-          setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+          setErrorObj(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
         }
       });
 
       sendTransaction.on('locked', () => {
         logger.info('SendTransaction: Wallet Locked', { coinType });
-        setErrorMessage(langStrings.ERRORS.WALLET_LOCKED);
+        setErrorObj(langStrings.ERRORS.WALLET_LOCKED);
       });
 
       sendTransaction.on('notReady', () => {
         logger.info('SendTransaction: Device Locked', { coinType });
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY);
+        setErrorObj(langStrings.ERRORS.DEVICE_NOT_READY);
       });
 
       sendTransaction.on('coinsConfirmed', coins => {
@@ -440,7 +439,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.info('SendTransaction: Txn rejected from device', {
             coinType
           });
-          setErrorMessage(
+          setErrorObj(
             langStrings.ERRORS.SEND_TXN_REJECTED(COINS[coinType].name)
           );
         }
@@ -448,7 +447,7 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       sendTransaction.on('txnTooLarge', () => {
         logger.info('SendTransaction: Txn Too large', { coinType });
-        setErrorMessage(langStrings.ERRORS.SEND_TXN_SIZE_TOO_LARGE);
+        setErrorObj(langStrings.ERRORS.SEND_TXN_SIZE_TOO_LARGE);
       });
 
       sendTransaction.on('noWalletFound', (inPartialState: boolean) => {
@@ -457,15 +456,15 @@ export const useSendTransaction: UseSendTransaction = () => {
           inPartialState
         });
         if (inPartialState) {
-          setErrorMessage(langStrings.ERRORS.WALLET_PARTIAL_STATE);
+          setErrorObj(langStrings.ERRORS.WALLET_PARTIAL_STATE);
         } else {
-          setErrorMessage(langStrings.ERRORS.WALLET_NOT_FOUND);
+          setErrorObj(langStrings.ERRORS.WALLET_NOT_FOUND);
         }
       });
 
       sendTransaction.on('noWalletOnCard', () => {
         logger.info('SendTransaction: No Wallet on card', { coinType });
-        setErrorMessage(langStrings.ERRORS.WALLET_NOT_ON_CARD);
+        setErrorObj(langStrings.ERRORS.WALLET_NOT_ON_CARD);
       });
 
       sendTransaction.on('totalFees', fee => {
@@ -494,7 +493,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       sendTransaction.on('insufficientFunds', funds => {
         if (funds) {
           logger.info('SendTransaction: Not enough funds', { coinType });
-          setErrorMessage(
+          setErrorObj(
             langStrings.ERRORS.SEND_TXN_INSUFFICIENT_BALANCE(
               COINS[coinType].name
             )
@@ -512,7 +511,7 @@ export const useSendTransaction: UseSendTransaction = () => {
             coinType,
             command: val
           });
-          setErrorMessage(langStrings.ERRORS.SEND_TXN_REJECTED);
+          setErrorObj(langStrings.ERRORS.SEND_TXN_REJECTED);
 
           if (val === 0) {
             logger.info('SendTransaction: Txn was rejected on address screen');
@@ -537,9 +536,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           setPinEntered(true);
         } else {
           logger.info('SendTransaction: Pin incorrect', { coinType });
-          setErrorMessage(
-            langStrings.ERRORS.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
-          );
+          setErrorObj(langStrings.ERRORS.WALLET_LOCKED_DUE_TO_INCORRECT_PIN);
         }
       });
 
@@ -561,7 +558,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           setSignedTxn(txn);
         } else {
           logger.info('SendTransaction: Signed txn not found', { coinType });
-          setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+          setErrorObj(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
         }
       });
 
@@ -608,7 +605,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         setIsInFlow(false);
         logger.error('SendTransaction: Error', { coinType });
         logger.error(e);
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        setErrorObj(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
         sendTransaction.removeAllListeners();
       }
     };
@@ -752,7 +749,7 @@ export const useSendTransaction: UseSendTransaction = () => {
   /**
    * Only set the externalErrorMsg if the flow has not been canclled.
    *
-   * 2 different vars, errorMessage and externalErrorMsg are being used
+   * 2 different vars, errorObj and externalErrorMsg are being used
    * because we don't want to display the error after the flow has been
    * canclled.
    *
@@ -761,18 +758,18 @@ export const useSendTransaction: UseSendTransaction = () => {
    */
   useEffect(() => {
     if (isCancelled) {
-      setExternalErrorMsg('');
+      setExternalErrorObj(undefined);
     } else {
-      setExternalErrorMsg(errorMessage);
+      setExternalErrorObj(errorObj);
     }
-  }, [errorMessage]);
+  }, [errorObj]);
 
   /**
    * This will be used externally to clear the error msg
    */
-  const onSetErrorMsg = (msg: string) => {
-    setErrorMessage(msg);
-    setExternalErrorMsg(msg);
+  const onSetErrorMsg = (err: ErrorObject) => {
+    setErrorObj(err);
+    setExternalErrorObj(err);
   };
 
   return {
@@ -780,8 +777,8 @@ export const useSendTransaction: UseSendTransaction = () => {
     handleEstimateGasLimit,
     deviceConnected,
     setDeviceConnected,
-    errorMessage: externalErrorMsg,
-    setErrorMessage: onSetErrorMsg,
+    errorObj: externalErrorObj,
+    setErrorObj: onSetErrorMsg,
     completed,
     setCompleted,
     coinsConfirmed,

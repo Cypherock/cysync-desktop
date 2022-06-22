@@ -8,8 +8,11 @@ import { I18nStrings } from './type';
 const en: I18nStrings = {
   ERRORS: {
     // Unknown fatal errors
-    UNKNOWN_FLOW_ERROR:
-      'Some internal error occurred. Please disconnect and then reconnect the device and restart the process',
+    UNKNOWN_FLOW_ERROR: {
+      code: 'DS_MISC_5500',
+      message:
+        'Some internal error occurred. Please disconnect and then reconnect the device and restart the process'
+    },
     UNKNOWN_INTERNAL_ERROR: (msg: string) => ({
       code: 'DS_MISC_5500',
       message: msg
@@ -63,21 +66,31 @@ const en: I18nStrings = {
     DEVICE_NOT_SUPPORTED:
       'The connected device is not supported, please make sure that CySync and X1 wallet are up to date.',
 
-    WALLET_NOT_FOUND:
-      'This wallet does not seem to be present on the X1 wallet',
+    WALLET_NOT_FOUND: {
+      code: 'HD_OPS_1003',
+      message: 'This wallet does not seem to be present on the X1 device'
+    },
     WALLET_NOT_ON_CARD:
       'This wallet does not seem to be present on the X1 Cards',
-    WALLET_PARTIAL_STATE:
-      'This wallet is misconfigured. Please select the wallet from the main menu on the device to fix it.',
+    WALLET_PARTIAL_STATE: {
+      code: 'HD_OPS_1004',
+      message:
+        'This wallet is misconfigured. Please select the wallet from the main menu on the device to fix it.'
+    },
     ALL_WALLET_PARTIAL_STATE:
       'All wallets are misconfigured. Please go to the wallets from the main menu and configure them again.',
     NO_WALLET_ON_DEVICE:
-      'No wallet found. Please add a new wallet on the X1 wallet first',
-    WALLET_LOCKED:
-      'Wallet is locked on the device\nPlease unlock it before continuing with any operations on the wallet',
-    WALLET_LOCKED_DUE_TO_INCORRECT_PIN:
-      'Your wallet is now locked due to multiple incorrect attempts\nPlease unlock it before continuing with any operations on the wallet',
-
+      'No wallet found. Please add a new wallet on the X1 device first',
+    WALLET_LOCKED: {
+      code: 'HD_OPS_1005',
+      message:
+        'Wallet is locked on the device\nPlease unlock it before continuing with any operations on the wallet'
+    },
+    WALLET_LOCKED_DUE_TO_INCORRECT_PIN: {
+      code: 'HD_OPS_1006',
+      message:
+        'Your wallet is now locked due to multiple incorrect attempts\nPlease unlock it before continuing with any operations on the wallet'
+    },
     ADD_WALLET_REJECTED:
       'Request rejected on X1 wallet. Please restart the process to add a new wallet',
     ADD_WALLET_LIMIT_EXCEEDED: 'Cannot add more than 4 wallets.',

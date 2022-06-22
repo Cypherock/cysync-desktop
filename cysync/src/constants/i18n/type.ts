@@ -5,7 +5,7 @@ export interface ErrorObject {
 
 export interface I18nStrings {
   ERRORS: {
-    UNKNOWN_FLOW_ERROR: string;
+    UNKNOWN_FLOW_ERROR: ErrorObject;
     UNKNOWN_INTERNAL_ERROR: (msg: string) => ErrorObject;
 
     NETWORK_UNREACHABLE: ErrorObject;
@@ -20,13 +20,13 @@ export interface I18nStrings {
     DEVICE_NOT_READY_IN_INITIAL: ErrorObject;
     DEVICE_NOT_SUPPORTED: string;
 
-    WALLET_NOT_FOUND: string;
+    WALLET_NOT_FOUND: ErrorObject;
     WALLET_NOT_ON_CARD: string;
-    WALLET_PARTIAL_STATE: string;
+    WALLET_PARTIAL_STATE: ErrorObject;
     ALL_WALLET_PARTIAL_STATE: string;
     NO_WALLET_ON_DEVICE: string;
-    WALLET_LOCKED: string;
-    WALLET_LOCKED_DUE_TO_INCORRECT_PIN: string;
+    WALLET_LOCKED: ErrorObject;
+    WALLET_LOCKED_DUE_TO_INCORRECT_PIN: ErrorObject;
 
     ADD_WALLET_REJECTED: string;
     ADD_WALLET_LIMIT_EXCEEDED: string;
