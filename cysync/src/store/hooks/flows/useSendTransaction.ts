@@ -98,6 +98,14 @@ export const verifyAddress = (address: string, coin: string) => {
   if (!coinDetails) {
     throw new Error(`Cannot find coin details for coin: ${coin}`);
   }
+
+  if (coinDetails.group === coinGroup.Near) {
+    const regex =
+      coinDetails.validatorNetworkType === 'testnet'
+        ? /^([a-z0-9]{2,56}[-_]?)+\.testnet$|^[a-f0-9]{64}$/
+        : /^([a-z0-9]{2,59}[-_]?)+\.near$|^[a-f0-9]{64}$/;
+    return regex.test(address);
+  }
   return WAValidator.validate(
     address,
     coinDetails.validatorCoinName,
@@ -268,8 +276,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputList,
           fees,
           isSendAll,
-          data,
-          transactionDb
+          data
         )
         .then(() => {
           setEstimationError(undefined);
@@ -289,10 +296,7 @@ export const useSendTransaction: UseSendTransaction = () => {
               );
             }
           } else {
-            if (
-              error instanceof WalletError &&
-              error.errorType === WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE
-            )
+            if (error instanceof WalletError)
               setEstimationError(
                 langStrings.ERRORS.SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE
               );
@@ -604,7 +608,6 @@ export const useSendTransaction: UseSendTransaction = () => {
           connection,
           sdkVersion,
           addressDB: addressDb,
-          transactionDB: transactionDb,
           walletId,
           pinExists,
           passphraseExists,
