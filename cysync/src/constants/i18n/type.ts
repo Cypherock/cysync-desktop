@@ -6,9 +6,11 @@ export interface ErrorObject {
 export interface I18nStrings {
   ERRORS: {
     UNKNOWN_FLOW_ERROR: string;
+    UNKNOWN_INTERNAL_ERROR: (msg: string) => ErrorObject;
 
-    NETWORK_ERROR: string;
-    NETWORK_ERROR_WITH_NO_RESPONSE: string;
+    NETWORK_UNREACHABLE: ErrorObject;
+    NETWORK_ERROR: ErrorObject;
+    NETWORK_FAILURE: ErrorObject;
 
     DEVICE_NOT_CONNECTED: ErrorObject;
     DEVICE_DISCONNECTED_IN_FLOW: ErrorObject;

@@ -3,8 +3,11 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import { version } from '../../../package.json';
+import { ErrorObject } from '../../constants/i18n';
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
 import logger from '../../utils/logger';
+
+import { useI18n } from './i18nProvider';
 
 export interface Tutorial {
   _id: string;
@@ -20,7 +23,7 @@ export interface TutorialContextInterface {
   isLoading: boolean;
   isFetched: boolean;
   getAll: () => void;
-  errorMsg: string;
+  errorObj: ErrorObject;
 }
 
 export const TutorialContext: React.Context<TutorialContextInterface> =
@@ -32,12 +35,14 @@ export const TutorialProvider: React.FC = ({ children }) => {
     TutorialContextInterface['tutorials']
   >([]);
   const [isFetched, setIsFetched] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorObj, setErrorObj] = useState<ErrorObject>(undefined);
+
+  const { langStrings } = useI18n();
 
   const getAll = async () => {
     if (isLoading) return;
     setIsLoading(true);
-    setErrorMsg('');
+    setErrorObj(undefined);
 
     try {
       const res = await tutorialServer.getAll(version).request();
@@ -52,17 +57,15 @@ export const TutorialProvider: React.FC = ({ children }) => {
 
       if (error.isAxiosError) {
         if (error.response) {
-          setErrorMsg(
-            'Some internal error occurred while communicating with the server. Please try again later.'
-          );
+          setErrorObj(langStrings.ERRORS.NETWORK_ERROR);
         } else {
-          setErrorMsg(
-            'Failed to communicate with the server. Please check your internet connection and try again later.'
-          );
+          setErrorObj(langStrings.ERRORS.NETWORK_UNREACHABLE);
         }
       } else {
-        setErrorMsg(
-          'Some internal error occurred while fetching the tutorials.'
+        setErrorObj(
+          langStrings.ERRORS.UNKNOWN_INTERNAL_ERROR(
+            'Some internal error occurred while fetching the tutorials.'
+          )
         );
       }
     } finally {
@@ -77,13 +80,13 @@ export const TutorialProvider: React.FC = ({ children }) => {
         isLoading,
         isFetched,
         getAll,
-        errorMsg
+        errorObj
       }}
     >
       <ErrorDialog
-        open={!!errorMsg}
-        handleClose={() => setErrorMsg('')}
-        text={errorMsg}
+        open={!!errorObj}
+        handleClose={() => setErrorObj(undefined)}
+        error={errorObj}
         actionText="Retry"
         handleAction={() => getAll()}
         flow="Fetching Tutorials"

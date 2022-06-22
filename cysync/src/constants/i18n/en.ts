@@ -7,14 +7,31 @@ import { I18nStrings } from './type';
 
 const en: I18nStrings = {
   ERRORS: {
+    // Unknown fatal errors
     UNKNOWN_FLOW_ERROR:
       'Some internal error occurred. Please disconnect and then reconnect the device and restart the process',
+    UNKNOWN_INTERNAL_ERROR: (msg: string) => ({
+      code: 'DS_MISC_5500',
+      message: msg
+    }),
 
-    NETWORK_ERROR:
-      'Some internal error occurred while communicating with the server. Please try again later.',
-    NETWORK_ERROR_WITH_NO_RESPONSE:
-      'Failed to communicate with the server. Please check your internet connection and try again later.',
+    // Network, Server
+    NETWORK_UNREACHABLE: {
+      code: 'DS_CONN_2001',
+      message:
+        'Failed to communicate with the server. Please check your internet connection and try again later.'
+    },
+    NETWORK_ERROR: {
+      code: 'DS_CONN_3001',
+      message:
+        'Some internal error occurred while communicating with the server. Please try again later.'
+    },
+    NETWORK_FAILURE: {
+      code: 'DS_CONN_3002',
+      message: 'Unexpected response from server'
+    },
 
+    // Device Communication, Connection
     DEVICE_NOT_CONNECTED: {
       code: 'HD_INIT_1001',
       message:
