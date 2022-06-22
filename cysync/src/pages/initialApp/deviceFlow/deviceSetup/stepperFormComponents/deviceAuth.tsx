@@ -15,7 +15,8 @@ import {
   DeviceConnectionState,
   FeedbackState,
   useConnection,
-  useFeedback
+  useFeedback,
+  useI18n
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../../../utils/compareVersion';
@@ -96,6 +97,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
   } = useDeviceAuth(true);
 
   const feedback = useFeedback();
+  const { langStrings } = useI18n();
 
   useEffect(() => {
     Analytics.Instance.event(
