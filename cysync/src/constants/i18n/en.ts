@@ -18,15 +18,15 @@ const en: I18nStrings = {
     DEVICE_NOT_CONNECTED:
       'Error Code: HD_INIT_1001 | Please connect the cypherock X1 wallet before proceeding with this process',
     DEVICE_DISCONNECTED_IN_FLOW:
-      'Error Code: HD_INIT_1002 | Device disconnected. Please reconnect the Cypherock X1 device and try again',
+      'Error Code: HD_COM_1004 | Device disconnected. Please reconnect the Cypherock X1 device and try again',
     DEVICE_READ_TIMEOUT:
       'Error Code: HD_COM_1004 | Read timeout: Did not receive expected command on time from device',
     DEVICE_WRITE_TIMEOUT:
       'Error Code: HD_COM_1005 | Write timeout: Did not receive ACK on time',
     DEVICE_NOT_READY:
-      'Error Code: HD_INIT_1003 | Please bring the device to the main menu before starting any process from the CySync App.',
+      'Error Code: HD_COM_1001 | Please bring the device to the main menu before starting any process from the CySync App.',
     DEVICE_NOT_READY_IN_INITIAL:
-      'Error Code: HD_INIT_1004 | Error connecting the device, please reconnect the device.',
+      'Error Code: HD_COM_1002 | Error connecting the device, please reconnect the device.',
     DEVICE_NOT_SUPPORTED:
       'The connected device is not supported, please make sure that CySync and X1 wallet are up to date.',
 
