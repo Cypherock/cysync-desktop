@@ -8,6 +8,7 @@ import React from 'react';
 
 import { useFeedback } from '../../../store/provider/feedbackProvider';
 import { formatErrorMessage } from '../../../utils/errorHandler';
+import logger from '../../../utils/logger';
 import prevent from '../../../utils/preventPropagation';
 import ErrorExclamation from '../../iconGroups/errorExclamation';
 import CustomButton from '../buttons/button';
@@ -77,6 +78,10 @@ const Error = (props: any) => {
   } = props;
 
   const [collapseTab, setCollapseTab] = React.useState(false);
+
+  React.useEffect(() => {
+    logger.error(text);
+  }, []);
 
   const getAdvanceText = () => {
     if (advanceText.length > 200) {
