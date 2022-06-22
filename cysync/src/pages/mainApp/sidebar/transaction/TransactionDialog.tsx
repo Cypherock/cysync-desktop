@@ -1,7 +1,8 @@
-import { ETHCOINS } from '@cypherock/communication';
+import { ETHCOINS, NEARCOINS } from '@cypherock/communication';
 import {
   bitcoin as bitcoinServer,
-  eth as ethServer
+  eth as ethServer,
+  near as nearServer
 } from '@cypherock/server-wrapper';
 import CopyIcon from '@mui/icons-material/FileCopyOutlined';
 import Chip from '@mui/material/Chip';
@@ -174,6 +175,13 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           network: coin.network,
           txHash: txn.hash,
           isConfirmed: txn.confirmations && txn.confirmations > 0
+        })
+      );
+    } else if (NEARCOINS[txn.coin]) {
+      shell.openExternal(
+        nearServer.transaction.getOpenTxnLink({
+          network: NEARCOINS[txn.coin].network,
+          txHash: txn.hash
         })
       );
     } else {

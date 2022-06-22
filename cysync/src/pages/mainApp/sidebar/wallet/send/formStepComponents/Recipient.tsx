@@ -456,6 +456,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   let validatedAddresses: any[any] = [];
 
   const isEthereum = COINS[coinDetails.slug].group === coinGroup.Ethereum;
+  const isNear = COINS[coinDetails.slug].group === coinGroup.Near;
 
   const handleCheckAddresses = (skipEmpty = false) => {
     let isValid = true;
@@ -608,7 +609,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   return (
     <Root container className={root}>
-      {!isEthereum && (
+      {!isEthereum && !isNear && (
         <ButtonGroup
           disableElevation
           aria-label="outlined secondary button group"
@@ -771,33 +772,35 @@ const Recipient: React.FC<StepComponentProps> = props => {
           </Grid>
         </Grid>
       )}
-      <div className={networkFees}>
-        <div className={networkLabel}>
-          <Typography className="text" color="textPrimary">
-            {`Network Fees ${isEthereum ? '( Gas Price )' : ''} :`}
-          </Typography>
-          <SwitchButton completed={feeType} handleChange={handleFeeType} />
-          <Typography color="secondary">
-            {feeType ? 'Slider' : 'Manual'}
-          </Typography>
-        </div>
-        {getFeeInput()}
-        {intTransactionFee < lowFeePercentage * mediumFee && (
-          <div style={{ textAlign: 'center' }}>
-            <Typography
-              className="text"
-              color="secondary"
-              style={{ margin: 'auto', marginTop: '1.5rem' }}
-            >
-              <AlertIcon
-                className={classes.primaryColor}
-                style={{ marginRight: '5px', verticalAlign: 'bottom' }}
-              />
-              Transaction might be cancelled due to low fees
+      {!isNear && (
+        <div className={networkFees}>
+          <div className={networkLabel}>
+            <Typography className="text" color="textPrimary">
+              {`Network Fees ${isEthereum ? '( Gas Price )' : ''} :`}
+            </Typography>
+            <SwitchButton completed={feeType} handleChange={handleFeeType} />
+            <Typography color="secondary">
+              {feeType ? 'Slider' : 'Manual'}
             </Typography>
           </div>
-        )}
-      </div>
+          {getFeeInput()}
+          {intTransactionFee < lowFeePercentage * mediumFee && (
+            <div style={{ textAlign: 'center' }}>
+              <Typography
+                className="text"
+                color="secondary"
+                style={{ margin: 'auto', marginTop: '1.5rem' }}
+              >
+                <AlertIcon
+                  className={classes.primaryColor}
+                  style={{ marginRight: '5px', verticalAlign: 'bottom' }}
+                />
+                Transaction might be cancelled due to low fees
+              </Typography>
+            </div>
+          )}
+        </div>
+      )}
       <div className={divider} />
       <div className={recipientFooter}>
         {sendTransaction.estimationError ? (

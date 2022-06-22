@@ -2,17 +2,20 @@ import {
   BtcCoinData,
   COINS,
   ERC20TOKENS,
-  EthCoinData
+  EthCoinData,
+  NearCoinData
 } from '@cypherock/communication';
 import {
   batch as batchServer,
   eth as ethServer,
   IRequestMetadata,
+  near as nearServer,
   v2 as v2Server
 } from '@cypherock/server-wrapper';
 import {
   formatEthAddress,
   generateEthAddressFromXpub,
+  generateNearAddressFromXpub,
   getEthAmountFromInput
 } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
@@ -77,6 +80,16 @@ export const getRequestsMetadata = (
       )
       .getMetadata();
     return [ethTxnMetadata, erc20Metadata];
+  }
+
+  if (coin instanceof NearCoinData) {
+    const address = generateNearAddressFromXpub(item.xpub);
+
+    const nearTxnMetadata = nearServer.transaction
+      .getHistory({ address, network: coin.network }, item.isRefresh)
+      .getMetadata();
+
+    return [nearTxnMetadata];
   }
 
   logger.warn('Invalid coin in sync queue', {

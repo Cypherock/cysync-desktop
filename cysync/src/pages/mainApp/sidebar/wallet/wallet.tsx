@@ -27,6 +27,7 @@ import Analytics from '../../../../utils/analytics';
 import AddCoinForm from './addCoin';
 import allCoins from './addCoin/coins';
 import EthereumOneCoin from './EthereumOneCoin';
+import NearOneCoin from './NearOneCoin';
 import OneCoin from './OneCoin';
 
 const PREFIX = 'Wallet';
@@ -460,6 +461,20 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                     >
                       {coinObj && coinObj.group === coinGroup.Ethereum ? (
                         <EthereumOneCoin
+                          initial={coin.slug.toUpperCase()}
+                          name={coinObj.name}
+                          holding={coin.displayBalance}
+                          value={coin.displayValue}
+                          price={coin.displayPrice}
+                          decimal={coinObj.decimal}
+                          isEmpty={coin.isEmpty}
+                          deleteCoin={deleteCoinByXpub}
+                          deleteHistory={deleteCoinHistory}
+                          walletId={selectedWallet._id}
+                          sortIndex={sortIndex}
+                        />
+                      ) : coinObj && coinObj.group === coinGroup.Near ? (
+                        <NearOneCoin
                           initial={coin.slug.toUpperCase()}
                           name={coinObj.name}
                           holding={coin.displayBalance}
