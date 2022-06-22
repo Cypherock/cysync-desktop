@@ -1,4 +1,4 @@
-import { coinGroup, COINS } from '@cypherock/communication';
+import { CoinGroup, COINS } from '@cypherock/communication';
 import { getServerUrl } from '@cypherock/server-wrapper';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
@@ -144,7 +144,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       logger.warn('Invalid coinType in addReceiveAddressHook: ' + coinType);
       return;
     }
-    if (coin.group === coinGroup.Ethereum) {
+    if (coin.group === CoinGroup.Ethereum) {
       return addReceiveAddressHookFromSocket(
         address,
         walletId,
@@ -174,7 +174,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       return;
     }
 
-    if (coin.group === coinGroup.Ethereum) {
+    if (coin.group === CoinGroup.Ethereum) {
       return addTxnConfirmAddressHookFromSocket(
         hash,
         coinType,
@@ -198,7 +198,7 @@ export const SocketProvider: React.FC = ({ children }) => {
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
-      if (coin && coin.group === coinGroup.Ethereum) {
+      if (coin && coin.group === CoinGroup.Ethereum) {
         addTxnConfirmAddressHook(
           pendingTxn.hash,
           pendingTxn.walletId,
@@ -213,7 +213,7 @@ export const SocketProvider: React.FC = ({ children }) => {
 
     for (const receiveAddr of allReceiveAddr) {
       const coin = COINS[receiveAddr.coinType];
-      if (coin && coin.group === coinGroup.Ethereum) {
+      if (coin && coin.group === CoinGroup.Ethereum) {
         addReceiveAddressHook(
           receiveAddr.address,
           receiveAddr.walletId,
@@ -236,7 +236,7 @@ export const SocketProvider: React.FC = ({ children }) => {
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
-      if (coin && coin.group === coinGroup.BitcoinForks) {
+      if (coin && coin.group === CoinGroup.BitcoinForks) {
         addTxnConfirmAddressHook(
           pendingTxn.hash,
           pendingTxn.walletId,
@@ -251,7 +251,7 @@ export const SocketProvider: React.FC = ({ children }) => {
 
     for (const receiveAddr of allReceiveAddr) {
       const coin = COINS[receiveAddr.coinType];
-      if (coin && coin.group === coinGroup.BitcoinForks) {
+      if (coin && coin.group === CoinGroup.BitcoinForks) {
         addReceiveAddressHook(
           receiveAddr.address,
           receiveAddr.walletId,

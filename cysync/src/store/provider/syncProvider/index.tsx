@@ -1,7 +1,7 @@
 import {
   ALLCOINS,
   BtcCoinData,
-  coinGroup,
+  CoinGroup,
   COINS,
   EthCoinData
 } from '@cypherock/communication';
@@ -239,7 +239,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         );
       }
 
-      if (coinData.group === coinGroup.Ethereum) {
+      if (coinData.group === CoinGroup.Ethereum) {
         addToQueue(
           new BalanceSyncItem({
             xpub: coin.xpub,

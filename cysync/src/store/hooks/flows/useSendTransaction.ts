@@ -1,6 +1,6 @@
 import {
   ALLCOINS as COINS,
-  coinGroup,
+  CoinGroup,
   DeviceConnection,
   DeviceError,
   DeviceErrorType,
@@ -687,7 +687,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         }
       }
 
-      if (coinObj.group === coinGroup.BitcoinForks) {
+      if (coinObj.group === CoinGroup.BitcoinForks) {
         if (totalFees) {
           amount = amount.minus(fees);
         }

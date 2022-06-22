@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS, coinGroup } from '@cypherock/communication';
+import { ALLCOINS as COINS, CoinGroup } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
@@ -146,7 +146,7 @@ export const usePortfolio: UsePortfolio = () => {
     let transactionHistory: Transaction[] = [];
 
     if (wallet && wallet !== 'null') {
-      if (coinData.group === coinGroup.ERC20Tokens) {
+      if (coinData.group === CoinGroup.ERC20Tokens) {
         const token = await tokenDb.getOne({
           walletId: wallet,
           slug: coinType
@@ -177,7 +177,7 @@ export const usePortfolio: UsePortfolio = () => {
         }
       );
     } else {
-      if (coinData.group === coinGroup.ERC20Tokens) {
+      if (coinData.group === CoinGroup.ERC20Tokens) {
         const tokens = await tokenDb.getAll({ slug: coinType });
         if (tokens.length === 0) return null;
         for (const token of tokens) {
@@ -239,7 +239,7 @@ export const usePortfolio: UsePortfolio = () => {
               prevTransactionAmount = prevTransactionAmount.plus(
                 new BigNumber(transaction.amount)
               );
-              if (coinData.group === coinGroup.ERC20Tokens) {
+              if (coinData.group === CoinGroup.ERC20Tokens) {
                 prevTransactionAmount = prevTransactionAmount.plus(
                   new BigNumber(transaction.fees || 0)
                 );
@@ -371,7 +371,7 @@ export const usePortfolio: UsePortfolio = () => {
         };
 
         if (walletId && walletId !== 'null') {
-          if (coinData.group === coinGroup.ERC20Tokens) {
+          if (coinData.group === CoinGroup.ERC20Tokens) {
             const token = await tokenDb.getOne({
               walletId,
               slug: coinType
@@ -387,7 +387,7 @@ export const usePortfolio: UsePortfolio = () => {
             else continue;
           }
         }
-        if (coinData.group === coinGroup.ERC20Tokens) {
+        if (coinData.group === CoinGroup.ERC20Tokens) {
           const tokens = await tokenDb.getAll({ slug: coinType });
           if (tokens.length === 0) continue;
           for (const token of tokens) {
