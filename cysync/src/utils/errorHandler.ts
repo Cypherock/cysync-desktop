@@ -1,5 +1,7 @@
 import { ipcRenderer } from 'electron';
 
+import { ErrorObject } from '../constants/i18n';
+
 import logger from './logger';
 import getUUID from './uuid';
 
@@ -23,14 +25,14 @@ const setErrorHandler = () => {
 
 /**
  * A util function to format error messages.
- * @param errorMsg The error message to format.
+ * @param errorMsg The error object.
  * @param onlySendText - If true, only the error message will be sent.
  * @returns
  */
-const formatErrorMessage = (errorMsg: string, onlySendText = false) => {
-  const error = errorMsg.split('|');
-  if (onlySendText) return error[1];
-  return error.join('\n');
+const formatErrorMessage = (error: ErrorObject, onlySendText = false) => {
+  const errorValues = Object.values(error);
+  if (onlySendText) return error.message;
+  return errorValues.join('\n');
 };
 
 // Run as soon as imported, to set the handler before other imports

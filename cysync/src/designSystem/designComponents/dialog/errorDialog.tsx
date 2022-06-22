@@ -6,6 +6,7 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React from 'react';
 
+import { ErrorObject } from '../../../constants/i18n';
 import { useFeedback } from '../../../store/provider/feedbackProvider';
 import { formatErrorMessage } from '../../../utils/errorHandler';
 import logger from '../../../utils/logger';
@@ -78,10 +79,6 @@ const Error = (props: any) => {
   } = props;
 
   const [collapseTab, setCollapseTab] = React.useState(false);
-
-  React.useEffect(() => {
-    logger.error(text);
-  }, []);
 
   const getAdvanceText = () => {
     if (advanceText.length > 200) {
@@ -189,7 +186,7 @@ const Error = (props: any) => {
 export interface ErrorProps {
   open: boolean;
   handleClose: () => void;
-  text: string;
+  error: ErrorObject;
   actionText?: string;
   closeText?: string;
   handleAction?: () => void;
@@ -203,7 +200,7 @@ export interface ErrorProps {
 const errorDialog: React.FC<ErrorProps> = ({
   open,
   handleClose,
-  text,
+  error,
   actionText,
   handleAction,
   closeText = 'Ok',
@@ -215,6 +212,10 @@ const errorDialog: React.FC<ErrorProps> = ({
 }: ErrorProps) => {
   const { showFeedback } = useFeedback();
 
+  React.useEffect(() => {
+    logger.error(error);
+  }, []);
+
   const handleFeedbackOpen = () => {
     showFeedback({
       isContact: true,
@@ -224,7 +225,7 @@ const errorDialog: React.FC<ErrorProps> = ({
         attachDeviceLogs: false,
         categories: ['Report'],
         category: 'Report',
-        description: formatErrorMessage(text),
+        description: formatErrorMessage(error),
         descriptionError: '',
         email: '',
         emailError: '',
@@ -246,7 +247,7 @@ const errorDialog: React.FC<ErrorProps> = ({
       restComponents={
         <Error
           advanceText={advanceText}
-          text={text}
+          text={formatErrorMessage(error)}
           closeText={closeText}
           disableAction={disableAction}
           handleClose={disableAction ? () => {} : handleClose}

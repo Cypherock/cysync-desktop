@@ -15,18 +15,34 @@ const en: I18nStrings = {
     NETWORK_ERROR_WITH_NO_RESPONSE:
       'Failed to communicate with the server. Please check your internet connection and try again later.',
 
-    DEVICE_NOT_CONNECTED:
-      'Error Code: HD_INIT_1001 | Please connect the cypherock X1 wallet before proceeding with this process',
-    DEVICE_DISCONNECTED_IN_FLOW:
-      'Error Code: HD_COM_1004 | Device disconnected. Please reconnect the Cypherock X1 device and try again',
-    DEVICE_READ_TIMEOUT:
-      'Error Code: HD_COM_1004 | Read timeout: Did not receive expected command on time from device',
-    DEVICE_WRITE_TIMEOUT:
-      'Error Code: HD_COM_1005 | Write timeout: Did not receive ACK on time',
-    DEVICE_NOT_READY:
-      'Error Code: HD_COM_1001 | Please bring the device to the main menu before starting any process from the CySync App.',
-    DEVICE_NOT_READY_IN_INITIAL:
-      'Error Code: HD_COM_1002 | Error connecting the device, please reconnect the device.',
+    DEVICE_NOT_CONNECTED: {
+      code: 'HD_INIT_1001',
+      message:
+        'Please connect the cypherock X1 wallet before proceeding with this process'
+    },
+    DEVICE_DISCONNECTED_IN_FLOW: {
+      code: 'HD_COM_1004',
+      message:
+        'Device disconnected. Please reconnect the Cypherock X1 device and try again'
+    },
+    DEVICE_READ_TIMEOUT: {
+      code: 'HD_COM_1006',
+      message:
+        'Read timeout: Did not receive expected command on time from device'
+    },
+    DEVICE_WRITE_TIMEOUT: {
+      code: 'HD_COM_1005',
+      message: 'Write timeout: Did not receive ACK on time'
+    },
+    DEVICE_NOT_READY: {
+      code: 'HD_COM_1001',
+      message:
+        'Please bring the device to the main menu before starting any process from the CySync App.'
+    },
+    DEVICE_NOT_READY_IN_INITIAL: {
+      code: 'HD_COM_1002',
+      message: 'Error connecting the device, please reconnect the device.'
+    },
     DEVICE_NOT_SUPPORTED:
       'The connected device is not supported, please make sure that CySync and X1 wallet are up to date.',
 

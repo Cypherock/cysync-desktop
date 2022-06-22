@@ -1,3 +1,8 @@
+export interface ErrorObject {
+  code: string;
+  message: string;
+}
+
 export interface I18nStrings {
   ERRORS: {
     UNKNOWN_FLOW_ERROR: string;
@@ -5,12 +10,12 @@ export interface I18nStrings {
     NETWORK_ERROR: string;
     NETWORK_ERROR_WITH_NO_RESPONSE: string;
 
-    DEVICE_NOT_CONNECTED: string;
-    DEVICE_DISCONNECTED_IN_FLOW: string;
-    DEVICE_READ_TIMEOUT: string;
-    DEVICE_WRITE_TIMEOUT: string;
-    DEVICE_NOT_READY: string;
-    DEVICE_NOT_READY_IN_INITIAL: string;
+    DEVICE_NOT_CONNECTED: ErrorObject;
+    DEVICE_DISCONNECTED_IN_FLOW: ErrorObject;
+    DEVICE_READ_TIMEOUT: ErrorObject;
+    DEVICE_WRITE_TIMEOUT: ErrorObject;
+    DEVICE_NOT_READY: ErrorObject;
+    DEVICE_NOT_READY_IN_INITIAL: ErrorObject;
     DEVICE_NOT_SUPPORTED: string;
 
     WALLET_NOT_FOUND: string;
