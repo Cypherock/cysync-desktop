@@ -26,7 +26,7 @@ const en: I18nStrings = {
     DEVICE_NOT_READY:
       'Error Code: HD_INIT_1003 | Please bring the device to the main menu before starting any process from the CySync App.',
     DEVICE_NOT_READY_IN_INITIAL:
-      'Error connecting the device, please reconnect the device.',
+      'Error Code: HD_INIT_1004 | Error connecting the device, please reconnect the device.',
     DEVICE_NOT_SUPPORTED:
       'The connected device is not supported, please make sure that CySync and X1 wallet are up to date.',
 

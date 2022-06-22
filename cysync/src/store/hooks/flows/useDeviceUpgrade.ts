@@ -270,7 +270,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     deviceUpdater.on('notReady', () => {
       logger.info('DeviceUpgrade: Device not ready');
       if (isInitial) {
-        setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL);
+        setDisplayErrorMessage(
+          formatErrorMessage(
+            langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL,
+            true
+          )
+        );
       } else {
         setDisplayErrorMessage(
           formatErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY, true)
