@@ -10,6 +10,7 @@ import {
   hexToVersion,
   inTestApp
 } from '../../../../../../../utils/compareVersion';
+import { DisplayError } from '../../../../../../../utils/errorHandler';
 import logger from '../../../../../../../utils/logger';
 import DynamicTextView from '../dynamicTextView';
 
@@ -17,6 +18,7 @@ interface Props {
   isCompleted: -1 | 0 | 1 | 2;
   setCompleted: React.Dispatch<React.SetStateAction<0 | 1 | -1 | 2>>;
   errorMessage: string;
+  errorObj: DisplayError;
   handleDeviceAuth: (options: HandleDeviceAuthOptions) => void;
   resetHooks: () => void;
   completed: boolean;
@@ -29,6 +31,7 @@ const Authentication: React.FC<Props> = ({
   isCompleted,
   setCompleted,
   errorMessage,
+  errorObj,
   handleDeviceAuth,
   resetHooks,
   completed,
@@ -66,7 +69,7 @@ const Authentication: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (verified === -1 || errorMessage) {
+    if (verified === -1 || errorMessage || errorObj) {
       logger.info('Device auth failed');
       setCompleted(-1);
     } else if (completed && verified === 2) {
@@ -77,7 +80,7 @@ const Authentication: React.FC<Props> = ({
   }, [verified, completed]);
 
   useEffect(() => {
-    if (isCompleted === -1 || errorMessage) {
+    if (isCompleted === -1 || errorMessage || errorObj) {
       Analytics.Instance.event(
         Analytics.Categories.DEVICE_UPDATE,
         Analytics.Actions.ERROR
@@ -88,7 +91,7 @@ const Authentication: React.FC<Props> = ({
         Analytics.Actions.COMPLETED
       );
     }
-  }, [isCompleted, errorMessage]);
+  }, [isCompleted, errorMessage, errorObj]);
 
   return (
     <Grid container>
@@ -109,6 +112,7 @@ Authentication.propTypes = {
   isCompleted: PropTypes.oneOf<-1 | 0 | 1 | 2>([-1, 0, 1, 2]).isRequired,
   setCompleted: PropTypes.func.isRequired,
   errorMessage: PropTypes.string.isRequired,
+  errorObj: PropTypes.instanceOf(DisplayError).isRequired,
   cancelDeviceAuth: PropTypes.func.isRequired,
   completed: PropTypes.bool.isRequired,
   confirmed: PropTypes.oneOf<-1 | 0 | 1 | 2>([-1, 0, 1, 2]).isRequired,

@@ -172,9 +172,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         if (error && error.response) {
           setDisplayErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
         } else {
-          setDisplayErrorMessage(
-            langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE
-          );
+          setDisplayErrorMessage(langStrings.ERRORS.NETWORK_UNREACHABLE);
         }
         setUpdateDownloaded(-1);
         setIsCompleted(-1);

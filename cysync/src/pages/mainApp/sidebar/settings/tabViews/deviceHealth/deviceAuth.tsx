@@ -258,6 +258,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     verified,
     resetHooks,
     errorMessage,
+    errorObj,
     cancelDeviceAuth,
     setErrorMessage,
     confirmed
@@ -321,6 +322,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
           isCompleted={isCompleted}
           setCompleted={setCompleted}
           errorMessage={errorMessage}
+          errorObj={errorObj}
           handleDeviceAuth={handleDeviceAuth}
           completed={completed}
           verified={verified}
@@ -351,11 +353,11 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     attachDeviceLogs: false,
     categories: ['Report'],
     category: 'Report',
-    description: errorMessage,
+    description: errorObj?.message || '',
     descriptionError: '',
     email: '',
     emailError: '',
-    subject: 'Reporting for Error (Authenticating Device)',
+    subject: `Reporting for Error ${errorObj?.code} (Authenticating Device)`,
     subjectError: ''
   };
 
@@ -423,11 +425,14 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
           >
             Device Authentication Failed
           </Typography>
+          <Typography color="textPrimary" style={{ margin: '1rem 0rem 6rem' }}>
+            {errorObj.code}
+          </Typography>
           <Typography
             color="textSecondary"
             style={{ margin: '1rem 0rem 6rem' }}
           >
-            {errorMessage}
+            {errorObj.message}
           </Typography>
           {verified === -1 ? (
             <div className={classes.errorButtons}>

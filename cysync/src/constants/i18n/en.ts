@@ -9,12 +9,11 @@ const en: I18nStrings = {
   ERRORS: {
     HD_INIT_1010:
       'Device disconnected. Please reconnect the Cypherock X1 device',
-    UNKNOWN_FLOW_ERROR:
-      'Some internal error occurred. Please disconnect and then reconnect the device and restart the process',
-
+    UNKNOWN_FLOW_ERROR: flow =>
+      `Some internal error occurred. Please disconnect and then reconnect the device and restart ${flow}`,
     NETWORK_ERROR:
       'Some internal error occurred while communicating with the server. Please try again later.',
-    NETWORK_ERROR_WITH_NO_RESPONSE:
+    NETWORK_UNREACHABLE:
       'Failed to communicate with the server. Please check your internet connection and try again later.',
 
     DEVICE_NOT_CONNECTED:

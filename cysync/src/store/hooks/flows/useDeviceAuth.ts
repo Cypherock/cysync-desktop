@@ -7,6 +7,13 @@ import { Device } from '@cypherock/database';
 import { DeviceAuthenticator } from '@cypherock/protocols';
 import { useState } from 'react';
 
+import Analytics from '../../../utils/analytics';
+import {
+  CyError,
+  CysyncError,
+  DisplayError,
+  handleErrors
+} from '../../../utils/errorHandler';
 import logger from '../../../utils/logger';
 import { deviceDb } from '../../database';
 import { useI18n } from '../../provider';
@@ -24,6 +31,7 @@ export interface UseDeviceAuthValues {
   handleDeviceAuth: (options: HandleDeviceAuthOptions) => Promise<void>;
   verified: 0 | -1 | 1 | 2;
   errorMessage: string;
+  errorObj: DisplayError;
   setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
   completed: boolean;
   confirmed: 0 | -1 | 1 | 2;
@@ -35,6 +43,7 @@ export type UseDeviceAuth = (isInitial?: boolean) => UseDeviceAuthValues;
 
 export const useDeviceAuth: UseDeviceAuth = isInitial => {
   const [errorMessage, setErrorMessage] = useState('');
+  const [errorObj, setErrorObj] = useState<CyError>(undefined);
   const [verified, setVerified] = useState<-1 | 0 | 1 | 2>(0);
   const [confirmed, setConfirmed] = useState<-1 | 0 | 1 | 2>(0);
   const [completed, setCompleted] = useState(false);
@@ -105,14 +114,17 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
 
     deviceAuth.on('error', err => {
       logger.error('DeviceAuth: Error occurred in device auth flow');
-      logger.error(err);
+      const cyError = new CyError();
       if (err.isAxiosError) {
         if (err.response) {
-          setErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
+          cyError.code = CysyncError.NETWORK_FAILURE;
+          cyError.message = langStrings.ERRORS.NETWORK_ERROR;
         } else {
-          setErrorMessage(langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE);
+          cyError.code = CysyncError.NETWORK_UNREACHABLE;
+          cyError.message = langStrings.ERRORS.NETWORK_UNREACHABLE;
         }
       } else if (err instanceof DeviceError) {
+        cyError.pushSubErrors(err);
         if (
           [
             DeviceErrorType.CONNECTION_CLOSED,
@@ -121,22 +133,34 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
         ) {
           setConfirmed(_confirmed => (_confirmed === 1 ? -1 : _confirmed));
           setVerified(_verified => (_verified === 1 ? -1 : _verified));
-          setErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
+          cyError.code = DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW;
+          cyError.message = langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW;
         } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+          cyError.code = DeviceErrorType.NOT_CONNECTED;
+          cyError.message = langStrings.ERRORS.DEVICE_NOT_CONNECTED;
         } else if (
           [
             DeviceErrorType.WRITE_TIMEOUT,
             DeviceErrorType.READ_TIMEOUT
           ].includes(err.errorType)
         ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
+          cyError.code = DeviceErrorType.TIMEOUT_ERROR;
+          cyError.message = langStrings.ERRORS.DEVICE_TIMEOUT_ERROR;
         } else {
-          setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+          cyError.code = DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR;
+          cyError.message = langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
+            Analytics.Categories.DEVICE_AUTH
+          );
         }
       } else {
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        // unknown flow error
+        cyError.code = CysyncError.UNKNOWN_FLOW_ERROR;
+        cyError.message = langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
+          Analytics.Categories.DEVICE_AUTH
+        );
       }
+      setErrorObj(cyError);
+      handleErrors(cyError);
     });
 
     deviceAuth.on('confirmed', (v: boolean) => {
@@ -219,6 +243,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
 
   return {
     errorMessage,
+    errorObj,
     setErrorMessage,
     cancelDeviceAuth,
     handleDeviceAuth,
