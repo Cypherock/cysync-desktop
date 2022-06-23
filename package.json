@@ -23,7 +23,8 @@
   },
   "dependencies": {
     "axios": "^0.26.1",
-    "fs-extra": "^10.0.0"
+    "fs-extra": "^10.0.0",
+    "near-api-js": "^0.45.1"
   },
   "devDependencies": {
     "husky": "^7.0.4",
