@@ -5,6 +5,7 @@ export interface I18nStrings {
     NETWORK_ERROR: string;
     NETWORK_ERROR_WITH_NO_RESPONSE: string;
 
+    HD_INIT_1010: string;
     DEVICE_NOT_CONNECTED: string;
     DEVICE_DISCONNECTED_IN_FLOW: string;
     DEVICE_TIMEOUT_ERROR: string;

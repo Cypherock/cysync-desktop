@@ -1,7 +1,14 @@
 import { I18nStrings } from './type';
 
+// NOMENCLATURE
+// Cypherock X1 Device: The hardware device
+// Cypherock X1 Card: The 4 cards
+// Cypherock X1 Wallet: Cypherock X1 Device + Cypherock X1 Card
+
 const en: I18nStrings = {
   ERRORS: {
+    HD_INIT_1010:
+      'Device disconnected. Please reconnect the Cypherock X1 device',
     UNKNOWN_FLOW_ERROR:
       'Some internal error occurred. Please disconnect and then reconnect the device and restart the process',
 
