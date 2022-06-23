@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import {
   Coin,
+  CustomAccount,
   InputOutput,
   IOtype,
   Token,
@@ -17,6 +18,13 @@ export interface DisplayCoin extends Coin {
 }
 
 export interface DisplayToken extends Token {
+  displayValue: string;
+  displayPrice: string;
+  displayBalance: string;
+  isEmpty: boolean;
+}
+
+export interface DisplayCustomAccount extends CustomAccount {
   displayValue: string;
   displayPrice: string;
   displayBalance: string;
