@@ -1,6 +1,6 @@
 import {
   ALLCOINS as COINS,
-  coinGroup,
+  CoinGroup,
   DeviceConnection,
   DeviceError,
   DeviceErrorType,
@@ -99,7 +99,7 @@ export const verifyAddress = (address: string, coin: string) => {
     throw new Error(`Cannot find coin details for coin: ${coin}`);
   }
 
-  if (coinDetails.group === coinGroup.Near) {
+  if (coinDetails.group === CoinGroup.Near) {
     const regex =
       coinDetails.validatorNetworkType === 'testnet'
         ? /^([a-z0-9]{2,56}[-_]?)+\.testnet$|^[a-f0-9]{64}$/
@@ -701,7 +701,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         }
       }
 
-      if (coinObj.group === coinGroup.BitcoinForks) {
+      if (coinObj.group === CoinGroup.BitcoinForks) {
         if (totalFees) {
           amount = amount.minus(fees);
         }

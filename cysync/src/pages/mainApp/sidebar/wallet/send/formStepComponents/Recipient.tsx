@@ -1,6 +1,6 @@
 import {
   ALLCOINS,
-  coinGroup,
+  CoinGroup,
   COINS,
   Erc20CoinData
 } from '@cypherock/communication';
@@ -455,8 +455,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   let validatedAddresses: any[any] = [];
 
-  const isEthereum = COINS[coinDetails.slug].group === coinGroup.Ethereum;
-  const isNear = COINS[coinDetails.slug].group === coinGroup.Near;
+  const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
+  const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
 
   const handleCheckAddresses = (skipEmpty = false) => {
     let isValid = true;

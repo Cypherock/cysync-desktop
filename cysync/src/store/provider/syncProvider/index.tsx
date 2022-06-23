@@ -1,11 +1,13 @@
 import {
   ALLCOINS,
   BtcCoinData,
-  coinGroup,
+  CoinGroup,
   COINS,
   EthCoinData,
   NearCoinData
 } from '@cypherock/communication';
+import { near } from '@cypherock/server-wrapper';
+import { NearWallet } from '@cypherock/wallet';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
@@ -14,10 +16,12 @@ import logger from '../../../utils/logger';
 import {
   Coin,
   coinDb,
+  customAccountDb,
   getTopBlock,
   priceHistoryDb,
   tokenDb,
-  transactionDb
+  transactionDb,
+  walletDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
@@ -258,7 +262,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         );
       }
 
-      if (coinData.group === coinGroup.Ethereum) {
+      if (coinData.group === CoinGroup.Ethereum) {
         addToQueue(
           new BalanceSyncItem({
             xpub: coin.xpub,
@@ -269,7 +273,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             isRefresh
           })
         );
-      } else if (coinData.group === coinGroup.Near) {
+      } else if (coinData.group === CoinGroup.Near) {
         addToQueue(
           new BalanceSyncItem({
             xpub: coin.xpub,
@@ -616,11 +620,48 @@ export const SyncProvider: React.FC = ({ children }) => {
   const reSync = async () => {
     logger.info('Sync: ReSyncing items');
 
+    await fetchAllCustomAccounts();
     await addBalanceRefresh({});
     await addHistoryRefresh({});
     await addPriceRefresh({});
     await addLatestPriceRefresh({});
     await notifications.updateLatest();
+  };
+
+  const fetchAllCustomAccounts = async () => {
+    const wallets = await walletDb.getAll();
+    for (const w of wallets) {
+      const coins = await coinDb.getAll({ walletId: w._id });
+      for (const coin of coins) {
+        const coinObj = COINS[coin.slug];
+        if (coinObj.group === CoinGroup.Near) {
+          const wallet = new NearWallet(coin.xpub, coinObj as NearCoinData);
+          const res = await near.wallet
+            .getAccounts({
+              address: wallet.nearPublicKey,
+              network: (coinObj as NearCoinData).network
+            })
+            .request();
+          const data = [];
+          for (const d of res.data) {
+            const bal = await near.wallet
+              .getBalance({
+                address: d.account_id,
+                network: (coinObj as NearCoinData).network
+              })
+              .request();
+            data.push({
+              name: d.account_id,
+              walletId: w._id,
+              coin: coinObj.abbr,
+              price: coin.price.toString(),
+              balance: bal.data.toString()
+            });
+          }
+          await customAccountDb.rebuild(data, { walletId: w._id });
+        }
+      }
+    }
   };
 
   const intervals = useRef<NodeJS.Timeout[]>([]);
@@ -661,6 +702,13 @@ export const SyncProvider: React.FC = ({ children }) => {
             })
             .catch(err => {
               logger.error('Sync: Transaction Refresh failed', err);
+            });
+          fetchAllCustomAccounts()
+            .then(() => {
+              logger.info('Sync: Custom Accounts Refresh completed');
+            })
+            .catch(err => {
+              logger.error('Sync: Custom Accounts Refresh failed', err);
             });
         }, 1000 * 60 * 60)
       );

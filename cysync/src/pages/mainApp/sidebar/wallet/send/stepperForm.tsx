@@ -1,6 +1,6 @@
 import {
   ALLCOINS as COINS,
-  coinGroup,
+  CoinGroup,
   Erc20CoinData,
   ERC20TOKENS,
   EthCoinData
@@ -477,7 +477,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       JSON.stringify(batchRecipientData)
     );
     let isValid = true;
-    const isEthereum = COINS[coinDetails.slug].group === coinGroup.Ethereum;
+    const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
     copyBatchRecipientData.forEach((elem, index) => {
       const amount = new BigNumber(
         elem.amount === undefined ? '' : elem.amount

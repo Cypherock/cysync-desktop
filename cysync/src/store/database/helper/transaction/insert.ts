@@ -1,4 +1,4 @@
-import { ALLCOINS, coinGroup, ERC20TOKENS } from '@cypherock/communication';
+import { ALLCOINS, CoinGroup, ERC20TOKENS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 
@@ -19,7 +19,7 @@ const isBtcFork = (coinStr: string) => {
     throw new Error('Invalid coin');
   }
 
-  return coin.group === coinGroup.BitcoinForks;
+  return coin.group === CoinGroup.BitcoinForks;
 };
 
 export const insertFromFullTxn = async (transaction: {

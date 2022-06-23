@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS, coinGroup } from '@cypherock/communication';
+import { ALLCOINS as COINS, CoinGroup } from '@cypherock/communication';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -459,7 +459,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                       value={{ coinDetails: coin }}
                       key={coin.slug}
                     >
-                      {coinObj && coinObj.group === coinGroup.Ethereum ? (
+                      {coinObj && coinObj.group === CoinGroup.Ethereum ? (
                         <EthereumOneCoin
                           initial={coin.slug.toUpperCase()}
                           name={coinObj.name}
@@ -473,7 +473,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                           walletId={selectedWallet._id}
                           sortIndex={sortIndex}
                         />
-                      ) : coinObj && coinObj.group === coinGroup.Near ? (
+                      ) : coinObj && coinObj.group === CoinGroup.Near ? (
                         <NearOneCoin
                           initial={coin.slug.toUpperCase()}
                           name={coinObj.name}
