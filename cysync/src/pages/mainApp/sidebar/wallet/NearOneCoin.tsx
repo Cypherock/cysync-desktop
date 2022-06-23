@@ -1,3 +1,5 @@
+import { ALLCOINS as COINS } from '@cypherock/communication';
+import { NearWallet } from '@cypherock/wallet';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -40,6 +42,7 @@ import prevent from '../../../../utils/preventPropagation';
 
 // import AddAccount from './addAccount';
 import { NearOneCoinProps, NearOneCoinPropTypes } from './OneCoinProps';
+import OneNearAccount from './OneNearAccount';
 import Recieve from './recieve';
 import Send from './send';
 
@@ -175,6 +178,9 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   const { selectedWallet } = useSelectedWallet();
 
   const { coinDetails } = useCurrentCoin();
+  const coin: any = COINS[coinDetails.slug];
+  const wallet = new NearWallet(coinDetails.xpub, coin);
+  const implicitAccount = wallet.address;
 
   const { beforeNetworkAction } = useConnection();
 
@@ -348,41 +354,49 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
             <Typography color="textPrimary">{`$${price}`}</Typography>
           </Grid>
           <Grid item xs={2} className={classes.actions}>
-            <Button
-              variant="text"
-              className={!isEmpty ? clsx(classes.orange) : clsx(classes.grey)}
-              onClick={handleSendFormOpen}
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={
-                    !isEmpty
-                      ? theme.palette.secondary.main
-                      : theme.palette.grey[500]
+            {!classes ? (
+              <>
+                <Button
+                  variant="text"
+                  className={
+                    !isEmpty ? clsx(classes.orange) : clsx(classes.grey)
                   }
-                />
-              }
-            >
-              Send
-            </Button>
-            <Divider orientation="vertical" className={classes.divider} />
-            <Button
-              variant="text"
-              className={clsx(classes.recieveButton)}
-              startIcon={
-                <Icon
-                  className={classes.icon}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletRecieve}
-                  color={theme.palette.info.main}
-                />
-              }
-              onClick={handleReceiveFormOpen}
-            >
-              Receive
-            </Button>
+                  onClick={handleSendFormOpen}
+                  startIcon={
+                    <Icon
+                      className={classes.icon}
+                      viewBox="0 0 14 15"
+                      icon={ICONS.walletSend}
+                      color={
+                        !isEmpty
+                          ? theme.palette.secondary.main
+                          : theme.palette.grey[500]
+                      }
+                    />
+                  }
+                >
+                  Send
+                </Button>
+                <Divider orientation="vertical" className={classes.divider} />
+                <Button
+                  variant="text"
+                  className={clsx(classes.recieveButton)}
+                  startIcon={
+                    <Icon
+                      className={classes.icon}
+                      viewBox="0 0 14 15"
+                      icon={ICONS.walletRecieve}
+                      color={theme.palette.info.main}
+                    />
+                  }
+                  onClick={handleReceiveFormOpen}
+                >
+                  Receive
+                </Button>
+              </>
+            ) : (
+              <></>
+            )}
           </Grid>
           <Grid item xs={1} className={classes.alignCenterCenter}>
             <CustomIconButton title="Delete Coin" onClick={handleDeleteOpen}>
@@ -405,6 +419,18 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
             <Grid container>
               <Grid item xs={12}>
                 <Collapse in={collapseTab} timeout="auto" unmountOnExit>
+                  <React.Fragment key={'test'}>
+                    <OneNearAccount
+                      initial={coinDetails.slug.toUpperCase()}
+                      name={implicitAccount}
+                      holding="1.00"
+                      price="0.00"
+                      decimal={0}
+                      value="0.00"
+                      isEmpty={false}
+                      walletId={walletId}
+                    />
+                  </React.Fragment>
                   <CoinCardBtn
                     onClick={(e: React.MouseEvent) => {
                       prevent(e);
