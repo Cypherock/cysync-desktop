@@ -19,7 +19,12 @@ export interface SyncProviderTypes {
   ) => void;
   addBalanceSyncItemFromCoin: (
     coin: Coin,
-    options: { token?: string; module?: string; isRefresh?: boolean }
+    options: {
+      token?: string;
+      module?: string;
+      isRefresh?: boolean;
+      customAccount?: string;
+    }
   ) => void;
   addPriceSyncItemFromCoin: (
     coin: Coin,
