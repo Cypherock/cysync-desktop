@@ -1,4 +1,9 @@
-import { ALLCOINS, COINS, Erc20CoinData } from '@cypherock/communication';
+import {
+  ALLCOINS,
+  CoinGroup,
+  COINS,
+  Erc20CoinData
+} from '@cypherock/communication';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { Typography } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -451,7 +456,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   let validatedAddresses: any[any] = [];
 
-  const isEthereum = (ALLCOINS[coinDetails.slug] || { isEth: false }).isEth;
+  const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
 
   const handleCheckAddresses = (skipEmpty = false) => {
     let isValid = true;

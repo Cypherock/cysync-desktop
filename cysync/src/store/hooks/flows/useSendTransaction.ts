@@ -1,5 +1,6 @@
 import {
   ALLCOINS as COINS,
+  CoinGroup,
   DeviceConnection,
   DeviceError,
   DeviceErrorType,
@@ -686,7 +687,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         }
       }
 
-      if (!coinObj.isEth && !coinObj.isErc20Token) {
+      if (coinObj.group === CoinGroup.BitcoinForks) {
         if (totalFees) {
           amount = amount.minus(fees);
         }
