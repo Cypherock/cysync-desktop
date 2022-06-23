@@ -7,6 +7,7 @@ export interface BalanceSyncItemOptions {
   module: string;
   ethCoin?: string;
   zpub?: string;
+  customAccount?: string;
   isRefresh?: boolean;
 }
 
@@ -19,12 +20,15 @@ export class BalanceSyncItem extends SyncItem {
 
   public ethCoin?: string;
 
+  public customAccount?: string;
+
   constructor({
     xpub,
     zpub,
     coinType,
     walletId,
     ethCoin,
+    customAccount,
     module,
     isRefresh
   }: BalanceSyncItemOptions) {
@@ -33,6 +37,7 @@ export class BalanceSyncItem extends SyncItem {
     this.zpub = zpub;
     this.walletId = walletId;
     this.ethCoin = ethCoin;
+    this.customAccount = customAccount;
   }
 
   equals(item: BalanceSyncItem | SyncItem) {
@@ -50,6 +55,7 @@ export class BalanceSyncItem extends SyncItem {
       coinType: this.coinType,
       walletId: this.walletId,
       ethCoin: this.ethCoin,
+      customAccount: this.customAccount,
       module: this.module,
       isRefresh: this.isRefresh
     });

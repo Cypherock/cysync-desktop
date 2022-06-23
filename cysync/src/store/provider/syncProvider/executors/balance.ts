@@ -17,7 +17,7 @@ import {
 } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
-import { coinDb, tokenDb } from '../../../database';
+import { coinDb, customAccountDb, tokenDb } from '../../../database';
 import { BalanceSyncItem } from '../types';
 
 export const getRequestsMetadata = (
@@ -69,7 +69,9 @@ export const getRequestsMetadata = (
       );
     }
   } else if (coin instanceof NearCoinData) {
-    const address = generateNearAddressFromXpub(item.xpub);
+    const address = item.customAccount
+      ? item.customAccount
+      : generateNearAddressFromXpub(item.xpub);
     const balanceMetadata = nearServer.wallet
       .getBalance(
         {
@@ -136,13 +138,20 @@ export const processResponses = async (
     const balanceRes = responses[0];
 
     const balance = new BigNumber(balanceRes.data);
-
-    await coinDb.updateTotalBalance({
-      xpub: item.xpub,
-      slug: item.coinType,
-      totalBalance: balance.toString(),
-      totalUnconfirmedBalance: '0'
-    });
+    if (item.customAccount) {
+      await customAccountDb.updateBalance({
+        walletId: item.walletId,
+        name: item.customAccount,
+        balance: balance.toString()
+      });
+    } else {
+      await coinDb.updateTotalBalance({
+        xpub: item.xpub,
+        slug: item.coinType,
+        totalBalance: balance.toString(),
+        totalUnconfirmedBalance: '0'
+      });
+    }
   } else {
     throw new Error('Invalid coin in balance sync item: ' + item.coinType);
   }

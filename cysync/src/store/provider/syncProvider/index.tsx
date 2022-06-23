@@ -53,7 +53,12 @@ export interface SyncContextInterface {
   reSync: () => void;
   addBalanceSyncItemFromCoin: (
     coin: Coin,
-    options: { token?: string; module?: string; isRefresh?: boolean }
+    options: {
+      token?: string;
+      module?: string;
+      isRefresh?: boolean;
+      customAccount?: string;
+    }
   ) => void;
   addHistorySyncItemFromCoin: (
     coin: Coin,
@@ -217,7 +222,10 @@ export const SyncProvider: React.FC = ({ children }) => {
     };
 
   const addBalanceSyncItemFromCoin: SyncProviderTypes['addBalanceSyncItemFromCoin'] =
-    (coin: Coin, { token, module = 'default', isRefresh = false }) => {
+    (
+      coin: Coin,
+      { token, module = 'default', isRefresh = false, customAccount }
+    ) => {
       const coinData = COINS[coin.slug];
 
       if (!coinData) {
@@ -268,6 +276,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             zpub: coin.zpub,
             walletId: coin.walletId,
             coinType: coin.slug,
+            customAccount,
             module,
             isRefresh
           })
