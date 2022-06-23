@@ -46,7 +46,7 @@ const getFees = async (coinType: string) => {
         network: coin.network
       })
       .request();
-    return Math.round(resp);
+    return Math.round(resp.data);
   }
 
   const res = await Server.bitcoin.transaction.getFees({ coinType }).request();
