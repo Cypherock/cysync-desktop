@@ -473,7 +473,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                           walletId={selectedWallet._id}
                           sortIndex={sortIndex}
                         />
-                      ) : coinObj && coinObj.group === coinGroup.Near ? (
+                      ) : coinObj && coinObj.group === CoinGroup.Near ? (
                         <NearOneCoin
                           initial={coin.slug.toUpperCase()}
                           name={coinObj.name}

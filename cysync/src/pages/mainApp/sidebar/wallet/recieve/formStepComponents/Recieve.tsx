@@ -14,6 +14,7 @@ import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/
 import { addressDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
+  useCustomAccountContext,
   useReceiveTransactionContext,
   useSelectedWallet,
   useSnackbar,
@@ -105,7 +106,8 @@ const getReceiveAddress = async (
   coinType: string,
   xpub: string,
   walletId: string,
-  zpub?: string
+  zpub?: string,
+  customAccount?: string
 ) => {
   let receiveAddress = '';
   let w;
@@ -121,6 +123,8 @@ const getReceiveAddress = async (
     receiveAddress = (await w.newReceiveAddress()).toUpperCase();
     // To make the first x in lowercase
     receiveAddress = `0x${receiveAddress.slice(2)}`;
+  } else if (coin.group === CoinGroup.Near && customAccount) {
+    receiveAddress = customAccount;
   } else {
     w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
     receiveAddress = await w.newReceiveAddress();
@@ -145,6 +149,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const { selectedWallet } = useSelectedWallet();
 
   const { token } = useTokenContext();
+  const { customAccount } = useCustomAccountContext();
 
   const coinAbbr = token ? token.slug : coinDetails.slug;
 
@@ -154,7 +159,8 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
         coinDetails.slug,
         coinDetails.xpub,
         coinDetails.walletId,
-        coinDetails.zpub
+        coinDetails.zpub,
+        customAccount.name
       )
         .then(addr => {
           setCoinAddress(addr);

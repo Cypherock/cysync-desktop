@@ -1,5 +1,3 @@
-import { ALLCOINS as COINS } from '@cypherock/communication';
-import { NearWallet } from '@cypherock/wallet';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -23,12 +21,13 @@ import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import DeleteCoinIcon from '../../../../designSystem/iconGroups/deleteCoin';
 import Dustbin from '../../../../designSystem/iconGroups/dustbin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
-// import { useAccount } from '../../../../store/hooks';
+import { useCustomAccount } from '../../../../store/hooks';
 import {
   useReceiveTransaction,
   useSendTransaction
 } from '../../../../store/hooks/flows';
 import {
+  CustomAccountContext,
   ReceiveTransactionContext,
   SendTransactionContext,
   useConnection,
@@ -167,7 +166,6 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   walletId,
   deleteCoin,
   deleteHistory
-  // sortIndex
 }) => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -178,18 +176,14 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   const { selectedWallet } = useSelectedWallet();
 
   const { coinDetails } = useCurrentCoin();
-  const coin: any = COINS[coinDetails.slug];
-  const wallet = new NearWallet(coinDetails.xpub, coin);
-  const implicitAccount = wallet.address;
 
   const { beforeNetworkAction } = useConnection();
 
-  // const {
-  //   accountData,
-  //   accountList,
-  //   setCurrentWalletId,
-  //   sortAccounts,
-  // } = useAccount();
+  const {
+    customAccountData: accountData,
+    setCurrentWalletId,
+    setCurrentCoin
+  } = useCustomAccount();
 
   useEffect(() => {
     const key = `${walletId}-${initial.toLowerCase()}`;
@@ -199,10 +193,6 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
       setIsLoading(false);
     }
   }, [sync.modulesInExecutionQueue, walletId, initial]);
-
-  // useEffect(() => {
-  //   sortAccounts(sortIndex);
-  // }, [sortIndex]);
 
   const beforeAction = () => {
     if (isLoading) {
@@ -251,6 +241,8 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
 
   const [collapseTab, setCollapseTab] = React.useState(false);
 
+  const lengthThreshold = 1;
+
   const onClick = () => {
     if (beforeAction()) {
       navigate(
@@ -261,9 +253,10 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
     }
   };
 
-  // useEffect(() => {
-  //   setCurrentWalletId(selectedWallet._id);
-  // }, [selectedWallet._id]);
+  useEffect(() => {
+    setCurrentWalletId(selectedWallet._id);
+    setCurrentCoin(coinDetails.slug);
+  }, [selectedWallet._id]);
 
   useEffect(() => {
     setCollapseTab(false);
@@ -354,7 +347,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
             <Typography color="textPrimary">{`$${price}`}</Typography>
           </Grid>
           <Grid item xs={2} className={classes.actions}>
-            {!classes ? (
+            {!(accountData.length > lengthThreshold) ? (
               <>
                 <Button
                   variant="text"
@@ -415,22 +408,30 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
       </Grid>
       {
         <>
-          {classes ? (
+          {accountData.length > lengthThreshold ? (
             <Grid container>
               <Grid item xs={12}>
                 <Collapse in={collapseTab} timeout="auto" unmountOnExit>
-                  <React.Fragment key={'test'}>
-                    <OneNearAccount
-                      initial={coinDetails.slug.toUpperCase()}
-                      name={implicitAccount}
-                      holding="1.00"
-                      price="0.00"
-                      decimal={0}
-                      value="0.00"
-                      isEmpty={false}
-                      walletId={walletId}
-                    />
-                  </React.Fragment>
+                  {accountData.map(account => {
+                    return (
+                      <React.Fragment key={account.name}>
+                        <CustomAccountContext.Provider
+                          value={{ customAccount: account }}
+                        >
+                          <OneNearAccount
+                            initial={coinDetails.slug.toUpperCase()}
+                            name={account.name}
+                            holding={account.displayBalance}
+                            price={account.displayPrice}
+                            decimal={24}
+                            value={account.displayValue}
+                            isEmpty={account.isEmpty}
+                            walletId={walletId}
+                          />
+                        </CustomAccountContext.Provider>
+                      </React.Fragment>
+                    );
+                  })}
                   <CoinCardBtn
                     onClick={(e: React.MouseEvent) => {
                       prevent(e);
