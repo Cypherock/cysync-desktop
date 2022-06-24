@@ -286,6 +286,11 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         }
       });
 
+      receiveTransaction.on('cardTapped', () => {
+        logger.verbose('ReceiveAddress: Card Tapped', { coinType });
+        setCardTapped(true);
+      });
+
       try {
         setIsInFlow(true);
         /**
