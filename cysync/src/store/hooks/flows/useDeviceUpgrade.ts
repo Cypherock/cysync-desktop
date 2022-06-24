@@ -64,7 +64,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     completed,
     resetHooks,
     setErrorMessage,
-    errorMessage
+    errorMessage,
+    errorObj
   } = useDeviceAuth();
 
   const {
@@ -455,7 +456,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   }, [isUpdated]);
 
   useEffect(() => {
-    if (verified === -1 || errorMessage) {
+    if (verified === -1 || errorObj.isSet) {
       retries.current += 1;
 
       if (verified === -1 || retries.current > MAX_RETRIES) {
@@ -465,14 +466,14 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           logger.warn('Error in device auth, max retries exceeded.');
         }
         setDisplayErrorMessage(
-          errorMessage || langStrings.ERRORS.DEVICE_AUTH_FAILED
+          errorObj.getMessage() || langStrings.ERRORS.DEVICE_AUTH_FAILED
         );
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
         setBlockNewConnection(false);
       } else {
         logger.warn('Error in device auth, retrying...');
-        logger.warn(errorMessage);
+        logger.warn(errorObj);
 
         if (timeout.current) {
           clearTimeout(timeout.current);
@@ -490,7 +491,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       }, 500);
       resetHooks();
     }
-  }, [verified, errorMessage, completed]);
+  }, [verified, errorObj, completed]);
 
   return {
     startDeviceUpdate,

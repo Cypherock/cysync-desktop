@@ -92,7 +92,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
     setIsInFlow
   } = useConnection();
 
-  const { handleDeviceAuth, completed, verified, errorMessage, confirmed } =
+  const { handleDeviceAuth, completed, verified, errorObj, confirmed } =
     useDeviceAuth();
 
   const feedback = useFeedback();
@@ -121,7 +121,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
   }, []);
 
   useEffect(() => {
-    if (verified === -1 || errorMessage) {
+    if (verified === -1 || errorObj.isSet) {
       Analytics.Instance.event(
         Analytics.Categories.DEVICE_AUTH_PROMPT,
         Analytics.Actions.ERROR
@@ -206,7 +206,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
               </Typography>
             </div>
           )}
-          {errorMessage ? (
+          {errorObj.isSet ? (
             <div className={classes.center}>
               <div>
                 <ListItem color="red">
@@ -219,7 +219,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
                   </ListItemAvatar>
                   <ListItemText
                     className={classes.error}
-                    primary={errorMessage || 'Device Auth Failed'}
+                    primary={errorObj.getMessage() || 'Device Auth Failed'}
                   />
                 </ListItem>
                 <div className={classes.errorButtons}>

@@ -38,20 +38,35 @@ export enum FLOWS {
 setErrorHandler();
 
 class DisplayError {
-  code: string;
-  message: string;
+  protected code: string;
+  protected message: string;
+  public isSet: boolean;
+  constructor(code: string, message: string) {
+    this.isSet = Boolean(code && message);
+    this.code = code;
+    this.message = message;
+  }
+  public getMessage() {
+    return this.message || '';
+  }
+  public getCode() {
+    return this.code || '';
+  }
 }
 /* tslint:disable-next-line */
 class CyError extends DisplayError {
   public childErrors: DisplayError[];
   constructor(code?: string, message?: string) {
-    super();
-    this.code = code;
-    this.message = message;
+    super(code, message);
     this.childErrors = [];
   }
-  public pushSubErrors(err: DisplayError) {
-    this.childErrors.push(err);
+  public setError(code: string, message: string) {
+    this.isSet = true;
+    this.code = code;
+    this.message = message;
+  }
+  public pushSubErrors(code: string, message: string) {
+    this.childErrors.push(new DisplayError(code, message));
   }
 }
 

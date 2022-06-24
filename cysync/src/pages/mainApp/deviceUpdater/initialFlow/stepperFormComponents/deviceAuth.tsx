@@ -93,7 +93,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
     verified,
     resetHooks,
     completed,
-    errorMessage,
+    errorObj,
     confirmed,
     setErrorMessage
   } = useDeviceAuth(true);
@@ -161,7 +161,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
       );
     }
 
-    if (verified === -1 || errorMessage) {
+    if (verified === -1 || errorObj.isSet) {
       Analytics.Instance.event(
         Analytics.Categories.INITIAL_DEVICE_AUTH,
         Analytics.Actions.ERROR
@@ -174,11 +174,11 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
     attachDeviceLogs: false,
     categories: ['Report'],
     category: 'Report',
-    description: errorMsg || errorMessage,
+    description: errorMsg || errorObj.getMessage(),
     descriptionError: '',
     email: '',
     emailError: '',
-    subject: 'Reporting for Error (Device Authentication)',
+    subject: `Reporting for Error ${errorObj.getCode()} (Device Authentication)`,
     subjectError: ''
   };
 
@@ -240,7 +240,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
         <br />
         <DynamicTextView
           text="Authenticating Device"
-          state={errorMessage || errorMsg ? -1 : confirmed === 1 ? 1 : verified}
+          state={
+            errorObj.isSet || errorMsg ? -1 : confirmed === 1 ? 1 : verified
+          }
         />
         <br />
         {verified === 2 && (
@@ -251,7 +253,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
             </Typography>
           </div>
         )}
-        {(verified === -1 || errorMessage || errorMsg) && (
+        {(verified === -1 || errorObj.isSet || errorMsg) && (
           <div className={classes.bottomContainer}>
             <div className={classes.success}>
               <Icon
@@ -260,7 +262,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
                 iconGroup={<ErrorExclamation />}
               />
               <Typography variant="body2" color="secondary">
-                {errorMessage || errorMsg || 'Device Authenticating failed'}
+                {errorObj.getMessage() ||
+                  errorMsg ||
+                  'Device Authenticating failed'}
               </Typography>
             </div>
             <div className={classes.btnContainer}>

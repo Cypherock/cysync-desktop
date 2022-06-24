@@ -353,11 +353,11 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     attachDeviceLogs: false,
     categories: ['Report'],
     category: 'Report',
-    description: errorObj?.message || '',
+    description: errorObj.getMessage(),
     descriptionError: '',
     email: '',
     emailError: '',
-    subject: `Reporting for Error ${errorObj?.code} (Authenticating Device)`,
+    subject: `Reporting for Error ${errorObj.getCode()} (Authenticating Device)`,
     subjectError: ''
   };
 
@@ -426,13 +426,13 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
             Device Authentication Failed
           </Typography>
           <Typography color="textPrimary" style={{ margin: '1rem 0rem 6rem' }}>
-            {errorObj.code}
+            {errorObj.getCode()}
           </Typography>
           <Typography
             color="textSecondary"
             style={{ margin: '1rem 0rem 6rem' }}
           >
-            {errorObj.message}
+            {errorObj.getMessage()}
           </Typography>
           {verified === -1 ? (
             <div className={classes.errorButtons}>

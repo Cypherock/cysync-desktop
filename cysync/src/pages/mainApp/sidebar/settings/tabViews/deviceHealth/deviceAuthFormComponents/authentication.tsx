@@ -69,7 +69,7 @@ const Authentication: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (verified === -1 || errorMessage || errorObj) {
+    if (verified === -1 || errorMessage || errorObj.isSet) {
       logger.info('Device auth failed');
       setCompleted(-1);
     } else if (completed && verified === 2) {
@@ -80,7 +80,7 @@ const Authentication: React.FC<Props> = ({
   }, [verified, completed]);
 
   useEffect(() => {
-    if (isCompleted === -1 || errorMessage || errorObj) {
+    if (isCompleted === -1 || errorMessage || errorObj.isSet) {
       Analytics.Instance.event(
         Analytics.Categories.DEVICE_UPDATE,
         Analytics.Actions.ERROR
@@ -91,7 +91,7 @@ const Authentication: React.FC<Props> = ({
         Analytics.Actions.COMPLETED
       );
     }
-  }, [isCompleted, errorMessage, errorObj]);
+  }, [isCompleted, errorMessage, errorObj.isSet]);
 
   return (
     <Grid container>

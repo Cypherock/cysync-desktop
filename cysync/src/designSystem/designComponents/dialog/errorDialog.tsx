@@ -4,9 +4,11 @@ import { Collapse } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useFeedback } from '../../../store/provider/feedbackProvider';
+import { CyError } from '../../../utils/errorHandler';
+import logger from '../../../utils/logger';
 import prevent from '../../../utils/preventPropagation';
 import ErrorExclamation from '../../iconGroups/errorExclamation';
 import CustomButton from '../buttons/button';
@@ -183,6 +185,7 @@ const Error = (props: any) => {
 export interface ErrorProps {
   open: boolean;
   handleClose: () => void;
+  errorObj?: CyError;
   text: string;
   actionText?: string;
   closeText?: string;
@@ -198,6 +201,7 @@ const errorDialog: React.FC<ErrorProps> = ({
   open,
   handleClose,
   text,
+  errorObj,
   actionText,
   handleAction,
   closeText = 'Ok',
@@ -209,6 +213,12 @@ const errorDialog: React.FC<ErrorProps> = ({
 }: ErrorProps) => {
   const { showFeedback } = useFeedback();
 
+  useEffect(() => {
+    logger.error(
+      `In Error Dialog: ${errorObj?.getCode()} - ${errorObj?.getMessage()}`
+    );
+  }, []);
+
   const handleFeedbackOpen = () => {
     showFeedback({
       isContact: true,
@@ -218,12 +228,12 @@ const errorDialog: React.FC<ErrorProps> = ({
         attachDeviceLogs: false,
         categories: ['Report'],
         category: 'Report',
-        description: text,
+        description: errorObj?.getMessage(),
         descriptionError: '',
         email: '',
         emailError: '',
-        subject: flow ? `Reporting for Error (${flow})` : 'Reporting for Error',
-        subjectError: ''
+        subject: `Reporting for Error ${errorObj?.getCode()}`,
+        subjectError: `${flow}`
       }
     });
   };

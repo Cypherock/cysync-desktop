@@ -43,7 +43,7 @@ export type UseDeviceAuth = (isInitial?: boolean) => UseDeviceAuthValues;
 
 export const useDeviceAuth: UseDeviceAuth = isInitial => {
   const [errorMessage, setErrorMessage] = useState('');
-  const [errorObj, setErrorObj] = useState<CyError>(undefined);
+  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [verified, setVerified] = useState<-1 | 0 | 1 | 2>(0);
   const [confirmed, setConfirmed] = useState<-1 | 0 | 1 | 2>(0);
   const [completed, setCompleted] = useState(false);
@@ -117,14 +117,18 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       const cyError = new CyError();
       if (err.isAxiosError) {
         if (err.response) {
-          cyError.code = CysyncError.NETWORK_FAILURE;
-          cyError.message = langStrings.ERRORS.NETWORK_ERROR;
+          cyError.setError(
+            CysyncError.NETWORK_FAILURE,
+            langStrings.ERRORS.NETWORK_ERROR
+          );
         } else {
-          cyError.code = CysyncError.NETWORK_UNREACHABLE;
-          cyError.message = langStrings.ERRORS.NETWORK_UNREACHABLE;
+          cyError.setError(
+            CysyncError.NETWORK_UNREACHABLE,
+            langStrings.ERRORS.NETWORK_UNREACHABLE
+          );
         }
       } else if (err instanceof DeviceError) {
-        cyError.pushSubErrors(err);
+        cyError.pushSubErrors(err.code, err.message);
         if (
           [
             DeviceErrorType.CONNECTION_CLOSED,
@@ -133,30 +137,40 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
         ) {
           setConfirmed(_confirmed => (_confirmed === 1 ? -1 : _confirmed));
           setVerified(_verified => (_verified === 1 ? -1 : _verified));
-          cyError.code = DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW;
-          cyError.message = langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW;
+          cyError.setError(
+            DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW,
+            langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW
+          );
         } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          cyError.code = DeviceErrorType.NOT_CONNECTED;
-          cyError.message = langStrings.ERRORS.DEVICE_NOT_CONNECTED;
+          cyError.setError(
+            DeviceErrorType.NOT_CONNECTED,
+            langStrings.ERRORS.DEVICE_NOT_CONNECTED
+          );
         } else if (
           [
             DeviceErrorType.WRITE_TIMEOUT,
             DeviceErrorType.READ_TIMEOUT
           ].includes(err.errorType)
         ) {
-          cyError.code = DeviceErrorType.TIMEOUT_ERROR;
-          cyError.message = langStrings.ERRORS.DEVICE_TIMEOUT_ERROR;
+          cyError.setError(
+            DeviceErrorType.TIMEOUT_ERROR,
+            langStrings.ERRORS.DEVICE_TIMEOUT_ERROR
+          );
         } else {
-          cyError.code = DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR;
-          cyError.message = langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
-            Analytics.Categories.DEVICE_AUTH
+          cyError.setError(
+            DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR,
+            langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
+              Analytics.Categories.DEVICE_AUTH
+            )
           );
         }
       } else {
         // unknown flow error
-        cyError.code = CysyncError.UNKNOWN_FLOW_ERROR;
-        cyError.message = langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
-          Analytics.Categories.DEVICE_AUTH
+        cyError.setError(
+          CysyncError.UNKNOWN_FLOW_ERROR,
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
+            Analytics.Categories.DEVICE_AUTH
+          )
         );
       }
       setErrorObj(cyError);
