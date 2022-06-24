@@ -22,8 +22,8 @@ const setErrorHandler = () => {
 };
 
 export enum CysyncError {
-  UNKNOWN_ERROR = 'DS_CONN_5500',
   UNKNOWN_FLOW_ERROR = 'DS_MISC_5500',
+  CUSTOM_ERROR = 'DS_MISC_5501',
 
   NETWORK_ERROR = 'DS_CONN_3001',
   NETWORK_FAILURE = 'DS_CONN_3002',

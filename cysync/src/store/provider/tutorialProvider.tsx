@@ -4,7 +4,10 @@ import React, { useState } from 'react';
 
 import { version } from '../../../package.json';
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
+import { CyError, CysyncError } from '../../utils/errorHandler';
 import logger from '../../utils/logger';
+
+import { useI18n } from './i18nProvider';
 
 export interface Tutorial {
   _id: string;
@@ -20,7 +23,7 @@ export interface TutorialContextInterface {
   isLoading: boolean;
   isFetched: boolean;
   getAll: () => void;
-  errorMsg: string;
+  errorObj: CyError;
 }
 
 export const TutorialContext: React.Context<TutorialContextInterface> =
@@ -32,12 +35,13 @@ export const TutorialProvider: React.FC = ({ children }) => {
     TutorialContextInterface['tutorials']
   >([]);
   const [isFetched, setIsFetched] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
+  const { langStrings } = useI18n();
 
   const getAll = async () => {
     if (isLoading) return;
     setIsLoading(true);
-    setErrorMsg('');
+    setErrorObj(new CyError());
 
     try {
       const res = await tutorialServer.getAll(version).request();
@@ -52,17 +56,26 @@ export const TutorialProvider: React.FC = ({ children }) => {
 
       if (error.isAxiosError) {
         if (error.response) {
-          setErrorMsg(
-            'Some internal error occurred while communicating with the server. Please try again later.'
+          setErrorObj(
+            new CyError(
+              CysyncError.NETWORK_ERROR,
+              langStrings.ERRORS.NETWORK_ERROR
+            )
           );
         } else {
-          setErrorMsg(
-            'Failed to communicate with the server. Please check your internet connection and try again later.'
+          setErrorObj(
+            new CyError(
+              CysyncError.NETWORK_UNREACHABLE,
+              langStrings.ERRORS.NETWORK_UNREACHABLE
+            )
           );
         }
       } else {
-        setErrorMsg(
-          'Some internal error occurred while fetching the tutorials.'
+        setErrorObj(
+          new CyError(
+            CysyncError.CUSTOM_ERROR,
+            langStrings.ERRORS.CUSTOM_ERROR('fetching the tutorials.')
+          )
         );
       }
     } finally {
@@ -77,13 +90,13 @@ export const TutorialProvider: React.FC = ({ children }) => {
         isLoading,
         isFetched,
         getAll,
-        errorMsg
+        errorObj
       }}
     >
       <ErrorDialog
-        open={!!errorMsg}
-        handleClose={() => setErrorMsg('')}
-        text={errorMsg}
+        open={errorObj.isSet}
+        handleClose={() => setErrorObj(new CyError())}
+        text={errorObj.showError()}
         actionText="Retry"
         handleAction={() => getAll()}
         flow="Fetching Tutorials"

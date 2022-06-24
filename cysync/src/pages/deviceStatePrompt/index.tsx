@@ -2,7 +2,7 @@ import { CancelFlow } from '@cypherock/protocols';
 import React, { useState } from 'react';
 
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
-import { useConnection } from '../../store/provider';
+import { useConnection, useI18n } from '../../store/provider';
 import logger from '../../utils/logger';
 
 const DeviceStatePrompt = () => {
@@ -18,6 +18,8 @@ const DeviceStatePrompt = () => {
   } = useConnection();
 
   const cancelFlow = new CancelFlow();
+
+  const { langStrings } = useI18n();
 
   const runCancelFlow = async () => {
     setIsCancelRunning(true);
@@ -57,8 +59,7 @@ const DeviceStatePrompt = () => {
       <ErrorDialog
         open={openErrorPrompt}
         handleClose={() => setOpenErrorPrompt(false)}
-        text="Please connect the cypherock X1 wallet before proceeding with this process"
-        flow="Device Disconnected"
+        text={langStrings.ERRORS.DEVICE_NOT_CONNECTED}
       />
     );
   }

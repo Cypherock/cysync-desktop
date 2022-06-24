@@ -214,10 +214,9 @@ const errorDialog: React.FC<ErrorProps> = ({
   const { showFeedback } = useFeedback();
 
   useEffect(() => {
-    logger.error(
-      `In Error Dialog: ${errorObj?.getCode()} - ${errorObj?.getMessage()}`
-    );
-  }, []);
+    if (errorObj?.isSet)
+      logger.error(`In Error Dialog: ${errorObj.showError()}`);
+  }, [errorObj]);
 
   const handleFeedbackOpen = () => {
     showFeedback({
@@ -228,11 +227,11 @@ const errorDialog: React.FC<ErrorProps> = ({
         attachDeviceLogs: false,
         categories: ['Report'],
         category: 'Report',
-        description: errorObj?.getMessage(),
+        description: errorObj.getMessage(),
         descriptionError: '',
         email: '',
         emailError: '',
-        subject: `Reporting for Error ${errorObj?.getCode()}`,
+        subject: `Reporting for Error ${errorObj.getCode()}`,
         subjectError: `${flow}`
       }
     });
@@ -250,7 +249,7 @@ const errorDialog: React.FC<ErrorProps> = ({
       restComponents={
         <Error
           advanceText={advanceText}
-          text={text}
+          text={errorObj?.showError() || text}
           closeText={closeText}
           disableAction={disableAction}
           handleClose={disableAction ? () => {} : handleClose}
