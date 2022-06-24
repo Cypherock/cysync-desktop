@@ -21,11 +21,7 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import { useDeviceAuth } from '../../../../../../store/hooks/flows';
-import {
-  FeedbackState,
-  useConnection,
-  useFeedback
-} from '../../../../../../store/provider';
+import { useConnection } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import logger from '../../../../../../utils/logger';
 
@@ -261,7 +257,8 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     errorObj,
     cancelDeviceAuth,
     setErrorMessage,
-    confirmed
+    confirmed,
+    handleFeedbackOpen
   } = useDeviceAuth();
 
   const latestDeviceConnection = useRef<any>();
@@ -344,29 +341,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     } else {
       setActiveStep(0);
     }
-  };
-
-  const { showFeedback } = useFeedback();
-
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: errorObj.getMessage(),
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: `Reporting for Error ${errorObj.getCode()} (Authenticating Device)`,
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
   };
 
   return (

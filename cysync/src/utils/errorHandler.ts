@@ -52,6 +52,9 @@ class DisplayError {
   public getCode() {
     return this.code || '';
   }
+  public showError() {
+    return this.getCode() + ' : ' + this.getMessage();
+  }
 }
 /* tslint:disable-next-line */
 class CyError extends DisplayError {

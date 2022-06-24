@@ -16,7 +16,7 @@ import {
 } from '../../../utils/errorHandler';
 import logger from '../../../utils/logger';
 import { deviceDb } from '../../database';
-import { useI18n } from '../../provider';
+import { FeedbackState, useFeedback, useI18n } from '../../provider';
 
 export interface HandleDeviceAuthOptions {
   connection: DeviceConnection;
@@ -37,6 +37,7 @@ export interface UseDeviceAuthValues {
   confirmed: 0 | -1 | 1 | 2;
   resetHooks: () => void;
   cancelDeviceAuth: (connection: DeviceConnection) => void;
+  handleFeedbackOpen: () => void;
 }
 
 export type UseDeviceAuth = (isInitial?: boolean) => UseDeviceAuthValues;
@@ -48,6 +49,8 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
   const [confirmed, setConfirmed] = useState<-1 | 0 | 1 | 2>(0);
   const [completed, setCompleted] = useState(false);
   const deviceAuth = new DeviceAuthenticator();
+
+  const { showFeedback } = useFeedback();
 
   const { langStrings } = useI18n();
   let deviceSerial: string | null = null;
@@ -255,6 +258,27 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       });
   };
 
+  const newFeedbackState: FeedbackState = {
+    attachLogs: true,
+    attachDeviceLogs: false,
+    categories: ['Report'],
+    category: 'Report',
+    description: errorObj.getMessage(),
+    descriptionError: '',
+    email: '',
+    emailError: '',
+    subject: `Reporting for Error ${errorObj.getCode()} (Authenticating Device)`,
+    subjectError: ''
+  };
+
+  const handleFeedbackOpen = () => {
+    showFeedback({
+      isContact: true,
+      heading: 'Report',
+      initFeedbackState: newFeedbackState
+    });
+  };
+
   return {
     errorMessage,
     errorObj,
@@ -264,6 +288,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
     resetHooks,
     verified,
     completed,
-    confirmed
+    confirmed,
+    handleFeedbackOpen
   } as UseDeviceAuthValues;
 };

@@ -14,7 +14,7 @@ import ModAvatar from '../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../designSystem/iconGroups/errorExclamation';
 import { useDeviceAuth } from '../../../store/hooks/flows';
-import { useConnection, useFeedback } from '../../../store/provider';
+import { useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
@@ -92,10 +92,14 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
     setIsInFlow
   } = useConnection();
 
-  const { handleDeviceAuth, completed, verified, errorObj, confirmed } =
-    useDeviceAuth();
-
-  const feedback = useFeedback();
+  const {
+    handleDeviceAuth,
+    completed,
+    verified,
+    errorObj,
+    confirmed,
+    handleFeedbackOpen
+  } = useDeviceAuth();
 
   const startDeviceAuth = () => {
     logger.info('Initiating device auth from prompt');
@@ -219,7 +223,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
                   </ListItemAvatar>
                   <ListItemText
                     className={classes.error}
-                    primary={errorObj.getMessage() || 'Device Auth Failed'}
+                    primary={errorObj.showError() || 'Device Auth Failed'}
                   />
                 </ListItem>
                 <div className={classes.errorButtons}>
@@ -241,9 +245,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
                     Retry
                   </CustomButton>
                   <CustomButton
-                    onClick={() => {
-                      feedback.showFeedback({ isContact: true });
-                    }}
+                    onClick={handleFeedbackOpen}
                     style={{ margin: '1rem 0rem' }}
                   >
                     Contact Us

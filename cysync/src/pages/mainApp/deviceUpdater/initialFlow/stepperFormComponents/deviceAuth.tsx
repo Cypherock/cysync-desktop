@@ -13,9 +13,7 @@ import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclam
 import { useDeviceAuth } from '../../../../../store/hooks/flows';
 import {
   DeviceConnectionState,
-  FeedbackState,
-  useConnection,
-  useFeedback
+  useConnection
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../../../utils/compareVersion';
@@ -95,10 +93,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
     completed,
     errorObj,
     confirmed,
-    setErrorMessage
+    setErrorMessage,
+    handleFeedbackOpen
   } = useDeviceAuth(true);
-
-  const feedback = useFeedback();
 
   useEffect(() => {
     Analytics.Instance.event(
@@ -168,27 +165,6 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
       );
     }
   }, [verified, completed]);
-
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: errorMsg || errorObj.getMessage(),
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: `Reporting for Error ${errorObj.getCode()} (Device Authentication)`,
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    feedback.showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
-  };
 
   const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const onRetry = () => {
@@ -287,9 +263,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
                 </CustomButton>
               )}
               <CustomButton
-                onClick={() => {
-                  feedback.showFeedback({ isContact: true });
-                }}
+                onClick={handleFeedbackOpen}
                 style={{ margin: '1rem 0rem' }}
               >
                 Contact Us
