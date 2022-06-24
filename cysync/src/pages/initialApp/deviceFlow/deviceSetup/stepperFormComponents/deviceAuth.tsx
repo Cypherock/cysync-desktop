@@ -10,6 +10,7 @@ import CustomButton from '../../../../../designSystem/designComponents/buttons/b
 import AvatarIcon from '../../../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
+import { CyError } from '../../../../../errors';
 import { useDeviceAuth } from '../../../../../store/hooks/flows';
 import {
   DeviceConnectionState,
@@ -92,7 +93,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     completed,
     errorObj,
     confirmed,
-    setErrorMessage
+    setErrorObj
   } = useDeviceAuth(true);
 
   const feedback = useFeedback();
@@ -190,7 +191,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
   const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const onRetry = () => {
     setErrorMsg('');
-    setErrorMessage('');
+    setErrorObj(new CyError());
     resetHooks();
 
     if (timeout.current) {

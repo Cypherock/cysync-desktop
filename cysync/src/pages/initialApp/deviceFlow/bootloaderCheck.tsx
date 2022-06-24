@@ -61,16 +61,12 @@ const BootloaderCheck = (props: any) => {
   const {
     startDeviceUpdate,
     handleRetry,
-    deviceConnection,
     isCompleted,
-    displayErrorMessage,
-    setDisplayErrorMessage,
     isInternetSlow,
     updateDownloaded,
     latestVersion,
-    setUpdated,
-    setIsCompleted,
-    setBlockNewConnection
+    setBlockNewConnection,
+    errorObj
   } = useDeviceUpgrade(true);
 
   const refreshComponent = () => {
@@ -90,13 +86,13 @@ const BootloaderCheck = (props: any) => {
     }
 
     logger.info('Initiating device update from bootloader check');
-    if (!deviceConnection) {
-      logger.info('Failed due to device not connected');
-      setDisplayErrorMessage('Please connect the device and try again.');
-      setUpdated(-1);
-      setIsCompleted(-1);
-      return;
-    }
+    // if (!deviceConnection) {
+    //   logger.info('Failed due to device not connected');
+    //   setDisplayErrorMessage('Please connect the device and try again.');
+    //   setUpdated(-1);
+    //   setIsCompleted(-1);
+    //   return;
+    // }
 
     startDeviceUpdate();
 
@@ -183,7 +179,7 @@ const BootloaderCheck = (props: any) => {
                 iconGroup={<ErrorExclamation />}
               />
               <Typography color="error" variant="h5">
-                {displayErrorMessage}
+                {errorObj.showError()}
               </Typography>
             </div>
             <CustomButton

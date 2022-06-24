@@ -17,7 +17,6 @@ import DynamicTextView from '../dynamicTextView';
 interface Props {
   isCompleted: -1 | 0 | 1 | 2;
   setCompleted: React.Dispatch<React.SetStateAction<0 | 1 | -1 | 2>>;
-  errorMessage: string;
   errorObj: DisplayError;
   handleDeviceAuth: (options: HandleDeviceAuthOptions) => void;
   resetHooks: () => void;
@@ -30,7 +29,6 @@ interface Props {
 const Authentication: React.FC<Props> = ({
   isCompleted,
   setCompleted,
-  errorMessage,
   errorObj,
   handleDeviceAuth,
   resetHooks,
@@ -69,7 +67,7 @@ const Authentication: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (verified === -1 || errorMessage || errorObj.isSet) {
+    if (verified === -1 || errorObj.isSet) {
       logger.info('Device auth failed');
       setCompleted(-1);
     } else if (completed && verified === 2) {
@@ -80,7 +78,7 @@ const Authentication: React.FC<Props> = ({
   }, [verified, completed]);
 
   useEffect(() => {
-    if (isCompleted === -1 || errorMessage || errorObj.isSet) {
+    if (isCompleted === -1 || errorObj.isSet) {
       Analytics.Instance.event(
         Analytics.Categories.DEVICE_UPDATE,
         Analytics.Actions.ERROR
@@ -91,7 +89,7 @@ const Authentication: React.FC<Props> = ({
         Analytics.Actions.COMPLETED
       );
     }
-  }, [isCompleted, errorMessage, errorObj.isSet]);
+  }, [isCompleted, errorObj.isSet]);
 
   return (
     <Grid container>
@@ -111,7 +109,6 @@ const Authentication: React.FC<Props> = ({
 Authentication.propTypes = {
   isCompleted: PropTypes.oneOf<-1 | 0 | 1 | 2>([-1, 0, 1, 2]).isRequired,
   setCompleted: PropTypes.func.isRequired,
-  errorMessage: PropTypes.string.isRequired,
   errorObj: PropTypes.instanceOf(DisplayError).isRequired,
   cancelDeviceAuth: PropTypes.func.isRequired,
   completed: PropTypes.bool.isRequired,

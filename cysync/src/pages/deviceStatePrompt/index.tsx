@@ -1,7 +1,9 @@
+import { DeviceErrorType } from '@cypherock/communication';
 import { CancelFlow } from '@cypherock/protocols';
 import React, { useState } from 'react';
 
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
+import { CyError } from '../../errors';
 import { useConnection, useI18n } from '../../store/provider';
 import logger from '../../utils/logger';
 
@@ -55,11 +57,16 @@ const DeviceStatePrompt = () => {
   }
 
   if (openErrorPrompt) {
+    const cyError = new CyError(
+      DeviceErrorType.NOT_CONNECTED,
+      langStrings.ERRORS.DEVICE_NOT_CONNECTED
+    );
     return (
       <ErrorDialog
         open={openErrorPrompt}
         handleClose={() => setOpenErrorPrompt(false)}
         text={langStrings.ERRORS.DEVICE_NOT_CONNECTED}
+        errorObj={cyError}
       />
     );
   }

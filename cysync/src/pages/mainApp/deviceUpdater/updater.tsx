@@ -14,6 +14,7 @@ import CustomButton from '../../../designSystem/designComponents/buttons/button'
 import ModAvatar from '../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../designSystem/iconGroups/errorExclamation';
+import { CyError } from '../../../errors';
 import { useDeviceUpgrade } from '../../../store/hooks/flows';
 import { useNetwork } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
@@ -89,14 +90,13 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
     startDeviceUpdate,
     setBlockNewConnection,
     isCompleted,
-    displayErrorMessage,
-    setDisplayErrorMessage,
     isApproved,
     isInternetSlow,
     updateDownloaded,
     latestVersion,
     handleFeedbackOpen,
-    errorObj
+    errorObj,
+    setErrorObj
   } = useDeviceUpgrade();
 
   const onClose = () => {
@@ -106,7 +106,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
 
   useEffect(() => {
     logger.info('Initiating device update from prompt');
-    setDisplayErrorMessage('');
+    setErrorObj(new CyError());
 
     startDeviceUpdate();
 
@@ -231,7 +231,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
                   </ListItemAvatar>
                   <ListItemText
                     className={classes.error}
-                    primary={displayErrorMessage || 'Device Upgrade Failed'}
+                    primary={errorObj.showError() || 'Device Upgrade Failed'}
                   />
                 </ListItem>
                 <div className={classes.errorButtons}>

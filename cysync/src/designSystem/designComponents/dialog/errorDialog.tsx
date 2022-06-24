@@ -232,7 +232,7 @@ const errorDialog: React.FC<ErrorProps> = ({
         email: '',
         emailError: '',
         subject: `Reporting for Error ${errorObj.getCode()}`,
-        subjectError: `${flow}`
+        subjectError: `${flow || ''}`
       }
     });
   };

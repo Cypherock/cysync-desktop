@@ -283,20 +283,20 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       });
   };
 
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: errorObj.getMessage(),
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: `Reporting for Error ${errorObj.getCode()} (Authenticating Device)`,
-    subjectError: ''
-  };
-
   const handleFeedbackOpen = () => {
+    const newFeedbackState: FeedbackState = {
+      attachLogs: true,
+      attachDeviceLogs: false,
+      categories: ['Report'],
+      category: 'Report',
+      description: errorObj.getMessage(),
+      descriptionError: '',
+      email: '',
+      emailError: '',
+      subject: `Reporting for Error ${errorObj.getCode()} (Authenticating Device)`,
+      subjectError: ''
+    };
+
     showFeedback({
       isContact: true,
       heading: 'Report',

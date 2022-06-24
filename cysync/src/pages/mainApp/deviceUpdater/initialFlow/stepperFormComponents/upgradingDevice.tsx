@@ -88,15 +88,12 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     handleRetry,
     deviceConnection,
     isCompleted,
-    displayErrorMessage,
-    setDisplayErrorMessage,
     setBlockNewConnection,
     isInternetSlow,
     updateDownloaded,
     handleFeedbackOpen,
     latestVersion,
-    setUpdated,
-    setIsCompleted,
+    errorObj,
     inBackgroundProcess
   } = useDeviceUpgrade(true);
 
@@ -127,15 +124,15 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   useEffect(() => {
     logger.info('Initiating device update from initial setup in main');
-    if (!deviceConnection) {
-      logger.info('Failed due to device not connected');
-      setDisplayErrorMessage('Please connect the device and try again.');
-      setUpdated(-1);
-      setIsCompleted(-1);
-      return () => {
-        // empty
-      };
-    }
+    // if (!deviceConnection) {
+    //   logger.info('Failed due to device not connected');
+    //   setDisplayErrorMessage('Please connect the device and try again.');
+    //   setUpdated(-1);
+    //   setIsCompleted(-1);
+    //   return () => {
+    //     // empty
+    //   };
+    // }
 
     startDeviceUpdate();
 
@@ -221,7 +218,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
                 iconGroup={<ErrorExclamation />}
               />
               <Typography color="error" variant="h5">
-                {displayErrorMessage}
+                {errorObj.showError()}
               </Typography>
             </div>
             <div className={classes.errorButtons}>

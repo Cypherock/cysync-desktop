@@ -20,6 +20,7 @@ import AvatarIcon from '../../../../../../designSystem/designComponents/icons/Av
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
+import { CyError } from '../../../../../../errors';
 import { useDeviceAuth } from '../../../../../../store/hooks/flows';
 import { useConnection } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
@@ -253,10 +254,9 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     completed,
     verified,
     resetHooks,
-    errorMessage,
     errorObj,
     cancelDeviceAuth,
-    setErrorMessage,
+    setErrorObj,
     confirmed,
     handleFeedbackOpen
   } = useDeviceAuth();
@@ -318,7 +318,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
         <Authentication
           isCompleted={isCompleted}
           setCompleted={setCompleted}
-          errorMessage={errorMessage}
           errorObj={errorObj}
           handleDeviceAuth={handleDeviceAuth}
           completed={completed}
@@ -333,7 +332,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 
   const handleRetry = () => {
     logger.info('Device authentication retry');
-    setErrorMessage('');
+    setErrorObj(new CyError());
     setCompleted(0);
     resetHooks();
     if (deviceConnection) {
@@ -430,6 +429,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
               <CustomButton
                 variant="outlined"
                 onClick={handleRetry}
+                disabled={!latestDeviceConnection.current}
                 style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
               >
                 Retry
