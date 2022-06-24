@@ -14,11 +14,7 @@ import AvatarIcon from '../../../../../designSystem/designComponents/icons/Avata
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
 import { useDeviceUpgrade } from '../../../../../store/hooks/flows';
-import {
-  FeedbackState,
-  useFeedback,
-  useNetwork
-} from '../../../../../store/provider';
+import { FeedbackState, useNetwork } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import logger from '../../../../../utils/logger';
 
@@ -97,7 +93,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     setBlockNewConnection,
     isInternetSlow,
     updateDownloaded,
-    errorMessage,
+    handleFeedbackOpen,
     latestVersion,
     setUpdated,
     setIsCompleted,
@@ -165,30 +161,6 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
       setTimeout(onClose, 350);
     }
   }, [isCompleted]);
-
-  const { showFeedback } = useFeedback();
-
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: displayErrorMessage || errorMessage,
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: 'Reporting for Error (Upgrading Device)',
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
-  };
-
   return (
     <Root container>
       <Grid item xs={2} />
