@@ -6,8 +6,8 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
+import { CyError } from '../../../errors';
 import { useFeedback } from '../../../store/provider/feedbackProvider';
-import { CyError } from '../../../utils/errorHandler';
 import logger from '../../../utils/logger';
 import prevent from '../../../utils/preventPropagation';
 import ErrorExclamation from '../../iconGroups/errorExclamation';

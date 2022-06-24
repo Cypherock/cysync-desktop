@@ -14,7 +14,7 @@ import AvatarIcon from '../../../../../designSystem/designComponents/icons/Avata
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
 import { useDeviceUpgrade } from '../../../../../store/hooks/flows';
-import { FeedbackState, useNetwork } from '../../../../../store/provider';
+import { useNetwork } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import logger from '../../../../../utils/logger';
 

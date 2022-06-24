@@ -3,6 +3,7 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 
+import { DisplayError } from '../../../../../../../errors';
 import { HandleDeviceAuthOptions } from '../../../../../../../store/hooks/flows';
 import { useConnection } from '../../../../../../../store/provider';
 import Analytics from '../../../../../../../utils/analytics';
@@ -10,7 +11,6 @@ import {
   hexToVersion,
   inTestApp
 } from '../../../../../../../utils/compareVersion';
-import { DisplayError } from '../../../../../../../utils/errorHandler';
 import logger from '../../../../../../../utils/logger';
 import DynamicTextView from '../dynamicTextView';
 

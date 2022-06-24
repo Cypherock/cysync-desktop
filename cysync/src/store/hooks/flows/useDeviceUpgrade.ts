@@ -10,6 +10,13 @@ import { ipcRenderer } from 'electron';
 import React, { useEffect } from 'react';
 
 import {
+  CyError,
+  CysyncError,
+  DisplayError,
+  handleErrors
+} from '../../../errors';
+import Analytics from '../../../utils/analytics';
+import {
   getFirmwareHex,
   hexToVersion,
   inTestApp
@@ -17,7 +24,9 @@ import {
 import logger from '../../../utils/logger';
 import {
   ConnectionContextInterface,
+  FeedbackState,
   useConnection,
+  useFeedback,
   useI18n
 } from '../../provider';
 
@@ -46,13 +55,14 @@ export interface UseDeviceUpgradeValues {
   isUpdated: number;
   setDeviceSerial: ConnectionContextInterface['setDeviceSerial'];
   verified: number;
-  errorMessage: string;
+  errorObj: DisplayError;
   completed: boolean;
   resetHooks: () => void;
   latestVersion: string;
   setLatestVersion: React.Dispatch<React.SetStateAction<string>>;
   setUpdated: React.Dispatch<React.SetStateAction<number>>;
   cancelDeviceUpgrade: (connection: DeviceConnection) => void;
+  handleFeedbackOpen: () => void;
 }
 
 export type UseDeviceUpgrade = (isInitial?: boolean) => UseDeviceUpgradeValues;
@@ -63,8 +73,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     verified,
     completed,
     resetHooks,
-    setErrorMessage,
-    errorMessage,
+    setErrorObj,
     errorObj
   } = useDeviceAuth();
 
@@ -85,6 +94,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
   const deviceUpdater = new DeviceUpdater();
   const { langStrings } = useI18n();
+  const { showFeedback } = useFeedback();
 
   const [isCompleted, setIsCompleted] = React.useState<-1 | 0 | 1 | 2>(0);
   const [displayErrorMessage, setDisplayErrorMessage] = React.useState('');
@@ -116,7 +126,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     setIsInternetSlow(false);
     setDisplayErrorMessage('');
     resetHooks();
-    setErrorMessage('');
+    setErrorObj(new CyError());
 
     setUpdateDownloaded(1);
 
@@ -283,33 +293,54 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
     deviceUpdater.on('error', err => {
       waitForCancel.current = true;
-      logger.info('Error on Device update');
-      logger.error(err);
+      logger.info('DeviceAuth: Error occurred in device update flow');
+      const cyError = new CyError();
       if (err instanceof DeviceError) {
+        cyError.pushSubErrors(err.code, err.message);
         if (
           [
             DeviceErrorType.CONNECTION_CLOSED,
             DeviceErrorType.CONNECTION_NOT_OPEN
           ].includes(err.errorType)
         ) {
-          setDisplayErrorMessage(
+          cyError.setError(
+            DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW,
             langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW
           );
         } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+          cyError.setError(
+            DeviceErrorType.NOT_CONNECTED,
+            langStrings.ERRORS.DEVICE_NOT_CONNECTED
+          );
         } else if (
           [
             DeviceErrorType.WRITE_TIMEOUT,
             DeviceErrorType.READ_TIMEOUT
           ].includes(err.errorType)
         ) {
-          setDisplayErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
+          cyError.setError(
+            DeviceErrorType.TIMEOUT_ERROR,
+            langStrings.ERRORS.DEVICE_TIMEOUT_ERROR
+          );
         } else {
-          setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+          cyError.setError(
+            DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR,
+            langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
+              Analytics.Categories.DEVICE_UPDATE
+            )
+          );
         }
       } else {
-        setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        // unknown flow error
+        cyError.setError(
+          CysyncError.UNKNOWN_FLOW_ERROR,
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
+            Analytics.Categories.DEVICE_UPDATE
+          )
+        );
       }
+      setErrorObj(cyError);
+      handleErrors(cyError);
       setUpdated(-1);
       setApproved(-1);
       setIsCompleted(-1);
@@ -493,6 +524,27 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     }
   }, [verified, errorObj, completed]);
 
+  const newFeedbackState: FeedbackState = {
+    attachLogs: true,
+    attachDeviceLogs: false,
+    categories: ['Report'],
+    category: 'Report',
+    description: errorObj.getMessage(),
+    descriptionError: '',
+    email: '',
+    emailError: '',
+    subject: `Reporting for Error ${errorObj.getCode()} (Upgrading Device)`,
+    subjectError: ''
+  };
+
+  const handleFeedbackOpen = () => {
+    showFeedback({
+      isContact: true,
+      heading: 'Report',
+      initFeedbackState: newFeedbackState
+    });
+  };
+
   return {
     startDeviceUpdate,
     handleRetry,
@@ -517,12 +569,13 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     isUpdated,
     setDeviceSerial,
     verified,
-    errorMessage,
+    errorObj,
     completed,
     resetHooks,
     latestVersion,
     setLatestVersion,
     setUpdated,
-    isDeviceUpdating
+    isDeviceUpdating,
+    handleFeedbackOpen
   } as UseDeviceUpgradeValues;
 };

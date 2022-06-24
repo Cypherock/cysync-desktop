@@ -15,7 +15,7 @@ import ModAvatar from '../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../designSystem/iconGroups/errorExclamation';
 import { useDeviceUpgrade } from '../../../store/hooks/flows';
-import { useFeedback, useNetwork } from '../../../store/provider';
+import { useNetwork } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import DynamicTextView from '../sidebar/settings/tabViews/deviceHealth/dynamicTextView';
@@ -94,11 +94,10 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
     isApproved,
     isInternetSlow,
     updateDownloaded,
-    errorMessage,
-    latestVersion
+    latestVersion,
+    handleFeedbackOpen,
+    errorObj
   } = useDeviceUpgrade();
-
-  const feedback = useFeedback();
 
   const onClose = () => {
     setBlockNewConnection(false);
@@ -118,7 +117,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
   }, []);
 
   useEffect(() => {
-    if (isCompleted === -1 || errorMessage) {
+    if (isCompleted === -1 || errorObj.isSet) {
       Analytics.Instance.event(
         Analytics.Categories.PARTIAL_DEVICE_UPDATE,
         Analytics.Actions.ERROR
@@ -129,7 +128,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
         Analytics.Actions.COMPLETED
       );
     }
-  }, [isCompleted, errorMessage]);
+  }, [isCompleted, errorObj]);
 
   return (
     <Root className={classes.container} container>
@@ -219,7 +218,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
               </Typography>
             </div>
           )}
-          {isCompleted === -1 || errorMessage ? (
+          {isCompleted === -1 || errorObj.isSet ? (
             <div className={classes.center}>
               <div>
                 <ListItem color="red">
@@ -243,9 +242,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
                     Close
                   </CustomButton>
                   <CustomButton
-                    onClick={() => {
-                      feedback.showFeedback({ isContact: true });
-                    }}
+                    onClick={handleFeedbackOpen}
                     style={{ margin: '1rem 0rem' }}
                   >
                     Contact Us

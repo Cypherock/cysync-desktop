@@ -22,12 +22,7 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import { useDeviceUpgrade } from '../../../../../../store/hooks/flows';
-import {
-  FeedbackState,
-  useConnection,
-  useFeedback,
-  useNetwork
-} from '../../../../../../store/provider';
+import { useConnection, useNetwork } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import {
   compareVersion,
@@ -276,7 +271,8 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     isApproved,
     isInternetSlow,
     updateDownloaded,
-    errorMessage,
+    errorObj,
+    handleFeedbackOpen,
     latestVersion,
     setLatestVersion
   } = useDeviceUpgrade();
@@ -430,29 +426,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
 
   const handleOnRetry = () => {
     handleRetry();
-  };
-
-  const { showFeedback } = useFeedback();
-
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: displayErrorMessage || errorMessage,
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: 'Reporting for Error (Upgrading Device)',
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
   };
 
   return (

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 
 import { version } from '../../../package.json';
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
-import { CyError, CysyncError } from '../../utils/errorHandler';
+import { CyError, CysyncError } from '../../errors';
 import logger from '../../utils/logger';
 
 import { useI18n } from './i18nProvider';

@@ -7,13 +7,13 @@ import { Device } from '@cypherock/database';
 import { DeviceAuthenticator } from '@cypherock/protocols';
 import { useState } from 'react';
 
-import Analytics from '../../../utils/analytics';
 import {
   CyError,
   CysyncError,
   DisplayError,
   handleErrors
-} from '../../../utils/errorHandler';
+} from '../../../errors';
+import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { deviceDb } from '../../database';
 import { FeedbackState, useFeedback, useI18n } from '../../provider';
@@ -30,9 +30,8 @@ export interface HandleDeviceAuthOptions {
 export interface UseDeviceAuthValues {
   handleDeviceAuth: (options: HandleDeviceAuthOptions) => Promise<void>;
   verified: 0 | -1 | 1 | 2;
-  errorMessage: string;
   errorObj: DisplayError;
-  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  setErrorObj: React.Dispatch<React.SetStateAction<DisplayError>>;
   completed: boolean;
   confirmed: 0 | -1 | 1 | 2;
   resetHooks: () => void;
@@ -43,7 +42,6 @@ export interface UseDeviceAuthValues {
 export type UseDeviceAuth = (isInitial?: boolean) => UseDeviceAuthValues;
 
 export const useDeviceAuth: UseDeviceAuth = isInitial => {
-  const [errorMessage, setErrorMessage] = useState('');
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [verified, setVerified] = useState<-1 | 0 | 1 | 2>(0);
   const [confirmed, setConfirmed] = useState<-1 | 0 | 1 | 2>(0);
@@ -101,7 +99,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       localStorage.getItem('disableProvision') === 'true';
 
     setConfirmed(1);
-    setErrorMessage('');
+    setErrorObj(new CyError());
     logger.info('DeviceAuth: initiated');
     if (mockAuth) {
       logger.info('DeviceAuth: Mocking device auth in debug build');
@@ -187,7 +185,12 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
         setVerified(1);
       } else {
         logger.info('DeviceAuth: Rejected from device');
-        setErrorMessage(langStrings.ERRORS.DEVICE_AUTH_REJECTED);
+        setErrorObj(
+          new CyError(
+            CysyncError.DEVICE_AUTH_REJECTED,
+            langStrings.ERRORS.DEVICE_AUTH_REJECTED
+          )
+        );
         setConfirmed(-1);
       }
     });
@@ -203,19 +206,34 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       if (v) {
         logger.info('DeviceAuth: verified');
         setVerified(2);
-        setErrorMessage('');
+        setErrorObj(new CyError());
       } else {
         logger.info('DeviceAuth: not verified');
         setVerified(-1);
-        setErrorMessage(langStrings.ERRORS.DEVICE_AUTH_FAILED);
+        setErrorObj(
+          new CyError(
+            CysyncError.DEVICE_AUTH_FAILED,
+            langStrings.ERRORS.DEVICE_AUTH_FAILED
+          )
+        );
       }
     });
 
     deviceAuth.on('notReady', () => {
       if (isInitial) {
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL);
+        setErrorObj(
+          new CyError(
+            CysyncError.DEVICE_NOT_READY_IN_INITIAL,
+            langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL
+          )
+        );
       } else {
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY);
+        setErrorObj(
+          new CyError(
+            CysyncError.DEVICE_NOT_READY,
+            langStrings.ERRORS.DEVICE_NOT_READY
+          )
+        );
       }
     });
 
@@ -237,9 +255,16 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       setCompleted(true);
     } catch (e) {
       setIsInFlow(false);
-      logger.error('DeviceAuth: Some error occurred.');
+      logger.error('DeviceAuth: Some unknown error occurred.');
       logger.error(e);
-      setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+      setErrorObj(
+        new CyError(
+          CysyncError.UNKNOWN_FLOW_ERROR,
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
+            Analytics.Categories.DEVICE_AUTH
+          )
+        )
+      );
       deviceAuth.removeAllListeners();
     }
   };
@@ -280,9 +305,8 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
   };
 
   return {
-    errorMessage,
     errorObj,
-    setErrorMessage,
+    setErrorObj,
     cancelDeviceAuth,
     handleDeviceAuth,
     resetHooks,
