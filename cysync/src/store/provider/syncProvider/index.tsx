@@ -257,7 +257,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     };
 
   const addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'] =
-    async (coin: Coin, { module = 'default', isRefresh = false }) => {
+    async (coin, { module = 'default', isRefresh = false }) => {
       const coinName = coin.slug;
 
       const coinData = ALLCOINS[coinName];
@@ -297,6 +297,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             const newItem = new PriceSyncItem({
               days,
               coinType: coinData.abbr,
+              ethCoin: coin.ethCoin,
               isRefresh,
               module
             });
@@ -307,7 +308,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     };
 
   const addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'] =
-    (coin: Coin, { module = 'default', isRefresh = false }) => {
+    (coin, { module = 'default', isRefresh = false }) => {
       const coinName = coin.slug;
 
       const coinData = ALLCOINS[coinName];
@@ -322,6 +323,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       if (!coinData.isTest) {
         const newItem = new LatestPriceSyncItem({
           coinType: coinData.abbr,
+          ethCoin: coin.ethCoin,
           isRefresh,
           module
         });
@@ -560,14 +562,20 @@ export const SyncProvider: React.FC = ({ children }) => {
         isRefresh: true
       })
     );
-    addPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
-      isRefresh: true,
-      module: 'default'
-    });
-    addLatestPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
-      isRefresh: true,
-      module: 'default'
-    });
+    addPriceSyncItemFromCoin(
+      { slug: tokenName, ethCoin } as Coin & { ethCoin: string },
+      {
+        isRefresh: true,
+        module: 'default'
+      }
+    );
+    addLatestPriceSyncItemFromCoin(
+      { slug: tokenName, ethCoin } as Coin & { ethCoin: string },
+      {
+        isRefresh: true,
+        module: 'default'
+      }
+    );
   };
 
   const setupInitial = async () => {

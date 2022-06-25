@@ -1,9 +1,4 @@
-import {
-  BtcCoinData,
-  COINS,
-  ERC20TOKENS,
-  EthCoinData
-} from '@cypherock/communication';
+import { BtcCoinData, COINS, EthCoinData } from '@cypherock/communication';
 import {
   batch as batchServer,
   eth as ethServer,
@@ -262,7 +257,7 @@ export const processResponses = async (
       // If it is a failed transaction, then check if it is a token transaction.
       if (txn.status === 2) {
         let amount = '0';
-        const token = Object.values(ERC20TOKENS).find(
+        const token = Object.values(coinData.erc20TokensList).find(
           t => t.address === ele.to.toLowerCase()
         );
 
@@ -302,7 +297,7 @@ export const processResponses = async (
     }
 
     for (const ele of erc20history) {
-      const tokenObj = ERC20TOKENS[ele.tokenSymbol.toLowerCase()];
+      const tokenObj = coinData.erc20TokensList[ele.tokenSymbol.toLowerCase()];
       const fromAddr = formatEthAddress(ele.from);
       const toAddr = formatEthAddress(ele.to);
 
