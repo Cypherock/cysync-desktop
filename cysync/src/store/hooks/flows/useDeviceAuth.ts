@@ -30,7 +30,7 @@ export interface HandleDeviceAuthOptions {
 export interface UseDeviceAuthValues {
   handleDeviceAuth: (options: HandleDeviceAuthOptions) => Promise<void>;
   verified: 0 | -1 | 1 | 2;
-  errorObj: DisplayError;
+  errorObj: CyError;
   setErrorObj: React.Dispatch<React.SetStateAction<DisplayError>>;
   completed: boolean;
   confirmed: 0 | -1 | 1 | 2;
@@ -174,8 +174,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
           )
         );
       }
-      setErrorObj(cyError);
-      handleErrors(cyError);
+      setErrorObj(handleErrors(errorObj, cyError));
     });
 
     deviceAuth.on('confirmed', (v: boolean) => {

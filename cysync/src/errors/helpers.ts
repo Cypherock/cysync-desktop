@@ -1,8 +1,23 @@
+import { DeviceErrorType } from '@cypherock/communication';
+
 import logger from '../utils/logger';
 
 import { CyError } from './error';
 
-const handleErrors = (err: CyError, flow?: string, metadata?: any) => {
+const handleErrors = (
+  currError: CyError,
+  err: CyError,
+  flow?: string,
+  metadata?: any
+) => {
+  // handle cascade effect properly
+  if (!currError.isSet)
+    currError.pushSubErrors(err.getCode(), err.getMessage());
+
+  // if (currError.getCode() === DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW)
+  //   err.pushSubErrors(currError.getCode(), currError.getMessage());
+
+  return err;
   // log the original error
   logger.error('Origin Errors');
   err.childErrors.forEach(e => logger.error(e));

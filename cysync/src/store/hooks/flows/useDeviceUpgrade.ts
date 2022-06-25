@@ -36,7 +36,6 @@ import { useDeviceAuth } from './useDeviceAuth';
 export interface UseDeviceUpgradeValues {
   startDeviceUpdate: () => void;
   handleRetry: () => void;
-  handleDeviceUpgrade: () => Promise<void>;
   deviceConnection: ConnectionContextInterface['deviceConnection'];
   inBackgroundProcess: ConnectionContextInterface['inBackgroundProcess'];
   firmwareVersion: ConnectionContextInterface['firmwareVersion'];
@@ -290,7 +289,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         )
       );
       setUpdated(-1);
-      setApproved(-1);
+      setApproved(val => (val === 2 ? val : -1));
       setIsCompleted(-1);
       setIsDeviceUpdating(false);
       setBlockNewConnection(false);
@@ -353,7 +352,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
     deviceUpdater.on('error', err => {
       waitForCancel.current = true;
-      logger.info('DeviceAuth: Error occurred in device update flow');
+      logger.info('DeviceAuth: Error occurred in device update flow', err);
       const cyError = new CyError();
       if (err instanceof DeviceError) {
         cyError.pushSubErrors(err.code, err.message);
@@ -399,10 +398,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           )
         );
       }
-      setErrorObj(cyError);
-      handleErrors(cyError);
+      setErrorObj(handleErrors(errorObj, cyError));
       setUpdated(-1);
-      setApproved(-1);
+      setApproved(val => (val === 2 ? val : -1));
       setIsCompleted(-1);
       setIsDeviceUpdating(false);
       deviceUpdater.removeAllListeners();
@@ -530,12 +528,18 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       if (retries.current > MAX_RETRIES) {
         logger.warn('Error in device auth, max retries exceeded.');
         logger.error(error);
-        setErrorObj(
-          new CyError(
-            CysyncError.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH,
-            langStrings.ERRORS.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH
+        if (
+          !(
+            errorObj.isSet &&
+            errorObj.getCode() === DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW
           )
-        );
+        )
+          setErrorObj(
+            new CyError(
+              CysyncError.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH,
+              langStrings.ERRORS.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH
+            )
+          );
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
         setBlockNewConnection(false);
@@ -547,8 +551,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           clearTimeout(timeout.current);
           timeout.current = undefined;
         }
-
-        timeout.current = setTimeout(initiateDeviceAuth, 2000);
+        if (!errorObj.isSet)
+          timeout.current = setTimeout(initiateDeviceAuth, 2000);
       }
     }
   };
@@ -625,7 +629,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   return {
     startDeviceUpdate,
     handleRetry,
-    handleDeviceUpgrade,
     handleDeviceAuth,
     cancelDeviceUpgrade,
     deviceConnection,
