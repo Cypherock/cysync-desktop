@@ -5,7 +5,7 @@ import {
 } from '@cypherock/communication';
 import { Device } from '@cypherock/database';
 import { DeviceAuthenticator } from '@cypherock/protocols';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   CyError,
@@ -16,7 +16,13 @@ import {
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { deviceDb } from '../../database';
-import { FeedbackState, useFeedback, useI18n } from '../../provider';
+import {
+  DeviceConnectionState,
+  FeedbackState,
+  useConnection,
+  useFeedback,
+  useI18n
+} from '../../provider';
 
 export interface HandleDeviceAuthOptions {
   connection: DeviceConnection;
@@ -49,6 +55,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
   const deviceAuth = new DeviceAuthenticator();
 
   const { showFeedback } = useFeedback();
+  const { setDeviceConnectionStatus, deviceConnection } = useConnection();
 
   const { langStrings } = useI18n();
   let deviceSerial: string | null = null;
@@ -61,6 +68,12 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
     setCompleted(false);
     deviceAuth.removeAllListeners();
   };
+
+  useEffect(() => {
+    if (completed && !deviceConnection) {
+      setDeviceConnectionStatus(false);
+    }
+  }, [completed]);
 
   const onDeviceAuthenticate = (firmwareVersion: string, auth: boolean) => {
     try {

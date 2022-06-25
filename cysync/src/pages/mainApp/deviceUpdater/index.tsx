@@ -1,6 +1,8 @@
 import { shell } from 'electron';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
+import Routes from '../../../constants/routes';
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import { DeviceConnectionState, useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
@@ -22,6 +24,8 @@ const DeviceUpdatePopup = () => {
     setOpenMisconfiguredPrompt,
     updateRequiredType
   } = useConnection();
+
+  const navigate = useNavigate();
 
   const onConfirmation = (val: boolean) => {
     setOpenMisconfiguredPrompt(false);
@@ -47,20 +51,20 @@ const DeviceUpdatePopup = () => {
         }
       }
 
-      setUpdateType(localUpdateType);
-      setIsOpen(true);
       if (localUpdateType === 'update') {
         Analytics.Instance.event(
           Analytics.Categories.PARTIAL_DEVICE_UPDATE,
           Analytics.Actions.OPEN
         );
-        logger.info('Device update prompt opened by user');
+        logger.info('Redirecting user to device update settings page');
+        return navigate(Routes.settings.device.upgrade);
       } else if (localUpdateType === 'auth') {
         Analytics.Instance.event(
           Analytics.Categories.DEVICE_AUTH_PROMPT,
           Analytics.Actions.OPEN
         );
-        logger.info('Device auth prompt opened by user');
+        logger.info('Redirecting user to device auth settings page');
+        return navigate(Routes.settings.device.auth);
       } else {
         Analytics.Instance.event(
           Analytics.Categories.INITIAL_FLOW_IN_MAIN,
@@ -68,6 +72,8 @@ const DeviceUpdatePopup = () => {
         );
         logger.info('Intial flow in main opened by user');
       }
+      setIsOpen(true);
+      setUpdateType(localUpdateType);
     } else {
       setIsOpen(false);
     }
@@ -97,25 +103,25 @@ const DeviceUpdatePopup = () => {
   }, [openMisconfiguredPrompt]);
 
   if (isOpen) {
-    return (
-      <DialogBox
-        fullWidth
-        maxWidth="md"
-        open={isOpen}
-        disableBackdropClick
-        disableEscapeKeyDown
-        handleClose={handleClose}
-        restComponents={
-          updateType === 'update' ? (
-            <UpdaterComponent handleClose={handleClose} />
-          ) : updateType === 'auth' ? (
-            <AuthenticatorComponent handleClose={handleClose} />
-          ) : (
-            <InitialFlowComponent handleClose={handleClose} />
-          )
-        }
-      />
-    );
+    // return (
+    //   <DialogBox
+    //     fullWidth
+    //     maxWidth="md"
+    //     open={isOpen}
+    //     disableBackdropClick
+    //     disableEscapeKeyDown
+    //     handleClose={handleClose}
+    //     restComponents={
+    //       updateType === 'update' ? (
+    //         <UpdaterComponent handleClose={handleClose} />
+    //       ) : updateType === 'auth' ? (
+    //         <AuthenticatorComponent handleClose={handleClose} />
+    //       ) : (
+    //         <InitialFlowComponent handleClose={handleClose} />
+    //       )
+    //     }
+    //   />
+    // );
   }
 
   if (
