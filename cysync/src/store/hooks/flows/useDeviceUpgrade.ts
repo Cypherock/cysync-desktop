@@ -571,7 +571,10 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   }, [isUpdated]);
 
   useEffect(() => {
-    if (verified === -1 || errorObj.isSet) {
+    // Dont do anything if the auth process hasnt even started
+    // as the below logic is only applicable after auth has started
+    if (verified === 0) return;
+    else if (verified === -1 || errorObj.isSet) {
       retries.current += 1;
 
       if (verified === -1 || retries.current > MAX_RETRIES) {
