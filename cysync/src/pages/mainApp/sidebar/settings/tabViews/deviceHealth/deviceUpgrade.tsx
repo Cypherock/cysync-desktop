@@ -1,4 +1,3 @@
-import { stmFirmware as firmwareServer } from '@cypherock/server-wrapper';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { Button, Grid } from '@mui/material';
@@ -22,18 +21,8 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import { useDeviceUpgrade } from '../../../../../../store/hooks/flows';
-import {
-  FeedbackState,
-  useConnection,
-  useFeedback,
-  useNetwork
-} from '../../../../../../store/provider';
+import { useNetwork } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
-import {
-  compareVersion,
-  hexToVersion,
-  inTestApp
-} from '../../../../../../utils/compareVersion';
 import logger from '../../../../../../utils/logger';
 
 import Authentication from './deviceUpgradeFormComponents/authentication';
@@ -255,7 +244,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
 }) => {
   const [authState, setAuthState] = React.useState<-1 | 0 | 1 | 2>(0);
   const [connStatus, setConnStatus] = React.useState<-1 | 0 | 1 | 2>(1);
-  const [upgradeAvailable, setUpgradeAvailable] = React.useState(false);
   const [initialStart, setInitialStart] = React.useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
 
@@ -266,22 +254,18 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     cancelDeviceUpgrade,
     handleRetry,
     deviceConnection,
-    firmwareVersion,
-    deviceState,
     inBackgroundProcess,
     isCompleted,
     setIsCompleted,
-    displayErrorMessage,
-    setDisplayErrorMessage,
     isApproved,
     isInternetSlow,
     updateDownloaded,
-    errorMessage,
+    errorObj,
+    handleFeedbackOpen,
     latestVersion,
-    setLatestVersion
+    downloadFirmware,
+    upgradeAvailable
   } = useDeviceUpgrade();
-
-  const { inBootloader } = useConnection();
 
   const latestDeviceConnection = useRef<any>();
   const latestCompleted = useRef<boolean>();
@@ -335,41 +319,14 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
 
   useEffect(() => {
     if (authState === 1) {
-      firmwareServer
-        .getLatest()
-        .request()
-        .then(response => {
-          setLatestVersion(response.data.firmware.version);
-
-          if (
-            (firmwareVersion &&
-              deviceState &&
-              compareVersion(
-                response.data.firmware.version,
-                hexToVersion(firmwareVersion)
-              )) ||
-            inTestApp(deviceState)
-          ) {
-            setUpgradeAvailable(true);
-          }
-
-          if (process.env.BUILD_TYPE === 'debug') {
-            setUpgradeAvailable(true);
-          } else if (inBootloader) {
-            setUpgradeAvailable(true);
-          }
-
-          setAuthState(2);
-          return null;
-        })
-        .catch(error => {
-          logger.error(error);
-          setIsCompleted(-1);
-          setAuthState(-1);
-          setDisplayErrorMessage(
-            'Cannot connect to the server. Please check your internet connection and try again.'
-          );
-        });
+      const onSuccess = () => {
+        setAuthState(2);
+      };
+      const onError = () => {
+        setIsCompleted(-1);
+        setAuthState(-1);
+      };
+      downloadFirmware(onSuccess, onError);
     }
   }, [authState]);
 
@@ -430,29 +387,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
 
   const handleOnRetry = () => {
     handleRetry();
-  };
-
-  const { showFeedback } = useFeedback();
-
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: displayErrorMessage || errorMessage,
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: 'Reporting for Error (Upgrading Device)',
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
   };
 
   return (
@@ -565,7 +499,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             color="textSecondary"
             style={{ margin: '1rem 0rem 6rem' }}
           >
-            {displayErrorMessage}
+            {errorObj.showError()}
           </Typography>
           <div className={classes.errorButtons}>
             <CustomButton

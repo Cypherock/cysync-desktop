@@ -10,12 +10,11 @@ import CustomButton from '../../../../../designSystem/designComponents/buttons/b
 import AvatarIcon from '../../../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
+import { CyError } from '../../../../../errors';
 import { useDeviceAuth } from '../../../../../store/hooks/flows';
 import {
   DeviceConnectionState,
-  FeedbackState,
-  useConnection,
-  useFeedback
+  useConnection
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../../../utils/compareVersion';
@@ -93,12 +92,11 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
     verified,
     resetHooks,
     completed,
-    errorMessage,
+    errorObj,
     confirmed,
-    setErrorMessage
+    handleFeedbackOpen,
+    setErrorObj
   } = useDeviceAuth(true);
-
-  const feedback = useFeedback();
 
   useEffect(() => {
     Analytics.Instance.event(
@@ -161,7 +159,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
       );
     }
 
-    if (verified === -1 || errorMessage) {
+    if (verified === -1 || errorObj.isSet) {
       Analytics.Instance.event(
         Analytics.Categories.INITIAL_DEVICE_AUTH,
         Analytics.Actions.ERROR
@@ -169,31 +167,10 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
     }
   }, [verified, completed]);
 
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: errorMsg || errorMessage,
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: 'Reporting for Error (Device Authentication)',
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    feedback.showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
-  };
-
   const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const onRetry = () => {
     setErrorMsg('');
-    setErrorMessage('');
+    setErrorObj(new CyError());
     resetHooks();
 
     if (timeout.current) {
@@ -240,7 +217,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
         <br />
         <DynamicTextView
           text="Authenticating Device"
-          state={errorMessage || errorMsg ? -1 : confirmed === 1 ? 1 : verified}
+          state={
+            errorObj.isSet || errorMsg ? -1 : confirmed === 1 ? 1 : verified
+          }
         />
         <br />
         {verified === 2 && (
@@ -251,7 +230,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
             </Typography>
           </div>
         )}
-        {(verified === -1 || errorMessage || errorMsg) && (
+        {(verified === -1 || errorObj.isSet || errorMsg) && (
           <div className={classes.bottomContainer}>
             <div className={classes.success}>
               <Icon
@@ -260,7 +239,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
                 iconGroup={<ErrorExclamation />}
               />
               <Typography variant="body2" color="secondary">
-                {errorMessage || errorMsg || 'Device Authenticating failed'}
+                {errorObj.getMessage() ||
+                  errorMsg ||
+                  'Device Authenticating failed'}
               </Typography>
             </div>
             <div className={classes.btnContainer}>
@@ -283,9 +264,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
                 </CustomButton>
               )}
               <CustomButton
-                onClick={() => {
-                  feedback.showFeedback({ isContact: true });
-                }}
+                onClick={handleFeedbackOpen}
                 style={{ margin: '1rem 0rem' }}
               >
                 Contact Us

@@ -273,9 +273,7 @@ export const useSendTransaction: UseSendTransaction = () => {
             if (error.response) {
               setErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
             } else {
-              setErrorMessage(
-                langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE
-              );
+              setErrorMessage(langStrings.ERRORS.NETWORK_UNREACHABLE);
             }
           } else {
             if (
@@ -322,7 +320,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           // Don't show any other error because it may be due to
           // incorrect amount or address which the user may change.
           if (e.isAxiosError && !e.response) {
-            setErrorMessage(langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE);
+            setErrorMessage(langStrings.ERRORS.NETWORK_UNREACHABLE);
           }
           resolve(null);
         });
@@ -399,7 +397,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           if (err.response) {
             setErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
           } else {
-            setErrorMessage(langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE);
+            setErrorMessage(langStrings.ERRORS.NETWORK_UNREACHABLE);
           }
         } else if (err instanceof DeviceError) {
           if (

@@ -10,6 +10,14 @@ import { ipcRenderer } from 'electron';
 import React, { useEffect } from 'react';
 
 import {
+  CyError,
+  CysyncError,
+  DisplayError,
+  handleErrors
+} from '../../../errors';
+import Analytics from '../../../utils/analytics';
+import {
+  compareVersion,
   getFirmwareHex,
   hexToVersion,
   inTestApp
@@ -17,7 +25,9 @@ import {
 import logger from '../../../utils/logger';
 import {
   ConnectionContextInterface,
+  FeedbackState,
   useConnection,
+  useFeedback,
   useI18n
 } from '../../provider';
 
@@ -26,15 +36,12 @@ import { useDeviceAuth } from './useDeviceAuth';
 export interface UseDeviceUpgradeValues {
   startDeviceUpdate: () => void;
   handleRetry: () => void;
-  handleDeviceUpgrade: () => Promise<void>;
   deviceConnection: ConnectionContextInterface['deviceConnection'];
   inBackgroundProcess: ConnectionContextInterface['inBackgroundProcess'];
   firmwareVersion: ConnectionContextInterface['firmwareVersion'];
   deviceState: ConnectionContextInterface['deviceState'];
   isCompleted: 0 | 1 | -1 | 2;
   setIsCompleted: React.Dispatch<React.SetStateAction<number>>;
-  displayErrorMessage: string;
-  setDisplayErrorMessage: React.Dispatch<React.SetStateAction<string>>;
   isDeviceUpdating: boolean;
   setIsDeviceUpdating: ConnectionContextInterface['setIsDeviceUpdating'];
   setBlockNewConnection: ConnectionContextInterface['setBlockNewConnection'];
@@ -46,13 +53,17 @@ export interface UseDeviceUpgradeValues {
   isUpdated: number;
   setDeviceSerial: ConnectionContextInterface['setDeviceSerial'];
   verified: number;
-  errorMessage: string;
+  errorObj: DisplayError;
   completed: boolean;
   resetHooks: () => void;
   latestVersion: string;
   setLatestVersion: React.Dispatch<React.SetStateAction<string>>;
   setUpdated: React.Dispatch<React.SetStateAction<number>>;
   cancelDeviceUpgrade: (connection: DeviceConnection) => void;
+  handleFeedbackOpen: () => void;
+  downloadFirmware: (onSuccess?: () => void, onError?: () => void) => void;
+  upgradeAvailable: boolean;
+  setErrorObj: React.Dispatch<React.SetStateAction<DisplayError>>;
 }
 
 export type UseDeviceUpgrade = (isInitial?: boolean) => UseDeviceUpgradeValues;
@@ -63,8 +74,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     verified,
     completed,
     resetHooks,
-    setErrorMessage,
-    errorMessage
+    setErrorObj,
+    errorObj
   } = useDeviceAuth();
 
   const {
@@ -84,9 +95,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
   const deviceUpdater = new DeviceUpdater();
   const { langStrings } = useI18n();
+  const { showFeedback } = useFeedback();
 
   const [isCompleted, setIsCompleted] = React.useState<-1 | 0 | 1 | 2>(0);
-  const [displayErrorMessage, setDisplayErrorMessage] = React.useState('');
   const [isApproved, setApproved] = React.useState<-1 | 0 | 1 | 2>(0);
   const [isUpdated, setUpdated] = React.useState<-1 | 0 | 1 | 2>(0);
   const [updateDownloaded, setUpdateDownloaded] = React.useState<
@@ -98,38 +109,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   const internetSlowTimeout = React.useRef<NodeJS.Timeout | undefined>(
     undefined
   );
+  const [upgradeAvailable, setUpgradeAvailable] = React.useState(false);
 
   const waitForCancel = React.useRef(false);
   const alreadyCancelled = React.useRef(false);
 
-  const startDeviceUpdate = () => {
-    alreadyCancelled.current = false;
-    waitForCancel.current = false;
-
-    setApproved(0);
-    setIsCompleted(0);
-    setUpdated(0);
-    setUpdateDownloaded(0);
-    setLatestVersion('0.0.0');
-    setFirmwarePath('');
-    setIsInternetSlow(false);
-    setDisplayErrorMessage('');
-    resetHooks();
-    setErrorMessage('');
-
-    setUpdateDownloaded(1);
-
-    logger.info('Initiating device update from settings');
-
-    if (!beforeFlowStart(true)) {
-      setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
-      setIsCompleted(-1);
-      return;
-    }
-
-    setIsDeviceUpdating(true);
-    setBlockNewConnection(true);
-
+  const downloadFirmware = (onSuccess?: () => void, onError?: () => void) => {
     firmwareServer
       .getLatest()
       .request()
@@ -153,10 +138,26 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           setUpdated(2);
           return null;
         }
-        internetSlowTimeout.current = setTimeout(() => {
-          logger.verbose('Setting internet Slow.');
-          setIsInternetSlow(true);
-        }, 5000);
+        if (
+          (firmwareVersion &&
+            deviceState &&
+            compareVersion(
+              response.data.firmware.version,
+              hexToVersion(firmwareVersion)
+            )) ||
+          inTestApp(deviceState)
+        ) {
+          setUpgradeAvailable(true);
+        }
+
+        if (process.env.BUILD_TYPE === 'debug' || inBootloader)
+          setUpgradeAvailable(true);
+
+        //What is this sorcery???
+        // internetSlowTimeout.current = setTimeout(() => {
+        //   logger.verbose('Setting internet Slow.');
+        //   setIsInternetSlow(true);
+        // }, 5000);
         ipcRenderer.send('download', {
           url: response.data.firmware.downloadUrl,
           properties: {
@@ -164,27 +165,71 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
             filename: 'app_dfu_package.bin'
           }
         });
+        if (onSuccess) onSuccess();
         return null;
       })
       .catch(error => {
         logger.error('Error in getting firmware version');
         logger.error(error);
         if (error && error.response) {
-          setDisplayErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
+          setErrorObj(
+            new CyError(
+              CysyncError.NETWORK_FAILURE,
+              langStrings.ERRORS.NETWORK_ERROR
+            )
+          );
         } else {
-          setDisplayErrorMessage(
-            langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE
+          setErrorObj(
+            new CyError(
+              CysyncError.NETWORK_UNREACHABLE,
+              langStrings.ERRORS.NETWORK_UNREACHABLE
+            )
           );
         }
         setUpdateDownloaded(-1);
         setIsCompleted(-1);
         setBlockNewConnection(false);
         setIsDeviceUpdating(false);
+        if (onError) onError();
         if (internetSlowTimeout.current) {
           clearTimeout(internetSlowTimeout.current);
           internetSlowTimeout.current = undefined;
         }
       });
+  };
+
+  const startDeviceUpdate = () => {
+    alreadyCancelled.current = false;
+    waitForCancel.current = false;
+
+    setApproved(0);
+    setIsCompleted(0);
+    setUpdated(0);
+    setUpdateDownloaded(0);
+    setLatestVersion('0.0.0');
+    setFirmwarePath('');
+    setIsInternetSlow(false);
+    resetHooks();
+    setErrorObj(new CyError());
+
+    setUpdateDownloaded(1);
+
+    logger.info('Initiating device update from settings');
+
+    if (!beforeFlowStart(true)) {
+      setErrorObj(
+        new CyError(
+          DeviceErrorType.NOT_CONNECTED,
+          langStrings.ERRORS.DEVICE_NOT_CONNECTED
+        )
+      );
+      setIsCompleted(-1);
+      return;
+    }
+
+    setIsDeviceUpdating(true);
+    setBlockNewConnection(true);
+    downloadFirmware();
 
     ipcRenderer.on('download complete', (_event, filePath) => {
       logger.info('Firmware downloaded successfully');
@@ -199,8 +244,11 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     ipcRenderer.on('download error', error => {
       logger.error('Error in downloading firmware');
       logger.error(error);
-      setDisplayErrorMessage(
-        langStrings.ERRORS.DEVICE_UPGRADE_FIRMWARE_DOWNLOAD_FAILED
+      setErrorObj(
+        new CyError(
+          CysyncError.DEVICE_UPGRADE_FIRMWARE_DOWNLOAD_FAILED,
+          langStrings.ERRORS.DEVICE_UPGRADE_FIRMWARE_DOWNLOAD_FAILED
+        )
       );
       setIsCompleted(-1);
       setBlockNewConnection(false);
@@ -234,9 +282,14 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   const handleDeviceUpgrade = async () => {
     if (!deviceConnection) {
       logger.error('Device is not connected');
-      setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+      setErrorObj(
+        new CyError(
+          DeviceErrorType.NOT_CONNECTED,
+          langStrings.ERRORS.DEVICE_NOT_CONNECTED
+        )
+      );
       setUpdated(-1);
-      setApproved(-1);
+      setApproved(val => (val === 2 ? val : -1));
       setIsCompleted(-1);
       setIsDeviceUpdating(false);
       setBlockNewConnection(false);
@@ -258,7 +311,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       } else {
         logger.info('Device update rejected');
         setApproved(-1);
-        setDisplayErrorMessage(langStrings.ERRORS.DEVICE_UPGRADE_REJECTED);
+        setErrorObj(
+          new CyError(
+            CysyncError.DEVICE_UPGRADE_REJECTED,
+            langStrings.ERRORS.DEVICE_UPGRADE_REJECTED
+          )
+        );
         setIsCompleted(-1);
         setBlockNewConnection(false);
         setIsDeviceUpdating(false);
@@ -269,9 +327,19 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     deviceUpdater.on('notReady', () => {
       logger.info('DeviceUpgrade: Device not ready');
       if (isInitial) {
-        setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL);
+        setErrorObj(
+          new CyError(
+            CysyncError.DEVICE_NOT_READY_IN_INITIAL,
+            langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL
+          )
+        );
       } else {
-        setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY);
+        setErrorObj(
+          new CyError(
+            CysyncError.DEVICE_NOT_READY,
+            langStrings.ERRORS.DEVICE_NOT_READY
+          )
+        );
       }
 
       setUpdated(-1);
@@ -284,35 +352,55 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
     deviceUpdater.on('error', err => {
       waitForCancel.current = true;
-      logger.info('Error on Device update');
-      logger.error(err);
+      logger.info('DeviceAuth: Error occurred in device update flow', err);
+      const cyError = new CyError();
       if (err instanceof DeviceError) {
+        cyError.pushSubErrors(err.code, err.message);
         if (
           [
             DeviceErrorType.CONNECTION_CLOSED,
             DeviceErrorType.CONNECTION_NOT_OPEN
           ].includes(err.errorType)
         ) {
-          setDisplayErrorMessage(
+          cyError.setError(
+            DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW,
             langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW
           );
         } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+          cyError.setError(
+            DeviceErrorType.NOT_CONNECTED,
+            langStrings.ERRORS.DEVICE_NOT_CONNECTED
+          );
         } else if (
           [
             DeviceErrorType.WRITE_TIMEOUT,
             DeviceErrorType.READ_TIMEOUT
           ].includes(err.errorType)
         ) {
-          setDisplayErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
+          cyError.setError(
+            DeviceErrorType.TIMEOUT_ERROR,
+            langStrings.ERRORS.DEVICE_TIMEOUT_ERROR
+          );
         } else {
-          setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+          cyError.setError(
+            DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR,
+            langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
+              Analytics.Categories.DEVICE_UPDATE
+            )
+          );
         }
       } else {
-        setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        // unknown flow error
+        cyError.setError(
+          CysyncError.UNKNOWN_FLOW_ERROR,
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
+            Analytics.Categories.DEVICE_UPDATE
+          )
+        );
       }
+      setErrorObj(handleErrors(errorObj, cyError));
       setUpdated(-1);
-      setApproved(-1);
+      setApproved(val => (val === 2 ? val : -1));
       setIsCompleted(-1);
       setIsDeviceUpdating(false);
       deviceUpdater.removeAllListeners();
@@ -325,7 +413,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setIsCompleted(-1);
       setIsDeviceUpdating(false);
       setBlockNewConnection(false);
-      setDisplayErrorMessage(langStrings.ERRORS.DEVICE_UPGRADE_FAILED);
+      setErrorObj(
+        new CyError(
+          CysyncError.DEVICE_UPGRADE_FAILED,
+          langStrings.ERRORS.DEVICE_UPGRADE_FAILED
+        )
+      );
       deviceUpdater.removeAllListeners();
     });
 
@@ -350,7 +443,14 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setIsInFlow(true);
       logger.error('DeviceUpgrade: Some error occurred.');
       logger.error(e);
-      setDisplayErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+      setErrorObj(
+        new CyError(
+          CysyncError.UNKNOWN_FLOW_ERROR,
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
+            Analytics.Categories.DEVICE_UPDATE
+          )
+        )
+      );
       deviceUpdater.removeAllListeners();
       setIsDeviceUpdating(false);
       setBlockNewConnection(false);
@@ -365,7 +465,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     if (updateDownloaded === 2) {
       logger.info('Running device update');
       if (!beforeFlowStart(true)) {
-        setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+        setErrorObj(
+          new CyError(
+            DeviceErrorType.NOT_CONNECTED,
+            langStrings.ERRORS.DEVICE_NOT_CONNECTED
+          )
+        );
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
         setBlockNewConnection(false);
@@ -423,9 +528,18 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       if (retries.current > MAX_RETRIES) {
         logger.warn('Error in device auth, max retries exceeded.');
         logger.error(error);
-        setDisplayErrorMessage(
-          langStrings.ERRORS.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH
-        );
+        if (
+          !(
+            errorObj.isSet &&
+            errorObj.getCode() === DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW
+          )
+        )
+          setErrorObj(
+            new CyError(
+              CysyncError.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH,
+              langStrings.ERRORS.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH
+            )
+          );
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
         setBlockNewConnection(false);
@@ -437,8 +551,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           clearTimeout(timeout.current);
           timeout.current = undefined;
         }
-
-        timeout.current = setTimeout(initiateDeviceAuth, 2000);
+        if (!errorObj.isSet)
+          timeout.current = setTimeout(initiateDeviceAuth, 2000);
       }
     }
   };
@@ -457,7 +571,10 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   }, [isUpdated]);
 
   useEffect(() => {
-    if (verified === -1 || errorMessage) {
+    // Dont do anything if the auth process hasnt even started
+    // as the below logic is only applicable after auth has started
+    if (verified === 0) return;
+    else if (verified === -1 || errorObj.isSet) {
       retries.current += 1;
 
       if (verified === -1 || retries.current > MAX_RETRIES) {
@@ -466,15 +583,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         } else {
           logger.warn('Error in device auth, max retries exceeded.');
         }
-        setDisplayErrorMessage(
-          errorMessage || langStrings.ERRORS.DEVICE_AUTH_FAILED
-        );
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
         setBlockNewConnection(false);
       } else {
         logger.warn('Error in device auth, retrying...');
-        logger.warn(errorMessage);
+        logger.warn(errorObj);
 
         if (timeout.current) {
           clearTimeout(timeout.current);
@@ -492,12 +606,32 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       }, 500);
       resetHooks();
     }
-  }, [verified, errorMessage, completed]);
+  }, [verified, errorObj, completed]);
+
+  const newFeedbackState: FeedbackState = {
+    attachLogs: true,
+    attachDeviceLogs: false,
+    categories: ['Report'],
+    category: 'Report',
+    description: errorObj.getMessage(),
+    descriptionError: '',
+    email: '',
+    emailError: '',
+    subject: `Reporting for Error ${errorObj.getCode()} (Upgrading Device)`,
+    subjectError: ''
+  };
+
+  const handleFeedbackOpen = () => {
+    showFeedback({
+      isContact: true,
+      heading: 'Report',
+      initFeedbackState: newFeedbackState
+    });
+  };
 
   return {
     startDeviceUpdate,
     handleRetry,
-    handleDeviceUpgrade,
     handleDeviceAuth,
     cancelDeviceUpgrade,
     deviceConnection,
@@ -506,8 +640,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     deviceState,
     isCompleted,
     setIsCompleted,
-    displayErrorMessage,
-    setDisplayErrorMessage,
     setIsDeviceUpdating,
     setBlockNewConnection,
     updateDownloaded,
@@ -518,12 +650,16 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     isUpdated,
     setDeviceSerial,
     verified,
-    errorMessage,
+    errorObj,
     completed,
     resetHooks,
     latestVersion,
     setLatestVersion,
     setUpdated,
-    isDeviceUpdating
+    isDeviceUpdating,
+    handleFeedbackOpen,
+    downloadFirmware,
+    upgradeAvailable,
+    setErrorObj
   } as UseDeviceUpgradeValues;
 };

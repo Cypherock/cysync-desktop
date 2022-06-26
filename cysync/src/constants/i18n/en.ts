@@ -1,17 +1,23 @@
 import { I18nStrings } from './type';
 
+// NOMENCLATURE
+// Cypherock X1 Device: The hardware device
+// Cypherock X1 Card: The 4 cards
+// Cypherock X1 Wallet: Cypherock X1 Device + Cypherock X1 Card
+
 const en: I18nStrings = {
   ERRORS: {
-    UNKNOWN_FLOW_ERROR:
-      'Some internal error occurred. Please disconnect and then reconnect the device and restart the process',
+    UNKNOWN_FLOW_ERROR: flow =>
+      `Some internal error occurred. Please disconnect and then reconnect the device and restart ${flow}`,
+    CUSTOM_ERROR: txt => `Some internal error occured while ${txt}`,
 
     NETWORK_ERROR:
       'Some internal error occurred while communicating with the server. Please try again later.',
-    NETWORK_ERROR_WITH_NO_RESPONSE:
+    NETWORK_UNREACHABLE:
       'Failed to communicate with the server. Please check your internet connection and try again later.',
 
     DEVICE_NOT_CONNECTED:
-      'Please connect the cypherock X1 wallet before proceeding with this process',
+      'Please connect the cypherock X1 device before proceeding with this process',
     DEVICE_DISCONNECTED_IN_FLOW:
       'Hardware Wallet disconnected. Please reconnect the Cypherock X1 wallet',
     DEVICE_TIMEOUT_ERROR:

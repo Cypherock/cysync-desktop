@@ -1,9 +1,10 @@
 export interface I18nStrings {
   ERRORS: {
-    UNKNOWN_FLOW_ERROR: string;
+    UNKNOWN_FLOW_ERROR: (flow: string) => string;
+    CUSTOM_ERROR: (txt: string) => string;
 
     NETWORK_ERROR: string;
-    NETWORK_ERROR_WITH_NO_RESPONSE: string;
+    NETWORK_UNREACHABLE: string;
 
     DEVICE_NOT_CONNECTED: string;
     DEVICE_DISCONNECTED_IN_FLOW: string;

@@ -20,12 +20,9 @@ import AvatarIcon from '../../../../../../designSystem/designComponents/icons/Av
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
+import { CyError } from '../../../../../../errors';
 import { useDeviceAuth } from '../../../../../../store/hooks/flows';
-import {
-  FeedbackState,
-  useConnection,
-  useFeedback
-} from '../../../../../../store/provider';
+import { useConnection } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import logger from '../../../../../../utils/logger';
 
@@ -250,17 +247,19 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 }) => {
   const [connStatus, setConnStatus] = React.useState<-1 | 0 | 1 | 2>(1);
 
-  const { deviceConnection, connected } = useConnection();
+  const { internalDeviceConnection: deviceConnection, connected } =
+    useConnection();
 
   const {
     handleDeviceAuth,
     completed,
     verified,
     resetHooks,
-    errorMessage,
+    errorObj,
     cancelDeviceAuth,
-    setErrorMessage,
-    confirmed
+    setErrorObj,
+    confirmed,
+    handleFeedbackOpen
   } = useDeviceAuth();
 
   const latestDeviceConnection = useRef<any>();
@@ -303,7 +302,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
         if (activeStep !== 1) {
           setActiveStep(1);
         }
-      }, 1000);
+      }, 0);
     } else {
       setConnStatus(1);
     }
@@ -320,7 +319,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
         <Authentication
           isCompleted={isCompleted}
           setCompleted={setCompleted}
-          errorMessage={errorMessage}
+          errorObj={errorObj}
           handleDeviceAuth={handleDeviceAuth}
           completed={completed}
           verified={verified}
@@ -334,7 +333,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 
   const handleRetry = () => {
     logger.info('Device authentication retry');
-    setErrorMessage('');
+    setErrorObj(new CyError());
     setCompleted(0);
     resetHooks();
     if (deviceConnection) {
@@ -342,29 +341,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     } else {
       setActiveStep(0);
     }
-  };
-
-  const { showFeedback } = useFeedback();
-
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: errorMessage,
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: 'Reporting for Error (Authenticating Device)',
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
   };
 
   return (
@@ -423,11 +399,14 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
           >
             Device Authentication Failed
           </Typography>
+          <Typography color="textPrimary" style={{ margin: '1rem 0rem 6rem' }}>
+            {errorObj.getCode()}
+          </Typography>
           <Typography
             color="textSecondary"
             style={{ margin: '1rem 0rem 6rem' }}
           >
-            {errorMessage}
+            {errorObj.getMessage()}
           </Typography>
           {verified === -1 ? (
             <div className={classes.errorButtons}>
@@ -451,6 +430,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
               <CustomButton
                 variant="outlined"
                 onClick={handleRetry}
+                disabled={!latestDeviceConnection.current}
                 style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
               >
                 Retry

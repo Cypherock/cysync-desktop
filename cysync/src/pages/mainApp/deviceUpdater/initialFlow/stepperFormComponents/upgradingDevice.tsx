@@ -14,11 +14,7 @@ import AvatarIcon from '../../../../../designSystem/designComponents/icons/Avata
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
 import { useDeviceUpgrade } from '../../../../../store/hooks/flows';
-import {
-  FeedbackState,
-  useFeedback,
-  useNetwork
-} from '../../../../../store/provider';
+import { useNetwork } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import logger from '../../../../../utils/logger';
 
@@ -92,15 +88,12 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     handleRetry,
     deviceConnection,
     isCompleted,
-    displayErrorMessage,
-    setDisplayErrorMessage,
     setBlockNewConnection,
     isInternetSlow,
     updateDownloaded,
-    errorMessage,
+    handleFeedbackOpen,
     latestVersion,
-    setUpdated,
-    setIsCompleted,
+    errorObj,
     inBackgroundProcess
   } = useDeviceUpgrade(true);
 
@@ -131,15 +124,15 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   useEffect(() => {
     logger.info('Initiating device update from initial setup in main');
-    if (!deviceConnection) {
-      logger.info('Failed due to device not connected');
-      setDisplayErrorMessage('Please connect the device and try again.');
-      setUpdated(-1);
-      setIsCompleted(-1);
-      return () => {
-        // empty
-      };
-    }
+    // if (!deviceConnection) {
+    //   logger.info('Failed due to device not connected');
+    //   setDisplayErrorMessage('Please connect the device and try again.');
+    //   setUpdated(-1);
+    //   setIsCompleted(-1);
+    //   return () => {
+    //     // empty
+    //   };
+    // }
 
     startDeviceUpdate();
 
@@ -165,30 +158,6 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
       setTimeout(onClose, 350);
     }
   }, [isCompleted]);
-
-  const { showFeedback } = useFeedback();
-
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: displayErrorMessage || errorMessage,
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: 'Reporting for Error (Upgrading Device)',
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
-  };
-
   return (
     <Root container>
       <Grid item xs={2} />
@@ -249,7 +218,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
                 iconGroup={<ErrorExclamation />}
               />
               <Typography color="error" variant="h5">
-                {displayErrorMessage}
+                {errorObj.showError()}
               </Typography>
             </div>
             <div className={classes.errorButtons}>

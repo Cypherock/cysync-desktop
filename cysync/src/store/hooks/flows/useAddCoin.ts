@@ -287,7 +287,7 @@ export const useAddCoin: UseAddCoin = () => {
         if (err.response) {
           setErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
         } else {
-          setErrorMessage(langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE);
+          setErrorMessage(langStrings.ERRORS.NETWORK_UNREACHABLE);
         }
       } else if (err instanceof DeviceError) {
         if (

@@ -10,6 +10,7 @@ import CustomButton from '../../../../../designSystem/designComponents/buttons/b
 import AvatarIcon from '../../../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
+import { CyError } from '../../../../../errors';
 import { useDeviceAuth } from '../../../../../store/hooks/flows';
 import {
   DeviceConnectionState,
@@ -90,9 +91,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     verified,
     resetHooks,
     completed,
-    errorMessage,
+    errorObj,
     confirmed,
-    setErrorMessage
+    setErrorObj
   } = useDeviceAuth(true);
 
   const feedback = useFeedback();
@@ -158,7 +159,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
       );
     }
 
-    if (verified === -1 || errorMessage) {
+    if (verified === -1 || errorObj.isSet) {
       Analytics.Instance.event(
         Analytics.Categories.INITIAL_DEVICE_AUTH,
         Analytics.Actions.ERROR
@@ -171,11 +172,11 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     attachDeviceLogs: false,
     categories: ['Report'],
     category: 'Report',
-    description: errorMsg || errorMessage,
+    description: errorMsg || errorObj?.getMessage(),
     descriptionError: '',
     email: '',
     emailError: '',
-    subject: 'Reporting for Error (Device Authentication)',
+    subject: `Reporting for Error ${errorObj.getCode()} (Device Authentication)`,
     subjectError: ''
   };
 
@@ -190,7 +191,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
   const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const onRetry = () => {
     setErrorMsg('');
-    setErrorMessage('');
+    setErrorObj(new CyError());
     resetHooks();
 
     if (timeout.current) {
@@ -237,7 +238,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
         <br />
         <DynamicTextView
           text="Authenticating Device"
-          state={errorMessage || errorMsg ? -1 : confirmed === 1 ? 1 : verified}
+          state={
+            errorObj.isSet || errorMsg ? -1 : confirmed === 1 ? 1 : verified
+          }
         />
         <br />
         {verified === 2 && (
@@ -248,7 +251,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
             </Typography>
           </div>
         )}
-        {(verified === -1 || errorMessage || errorMsg) && (
+        {(verified === -1 || errorObj.isSet || errorMsg) && (
           <div className={classes.bottomContainer}>
             <div className={classes.success}>
               <Icon
@@ -257,7 +260,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
                 iconGroup={<ErrorExclamation />}
               />
               <Typography variant="body2" color="secondary">
-                {errorMessage || errorMsg || 'Device Authenticating failed'}
+                {errorObj.getMessage() ||
+                  errorMsg ||
+                  'Device Authenticating failed'}
               </Typography>
             </div>
             <div className={classes.btnContainer}>
