@@ -1,5 +1,3 @@
-import { DeviceErrorType } from '@cypherock/communication';
-
 import logger from '../utils/logger';
 
 import { CyError } from './error';

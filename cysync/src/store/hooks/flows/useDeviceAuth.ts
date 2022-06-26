@@ -17,7 +17,6 @@ import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { deviceDb } from '../../database';
 import {
-  DeviceConnectionState,
   FeedbackState,
   useConnection,
   useFeedback,

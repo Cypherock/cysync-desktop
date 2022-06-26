@@ -22,10 +22,7 @@ import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExc
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import { CyError } from '../../../../../../errors';
 import { useDeviceAuth } from '../../../../../../store/hooks/flows';
-import {
-  DeviceConnectionState,
-  useConnection
-} from '../../../../../../store/provider';
+import { useConnection } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import logger from '../../../../../../utils/logger';
 
@@ -250,11 +247,8 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 }) => {
   const [connStatus, setConnStatus] = React.useState<-1 | 0 | 1 | 2>(1);
 
-  const {
-    internalDeviceConnection: deviceConnection,
-    connected,
-    deviceConnectionState
-  } = useConnection();
+  const { internalDeviceConnection: deviceConnection, connected } =
+    useConnection();
 
   const {
     handleDeviceAuth,

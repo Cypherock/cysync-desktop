@@ -8,10 +8,8 @@ import { DeviceConnectionState, useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
-import AuthenticatorComponent from './authenticator';
 import ConfirmationComponent from './confirmation';
 import InitialFlowComponent from './initialFlow';
-import UpdaterComponent from './updater';
 
 type UpdateType = 'update' | 'auth' | 'initial';
 
@@ -103,25 +101,17 @@ const DeviceUpdatePopup = () => {
   }, [openMisconfiguredPrompt]);
 
   if (isOpen) {
-    // return (
-    //   <DialogBox
-    //     fullWidth
-    //     maxWidth="md"
-    //     open={isOpen}
-    //     disableBackdropClick
-    //     disableEscapeKeyDown
-    //     handleClose={handleClose}
-    //     restComponents={
-    //       updateType === 'update' ? (
-    //         <UpdaterComponent handleClose={handleClose} />
-    //       ) : updateType === 'auth' ? (
-    //         <AuthenticatorComponent handleClose={handleClose} />
-    //       ) : (
-    //         <InitialFlowComponent handleClose={handleClose} />
-    //       )
-    //     }
-    //   />
-    // );
+    return (
+      <DialogBox
+        fullWidth
+        maxWidth="md"
+        open={isOpen}
+        disableBackdropClick
+        disableEscapeKeyDown
+        handleClose={handleClose}
+        restComponents={<InitialFlowComponent handleClose={handleClose} />}
+      />
+    );
   }
 
   if (
