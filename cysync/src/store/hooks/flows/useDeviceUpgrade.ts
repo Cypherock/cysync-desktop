@@ -13,6 +13,7 @@ import {
   CyError,
   CysyncError,
   DisplayError,
+  handleDeviceErrors,
   handleErrors
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
@@ -32,6 +33,8 @@ import {
 } from '../../provider';
 
 import { useDeviceAuth } from './useDeviceAuth';
+
+const flow = Analytics.Categories.DEVICE_UPDATE;
 
 export interface UseDeviceUpgradeValues {
   startDeviceUpdate: () => void;
@@ -325,22 +328,19 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     });
 
     deviceUpdater.on('notReady', () => {
-      logger.info('DeviceUpgrade: Device not ready');
+      const cyError = new CyError();
       if (isInitial) {
-        setErrorObj(
-          new CyError(
-            CysyncError.DEVICE_NOT_READY_IN_INITIAL,
-            langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL
-          )
+        cyError.setError(
+          CysyncError.DEVICE_NOT_READY_IN_INITIAL,
+          langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL
         );
       } else {
-        setErrorObj(
-          new CyError(
-            CysyncError.DEVICE_NOT_READY,
-            langStrings.ERRORS.DEVICE_NOT_READY
-          )
+        cyError.setError(
+          CysyncError.DEVICE_NOT_READY,
+          langStrings.ERRORS.DEVICE_NOT_READY
         );
       }
+      setErrorObj(handleErrors(errorObj, cyError, flow));
 
       setUpdated(-1);
       setApproved(-1);
@@ -355,50 +355,15 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       logger.info('DeviceAuth: Error occurred in device update flow', err);
       const cyError = new CyError();
       if (err instanceof DeviceError) {
-        cyError.pushSubErrors(err.code, err.message);
-        if (
-          [
-            DeviceErrorType.CONNECTION_CLOSED,
-            DeviceErrorType.CONNECTION_NOT_OPEN
-          ].includes(err.errorType)
-        ) {
-          cyError.setError(
-            DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW,
-            langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW
-          );
-        } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          cyError.setError(
-            DeviceErrorType.NOT_CONNECTED,
-            langStrings.ERRORS.DEVICE_NOT_CONNECTED
-          );
-        } else if (
-          [
-            DeviceErrorType.WRITE_TIMEOUT,
-            DeviceErrorType.READ_TIMEOUT
-          ].includes(err.errorType)
-        ) {
-          cyError.setError(
-            DeviceErrorType.TIMEOUT_ERROR,
-            langStrings.ERRORS.DEVICE_TIMEOUT_ERROR
-          );
-        } else {
-          cyError.setError(
-            DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR,
-            langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
-              Analytics.Categories.DEVICE_UPDATE
-            )
-          );
-        }
+        handleDeviceErrors(cyError, err, langStrings, flow);
       } else {
         // unknown flow error
         cyError.setError(
           CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
-            Analytics.Categories.DEVICE_UPDATE
-          )
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flow)
         );
       }
-      setErrorObj(handleErrors(errorObj, cyError));
+      setErrorObj(handleErrors(errorObj, cyError, flow));
       setUpdated(-1);
       setApproved(val => (val === 2 ? val : -1));
       setIsCompleted(-1);
