@@ -5,6 +5,7 @@ import Analytics from '../utils/analytics';
 import logger from '../utils/logger';
 
 import { CyError } from './error';
+import { CysyncError } from './types';
 
 const handleErrors = (
   currError: CyError,
@@ -86,4 +87,25 @@ const handleDeviceErrors = (
   }
 };
 
-export { handleErrors, handleDeviceErrors };
+const handleAxiosErrors = (
+  cyError: CyError,
+  error: any,
+  langStrings: I18nStrings
+) => {
+  if (error && error.response) {
+    cyError.setError(
+      CysyncError.NETWORK_FAILURE,
+      langStrings.ERRORS.NETWORK_ERROR
+    );
+  } else {
+    cyError.setError(
+      CysyncError.NETWORK_UNREACHABLE,
+      langStrings.ERRORS.NETWORK_UNREACHABLE
+    );
+  }
+};
+
+// const handleUnknownFlowErrors;
+// const;
+
+export { handleErrors, handleDeviceErrors, handleAxiosErrors };

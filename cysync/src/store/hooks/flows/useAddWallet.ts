@@ -44,7 +44,7 @@ export interface UseAddWalletValues {
 
 export type UseAddWallet = () => UseAddWalletValues;
 
-const flow = Analytics.Categories.ADD_WALLET;
+const flowName = Analytics.Categories.ADD_WALLET;
 
 export const useAddWallet: UseAddWallet = () => {
   const addWallet = new WalletAdder();
@@ -95,7 +95,7 @@ export const useAddWallet: UseAddWallet = () => {
           DeviceErrorType.NOT_CONNECTED,
           langStrings.ERRORS.DEVICE_NOT_CONNECTED
         );
-        setErrorObj(handleErrors(errorObj, cyError, flow));
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
       }, 100);
       return;
     }
@@ -112,14 +112,14 @@ export const useAddWallet: UseAddWallet = () => {
       logger.info('Add wallet: Error occurred in Add wallet flow', err);
       const cyError = new CyError();
       if (err instanceof DeviceError) {
-        handleDeviceErrors(cyError, err, langStrings, flow);
+        handleDeviceErrors(cyError, err, langStrings, flowName);
       } else {
         cyError.setError(
           CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flow)
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
         );
       }
-      setErrorObj(handleErrors(errorObj, cyError, flow));
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     addWallet.on('noWalletFound', (inPartialState: boolean) => {
@@ -136,7 +136,7 @@ export const useAddWallet: UseAddWallet = () => {
           langStrings.ERRORS.NO_WALLET_ON_DEVICE
         );
       }
-      setErrorObj(handleErrors(errorObj, cyError, flow));
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     addWallet.on('walletDetails', async (walletDetails: Wallet) => {
@@ -146,7 +146,7 @@ export const useAddWallet: UseAddWallet = () => {
             CysyncError.ADD_WALLET_REJECTED,
             langStrings.ERRORS.ADD_WALLET_REJECTED
           );
-          setErrorObj(handleErrors(errorObj, cyError, flow));
+          setErrorObj(handleErrors(errorObj, cyError, flowName));
           return;
         }
 
@@ -157,7 +157,7 @@ export const useAddWallet: UseAddWallet = () => {
             CysyncError.ADD_WALLET_LIMIT_EXCEEDED,
             langStrings.ERRORS.ADD_WALLET_LIMIT_EXCEEDED
           );
-          setErrorObj(handleErrors(errorObj, cyError, flow));
+          setErrorObj(handleErrors(errorObj, cyError, flowName));
           return;
         }
 
@@ -171,7 +171,7 @@ export const useAddWallet: UseAddWallet = () => {
               CysyncError.ADD_WALLET_DUPLICATE,
               langStrings.ERRORS.ADD_WALLET_DUPLICATE
             );
-            setErrorObj(handleErrors(errorObj, cyError, flow));
+            setErrorObj(handleErrors(errorObj, cyError, flowName));
           } else {
             logger.info('AddWallet: Same wallet found with different name');
             setWalletName(walletDetails.name);
@@ -183,7 +183,7 @@ export const useAddWallet: UseAddWallet = () => {
               CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME,
               langStrings.ERRORS.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME
             );
-            setErrorObj(handleErrors(errorObj, cyError, flow));
+            setErrorObj(handleErrors(errorObj, cyError, flowName));
           }
 
           return;
@@ -205,7 +205,7 @@ export const useAddWallet: UseAddWallet = () => {
                 CysyncError.ADD_WALLET_WITH_SAME_NAME,
                 langStrings.ERRORS.ADD_WALLET_WITH_SAME_NAME
               );
-              setErrorObj(handleErrors(errorObj, cyError, flow));
+              setErrorObj(handleErrors(errorObj, cyError, flowName));
             } else {
               logger.error(err);
             }
@@ -213,9 +213,9 @@ export const useAddWallet: UseAddWallet = () => {
       } catch (error) {
         const cyError = new CyError(
           CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flow)
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
         );
-        setErrorObj(handleErrors(errorObj, cyError, flow));
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
       }
     });
 
@@ -224,7 +224,7 @@ export const useAddWallet: UseAddWallet = () => {
         CysyncError.DEVICE_NOT_READY,
         langStrings.ERRORS.DEVICE_NOT_READY
       );
-      setErrorObj(handleErrors(errorObj, cyError, flow));
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     try {
@@ -243,9 +243,9 @@ export const useAddWallet: UseAddWallet = () => {
       logger.error(e);
       const cyError = new CyError(
         CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flow)
+        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
       );
-      setErrorObj(handleErrors(errorObj, cyError, flow));
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
       addWallet.removeAllListeners();
     }
   };
@@ -292,22 +292,12 @@ export const useAddWallet: UseAddWallet = () => {
       setIsNameDiff(false);
       const cyError = new CyError(
         CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flow)
+        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
       );
-      setErrorObj(handleErrors(errorObj, cyError, flow));
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     }
   };
 
-  /**
-   * Only set the externalErrorMsg if the flow has not been canclled.
-   *
-   * 2 different vars, errorMessage and externalErrorMsg are being used
-   * because we don't want to display the error after the flow has been
-   * canclled.
-   *
-   * I could not achieve this by using a single var because the `isCancelled`
-   * was not being updated inside the `handle<Flow>` function.
-   */
   // I think this will work, reset the error obj if its cancelled
   useEffect(() => {
     if (isCancelled && errorObj.isSet) {
