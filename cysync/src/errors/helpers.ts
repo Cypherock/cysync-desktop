@@ -1,3 +1,6 @@
+import { DeviceErrorType } from '@cypherock/communication';
+
+import { I18nStrings } from '../constants/i18n';
 import logger from '../utils/logger';
 
 import { CyError } from './error';
@@ -40,4 +43,43 @@ const handleErrors = (
   // }
 };
 
-export { handleErrors };
+const handleDeviceErrors = (
+  cyError: CyError,
+  err: any,
+  langStrings: I18nStrings,
+  flow: string
+) => {
+  cyError.pushSubErrors(err.code, err.message);
+  if (
+    [
+      DeviceErrorType.CONNECTION_CLOSED,
+      DeviceErrorType.CONNECTION_NOT_OPEN
+    ].includes(err.errorType)
+  ) {
+    cyError.setError(
+      DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW,
+      langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW
+    );
+  } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
+    cyError.setError(
+      DeviceErrorType.NOT_CONNECTED,
+      langStrings.ERRORS.DEVICE_NOT_CONNECTED
+    );
+  } else if (
+    [DeviceErrorType.WRITE_TIMEOUT, DeviceErrorType.READ_TIMEOUT].includes(
+      err.errorType
+    )
+  ) {
+    cyError.setError(
+      DeviceErrorType.TIMEOUT_ERROR,
+      langStrings.ERRORS.DEVICE_TIMEOUT_ERROR
+    );
+  } else {
+    cyError.setError(
+      DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR,
+      langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flow)
+    );
+  }
+};
+
+export { handleErrors, handleDeviceErrors };
