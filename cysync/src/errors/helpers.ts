@@ -1,6 +1,7 @@
 import { DeviceErrorType } from '@cypherock/communication';
 
 import { I18nStrings } from '../constants/i18n';
+import Analytics from '../utils/analytics';
 import logger from '../utils/logger';
 
 import { CyError } from './error';
@@ -19,8 +20,11 @@ const handleErrors = (
   }
   // log the display error
   logger.error(`${flow ? flow : ''}: ${err.showError()}`);
-  return err;
+
   // report to analytics
+  Analytics.Instance.event(flow, Analytics.Actions.ERROR);
+
+  return err;
   // narrow down to the parent
   // const parentError = code.replace(
   //   /.$/,
