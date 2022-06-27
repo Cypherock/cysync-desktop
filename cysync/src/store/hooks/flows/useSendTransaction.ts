@@ -122,6 +122,7 @@ export interface HandleSendTransactionOptions {
   passphraseExists: boolean;
   xpub: string;
   zpub: string | undefined;
+  customAccount: string | undefined;
   coinType: string;
   outputList: any[];
   fees: number;
@@ -354,6 +355,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       passphraseExists,
       xpub,
       zpub,
+      customAccount,
       coinType,
       outputList,
       fees,
@@ -613,6 +615,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           passphraseExists,
           xpub,
           zpub,
+          customAccount,
           coinType,
           outputList,
           fee: fees,

@@ -3,7 +3,10 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
-import { useReceiveTransactionContext } from '../../../../../../store/provider';
+import {
+  useCustomAccountContext,
+  useReceiveTransactionContext
+} from '../../../../../../store/provider';
 
 import {
   StepComponentProps,
@@ -46,6 +49,7 @@ const Root = styled('div')(() => ({
 
 const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
   const { receiveTransaction } = useReceiveTransactionContext();
+  const { customAccount } = useCustomAccountContext();
 
   useEffect(() => {
     if (receiveTransaction.verified) {
@@ -58,7 +62,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
     <Root className={classes.root}>
       <div className={classes.addressContainer}>
         <Typography color="secondary" variant="h4">
-          {address}
+          {customAccount ? customAccount.name : address}
         </Typography>
       </div>
       <Typography color="textSecondary">Verify Address on Device</Typography>
