@@ -34,7 +34,7 @@ import {
 
 import { useDeviceAuth } from './useDeviceAuth';
 
-const flow = Analytics.Categories.DEVICE_UPDATE;
+const flowName = Analytics.Categories.DEVICE_UPDATE;
 
 export interface UseDeviceUpgradeValues {
   startDeviceUpdate: () => void;
@@ -340,7 +340,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           langStrings.ERRORS.DEVICE_NOT_READY
         );
       }
-      setErrorObj(handleErrors(errorObj, cyError, flow));
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
 
       setUpdated(-1);
       setApproved(-1);
@@ -355,15 +355,15 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       logger.info('DeviceAuth: Error occurred in device update flow', err);
       const cyError = new CyError();
       if (err instanceof DeviceError) {
-        handleDeviceErrors(cyError, err, langStrings, flow);
+        handleDeviceErrors(cyError, err, langStrings, flowName);
       } else {
         // unknown flow error
         cyError.setError(
           CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flow)
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
         );
       }
-      setErrorObj(handleErrors(errorObj, cyError, flow));
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
       setUpdated(-1);
       setApproved(val => (val === 2 ? val : -1));
       setIsCompleted(-1);

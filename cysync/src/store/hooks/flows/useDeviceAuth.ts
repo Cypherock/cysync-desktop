@@ -46,6 +46,8 @@ export interface UseDeviceAuthValues {
 
 export type UseDeviceAuth = (isInitial?: boolean) => UseDeviceAuthValues;
 
+const flowName = Analytics.Categories.DEVICE_AUTH;
+
 export const useDeviceAuth: UseDeviceAuth = isInitial => {
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [verified, setVerified] = useState<-1 | 0 | 1 | 2>(0);
@@ -172,18 +174,14 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
         } else {
           cyError.setError(
             DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR,
-            langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
-              Analytics.Categories.DEVICE_AUTH
-            )
+            langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
           );
         }
       } else {
         // unknown flow error
         cyError.setError(
           CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
-            Analytics.Categories.DEVICE_AUTH
-          )
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
         );
       }
       setErrorObj(handleErrors(errorObj, cyError));
@@ -271,9 +269,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       setErrorObj(
         new CyError(
           CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
-            Analytics.Categories.DEVICE_AUTH
-          )
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
         )
       );
       deviceAuth.removeAllListeners();
