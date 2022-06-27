@@ -11,6 +11,7 @@ import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop'
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import {
   useCurrentCoin,
+  useCustomAccountContext,
   useNetwork,
   useSendTransactionContext,
   useTokenContext
@@ -106,6 +107,8 @@ const Verify = (props: any) => {
 
   const { token } = useTokenContext();
 
+  const { customAccount } = useCustomAccountContext();
+
   const { connected } = useNetwork();
 
   const coinAbbr = token ? token.slug : coinDetails.slug;
@@ -166,6 +169,15 @@ const Verify = (props: any) => {
               text={(COINS[coinAbbr] || { name: '' }).name}
               verified={sendTransaction.pinEntered}
             />
+            {customAccount ? (
+              <LabelText
+                label="Sender"
+                text={customAccount.name}
+                verified={sendTransaction.verified}
+              />
+            ) : (
+              <></>
+            )}
             <LabelText
               label="Receiver"
               text={batchRecipientData[0].recipient}

@@ -31,6 +31,7 @@ import {
 import {
   useConnection,
   useCurrentCoin,
+  useCustomAccountContext,
   useSelectedWallet,
   useSendTransactionContext,
   useTokenContext
@@ -373,6 +374,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = classes;
 
   const { coinDetails } = useCurrentCoin();
+  const { customAccount } = useCustomAccountContext();
 
   const {
     selectedWallet: { passwordSet, passphraseSet, _id }
@@ -511,6 +513,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         passphraseExists: passphraseSet,
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
+        customAccount: customAccount.name,
         coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
           batchRecipientData,
