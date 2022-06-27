@@ -7,6 +7,8 @@ import { Wallet } from '@cypherock/database';
 import { WalletAdder } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
 
+import { CyError, CysyncError, handleErrors } from '../../../errors';
+import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { walletDb } from '../../database';
 import { useConnection, useI18n, useWallets } from '../../provider';
@@ -37,6 +39,8 @@ export interface UseAddWalletValues {
 
 export type UseAddWallet = () => UseAddWalletValues;
 
+const flow = Analytics.Categories.ADD_WALLET;
+
 export const useAddWallet: UseAddWallet = () => {
   const addWallet = new WalletAdder();
   const [deviceConnected, setDeviceConnected] = useState(false);
@@ -47,6 +51,7 @@ export const useAddWallet: UseAddWallet = () => {
   const [completed, setCompleted] = useState(false);
   const [externalErrorMsg, setExternalErrorMsg] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [isNameDiff, setIsNameDiff] = useState(false);
   const [walletId, setWalletId] = useState('');
   const [isCancelled, setIsCancelled] = useState(false);
@@ -128,26 +133,40 @@ export const useAddWallet: UseAddWallet = () => {
 
     addWallet.on('noWalletFound', (inPartialState: boolean) => {
       logger.info('AddWallet: No Wallet found', { inPartialState });
+      const cyError = new CyError();
       if (inPartialState) {
-        setErrorMessage(langStrings.ERRORS.ALL_WALLET_PARTIAL_STATE);
+        cyError.setError(
+          CysyncError.ALL_WALLET_PARTIAL_STATE,
+          langStrings.ERRORS.ALL_WALLET_PARTIAL_STATE
+        );
       } else {
-        setErrorMessage(langStrings.ERRORS.NO_WALLET_ON_DEVICE);
+        cyError.setError(
+          CysyncError.NO_WALLET_ON_DEVICE,
+          langStrings.ERRORS.NO_WALLET_ON_DEVICE
+        );
       }
+      setErrorObj(handleErrors(errorObj, cyError, flow));
     });
 
     addWallet.on('walletDetails', async (walletDetails: Wallet) => {
       try {
         if (walletDetails === null) {
-          logger.info('AddWallet: Rejected from device');
-          setErrorMessage(langStrings.ERRORS.ADD_WALLET_REJECTED);
+          const cyError = new CyError(
+            CysyncError.ADD_WALLET_REJECTED,
+            langStrings.ERRORS.ADD_WALLET_REJECTED
+          );
+          setErrorObj(handleErrors(errorObj, cyError, flow));
           return;
         }
 
         logger.verbose('AddWallet: Wallet confirmed');
         const { allWallets } = wallets;
         if (allWallets.length >= 4) {
-          logger.info('AddWallet: Cannot add more than 4 wallets');
-          setErrorMessage(langStrings.ERRORS.ADD_WALLET_LIMIT_EXCEEDED);
+          const cyError = new CyError(
+            CysyncError.ADD_WALLET_LIMIT_EXCEEDED,
+            langStrings.ERRORS.ADD_WALLET_LIMIT_EXCEEDED
+          );
+          setErrorObj(handleErrors(errorObj, cyError, flow));
           return;
         }
 
@@ -157,8 +176,11 @@ export const useAddWallet: UseAddWallet = () => {
           const duplicateWallet = walletWithSameId;
 
           if (duplicateWallet.name === walletDetails.name) {
-            logger.info('AddWallet: Duplicate wallet found');
-            setErrorMessage(langStrings.ERRORS.ADD_WALLET_DUPLICATE);
+            const cyError = new CyError(
+              CysyncError.ADD_WALLET_DUPLICATE,
+              langStrings.ERRORS.ADD_WALLET_DUPLICATE
+            );
+            setErrorObj(handleErrors(errorObj, cyError, flow));
           } else {
             logger.info('AddWallet: Same wallet found with different name');
             setWalletName(walletDetails.name);
@@ -166,9 +188,11 @@ export const useAddWallet: UseAddWallet = () => {
             setPasswordSet(walletDetails.passwordSet);
             setPassphraseSet(walletDetails.passphraseSet);
             setIsNameDiff(true);
-            setErrorMessage(
+            const cyError = new CyError(
+              CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME,
               langStrings.ERRORS.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME
             );
+            setErrorObj(handleErrors(errorObj, cyError, flow));
           }
 
           return;
@@ -186,16 +210,21 @@ export const useAddWallet: UseAddWallet = () => {
           })
           .catch((err: any) => {
             if (err.errorType === 'uniqueViolated') {
-              setErrorMessage(langStrings.ERRORS.ADD_WALLET_WITH_SAME_NAME);
-              logger.error('Wallet already exists');
+              const cyError = new CyError(
+                CysyncError.ADD_WALLET_WITH_SAME_NAME,
+                langStrings.ERRORS.ADD_WALLET_WITH_SAME_NAME
+              );
+              setErrorObj(handleErrors(errorObj, cyError, flow));
             } else {
               logger.error(err);
             }
           });
       } catch (error) {
-        logger.error('AddWallet: Same error occurred in adding wallet');
-        logger.error(error);
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        const cyError = new CyError(
+          CysyncError.UNKNOWN_FLOW_ERROR,
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flow)
+        );
+        setErrorObj(handleErrors(errorObj, cyError, flow));
       }
     });
 

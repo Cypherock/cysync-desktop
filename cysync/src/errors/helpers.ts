@@ -8,17 +8,15 @@ const handleErrors = (
   flow?: string,
   metadata?: any
 ) => {
-  // handle cascade effect properly
-  if (!currError.isSet)
-    currError.pushSubErrors(err.getCode(), err.getMessage());
-
-  // if (currError.getCode() === DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW)
-  //   err.pushSubErrors(currError.getCode(), currError.getMessage());
-
-  return err;
+  // handle cascade effect properlys
   // log the original error
-  logger.error('Origin Errors');
-  err.childErrors.forEach(e => logger.error(e));
+  if (err.childErrors.length > 0) {
+    logger.error('Origin Errors');
+    err.childErrors.forEach(e => logger.error(e));
+  }
+  // log the display error
+  logger.error(`${flow ? flow : ''}: ${err.showError()}`);
+  return err;
   // report to analytics
   // narrow down to the parent
   // const parentError = code.replace(
