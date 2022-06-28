@@ -62,5 +62,9 @@ export interface I18nStrings {
     SENX_TXN_BROADCAST_FAILED: string;
 
     RECEIVE_TXN_XPUB_MISSING: string;
+
+    INCOMPATIBLE_DEVICE: string;
+    INCOMPATIBLE_DESKTOP: string;
+    INCOMPATIBLE_DEVICE_AND_DESKTOP: string;
   };
 }

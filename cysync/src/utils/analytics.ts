@@ -31,6 +31,7 @@ class Analytics {
     SEND_TXN: 'Send Transaction',
     FEEDBACK: 'Feedback',
     CARD_AUTH: 'Card Authentication',
+    DEVICE_INFO: 'Device Info',
     DEVICE_UPDATE: 'Device Update',
     DEVICE_AUTH: 'Device Authentication',
     PARTIAL_DEVICE_UPDATE: 'Partial Device Update',

@@ -104,7 +104,11 @@ const en: I18nStrings = {
     SEND_TXN_SIZE_TOO_LARGE: 'This transaction cannot be performed.',
     SENX_TXN_BROADCAST_FAILED: 'Error trying to broadcast transaction.',
 
-    RECEIVE_TXN_XPUB_MISSING: 'Coin/Xpub is not present on device'
+    RECEIVE_TXN_XPUB_MISSING: 'Coin/Xpub is not present on device',
+
+    INCOMPATIBLE_DEVICE: 'Device needs upgrade',
+    INCOMPATIBLE_DESKTOP: 'Application needs upgrade',
+    INCOMPATIBLE_DEVICE_AND_DESKTOP: 'Both needs upgrade'
   }
 };
 
