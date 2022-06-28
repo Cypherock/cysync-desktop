@@ -26,6 +26,7 @@ const handleErrors = (
   logger.error(`${flow ? flow : ''}: ${err.showError()}`);
 
   // logging the metadata
+  logger.info('Metada for the error');
   logger.info(metadata);
 
   // report to analytics

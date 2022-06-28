@@ -52,7 +52,7 @@ export interface I18nStrings {
 
     RECEIVE_TXN_REJECTED: (coin: string) => string;
     RECEIVE_TXN_DEVICE_MISCONFIGURED: string;
-    RECEIVE_TXN_DIFFERENT_ADDRESS: string;
+    RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE: string;
     RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER: string;
 
     SEND_TXN_REJECTED: (coin: string) => string;
@@ -60,5 +60,7 @@ export interface I18nStrings {
     SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE: string;
     SEND_TXN_SIZE_TOO_LARGE: string;
     SENX_TXN_BROADCAST_FAILED: string;
+
+    RECEIVE_TXN_XPUB_MISSING: string;
   };
 }

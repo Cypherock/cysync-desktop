@@ -461,14 +461,11 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.verbose('SendTransaction: Txn confirmed', { coinType });
           setCoinsConfirmed(true);
         } else {
-          logger.info('SendTransaction: Txn rejected from device', {
-            coinType
-          });
           const cyError = new CyError(
             CysyncError.ADD_COIN_REJECTED,
             langStrings.ERRORS.SEND_TXN_REJECTED(COINS[coinType].name)
           );
-          setErrorObj(handleErrors(errorObj, cyError, flowName));
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
 
@@ -481,10 +478,6 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
 
       sendTransaction.on('noWalletFound', (inPartialState: boolean) => {
-        logger.info('SendTransaction: Wallet not found', {
-          coinType,
-          inPartialState
-        });
         const cyError = new CyError();
         if (inPartialState) {
           cyError.setError(
@@ -497,7 +490,12 @@ export const useSendTransaction: UseSendTransaction = () => {
             langStrings.ERRORS.WALLET_NOT_FOUND_IN_DEVICE
           );
         }
-        setErrorObj(handleErrors(errorObj, cyError, flowName));
+        setErrorObj(
+          handleErrors(errorObj, cyError, flowName, {
+            coinType,
+            inPartialState
+          })
+        );
       });
 
       sendTransaction.on('noWalletOnCard', () => {
