@@ -426,7 +426,7 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       sendTransaction.on('locked', () => {
         logger.info('SendTransaction: Wallet Locked', { coinType });
-        setErrorMessage(langStrings.ERRORS.WALLET_LOCKED);
+        setErrorMessage(langStrings.ERRORS.WALLET_IS_LOCKED);
       });
 
       sendTransaction.on('notReady', () => {
@@ -461,13 +461,13 @@ export const useSendTransaction: UseSendTransaction = () => {
         if (inPartialState) {
           setErrorMessage(langStrings.ERRORS.WALLET_PARTIAL_STATE);
         } else {
-          setErrorMessage(langStrings.ERRORS.WALLET_NOT_FOUND);
+          setErrorMessage(langStrings.ERRORS.WALLET_NOT_FOUND_IN_DEVICE);
         }
       });
 
       sendTransaction.on('noWalletOnCard', () => {
         logger.info('SendTransaction: No Wallet on card', { coinType });
-        setErrorMessage(langStrings.ERRORS.WALLET_NOT_ON_CARD);
+        setErrorMessage(langStrings.ERRORS.WALLET_NOT_FOUND_IN_CARD);
       });
 
       sendTransaction.on('totalFees', fee => {

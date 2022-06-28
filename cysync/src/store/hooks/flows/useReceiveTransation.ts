@@ -180,7 +180,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
 
       receiveTransaction.on('locked', () => {
         logger.info('ReceiveAddress: Wallet locked', { coinType });
-        setErrorMessage(langStrings.ERRORS.WALLET_LOCKED);
+        setErrorMessage(langStrings.ERRORS.WALLET_IS_LOCKED);
       });
 
       receiveTransaction.on('notReady', () => {
@@ -196,13 +196,13 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         if (inPartialState) {
           setErrorMessage(langStrings.ERRORS.WALLET_PARTIAL_STATE);
         } else {
-          setErrorMessage(langStrings.ERRORS.WALLET_NOT_FOUND);
+          setErrorMessage(langStrings.ERRORS.WALLET_NOT_FOUND_IN_DEVICE);
         }
       });
 
       receiveTransaction.on('noWalletOnCard', () => {
         logger.info('ReceiveAddress: No Wallet on card', { coinType });
-        setErrorMessage(langStrings.ERRORS.WALLET_NOT_ON_CARD);
+        setErrorMessage(langStrings.ERRORS.WALLET_NOT_FOUND_IN_CARD);
       });
 
       receiveTransaction.on('coinsConfirmed', coins => {

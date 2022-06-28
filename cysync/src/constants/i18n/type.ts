@@ -13,12 +13,12 @@ export interface I18nStrings {
     DEVICE_NOT_READY_IN_INITIAL: string;
     DEVICE_NOT_SUPPORTED: string;
 
-    WALLET_NOT_FOUND: string;
-    WALLET_NOT_ON_CARD: string;
+    WALLET_NOT_FOUND_IN_DEVICE: string;
+    WALLET_NOT_FOUND_IN_CARD: string;
     WALLET_PARTIAL_STATE: string;
     ALL_WALLET_PARTIAL_STATE: string;
     NO_WALLET_ON_DEVICE: string;
-    WALLET_LOCKED: string;
+    WALLET_IS_LOCKED: string;
     WALLET_LOCKED_DUE_TO_INCORRECT_PIN: string;
 
     ADD_WALLET_REJECTED: string;
@@ -35,6 +35,7 @@ export interface I18nStrings {
     CARD_AUTH_REJECTED: string;
     CARD_AUTH_FAILED: string;
     CARD_AUTH_DEVICE_PAIRING_FAILED: string;
+    UNKNOWN_CARD_ERROR: string;
 
     DEVICE_AUTH_REJECTED: string;
     DEVICE_AUTH_FAILED: string;

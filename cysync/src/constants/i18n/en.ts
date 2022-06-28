@@ -29,9 +29,9 @@ const en: I18nStrings = {
     DEVICE_NOT_SUPPORTED:
       'The connected device is not supported, please make sure that CySync and X1 wallet are up to date.',
 
-    WALLET_NOT_FOUND:
-      'This wallet does not seem to be present on the X1 wallet',
-    WALLET_NOT_ON_CARD:
+    WALLET_NOT_FOUND_IN_DEVICE:
+      'This wallet does not seem to be present on the X1 device',
+    WALLET_NOT_FOUND_IN_CARD:
       'This wallet does not seem to be present on the X1 Cards',
     WALLET_PARTIAL_STATE:
       'This wallet is misconfigured. Please select the wallet from the main menu on the device to fix it.',
@@ -39,7 +39,7 @@ const en: I18nStrings = {
       'All wallets are misconfigured. Please go to the wallets from the main menu and configure them again.',
     NO_WALLET_ON_DEVICE:
       'No wallet found. Please add a new wallet on the X1 wallet first',
-    WALLET_LOCKED:
+    WALLET_IS_LOCKED:
       'Wallet is locked on the device\nPlease unlock it before continuing with any operations on the wallet',
     WALLET_LOCKED_DUE_TO_INCORRECT_PIN:
       'Your wallet is now locked due to multiple incorrect attempts\nPlease unlock it before continuing with any operations on the wallet',
@@ -66,6 +66,7 @@ const en: I18nStrings = {
     CARD_AUTH_FAILED:
       'X1 Card authentication failed. Please contact Cypherock immediately',
     CARD_AUTH_DEVICE_PAIRING_FAILED: 'Device-Card pairing failed',
+    UNKNOWN_CARD_ERROR: 'Unknown card error occured',
 
     DEVICE_AUTH_REJECTED: 'Device auth was rejected from the device.',
     DEVICE_AUTH_FAILED:
