@@ -62,23 +62,14 @@ const WalletSend = () => {
     setSendForm(false);
   };
 
-  useEffect(() => {
-    if (sendTransaction.errorMessage) {
-      Analytics.Instance.event(
-        Analytics.Categories.SEND_TXN,
-        Analytics.Actions.ERROR,
-        coinAbbr
-      );
-    }
-  }, [sendTransaction.errorMessage]);
-
   return (
     <>
-      {sendTransaction.errorMessage && (
+      {sendTransaction.errorObj.isSet && (
         <ErrorDialog
-          open={!!sendTransaction.errorMessage}
+          open={sendTransaction.errorObj.isSet}
           handleClose={() => handleSendFormClose(true)}
-          text={sendTransaction.errorMessage}
+          errorObj={sendTransaction.errorObj}
+          text={sendTransaction.errorObj.showError()}
           flow="Sending Transaction"
         />
       )}

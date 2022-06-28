@@ -19,9 +19,20 @@ import BigNumber from 'bignumber.js';
 import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
 
+import {
+  CyError,
+  CysyncError,
+  handleAxiosErrors,
+  handleDeviceErrors,
+  handleErrors,
+  handleWalletErrors
+} from '../../../errors';
+import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { addressDb, coinDb, transactionDb } from '../../database';
 import { useI18n } from '../../provider';
+
+const flowName = Analytics.Categories.SEND_TXN;
 
 export const changeFormatOfOutputList = (
   targetList: any,
@@ -125,8 +136,8 @@ export interface UseSendTransactionValues {
   setDeviceConnected: React.Dispatch<React.SetStateAction<boolean>>;
   completed: boolean;
   setCompleted: React.Dispatch<React.SetStateAction<boolean>>;
-  errorMessage: string;
-  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  errorObj: CyError;
+  clearErrorObj: () => void;
   coinsConfirmed: boolean;
   metadataSent: boolean;
   verified: boolean;
@@ -156,7 +167,7 @@ export interface UseSendTransactionValues {
     txHash: string;
     token?: string;
   }) => void;
-  estimationError: string;
+  estimationError: CyError;
 }
 
 export type UseSendTransaction = () => UseSendTransactionValues;
@@ -178,8 +189,10 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [passphraseEntered, setPassphraseEntered] = useState(false);
   const [cardsTapped, setCardsTapped] = useState(false);
   const [signedTxn, setSignedTxn] = useState('');
-  const [externalErrorMsg, setExternalErrorMsg] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
+  const [estimationError, setEstimationError] = useState<CyError>(
+    new CyError()
+  );
   const [hash, setHash] = useState('');
   const [metadataSent, setMetadataSent] = useState(false);
   const sendTransaction = new TransactionSender();
@@ -189,7 +202,6 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [approxTotalFee, setApproxTotalFees] = useState(0);
   const [sendMaxAmount, setSendMaxAmount] = useState(0);
   const [isCancelled, setIsCancelled] = useState(false);
-  const [estimationError, setEstimationError] = useState(undefined);
 
   const { langStrings } = useI18n();
 
@@ -211,8 +223,7 @@ export const useSendTransaction: UseSendTransaction = () => {
 
   const clearAll = () => {
     setIsCancelled(false);
-    setErrorMessage('');
-    setExternalErrorMsg('');
+    clearErrorObj();
     resetHooks();
   };
 
@@ -235,15 +246,22 @@ export const useSendTransaction: UseSendTransaction = () => {
         }
       }
 
-      logger.info('EstimateFee: Initiated', { coinType, fees, isSendAll });
+      const subFlowName = Analytics.Categories.ESTIMATE_FEE;
+      logger.info(
+        `${subFlowName}: Initiated , ${[coinType, fees, isSendAll].join(',')}`
+      );
 
       sendTransaction.on('approxTotalFee', fee => {
-        logger.verbose('EstimateFee: Total fee generated', { coinType });
+        logger.verbose(`${subFlowName}: Total fee generated , ${coinType}`);
         setApproxTotalFees(Number(fee));
       });
 
       sendTransaction.on('sendMaxAmount', amt => {
-        logger.verbose('EstimateFee: Send Max amount generated', { coinType });
+        logger.verbose(
+          `${subFlowName}: Send Max amount generated: ${[amt, coinType].join(
+            ','
+          )}`
+        );
         setSendMaxAmount(Number(amt));
       });
 
@@ -262,33 +280,33 @@ export const useSendTransaction: UseSendTransaction = () => {
         )
         .then(() => {
           setEstimationError(undefined);
-          logger.info('EstimateFee: Completed', { coinType });
+          logger.info(`${subFlowName}: Completed', ${coinType}`);
         })
         .catch(error => {
-          logger.info('EstimateFee: Error', { coinType });
+          logger.info(`${subFlowName}: Error', ${coinType}`);
           logger.error(error);
+          const cyError = new CyError();
           // Don't show error other than network error, because the data may be
           // insufficient for the calculation
           if (error.isAxiosError) {
-            if (error.response) {
-              setErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
-            } else {
-              setErrorMessage(langStrings.ERRORS.NETWORK_UNREACHABLE);
-            }
+            handleAxiosErrors(cyError, error, langStrings);
+            setErrorObj(handleErrors(errorObj, cyError, subFlowName));
+            return;
+          } else if (error instanceof WalletError) {
+            handleWalletErrors(cyError, error, langStrings, { coinType });
           } else {
-            if (
-              error instanceof WalletError &&
-              error.errorType === WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE
-            )
-              setEstimationError(
-                langStrings.ERRORS.SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE
-              );
-            else if (error.errorType === WalletErrorType.INSUFFICIENT_FUNDS)
-              setEstimationError(
-                langStrings.ERRORS.SEND_TXN_INSUFFICIENT_BALANCE(coinType)
-              );
-            else setEstimationError(error.message);
+            cyError.setError(
+              CysyncError.UNKNOWN_FLOW_ERROR,
+              langStrings.ERRORS.CUSTOM_ERROR(error.message)
+            );
+            cyError.pushSubErrors(
+              CysyncError.UNKNOWN_FLOW_ERROR,
+              langStrings.ERRORS.UNKNOWN_FLOW_ERROR(subFlowName)
+            );
           }
+          setEstimationError(
+            handleErrors(estimationError, cyError, subFlowName)
+          );
         });
     };
 
@@ -300,7 +318,8 @@ export const useSendTransaction: UseSendTransaction = () => {
     amount: number
   ) => {
     return new Promise(resolve => {
-      logger.info('EstimateGasLimit: Initiated', { contractAddress });
+      const subFlowName = Analytics.Categories.ESTIMATE_GAS_LIMIT;
+      logger.info(`${subFlowName}: Initiated', ${contractAddress}`);
       Server.eth.transaction
         .getContractFees({
           fromAddress,
@@ -311,17 +330,24 @@ export const useSendTransaction: UseSendTransaction = () => {
         })
         .request()
         .then(res => {
-          logger.info('EstimateGasLimit: Completed', { contractAddress });
+          logger.info(`${subFlowName}: Completed', ${contractAddress}`);
           resolve(res.data);
         })
         .catch(e => {
-          logger.info('EstimateGasLimit: Error', { contractAddress });
+          logger.info(`${subFlowName}: Error', ${contractAddress}`);
           logger.error(e);
+          const cyError = new CyError();
           // Don't show any other error because it may be due to
           // incorrect amount or address which the user may change.
-          if (e.isAxiosError && !e.response) {
-            setErrorMessage(langStrings.ERRORS.NETWORK_UNREACHABLE);
+          if (e.isAxiosError) {
+            handleAxiosErrors(cyError, e, langStrings);
+          } else {
+            cyError.pushSubErrors(
+              CysyncError.UNKNOWN_FLOW_ERROR,
+              langStrings.ERRORS.CUSTOM_ERROR(e.message)
+            );
           }
+          setErrorObj(handleErrors(errorObj, cyError, subFlowName));
           resolve(null);
         });
     });
@@ -361,10 +387,17 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
 
       if (!connection) {
-        logger.error('SendTransaction: Failed - Device not connected', {
-          coinType
-        });
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+        setErrorObj(
+          handleErrors(
+            errorObj,
+            new CyError(
+              DeviceErrorType.NOT_CONNECTED,
+              langStrings.ERRORS.DEVICE_NOT_CONNECTED
+            ),
+            flowName,
+            { coinType }
+          )
+        );
         return;
       }
 
@@ -377,61 +410,50 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
 
       sendTransaction.on('cardError', () => {
-        logger.error('SendTransaction: Card Error', { coinType });
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        setErrorObj(
+          handleErrors(
+            errorObj,
+            new CyError(
+              CysyncError.UNKNOWN_CARD_ERROR,
+              langStrings.ERRORS.UNKNOWN_CARD_ERROR
+            ),
+            flowName,
+            { coinType }
+          )
+        );
       });
 
       sendTransaction.on('error', err => {
-        logger.error('SendTransaction: Error occurred', { coinType });
-        logger.error(err);
-        if (
-          err instanceof WalletError &&
-          err.errorType === WalletErrorType.INSUFFICIENT_FUNDS
-        ) {
-          setErrorMessage(
-            langStrings.ERRORS.SEND_TXN_INSUFFICIENT_BALANCE(
-              COINS[coinType].name
-            )
-          );
+        const cyError = new CyError();
+        if (err instanceof WalletError) {
+          handleWalletErrors(cyError, err, langStrings, { coinType });
         } else if (err.isAxiosError) {
-          if (err.response) {
-            setErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
-          } else {
-            setErrorMessage(langStrings.ERRORS.NETWORK_UNREACHABLE);
-          }
+          handleAxiosErrors(cyError, err, langStrings);
         } else if (err instanceof DeviceError) {
-          if (
-            [
-              DeviceErrorType.CONNECTION_CLOSED,
-              DeviceErrorType.CONNECTION_NOT_OPEN
-            ].includes(err.errorType)
-          ) {
-            setErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
-          } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-            setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
-          } else if (
-            [
-              DeviceErrorType.WRITE_TIMEOUT,
-              DeviceErrorType.READ_TIMEOUT
-            ].includes(err.errorType)
-          ) {
-            setErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
-          } else {
-            setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
-          }
+          handleDeviceErrors(cyError, err, langStrings, flowName);
         } else {
-          setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+          cyError.setError(
+            CysyncError.UNKNOWN_FLOW_ERROR,
+            langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          );
         }
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
       });
 
       sendTransaction.on('locked', () => {
-        logger.info('SendTransaction: Wallet Locked', { coinType });
-        setErrorMessage(langStrings.ERRORS.WALLET_IS_LOCKED);
+        const cyError = new CyError(
+          CysyncError.WALLET_IS_LOCKED,
+          langStrings.ERRORS.WALLET_IS_LOCKED
+        );
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
       sendTransaction.on('notReady', () => {
-        logger.info('SendTransaction: Device Locked', { coinType });
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY);
+        const cyError = new CyError(
+          CysyncError.DEVICE_NOT_READY,
+          langStrings.ERRORS.DEVICE_NOT_READY
+        );
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
       sendTransaction.on('coinsConfirmed', coins => {
@@ -439,35 +461,49 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.verbose('SendTransaction: Txn confirmed', { coinType });
           setCoinsConfirmed(true);
         } else {
-          logger.info('SendTransaction: Txn rejected from device', {
-            coinType
-          });
-          setErrorMessage(
+          const cyError = new CyError(
+            CysyncError.ADD_COIN_REJECTED,
             langStrings.ERRORS.SEND_TXN_REJECTED(COINS[coinType].name)
           );
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
 
       sendTransaction.on('txnTooLarge', () => {
-        logger.info('SendTransaction: Txn Too large', { coinType });
-        setErrorMessage(langStrings.ERRORS.SEND_TXN_SIZE_TOO_LARGE);
+        const cyError = new CyError(
+          CysyncError.SEND_TXN_SIZE_TOO_LARGE,
+          langStrings.ERRORS.SEND_TXN_SIZE_TOO_LARGE
+        );
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
       sendTransaction.on('noWalletFound', (inPartialState: boolean) => {
-        logger.info('SendTransaction: Wallet not found', {
-          coinType,
-          inPartialState
-        });
+        const cyError = new CyError();
         if (inPartialState) {
-          setErrorMessage(langStrings.ERRORS.WALLET_PARTIAL_STATE);
+          cyError.setError(
+            CysyncError.WALLET_PARTIAL_STATE,
+            langStrings.ERRORS.WALLET_PARTIAL_STATE
+          );
         } else {
-          setErrorMessage(langStrings.ERRORS.WALLET_NOT_FOUND_IN_DEVICE);
+          cyError.setError(
+            CysyncError.WALLET_NOT_FOUND_IN_DEVICE,
+            langStrings.ERRORS.WALLET_NOT_FOUND_IN_DEVICE
+          );
         }
+        setErrorObj(
+          handleErrors(errorObj, cyError, flowName, {
+            coinType,
+            inPartialState
+          })
+        );
       });
 
       sendTransaction.on('noWalletOnCard', () => {
-        logger.info('SendTransaction: No Wallet on card', { coinType });
-        setErrorMessage(langStrings.ERRORS.WALLET_NOT_FOUND_IN_CARD);
+        const cyError = new CyError(
+          CysyncError.WALLET_NOT_FOUND_IN_CARD,
+          langStrings.ERRORS.WALLET_NOT_FOUND_IN_CARD
+        );
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
       });
 
       sendTransaction.on('totalFees', fee => {
@@ -495,11 +531,14 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       sendTransaction.on('insufficientFunds', funds => {
         if (funds) {
-          logger.info('SendTransaction: Not enough funds', { coinType });
-          setErrorMessage(
+          const cyError = new CyError(
+            WalletErrorType.INSUFFICIENT_FUNDS,
             langStrings.ERRORS.SEND_TXN_INSUFFICIENT_BALANCE(
               COINS[coinType].name
             )
+          );
+          setErrorObj(
+            handleErrors(errorObj, cyError, flowName, { coinType, funds })
           );
         }
       });
@@ -510,21 +549,38 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.verbose('SendTransaction: Txn verified', { coinType });
           setVerified(true);
         } else {
+          const cyError = new CyError(
+            CysyncError.SEND_TXN_REJECTED,
+            langStrings.ERRORS.SEND_TXN_REJECTED(coinType)
+          );
+
           logger.info('SendTransaction: Txn rejected from device', {
             coinType,
             command: val
           });
-          setErrorMessage(langStrings.ERRORS.SEND_TXN_REJECTED);
 
           if (val === 0) {
-            logger.info('SendTransaction: Txn was rejected on address screen');
+            cyError.pushSubErrors(
+              CysyncError.SEND_TXN_REJECTED_AT_ADDRESS,
+              'SendTransaction: Txn was rejected on address screen'
+            );
           } else if (val === 2) {
-            logger.info('SendTransaction: Txn was rejected on amount screen');
+            cyError.pushSubErrors(
+              CysyncError.SEND_TXN_REJECTED_AT_AMOUNT,
+              'SendTransaction: Txn was rejected on address screen'
+            );
           } else if (val === 3) {
-            logger.info('SendTransaction: Txn was rejected on fee screen');
+            cyError.pushSubErrors(
+              CysyncError.SEND_TXN_REJECTED_AT_FEE,
+              'SendTransaction: Txn was rejected on address screen'
+            );
           } else {
-            logger.info('SendTransaction: Txn was rejected on unknown screen');
+            cyError.pushSubErrors(
+              CysyncError.SEND_TXN_REJECTED_AT_UNKNOWN,
+              'SendTransaction: Txn was rejected on address screen'
+            );
           }
+          setErrorObj(handleErrors(errorObj, cyError, flowName));
         }
       });
 
@@ -538,10 +594,11 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.verbose('SendTransaction: Pin entered', { coinType });
           setPinEntered(true);
         } else {
-          logger.info('SendTransaction: Pin incorrect', { coinType });
-          setErrorMessage(
+          const cyError = new CyError(
+            CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN,
             langStrings.ERRORS.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
           );
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
 
@@ -562,14 +619,26 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.verbose('SendTransaction: Signed txn generated', { coinType });
           setSignedTxn(txn);
         } else {
-          logger.info('SendTransaction: Signed txn not found', { coinType });
-          setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+          const cyError = new CyError(
+            CysyncError.KNOWN_FLOW_ERROR,
+            langStrings.ERRORS.KNOWN_FLOW_ERROR(flowName)
+          );
+          cyError.pushSubErrors(
+            CysyncError.SEND_TXN_SIGNED_TXN_NOT_FOUND,
+            'Signed Transaction was not found'
+          );
+          setErrorObj(
+            handleErrors(errorObj, cyError, flowName, { txn, coinType })
+          );
         }
       });
 
+      // Why is this not treated as an error?
       sendTransaction.on('signatureVerify', ({ isVerified, index, error }) => {
         if (error) {
-          logger.warn('Error in verifying txn signature.');
+          logger.warn(
+            `${CysyncError.SEND_TXN_VERIFICATION_FAILED} : Error in verifying txn signature.`
+          );
           logger.warn(error);
           return;
         }
@@ -608,9 +677,11 @@ export const useSendTransaction: UseSendTransaction = () => {
         setCompleted(true);
       } catch (e) {
         setIsInFlow(false);
-        logger.error('SendTransaction: Error', { coinType });
-        logger.error(e);
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        const cyError = new CyError(
+          CysyncError.UNKNOWN_FLOW_ERROR,
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        );
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType, e }));
         sendTransaction.removeAllListeners();
       }
     };
@@ -625,7 +696,9 @@ export const useSendTransaction: UseSendTransaction = () => {
         }
       })
       .catch(e => {
-        logger.error('SendTransaction: Error in flow cancel');
+        logger.error(
+          `${CysyncError.SEND_TXN_CANCEL_FAILED} SendTransaction: Error in flow cancel`
+        );
         logger.error(e);
       });
   };
@@ -746,35 +819,23 @@ export const useSendTransaction: UseSendTransaction = () => {
         logger.info(txnInputs);
       });
     } catch (error) {
-      logger.error('Error in onTxnBroadcast');
-      logger.error(error);
+      const cyError = new CyError(
+        CysyncError.SENX_TXN_BROADCAST_FAILED,
+        langStrings.ERRORS.SENX_TXN_BROADCAST_FAILED
+      );
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
     }
   };
 
-  /**
-   * Only set the externalErrorMsg if the flow has not been canclled.
-   *
-   * 2 different vars, errorMessage and externalErrorMsg are being used
-   * because we don't want to display the error after the flow has been
-   * canclled.
-   *
-   * I could not achieve this by using a single var because the `isCancelled`
-   * was not being updated inside the `handle<Flow>` function.
-   */
+  // I think this will work, reset the error obj if its cancelled
   useEffect(() => {
-    if (isCancelled) {
-      setExternalErrorMsg('');
-    } else {
-      setExternalErrorMsg(errorMessage);
+    if (isCancelled && errorObj.isSet) {
+      clearErrorObj();
     }
-  }, [errorMessage]);
+  }, [errorObj]);
 
-  /**
-   * This will be used externally to clear the error msg
-   */
-  const onSetErrorMsg = (msg: string) => {
-    setErrorMessage(msg);
-    setExternalErrorMsg(msg);
+  const clearErrorObj = () => {
+    setErrorObj(new CyError());
   };
 
   return {
@@ -782,8 +843,8 @@ export const useSendTransaction: UseSendTransaction = () => {
     handleEstimateGasLimit,
     deviceConnected,
     setDeviceConnected,
-    errorMessage: externalErrorMsg,
-    setErrorMessage: onSetErrorMsg,
+    errorObj,
+    clearErrorObj,
     completed,
     setCompleted,
     coinsConfirmed,

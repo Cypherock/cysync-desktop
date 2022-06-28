@@ -364,7 +364,6 @@ export const useAddCoin: UseAddCoin = () => {
         logger.verbose(`${flowName}: Pin Entered`);
         setPinEntered(true);
       } else {
-        logger.info(`${flowName}: Pin incorrect`);
         const cyError = new CyError(
           CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN,
           langStrings.ERRORS.WALLET_LOCKED_DUE_TO_INCORRECT_PIN

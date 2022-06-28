@@ -9,6 +9,8 @@ const en: I18nStrings = {
   ERRORS: {
     UNKNOWN_FLOW_ERROR: flow =>
       `Some internal error occurred. Please disconnect and then reconnect the device and restart ${flow}`,
+    KNOWN_FLOW_ERROR: flow =>
+      `A known internal has occured while ${flow}. Please report this to Cypherock Support`,
     CUSTOM_ERROR: txt => `Some internal error occured while ${txt}`,
 
     NETWORK_ERROR:
@@ -90,7 +92,7 @@ const en: I18nStrings = {
       `Request was rejected on the X1 Wallet\nPlease restart the process to receive ${coin} on the CySync application`,
     RECEIVE_TXN_DEVICE_MISCONFIGURED:
       'Looks like your device has been misconfigured, do you want to configure it now?',
-    RECEIVE_TXN_DIFFERENT_ADDRESS:
+    RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE:
       'Some error occurred while fetching the address.',
     RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER: `Please contact cypherock if the addresses on the application did not match the addresses on the device`,
 
@@ -99,7 +101,10 @@ const en: I18nStrings = {
     SEND_TXN_INSUFFICIENT_BALANCE: (coin: string) =>
       `You do not have enough ${coin} to make this transaction`,
     SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE: `This transaction requires UTXOs from your previous transaction. Wait for few minutes before retrying`,
-    SEND_TXN_SIZE_TOO_LARGE: 'This transaction cannot be performed.'
+    SEND_TXN_SIZE_TOO_LARGE: 'This transaction cannot be performed.',
+    SENX_TXN_BROADCAST_FAILED: 'Error trying to broadcast transaction.',
+
+    RECEIVE_TXN_XPUB_MISSING: 'Coin/Xpub is not present on device'
   }
 };
 
