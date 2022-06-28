@@ -9,6 +9,8 @@ const en: I18nStrings = {
   ERRORS: {
     UNKNOWN_FLOW_ERROR: flow =>
       `Some internal error occurred. Please disconnect and then reconnect the device and restart ${flow}`,
+    KNOWN_FLOW_ERROR: flow =>
+      `A known internal has occured while ${flow}. Please report this to Cypherock Support`,
     CUSTOM_ERROR: txt => `Some internal error occured while ${txt}`,
 
     NETWORK_ERROR:
@@ -99,7 +101,8 @@ const en: I18nStrings = {
     SEND_TXN_INSUFFICIENT_BALANCE: (coin: string) =>
       `You do not have enough ${coin} to make this transaction`,
     SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE: `This transaction requires UTXOs from your previous transaction. Wait for few minutes before retrying`,
-    SEND_TXN_SIZE_TOO_LARGE: 'This transaction cannot be performed.'
+    SEND_TXN_SIZE_TOO_LARGE: 'This transaction cannot be performed.',
+    SENX_TXN_BROADCAST_FAILED: 'Error trying to broadcast transaction.'
   }
 };
 

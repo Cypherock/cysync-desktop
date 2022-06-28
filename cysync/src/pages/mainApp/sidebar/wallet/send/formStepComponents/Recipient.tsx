@@ -801,7 +801,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
       </div>
       <div className={divider} />
       <div className={recipientFooter}>
-        {sendTransaction.estimationError ? (
+        {sendTransaction.estimationError?.isSet ? (
           <div
             className={classes.center}
             style={{ justifyContent: 'flex-start' }}
@@ -811,7 +811,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               style={{ marginRight: '5px' }}
             />
             <Typography variant="body2" color="textSecondary" align="center">
-              {sendTransaction.estimationError}
+              {sendTransaction.estimationError.getMessage()}
             </Typography>
           </div>
         ) : (
