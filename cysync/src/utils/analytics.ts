@@ -26,6 +26,8 @@ class Analytics {
     ADD_WALLET: 'Add Wallet',
     ADD_COIN: 'Add Coin',
     RECEIVE_ADDR: 'Receive Address',
+    ESTIMATE_FEE: 'Estimate Fee',
+    ESTIMATE_GAS_LIMIT: 'Estimate Gas Limit',
     SEND_TXN: 'Send Transaction',
     FEEDBACK: 'Feedback',
     CARD_AUTH: 'Card Authentication',

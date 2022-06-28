@@ -1,4 +1,5 @@
 import { DeviceErrorType } from '@cypherock/communication';
+import { WalletErrorType } from '@cypherock/wallet';
 
 import { I18nStrings } from '../constants/i18n';
 import Analytics from '../utils/analytics';
@@ -13,7 +14,9 @@ const handleErrors = (
   flow?: string,
   metadata?: any
 ) => {
-  // handle cascade effect properlys
+  //TODO:  handle cascade effect properly
+  logger.info(currError);
+
   // log the original error
   if (err.childErrors.length > 0) {
     logger.error('Origin Errors');
@@ -21,6 +24,10 @@ const handleErrors = (
   }
   // log the display error
   logger.error(`${flow ? flow : ''}: ${err.showError()}`);
+
+  // logging the metadata
+  logger.info('Metada for the error');
+  logger.info(metadata);
 
   // report to analytics
   Analytics.Instance.event(flow, Analytics.Actions.ERROR);
@@ -105,7 +112,32 @@ const handleAxiosErrors = (
   }
 };
 
+const handleWalletErrors = (
+  cyError: CyError,
+  error: any,
+  langStrings: I18nStrings,
+  metadata: {
+    coinType: string;
+  }
+) => {
+  if (error.errorType === WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE)
+    cyError.setError(
+      WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE,
+      langStrings.ERRORS.SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE
+    );
+  else if (error.errorType === WalletErrorType.INSUFFICIENT_FUNDS)
+    cyError.setError(
+      WalletErrorType.INSUFFICIENT_FUNDS,
+      langStrings.ERRORS.SEND_TXN_INSUFFICIENT_BALANCE(metadata.coinType)
+    );
+};
+
 // const handleUnknownFlowErrors;
 // const;
 
-export { handleErrors, handleDeviceErrors, handleAxiosErrors };
+export {
+  handleErrors,
+  handleDeviceErrors,
+  handleAxiosErrors,
+  handleWalletErrors
+};

@@ -9,7 +9,7 @@ import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import CreateComponent from '../../../../../components/createComponent';
 import ErrorBox from '../../../../../designSystem/designComponents/dialog/errorDialog';
@@ -198,7 +198,7 @@ const ReceiveForm: React.FC<StepperProps> = ({
   };
 
   const handleErrorBoxClose = () => {
-    receiveTransaction.setErrorMessage('');
+    receiveTransaction.clearErrorObj();
     receiveTransaction.setXpubMissing(false);
     receiveTransaction.resetHooks();
     // Go to the Receive address component to display the unverified address
@@ -212,28 +212,19 @@ const ReceiveForm: React.FC<StepperProps> = ({
     );
     logger.info('Resync coin initiated');
     handleClose(true);
-    receiveTransaction.setErrorMessage('');
+    receiveTransaction.clearErrorObj();
     receiveTransaction.setXpubMissing(false);
     handleXpubMissing();
   };
 
-  useEffect(() => {
-    if (receiveTransaction.errorMessage) {
-      Analytics.Instance.event(
-        Analytics.Categories.RECEIVE_ADDR,
-        Analytics.Actions.ERROR,
-        receiveTransaction.xpubMissing ? 'Xpub missing' : undefined
-      );
-    }
-  }, [receiveTransaction.errorMessage]);
-
   return (
     <Root className={classes.root}>
       <ErrorBox
-        open={!!receiveTransaction.errorMessage}
+        open={receiveTransaction.errorObj.isSet}
         closeText={receiveTransaction.xpubMissing ? 'No' : undefined}
         handleClose={handleErrorBoxClose}
-        text={receiveTransaction.errorMessage}
+        errorObj={receiveTransaction.errorObj}
+        text={receiveTransaction.errorObj.showError()}
         actionText={receiveTransaction.xpubMissing ? 'Yes' : undefined}
         handleAction={
           receiveTransaction.xpubMissing ? onResyncCoins : undefined

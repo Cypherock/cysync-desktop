@@ -13,6 +13,7 @@ import {
   CyError,
   CysyncError,
   DisplayError,
+  handleAxiosErrors,
   handleDeviceErrors,
   handleErrors
 } from '../../../errors';
@@ -174,21 +175,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       .catch(error => {
         logger.error('Error in getting firmware version');
         logger.error(error);
-        if (error && error.response) {
-          setErrorObj(
-            new CyError(
-              CysyncError.NETWORK_FAILURE,
-              langStrings.ERRORS.NETWORK_ERROR
-            )
-          );
-        } else {
-          setErrorObj(
-            new CyError(
-              CysyncError.NETWORK_UNREACHABLE,
-              langStrings.ERRORS.NETWORK_UNREACHABLE
-            )
-          );
-        }
+        const cyError = new CyError();
+        handleAxiosErrors(cyError, error, langStrings);
         setUpdateDownloaded(-1);
         setIsCompleted(-1);
         setBlockNewConnection(false);
