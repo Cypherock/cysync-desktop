@@ -612,6 +612,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       await addHistoryRefresh({ isRefresh: true });
       await addPriceRefresh({ isRefresh: true });
       await addLatestPriceRefresh({ isRefresh: true });
+      await fetchAllCustomAccounts();
     }
 
     setInitialSetupDone(true);
