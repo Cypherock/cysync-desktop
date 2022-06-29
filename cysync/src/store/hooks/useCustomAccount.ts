@@ -106,8 +106,8 @@ export const useCustomAccount: UseCustomAccount = () => {
     accounts => {
       setCustomAccountData(
         [...accounts].sort((a, b) => {
-          const numA = new BigNumber(a.displayValue);
-          const numB = new BigNumber(b.displayValue);
+          const numA = new BigNumber(a.displayBalance);
+          const numB = new BigNumber(b.displayBalance);
           return numB.comparedTo(numA);
         })
       );
