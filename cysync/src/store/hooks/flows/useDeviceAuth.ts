@@ -1,8 +1,4 @@
-import {
-  DeviceConnection,
-  DeviceError,
-  DeviceErrorType
-} from '@cypherock/communication';
+import { DeviceConnection, DeviceError } from '@cypherock/communication';
 import { Device } from '@cypherock/database';
 import { DeviceAuthenticator } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
@@ -143,7 +139,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
           langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
         );
       }
-      setErrorObj(handleErrors(errorObj, cyError));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
     });
 
     deviceAuth.on('confirmed', (v: boolean) => {

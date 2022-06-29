@@ -193,8 +193,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const {
     handleLogFetch,
-    errorMessage: logErrorMessage,
-    setErrorMessage: setLogErrorMessage,
+    errorObj,
+    clearErrorObj,
     completed: logFetchCompleted,
     logFetched: logFetchState,
     requestStatus: logRequestStatus,
@@ -208,7 +208,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     setSubmitting(false);
     setError('');
     resetLogFetcherHooks();
-    setLogErrorMessage('');
+    clearErrorObj();
   };
 
   const showFeedback: ShowFeedback = ({
@@ -257,7 +257,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       firmwareVersion &&
       beforeFlowStart(true)
     ) {
-      setLogErrorMessage('');
+      clearErrorObj();
       resetLogFetcherHooks();
       handleLogFetch({
         connection: deviceConnection,
@@ -273,7 +273,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (!deviceConnection) {
-      setLogErrorMessage('');
+      clearErrorObj();
     }
   }, [deviceConnection]);
 
@@ -462,7 +462,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     logger.info('Feedback: Closed');
 
     resetLogFetcherHooks();
-    setLogErrorMessage('');
+    clearErrorObj();
 
     if (externalHandleClose) {
       externalHandleClose();
@@ -683,7 +683,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                           </Typography>
                         </Grid>
                       )}
-                      {logErrorMessage && (
+                      {errorObj.isSet && (
                         <Grid
                           container
                           className={classes.extras}
@@ -698,7 +698,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                             variant="body2"
                             className={classes.errorColor}
                           >
-                            {logErrorMessage}
+                            {errorObj.getMessage()}
                           </Typography>
                         </Grid>
                       )}

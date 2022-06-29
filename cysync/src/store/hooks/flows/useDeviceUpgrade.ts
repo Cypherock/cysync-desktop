@@ -158,10 +158,10 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           setUpgradeAvailable(true);
 
         //What is this sorcery???
-        // internetSlowTimeout.current = setTimeout(() => {
-        //   logger.verbose('Setting internet Slow.');
-        //   setIsInternetSlow(true);
-        // }, 5000);
+        internetSlowTimeout.current = setTimeout(() => {
+          logger.verbose('Setting internet Slow.');
+          setIsInternetSlow(true);
+        }, 5000);
         ipcRenderer.send('download', {
           url: response.data.firmware.downloadUrl,
           properties: {

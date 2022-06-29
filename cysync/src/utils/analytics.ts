@@ -37,6 +37,7 @@ class Analytics {
     PARTIAL_DEVICE_UPDATE: 'Partial Device Update',
     DEVICE_AUTH_PROMPT: 'Device Auth Prompt',
     ERROR_BOUNDARY: 'Error boundary',
+    FETCH_LOG: 'Fetch Log',
     INITIAL_FLOW_IN_MAIN: 'Initial Flow In Main',
     INITIAL_CARD_AUTH: 'Initial Card Auth',
     INITIAL_CARD_AUTH_IN_MAIN: 'Initial Card Auth In Main',
