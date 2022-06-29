@@ -160,7 +160,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
         coinDetails.xpub,
         coinDetails.walletId,
         coinDetails.zpub,
-        customAccount.name
+        customAccount?.name
       )
         .then(addr => {
           setCoinAddress(addr);

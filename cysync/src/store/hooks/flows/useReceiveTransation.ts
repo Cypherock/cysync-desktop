@@ -21,6 +21,7 @@ export interface HandleReceiveTransactionOptions {
   zpub?: string;
   contractAbbr?: string;
   passphraseExists?: boolean;
+  customAccount?: string;
 }
 
 export interface UseReceiveTransactionValues {
@@ -103,7 +104,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       xpub,
       zpub,
       contractAbbr,
-      passphraseExists
+      passphraseExists,
+      customAccount
     }) => {
       const coin = COINS[coinType];
       if (!coin) {
@@ -242,13 +244,22 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
             coinType
           });
 
-          if (!recAddr || recAddr.toLowerCase() !== val.toLowerCase()) {
+          if (
+            !customAccount &&
+            (!recAddr || recAddr.toLowerCase() !== val.toLowerCase())
+          ) {
             setErrorMessage(langStrings.ERRORS.RECEIVE_TXN_DIFFERENT_ADDRESS);
             logger.verbose(
               'ReceiveAddress: Address different on device',
               coinType
             );
             return;
+          }
+          if (customAccount) {
+            logger.verbose(
+              'ReceiveAddress: Address comparision skipped, found customAccount',
+              coinType
+            );
           }
 
           setVerified(true);
@@ -301,7 +312,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           xpub,
           zpub,
           contractAbbr,
-          passphraseExists
+          passphraseExists,
+          customAccount
         });
 
         setIsInFlow(false);
