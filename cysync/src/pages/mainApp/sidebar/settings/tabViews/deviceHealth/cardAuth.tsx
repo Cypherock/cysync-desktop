@@ -20,11 +20,7 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import { useCardAuth } from '../../../../../../store/hooks/flows';
-import {
-  FeedbackState,
-  useConnection,
-  useFeedback
-} from '../../../../../../store/provider';
+import { useConnection } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import logger from '../../../../../../utils/logger';
 
@@ -230,18 +226,19 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
   const [activeStep, setActiveStep] = useState(0);
 
   const {
-    errorMessage,
+    errorObj,
+    clearErrorObj,
+    handleFeedbackOpen,
     handleCardAuth,
     verified,
     requestStatus,
     resetHooks,
-    setErrorMessage,
     cancelCardAuth,
     completed
   } = useCardAuth();
 
   const handleRetry = () => {
-    setErrorMessage('');
+    clearErrorObj();
     resetHooks();
     setActiveStep(0);
   };
@@ -300,34 +297,9 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
     },
     {
       name: 'Authentication',
-      element: (
-        <Authentication verified={verified} errorMessage={errorMessage} />
-      )
+      element: <Authentication verified={verified} errorObj={errorObj} />
     }
   ];
-
-  const { showFeedback } = useFeedback();
-
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: errorMessage,
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: 'Reporting for Error (X1 Card Authentication)',
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
-  };
 
   return (
     <Root container style={{ padding: '0.5rem 0rem' }}>
@@ -366,7 +338,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
             Ok
           </CustomButton>
         </Grid>
-      ) : errorMessage ? (
+      ) : errorObj.isSet ? (
         <Grid
           item
           container
@@ -397,7 +369,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
             color="textSecondary"
             style={{ margin: '1rem 0rem 6rem' }}
           >
-            {errorMessage}
+            {errorObj.showError()}
           </Typography>
           {verified === -1 ? (
             <div className={classes.errorButtons}>

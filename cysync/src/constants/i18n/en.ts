@@ -30,6 +30,9 @@ const en: I18nStrings = {
       'Error connecting the device, please reconnect the device.',
     DEVICE_NOT_SUPPORTED:
       'The connected device is not supported, please make sure that CySync and X1 wallet are up to date.',
+    // I dont understand how this message would be helpful.
+    DEVICE_MISCONFIGURED:
+      'Your device is misconfigured, Please restart cySync App. If the problem persists, please contact us.',
 
     WALLET_NOT_FOUND_IN_DEVICE:
       'This wallet does not seem to be present on the X1 device',

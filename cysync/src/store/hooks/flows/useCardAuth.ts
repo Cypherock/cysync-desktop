@@ -1,19 +1,29 @@
-import {
-  DeviceConnection,
-  DeviceError,
-  DeviceErrorType
-} from '@cypherock/communication';
+import { DeviceConnection, DeviceError } from '@cypherock/communication';
 import { CardAuthenticator } from '@cypherock/protocols';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { useI18n } from '../../../store/provider';
+import {
+  CyError,
+  CysyncError,
+  handleAxiosErrors,
+  handleDeviceErrors,
+  handleErrors
+} from '../../../errors';
+import {
+  DeviceConnectionState,
+  FeedbackState,
+  useConnection,
+  useFeedback,
+  useI18n
+} from '../../../store/provider';
+import Analytics from '../../../utils/analytics';
+import { hexToVersion, inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
+import sleep from '../../../utils/sleep';
 
 export interface HandleCardAuthOptions {
   connection: DeviceConnection;
   sdkVersion: string;
-  setIsInFlow: (val: boolean) => void;
-  firmwareVersion: string;
   cardNumber?: string;
   isTestApp?: boolean;
 }
@@ -26,17 +36,32 @@ export interface UseCardAuthValues {
   pairingFailed: boolean;
   isCardError: boolean;
   isNetworkError: boolean;
-  errorMessage: string;
-  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  errorObj: CyError;
+  clearErrorObj: () => void;
+  cardsStatus: 0 | 1 | -1 | 2;
+  connStatus: 0 | 1 | -1 | 2;
+  cardsAuth: ICardAuthState;
+  showRetry: boolean;
+  onRetry: () => void;
+  setCardsStatus: React.Dispatch<React.SetStateAction<0 | 1 | -1 | 2>>;
   completed: boolean;
   resetHooks: () => void;
   cancelCardAuth: (connection: DeviceConnection) => void;
+  handleFeedbackOpen: () => void;
+}
+
+export interface ICardAuthState {
+  '01': -1 | 0 | 1 | 2;
+  '02': -1 | 0 | 1 | 2;
+  '03': -1 | 0 | 1 | 2;
+  '04': -1 | 0 | 1 | 2;
 }
 
 export type UseCardAuth = (isInitial?: boolean) => UseCardAuthValues;
 
+const flowName = Analytics.Categories.CARD_AUTH;
 export const useCardAuth: UseCardAuth = isInitial => {
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [verified, setVerified] = useState<-1 | 0 | 1 | 2>(0);
   const [pairingFailed, setPairingFailed] = useState(false);
   const [isCardError, setCardError] = useState(false);
@@ -44,8 +69,48 @@ export const useCardAuth: UseCardAuth = isInitial => {
   const [requestStatus, setRequestStatus] = useState<-1 | 0 | 1 | 2>(0);
   const [processStatus, setProcessStatus] = useState<-1 | 0 | 1 | 2>(0);
   const [completed, setCompleted] = useState(false);
+  const [showRetry, setShowRetry] = useState(false);
+  /**
+   * -2 means authentication is remaining
+   * -1 means all cards failed authentication
+   * 0 means some cards failed authentication
+   * 1 means all cards are successfully authenticated
+   */
+  const [cardsStatus, setCardsStatus] = useState<-2 | -1 | 0 | 1>(-2);
+
+  const [connStatus, setConnStatus] = useState<-1 | 0 | 1 | 2>(1);
+  const [initialStart, setInitialStart] = useState(false);
+  const [cardsAuth, setCardsAuth] = useState<ICardAuthState>({
+    '01': 0,
+    '02': 0,
+    '03': 0,
+    '04': 0
+  });
+
+  const [currentCard, setCurrentCard] = useState<
+    '00' | '01' | '02' | '03' | '04'
+  >('00');
+
+  const incrementCurrentCard = (current: string) => {
+    if (current === '01') return '02';
+    if (current === '02') return '03';
+    if (current === '03') return '04';
+    return '00';
+  };
   const cardAuth = new CardAuthenticator();
   const { langStrings } = useI18n();
+
+  const {
+    internalDeviceConnection: deviceConnection,
+    deviceSdkVersion,
+    connected,
+    inBootloader,
+    firmwareVersion,
+    inBackgroundProcess,
+    deviceConnectionState,
+    setIsInFlow,
+    deviceState
+  } = useConnection();
 
   // To call resetHooks outside of this function
   const resetHooks = () => {
@@ -60,15 +125,170 @@ export const useCardAuth: UseCardAuth = isInitial => {
   const clearAll = () => {
     setCardError(false);
     setNetworkError(false);
-    setErrorMessage('');
+    clearErrorObj();
     resetHooks();
+  };
+
+  useEffect(() => {
+    if (
+      deviceConnection &&
+      !inBackgroundProcess &&
+      [
+        DeviceConnectionState.IN_TEST_APP,
+        DeviceConnectionState.IN_BOOTLOADER
+      ].includes(deviceConnectionState)
+    ) {
+      const cyError = new CyError();
+      if (inBootloader) {
+        setShowRetry(false);
+        cyError.setError(
+          CysyncError.DEVICE_IN_BOOTLOADER,
+          langStrings.ERRORS.DEVICE_MISCONFIGURED
+        );
+        setErrorObj(
+          handleErrors(errorObj, cyError, flowName, {
+            deviceConnectionState,
+            deviceConnection,
+            inBootloader,
+            inBackgroundProcess
+          })
+        );
+
+        return;
+      }
+
+      setConnStatus(2);
+
+      if (initialStart) {
+        return;
+      }
+
+      clearErrorObj();
+      if (currentCard === '00') {
+        setCardsAuth({ ...cardsAuth, '01': 1 });
+        setCurrentCard('01');
+      } else {
+        const temp = { ...cardsAuth };
+        temp[currentCard] = 1;
+        setCardsAuth(temp);
+        // 0.1 second delay to give time to the device for processing
+        sleep(100)
+          .then(() => {
+            if (firmwareVersion) {
+              return handleCardAuth({
+                connection: deviceConnection,
+                sdkVersion: deviceSdkVersion,
+                cardNumber: currentCard,
+                isTestApp: inTestApp(deviceState)
+              });
+            }
+          })
+          .catch(() => {
+            // empty
+          });
+      }
+      setInitialStart(true);
+    } else {
+      setConnStatus(1);
+    }
+  }, [deviceConnection, connected, inBackgroundProcess]);
+
+  useEffect(() => {
+    const temp = { ...cardsAuth };
+    if (currentCard === '00') {
+      return;
+    }
+
+    if (completed) {
+      if (errorObj.isSet) {
+        temp[currentCard] = -1;
+
+        // Only show retry when the error is other than not verified
+        if (verified !== -1 || pairingFailed) {
+          setShowRetry(true);
+        }
+
+        // setErrorMsg(errorMessage);
+      } else if (verified === 2 && !pairingFailed) {
+        temp[currentCard] = verified;
+        setCurrentCard(incrementCurrentCard);
+        resetHooks();
+      } else {
+        // setErrorMsg('Some internal error occurred');
+        setShowRetry(true);
+      }
+    }
+    setCardsAuth(temp);
+  }, [completed]);
+
+  useEffect(() => {
+    if (currentCard !== '00') {
+      const temp = { ...cardsAuth };
+      temp[currentCard] = 1;
+      setCardsAuth(temp);
+      setTimeout(() => {
+        if (deviceConnection && firmwareVersion) {
+          handleCardAuth({
+            connection: deviceConnection,
+            sdkVersion: deviceSdkVersion,
+            cardNumber: currentCard,
+            isTestApp: inTestApp(deviceState)
+          });
+        }
+      }, 3000);
+    }
+  }, [currentCard]);
+
+  const timeout = useRef<NodeJS.Timeout | undefined>(undefined);
+  const onRetry = () => {
+    setShowRetry(false);
+    clearErrorObj();
+
+    if (deviceConnectionState !== DeviceConnectionState.IN_TEST_APP) {
+      setShowRetry(true);
+      const cyError = new CyError(
+        CysyncError.DEVICE_IN_TEST_APP,
+        langStrings.ERRORS.DEVICE_MISCONFIGURED
+      );
+      setErrorObj(
+        handleErrors(errorObj, cyError, flowName, { deviceConnectionState })
+      );
+      return;
+    }
+
+    const temp = { ...cardsAuth };
+
+    if (currentCard === '00') {
+      return;
+    }
+
+    if (deviceConnection) {
+      temp[currentCard] = 1;
+    } else {
+      temp[currentCard] = 0;
+    }
+    setCardsAuth(temp);
+
+    if (timeout.current) {
+      clearTimeout(timeout.current);
+      timeout.current = undefined;
+    }
+
+    timeout.current = setTimeout(() => {
+      if (deviceConnection && firmwareVersion) {
+        handleCardAuth({
+          connection: deviceConnection,
+          sdkVersion: deviceSdkVersion,
+          cardNumber: currentCard,
+          isTestApp: inTestApp(deviceState)
+        });
+      }
+    }, 1000);
   };
 
   const handleCardAuth = async ({
     connection,
     sdkVersion,
-    setIsInFlow,
-    firmwareVersion,
     cardNumber = '01',
     isTestApp = false
   }: HandleCardAuthOptions) => {
@@ -87,43 +307,27 @@ export const useCardAuth: UseCardAuth = isInitial => {
 
     cardAuth.on('cardError', () => {
       setCardError(true);
-      logger.info('CardAuth: Card Error');
-      setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+      const cyError = new CyError(
+        CysyncError.UNKNOWN_CARD_ERROR,
+        langStrings.ERRORS.UNKNOWN_CARD_ERROR
+      );
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     cardAuth.on('error', err => {
-      logger.error('CardAuth: Error occurred in card auth flow');
-      logger.error(err);
+      const cyError = new CyError();
       if (err.isAxiosError) {
         setNetworkError(true);
-        if (err.response) {
-          setErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
-        } else {
-          setErrorMessage(langStrings.ERRORS.NETWORK_UNREACHABLE);
-        }
+        handleAxiosErrors(cyError, err, langStrings);
       } else if (err instanceof DeviceError) {
-        if (
-          [
-            DeviceErrorType.CONNECTION_CLOSED,
-            DeviceErrorType.CONNECTION_NOT_OPEN
-          ].includes(err.errorType)
-        ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
-        } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
-        } else if (
-          [
-            DeviceErrorType.WRITE_TIMEOUT,
-            DeviceErrorType.READ_TIMEOUT
-          ].includes(err.errorType)
-        ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
-        } else {
-          setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
-        }
+        handleDeviceErrors(cyError, err, langStrings, flowName);
       } else {
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        cyError.setError(
+          CysyncError.UNKNOWN_FLOW_ERROR,
+          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        );
       }
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     cardAuth.on('acceptedRequest', acceptedRequest => {
@@ -131,8 +335,11 @@ export const useCardAuth: UseCardAuth = isInitial => {
         setRequestStatus(2);
         setVerified(1);
       } else {
-        logger.info('CardAuth: Rejected from device');
-        setErrorMessage(langStrings.ERRORS.CARD_AUTH_REJECTED);
+        const cyError = new CyError(
+          CysyncError.CARD_AUTH_REJECTED,
+          langStrings.ERRORS.CARD_AUTH_REJECTED
+        );
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
         setRequestStatus(-1);
       }
     });
@@ -150,27 +357,40 @@ export const useCardAuth: UseCardAuth = isInitial => {
         logger.info('CardAuth: Card verified');
         setVerified(2);
       } else {
-        logger.info('CardAuth: Card verification failed');
         setVerified(-1);
         setProcessStatus(-1);
-        setErrorMessage(langStrings.ERRORS.CARD_AUTH_FAILED);
+        const cyError = new CyError(
+          CysyncError.CARD_AUTH_FAILED,
+          langStrings.ERRORS.CARD_AUTH_FAILED
+        );
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
       }
     });
 
     cardAuth.on('pairingFailed', () => {
-      logger.info('CardAuth: Pairing failed');
       setPairingFailed(true);
       setProcessStatus(-1);
-      setErrorMessage(langStrings.ERRORS.CARD_AUTH_DEVICE_PAIRING_FAILED);
+      const cyError = new CyError(
+        CysyncError.CARD_PAIRING_FAILED,
+        langStrings.ERRORS.CARD_AUTH_DEVICE_PAIRING_FAILED
+      );
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     cardAuth.on('notReady', () => {
-      logger.info('CardAuth: Device not ready');
+      const cyError = new CyError();
       if (isInitial) {
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL);
+        cyError.setError(
+          CysyncError.DEVICE_NOT_READY_IN_INITIAL,
+          langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL
+        );
       } else {
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY);
+        cyError.setError(
+          CysyncError.DEVICE_NOT_READY,
+          langStrings.ERRORS.DEVICE_NOT_READY
+        );
       }
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     try {
@@ -182,8 +402,9 @@ export const useCardAuth: UseCardAuth = isInitial => {
       await cardAuth.run({
         connection,
         sdkVersion,
-        firmwareVersion,
+        firmwareVersion: hexToVersion(firmwareVersion),
         cardNumber,
+
         isTestApp
       });
       setIsInFlow(false);
@@ -191,10 +412,12 @@ export const useCardAuth: UseCardAuth = isInitial => {
       setCompleted(true);
     } catch (e) {
       setIsInFlow(false);
-      logger.error('CardAuth: Some error occurred.');
-      logger.error(e);
-      setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
       setCompleted(true);
+      const cyError = new CyError(
+        CysyncError.UNKNOWN_FLOW_ERROR,
+        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+      );
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       cardAuth.removeAllListeners();
     }
   };
@@ -213,6 +436,33 @@ export const useCardAuth: UseCardAuth = isInitial => {
       });
   };
 
+  const { showFeedback } = useFeedback();
+
+  const newFeedbackState: FeedbackState = {
+    attachLogs: true,
+    attachDeviceLogs: false,
+    categories: ['Report'],
+    category: 'Report',
+    description: errorObj.showError(),
+    descriptionError: '',
+    email: '',
+    emailError: '',
+    subject: 'Reporting for Error (X1 Card Authentication)',
+    subjectError: ''
+  };
+
+  const handleFeedbackOpen = () => {
+    showFeedback({
+      isContact: true,
+      heading: 'Report',
+      initFeedbackState: newFeedbackState
+    });
+  };
+
+  const clearErrorObj = () => {
+    setErrorObj(new CyError());
+  };
+
   return {
     handleCardAuth,
     requestStatus,
@@ -220,8 +470,15 @@ export const useCardAuth: UseCardAuth = isInitial => {
     verified,
     isCardError,
     isNetworkError,
-    errorMessage,
-    setErrorMessage,
+    errorObj,
+    clearErrorObj,
+    handleFeedbackOpen,
+    cardsAuth,
+    connStatus,
+    cardsStatus,
+    showRetry,
+    onRetry,
+    setCardsStatus,
     completed,
     resetHooks,
     cancelCardAuth,
