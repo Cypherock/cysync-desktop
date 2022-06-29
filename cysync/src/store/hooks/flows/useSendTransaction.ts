@@ -123,6 +123,7 @@ export interface HandleSendTransactionOptions {
   xpub: string;
   zpub: string | undefined;
   customAccount: string | undefined;
+  newAccountId: string | undefined;
   coinType: string;
   outputList: any[];
   fees: number;
@@ -356,6 +357,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       xpub,
       zpub,
       customAccount,
+      newAccountId,
       coinType,
       outputList,
       fees,
@@ -616,6 +618,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           xpub,
           zpub,
           customAccount,
+          newAccountId,
           coinType,
           outputList,
           fee: fees,
@@ -744,14 +747,14 @@ export const useSendTransaction: UseSendTransaction = () => {
         transactionDb.insert(feeTxn);
       } else {
         tx = {
-          hash: txHash.toLowerCase(),
+          hash: coin.toLowerCase() === 'near' ? txHash : txHash.toLowerCase(),
           amount: amount.toString(),
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
           walletId,
           slug: coin.toLowerCase(),
           confirmations: 0,
-          status: 0,
+          status: coin.toLowerCase() === 'near' ? 1 : 0,
           sentReceive: SentReceive.SENT,
           confirmed: new Date(),
           blockHeight: -1,

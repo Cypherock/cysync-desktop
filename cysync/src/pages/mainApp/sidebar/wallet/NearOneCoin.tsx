@@ -39,7 +39,7 @@ import {
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 import prevent from '../../../../utils/preventPropagation';
 
-// import AddAccount from './addAccount';
+import AddAccount from './addAccount';
 import { NearOneCoinProps, NearOneCoinPropTypes } from './OneCoinProps';
 import OneNearAccount from './OneNearAccount';
 import Recieve from './recieve';
@@ -222,12 +222,19 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   };
 
   const [sendForm, setSendForm] = useState(false);
+  const [addAccountForm, setAddAccountForm] = useState(false);
 
   const sendTransaction = useSendTransaction();
 
   const handleSendFormOpen = (e: React.MouseEvent) => {
     prevent(e);
     if (beforeAction() && beforeNetworkAction() && !isEmpty) setSendForm(true);
+  };
+
+  const handleAddAccountFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
+    if (beforeAction() && beforeNetworkAction() && !isEmpty)
+      setAddAccountForm(true);
   };
 
   const [receiveForm, setReceiveForm] = useState(false);
@@ -262,12 +269,6 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
     setCollapseTab(false);
   }, [selectedWallet._id]);
 
-  // const [openAddAccount, setOpenAddAccount] = useState(false);
-
-  // const handleAddAccountFormClose = () => {
-  //   setOpenAddAccount(false);
-  // };
-
   return (
     <Root>
       <CustomizedDialog
@@ -286,11 +287,16 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
         </Typography>
         <Typography color="textPrimary">{`You want to delete ${name} ?`}</Typography>
       </CustomizedDialog>
-      {/* <AddAccount
-        openAddAccount={openAddAccount}
-        AccountList={AccountList}
-        handleClose={handleAddAccountFormClose}
-      /> */}
+
+      <SendTransactionContext.Provider
+        value={{
+          sendForm: addAccountForm,
+          setSendForm: setAddAccountForm,
+          sendTransaction
+        }}
+      >
+        <AddAccount />
+      </SendTransactionContext.Provider>
 
       <SendTransactionContext.Provider
         value={{
@@ -433,10 +439,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                     );
                   })}
                   <CoinCardBtn
-                    onClick={(e: React.MouseEvent) => {
-                      prevent(e);
-                      // if (setOpenAddAccount) setOpenAddAccount(true);
-                    }}
+                    onClick={handleAddAccountFormOpen}
                     fullWidth
                     startIcon={<AddCircleIcon />}
                     style={{
@@ -447,7 +450,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                     disabled={isLoading}
                     disableRipple
                   >
-                    ADD ACCOUNTS
+                    ADD ACCOUNT
                   </CoinCardBtn>
                 </Collapse>
               </Grid>
@@ -470,10 +473,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
           ) : (
             <Grid item xs={12} className={classes.rootButtonWrapper}>
               <CoinCardBtn
-                onClick={(e: React.MouseEvent) => {
-                  prevent(e);
-                  // if (setOpenAddAccount) setOpenAddAccount(true);
-                }}
+                onClick={handleAddAccountFormOpen}
                 fullWidth
                 startIcon={<AddCircleIcon />}
                 style={{
@@ -484,7 +484,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                 disabled={isLoading}
                 disableRipple
               >
-                ADD ACCOUNTS
+                ADD ACCOUNT
               </CoinCardBtn>
             </Grid>
           )}

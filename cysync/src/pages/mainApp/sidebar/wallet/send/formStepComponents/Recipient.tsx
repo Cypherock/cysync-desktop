@@ -513,7 +513,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
         passphraseExists: passphraseSet,
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
-        customAccount: customAccount.name,
+        customAccount: customAccount?.name,
+        newAccountId: null,
         coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
           batchRecipientData,
