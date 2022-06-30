@@ -14,7 +14,6 @@ import CustomButton from '../../../designSystem/designComponents/buttons/button'
 import ModAvatar from '../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../designSystem/iconGroups/errorExclamation';
-import { CyError } from '../../../errors';
 import { useDeviceUpgrade } from '../../../store/hooks/flows';
 import { useNetwork } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';

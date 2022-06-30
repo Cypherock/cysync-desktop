@@ -22,7 +22,6 @@ import AvatarIcon from '../../../../../../designSystem/designComponents/icons/Av
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
-import { CyError } from '../../../../../../errors';
 import { useDeviceAuth } from '../../../../../../store/hooks/flows';
 import { useConnection } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';

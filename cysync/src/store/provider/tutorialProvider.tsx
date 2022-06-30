@@ -6,12 +6,10 @@ import { version } from '../../../package.json';
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
 import {
   CyError,
-  CyError,
   CysyncError,
   handleAxiosErrors,
   handleErrors
 } from '../../errors';
-import logger from '../../utils/logger';
 
 import { useI18n } from './i18nProvider';
 
@@ -67,7 +65,7 @@ export const TutorialProvider: React.FC = ({ children }) => {
           langStrings.ERRORS.CUSTOM_ERROR('fetching the tutorials.')
         );
       }
-      setErrorObj(handleErrors(errorObj, cyError, _, error));
+      setErrorObj(handleErrors(errorObj, cyError, 'Tutorials', error));
     } finally {
       setIsLoading(false);
     }
