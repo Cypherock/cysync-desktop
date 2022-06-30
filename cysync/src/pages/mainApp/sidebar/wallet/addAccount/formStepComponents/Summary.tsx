@@ -223,7 +223,7 @@ const Summary: React.FC<StepComponentProps> = ({
             label={`Amount ${coinAbbr.toUpperCase()}`}
             text={
               !maxSend
-                ? `${batchRecipientData[0].amount} ~( $${formatDisplayAmount(
+                ? `${0.1} ~( $${formatDisplayAmount(
                     parseFloat(batchRecipientData[0].amount || '0') *
                       parseFloat(coinPrice),
                     2,
@@ -247,9 +247,7 @@ const Summary: React.FC<StepComponentProps> = ({
         )}
         <LabelText
           label="Transaction Fees"
-          text={`~ ${
-            sendTransaction.totalFees
-          } ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
+          text={`~ ${0.0012} ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
             sendTransaction.totalFees * parseFloat(coinDetails.displayPrice),
             2,
             true
