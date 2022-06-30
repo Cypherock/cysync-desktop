@@ -123,7 +123,7 @@ export const useAddCoin: UseAddCoin = () => {
 
   const clearAll = () => {
     setIsCancelled(false);
-    setErrorObj(new CyError());
+    clearErrorObj();
     resetHooks();
   };
 

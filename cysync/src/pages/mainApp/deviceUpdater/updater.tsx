@@ -96,7 +96,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
     latestVersion,
     handleFeedbackOpen,
     errorObj,
-    setErrorObj
+    clearErrorObj
   } = useDeviceUpgrade();
 
   const onClose = () => {
@@ -106,7 +106,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
 
   useEffect(() => {
     logger.info('Initiating device update from prompt');
-    setErrorObj(new CyError());
+    clearErrorObj();
 
     startDeviceUpdate();
 

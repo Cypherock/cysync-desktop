@@ -259,7 +259,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     resetHooks,
     errorObj,
     cancelDeviceAuth,
-    setErrorObj,
+    clearErrorObj,
     confirmed,
     handleFeedbackOpen
   } = useDeviceAuth();
@@ -345,7 +345,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 
   const handleRetry = () => {
     logger.info('Device authentication retry');
-    setErrorObj(new CyError());
+    clearErrorObj();
     setCompleted(0);
     resetHooks();
     if (deviceConnection) {

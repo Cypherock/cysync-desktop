@@ -98,7 +98,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     completed,
     errorObj,
     confirmed,
-    setErrorObj
+    clearErrorObj
   } = useDeviceAuth(true);
 
   const feedback = useFeedback();
@@ -196,7 +196,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
   const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const onRetry = () => {
     setErrorMsg('');
-    setErrorObj(new CyError());
+    clearErrorObj();
     resetHooks();
 
     if (timeout.current) {

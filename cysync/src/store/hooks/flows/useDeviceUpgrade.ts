@@ -68,6 +68,7 @@ export interface UseDeviceUpgradeValues {
   checkLatestFirmware: (onSuccess?: () => void, onError?: () => void) => void;
   upgradeAvailable: boolean;
   setErrorObj: React.Dispatch<React.SetStateAction<DisplayError>>;
+  clearErrorObj: () => void;
 }
 
 export type UseDeviceUpgrade = (isInitial?: boolean) => UseDeviceUpgradeValues;
@@ -191,12 +192,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     logger.info('Initiating device update from settings');
 
     if (!beforeFlowStart(true)) {
-      setErrorObj(
-        new CyError(
-          DeviceErrorType.NOT_CONNECTED,
-          langStrings.ERRORS.DEVICE_NOT_CONNECTED
-        )
+      const cyError = new CyError(
+        DeviceErrorType.NOT_CONNECTED,
+        langStrings.ERRORS.DEVICE_NOT_CONNECTED
       );
+
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
       setIsCompleted(-1);
       return;
     }
@@ -242,14 +243,11 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     });
 
     ipcRenderer.on('download error', error => {
-      logger.error('Error in downloading firmware');
-      logger.error(error);
-      setErrorObj(
-        new CyError(
-          CysyncError.DEVICE_UPGRADE_FIRMWARE_DOWNLOAD_FAILED,
-          langStrings.ERRORS.DEVICE_UPGRADE_FIRMWARE_DOWNLOAD_FAILED
-        )
+      const cyError = new CyError(
+        CysyncError.DEVICE_UPGRADE_FIRMWARE_DOWNLOAD_FAILED,
+        langStrings.ERRORS.DEVICE_UPGRADE_FIRMWARE_DOWNLOAD_FAILED
       );
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
       setIsCompleted(-1);
       setBlockNewConnection(false);
       setIsDeviceUpdating(false);
@@ -281,13 +279,11 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
   const handleDeviceUpgrade = async () => {
     if (!deviceConnection) {
-      logger.error('Device is not connected');
-      setErrorObj(
-        new CyError(
-          DeviceErrorType.NOT_CONNECTED,
-          langStrings.ERRORS.DEVICE_NOT_CONNECTED
-        )
+      const cyError = new CyError(
+        DeviceErrorType.NOT_CONNECTED,
+        langStrings.ERRORS.DEVICE_NOT_CONNECTED
       );
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
       setUpdated(-1);
       setApproved(val => (val === 2 ? val : -1));
       setIsCompleted(-1);
@@ -309,14 +305,12 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         setApproved(2);
         setIsCompleted(1);
       } else {
-        logger.info('Device update rejected');
         setApproved(-1);
-        setErrorObj(
-          new CyError(
-            CysyncError.DEVICE_UPGRADE_REJECTED,
-            langStrings.ERRORS.DEVICE_UPGRADE_REJECTED
-          )
+        const cyError = new CyError(
+          CysyncError.DEVICE_UPGRADE_REJECTED,
+          langStrings.ERRORS.DEVICE_UPGRADE_REJECTED
         );
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
         setIsCompleted(-1);
         setBlockNewConnection(false);
         setIsDeviceUpdating(false);
@@ -369,18 +363,16 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     });
 
     deviceUpdater.on('failed', () => {
-      logger.info('Error on Device update');
       setUpdated(-1);
       setApproved(-1);
       setIsCompleted(-1);
       setIsDeviceUpdating(false);
       setBlockNewConnection(false);
-      setErrorObj(
-        new CyError(
-          CysyncError.DEVICE_UPGRADE_FAILED,
-          langStrings.ERRORS.DEVICE_UPGRADE_FAILED
-        )
+      const cyError = new CyError(
+        CysyncError.DEVICE_UPGRADE_FAILED,
+        langStrings.ERRORS.DEVICE_UPGRADE_FAILED
       );
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
       deviceUpdater.removeAllListeners();
     });
 
@@ -403,16 +395,11 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       logger.info('DeviceUpgrade: completed.');
     } catch (e) {
       setIsInFlow(true);
-      logger.error('DeviceUpgrade: Some error occurred.');
-      logger.error(e);
-      setErrorObj(
-        new CyError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(
-            Analytics.Categories.DEVICE_UPDATE
-          )
-        )
+      const cyError = new CyError(
+        CysyncError.UNKNOWN_FLOW_ERROR,
+        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
       );
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       deviceUpdater.removeAllListeners();
       setIsDeviceUpdating(false);
       setBlockNewConnection(false);
@@ -427,12 +414,11 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     if (updateDownloaded === 2) {
       logger.info('Running device update');
       if (!beforeFlowStart(true)) {
-        setErrorObj(
-          new CyError(
-            DeviceErrorType.NOT_CONNECTED,
-            langStrings.ERRORS.DEVICE_NOT_CONNECTED
-          )
+        const cyError = new CyError(
+          DeviceErrorType.NOT_CONNECTED,
+          langStrings.ERRORS.DEVICE_NOT_CONNECTED
         );
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
         setBlockNewConnection(false);
@@ -495,13 +481,13 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
             errorObj.isSet &&
             errorObj.getCode() === DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW
           )
-        )
-          setErrorObj(
-            new CyError(
-              CysyncError.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH,
-              langStrings.ERRORS.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH
-            )
+        ) {
+          const cyError = new CyError(
+            CysyncError.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH,
+            langStrings.ERRORS.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH
           );
+          setErrorObj(handleErrors(errorObj, cyError, flowName));
+        }
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
         setBlockNewConnection(false);
@@ -591,6 +577,10 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     });
   };
 
+  const clearErrorObj = () => {
+    setErrorObj(new CyError());
+  };
+
   return {
     startDeviceUpdate,
     handleRetry,
@@ -622,6 +612,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     handleFeedbackOpen,
     checkLatestFirmware,
     upgradeAvailable,
-    setErrorObj
+    setErrorObj,
+    clearErrorObj
   } as UseDeviceUpgradeValues;
 };
