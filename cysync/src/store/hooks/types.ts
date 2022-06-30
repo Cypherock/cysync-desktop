@@ -21,6 +21,7 @@ export interface DisplayToken extends Token {
   displayPrice: string;
   displayBalance: string;
   isEmpty: boolean;
+  parentCoin: string;
 }
 
 export interface DisplayInputOutput extends InputOutput {

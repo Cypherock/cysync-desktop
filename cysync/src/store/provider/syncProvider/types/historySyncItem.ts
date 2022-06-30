@@ -11,6 +11,8 @@ export interface HistorySyncItemOptions {
   zpub?: string;
   page?: number;
   afterBlock?: number;
+  parentCoin?: string;
+  coinGroup: CoinGroup;
   isRefresh?: boolean;
 }
 
@@ -36,9 +38,18 @@ export class HistorySyncItem extends SyncItem {
     module,
     page,
     afterBlock,
-    isRefresh
+    isRefresh,
+    parentCoin,
+    coinGroup
   }: HistorySyncItemOptions) {
-    super({ type: 'history', coinType, isRefresh, module });
+    super({
+      type: 'history',
+      coinType,
+      isRefresh,
+      module,
+      parentCoin,
+      coinGroup
+    });
     this.xpub = xpub;
     this.zpub = zpub;
     this.walletName = walletName;
@@ -71,7 +82,9 @@ export class HistorySyncItem extends SyncItem {
       module: this.module,
       page: this.page,
       afterBlock: this.afterBlock,
-      isRefresh: this.isRefresh
+      isRefresh: this.isRefresh,
+      coinGroup: this.coinGroup,
+      parentCoin: this.parentCoin
     });
 
     newItem.retries = this.retries;

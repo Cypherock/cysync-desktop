@@ -1,27 +1,35 @@
+import { CoinGroup } from '@cypherock/communication';
 import { SyncItem } from './syncItem';
 
 export interface PriceSyncItemOptions {
   coinType: string;
   days: 7 | 30 | 365;
   module: string;
-  ethCoin?: string;
   isRefresh?: boolean;
+  parentCoin?: string;
+  coinGroup: CoinGroup;
 }
 
 export class PriceSyncItem extends SyncItem {
   public days: 7 | 30 | 365;
-  public ethCoin?: string;
 
   constructor({
     days,
     coinType,
-    ethCoin,
     isRefresh,
-    module
+    module,
+    coinGroup,
+    parentCoin
   }: PriceSyncItemOptions) {
-    super({ type: 'price', coinType, isRefresh, module });
+    super({
+      type: 'price',
+      coinType,
+      isRefresh,
+      module,
+      coinGroup,
+      parentCoin
+    });
     this.days = days;
-    this.ethCoin = ethCoin;
   }
 
   equals(item: PriceSyncItem | SyncItem) {
@@ -29,7 +37,7 @@ export class PriceSyncItem extends SyncItem {
       return (
         this.days === item.days &&
         this.coinType === item.coinType &&
-        this.ethCoin === item.coinType
+        this.coinGroup === item.coinGroup
       );
     }
 
@@ -42,7 +50,8 @@ export class PriceSyncItem extends SyncItem {
       coinType: this.coinType,
       isRefresh: this.isRefresh,
       module: this.module,
-      ethCoin: this.ethCoin
+      parentCoin: this.parentCoin,
+      coinGroup: this.coinGroup
     });
 
     newItem.retries = this.retries;

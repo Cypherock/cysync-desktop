@@ -1,4 +1,9 @@
-import { BtcCoinData, COINS, EthCoinData } from '@cypherock/communication';
+import {
+  BtcCoinData,
+  COINS,
+  EthCoinData,
+  CoinGroup
+} from '@cypherock/communication';
 import {
   batch as batchServer,
   eth as ethServer,
@@ -400,7 +405,8 @@ export const processResponses = async (
             xpub: item.xpub,
             walletId: item.walletId,
             coinType: tokenName,
-            ethCoin: item.coinType,
+            parentCoin: item.coinType,
+            coinGroup: CoinGroup.ERC20Tokens,
             module: item.module,
             isRefresh: true
           })

@@ -1,9 +1,9 @@
 import {
-  ALLCOINS,
   BtcCoinData,
   CoinGroup,
   COINS,
-  EthCoinData
+  EthCoinData,
+  AbsCoinData
 } from '@cypherock/communication';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
@@ -30,7 +30,8 @@ import {
   PriceSyncItemOptions,
   SyncItem,
   SyncProviderTypes,
-  SyncQueueItem
+  SyncQueueItem,
+  ModifiedCoin
 } from './types';
 
 const BATCH_SIZE = 5;
@@ -43,7 +44,7 @@ export interface SyncContextInterface {
   isSyncing: boolean;
   isWaitingForConnection: boolean;
   modulesInExecutionQueue: string[];
-  addCoinTask: (coin: Coin, options: { module: string }) => void;
+  addCoinTask: (coin: ModifiedCoin, options: { module: string }) => void;
   addTokenTask: (
     walletId: string,
     tokenName: string,
@@ -51,11 +52,11 @@ export interface SyncContextInterface {
   ) => Promise<void>;
   reSync: () => void;
   addBalanceSyncItemFromCoin: (
-    coin: Coin,
+    coin: ModifiedCoin,
     options: { token?: string; module?: string; isRefresh?: boolean }
   ) => void;
   addHistorySyncItemFromCoin: (
-    coin: Coin,
+    coin: ModifiedCoin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
 }
@@ -148,7 +149,8 @@ export const SyncProvider: React.FC = ({ children }) => {
           isRefresh,
           module,
           afterBlock: topBlock,
-          page: 1
+          page: 1,
+          coinGroup: CoinGroup.BitcoinForks
         });
         addToQueue(newItem);
 
@@ -178,7 +180,8 @@ export const SyncProvider: React.FC = ({ children }) => {
             isRefresh,
             module,
             afterBlock: topBlock,
-            page: 1
+            page: 1,
+            coinGroup: CoinGroup.BitcoinForks
           });
           addToQueue(newZItem);
         }
@@ -189,7 +192,8 @@ export const SyncProvider: React.FC = ({ children }) => {
           walletId: coin.walletId,
           coinType: coinData.abbr,
           isRefresh,
-          module
+          module,
+          coinGroup: CoinGroup.Ethereum
         });
         addToQueue(newItem);
       } else {
@@ -206,7 +210,24 @@ export const SyncProvider: React.FC = ({ children }) => {
     };
 
   const addBalanceSyncItemFromCoin: SyncProviderTypes['addBalanceSyncItemFromCoin'] =
-    (coin: Coin, { token, module = 'default', isRefresh = false }) => {
+    (coin, { module = 'default', isRefresh = false }) => {
+      const isToken = coin.coinGroup === CoinGroup.ERC20Tokens;
+
+      // If a token txn, refresh eth as well as token balance
+      if (isToken) {
+        addToQueue(
+          new BalanceSyncItem({
+            xpub: coin.xpub,
+            walletId: coin.walletId,
+            coinType: coin.slug,
+            parentCoin: coin.parentCoin,
+            coinGroup: CoinGroup.ERC20Tokens,
+            module,
+            isRefresh
+          })
+        );
+      }
+
       const coinData = COINS[coin.slug];
 
       if (!coinData) {
@@ -225,20 +246,6 @@ export const SyncProvider: React.FC = ({ children }) => {
         return;
       }
 
-      // If a token txn, refresh eth as well as token balance
-      if (token) {
-        addToQueue(
-          new BalanceSyncItem({
-            xpub: coin.xpub,
-            walletId: coin.walletId,
-            coinType: token,
-            ethCoin: coin.slug,
-            module,
-            isRefresh
-          })
-        );
-      }
-
       if (coinData.group === CoinGroup.Ethereum) {
         addToQueue(
           new BalanceSyncItem({
@@ -247,7 +254,8 @@ export const SyncProvider: React.FC = ({ children }) => {
             walletId: coin.walletId,
             coinType: coin.slug,
             module,
-            isRefresh
+            isRefresh,
+            coinGroup: CoinGroup.Ethereum
           })
         );
       } else {
@@ -260,9 +268,22 @@ export const SyncProvider: React.FC = ({ children }) => {
     async (coin, { module = 'default', isRefresh = false }) => {
       const coinName = coin.slug;
 
-      const coinData = ALLCOINS[coinName];
+      let coinData: AbsCoinData;
 
-      if (!coin) {
+      if (coin.parentCoin) {
+        const parentCoinData = COINS[coin.parentCoin];
+        if (!parentCoinData || !(parentCoinData instanceof EthCoinData)) {
+          logger.warn('Invalid parentCoin in add price sync item', {
+            coinType: coin.parentCoin
+          });
+          return;
+        }
+        coinData = parentCoinData.erc20TokensList[coin.slug];
+      } else {
+        coinData = COINS[coinName];
+      }
+
+      if (!coinData) {
         logger.warn('Invalid coin in add price sync item', {
           coinType: coinName
         });
@@ -297,7 +318,8 @@ export const SyncProvider: React.FC = ({ children }) => {
             const newItem = new PriceSyncItem({
               days,
               coinType: coinData.abbr,
-              ethCoin: coin.ethCoin,
+              coinGroup: coinData.group,
+              parentCoin: coin.parentCoin,
               isRefresh,
               module
             });
@@ -310,10 +332,22 @@ export const SyncProvider: React.FC = ({ children }) => {
   const addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'] =
     (coin, { module = 'default', isRefresh = false }) => {
       const coinName = coin.slug;
+      let coinData: AbsCoinData;
 
-      const coinData = ALLCOINS[coinName];
+      if (coin.parentCoin) {
+        const parentCoinData = COINS[coin.parentCoin];
+        if (!parentCoinData || !(parentCoinData instanceof EthCoinData)) {
+          logger.warn('Invalid parentCoin in add latest price sync item', {
+            coinType: coin.parentCoin
+          });
+          return;
+        }
+        coinData = parentCoinData.erc20TokensList[coin.slug];
+      } else {
+        coinData = COINS[coinName];
+      }
 
-      if (!coin) {
+      if (!coinData) {
         logger.warn('Invalid coin in add latest price sync item', {
           coinType: coinName
         });
@@ -323,7 +357,8 @@ export const SyncProvider: React.FC = ({ children }) => {
       if (!coinData.isTest) {
         const newItem = new LatestPriceSyncItem({
           coinType: coinData.abbr,
-          ethCoin: coin.ethCoin,
+          parentCoin: coin.parentCoin,
+          coinGroup: coinData.group,
           isRefresh,
           module
         });
@@ -491,8 +526,9 @@ export const SyncProvider: React.FC = ({ children }) => {
         new BalanceSyncItem({
           xpub: ethXpub.xpub,
           walletId: token.walletId,
-          coinType: token.coin,
-          ethCoin: token.coin,
+          coinType: token.slug,
+          parentCoin: token.coin,
+          coinGroup: CoinGroup.ERC20Tokens,
           module,
           isRefresh
         })
@@ -509,10 +545,17 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
 
     for (const token of tokens) {
-      addPriceSyncItemFromCoin({ slug: token.coin } as Coin, {
-        isRefresh,
-        module
-      });
+      addPriceSyncItemFromCoin(
+        {
+          slug: token.coin,
+          coinGroup: CoinGroup.ERC20Tokens,
+          parentCoin: token.slug
+        } as ModifiedCoin,
+        {
+          isRefresh,
+          module
+        }
+      );
     }
   };
 
@@ -528,10 +571,17 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
 
     for (const token of tokens) {
-      addLatestPriceSyncItemFromCoin({ slug: token.coin } as Coin, {
-        isRefresh,
-        module
-      });
+      addLatestPriceSyncItemFromCoin(
+        {
+          slug: token.coin,
+          parentCoin: token.slug,
+          coinGroup: CoinGroup.ERC20Tokens
+        } as ModifiedCoin,
+        {
+          isRefresh,
+          module
+        }
+      );
     }
   };
 
@@ -557,20 +607,29 @@ export const SyncProvider: React.FC = ({ children }) => {
         xpub: ethXpub.xpub,
         walletId,
         coinType: tokenName,
-        ethCoin,
+        parentCoin: ethCoin,
+        coinGroup: CoinGroup.ERC20Tokens,
         module: 'default',
         isRefresh: true
       })
     );
     addPriceSyncItemFromCoin(
-      { slug: tokenName, ethCoin } as Coin & { ethCoin: string },
+      {
+        slug: tokenName,
+        parentCoin: ethCoin,
+        coinGroup: CoinGroup.ERC20Tokens
+      } as ModifiedCoin,
       {
         isRefresh: true,
         module: 'default'
       }
     );
     addLatestPriceSyncItemFromCoin(
-      { slug: tokenName, ethCoin } as Coin & { ethCoin: string },
+      {
+        slug: tokenName,
+        parentCoin: ethCoin,
+        coinGroup: CoinGroup.ERC20Tokens
+      } as ModifiedCoin,
       {
         isRefresh: true,
         module: 'default'

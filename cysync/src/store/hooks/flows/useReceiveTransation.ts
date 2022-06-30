@@ -1,5 +1,4 @@
 import {
-  ALLCOINS as COINS,
   DeviceConnection,
   DeviceError,
   DeviceErrorType
@@ -17,6 +16,7 @@ export interface HandleReceiveTransactionOptions {
   setIsInFlow: (val: boolean) => void;
   walletId: string;
   coinType: string;
+  coinName: string;
   xpub: string;
   zpub?: string;
   contractAbbr?: string;
@@ -100,16 +100,12 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       setIsInFlow,
       walletId,
       coinType,
+      coinName,
       xpub,
       zpub,
       contractAbbr,
       passphraseExists
     }) => {
-      const coin = COINS[coinType];
-      if (!coin) {
-        throw new Error(`Cannot find coinType: ${coinType}`);
-      }
-
       clearAll();
 
       logger.info('ReceiveAddress: Initiated', { coinType });
@@ -211,7 +207,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           setCoinsConfirmed(true);
         } else {
           logger.info('ReceiveAddress: Rejected on device', { coinType });
-          setErrorMessage(langStrings.ERRORS.RECEIVE_TXN_REJECTED(coin.name));
+          setErrorMessage(langStrings.ERRORS.RECEIVE_TXN_REJECTED(coinName));
         }
       });
 

@@ -1,4 +1,9 @@
-import { ALLCOINS, CoinGroup, ERC20TOKENS } from '@cypherock/communication';
+import {
+  ALLCOINS,
+  CoinGroup,
+  BtcCoinData,
+  EthCoinData
+} from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 
@@ -12,15 +17,6 @@ import {
   Status,
   Transaction
 } from '../../index';
-
-const isBtcFork = (coinStr: string) => {
-  const coin = ALLCOINS[coinStr.toLowerCase()];
-  if (!coin) {
-    throw new Error('Invalid coin');
-  }
-
-  return coin.group === CoinGroup.BitcoinForks;
-};
 
 export const insertFromFullTxn = async (transaction: {
   txn: any;
@@ -55,7 +51,12 @@ export const insertFromFullTxn = async (transaction: {
     }
   }
 
-  if (isBtcFork(coinType)) {
+  const coin = ALLCOINS[coinType.toLowerCase()];
+  if (!coin) {
+    throw new Error('Invalid coin');
+  }
+
+  if (coin instanceof BtcCoinData) {
     let myAddresses: string[] = [];
 
     if (addresses && addresses.length > 0) {
@@ -189,7 +190,7 @@ export const insertFromFullTxn = async (transaction: {
       }
     );
     await transactionDb.insert(newTxn);
-  } else {
+  } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
     const myAddress =
       utils.HDNode.fromExtendedKey(xpub).derivePath(`0/0`).address;
@@ -229,7 +230,8 @@ export const insertFromFullTxn = async (transaction: {
         return;
       }
 
-      if (!ERC20TOKENS[token]) {
+      const tokenData = coin.erc20TokensList[token];
+      if (!tokenData || tokenData.group !== CoinGroup.ERC20Tokens) {
         logger.warn('Invalid tokenAbbr in transaction', { token });
         return;
       }
@@ -313,7 +315,12 @@ export const insertFromBlockbookTxn = async (transaction: {
     }
   }
 
-  if (isBtcFork(coinType)) {
+  const coin = ALLCOINS[coinType.toLowerCase()];
+  if (!coin) {
+    throw new Error('Invalid coin');
+  }
+
+  if (coin instanceof BtcCoinData) {
     let myAddresses: string[] = [];
 
     if (addresses && addresses.length > 0) {
@@ -457,7 +464,7 @@ export const insertFromBlockbookTxn = async (transaction: {
       );
     }
     await transactionDb.insert(newTxn);
-  } else {
+  } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
     const myAddress =
       utils.HDNode.fromExtendedKey(xpub).derivePath(`0/0`).address;
@@ -497,7 +504,8 @@ export const insertFromBlockbookTxn = async (transaction: {
         return;
       }
 
-      if (!ERC20TOKENS[token]) {
+      const tokenData = coin.erc20TokensList[token];
+      if (!tokenData || tokenData.group !== CoinGroup.ERC20Tokens) {
         logger.warn('Invalid tokenAbbr in transaction', { token });
         return;
       }

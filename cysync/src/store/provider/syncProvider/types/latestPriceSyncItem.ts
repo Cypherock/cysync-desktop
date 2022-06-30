@@ -1,28 +1,39 @@
+import { CoinGroup } from '@cypherock/communication';
 import { SyncItem } from './syncItem';
 
 export interface LatestPriceSyncItemOptions {
   coinType: string;
-  ethCoin?: string;
+  parentCoin?: string;
+  coinGroup: CoinGroup;
   module: string;
   isRefresh?: boolean;
 }
 
 export class LatestPriceSyncItem extends SyncItem {
-  public ethCoin?: string;
-
   constructor({
     coinType,
     isRefresh,
     module,
-    ethCoin
+    parentCoin,
+    coinGroup
   }: LatestPriceSyncItemOptions) {
-    super({ type: 'latestPrice', coinType, isRefresh, module });
-    this.ethCoin = ethCoin;
+    super({
+      type: 'latestPrice',
+      coinType,
+      isRefresh,
+      module,
+      coinGroup,
+      parentCoin
+    });
   }
 
   equals(item: LatestPriceSyncItem | SyncItem) {
     if (item instanceof LatestPriceSyncItem) {
-      return this.coinType === item.coinType && this.ethCoin === item.ethCoin;
+      return (
+        this.coinType === item.coinType &&
+        this.coinGroup === item.coinGroup &&
+        this.parentCoin === item.parentCoin
+      );
     }
 
     return false;
@@ -31,7 +42,8 @@ export class LatestPriceSyncItem extends SyncItem {
   clone() {
     const newItem = new LatestPriceSyncItem({
       coinType: this.coinType,
-      ethCoin: this.ethCoin,
+      parentCoin: this.parentCoin,
+      coinGroup: this.coinGroup,
       isRefresh: this.isRefresh,
       module: this.module
     });

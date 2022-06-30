@@ -433,7 +433,9 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
                     }
                     return (
                       <React.Fragment key={token.slug}>
-                        <TokenContext.Provider value={{ token }}>
+                        <TokenContext.Provider
+                          value={{ token, ethCoin: initial }}
+                        >
                           <OneToken
                             initial={token.slug.toUpperCase()}
                             name={oneTokenData.name}

@@ -1,4 +1,4 @@
-import { ERC20TOKENS } from '@cypherock/communication';
+import { ALLCOINS, EthCoinData } from '@cypherock/communication';
 import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import React from 'react';
@@ -91,17 +91,33 @@ const StyledModAvatar = styled(ModAvatar)(() => ({
 
 type CoinIconsProps = {
   initial: string;
+  parentCoin?: string;
   size?: 'sm' | 'lg';
   style?: React.CSSProperties;
 };
 
-const CoinIcons: React.FC<CoinIconsProps> = ({ initial, size, style }) => {
+const CoinIcons: React.FC<CoinIconsProps> = ({
+  initial,
+  size,
+  style,
+  parentCoin
+}) => {
   let src;
   const handleGetIcon = (
     coinInitial: string,
     csize: 'sm' | 'lg' | null | undefined
   ) => {
-    if (ERC20TOKENS[coinInitial.toLowerCase()]) {
+    if (parentCoin) {
+      const coin = ALLCOINS[parentCoin];
+      if (!coin || !(coin instanceof EthCoinData)) {
+        throw new Error('Invalid parentCoin: ' + parentCoin);
+      }
+
+      const token = coin.erc20TokensList[coinInitial.toLowerCase()];
+      if (!token) {
+        throw new Error('Invalid token: ' + coinInitial);
+      }
+
       try {
         const img = requestErc20ImageFile(
           `./${coinInitial.toLowerCase()}.png`
