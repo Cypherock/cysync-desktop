@@ -13,6 +13,7 @@ import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import success from '../../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
@@ -21,7 +22,6 @@ import AvatarIcon from '../../../../../../designSystem/designComponents/icons/Av
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
-import { CyError } from '../../../../../../errors';
 import { useDeviceAuth } from '../../../../../../store/hooks/flows';
 import { useConnection } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
@@ -258,13 +258,23 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     resetHooks,
     errorObj,
     cancelDeviceAuth,
-    setErrorObj,
+    clearErrorObj,
     confirmed,
     handleFeedbackOpen
   } = useDeviceAuth();
 
   const latestDeviceConnection = useRef<any>();
   const latestCompleted = useRef<boolean>();
+
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const isRefresh = Boolean(query.get('isRefresh'));
+
+  useEffect(() => {
+    if (isRefresh) {
+      handleRetry();
+    }
+  }, [isRefresh]);
 
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
@@ -334,7 +344,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 
   const handleRetry = () => {
     logger.info('Device authentication retry');
-    setErrorObj(new CyError());
+    clearErrorObj();
     setCompleted(0);
     resetHooks();
     if (deviceConnection) {

@@ -1,16 +1,15 @@
 import ReportIcon from '@mui/icons-material/Report';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import success from '../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
 import AvatarIcon from '../../../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
-import { CyError } from '../../../../../errors';
 import { useDeviceAuth } from '../../../../../store/hooks/flows';
 import {
   DeviceConnectionState,
@@ -83,6 +82,11 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     deviceConnectionState,
     setIsInFlow
   } = useConnection();
+  const latestDeviceConnection = useRef<any>();
+
+  useEffect(() => {
+    latestDeviceConnection.current = deviceConnection;
+  }, [deviceConnection]);
   const [errorMsg, setErrorMsg] = React.useState('');
   const [initialStart, setInitialStart] = React.useState(false);
 
@@ -93,7 +97,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     completed,
     errorObj,
     confirmed,
-    setErrorObj
+    clearErrorObj
   } = useDeviceAuth(true);
 
   const feedback = useFeedback();
@@ -191,7 +195,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
   const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const onRetry = () => {
     setErrorMsg('');
-    setErrorObj(new CyError());
+    clearErrorObj();
     resetHooks();
 
     if (timeout.current) {
@@ -266,16 +270,29 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
               </Typography>
             </div>
             <div className={classes.btnContainer}>
-              {verified !== -1 && (
-                <CustomButton
-                  onClick={() => {
-                    onRetry();
-                  }}
-                  style={{ margin: '1rem 10px 1rem 0' }}
-                >
-                  Retry
-                </CustomButton>
-              )}
+              {verified !== -1 &&
+                (!latestDeviceConnection.current ? (
+                  <Tooltip
+                    title={'Reconnect the device to retry'}
+                    placement="top"
+                  >
+                    <div>
+                      <CustomButton
+                        style={{ margin: '1rem 10px 1rem 0' }}
+                        disabled
+                      >
+                        Retry
+                      </CustomButton>
+                    </div>
+                  </Tooltip>
+                ) : (
+                  <CustomButton
+                    onClick={onRetry}
+                    style={{ margin: '1rem 10px 1rem 0' }}
+                  >
+                    Retry
+                  </CustomButton>
+                ))}
               <CustomButton
                 onClick={() => {
                   feedback.showFeedback({ isContact: true });

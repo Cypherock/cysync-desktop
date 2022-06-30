@@ -35,6 +35,7 @@ export interface UseDeviceAuthValues {
   verified: 0 | -1 | 1 | 2;
   errorObj: CyError;
   setErrorObj: React.Dispatch<React.SetStateAction<DisplayError>>;
+  clearErrorObj: () => void;
   completed: boolean;
   confirmed: 0 | -1 | 1 | 2;
   resetHooks: () => void;
@@ -149,12 +150,11 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
         setVerified(1);
       } else {
         logger.info('DeviceAuth: Rejected from device');
-        setErrorObj(
-          new CyError(
-            CysyncError.DEVICE_AUTH_REJECTED,
-            langStrings.ERRORS.DEVICE_AUTH_REJECTED
-          )
+        const cyError = new CyError(
+          CysyncError.DEVICE_AUTH_REJECTED,
+          langStrings.ERRORS.DEVICE_AUTH_REJECTED
         );
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
         setConfirmed(-1);
       }
     });
@@ -174,31 +174,28 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       } else {
         logger.info('DeviceAuth: not verified');
         setVerified(-1);
-        setErrorObj(
-          new CyError(
-            CysyncError.DEVICE_AUTH_FAILED,
-            langStrings.ERRORS.DEVICE_AUTH_FAILED
-          )
+        const cyError = new CyError(
+          CysyncError.DEVICE_AUTH_FAILED,
+          langStrings.ERRORS.DEVICE_AUTH_FAILED
         );
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
       }
     });
 
     deviceAuth.on('notReady', () => {
+      const cyError = new CyError();
       if (isInitial) {
-        setErrorObj(
-          new CyError(
-            CysyncError.DEVICE_NOT_READY_IN_INITIAL,
-            langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL
-          )
+        cyError.setError(
+          CysyncError.DEVICE_NOT_READY_IN_INITIAL,
+          langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL
         );
       } else {
-        setErrorObj(
-          new CyError(
-            CysyncError.DEVICE_NOT_READY,
-            langStrings.ERRORS.DEVICE_NOT_READY
-          )
+        cyError.setError(
+          CysyncError.DEVICE_NOT_READY,
+          langStrings.ERRORS.DEVICE_NOT_READY
         );
       }
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     try {
@@ -219,14 +216,11 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       setCompleted(true);
     } catch (e) {
       setIsInFlow(false);
-      logger.error('DeviceAuth: Some unknown error occurred.');
-      logger.error(e);
-      setErrorObj(
-        new CyError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
-        )
+      const cyError = new CyError(
+        CysyncError.UNKNOWN_FLOW_ERROR,
+        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
       );
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       deviceAuth.removeAllListeners();
     }
   };
@@ -266,9 +260,14 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
     });
   };
 
+  const clearErrorObj = () => {
+    setErrorObj(new CyError());
+  };
+
   return {
     errorObj,
     setErrorObj,
+    clearErrorObj,
     cancelDeviceAuth,
     handleDeviceAuth,
     resetHooks,

@@ -1,5 +1,5 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { Grid } from '@mui/material';
+import { Grid, Tooltip } from '@mui/material';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
 import { StepIconProps } from '@mui/material/StepIcon';
@@ -390,13 +390,30 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
             </div>
           ) : (
             <div className={classes.errorButtons}>
-              <CustomButton
-                variant="outlined"
-                onClick={handleRetry}
-                style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
-              >
-                Retry
-              </CustomButton>
+              {!latestDeviceConnection.current ? (
+                <Tooltip
+                  title={'Reconnect the device to retry'}
+                  placement="top"
+                >
+                  <div>
+                    <CustomButton
+                      variant="outlined"
+                      style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
+                      disabled
+                    >
+                      Retry
+                    </CustomButton>
+                  </div>
+                </Tooltip>
+              ) : (
+                <CustomButton
+                  variant="outlined"
+                  onClick={handleRetry}
+                  style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
+                >
+                  Retry
+                </CustomButton>
+              )}
               <CustomButton
                 color="primary"
                 onClick={handleFeedbackOpen}

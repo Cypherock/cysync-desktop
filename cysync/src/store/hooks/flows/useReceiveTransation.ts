@@ -131,17 +131,11 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       });
 
       if (!connection) {
-        setErrorObj(
-          handleErrors(
-            errorObj,
-            new CyError(
-              DeviceErrorType.NOT_CONNECTED,
-              langStrings.ERRORS.DEVICE_NOT_CONNECTED
-            ),
-            flowName,
-            { coinType }
-          )
+        const cyError = new CyError(
+          DeviceErrorType.NOT_CONNECTED,
+          langStrings.ERRORS.DEVICE_NOT_CONNECTED
         );
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         return;
       }
 
@@ -154,17 +148,11 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       });
 
       receiveTransaction.on('cardError', () => {
-        setErrorObj(
-          handleErrors(
-            errorObj,
-            new CyError(
-              CysyncError.UNKNOWN_CARD_ERROR,
-              langStrings.ERRORS.UNKNOWN_CARD_ERROR
-            ),
-            flowName,
-            { coinType }
-          )
+        const cyError = new CyError(
+          CysyncError.UNKNOWN_CARD_ERROR,
+          langStrings.ERRORS.UNKNOWN_CARD_ERROR
         );
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
       receiveTransaction.on('error', err => {

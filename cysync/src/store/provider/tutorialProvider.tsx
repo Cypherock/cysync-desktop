@@ -4,8 +4,12 @@ import React, { useState } from 'react';
 
 import { version } from '../../../package.json';
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
-import { CyError, CysyncError } from '../../errors';
-import logger from '../../utils/logger';
+import {
+  CyError,
+  CysyncError,
+  handleAxiosErrors,
+  handleErrors
+} from '../../errors';
 
 import { useI18n } from './i18nProvider';
 
@@ -52,32 +56,16 @@ export const TutorialProvider: React.FC = ({ children }) => {
         throw new Error('Cannot find tutorials.');
       }
     } catch (error) {
-      logger.error(error);
-
+      const cyError = new CyError();
       if (error.isAxiosError) {
-        if (error.response) {
-          setErrorObj(
-            new CyError(
-              CysyncError.NETWORK_ERROR,
-              langStrings.ERRORS.NETWORK_ERROR
-            )
-          );
-        } else {
-          setErrorObj(
-            new CyError(
-              CysyncError.NETWORK_UNREACHABLE,
-              langStrings.ERRORS.NETWORK_UNREACHABLE
-            )
-          );
-        }
+        handleAxiosErrors(cyError, error, langStrings);
       } else {
-        setErrorObj(
-          new CyError(
-            CysyncError.CUSTOM_ERROR,
-            langStrings.ERRORS.CUSTOM_ERROR('fetching the tutorials.')
-          )
+        cyError.setError(
+          CysyncError.CUSTOM_ERROR,
+          langStrings.ERRORS.CUSTOM_ERROR('fetching the tutorials.')
         );
       }
+      setErrorObj(handleErrors(errorObj, cyError, 'Tutorials', error));
     } finally {
       setIsLoading(false);
     }

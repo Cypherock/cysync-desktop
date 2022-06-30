@@ -1,6 +1,6 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
-import { Button, Grid } from '@mui/material';
+import { Button, Grid, Tooltip } from '@mui/material';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
 import { StepIconProps } from '@mui/material/StepIcon';
@@ -12,6 +12,7 @@ import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import success from '../../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
@@ -263,13 +264,23 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     errorObj,
     handleFeedbackOpen,
     latestVersion,
-    downloadFirmware,
+    checkLatestFirmware,
     upgradeAvailable
   } = useDeviceUpgrade();
 
   const latestDeviceConnection = useRef<any>();
   const latestCompleted = useRef<boolean>();
   const latestStep = useRef<number>();
+
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const isRefresh = Boolean(query.get('isRefresh'));
+
+  useEffect(() => {
+    if (isRefresh) {
+      handleRetry();
+    }
+  }, [isRefresh]);
 
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
@@ -326,7 +337,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
         setIsCompleted(-1);
         setAuthState(-1);
       };
-      downloadFirmware(onSuccess, onError);
+      checkLatestFirmware(onSuccess, onError);
     }
   }, [authState]);
 
@@ -502,13 +513,27 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             {errorObj.showError()}
           </Typography>
           <div className={classes.errorButtons}>
-            <CustomButton
-              variant="outlined"
-              onClick={handleOnRetry}
-              style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
-            >
-              Retry
-            </CustomButton>
+            {!latestDeviceConnection.current ? (
+              <Tooltip title={'Reconnect the device to retry'} placement="top">
+                <div>
+                  <CustomButton
+                    variant="outlined"
+                    style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
+                    disabled
+                  >
+                    Retry
+                  </CustomButton>
+                </div>
+              </Tooltip>
+            ) : (
+              <CustomButton
+                variant="outlined"
+                onClick={handleOnRetry}
+                style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
+              >
+                Retry
+              </CustomButton>
+            )}
             <CustomButton
               color="primary"
               onClick={handleFeedbackOpen}

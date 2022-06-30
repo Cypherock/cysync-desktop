@@ -1,4 +1,5 @@
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
+import { Tooltip } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
@@ -235,15 +236,25 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
                   >
                     Close
                   </CustomButton>
-                  <CustomButton
-                    disabled={!(deviceConnection && firmwareVersion)}
-                    onClick={() => {
-                      startDeviceAuth();
-                    }}
-                    style={{ margin: '1rem 0rem' }}
-                  >
-                    Retry
-                  </CustomButton>
+                  {!(deviceConnection && firmwareVersion) ? (
+                    <Tooltip
+                      title={'Reconnect the device to retry'}
+                      placement="top"
+                    >
+                      <div>
+                        <CustomButton style={{ margin: '1rem 0rem' }} disabled>
+                          Retry
+                        </CustomButton>
+                      </div>
+                    </Tooltip>
+                  ) : (
+                    <CustomButton
+                      onClick={startDeviceAuth}
+                      style={{ margin: '1rem 0rem' }}
+                    >
+                      Retry
+                    </CustomButton>
+                  )}
                   <CustomButton
                     onClick={handleFeedbackOpen}
                     style={{ margin: '1rem 0rem' }}
