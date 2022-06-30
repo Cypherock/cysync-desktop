@@ -1,9 +1,9 @@
 import ReportIcon from '@mui/icons-material/Report';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import success from '../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
@@ -68,7 +68,12 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
   handleNext,
   handleClose
 }) => {
-  const { connected } = useConnection();
+  const { connected, deviceConnection } = useConnection();
+  const latestDeviceConnection = useRef<any>();
+
+  useEffect(() => {
+    latestDeviceConnection.current = deviceConnection;
+  }, [deviceConnection]);
 
   const {
     handleFeedbackOpen,
@@ -218,16 +223,30 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
               >
                 Close
               </CustomButton>
-              {showRetry && (
-                <CustomButton
-                  onClick={() => {
-                    onRetry();
-                  }}
-                  style={{ margin: '1rem 10px 1rem 0' }}
-                >
-                  Retry
-                </CustomButton>
-              )}
+
+              {showRetry &&
+                (!latestDeviceConnection.current ? (
+                  <Tooltip
+                    title={'Reconnect the device to retry'}
+                    placement="top"
+                  >
+                    <div>
+                      <CustomButton
+                        style={{ margin: '1rem 10px 1rem 0' }}
+                        disabled
+                      >
+                        Retry
+                      </CustomButton>
+                    </div>
+                  </Tooltip>
+                ) : (
+                  <CustomButton
+                    onClick={onRetry}
+                    style={{ margin: '1rem 10px 1rem 0' }}
+                  >
+                    Retry
+                  </CustomButton>
+                ))}
               <CustomButton
                 onClick={handleFeedbackOpen}
                 style={{ margin: '1rem 0rem' }}

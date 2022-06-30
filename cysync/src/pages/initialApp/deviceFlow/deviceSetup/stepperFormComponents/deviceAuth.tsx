@@ -1,9 +1,9 @@
 import ReportIcon from '@mui/icons-material/Report';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import success from '../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
@@ -83,6 +83,11 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     deviceConnectionState,
     setIsInFlow
   } = useConnection();
+  const latestDeviceConnection = useRef<any>();
+
+  useEffect(() => {
+    latestDeviceConnection.current = deviceConnection;
+  }, [deviceConnection]);
   const [errorMsg, setErrorMsg] = React.useState('');
   const [initialStart, setInitialStart] = React.useState(false);
 
@@ -266,16 +271,29 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
               </Typography>
             </div>
             <div className={classes.btnContainer}>
-              {verified !== -1 && (
-                <CustomButton
-                  onClick={() => {
-                    onRetry();
-                  }}
-                  style={{ margin: '1rem 10px 1rem 0' }}
-                >
-                  Retry
-                </CustomButton>
-              )}
+              {verified !== -1 &&
+                (!latestDeviceConnection.current ? (
+                  <Tooltip
+                    title={'Reconnect the device to retry'}
+                    placement="top"
+                  >
+                    <div>
+                      <CustomButton
+                        style={{ margin: '1rem 10px 1rem 0' }}
+                        disabled
+                      >
+                        Retry
+                      </CustomButton>
+                    </div>
+                  </Tooltip>
+                ) : (
+                  <CustomButton
+                    onClick={onRetry}
+                    style={{ margin: '1rem 10px 1rem 0' }}
+                  >
+                    Retry
+                  </CustomButton>
+                ))}
               <CustomButton
                 onClick={() => {
                   feedback.showFeedback({ isContact: true });

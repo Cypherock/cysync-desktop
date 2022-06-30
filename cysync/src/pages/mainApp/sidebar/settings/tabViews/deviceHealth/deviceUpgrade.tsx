@@ -1,6 +1,6 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
-import { Button, Grid } from '@mui/material';
+import { Button, Grid, Tooltip } from '@mui/material';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
 import { StepIconProps } from '@mui/material/StepIcon';
@@ -502,13 +502,48 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             {errorObj.showError()}
           </Typography>
           <div className={classes.errorButtons}>
-            <CustomButton
-              variant="outlined"
-              onClick={handleOnRetry}
-              style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
-            >
-              Retry
-            </CustomButton>
+            {!latestDeviceConnection.current ? (
+              <Tooltip title={'Reconnect the device to retry'} placement="top">
+                <div>
+                  <CustomButton
+                    color="primary"
+                    style={{ padding: '0.5rem 2rem' }}
+                    disabled
+                  >
+                    Retry
+                  </CustomButton>
+                </div>
+              </Tooltip>
+            ) : (
+              <CustomButton
+                color="primary"
+                onClick={handleRetry}
+                style={{ padding: '0.5rem 2rem' }}
+              >
+                Retry
+              </CustomButton>
+            )}
+            {!latestDeviceConnection.current ? (
+              <Tooltip title={'Reconnect the device to retry'} placement="top">
+                <div>
+                  <CustomButton
+                    variant="outlined"
+                    style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
+                    disabled
+                  >
+                    Retry
+                  </CustomButton>
+                </div>
+              </Tooltip>
+            ) : (
+              <CustomButton
+                variant="outlined"
+                onClick={handleOnRetry}
+                style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
+              >
+                Retry
+              </CustomButton>
+            )}
             <CustomButton
               color="primary"
               onClick={handleFeedbackOpen}
