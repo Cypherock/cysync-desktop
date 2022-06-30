@@ -182,7 +182,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
       shell.openExternal(
         ethServer.transaction.getOpenTxnLink({
-          network: coin.network,
+          network: ecoin.network,
           txHash: txn.hash,
           isConfirmed: txn.confirmations && txn.confirmations > 0
         })
