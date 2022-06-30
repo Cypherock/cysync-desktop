@@ -179,7 +179,7 @@ const Verify = (props: any) => {
               <></>
             )}
             <LabelText
-              label="Receiver"
+              label="New Account Id"
               text={batchRecipientData[0].recipient}
               verified={sendTransaction.verified}
             />
@@ -187,7 +187,7 @@ const Verify = (props: any) => {
               label={`Amount ${coinAbbr.toUpperCase()}`}
               text={
                 !maxSend
-                  ? `${batchRecipientData[0].amount} ~( $${formatDisplayAmount(
+                  ? `${0.1} ~( $${formatDisplayAmount(
                       batchRecipientData[0].amount * parseFloat(coinPrice),
                       2,
                       true
@@ -202,9 +202,7 @@ const Verify = (props: any) => {
             />
             <LabelText
               label="Transaction Fees"
-              text={`~ ${
-                sendTransaction.totalFees
-              } ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
+              text={`~ ${0.0012} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
                 sendTransaction.totalFees *
                   parseFloat(coinDetails.displayPrice),
                 2,

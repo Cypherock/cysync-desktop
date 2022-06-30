@@ -8,10 +8,8 @@ import Typography from '@mui/material/Typography';
 import { shell } from 'electron';
 import QRCode from 'qrcode';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import CheckMarkSuccessIcon from '../../../../../../assets/icons/checkmarkSuccess.svg';
-import Routes from '../../../../../../constants/routes';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import CustomIconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import AvatarIcon from '../../../../../../designSystem/designComponents/icons/AvatarIcon';
@@ -118,8 +116,6 @@ const Root = styled('div')(({ theme }) => ({
 }));
 
 const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
-  const navigate = useNavigate();
-
   const { sendTransaction } = useSendTransactionContext();
 
   const { coinDetails } = useCurrentCoin();
@@ -193,7 +189,6 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
   };
 
   const goToTransactions = () => {
-    navigate(Routes.transactions.index);
     handleClose();
   };
 
@@ -229,7 +224,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
             color="secondary"
             style={{ margin: '1.5rem 0rem' }}
           >
-            Sent Successfully
+            Account Created
           </Typography>
         </div>
         <div className={classes.transactionId}>
@@ -256,7 +251,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
       <div className={classes.divider} />
       <div className={classes.footer}>
         <CustomButton className={classes.footerBtn} onClick={goToTransactions}>
-          Check Transactions
+          Close
         </CustomButton>
       </div>
     </Root>
