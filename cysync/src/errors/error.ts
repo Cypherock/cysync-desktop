@@ -7,14 +7,27 @@ class DisplayError {
     this.code = code;
     this.message = message;
   }
+  /**
+   * used to display errors to the user
+   * @returns formatted error string
+   */
+  public showError() {
+    if (this.isSet) return this.getCode() + ' : ' + this.getMessage();
+    return '';
+  }
+  /**
+   * Use this only when the error message text is needed
+   * @returns error message
+   */
   public getMessage() {
     return this.message || '';
   }
+  /**
+   * Use this only when the error code is needed
+   * @returns error code
+   */
   public getCode() {
     return this.code || '';
-  }
-  public showError() {
-    return this.getCode() + ' : ' + this.getMessage();
   }
 }
 /* tslint:disable-next-line */

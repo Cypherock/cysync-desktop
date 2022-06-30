@@ -475,7 +475,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
       if (retries.current > MAX_RETRIES) {
         logger.warn('Error in device auth, max retries exceeded.');
-        logger.error(error);
         if (
           !(
             errorObj.isSet &&
@@ -486,7 +485,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
             CysyncError.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH,
             langStrings.ERRORS.DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH
           );
-          setErrorObj(handleErrors(errorObj, cyError, flowName));
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
         }
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
