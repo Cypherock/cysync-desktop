@@ -12,6 +12,7 @@ import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import success from '../../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
@@ -271,6 +272,16 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   const latestCompleted = useRef<boolean>();
   const latestStep = useRef<number>();
 
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const isRefresh = Boolean(query.get('isRefresh'));
+
+  useEffect(() => {
+    if (isRefresh) {
+      handleRetry();
+    }
+  }, [isRefresh]);
+
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
   }, [deviceConnection]);
@@ -502,27 +513,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             {errorObj.showError()}
           </Typography>
           <div className={classes.errorButtons}>
-            {!latestDeviceConnection.current ? (
-              <Tooltip title={'Reconnect the device to retry'} placement="top">
-                <div>
-                  <CustomButton
-                    color="primary"
-                    style={{ padding: '0.5rem 2rem' }}
-                    disabled
-                  >
-                    Retry
-                  </CustomButton>
-                </div>
-              </Tooltip>
-            ) : (
-              <CustomButton
-                color="primary"
-                onClick={handleRetry}
-                style={{ padding: '0.5rem 2rem' }}
-              >
-                Retry
-              </CustomButton>
-            )}
             {!latestDeviceConnection.current ? (
               <Tooltip title={'Reconnect the device to retry'} placement="top">
                 <div>

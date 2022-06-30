@@ -13,6 +13,7 @@ import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import success from '../../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
@@ -265,6 +266,16 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 
   const latestDeviceConnection = useRef<any>();
   const latestCompleted = useRef<boolean>();
+
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const isRefresh = Boolean(query.get('isRefresh'));
+
+  useEffect(() => {
+    if (isRefresh) {
+      handleRetry();
+    }
+  }, [isRefresh]);
 
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;

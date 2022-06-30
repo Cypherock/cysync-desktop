@@ -55,14 +55,14 @@ const DeviceUpdatePopup = () => {
           Analytics.Actions.OPEN
         );
         logger.info('Redirecting user to device update settings page');
-        return navigate(Routes.settings.device.upgrade);
+        return navigate(`${Routes.settings.device.upgrade}?isRefresh=true`);
       } else if (localUpdateType === 'auth') {
         Analytics.Instance.event(
           Analytics.Categories.DEVICE_AUTH_PROMPT,
           Analytics.Actions.OPEN
         );
         logger.info('Redirecting user to device auth settings page');
-        return navigate(Routes.settings.device.auth);
+        return navigate(`${Routes.settings.device.auth}?isRefresh=true`);
       } else {
         Analytics.Instance.event(
           Analytics.Categories.INITIAL_FLOW_IN_MAIN,
