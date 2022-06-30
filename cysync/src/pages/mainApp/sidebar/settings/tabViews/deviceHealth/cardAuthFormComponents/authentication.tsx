@@ -3,17 +3,18 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 
+import { CyError } from '../../../../../../../errors';
 import Analytics from '../../../../../../../utils/analytics';
 import DynamicTextView from '../dynamicTextView';
 
 type Props = {
   verified: -1 | 0 | 1 | 2;
-  errorMessage: string;
+  errorObj: CyError;
 };
 
-const Authentication: React.FC<Props> = ({ verified, errorMessage }) => {
+const Authentication: React.FC<Props> = ({ verified, errorObj }) => {
   useEffect(() => {
-    if (verified === -1 || errorMessage) {
+    if (verified === -1 || errorObj.isSet) {
       Analytics.Instance.event(
         Analytics.Categories.CARD_AUTH,
         Analytics.Actions.ERROR
@@ -24,7 +25,7 @@ const Authentication: React.FC<Props> = ({ verified, errorMessage }) => {
         Analytics.Actions.COMPLETED
       );
     }
-  }, [verified, errorMessage]);
+  }, [verified, errorObj]);
 
   return (
     <Grid container>
@@ -44,7 +45,7 @@ const Authentication: React.FC<Props> = ({ verified, errorMessage }) => {
 
 Authentication.propTypes = {
   verified: PropTypes.oneOf<-1 | 0 | 1 | 2>([-1, 0, 1, 2]).isRequired,
-  errorMessage: PropTypes.string.isRequired
+  errorObj: PropTypes.instanceOf(CyError).isRequired
 };
 
 export default Authentication;

@@ -8,7 +8,7 @@ import { I18nStrings } from './type';
 const en: I18nStrings = {
   ERRORS: {
     UNKNOWN_FLOW_ERROR: flow =>
-      `Some internal error occurred. Please disconnect and then reconnect the device and restart ${flow}`,
+      `Please disconnect and then reconnect the device and restart ${flow}`,
     KNOWN_FLOW_ERROR: flow =>
       `A known internal has occured while ${flow}. Please report this to Cypherock Support`,
     CUSTOM_ERROR: txt => `Some internal error occured while ${txt}`,
@@ -30,6 +30,9 @@ const en: I18nStrings = {
       'Error connecting the device, please reconnect the device.',
     DEVICE_NOT_SUPPORTED:
       'The connected device is not supported, please make sure that CySync and X1 wallet are up to date.',
+    // I dont understand how this message would be helpful.
+    DEVICE_MISCONFIGURED:
+      'Your device is misconfigured, Please restart cySync App. If the problem persists, please contact us.',
 
     WALLET_NOT_FOUND_IN_DEVICE:
       'This wallet does not seem to be present on the X1 device',
@@ -104,7 +107,11 @@ const en: I18nStrings = {
     SEND_TXN_SIZE_TOO_LARGE: 'This transaction cannot be performed.',
     SENX_TXN_BROADCAST_FAILED: 'Error trying to broadcast transaction.',
 
-    RECEIVE_TXN_XPUB_MISSING: 'Coin/Xpub is not present on device'
+    RECEIVE_TXN_XPUB_MISSING: 'Coin/Xpub is not present on device',
+
+    INCOMPATIBLE_DEVICE: 'Device needs upgrade',
+    INCOMPATIBLE_DESKTOP: 'Application needs upgrade',
+    INCOMPATIBLE_DEVICE_AND_DESKTOP: 'Both needs upgrade'
   }
 };
 

@@ -13,6 +13,7 @@ export interface I18nStrings {
     DEVICE_NOT_READY: string;
     DEVICE_NOT_READY_IN_INITIAL: string;
     DEVICE_NOT_SUPPORTED: string;
+    DEVICE_MISCONFIGURED: string;
 
     WALLET_NOT_FOUND_IN_DEVICE: string;
     WALLET_NOT_FOUND_IN_CARD: string;
@@ -62,5 +63,9 @@ export interface I18nStrings {
     SENX_TXN_BROADCAST_FAILED: string;
 
     RECEIVE_TXN_XPUB_MISSING: string;
+
+    INCOMPATIBLE_DEVICE: string;
+    INCOMPATIBLE_DESKTOP: string;
+    INCOMPATIBLE_DEVICE_AND_DESKTOP: string;
   };
 }

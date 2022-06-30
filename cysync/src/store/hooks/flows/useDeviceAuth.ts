@@ -1,8 +1,4 @@
-import {
-  DeviceConnection,
-  DeviceError,
-  DeviceErrorType
-} from '@cypherock/communication';
+import { DeviceConnection, DeviceError } from '@cypherock/communication';
 import { Device } from '@cypherock/database';
 import { DeviceAuthenticator } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
@@ -11,6 +7,8 @@ import {
   CyError,
   CysyncError,
   DisplayError,
+  handleAxiosErrors,
+  handleDeviceErrors,
   handleErrors
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
@@ -131,52 +129,9 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       logger.error('DeviceAuth: Error occurred in device auth flow');
       const cyError = new CyError();
       if (err.isAxiosError) {
-        if (err.response) {
-          cyError.setError(
-            CysyncError.NETWORK_FAILURE,
-            langStrings.ERRORS.NETWORK_ERROR
-          );
-        } else {
-          cyError.setError(
-            CysyncError.NETWORK_UNREACHABLE,
-            langStrings.ERRORS.NETWORK_UNREACHABLE
-          );
-        }
+        handleAxiosErrors(cyError, err, langStrings);
       } else if (err instanceof DeviceError) {
-        cyError.pushSubErrors(err.code, err.message);
-        if (
-          [
-            DeviceErrorType.CONNECTION_CLOSED,
-            DeviceErrorType.CONNECTION_NOT_OPEN
-          ].includes(err.errorType)
-        ) {
-          setConfirmed(_confirmed => (_confirmed === 1 ? -1 : _confirmed));
-          setVerified(_verified => (_verified === 1 ? -1 : _verified));
-          cyError.setError(
-            DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW,
-            langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW
-          );
-        } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          cyError.setError(
-            DeviceErrorType.NOT_CONNECTED,
-            langStrings.ERRORS.DEVICE_NOT_CONNECTED
-          );
-        } else if (
-          [
-            DeviceErrorType.WRITE_TIMEOUT,
-            DeviceErrorType.READ_TIMEOUT
-          ].includes(err.errorType)
-        ) {
-          cyError.setError(
-            DeviceErrorType.TIMEOUT_ERROR,
-            langStrings.ERRORS.DEVICE_TIMEOUT_ERROR
-          );
-        } else {
-          cyError.setError(
-            DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR,
-            langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
-          );
-        }
+        handleDeviceErrors(cyError, err, langStrings, flowName);
       } else {
         // unknown flow error
         cyError.setError(
@@ -184,7 +139,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
           langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
         );
       }
-      setErrorObj(handleErrors(errorObj, cyError));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
     });
 
     deviceAuth.on('confirmed', (v: boolean) => {

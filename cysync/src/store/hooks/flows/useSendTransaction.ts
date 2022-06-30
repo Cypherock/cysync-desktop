@@ -820,7 +820,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
     } catch (error) {
       const cyError = new CyError(
-        CysyncError.SENX_TXN_BROADCAST_FAILED,
+        CysyncError.SEND_TXN_BROADCAST_FAILED,
         langStrings.ERRORS.SENX_TXN_BROADCAST_FAILED
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));

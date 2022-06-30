@@ -122,9 +122,9 @@ export const ConnectionProvider: React.FC = ({ children }) => {
     handleGetDeviceInfo,
     authenticated,
     resetHooks,
-    setErrorMessage,
+    clearErrorObj,
     completed,
-    errorMessage,
+    errorObj,
     isNewDevice,
     isUpdateRequired,
     lastAuthFailed,
@@ -264,12 +264,12 @@ export const ConnectionProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (completed && deviceState && inTestApp(deviceState)) {
-      if (errorMessage) {
+      if (errorObj.isSet) {
         logger.info('Error in connecting device on initial', {
           isNewDevice,
           lastAuthFailed,
           isNotReady,
-          errorMessage
+          errorObj
         });
         setUpdateRequiredType(undefined);
         if (isNotReady) {
@@ -283,7 +283,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         }
         setIsDeviceNotReadyCheck(false);
         setInBackgroundProcess(false);
-        setErrorMessage('');
+        clearErrorObj();
         resetHooks();
       } else {
         logger.info('Device connection established in initial application', {
@@ -293,7 +293,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
           deviceState
         });
 
-        setErrorMessage('');
+        clearErrorObj();
         resetHooks();
         setDeviceConnectionState(DeviceConnectionState.IN_TEST_APP);
         setInBackgroundProcess(false);
@@ -301,12 +301,12 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       return;
     }
 
-    if (completed && (authenticated === -1 || errorMessage)) {
+    if (completed && (authenticated === -1 || errorObj.isSet)) {
       logger.info('Device unauthenticated', {
         isNewDevice,
         lastAuthFailed,
         isNotReady,
-        errorMessage,
+        errorObj,
         isUpdateRequired
       });
       let allowConnection = false;
@@ -334,7 +334,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       } else if (isUpdateRequired) {
         setUpdateRequiredType(isUpdateRequired);
         setDeviceConnectionState(DeviceConnectionState.UPDATE_REQUIRED);
-      } else if (errorMessage) {
+      } else if (errorObj.isSet) {
         setDeviceConnectionState(DeviceConnectionState.UNKNOWN_ERROR);
       } else {
         setDeviceConnectionState(DeviceConnectionState.PARTIAL_STATE);
@@ -343,7 +343,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       if (!allowConnection) {
         setIsDeviceNotReadyCheck(false);
         setInBackgroundProcess(false);
-        setErrorMessage('');
+        clearErrorObj();
         resetHooks();
         return;
       }
@@ -356,7 +356,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         inBootloader,
         deviceState
       });
-      setErrorMessage('');
+      clearErrorObj();
       resetHooks();
       setDeviceConnection(internalDeviceConnection);
       setDeviceConnectionState(DeviceConnectionState.VERIFIED);

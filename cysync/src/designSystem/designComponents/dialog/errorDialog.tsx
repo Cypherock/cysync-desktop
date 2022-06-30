@@ -233,7 +233,8 @@ const errorDialog: React.FC<ErrorProps> = ({
         emailError: '',
         subject: `Reporting for Error ${errorObj.getCode()}`,
         subjectError: `${flow || ''}`
-      }
+      },
+      handleClose
     });
   };
 

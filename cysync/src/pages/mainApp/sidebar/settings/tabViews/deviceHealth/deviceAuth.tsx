@@ -7,6 +7,7 @@ import { StepIconProps } from '@mui/material/StepIcon';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { styled, Theme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
@@ -427,14 +428,30 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
             </div>
           ) : (
             <div className={classes.errorButtons}>
-              <CustomButton
-                variant="outlined"
-                onClick={handleRetry}
-                disabled={!latestDeviceConnection.current}
-                style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
-              >
-                Retry
-              </CustomButton>
+              {!latestDeviceConnection.current ? (
+                <Tooltip
+                  title={'Reconnect the device to retry'}
+                  placement="top"
+                >
+                  <div>
+                    <CustomButton
+                      color="primary"
+                      style={{ padding: '0.5rem 2rem' }}
+                      disabled
+                    >
+                      Retry
+                    </CustomButton>
+                  </div>
+                </Tooltip>
+              ) : (
+                <CustomButton
+                  color="primary"
+                  onClick={handleRetry}
+                  style={{ padding: '0.5rem 2rem' }}
+                >
+                  Retry
+                </CustomButton>
+              )}
               <CustomButton
                 color="primary"
                 onClick={handleFeedbackOpen}
