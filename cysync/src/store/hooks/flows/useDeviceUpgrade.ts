@@ -65,7 +65,7 @@ export interface UseDeviceUpgradeValues {
   setUpdated: React.Dispatch<React.SetStateAction<number>>;
   cancelDeviceUpgrade: (connection: DeviceConnection) => void;
   handleFeedbackOpen: () => void;
-  downloadFirmware: (onSuccess?: () => void, onError?: () => void) => void;
+  checkLatestFirmware: (onSuccess?: () => void, onError?: () => void) => void;
   upgradeAvailable: boolean;
   setErrorObj: React.Dispatch<React.SetStateAction<DisplayError>>;
 }
@@ -118,78 +118,61 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   const waitForCancel = React.useRef(false);
   const alreadyCancelled = React.useRef(false);
 
-  const downloadFirmware = (onSuccess?: () => void, onError?: () => void) => {
-    firmwareServer
-      .getLatest()
-      .request()
-      .then(response => {
-        setLatestVersion(response.data.firmware.version);
-        logger.verbose(
-          `Device update available for version: ${response.data.firmware.version}`
-        );
-        /**
-         * This check is to prevent restarting the whole upgrade process if the user
-         * disconnects the device right after the firmware upgrade but not before
-         * device auth is done. This is only done on Initial app of Cysync as we have
-         * global popups on Main app of Cysync to handle this.
-         */
-        if (
-          response.data.firmware.version === hexToVersion(firmwareVersion) &&
-          deviceState === '02' &&
-          isInitial
-        ) {
-          logger.verbose(`Device already on the latest version`);
-          setUpdated(2);
-          return null;
-        }
-        if (
-          (firmwareVersion &&
-            deviceState &&
-            compareVersion(
-              response.data.firmware.version,
-              hexToVersion(firmwareVersion)
-            )) ||
-          inTestApp(deviceState)
-        ) {
-          setUpgradeAvailable(true);
-        }
+  const checkLatestFirmware = async (
+    onSuccess?: () => void,
+    onError?: () => void
+  ): Promise<string | undefined> => {
+    try {
+      const response = await firmwareServer.getLatest().request();
 
-        if (process.env.BUILD_TYPE === 'debug' || inBootloader)
-          setUpgradeAvailable(true);
-
-        //What is this sorcery???
-        internetSlowTimeout.current = setTimeout(() => {
-          logger.verbose('Setting internet Slow.');
-          setIsInternetSlow(true);
-        }, 5000);
-        ipcRenderer.send('download', {
-          url: response.data.firmware.downloadUrl,
-          properties: {
-            directory: `${process.env.userDataPath}`,
-            filename: 'app_dfu_package.bin'
-          }
-        });
-        if (onSuccess) onSuccess();
+      setLatestVersion(response.data.firmware.version);
+      logger.verbose(
+        `Device update available for version: ${response.data.firmware.version}`
+      );
+      /**
+       * This check is to prevent restarting the whole upgrade process if the user
+       * disconnects the device right after the firmware upgrade but not before
+       * device auth is done. This is only done on Initial app of Cysync as we have
+       * global popups on Main app of Cysync to handle this.
+       */
+      if (
+        response.data.firmware.version === hexToVersion(firmwareVersion) &&
+        deviceState === '02' &&
+        isInitial
+      ) {
+        logger.verbose(`Device already on the latest version`);
+        setUpdated(2);
         return null;
-      })
-      .catch(error => {
-        logger.error('Error in getting firmware version');
-        logger.error(error);
-        const cyError = new CyError();
-        handleAxiosErrors(cyError, error, langStrings);
-        setUpdateDownloaded(-1);
-        setIsCompleted(-1);
-        setBlockNewConnection(false);
-        setIsDeviceUpdating(false);
-        if (onError) onError();
-        if (internetSlowTimeout.current) {
-          clearTimeout(internetSlowTimeout.current);
-          internetSlowTimeout.current = undefined;
-        }
-      });
+      }
+      if (
+        (firmwareVersion &&
+          deviceState &&
+          compareVersion(
+            response.data.firmware.version,
+            hexToVersion(firmwareVersion)
+          )) ||
+        inTestApp(deviceState)
+      ) {
+        setUpgradeAvailable(true);
+      }
+
+      if (process.env.BUILD_TYPE === 'debug' || inBootloader)
+        setUpgradeAvailable(true);
+
+      //What is this sorcery???
+      if (onSuccess) onSuccess();
+      return response.data.firmware.downloadUrl;
+    } catch (error) {
+      logger.error('Error in getting firmware version');
+      logger.error(error);
+      const cyError = new CyError();
+      handleAxiosErrors(cyError, error, langStrings);
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
+      if (onError) onError();
+    }
   };
 
-  const startDeviceUpdate = () => {
+  const startDeviceUpdate = async () => {
     alreadyCancelled.current = false;
     waitForCancel.current = false;
 
@@ -220,7 +203,33 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
     setIsDeviceUpdating(true);
     setBlockNewConnection(true);
-    downloadFirmware();
+    let downloadUrl;
+    try {
+      downloadUrl = await checkLatestFirmware();
+    } catch (e) {
+      setUpdateDownloaded(-1);
+      setIsCompleted(-1);
+      setBlockNewConnection(false);
+      setIsDeviceUpdating(false);
+      if (internetSlowTimeout.current) {
+        clearTimeout(internetSlowTimeout.current);
+        internetSlowTimeout.current = undefined;
+      }
+      return;
+    }
+
+    internetSlowTimeout.current = setTimeout(() => {
+      logger.verbose('Setting internet Slow.');
+      setIsInternetSlow(true);
+    }, 5000);
+
+    ipcRenderer.send('download', {
+      url: downloadUrl,
+      properties: {
+        directory: `${process.env.userDataPath}`,
+        filename: 'app_dfu_package.bin'
+      }
+    });
 
     ipcRenderer.on('download complete', (_event, filePath) => {
       logger.info('Firmware downloaded successfully');
@@ -611,7 +620,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     setUpdated,
     isDeviceUpdating,
     handleFeedbackOpen,
-    downloadFirmware,
+    checkLatestFirmware,
     upgradeAvailable,
     setErrorObj
   } as UseDeviceUpgradeValues;

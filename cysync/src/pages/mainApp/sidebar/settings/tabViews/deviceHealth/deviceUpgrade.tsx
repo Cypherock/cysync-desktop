@@ -263,7 +263,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     errorObj,
     handleFeedbackOpen,
     latestVersion,
-    downloadFirmware,
+    checkLatestFirmware,
     upgradeAvailable
   } = useDeviceUpgrade();
 
@@ -326,7 +326,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
         setIsCompleted(-1);
         setAuthState(-1);
       };
-      downloadFirmware(onSuccess, onError);
+      checkLatestFirmware(onSuccess, onError);
     }
   }, [authState]);
 
