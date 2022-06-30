@@ -8,7 +8,7 @@ import { I18nStrings } from './type';
 const en: I18nStrings = {
   ERRORS: {
     UNKNOWN_FLOW_ERROR: flow =>
-      `Some internal error occurred. Please disconnect and then reconnect the device and restart ${flow}`,
+      `Please disconnect and then reconnect the device and restart ${flow}`,
     KNOWN_FLOW_ERROR: flow =>
       `A known internal has occured while ${flow}. Please report this to Cypherock Support`,
     CUSTOM_ERROR: txt => `Some internal error occured while ${txt}`,
