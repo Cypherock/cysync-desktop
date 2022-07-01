@@ -168,9 +168,15 @@ export const useWalletData: UseWalletData = () => {
     sortCoinData(coinData, index);
   };
 
-  const getAllCoinsFromWallet = async () => {
+  /**
+   *
+   * @param loader Set this flag to show spinner on the wallet view. Do not use
+   * when the wallet/coin data is frequently updated like how it happens during
+   * sync.
+   */
+  const getAllCoinsFromWallet = async (loader = false) => {
     if (currentWalletId) {
-      setIsLoading(true);
+      if (loader) setIsLoading(true);
       const res = await coinDb.getAll({ walletId: currentWalletId });
       const coinList: string[] = [];
       res.forEach(coin => {
@@ -179,7 +185,7 @@ export const useWalletData: UseWalletData = () => {
       setCoinsPresent(coinList);
       const unsortedCoins = await getCoinsWithPrices(res);
       sortCoinData(unsortedCoins, sortIndex);
-      setIsLoading(false);
+      if (loader) setIsLoading(false);
     }
   };
 
@@ -220,7 +226,7 @@ export const useWalletData: UseWalletData = () => {
   }, []);
 
   useEffect(() => {
-    getAllCoinsFromWallet();
+    getAllCoinsFromWallet(true);
   }, [currentWalletId]);
 
   useEffect(() => {
