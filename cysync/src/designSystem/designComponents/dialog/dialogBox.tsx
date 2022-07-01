@@ -3,7 +3,7 @@ import Dialog from '@mui/material/Dialog';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import ICONS from '../../iconGroups/iconConstants';
 import IconButton from '../buttons/customIconButton';
@@ -100,6 +100,14 @@ const DialogBox: React.FC<Props> = ({
       return;
     }
   };
+  const [bottomMarginStyle, setBottomMarginStyle] =
+    useState<React.CSSProperties>({});
+
+  useEffect(() => {
+    const transactionScreens = ['Add Coin', 'Send', 'Receive'];
+    if (transactionScreens.includes(dialogHeading))
+      setBottomMarginStyle({ marginBottom: '30px' });
+  }, []);
 
   return (
     <Root
@@ -136,6 +144,7 @@ const DialogBox: React.FC<Props> = ({
             className={classes.heading}
             variant="h3"
             color="textPrimary"
+            style={bottomMarginStyle}
           >
             {dialogHeading}
           </Typography>
