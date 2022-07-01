@@ -278,7 +278,10 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     updateDownloaded,
     errorMessage,
     latestVersion,
-    setLatestVersion
+    setLatestVersion,
+    updateProgress,
+    isAuthenticated,
+    isUpdated
   } = useDeviceUpgrade();
 
   const { inBootloader } = useConnection();
@@ -398,7 +401,9 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
       name: 'Upgrade',
       element: (
         <Authentication
-          isCompleted={isCompleted}
+          progress={updateProgress}
+          isAuthenticated={isAuthenticated}
+          isUpdated={isUpdated}
           isApproved={isApproved}
           isInternetSlow={isInternetSlow}
           updateDownloaded={updateDownloaded}

@@ -43,13 +43,15 @@ export interface UseDeviceUpgradeValues {
   isApproved: 0 | 1 | -1 | 2;
   setApproved: React.Dispatch<React.SetStateAction<number>>;
   isInternetSlow: boolean;
-  isUpdated: number;
+  isUpdated: 0 | 1 | -1 | 2;
+  isAuthenticated: 0 | 1 | -1 | 2;
   setDeviceSerial: ConnectionContextInterface['setDeviceSerial'];
   verified: number;
   errorMessage: string;
   completed: boolean;
   resetHooks: () => void;
   latestVersion: string;
+  updateProgress: number;
   setLatestVersion: React.Dispatch<React.SetStateAction<string>>;
   setUpdated: React.Dispatch<React.SetStateAction<number>>;
   cancelDeviceUpgrade: (connection: DeviceConnection) => void;
@@ -89,6 +91,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   const [displayErrorMessage, setDisplayErrorMessage] = React.useState('');
   const [isApproved, setApproved] = React.useState<-1 | 0 | 1 | 2>(0);
   const [isUpdated, setUpdated] = React.useState<-1 | 0 | 1 | 2>(0);
+  const [isAuthenticated, setAuthenticated] = React.useState<-1 | 0 | 1 | 2>(0);
+  const [updateProgress, setUpdateProgress] = React.useState(0);
   const [updateDownloaded, setUpdateDownloaded] = React.useState<
     -1 | 0 | 1 | 2
   >(1);
@@ -109,6 +113,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     setApproved(0);
     setIsCompleted(0);
     setUpdated(0);
+    setAuthenticated(0);
+    setUpdateProgress(0);
     setUpdateDownloaded(0);
     setLatestVersion('0.0.0');
     setFirmwarePath('');
@@ -247,18 +253,25 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     deviceUpdater.on('completed', () => {
       logger.info('Device Update completed');
       setUpdated(2);
+      setAuthenticated(1);
       deviceUpdater.removeAllListeners();
+    });
+
+    deviceUpdater.on('progress', (percent: number) => {
+      setUpdateProgress(Math.round(percent));
     });
 
     deviceUpdater.on('updateConfirmed', (val: boolean) => {
       if (val) {
         logger.info('Device update confirmed');
         setApproved(2);
+        setUpdated(1);
         setIsCompleted(1);
       } else {
         logger.info('Device update rejected');
         setApproved(-1);
         setDisplayErrorMessage(langStrings.ERRORS.DEVICE_UPGRADE_REJECTED);
+        setUpdated(-1);
         setIsCompleted(-1);
         setBlockNewConnection(false);
         setIsDeviceUpdating(false);
@@ -366,6 +379,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       logger.info('Running device update');
       if (!beforeFlowStart(true)) {
         setDisplayErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+        setUpdated(-1);
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
         setBlockNewConnection(false);
@@ -466,6 +480,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         } else {
           logger.warn('Error in device auth, max retries exceeded.');
         }
+        setAuthenticated(-1);
         setDisplayErrorMessage(
           errorMessage || langStrings.ERRORS.DEVICE_AUTH_FAILED
         );
@@ -485,6 +500,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       }
     } else if (completed && verified === 2) {
       logger.info('Device auth completed');
+      setAuthenticated(2);
       setIsCompleted(2);
       setTimeout(() => {
         setIsDeviceUpdating(false);
@@ -524,6 +540,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     latestVersion,
     setLatestVersion,
     setUpdated,
-    isDeviceUpdating
-  } as UseDeviceUpgradeValues;
+    isDeviceUpdating,
+    updateProgress,
+    isAuthenticated
+  };
 };

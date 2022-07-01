@@ -7,19 +7,23 @@ import React from 'react';
 import DynamicTextView from '../dynamicTextView';
 
 interface Props {
-  isCompleted: -1 | 0 | 1 | 2;
+  isAuthenticated: -1 | 0 | 1 | 2;
+  isUpdated: -1 | 0 | 1 | 2;
   isApproved: 0 | 2 | 1 | -1;
   isInternetSlow: boolean;
   updateDownloaded: 0 | 1 | 2 | -1;
+  progress: number;
   latestVersion?: string;
 }
 
 const Authentication: React.FC<Props> = ({
-  isCompleted,
+  isAuthenticated,
+  isUpdated,
   isInternetSlow,
   isApproved,
   updateDownloaded,
-  latestVersion
+  latestVersion,
+  progress
 }) => {
   return (
     <Grid container>
@@ -43,17 +47,27 @@ const Authentication: React.FC<Props> = ({
           text={`Confirm update on device to version ${latestVersion}`}
         />
         <br />
-        <DynamicTextView state={isCompleted} text="Updating Firmware" />
+        <DynamicTextView
+          state={isUpdated}
+          text={`Updating Firmware: ${progress}%`}
+        />
+        <br />
+        <DynamicTextView
+          state={isAuthenticated}
+          text="Verifying updated firmware"
+        />
       </Grid>
     </Grid>
   );
 };
 
 Authentication.propTypes = {
-  isCompleted: PropTypes.oneOf<-1 | 0 | 1 | 2>([-1, 0, 1, 2]).isRequired,
+  isAuthenticated: PropTypes.oneOf<-1 | 0 | 1 | 2>([-1, 0, 1, 2]).isRequired,
+  isUpdated: PropTypes.oneOf<-1 | 0 | 1 | 2>([-1, 0, 1, 2]).isRequired,
   isApproved: PropTypes.oneOf<-1 | 0 | 1 | 2>([-1, 0, 1, 2]).isRequired,
   updateDownloaded: PropTypes.oneOf<-1 | 0 | 1 | 2>([-1, 0, 1, 2]).isRequired,
   isInternetSlow: PropTypes.bool.isRequired,
+  progress: PropTypes.number.isRequired,
   latestVersion: PropTypes.string
 };
 
