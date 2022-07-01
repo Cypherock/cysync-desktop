@@ -1,11 +1,14 @@
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { Collapse } from '@mui/material';
+import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
+import { Button, Collapse, Tooltip } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { shell } from 'electron';
 import React, { useEffect } from 'react';
 
+import theme from '../../../designSystem/designConstants/theme';
 import { CyError } from '../../../errors';
 import { useFeedback } from '../../../store/provider/feedbackProvider';
 import logger from '../../../utils/logger';
@@ -23,7 +26,8 @@ const classes = {
   btnCointainer: `${PREFIX}-btnCointainer`,
   report: `${PREFIX}-report`,
   advanceText: `${PREFIX}-advanceText`,
-  detailedText: `${PREFIX}-detailedText`
+  detailedText: `${PREFIX}-detailedText`,
+  primaryColor: `${PREFIX}-primaryColor`
 };
 
 const Root = styled('div')({
@@ -60,11 +64,15 @@ const Root = styled('div')({
     backgroundColor: '#171717',
     borderRadius: '3px',
     fontSize: '14px'
+  },
+  [`& .${classes.primaryColor}`]: {
+    color: theme.palette.secondary.dark
   }
 });
 
 const Error = (props: any) => {
   const {
+    errorObj,
     text,
     handleClose,
     handleFeedbackOpen,
@@ -117,7 +125,23 @@ const Error = (props: any) => {
           align="center"
           style={{ margin: '0.5rem 0', whiteSpace: 'pre-line' }}
         >
-          {text}
+          {errorObj.getMessage() || text}
+          <Button
+            onClick={() => {
+              shell.openExternal(
+                `https://cypherock.com/help/error#${errorObj.getCode()}`
+              );
+            }}
+          >
+            <Tooltip title={'Click here for more details'}>
+              <div>
+                <AlertIcon
+                  className={classes.primaryColor}
+                  style={{ marginRight: '5px' }}
+                />
+              </div>
+            </Tooltip>
+          </Button>
         </Typography>
         {detailedText && (
           <>
@@ -250,7 +274,8 @@ const errorDialog: React.FC<ErrorProps> = ({
       restComponents={
         <Error
           advanceText={advanceText}
-          text={errorObj?.showError() || text}
+          errorObj={errorObj}
+          text={text}
           closeText={closeText}
           disableAction={disableAction}
           handleClose={disableAction ? () => {} : handleClose}

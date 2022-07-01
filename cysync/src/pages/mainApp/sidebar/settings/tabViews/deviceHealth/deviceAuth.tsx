@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
+import { shell } from 'electron';
 import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -22,8 +23,12 @@ import AvatarIcon from '../../../../../../designSystem/designComponents/icons/Av
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
+import { ConnectionStatus } from '../../../../../../pages/mainApp/navbar/deviceConnectionStatus';
 import { useDeviceAuth } from '../../../../../../store/hooks/flows';
-import { useConnection } from '../../../../../../store/provider';
+import {
+  DeviceConnectionState,
+  useConnection
+} from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import logger from '../../../../../../utils/logger';
 
@@ -248,8 +253,11 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 }) => {
   const [connStatus, setConnStatus] = React.useState<-1 | 0 | 1 | 2>(1);
 
-  const { internalDeviceConnection: deviceConnection, connected } =
-    useConnection();
+  const {
+    internalDeviceConnection: deviceConnection,
+    connected,
+    deviceConnectionState
+  } = useConnection();
 
   const {
     handleDeviceAuth,
@@ -410,14 +418,27 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
           >
             Device Authentication Failed
           </Typography>
-          <Typography color="textPrimary" style={{ margin: '1rem 0rem 6rem' }}>
-            {errorObj.getCode()}
-          </Typography>
           <Typography
             color="textSecondary"
             style={{ margin: '1rem 0rem 6rem' }}
           >
             {errorObj.getMessage()}
+            <Button
+              onClick={() => {
+                shell.openExternal(
+                  `https://cypherock.com/help/error#${errorObj.getCode()}`
+                );
+              }}
+            >
+              <Tooltip title={'Click here for more details'}>
+                <div>
+                  <AlertIcon
+                    className={classes.primaryColor}
+                    style={{ marginRight: '5px' }}
+                  />
+                </div>
+              </Tooltip>
+            </Button>
           </Typography>
           {verified === -1 ? (
             <div className={classes.errorButtons}>
@@ -438,7 +459,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
             </div>
           ) : (
             <div className={classes.errorButtons}>
-              {!latestDeviceConnection.current ? (
+              {deviceConnectionState !== DeviceConnectionState.VERIFIED ? (
                 <Tooltip
                   title={'Reconnect the device to retry'}
                   placement="top"

@@ -15,7 +15,7 @@ const handleErrors = (
   metadata?: any
 ) => {
   //TODO:  handle cascade effect properly
-  logger.info(currError);
+  logger.error(currError);
 
   // log the original error
   if (err.childErrors.length > 0) {
@@ -30,7 +30,7 @@ const handleErrors = (
   logger.info(metadata);
 
   // report to analytics
-  Analytics.Instance.event(flow, Analytics.Actions.ERROR);
+  Analytics.Instance.event(flow, Analytics.Actions.ERROR, err.getCode());
 
   return err;
   // narrow down to the parent
