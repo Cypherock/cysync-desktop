@@ -1,26 +1,29 @@
 import { shell } from 'electron';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
+import Routes from '../../../constants/routes';
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import { DeviceConnectionState, useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
-import AuthenticatorComponent from './authenticator';
 import ConfirmationComponent from './confirmation';
 import InitialFlowComponent from './initialFlow';
-import UpdaterComponent from './updater';
 
 type UpdateType = 'update' | 'auth' | 'initial';
 
 const DeviceUpdatePopup = () => {
+  const navigate = useNavigate();
+
   const [isOpen, setIsOpen] = useState(false);
   const [updateType, setUpdateType] = useState<UpdateType>('update');
   const {
     deviceConnectionState,
     openMisconfiguredPrompt,
     setOpenMisconfiguredPrompt,
-    updateRequiredType
+    updateRequiredType,
+    isDeviceUpdating
   } = useConnection();
 
   const onConfirmation = (val: boolean) => {
@@ -47,15 +50,21 @@ const DeviceUpdatePopup = () => {
         }
       }
 
+      if (localUpdateType === 'initial') {
+        setIsOpen(true);
+      }
+
       setUpdateType(localUpdateType);
-      setIsOpen(true);
+
       if (localUpdateType === 'update') {
+        navigate(Routes.settings.device.upgrade);
         Analytics.Instance.event(
           Analytics.Categories.PARTIAL_DEVICE_UPDATE,
           Analytics.Actions.OPEN
         );
         logger.info('Device update prompt opened by user');
       } else if (localUpdateType === 'auth') {
+        navigate(Routes.settings.device.auth);
         Analytics.Instance.event(
           Analytics.Categories.DEVICE_AUTH_PROMPT,
           Analytics.Actions.OPEN
@@ -96,6 +105,10 @@ const DeviceUpdatePopup = () => {
     }
   }, [openMisconfiguredPrompt]);
 
+  if (isDeviceUpdating) {
+    return <></>;
+  }
+
   if (isOpen) {
     return (
       <DialogBox
@@ -105,15 +118,7 @@ const DeviceUpdatePopup = () => {
         disableBackdropClick
         disableEscapeKeyDown
         handleClose={handleClose}
-        restComponents={
-          updateType === 'update' ? (
-            <UpdaterComponent handleClose={handleClose} />
-          ) : updateType === 'auth' ? (
-            <AuthenticatorComponent handleClose={handleClose} />
-          ) : (
-            <InitialFlowComponent handleClose={handleClose} />
-          )
-        }
+        restComponents={<InitialFlowComponent handleClose={handleClose} />}
       />
     );
   }
