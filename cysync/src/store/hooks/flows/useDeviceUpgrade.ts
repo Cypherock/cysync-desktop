@@ -184,6 +184,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       logger.error(error);
       const cyError = new CyError();
       handleAxiosErrors(cyError, error, langStrings);
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
       setErrorResolutionState(
         DeviceUpgradeErrorResolutionState.NO_RECONNECT_REQUIRED
       );
@@ -194,7 +195,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         clearTimeout(internetSlowTimeout.current);
         internetSlowTimeout.current = undefined;
       }
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
       if (onError) onError();
     }
   };
@@ -239,9 +239,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     try {
       downloadUrl = await checkLatestFirmware();
     } catch (e) {
-      setUpdateDownloaded(-1);
-      setIsCompleted(-1);
-      setBlockNewConnection(false);
       setIsDeviceUpdating(false);
       if (internetSlowTimeout.current) {
         clearTimeout(internetSlowTimeout.current);
