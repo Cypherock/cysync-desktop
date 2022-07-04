@@ -46,7 +46,7 @@ const Root = styled(Grid)(({ theme }) => ({
 }));
 
 interface State {
-  oldPassword: string;
+  curPassword: string;
   showPassword: boolean;
 }
 
@@ -60,7 +60,7 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
   const theme = useTheme();
   const snackbar = useSnackbar();
   const INITIAL_VALUES = {
-    oldPassword: '',
+    curPassword: '',
     showPassword: false
   };
   const [values, setValues] = React.useState<State>({
@@ -97,12 +97,12 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
     event.preventDefault();
   };
 
-  const handleSetPassword = async () => {
+  const handleConfirmPassword = async () => {
     try {
-      if (!values.oldPassword.trim()) {
+      if (!values.curPassword.trim()) {
         setError('Please enter your password.');
       } else {
-        if (await verifyPassword(values.oldPassword.trim())) {
+        if (await verifyPassword(values.curPassword.trim())) {
           setError('');
           closeDialogBox();
           snackbar.showSnackbar(
@@ -120,7 +120,7 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
         }
       }
     } catch (error) {
-      logger.error('Error while removing password');
+      logger.error('Error while confirming password');
       logger.error(error);
     }
     setIsLoading(false);
@@ -129,7 +129,7 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
   const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
   React.useEffect(() => {
     if (isLoading) {
-      timeout.current = setTimeout(handleSetPassword, 0);
+      timeout.current = setTimeout(handleConfirmPassword, 0);
     }
 
     return () => {
@@ -140,7 +140,7 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
     };
   }, [isLoading]);
 
-  const confirmChangePassword = async () => {
+  const confirmPassword = async () => {
     setIsLoading(true);
   };
 
@@ -157,7 +157,7 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
       maxWidth="sm"
       open={open}
       handleClose={closeDialogBox}
-      handleConfirmation={confirmChangePassword}
+      handleConfirmation={confirmPassword}
       confirmButtonDisabled={isLoading}
       rejectButtonDisabled={isLoading}
       restComponents={
@@ -189,9 +189,9 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
             fullWidth
             size="small"
             type={values.showPassword ? 'text' : 'password'}
-            value={values.oldPassword}
+            value={values.curPassword}
             placeholder="Confirm Your Password"
-            onChange={handleChange('oldPassword')}
+            onChange={handleChange('curPassword')}
             onKeyDown={handleKeyPress}
             className={classes.marginTopBottom}
             InputProps={{
