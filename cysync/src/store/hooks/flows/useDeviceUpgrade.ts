@@ -351,6 +351,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           DeviceUpgradeErrorResolutionState.NO_RECONNECT_REQUIRED
         );
         setUpdated(-1);
+        setIsDeviceUpdating(false);
         setIsCompleted(-1);
         setBlockNewConnection(false);
         deviceUpdater.removeAllListeners();
@@ -460,6 +461,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   useEffect(() => {
     if (updateDownloaded === 2) {
       logger.info('Running device update');
+      setIsDeviceUpdating(true);
       if (!beforeFlowStart(true)) {
         const cyError = new CyError(
           DeviceErrorType.NOT_CONNECTED,
