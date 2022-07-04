@@ -279,9 +279,10 @@ export const usePortfolio: UsePortfolio = () => {
   const getAllCoinPriceHistory = async (
     days: number,
     wallet = '',
-    isRefresh = false
+    isRefresh = false,
+    loader = true
   ) => {
-    setIsLoading(true);
+    if (loader) setIsLoading(true);
     const key = `${wallet}-${days}`;
     if (!isRefresh) {
       const cacheData:
@@ -345,7 +346,7 @@ export const usePortfolio: UsePortfolio = () => {
     setOldTotalPrice(prevTotal.toNumber());
     setCoinList(allCoinList);
     setCoinHistory(allCoinPriceHistory);
-    setIsLoading(false);
+    if (loader) setIsLoading(false);
   };
 
   // returns a list of all coins with their balances and value (eg, if there are 2 bitcoins in 2 different wallet, it will return a value of total if wallet is null
@@ -612,7 +613,7 @@ export const usePortfolio: UsePortfolio = () => {
           logger.error(error);
         });
 
-      getAllCoinPriceHistory(timeActiveButton, currentWallet, true);
+      getAllCoinPriceHistory(timeActiveButton, currentWallet, true, false);
     }
   }, [doRefresh]);
 

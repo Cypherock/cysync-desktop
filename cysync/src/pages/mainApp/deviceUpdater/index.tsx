@@ -14,16 +14,17 @@ import InitialFlowComponent from './initialFlow';
 type UpdateType = 'update' | 'auth' | 'initial';
 
 const DeviceUpdatePopup = () => {
+  const navigate = useNavigate();
+
   const [isOpen, setIsOpen] = useState(false);
   const [updateType, setUpdateType] = useState<UpdateType>('update');
   const {
     deviceConnectionState,
     openMisconfiguredPrompt,
     setOpenMisconfiguredPrompt,
-    updateRequiredType
+    updateRequiredType,
+    isDeviceUpdating
   } = useConnection();
-
-  const navigate = useNavigate();
 
   const onConfirmation = (val: boolean) => {
     setOpenMisconfiguredPrompt(false);
@@ -49,7 +50,14 @@ const DeviceUpdatePopup = () => {
         }
       }
 
+      if (localUpdateType === 'initial') {
+        setIsOpen(true);
+      }
+
+      setUpdateType(localUpdateType);
+
       if (localUpdateType === 'update') {
+        navigate(Routes.settings.device.upgrade);
         Analytics.Instance.event(
           Analytics.Categories.PARTIAL_DEVICE_UPDATE,
           Analytics.Actions.OPEN
@@ -57,6 +65,7 @@ const DeviceUpdatePopup = () => {
         logger.info('Redirecting user to device update settings page');
         return navigate(`${Routes.settings.device.upgrade}?isRefresh=true`);
       } else if (localUpdateType === 'auth') {
+        navigate(Routes.settings.device.auth);
         Analytics.Instance.event(
           Analytics.Categories.DEVICE_AUTH_PROMPT,
           Analytics.Actions.OPEN
@@ -99,6 +108,10 @@ const DeviceUpdatePopup = () => {
       logger.info('Device update prompt open');
     }
   }, [openMisconfiguredPrompt]);
+
+  if (isDeviceUpdating) {
+    return <></>;
+  }
 
   if (isOpen) {
     return (

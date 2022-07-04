@@ -150,7 +150,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       } else {
         setDeviceConnectionStatus(newStatus);
       }
-    }, 2);
+    }, 0.2);
   }, []);
 
   const checkIfIncomplete = () => {

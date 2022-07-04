@@ -248,8 +248,12 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 }) => {
   const [connStatus, setConnStatus] = React.useState<-1 | 0 | 1 | 2>(1);
 
-  const { internalDeviceConnection: deviceConnection, connected } =
-    useConnection();
+  const {
+    internalDeviceConnection: deviceConnection,
+    inBackgroundProcess,
+    connected,
+    retryConnection
+  } = useConnection();
 
   const {
     handleDeviceAuth,
@@ -307,7 +311,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   const [isCompleted, setCompleted] = React.useState<-1 | 0 | 1 | 2>(0);
 
   useEffect(() => {
-    if (deviceConnection) {
+    if (deviceConnection && !inBackgroundProcess) {
       setConnStatus(2);
       setTimeout(() => {
         if (activeStep !== 1) {
@@ -317,7 +321,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     } else {
       setConnStatus(1);
     }
-  }, [deviceConnection]);
+  }, [deviceConnection, inBackgroundProcess]);
 
   const steps = [
     {
@@ -347,11 +351,16 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     clearErrorObj();
     setCompleted(0);
     resetHooks();
-    if (deviceConnection) {
+    if (deviceConnection && !inBackgroundProcess) {
       setActiveStep(1);
     } else {
       setActiveStep(0);
     }
+  };
+
+  const onSuccess = () => {
+    retryConnection();
+    handleDeviceHealthTabClose();
   };
 
   return (
@@ -375,11 +384,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
           >
             Device Authentication Successful
           </Typography>
-          <Button
-            color="secondary"
-            onClick={handleDeviceHealthTabClose}
-            variant="contained"
-          >
+          <Button color="secondary" onClick={onSuccess} variant="contained">
             Ok
           </Button>
         </Grid>

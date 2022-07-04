@@ -12,17 +12,26 @@ import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import success from '../../../../../../assets/icons/generic/success.png';
+import Routes from '../../../../../../constants/routes';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import IconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import AvatarIcon from '../../../../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
-import { useDeviceUpgrade } from '../../../../../../store/hooks/flows';
-import { useNetwork } from '../../../../../../store/provider';
+import {
+  DeviceUpgradeErrorResolutionState,
+  useDeviceUpgrade
+} from '../../../../../../store/hooks/flows';
+import {
+  FeedbackState,
+  useConnection,
+  useFeedback,
+  useNetwork
+} from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import logger from '../../../../../../utils/logger';
 
@@ -243,10 +252,16 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   allowExit,
   setAllowExit
 }) => {
+  const navigate = useNavigate();
+
   const [authState, setAuthState] = React.useState<-1 | 0 | 1 | 2>(0);
   const [connStatus, setConnStatus] = React.useState<-1 | 0 | 1 | 2>(1);
   const [initialStart, setInitialStart] = React.useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
+
+  const [retryEnabled, setRetryEnabled] = React.useState(false);
+  const [isDisconnected, setIsDisconnected] = React.useState(false);
+  const [waitForReconnect, setWaitForReconnect] = React.useState(false);
 
   const { connected } = useNetwork();
 
@@ -265,7 +280,12 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     handleFeedbackOpen,
     latestVersion,
     checkLatestFirmware,
-    upgradeAvailable
+    upgradeAvailable,
+    updateProgress,
+    isAuthenticated,
+    isUpdated,
+    setIsDeviceUpdating,
+    errorResolutionState
   } = useDeviceUpgrade();
 
   const latestDeviceConnection = useRef<any>();
@@ -295,6 +315,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   }, [activeStep]);
 
   useEffect(() => {
+    setIsDeviceUpdating(true);
     Analytics.Instance.event(
       Analytics.Categories.DEVICE_UPDATE,
       Analytics.Actions.OPEN
@@ -303,6 +324,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
 
     return () => {
       setAllowExit(true);
+      setIsDeviceUpdating(false);
       if (
         latestStep.current !== 0 &&
         !latestCompleted.current &&
@@ -325,6 +347,18 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
       setAuthState(1);
     } else {
       setConnStatus(1);
+    }
+
+    if (waitForReconnect) {
+      if (!deviceConnection) {
+        setIsDisconnected(true);
+      }
+
+      if (isDisconnected && deviceConnection && !inBackgroundProcess) {
+        setRetryEnabled(true);
+      } else {
+        setRetryEnabled(false);
+      }
     }
   }, [deviceConnection, inBackgroundProcess]);
 
@@ -366,7 +400,9 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
       name: 'Upgrade',
       element: (
         <Authentication
-          isCompleted={isCompleted}
+          progress={updateProgress}
+          isAuthenticated={isAuthenticated}
+          isUpdated={isUpdated}
           isApproved={isApproved}
           isInternetSlow={isInternetSlow}
           updateDownloaded={updateDownloaded}
@@ -384,6 +420,23 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
 
   useEffect(() => {
     if (isCompleted === -1) {
+      if (
+        errorResolutionState ===
+        DeviceUpgradeErrorResolutionState.RECONNECT_REQUIRED
+      ) {
+        setRetryEnabled(false);
+        setIsDisconnected(!deviceConnection);
+        setWaitForReconnect(true);
+      } else {
+        setRetryEnabled(true);
+      }
+    } else {
+      setWaitForReconnect(false);
+      setIsDisconnected(false);
+      setRetryEnabled(false);
+    }
+
+    if (isCompleted === -1) {
       Analytics.Instance.event(
         Analytics.Categories.DEVICE_UPDATE,
         Analytics.Actions.ERROR
@@ -397,27 +450,19 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   }, [isCompleted]);
 
   const handleOnRetry = () => {
-    handleRetry();
+    if (
+      errorResolutionState ===
+      DeviceUpgradeErrorResolutionState.DEVICE_AUTH_REQUIRED
+    ) {
+      navigate(Routes.settings.device.index);
+    } else {
+      handleRetry();
+    }
   };
 
-  return (
-    <Root container style={{ padding: '0.5rem 0rem' }}>
-      <Grid item xs={12} className={classes.header}>
-        <Typography color="secondary" variant="h5">
-          Device Upgrade
-        </Typography>
-        {allowExit && (
-          <IconButton onClick={handleDeviceHealthTabClose} title="Close">
-            <Icon
-              size={16}
-              viewBox="0 0 14 14"
-              icon={ICONS.close}
-              color="red"
-            />
-          </IconButton>
-        )}
-      </Grid>
-      {isCompleted === 2 ? (
+  const getMainContent = () => {
+    if (isCompleted === 2) {
+      return (
         <Grid item xs={12} className={classes.rootCenter}>
           <AvatarIcon src={success} alt="success" />
           <Typography
@@ -436,7 +481,11 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             Ok
           </Button>
         </Grid>
-      ) : authState === 2 && activeStep === 0 ? (
+      );
+    }
+
+    if (authState === 2 && activeStep === 0) {
+      return (
         <Grid
           style={{
             display: 'flex',
@@ -479,7 +528,15 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             </CustomButton>
           )}
         </Grid>
-      ) : isCompleted === -1 ? (
+      );
+    }
+
+    if (isCompleted === -1) {
+      const isAuthFailed =
+        errorResolutionState ===
+        DeviceUpgradeErrorResolutionState.DEVICE_AUTH_REQUIRED;
+
+      return (
         <Grid
           item
           container
@@ -504,7 +561,9 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             variant="h5"
             style={{ margin: '1rem 0rem 0rem' }}
           >
-            Device Upgrade Failed
+            {isAuthFailed
+              ? 'Firmware Verification Failed'
+              : 'Device Upgrade Failed'}
           </Typography>
           <Typography
             color="textSecondary"
@@ -513,26 +572,27 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             {errorObj.showError()}
           </Typography>
           <div className={classes.errorButtons}>
-            {!latestDeviceConnection.current ? (
-              <Tooltip title={'Reconnect the device to retry'} placement="top">
-                <div>
-                  <CustomButton
-                    variant="outlined"
-                    style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
-                    disabled
-                  >
-                    Retry
-                  </CustomButton>
-                </div>
-              </Tooltip>
-            ) : (
+            {retryEnabled ? (
               <CustomButton
                 variant="outlined"
                 onClick={handleOnRetry}
                 style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
               >
-                Retry
+                {isAuthFailed ? 'Ok' : 'Retry'}
               </CustomButton>
+            ) : (
+              <Tooltip title="Please reconnect the X1 wallet to retry">
+                <span>
+                  <CustomButton
+                    variant="outlined"
+                    onClick={handleOnRetry}
+                    style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
+                    disabled={true}
+                  >
+                    {isAuthFailed ? 'Ok' : 'Retry'}
+                  </CustomButton>
+                </span>
+              </Tooltip>
             )}
             <CustomButton
               color="primary"
@@ -543,51 +603,74 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             </CustomButton>
           </div>
         </Grid>
-      ) : (
-        <Grid container className={classes.formWrapper}>
-          <Stepper
-            alternativeLabel
-            activeStep={activeStep}
-            className={classes.stepperRoot}
-            connector={<QontoConnector />}
-          >
-            {steps.map(step => (
-              <Step key={step.name}>
-                <StyledStepLabel
-                  StepIconComponent={QontoStepIcon}
-                  className={classes.stepLabel}
-                >
-                  {step.name}
-                </StyledStepLabel>
-              </Step>
-            ))}
-          </Stepper>
-          <div className={classes.content}>{steps[activeStep].element}</div>
-          <div className={classes.flexCenter} style={{ marginTop: '15px' }}>
-            <AlertIcon
-              className={classes.primaryColor}
-              style={{ marginRight: '5px' }}
+      );
+    }
+
+    return (
+      <Grid container className={classes.formWrapper}>
+        <Stepper
+          alternativeLabel
+          activeStep={activeStep}
+          className={classes.stepperRoot}
+          connector={<QontoConnector />}
+        >
+          {steps.map(step => (
+            <Step key={step.name}>
+              <StyledStepLabel
+                StepIconComponent={QontoStepIcon}
+                className={classes.stepLabel}
+              >
+                {step.name}
+              </StyledStepLabel>
+            </Step>
+          ))}
+        </Stepper>
+        <div className={classes.content}>{steps[activeStep].element}</div>
+        <div className={classes.flexCenter} style={{ marginTop: '15px' }}>
+          <AlertIcon
+            className={classes.primaryColor}
+            style={{ marginRight: '5px' }}
+          />
+          <Typography variant="body2" color="textSecondary" align="center">
+            Do not disconnect device while it is being updated. This may take a
+            few minutes.
+          </Typography>
+        </div>
+
+        {connected || (
+          <div style={{ marginTop: '10px' }} className={classes.center}>
+            <Icon
+              size={50}
+              viewBox="0 0 60 60"
+              iconGroup={<ErrorExclamation />}
             />
-            <Typography variant="body2" color="textSecondary" align="center">
-              Do not disconnect device while it is being updated. This may take
-              a few minutes.
+            <Typography variant="body2" color="secondary">
+              Internet connection is required for this action
             </Typography>
           </div>
+        )}
+      </Grid>
+    );
+  };
 
-          {connected || (
-            <div style={{ marginTop: '10px' }} className={classes.center}>
-              <Icon
-                size={50}
-                viewBox="0 0 60 60"
-                iconGroup={<ErrorExclamation />}
-              />
-              <Typography variant="body2" color="secondary">
-                Internet connection is required for this action
-              </Typography>
-            </div>
-          )}
-        </Grid>
-      )}
+  return (
+    <Root container style={{ padding: '0.5rem 0rem' }}>
+      <Grid item xs={12} className={classes.header}>
+        <Typography color="secondary" variant="h5">
+          Device Upgrade
+        </Typography>
+        {allowExit && (
+          <IconButton onClick={handleDeviceHealthTabClose} title="Close">
+            <Icon
+              size={16}
+              viewBox="0 0 14 14"
+              icon={ICONS.close}
+              color="red"
+            />
+          </IconButton>
+        )}
+      </Grid>
+      {getMainContent()}
     </Root>
   );
 };

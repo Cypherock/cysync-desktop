@@ -123,8 +123,7 @@ const DeviceSettings = ({ allowExit, setAllowExit }: DeviceSettingsProps) => {
 
   const handleDeviceHealthTabOpen = (index: number) => {
     if (beforeNetworkAction()) {
-      // Disable Internal Device Auth Popup if Device auth or Device upgrade is selected
-      if ([0].includes(index) || beforeFlowStart()) {
+      if ([0, 1].includes(index) || beforeFlowStart()) {
         navigate(DeviceHealthItems[index].route);
       }
     }
