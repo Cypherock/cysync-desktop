@@ -26,12 +26,7 @@ import {
   DeviceUpgradeErrorResolutionState,
   useDeviceUpgrade
 } from '../../../../../../store/hooks/flows';
-import {
-  FeedbackState,
-  useConnection,
-  useFeedback,
-  useNetwork
-} from '../../../../../../store/provider';
+import { useNetwork } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import logger from '../../../../../../utils/logger';
 

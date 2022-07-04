@@ -123,7 +123,7 @@ const DeviceSettings = ({ allowExit, setAllowExit }: DeviceSettingsProps) => {
 
   const handleDeviceHealthTabOpen = (index: number) => {
     if (beforeNetworkAction()) {
-      if ([0, 1].includes(index) || beforeFlowStart()) {
+      if ([0].includes(index) || beforeFlowStart()) {
         navigate(DeviceHealthItems[index].route);
       }
     }
