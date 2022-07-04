@@ -215,7 +215,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
             )}
             <div className={classes.btnContainer}>
               {showRetry &&
-                (!latestDeviceConnection.current ? (
+                (connStatus !== 2 ? (
                   <Tooltip
                     title={'Reconnect the device to retry'}
                     placement="top"

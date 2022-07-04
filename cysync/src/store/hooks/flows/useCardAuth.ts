@@ -188,6 +188,8 @@ export const useCardAuth: UseCardAuth = isInitial => {
           });
       }
       setInitialStart(true);
+    } else if (!deviceConnection) {
+      setConnStatus(-1);
     } else {
       setConnStatus(1);
     }
@@ -203,7 +205,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
       if (errorObj.isSet) {
         temp[currentCard] = -1;
 
-        // Only show retry when the error is other than not verified
+        // Only show retry when the error is other than not fset
         if (verified !== -1 || pairingFailed) {
           setShowRetry(true);
         }

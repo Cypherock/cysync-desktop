@@ -10,7 +10,7 @@ const en: I18nStrings = {
     UNKNOWN_FLOW_ERROR: flow =>
       `Please disconnect and then reconnect the device and restart ${flow}`,
     KNOWN_FLOW_ERROR: flow =>
-      `A known internal has occured while ${flow}. Please report this to Cypherock Support`,
+      `A known internal error has occured while ${flow}. Please report this to Cypherock Support`,
     CUSTOM_ERROR: txt => `Some internal error occured while ${txt}`,
 
     NETWORK_ERROR:
