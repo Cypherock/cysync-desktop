@@ -107,7 +107,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
           {customAccount ? customAccount.name : address}
         </Typography>
       </div>
-      {customAccount ? (
+      {customAccount && !receiveTransaction.accountExists ? (
         <>
           <div className={classes.transactionId}>
             <Typography color="textSecondary">Near Explorer</Typography>

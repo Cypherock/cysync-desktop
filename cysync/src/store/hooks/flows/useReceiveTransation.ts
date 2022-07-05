@@ -43,6 +43,7 @@ export interface UseReceiveTransactionValues {
   resetHooks: () => void;
   cancelReceiveTxn: (connection: DeviceConnection) => void;
   coinsConfirmed: boolean;
+  accountExists: boolean;
 }
 
 export type UseReceiveTransaction = () => UseReceiveTransactionValues;
@@ -59,6 +60,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [cardTapped, setCardTapped] = useState(false);
   const [passphraseEntered, setPassphraseEntered] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
+  const [accountExists, setAccountExists] = useState(false);
 
   const { addReceiveAddressHook } = useSocket();
   let recAddr: string | undefined;
@@ -74,6 +76,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     setCardTapped(false);
     setPassphraseEntered(false);
     setXpubMissing(false);
+    setAccountExists(false);
     receiveTransaction.removeAllListeners();
   };
 
@@ -214,6 +217,15 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         } else {
           logger.info('ReceiveAddress: Rejected on device', { coinType });
           setErrorMessage(langStrings.ERRORS.RECEIVE_TXN_REJECTED(coin.name));
+        }
+      });
+
+      receiveTransaction.on('customAccountExists', exists => {
+        if (exists) {
+          logger.verbose('ReceiveAddress: Custom Account exits on device', {
+            coinType
+          });
+          setAccountExists(true);
         }
       });
 
@@ -385,6 +397,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     xpubMissing,
     setXpubMissing,
     passphraseEntered,
-    onNewReceiveAddr
+    onNewReceiveAddr,
+    accountExists
   } as UseReceiveTransactionValues;
 };
