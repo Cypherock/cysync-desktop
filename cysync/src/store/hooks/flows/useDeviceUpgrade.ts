@@ -396,8 +396,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       } else {
         // unknown flow error
         cyError.setError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.DEVICE_UPGRADE_UNKNOWN_ERROR,
+          langStrings.ERRORS.DEVICE_UPGRADE_UNKNOWN_ERROR
         );
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
@@ -442,8 +442,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     } catch (e) {
       setIsInFlow(true);
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.DEVICE_UPGRADE_UNKNOWN_ERROR,
+        langStrings.ERRORS.DEVICE_UPGRADE_UNKNOWN_ERROR
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       setErrorResolutionState(

@@ -305,8 +305,6 @@ export const useAddCoin: UseAddCoin = () => {
     });
 
     addCoin.on('error', err => {
-      logger.error(`${flowName}: Error occurred`);
-      logger.error(err);
       const cyError = new CyError();
       if (err.isAxiosError) {
         handleAxiosErrors(cyError, err, langStrings);
@@ -325,11 +323,11 @@ export const useAddCoin: UseAddCoin = () => {
         }
       } else {
         cyError.setError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.ADD_COIN_UNKNOWN_ERROR,
+          langStrings.ERRORS.ADD_COIN_UNKNOWN_ERROR
         );
       }
-      setErrorObj(handleErrors(errorObj, cyError, flowName));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
     });
 
     addCoin.on('locked', () => {
@@ -392,8 +390,8 @@ export const useAddCoin: UseAddCoin = () => {
 
     addCoin.on('unknownError', () => {
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.ADD_COIN_UNKNOWN_ERROR,
+        langStrings.ERRORS.ADD_COIN_UNKNOWN_ERROR
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       resetHooks();
@@ -454,13 +452,11 @@ export const useAddCoin: UseAddCoin = () => {
       logger.info(`${flowName}: Completed`);
     } catch (e) {
       setIsInFlow(false);
-      logger.error(`${flowName}: Some Error`);
-      logger.error(e);
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.ADD_COIN_UNKNOWN_ERROR,
+        langStrings.ERRORS.ADD_COIN_UNKNOWN_ERROR
       );
-      setErrorObj(handleErrors(errorObj, cyError, flowName));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       addCoin.removeAllListeners();
     }
   };

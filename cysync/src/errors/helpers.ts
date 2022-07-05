@@ -26,33 +26,15 @@ const handleErrors = (
   logger.error(`${flow ? flow : ''}: ${err.showError()}`);
 
   // logging the metadata
-  logger.info('Metada for the error');
-  logger.info(metadata);
+  if (metadata) {
+    logger.info('Metadata for the error');
+    logger.info(metadata);
+  }
 
   // report to analytics
   Analytics.Instance.event(flow, Analytics.Actions.ERROR);
 
   return err;
-  // narrow down to the parent
-  // const parentError = code.replace(
-  //   /.$/,
-  //   '0'
-  // ) as unknown as keyof I18nStrings['ERRORS'];
-  // // format and send the error
-  // console.log(
-  //   code,
-  //   parentError,
-  //   Object.prototype.hasOwnProperty.call(langStrings.ERRORS, parentError)
-  // );
-  // let errorMessage;
-  // if (Object.prototype.hasOwnProperty.call(langStrings.ERRORS, parentError)) {
-  //   return encodeError(parentError, langStrings.ERRORS[parentError](metadata));
-  // } else {
-  //   return encodeError(
-  //     DeviceErrorType.UNKNOWN_ERROR,
-  //     langStrings.ERRORS.UNKNOWN_FLOW_ERROR
-  //   );
-  // }
 };
 
 const handleDeviceErrors = (
@@ -89,7 +71,7 @@ const handleDeviceErrors = (
   } else {
     cyError.setError(
       DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR,
-      langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flow)
+      langStrings.ERRORS.UNKNOWN_COMMUNICATION_ERROR(flow)
     );
   }
 };

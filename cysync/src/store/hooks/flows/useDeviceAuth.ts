@@ -136,8 +136,8 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       } else {
         // unknown flow error
         cyError.setError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.DEVICE_AUTH_UNKNOWN_ERROR,
+          langStrings.ERRORS.DEVICE_AUTH_UNKNOWN_ERROR
         );
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
@@ -217,8 +217,8 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
     } catch (e) {
       setIsInFlow(false);
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.DEVICE_AUTH_UNKNOWN_ERROR,
+        langStrings.ERRORS.DEVICE_AUTH_UNKNOWN_ERROR
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       deviceAuth.removeAllListeners();

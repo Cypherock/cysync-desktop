@@ -296,12 +296,12 @@ export const useSendTransaction: UseSendTransaction = () => {
             handleWalletErrors(cyError, error, langStrings, { coinType });
           } else {
             cyError.setError(
-              CysyncError.UNKNOWN_FLOW_ERROR,
-              langStrings.ERRORS.CUSTOM_ERROR(error.message)
+              CysyncError.SEND_TXN_UNKNOWN_ERROR,
+              langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
             );
             cyError.pushSubErrors(
-              CysyncError.UNKNOWN_FLOW_ERROR,
-              langStrings.ERRORS.UNKNOWN_FLOW_ERROR(subFlowName)
+              CysyncError.SEND_TXN_UNKNOWN_ERROR,
+              subFlowName + ' : ' + error.message
             );
           }
           setEstimationError(
@@ -342,9 +342,13 @@ export const useSendTransaction: UseSendTransaction = () => {
           if (e.isAxiosError) {
             handleAxiosErrors(cyError, e, langStrings);
           } else {
+            cyError.setError(
+              CysyncError.SEND_TXN_UNKNOWN_ERROR,
+              langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
+            );
             cyError.pushSubErrors(
-              CysyncError.UNKNOWN_FLOW_ERROR,
-              langStrings.ERRORS.CUSTOM_ERROR(e.message)
+              CysyncError.SEND_TXN_UNKNOWN_ERROR,
+              e.message
             );
           }
           setErrorObj(handleErrors(errorObj, cyError, subFlowName));
@@ -421,8 +425,8 @@ export const useSendTransaction: UseSendTransaction = () => {
           handleDeviceErrors(cyError, err, langStrings, flowName);
         } else {
           cyError.setError(
-            CysyncError.UNKNOWN_FLOW_ERROR,
-            langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+            CysyncError.SEND_TXN_UNKNOWN_ERROR,
+            langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
           );
         }
         setErrorObj(handleErrors(errorObj, cyError, flowName));
@@ -608,8 +612,8 @@ export const useSendTransaction: UseSendTransaction = () => {
           setSignedTxn(txn);
         } else {
           const cyError = new CyError(
-            CysyncError.KNOWN_FLOW_ERROR,
-            langStrings.ERRORS.KNOWN_FLOW_ERROR(flowName)
+            CysyncError.SEND_TXN_UNKNOWN_ERROR,
+            langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
           );
           cyError.pushSubErrors(
             CysyncError.SEND_TXN_SIGNED_TXN_NOT_FOUND,
@@ -666,8 +670,8 @@ export const useSendTransaction: UseSendTransaction = () => {
       } catch (e) {
         setIsInFlow(false);
         const cyError = new CyError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.SEND_TXN_UNKNOWN_ERROR,
+          langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
         );
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType, e }));
         sendTransaction.removeAllListeners();

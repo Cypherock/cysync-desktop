@@ -325,8 +325,8 @@ export const useCardAuth: UseCardAuth = isInitial => {
         handleDeviceErrors(cyError, err, langStrings, flowName);
       } else {
         cyError.setError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.CARD_AUTH_UNKNOWN_ERROR,
+          langStrings.ERRORS.CARD_AUTH_UNKNOWN_ERROR
         );
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName));
@@ -416,8 +416,8 @@ export const useCardAuth: UseCardAuth = isInitial => {
       setIsInFlow(false);
       setCompleted(true);
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.CARD_AUTH_UNKNOWN_ERROR,
+        langStrings.ERRORS.CARD_AUTH_UNKNOWN_ERROR
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       cardAuth.removeAllListeners();
