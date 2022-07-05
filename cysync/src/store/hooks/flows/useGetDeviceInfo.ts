@@ -94,8 +94,8 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
         handleDeviceErrors(cyError, err, langStrings, flowName);
       } else {
         cyError.setError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.DEVICE_INFO_UNKNOWN_ERROR,
+          langStrings.ERRORS.DEVICE_INFO_UNKNOWN_ERROR
         );
       }
       setErrorObj(handleErrors(errorObj, cyError));
@@ -187,8 +187,8 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
       setIsInFlow(false);
       getDeviceInfo.removeAllListeners();
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.DEVICE_INFO_UNKNOWN_ERROR,
+        langStrings.ERRORS.DEVICE_INFO_UNKNOWN_ERROR
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       setCompleted(true);

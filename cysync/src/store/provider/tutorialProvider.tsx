@@ -61,8 +61,8 @@ export const TutorialProvider: React.FC = ({ children }) => {
         handleAxiosErrors(cyError, error, langStrings);
       } else {
         cyError.setError(
-          CysyncError.CUSTOM_ERROR,
-          langStrings.ERRORS.CUSTOM_ERROR('fetching the tutorials.')
+          CysyncError.TUTORIALS_UNKNOWN_ERROR,
+          langStrings.ERRORS.TUTORIALS_UNKNOWN_ERROR
         );
       }
       setErrorObj(handleErrors(errorObj, cyError, 'Tutorials', error));

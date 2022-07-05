@@ -310,7 +310,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   }, [activeStep]);
 
   useEffect(() => {
-    setIsDeviceUpdating(true);
     Analytics.Instance.event(
       Analytics.Categories.DEVICE_UPDATE,
       Analytics.Actions.OPEN

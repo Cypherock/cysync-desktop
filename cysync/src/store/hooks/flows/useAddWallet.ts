@@ -109,17 +109,16 @@ export const useAddWallet: UseAddWallet = () => {
     });
 
     addWallet.on('error', err => {
-      logger.info('Add wallet: Error occurred in Add wallet flow', err);
       const cyError = new CyError();
       if (err instanceof DeviceError) {
         handleDeviceErrors(cyError, err, langStrings, flowName);
       } else {
         cyError.setError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.ADD_WALLET_UNKNOWN_ERROR,
+          langStrings.ERRORS.ADD_WALLET_UNKNOWN_ERROR
         );
       }
-      setErrorObj(handleErrors(errorObj, cyError, flowName));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
     });
 
     addWallet.on('noWalletFound', (inPartialState: boolean) => {
@@ -212,10 +211,10 @@ export const useAddWallet: UseAddWallet = () => {
           });
       } catch (error) {
         const cyError = new CyError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.ADD_WALLET_UNKNOWN_ERROR,
+          langStrings.ERRORS.ADD_WALLET_UNKNOWN_ERROR
         );
-        setErrorObj(handleErrors(errorObj, cyError, flowName));
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
       }
     });
 
@@ -242,8 +241,8 @@ export const useAddWallet: UseAddWallet = () => {
       logger.error('AddWallet: Some Error');
       logger.error(e);
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.ADD_WALLET_UNKNOWN_ERROR,
+        langStrings.ERRORS.ADD_WALLET_UNKNOWN_ERROR
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       addWallet.removeAllListeners();
@@ -287,14 +286,16 @@ export const useAddWallet: UseAddWallet = () => {
       clearErrorObj();
       setWalletSuccess(true);
     } catch (error) {
-      logger.error('AddWallet: Error in updating wallet name');
-      logger.error(error);
       setIsNameDiff(false);
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.ADD_WALLET_UNKNOWN_ERROR,
+        langStrings.ERRORS.ADD_WALLET_UNKNOWN_ERROR
       );
-      setErrorObj(handleErrors(errorObj, cyError, flowName));
+      cyError.pushSubErrors(
+        CysyncError.ADD_WALLET_UNKNOWN_ERROR,
+        'AddWallet: Error in updating wallet name'
+      );
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
     }
   };
 

@@ -184,6 +184,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       logger.error(error);
       const cyError = new CyError();
       handleAxiosErrors(cyError, error, langStrings);
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
       setErrorResolutionState(
         DeviceUpgradeErrorResolutionState.NO_RECONNECT_REQUIRED
       );
@@ -194,7 +195,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         clearTimeout(internetSlowTimeout.current);
         internetSlowTimeout.current = undefined;
       }
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
       if (onError) onError();
     }
   };
@@ -239,9 +239,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     try {
       downloadUrl = await checkLatestFirmware();
     } catch (e) {
-      setUpdateDownloaded(-1);
-      setIsCompleted(-1);
-      setBlockNewConnection(false);
       setIsDeviceUpdating(false);
       if (internetSlowTimeout.current) {
         clearTimeout(internetSlowTimeout.current);
@@ -354,6 +351,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           DeviceUpgradeErrorResolutionState.NO_RECONNECT_REQUIRED
         );
         setUpdated(-1);
+        setIsDeviceUpdating(false);
         setIsCompleted(-1);
         setBlockNewConnection(false);
         deviceUpdater.removeAllListeners();
@@ -398,8 +396,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       } else {
         // unknown flow error
         cyError.setError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.DEVICE_UPGRADE_UNKNOWN_ERROR,
+          langStrings.ERRORS.DEVICE_UPGRADE_UNKNOWN_ERROR
         );
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
@@ -444,8 +442,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     } catch (e) {
       setIsInFlow(true);
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.DEVICE_UPGRADE_UNKNOWN_ERROR,
+        langStrings.ERRORS.DEVICE_UPGRADE_UNKNOWN_ERROR
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       setErrorResolutionState(
@@ -463,6 +461,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   useEffect(() => {
     if (updateDownloaded === 2) {
       logger.info('Running device update');
+      setIsDeviceUpdating(true);
       if (!beforeFlowStart(true)) {
         const cyError = new CyError(
           DeviceErrorType.NOT_CONNECTED,

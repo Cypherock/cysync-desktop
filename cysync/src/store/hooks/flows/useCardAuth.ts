@@ -188,6 +188,8 @@ export const useCardAuth: UseCardAuth = isInitial => {
           });
       }
       setInitialStart(true);
+    } else if (!deviceConnection) {
+      setConnStatus(-1);
     } else {
       setConnStatus(1);
     }
@@ -203,7 +205,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
       if (errorObj.isSet) {
         temp[currentCard] = -1;
 
-        // Only show retry when the error is other than not verified
+        // Only show retry when the error is other than not fset
         if (verified !== -1 || pairingFailed) {
           setShowRetry(true);
         }
@@ -323,8 +325,8 @@ export const useCardAuth: UseCardAuth = isInitial => {
         handleDeviceErrors(cyError, err, langStrings, flowName);
       } else {
         cyError.setError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.CARD_AUTH_UNKNOWN_ERROR,
+          langStrings.ERRORS.CARD_AUTH_UNKNOWN_ERROR
         );
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName));
@@ -414,8 +416,8 @@ export const useCardAuth: UseCardAuth = isInitial => {
       setIsInFlow(false);
       setCompleted(true);
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.CARD_AUTH_UNKNOWN_ERROR,
+        langStrings.ERRORS.CARD_AUTH_UNKNOWN_ERROR
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       cardAuth.removeAllListeners();

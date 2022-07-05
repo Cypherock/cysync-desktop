@@ -163,8 +163,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           handleDeviceErrors(cyError, err, langStrings, flowName);
         } else {
           cyError.setError(
-            CysyncError.UNKNOWN_FLOW_ERROR,
-            langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+            CysyncError.RECEIVE_TXN_UNKNOWN_ERROR,
+            langStrings.ERRORS.RECEIVE_TXN_UNKNOWN_ERROR
           );
         }
         setErrorObj(handleErrors(errorObj, cyError, flowName, err));
@@ -266,7 +266,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
               langStrings.ERRORS.RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE
             );
             cyError.pushSubErrors(
-              CysyncError.KNOWN_FLOW_ERROR,
+              CysyncError.RECEIVE_TXN_UNKNOWN_ERROR,
               `This could happen 
               either when user has wrongly verified yes to the address shown on the
               display or the device sent an incorrect address from the one shown on the device`
@@ -338,8 +338,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       } catch (e) {
         setIsInFlow(false);
         const cyError = new CyError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+          CysyncError.RECEIVE_TXN_UNKNOWN_ERROR,
+          langStrings.ERRORS.RECEIVE_TXN_UNKNOWN_ERROR
         );
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, { error: e, coinType })

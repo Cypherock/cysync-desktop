@@ -82,8 +82,8 @@ export const useLogFetcher: UseLogFetcher = () => {
         handleDeviceErrors(errorObj, err, langStrings, flowName);
       } else {
         cyError.setError(
-          CysyncError.UNKNOWN_FLOW_ERROR,
-          langStrings.ERRORS.LOG_FETCHER_FAILED
+          CysyncError.LOG_FETCHER_UNKNOWN_ERROR,
+          langStrings.ERRORS.LOG_FETCHER_UNKNOWN_ERROR
         );
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
@@ -145,8 +145,8 @@ export const useLogFetcher: UseLogFetcher = () => {
     } catch (e) {
       setIsInFlow(false);
       const cyError = new CyError(
-        CysyncError.UNKNOWN_FLOW_ERROR,
-        langStrings.ERRORS.UNKNOWN_FLOW_ERROR(flowName)
+        CysyncError.LOG_FETCHER_UNKNOWN_ERROR,
+        langStrings.ERRORS.LOG_FETCHER_UNKNOWN_ERROR
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       setRequestStatus(-1);

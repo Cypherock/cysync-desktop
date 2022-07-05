@@ -516,7 +516,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
           coinDetails.slug,
           token
         ),
-        fees: floatTransactionFee,
+        //rounding the data to handle decimals for now
+        // TODO: Need to figure out support everywhere properly
+        fees: Math.round(floatTransactionFee),
         isSendAll: maxSend,
         data: {
           gasLimit,
