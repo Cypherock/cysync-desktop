@@ -2,6 +2,7 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 
+import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import DropMenu from '../../../../../../designSystem/designComponents/menu/DropMenu';
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
@@ -20,12 +21,30 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
+const classes = {
+  footer: `footer`,
+  footerBtn: `footerBtn`
+};
+
 const Root = styled('div')(() => ({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'flex-start',
   alignItems: 'flex-start',
-  padding: '3rem 10rem 6rem'
+  padding: '3rem 10rem 6rem',
+  [`& .${classes.footer}`]: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    width: '100%',
+    justifyContent: 'flex-end'
+  },
+  [`& .${classes.footerBtn}`]: {
+    width: '10rem',
+    height: '3rem',
+    marginTop: 15,
+    textTransform: 'none',
+    color: '#fff'
+  }
 }));
 
 const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
@@ -44,8 +63,6 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
   const { token } = useTokenContext();
 
   const [removeAccountIndex, setRemoveAccountIndex] = React.useState(0);
-
-  const removeAccounts = ['1', '2', '3', '4'];
 
   const handleRemoveAccountSelectionChange = (index: number) => {
     setRemoveAccountIndex(index);
@@ -80,8 +97,9 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
   }, []);
 
   useEffect(() => {
-    if (coinSpecificData.coinsConfirmed) {
+    if (coinSpecificData.coinsConfirmed === true) {
       setTimeout(handleNext, 500);
+    } else if (coinSpecificData.coinsConfirmed !== false) {
     }
   }, [coinSpecificData.coinsConfirmed]);
 
@@ -108,12 +126,21 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         text="Verify the Coin on Device"
         stylex={{ marginTop: '0rem' }}
       />
-      <Typography color="textSecondary">Remove account</Typography>
-      <DropMenu
-        options={removeAccounts}
-        index={removeAccountIndex}
-        handleMenuItemSelectionChange={handleRemoveAccountSelectionChange}
-      />
+      {coinSpecificData.pathSent && !coinSpecificData.coinsConfirmed && (
+        <>
+          <Typography color="textSecondary">Remove account</Typography>
+          <DropMenu
+            options={['test', 'test2', 'test3', 'test4']}
+            index={removeAccountIndex}
+            handleMenuItemSelectionChange={handleRemoveAccountSelectionChange}
+          />
+          <div className={classes.footer}>
+            <CustomButton className={classes.footerBtn} onClick={handleNext}>
+              Replace Account
+            </CustomButton>
+          </div>
+        </>
+      )}
     </Root>
   );
 };

@@ -10,9 +10,11 @@ import Typography from '@mui/material/Typography';
 import QRCode from 'qrcode';
 import React, { useState } from 'react';
 
+import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import { addressDb } from '../../../../../../store/database';
 import {
+  useCoinSpecificDataContext,
   useCurrentCoin,
   useCustomAccountContext,
   useReceiveTransactionContext,
@@ -22,6 +24,7 @@ import {
 } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import logger from '../../../../../../utils/logger';
+import prevent from '../../../../../../utils/preventPropagation';
 
 import {
   StepComponentProps,
@@ -39,7 +42,9 @@ const classes = {
   link: `${PREFIX}-link`,
   externalLinkContainer: `${PREFIX}-externalLinkContainer`,
   qrWrapper: `${PREFIX}-qrWrapper`,
-  qrImage: `${PREFIX}-qrImage`
+  qrImage: `${PREFIX}-qrImage`,
+  footer: `${PREFIX}-footer`,
+  footerBtn: `${PREFIX}-footerBtn`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -99,6 +104,19 @@ const Root = styled('div')(({ theme }) => ({
   [`& .${classes.qrImage}`]: {
     height: 150,
     width: 150
+  },
+  [`& .${classes.footer}`]: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    width: '100%',
+    justifyContent: 'flex-end'
+  },
+  [`& .${classes.footerBtn}`]: {
+    width: '10rem',
+    height: '3rem',
+    marginTop: 15,
+    textTransform: 'none',
+    color: '#fff'
   }
 }));
 
@@ -185,6 +203,14 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   }, []);
 
   const [imageData, setImageData] = React.useState('');
+
+  const { setCoinSpecificDataForm } = useCoinSpecificDataContext();
+
+  const handleCoinSpecificDataFormOpen = (e: React.MouseEvent) => {
+    prevent(e);
+    handleClose();
+    setCoinSpecificDataForm(true);
+  };
 
   React.useEffect(() => {
     if (coinAddress) {
@@ -282,6 +308,16 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             &nbsp; by the Device.&nbsp;
             <strong>Please use it at your own Risk.</strong>
           </Typography>
+        )}
+        {coinVerified && customAccount && !receiveTransaction.accountExists && (
+          <div className={classes.footer}>
+            <CustomButton
+              className={classes.footerBtn}
+              onClick={handleCoinSpecificDataFormOpen}
+            >
+              Save to Device
+            </CustomButton>
+          </div>
         )}
       </Root>
     );

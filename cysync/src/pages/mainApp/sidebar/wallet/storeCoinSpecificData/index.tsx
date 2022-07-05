@@ -17,7 +17,7 @@ import StepperForm from './StepperForm';
 const ReceiveFormComponents = [
   ['Device', Device],
   ['Verification', Verification],
-  ['Receive', Recieve]
+  ['Saved', Recieve]
 ];
 
 const WalletStoreCoinSpecificData = () => {
@@ -68,7 +68,7 @@ const WalletStoreCoinSpecificData = () => {
         open={coinSpecificDataForm}
         isClosePresent
         handleClose={handleClose}
-        dialogHeading="Receive"
+        dialogHeading="Save To Device"
         disableBackdropClick
         restComponents={
           <StepperForm
@@ -88,7 +88,7 @@ const WalletStoreCoinSpecificData = () => {
       disableBackdropClick
       isClosePresent
       handleClose={handleClose}
-      dialogHeading="Receive"
+      dialogHeading="Save To Device"
       restComponents={
         <Recieve handleClose={handleClose} handleNext={handleClose} />
       }

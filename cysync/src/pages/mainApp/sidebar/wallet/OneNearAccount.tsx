@@ -215,16 +215,6 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
         <Send />
       </SendTransactionContext.Provider>
 
-      <ReceiveTransactionContext.Provider
-        value={{
-          receiveTransaction,
-          receiveForm,
-          setReceiveForm
-        }}
-      >
-        <Recieve />
-      </ReceiveTransactionContext.Provider>
-
       <CoinSpecificDataContext.Provider
         value={{
           coinSpecificData,
@@ -233,6 +223,15 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
         }}
       >
         <CoinSpecificData />
+        <ReceiveTransactionContext.Provider
+          value={{
+            receiveTransaction,
+            receiveForm,
+            setReceiveForm
+          }}
+        >
+          <Recieve />
+        </ReceiveTransactionContext.Provider>
       </CoinSpecificDataContext.Provider>
 
       <Grid container onClick={onClick} className={classes.root}>
