@@ -31,6 +31,7 @@ import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { addressDb, coinDb, transactionDb } from '../../database';
 import { useI18n } from '../../provider';
+import { useError } from '../useError';
 
 const flowName = Analytics.Categories.SEND_TXN;
 
@@ -204,6 +205,7 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [isCancelled, setIsCancelled] = useState(false);
 
   const { langStrings } = useI18n();
+  const { createError } = useError();
 
   const resetHooks = () => {
     setDeviceConnected(false);
@@ -541,10 +543,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.verbose('SendTransaction: Txn verified', { coinType });
           setVerified(true);
         } else {
-          const cyError = new CyError(
-            CysyncError.SEND_TXN_REJECTED,
-            langStrings.ERRORS.SEND_TXN_REJECTED(coinType)
-          );
+          const cyError = createError(CysyncError.SEND_TXN_REJECTED);
 
           logger.info('SendTransaction: Txn rejected from device', {
             coinType,

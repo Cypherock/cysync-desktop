@@ -1,3 +1,6 @@
+import { DeviceErrorType } from '@cypherock/communication';
+import { WalletErrorType } from '@cypherock/wallet';
+
 export enum CysyncError {
   NETWORK_ERROR = 'DS_CONN_3001',
   NETWORK_FAILURE = 'DS_CONN_3002',
@@ -91,3 +94,11 @@ export enum CysyncError {
   SYNC_MAX_TRIES_EXCEEDED = 'DS_SYNC_1002',
   TUTORIALS_UNKNOWN_ERROR = 'DS_MISC_5503'
 }
+export type ErrorsSet = CysyncError | DeviceErrorType | WalletErrorType;
+interface ErrorObject {
+  parent?: ErrorsSet;
+  message: string;
+}
+export type CodeToErrorMap = {
+  [key in ErrorsSet]-?: ErrorObject;
+};

@@ -6,3 +6,4 @@ export * from './usePortfolio';
 export * from './useToken';
 export * from './useTransactionData';
 export * from './useWalletData';
+export * from './useError';
