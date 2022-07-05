@@ -1,8 +1,9 @@
 import { DeviceErrorType } from '@cypherock/communication';
+import { FlowErrorType } from '@cypherock/protocols';
 import { WalletErrorType } from '@cypherock/wallet';
 
 export enum CysyncError {
-  NETWORK_ERROR = 'DS_CONN_3001',
+  // NETWORK_ERROR = 'DS_CONN_3001',
   NETWORK_FAILURE = 'DS_CONN_3002',
   NETWORK_UNREACHABLE = 'DS_CONN_2001',
 
@@ -70,7 +71,7 @@ export enum CysyncError {
   UNAUTHENTICATED_DEVICE = 'HD_INIT_2103',
   NEW_DEVICE_CONNECTED = 'HD_INIT_2104',
   DEVICE_IN_TEST_APP = 'HD_INIT_2106',
-  DEVICE_IN_PARTIAL_STATE = 'HD_INIT_2106',
+  DEVICE_IN_PARTIAL_STATE = 'HD_INIT_2107',
   UNKNOWN_CONNECTION_ERROR = 'HD_INIT_5501',
   INCOMPATIBLE_DEVICE = 'SYS_VER_1011',
   INCOMPATIBLE_DESKTOP = 'SYS_VER_1012',
@@ -94,10 +95,14 @@ export enum CysyncError {
   SYNC_MAX_TRIES_EXCEEDED = 'DS_SYNC_1002',
   TUTORIALS_UNKNOWN_ERROR = 'DS_MISC_5503'
 }
-export type ErrorsSet = CysyncError | DeviceErrorType | WalletErrorType;
+export type ErrorsSet =
+  | CysyncError
+  | DeviceErrorType
+  | WalletErrorType
+  | FlowErrorType;
 interface ErrorObject {
   parent?: ErrorsSet;
-  message: string;
+  message: string | ((meta: string) => string);
 }
 export type CodeToErrorMap = {
   [key in ErrorsSet]-?: ErrorObject;

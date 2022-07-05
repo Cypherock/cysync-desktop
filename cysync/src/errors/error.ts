@@ -36,26 +36,40 @@ class DisplayError {
 class CyError extends DisplayError {
   public childErrors: DisplayError[];
   static map: CodeToErrorMap;
-  constructor(code?: ErrorsSet) {
-    if (code) {
-      const parentError = CyError.map[code].parent;
-      if (parentError) {
-        super(parentError, CyError.map[parentError].message);
-      } else {
-        super(code, CyError.map[code].message);
-      }
-    } else {
-      super(undefined, undefined);
-    }
+  constructor(code?: ErrorsSet, meta?: string) {
+    super(undefined, undefined);
+    //Initialising empty Object
+    if (!code) return;
+    this.setError(code, meta);
     this.childErrors = [];
   }
-  public setError(code: string, message: string) {
+  public setError(code: ErrorsSet, meta?: string) {
     this.isSet = true;
-    this.code = code;
-    this.message = message;
+    let parentCode = code;
+    // Traverse the object tree until parent error is reached
+    // Only parent errors are displayed in the UI
+    while (CyError.map[parentCode].parent) {
+      parentCode = CyError.map[parentCode].parent;
+    }
+    this.code = parentCode;
+
+    // Handle strings and function I18N values
+    const messageUnion = CyError.map[parentCode].message;
+    if (meta && typeof messageUnion === 'function') {
+      this.message = messageUnion(meta);
+    } else if (typeof messageUnion === 'string') {
+      this.message = messageUnion;
+    }
   }
-  public pushSubErrors(code: string, message: string) {
-    this.childErrors.push(new DisplayError(code, message));
+  public pushSubErrors(code: ErrorsSet, meta?: string) {
+    const messageUnion = CyError.map[code].message;
+    let dispError;
+    if (messageUnion === 'string')
+      dispError = new DisplayError(code, messageUnion);
+    else if (meta && typeof messageUnion === 'function')
+      dispError = new DisplayError(code, messageUnion(meta));
+    this.childErrors.push(dispError);
+    return dispError;
   }
 }
 

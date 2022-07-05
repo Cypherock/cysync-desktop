@@ -2,7 +2,7 @@ export interface I18nStrings {
   ERRORS: {
     UNKNOWN_COMMUNICATION_ERROR: (flow: string) => string;
 
-    NETWORK_ERROR: string;
+    NETWORK_FAILURE: string;
     NETWORK_UNREACHABLE: string;
 
     DEVICE_NOT_CONNECTED: string;
@@ -67,7 +67,7 @@ export interface I18nStrings {
     SEND_TXN_INSUFFICIENT_BALANCE: (coin: string) => string;
     SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE: string;
     SEND_TXN_SIZE_TOO_LARGE: string;
-    SENX_TXN_BROADCAST_FAILED: string;
+    SEND_TXN_BROADCAST_FAILED: string;
     SEND_TXN_UNKNOWN_ERROR: string;
 
     INCOMPATIBLE_DEVICE: string;

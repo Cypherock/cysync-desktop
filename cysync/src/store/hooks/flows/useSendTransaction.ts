@@ -204,7 +204,6 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [sendMaxAmount, setSendMaxAmount] = useState(0);
   const [isCancelled, setIsCancelled] = useState(false);
 
-  const { langStrings } = useI18n();
   const { createError } = useError();
 
   const resetHooks = () => {
@@ -291,23 +290,16 @@ export const useSendTransaction: UseSendTransaction = () => {
           // Don't show error other than network error, because the data may be
           // insufficient for the calculation
           if (error.isAxiosError) {
-            handleAxiosErrors(cyError, error, langStrings);
+            handleAxiosErrors(cyError, error);
             setErrorObj(handleErrors(errorObj, cyError, subFlowName));
             return;
           } else if (error instanceof WalletError) {
-            handleWalletErrors(cyError, error, langStrings, { coinType });
+            handleWalletErrors(cyError, error, { coinType });
           } else {
-            cyError.setError(
-              CysyncError.SEND_TXN_UNKNOWN_ERROR,
-              langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
-            );
-            cyError.pushSubErrors(
-              CysyncError.SEND_TXN_UNKNOWN_ERROR,
-              subFlowName + ' : ' + error.message
-            );
+            cyError.setError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
           }
           setEstimationError(
-            handleErrors(estimationError, cyError, subFlowName)
+            handleErrors(estimationError, cyError, subFlowName, { error })
           );
         });
     };
@@ -342,18 +334,11 @@ export const useSendTransaction: UseSendTransaction = () => {
           // Don't show any other error because it may be due to
           // incorrect amount or address which the user may change.
           if (e.isAxiosError) {
-            handleAxiosErrors(cyError, e, langStrings);
+            handleAxiosErrors(cyError, e);
           } else {
-            cyError.setError(
-              CysyncError.SEND_TXN_UNKNOWN_ERROR,
-              langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
-            );
-            cyError.pushSubErrors(
-              CysyncError.SEND_TXN_UNKNOWN_ERROR,
-              e.message
-            );
+            cyError.setError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
           }
-          setErrorObj(handleErrors(errorObj, cyError, subFlowName));
+          setErrorObj(handleErrors(errorObj, cyError, subFlowName, { e }));
           resolve(null);
         });
     });
@@ -393,10 +378,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
 
       if (!connection) {
-        const cyError = new CyError(
-          DeviceErrorType.NOT_CONNECTED,
-          langStrings.ERRORS.DEVICE_NOT_CONNECTED
-        );
+        const cyError = createError(DeviceErrorType.NOT_CONNECTED);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         return;
       }
@@ -410,43 +392,31 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
 
       sendTransaction.on('cardError', () => {
-        const cyError = new CyError(
-          CysyncError.UNKNOWN_CARD_ERROR,
-          langStrings.ERRORS.UNKNOWN_CARD_ERROR
-        );
+        const cyError = createError(CysyncError.UNKNOWN_CARD_ERROR);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
       sendTransaction.on('error', err => {
         const cyError = new CyError();
         if (err instanceof WalletError) {
-          handleWalletErrors(cyError, err, langStrings, { coinType });
+          handleWalletErrors(cyError, err, { coinType });
         } else if (err.isAxiosError) {
-          handleAxiosErrors(cyError, err, langStrings);
+          handleAxiosErrors(cyError, err);
         } else if (err instanceof DeviceError) {
-          handleDeviceErrors(cyError, err, langStrings, flowName);
+          handleDeviceErrors(cyError, err, flowName);
         } else {
-          cyError.setError(
-            CysyncError.SEND_TXN_UNKNOWN_ERROR,
-            langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
-          );
+          cyError.setError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
         }
         setErrorObj(handleErrors(errorObj, cyError, flowName));
       });
 
       sendTransaction.on('locked', () => {
-        const cyError = new CyError(
-          CysyncError.WALLET_IS_LOCKED,
-          langStrings.ERRORS.WALLET_IS_LOCKED
-        );
+        const cyError = createError(CysyncError.WALLET_IS_LOCKED);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
       sendTransaction.on('notReady', () => {
-        const cyError = new CyError(
-          CysyncError.DEVICE_NOT_READY,
-          langStrings.ERRORS.DEVICE_NOT_READY
-        );
+        const cyError = createError(CysyncError.DEVICE_NOT_READY);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
@@ -455,34 +425,25 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.verbose('SendTransaction: Txn confirmed', { coinType });
           setCoinsConfirmed(true);
         } else {
-          const cyError = new CyError(
+          const cyError = createError(
             CysyncError.ADD_COIN_REJECTED,
-            langStrings.ERRORS.SEND_TXN_REJECTED(COINS[coinType].name)
+            COINS[coinType].name
           );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
 
       sendTransaction.on('txnTooLarge', () => {
-        const cyError = new CyError(
-          CysyncError.SEND_TXN_SIZE_TOO_LARGE,
-          langStrings.ERRORS.SEND_TXN_SIZE_TOO_LARGE
-        );
+        const cyError = createError(CysyncError.SEND_TXN_SIZE_TOO_LARGE);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
       sendTransaction.on('noWalletFound', (inPartialState: boolean) => {
         const cyError = new CyError();
         if (inPartialState) {
-          cyError.setError(
-            CysyncError.WALLET_PARTIAL_STATE,
-            langStrings.ERRORS.WALLET_PARTIAL_STATE
-          );
+          cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
         } else {
-          cyError.setError(
-            CysyncError.WALLET_NOT_FOUND_IN_DEVICE,
-            langStrings.ERRORS.WALLET_NOT_FOUND_IN_DEVICE
-          );
+          cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
         }
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
@@ -493,10 +454,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
 
       sendTransaction.on('noWalletOnCard', () => {
-        const cyError = new CyError(
-          CysyncError.WALLET_NOT_FOUND_IN_CARD,
-          langStrings.ERRORS.WALLET_NOT_FOUND_IN_CARD
-        );
+        const cyError = createError(CysyncError.WALLET_NOT_FOUND_IN_CARD);
         setErrorObj(handleErrors(errorObj, cyError, flowName));
       });
 
@@ -525,11 +483,9 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       sendTransaction.on('insufficientFunds', funds => {
         if (funds) {
-          const cyError = new CyError(
+          const cyError = createError(
             WalletErrorType.INSUFFICIENT_FUNDS,
-            langStrings.ERRORS.SEND_TXN_INSUFFICIENT_BALANCE(
-              COINS[coinType].name
-            )
+            COINS[coinType].name
           );
           setErrorObj(
             handleErrors(errorObj, cyError, flowName, { coinType, funds })
@@ -551,25 +507,13 @@ export const useSendTransaction: UseSendTransaction = () => {
           });
 
           if (val === 0) {
-            cyError.pushSubErrors(
-              CysyncError.SEND_TXN_REJECTED_AT_ADDRESS,
-              'SendTransaction: Txn was rejected on address screen'
-            );
+            cyError.pushSubErrors(CysyncError.SEND_TXN_REJECTED_AT_ADDRESS);
           } else if (val === 2) {
-            cyError.pushSubErrors(
-              CysyncError.SEND_TXN_REJECTED_AT_AMOUNT,
-              'SendTransaction: Txn was rejected on address screen'
-            );
+            cyError.pushSubErrors(CysyncError.SEND_TXN_REJECTED_AT_AMOUNT);
           } else if (val === 3) {
-            cyError.pushSubErrors(
-              CysyncError.SEND_TXN_REJECTED_AT_FEE,
-              'SendTransaction: Txn was rejected on address screen'
-            );
+            cyError.pushSubErrors(CysyncError.SEND_TXN_REJECTED_AT_FEE);
           } else {
-            cyError.pushSubErrors(
-              CysyncError.SEND_TXN_REJECTED_AT_UNKNOWN,
-              'SendTransaction: Txn was rejected on address screen'
-            );
+            cyError.pushSubErrors(CysyncError.SEND_TXN_REJECTED_AT_UNKNOWN);
           }
           setErrorObj(handleErrors(errorObj, cyError, flowName));
         }
@@ -585,9 +529,8 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.verbose('SendTransaction: Pin entered', { coinType });
           setPinEntered(true);
         } else {
-          const cyError = new CyError(
-            CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN,
-            langStrings.ERRORS.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
+          const cyError = createError(
+            CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
           );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
@@ -610,14 +553,8 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.verbose('SendTransaction: Signed txn generated', { coinType });
           setSignedTxn(txn);
         } else {
-          const cyError = new CyError(
-            CysyncError.SEND_TXN_UNKNOWN_ERROR,
-            langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
-          );
-          cyError.pushSubErrors(
-            CysyncError.SEND_TXN_SIGNED_TXN_NOT_FOUND,
-            'Signed Transaction was not found'
-          );
+          const cyError = createError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
+          cyError.pushSubErrors(CysyncError.SEND_TXN_SIGNED_TXN_NOT_FOUND);
           setErrorObj(
             handleErrors(errorObj, cyError, flowName, { txn, coinType })
           );
@@ -668,10 +605,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         setCompleted(true);
       } catch (e) {
         setIsInFlow(false);
-        const cyError = new CyError(
-          CysyncError.SEND_TXN_UNKNOWN_ERROR,
-          langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
-        );
+        const cyError = createError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType, e }));
         sendTransaction.removeAllListeners();
       }
@@ -810,10 +744,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         logger.info(txnInputs);
       });
     } catch (error) {
-      const cyError = new CyError(
-        CysyncError.SEND_TXN_BROADCAST_FAILED,
-        langStrings.ERRORS.SENX_TXN_BROADCAST_FAILED
-      );
+      const cyError = createError(CysyncError.SEND_TXN_BROADCAST_FAILED);
       setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
     }
   };
