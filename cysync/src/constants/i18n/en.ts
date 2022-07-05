@@ -11,25 +11,26 @@ const en: I18nStrings = {
       `Please disconnect and then reconnect the device and restart ${flow}`,
     KNOWN_FLOW_ERROR: flow =>
       `A known internal error has occured while ${flow}. Please report this to Cypherock Support`,
-    CUSTOM_ERROR: txt => `Some internal error occured while ${txt}`,
+    CUSTOM_ERROR: txt =>
+      `Some internal error occured while ${txt}. Please report this to Cypherock Support`,
 
     NETWORK_ERROR:
-      'Some internal error occurred while communicating with the server. Please try again later.',
+      'Some internal error occurred while communicating with the server. Please try again.',
     NETWORK_UNREACHABLE:
-      'Failed to communicate with the server. Please check your internet connection and try again later.',
+      'Failed to communicate with the server. Please check your internet connection and try again.',
 
     DEVICE_NOT_CONNECTED:
       'Please connect the cypherock X1 device before proceeding with this process',
     DEVICE_DISCONNECTED_IN_FLOW:
-      'Hardware Wallet disconnected. Please reconnect the Cypherock X1 wallet',
+      'Hardware Wallet disconnected. Please reconnect the Cypherock X1 device',
     DEVICE_TIMEOUT_ERROR:
-      'Some internal error occurred\n This maybe due to inactivity on the Cypherock X1 wallet',
+      'Some internal error occurred\n This maybe due to inactivity on the Cypherock X1 device',
     DEVICE_NOT_READY:
-      'Please bring the device to the main menu before starting any process from the CySync App.',
+      'Please bring the device to the main menu before starting any process.',
     DEVICE_NOT_READY_IN_INITIAL:
-      'Error connecting the device, please reconnect the device.',
+      'Error connecting the device, please reconnect the device and try again.',
     DEVICE_NOT_SUPPORTED:
-      'The connected device is not supported, please make sure that CySync and X1 wallet are up to date.',
+      'The connected device is not supported, please make sure that CySync and X1 device are up to date.',
     // I dont understand how this message would be helpful.
     DEVICE_MISCONFIGURED:
       'Your device is misconfigured, Please restart cySync App. If the problem persists, please contact us.',
@@ -41,9 +42,9 @@ const en: I18nStrings = {
     WALLET_PARTIAL_STATE:
       'This wallet is misconfigured. Please select the wallet from the main menu on the device to fix it.',
     ALL_WALLET_PARTIAL_STATE:
-      'All wallets are misconfigured. Please go to the wallets from the main menu and configure them again.',
+      'All wallets are misconfigured. Please go to the wallets on the main menu and configure them again.',
     NO_WALLET_ON_DEVICE:
-      'No wallet found. Please add a new wallet on the X1 wallet first',
+      'No wallet found. Please create a new wallet on the X1 device first',
     WALLET_IS_LOCKED:
       'Wallet is locked on the device\nPlease unlock it before continuing with any operations on the wallet',
     WALLET_LOCKED_DUE_TO_INCORRECT_PIN:
@@ -63,9 +64,9 @@ const en: I18nStrings = {
       `Failed to communicate with the blockchain while adding ${coins}. Please check your internet connection.`,
     ADD_COIN_FAILED_INTERNAL_ERROR: coins =>
       `Some internal error occurred while adding ${coins}.`,
-    ADD_COIN_FAILED: coins => `Error on adding coins: ${coins}.`,
+    ADD_COIN_FAILED: coins => `Error while adding coins: ${coins}.`,
     ADD_COIN_REJECTED:
-      'Request was rejected on the X1 Wallet\nPlease restart the process to add new coins on the CySync application',
+      'Request was rejected on the X1 Wallet\nPlease restart the process to add coins.',
 
     CARD_AUTH_REJECTED: 'X1 Card auth was rejected from device.',
     CARD_AUTH_FAILED:
