@@ -16,7 +16,10 @@ const handleErrors = (
   metadata?: any
 ) => {
   //TODO:  handle cascade effect properly
-  logger.info(currError);
+  if (currError.isSet) {
+    logger.info(currError);
+    return;
+  }
 
   // log the original error
   if (err.childErrors.length > 0) {
@@ -181,7 +184,7 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
 
     [CysyncError.ADD_COIN_REJECTED]: {
-      message: (coin: string) => langStrings.ERRORS.SEND_TXN_REJECTED(coin)
+      message: langStrings.ERRORS.ADD_COIN_REJECTED
     },
     [CysyncError.ADD_COIN_FAILED]: {
       message: (coin: string) => langStrings.ERRORS.ADD_COIN_FAILED(coin)
