@@ -1,7 +1,7 @@
 {
   "name": "cypherock-cysync",
   "productName": "cypherock-cysync",
-  "version": "1.0.0",
+  "version": "1.0.0-dev.6",
   "description": "Desktop wallet for Cypherock X1 hardware wallet.",
   "main": ".webpack/main",
   "scripts": {
@@ -135,5 +135,8 @@
     "*.{js,jsx,json,md,html,css}": [
       "prettier --write"
     ]
+  },
+  "resolutions": {
+    "**/@electron-forge/maker-dmg/electron-installer-dmg/appdmg": "^0.6.4"
   }
 }
