@@ -99,7 +99,6 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
   useEffect(() => {
     if (coinSpecificData.coinsConfirmed === true) {
       setTimeout(handleNext, 500);
-    } else if (coinSpecificData.coinsConfirmed !== false) {
     }
   }, [coinSpecificData.coinsConfirmed]);
 
