@@ -207,7 +207,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [CysyncError.CARD_AUTH_UNKNOWN_ERROR]: {
       message: langStrings.ERRORS.CARD_AUTH_UNKNOWN_ERROR
     },
-    [CysyncError.SEND_TXN_SIZE_TOO_LARGE]: undefined,
+    [CysyncError.SEND_TXN_SIZE_TOO_LARGE]: {
+      message: langStrings.ERRORS.SEND_TXN_SIZE_TOO_LARGE
+    },
     [CysyncError.SEND_TXN_REJECTED]: {
       message: (coin: string) => langStrings.ERRORS.SEND_TXN_REJECTED(coin)
     },
