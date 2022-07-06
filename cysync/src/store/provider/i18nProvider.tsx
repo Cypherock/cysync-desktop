@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import { I18nStrings } from '../../constants/i18n';
+import { CyError, getMap } from '../../errors';
 
 // Include other supported languages here when implemented
 export type I18nLanguage = 'en';
@@ -27,6 +28,10 @@ export const I18nProvider: React.FC = ({ children }) => {
   useEffect(() => {
     setLangStrings(require(`../../constants/i18n/${language}`).default);
   }, [language]);
+
+  useEffect(() => {
+    CyError.map = getMap(langStrings);
+  }, [langStrings]);
 
   return (
     <I18nContext.Provider value={{ language, setLanguage, langStrings }}>

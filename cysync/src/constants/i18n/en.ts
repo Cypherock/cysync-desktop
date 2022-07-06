@@ -10,7 +10,7 @@ const en: I18nStrings = {
     UNKNOWN_COMMUNICATION_ERROR: flow =>
       `Some unknown communication error while ${flow}`,
 
-    NETWORK_ERROR:
+    NETWORK_FAILURE:
       'Some internal error occurred while communicating with the server. Please try again.',
     NETWORK_UNREACHABLE:
       'Failed to communicate with the server. Please check your internet connection and try again.',
@@ -110,7 +110,7 @@ const en: I18nStrings = {
       `You do not have enough ${coin} to make this transaction`,
     SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE: `This transaction requires UTXOs from your previous transaction. Wait for few minutes before retrying`,
     SEND_TXN_SIZE_TOO_LARGE: 'This transaction cannot be performed.',
-    SENX_TXN_BROADCAST_FAILED: 'Error trying to broadcast transaction.',
+    SEND_TXN_BROADCAST_FAILED: 'Error trying to broadcast transaction.',
     SEND_TXN_UNKNOWN_ERROR: `Some internal occured. Please disconnect and then reconnect the device and retry.`,
 
     RECEIVE_TXN_XPUB_MISSING: 'Coin/Xpub is not present on device',

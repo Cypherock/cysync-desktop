@@ -10,7 +10,6 @@ import {
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
-import { useI18n } from '../../provider';
 
 export interface HandleLogFetcherOptions {
   connection: DeviceConnection;
@@ -40,8 +39,6 @@ export const useLogFetcher: UseLogFetcher = () => {
   const [requestStatus, setRequestStatus] = useState<-1 | 0 | 1 | 2>(0);
   const [logFetched, setLogFetched] = useState<-1 | 0 | 1 | 2>(0);
   const logFetcher = new LogsFetcher();
-
-  const { langStrings } = useI18n();
 
   // To call resetHooks outside of this function
   const resetHooks = () => {
@@ -79,12 +76,9 @@ export const useLogFetcher: UseLogFetcher = () => {
       setCompleted(true);
       const cyError = new CyError();
       if (err instanceof DeviceError) {
-        handleDeviceErrors(errorObj, err, langStrings, flowName);
+        handleDeviceErrors(errorObj, err, flowName);
       } else {
-        cyError.setError(
-          CysyncError.LOG_FETCHER_UNKNOWN_ERROR,
-          langStrings.ERRORS.LOG_FETCHER_UNKNOWN_ERROR
-        );
+        cyError.setError(CysyncError.LOG_FETCHER_UNKNOWN_ERROR);
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
     });
@@ -92,10 +86,7 @@ export const useLogFetcher: UseLogFetcher = () => {
     logFetcher.on('loggingDisabled', () => {
       setRequestStatus(-1);
       setLogFetched(-1);
-      const cyError = new CyError(
-        CysyncError.LOG_FETCHER_DISABLED_ON_DEVICE,
-        langStrings.ERRORS.LOG_FETCHER_DISABLED_ON_DEVICE
-      );
+      const cyError = new CyError(CysyncError.LOG_FETCHER_DISABLED_ON_DEVICE);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
@@ -107,10 +98,7 @@ export const useLogFetcher: UseLogFetcher = () => {
       } else {
         setRequestStatus(-1);
         setLogFetched(-1);
-        const cyError = new CyError(
-          CysyncError.LOG_FETCHER_REJECTED,
-          langStrings.ERRORS.LOG_FETCHER_REJECTED
-        );
+        const cyError = new CyError(CysyncError.LOG_FETCHER_REJECTED);
         setErrorObj(handleErrors(errorObj, cyError, flowName));
       }
     });
@@ -125,10 +113,7 @@ export const useLogFetcher: UseLogFetcher = () => {
     logFetcher.on('notReady', () => {
       setRequestStatus(-1);
       setLogFetched(-1);
-      const cyError = new CyError(
-        CysyncError.DEVICE_NOT_READY_IN_INITIAL,
-        langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL
-      );
+      const cyError = new CyError(CysyncError.DEVICE_NOT_READY_IN_INITIAL);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
@@ -144,10 +129,7 @@ export const useLogFetcher: UseLogFetcher = () => {
       setCompleted(true);
     } catch (e) {
       setIsInFlow(false);
-      const cyError = new CyError(
-        CysyncError.LOG_FETCHER_UNKNOWN_ERROR,
-        langStrings.ERRORS.LOG_FETCHER_UNKNOWN_ERROR
-      );
+      const cyError = new CyError(CysyncError.LOG_FETCHER_UNKNOWN_ERROR);
       setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       setRequestStatus(-1);
       setLogFetched(-1);

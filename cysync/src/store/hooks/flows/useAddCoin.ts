@@ -17,7 +17,7 @@ import {
 } from '../../../errors';
 import logger from '../../../utils/logger';
 import { addressDb, Coin, coinDb } from '../../database';
-import { useI18n, useSync } from '../../provider';
+import { useSync } from '../../provider';
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -87,7 +87,6 @@ export const useAddCoin: UseAddCoin = () => {
   >([]);
 
   const sync = useSync();
-  const { langStrings } = useI18n();
   const addCoin = new CoinAdder();
 
   // converts data from GUI to required format;
@@ -201,28 +200,20 @@ export const useAddCoin: UseAddCoin = () => {
       let message = '';
       const cyError = new CyError();
       if (latestAllNetFailedCoins.length > 0) {
-        const serverErrorMessage =
-          langStrings.ERRORS.ADD_COIN_FAILED_DUE_TO_SERVER_ERROR(
-            latestAllNetFailedCoins.join(',').toUpperCase()
-          );
-        message += serverErrorMessage;
-        message += '\n';
-        cyError.pushSubErrors(
+        const serverError = cyError.pushSubErrors(
           CysyncError.ADD_COIN_FAILED_DUE_TO_SERVER_ERROR,
-          serverErrorMessage
+          latestAllNetFailedCoins.join(',').toUpperCase()
         );
+        message += serverError.getMessage();
+        message += '\n';
       }
       if (latestAllInternalFailedCoins.length > 0) {
-        const internalerrorMessage =
-          langStrings.ERRORS.ADD_COIN_FAILED_INTERNAL_ERROR(
-            latestAllInternalFailedCoins.join(',').toUpperCase()
-          );
-        message += internalerrorMessage;
-        message += '\n';
-        cyError.pushSubErrors(
+        const failedError = cyError.pushSubErrors(
           CysyncError.ADD_COIN_FAILED_INTERNAL_ERROR,
-          internalerrorMessage
+          latestAllInternalFailedCoins.join(',').toUpperCase()
         );
+        message += failedError.getMessage();
+        message += '\n';
       }
 
       setDetailedMessage(message);
@@ -230,9 +221,7 @@ export const useAddCoin: UseAddCoin = () => {
       if (latestAllFailedCoins.length > 0) {
         cyError.setError(
           CysyncError.ADD_COIN_FAILED,
-          langStrings.ERRORS.ADD_COIN_FAILED(
-            latestAllFailedCoins.join(', ').toUpperCase()
-          )
+          latestAllFailedCoins.join(', ').toUpperCase()
         );
         setErrorObj(handleErrors(errorObj, cyError));
       }
@@ -279,10 +268,7 @@ export const useAddCoin: UseAddCoin = () => {
 
     if (!connection) {
       logger.error(`${flowName}: Failed - Device not connected`);
-      const cyError = new CyError(
-        DeviceErrorType.NOT_CONNECTED,
-        langStrings.ERRORS.DEVICE_NOT_CONNECTED
-      );
+      const cyError = new CyError(DeviceErrorType.NOT_CONNECTED);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       return;
     }
@@ -297,44 +283,29 @@ export const useAddCoin: UseAddCoin = () => {
 
     addCoin.on('cardError', () => {
       // CRD_SEC_5500
-      const cyError = new CyError(
-        CysyncError.UNKNOWN_CARD_ERROR,
-        langStrings.ERRORS.UNKNOWN_CARD_ERROR
-      );
+      const cyError = new CyError(CysyncError.UNKNOWN_CARD_ERROR);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     addCoin.on('error', err => {
       const cyError = new CyError();
       if (err.isAxiosError) {
-        handleAxiosErrors(cyError, err, langStrings);
+        handleAxiosErrors(cyError, err);
       } else if (err instanceof DeviceError) {
-        handleDeviceErrors(cyError, err, langStrings, flowName);
+        handleDeviceErrors(cyError, err, flowName);
       } else if (err instanceof FlowError) {
         if (err.errorType === FlowErrorType.ADD_COIN_UNKNOWN_ASSET) {
-          cyError.pushSubErrors(
-            FlowErrorType.ADD_COIN_UNKNOWN_ASSET,
-            'Unknown Coin requested to the device'
-          );
-          cyError.setError(
-            CysyncError.ADD_COIN_FAILED,
-            langStrings.ERRORS.ADD_COIN_FAILED(err.metadata)
-          );
+          cyError.pushSubErrors(FlowErrorType.ADD_COIN_UNKNOWN_ASSET);
+          cyError.setError(CysyncError.ADD_COIN_FAILED, err.metadata);
         }
       } else {
-        cyError.setError(
-          CysyncError.ADD_COIN_UNKNOWN_ERROR,
-          langStrings.ERRORS.ADD_COIN_UNKNOWN_ERROR
-        );
+        cyError.setError(CysyncError.ADD_COIN_UNKNOWN_ERROR);
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
     });
 
     addCoin.on('locked', () => {
-      const cyError = new CyError(
-        CysyncError.WALLET_IS_LOCKED,
-        langStrings.ERRORS.WALLET_IS_LOCKED
-      );
+      const cyError = new CyError(CysyncError.WALLET_IS_LOCKED);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
@@ -343,11 +314,7 @@ export const useAddCoin: UseAddCoin = () => {
         logger.verbose(`${flowName}: Coins confirmed`);
         setCoinsConfirmed(true);
       } else {
-        logger.info(`${flowName}: Rejected from device`);
-        const cyError = new CyError(
-          CysyncError.ADD_COIN_REJECTED,
-          langStrings.ERRORS.ADD_COIN_REJECTED
-        );
+        const cyError = new CyError(CysyncError.ADD_COIN_REJECTED);
         setErrorObj(handleErrors(errorObj, cyError, flowName));
       }
     });
@@ -363,8 +330,7 @@ export const useAddCoin: UseAddCoin = () => {
         setPinEntered(true);
       } else {
         const cyError = new CyError(
-          CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN,
-          langStrings.ERRORS.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
+          CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
         );
         setErrorObj(handleErrors(errorObj, cyError, flowName));
         resetHooks();
@@ -389,19 +355,13 @@ export const useAddCoin: UseAddCoin = () => {
     });
 
     addCoin.on('unknownError', () => {
-      const cyError = new CyError(
-        CysyncError.ADD_COIN_UNKNOWN_ERROR,
-        langStrings.ERRORS.ADD_COIN_UNKNOWN_ERROR
-      );
+      const cyError = new CyError(CysyncError.ADD_COIN_UNKNOWN_ERROR);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       resetHooks();
     });
 
     addCoin.on('notReady', () => {
-      const cyError = new CyError(
-        CysyncError.DEVICE_NOT_READY,
-        langStrings.ERRORS.DEVICE_NOT_READY
-      );
+      const cyError = new CyError(CysyncError.DEVICE_NOT_READY);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       resetHooks();
     });
@@ -410,25 +370,16 @@ export const useAddCoin: UseAddCoin = () => {
       logger.info(`${flowName}: Wallet not found`, { inPartialState });
       const cyError = new CyError();
       if (inPartialState) {
-        cyError.setError(
-          CysyncError.WALLET_PARTIAL_STATE,
-          langStrings.ERRORS.WALLET_PARTIAL_STATE
-        );
+        cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
       } else {
-        cyError.setError(
-          CysyncError.WALLET_NOT_FOUND_IN_DEVICE,
-          langStrings.ERRORS.WALLET_NOT_FOUND_IN_DEVICE
-        );
+        cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       resetHooks();
     });
 
     addCoin.on('noWalletOnCard', () => {
-      const cyError = new CyError(
-        CysyncError.WALLET_NOT_FOUND_IN_CARD,
-        langStrings.ERRORS.WALLET_NOT_FOUND_IN_CARD
-      );
+      const cyError = new CyError(CysyncError.WALLET_NOT_FOUND_IN_CARD);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       resetHooks();
     });
@@ -452,10 +403,7 @@ export const useAddCoin: UseAddCoin = () => {
       logger.info(`${flowName}: Completed`);
     } catch (e) {
       setIsInFlow(false);
-      const cyError = new CyError(
-        CysyncError.ADD_COIN_UNKNOWN_ERROR,
-        langStrings.ERRORS.ADD_COIN_UNKNOWN_ERROR
-      );
+      const cyError = new CyError(CysyncError.ADD_COIN_UNKNOWN_ERROR);
       setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       addCoin.removeAllListeners();
     }

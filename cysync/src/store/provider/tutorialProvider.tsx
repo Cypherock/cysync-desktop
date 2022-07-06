@@ -11,8 +11,6 @@ import {
   handleErrors
 } from '../../errors';
 
-import { useI18n } from './i18nProvider';
-
 export interface Tutorial {
   _id: string;
   title: string;
@@ -40,7 +38,6 @@ export const TutorialProvider: React.FC = ({ children }) => {
   >([]);
   const [isFetched, setIsFetched] = useState(false);
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
-  const { langStrings } = useI18n();
 
   const getAll = async () => {
     if (isLoading) return;
@@ -58,12 +55,9 @@ export const TutorialProvider: React.FC = ({ children }) => {
     } catch (error) {
       const cyError = new CyError();
       if (error.isAxiosError) {
-        handleAxiosErrors(cyError, error, langStrings);
+        handleAxiosErrors(cyError, error);
       } else {
-        cyError.setError(
-          CysyncError.TUTORIALS_UNKNOWN_ERROR,
-          langStrings.ERRORS.TUTORIALS_UNKNOWN_ERROR
-        );
+        cyError.setError(CysyncError.TUTORIALS_UNKNOWN_ERROR);
       }
       setErrorObj(handleErrors(errorObj, cyError, 'Tutorials', error));
     } finally {

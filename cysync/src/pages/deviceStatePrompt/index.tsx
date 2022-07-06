@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
 import { CyError } from '../../errors';
-import { useConnection, useI18n } from '../../store/provider';
+import { useConnection } from '../../store/provider';
 import logger from '../../utils/logger';
 
 const DeviceStatePrompt = () => {
@@ -20,8 +20,6 @@ const DeviceStatePrompt = () => {
   } = useConnection();
 
   const cancelFlow = new CancelFlow();
-
-  const { langStrings } = useI18n();
 
   const runCancelFlow = async () => {
     setIsCancelRunning(true);
@@ -57,15 +55,12 @@ const DeviceStatePrompt = () => {
   }
 
   if (openErrorPrompt) {
-    const cyError = new CyError(
-      DeviceErrorType.NOT_CONNECTED,
-      langStrings.ERRORS.DEVICE_NOT_CONNECTED
-    );
+    const cyError = new CyError(DeviceErrorType.NOT_CONNECTED);
     return (
       <ErrorDialog
         open={openErrorPrompt}
         handleClose={() => setOpenErrorPrompt(false)}
-        text={langStrings.ERRORS.DEVICE_NOT_CONNECTED}
+        text={''}
         errorObj={cyError}
       />
     );

@@ -17,7 +17,7 @@ import {
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { addressDb, receiveAddressDb } from '../../database';
-import { useI18n, useSocket } from '../../provider';
+import { useSocket } from '../../provider';
 
 export interface HandleReceiveTransactionOptions {
   connection: DeviceConnection;
@@ -60,7 +60,6 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [xpubMissing, setXpubMissing] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [verified, setVerified] = useState(false);
-  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [receiveAddress, setReceiveAddress] = useState('');
   const [pathSent, setPathSent] = useState(false);
   const [cardTapped, setCardTapped] = useState(false);
@@ -70,8 +69,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const { addReceiveAddressHook } = useSocket();
   let recAddr: string | undefined;
   const receiveTransaction = new TransactionReceiver();
-  const { langStrings } = useI18n();
 
+  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const resetHooks = () => {
     setCoinsConfirmed(false);
     setVerified(false);
@@ -131,10 +130,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       });
 
       if (!connection) {
-        const cyError = new CyError(
-          DeviceErrorType.NOT_CONNECTED,
-          langStrings.ERRORS.DEVICE_NOT_CONNECTED
-        );
+        const cyError = new CyError(DeviceErrorType.NOT_CONNECTED);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         return;
       }
@@ -148,56 +144,38 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       });
 
       receiveTransaction.on('cardError', () => {
-        const cyError = new CyError(
-          CysyncError.UNKNOWN_CARD_ERROR,
-          langStrings.ERRORS.UNKNOWN_CARD_ERROR
-        );
+        const cyError = new CyError(CysyncError.UNKNOWN_CARD_ERROR);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
       receiveTransaction.on('error', err => {
         const cyError = new CyError();
         if (err.isAxiosError) {
-          handleAxiosErrors(cyError, err, langStrings);
+          handleAxiosErrors(cyError, err);
         } else if (err instanceof DeviceError) {
-          handleDeviceErrors(cyError, err, langStrings, flowName);
+          handleDeviceErrors(cyError, err, flowName);
         } else {
-          cyError.setError(
-            CysyncError.RECEIVE_TXN_UNKNOWN_ERROR,
-            langStrings.ERRORS.RECEIVE_TXN_UNKNOWN_ERROR
-          );
+          cyError.setError(CysyncError.RECEIVE_TXN_UNKNOWN_ERROR);
         }
         setErrorObj(handleErrors(errorObj, cyError, flowName, err));
       });
 
       receiveTransaction.on('locked', () => {
-        const cyError = new CyError(
-          CysyncError.WALLET_IS_LOCKED,
-          langStrings.ERRORS.WALLET_IS_LOCKED
-        );
+        const cyError = new CyError(CysyncError.WALLET_IS_LOCKED);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
       receiveTransaction.on('notReady', () => {
-        const cyError = new CyError(
-          CysyncError.DEVICE_NOT_READY,
-          langStrings.ERRORS.DEVICE_NOT_READY
-        );
+        const cyError = new CyError(CysyncError.DEVICE_NOT_READY);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
       receiveTransaction.on('noWalletFound', (inPartialState: boolean) => {
         const cyError = new CyError();
         if (inPartialState) {
-          cyError.setError(
-            CysyncError.WALLET_PARTIAL_STATE,
-            langStrings.ERRORS.WALLET_PARTIAL_STATE
-          );
+          cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
         } else {
-          cyError.setError(
-            CysyncError.WALLET_NOT_FOUND_IN_DEVICE,
-            langStrings.ERRORS.WALLET_NOT_FOUND_IN_DEVICE
-          );
+          cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
         }
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
@@ -208,10 +186,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       });
 
       receiveTransaction.on('noWalletOnCard', () => {
-        const cyError = new CyError(
-          CysyncError.WALLET_NOT_FOUND_IN_CARD,
-          langStrings.ERRORS.WALLET_NOT_FOUND_IN_CARD
-        );
+        const cyError = new CyError(CysyncError.WALLET_NOT_FOUND_IN_CARD);
         setErrorObj(handleErrors(errorObj, cyError, flowName));
       });
 
@@ -220,10 +195,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           logger.verbose('ReceiveAddress: Confirmed on device', { coinType });
           setCoinsConfirmed(true);
         } else {
-          const cyError = new CyError(
-            CysyncError.ADD_COIN_REJECTED,
-            langStrings.ERRORS.SEND_TXN_REJECTED(coin.name)
-          );
+          const cyError = new CyError(CysyncError.ADD_COIN_REJECTED, coin.name);
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
@@ -232,8 +204,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         setTimeout(() => {
           setXpubMissing(true);
           const cyError = new CyError(
-            CysyncError.RECEIVE_TXN_DEVICE_MISCONFIGURED,
-            langStrings.ERRORS.RECEIVE_TXN_DEVICE_MISCONFIGURED
+            CysyncError.RECEIVE_TXN_DEVICE_MISCONFIGURED
           );
           cyError.pushSubErrors(
             CysyncError.RECEIVE_TXN_XPUB_MISSING,
@@ -262,8 +233,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
 
           if (!recAddr || recAddr.toLowerCase() !== val.toLowerCase()) {
             cyError.setError(
-              CysyncError.RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE,
-              langStrings.ERRORS.RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE
+              CysyncError.RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE
             );
             cyError.pushSubErrors(
               CysyncError.RECEIVE_TXN_UNKNOWN_ERROR,
@@ -276,10 +246,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
             onNewReceiveAddr(recAddr, walletId, coinType);
           }
         } else {
-          cyError.setError(
-            CysyncError.RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER,
-            langStrings.ERRORS.RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER
-          );
+          cyError.setError(CysyncError.RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER);
         }
         if (cyError.isSet)
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
@@ -302,8 +269,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           setCardTapped(true);
         } else {
           const cyError = new CyError(
-            CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN,
-            langStrings.ERRORS.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
+            CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
           );
           setErrorObj(handleErrors(errorObj, cyError, flowName));
         }
@@ -337,10 +303,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         setCompleted(true);
       } catch (e) {
         setIsInFlow(false);
-        const cyError = new CyError(
-          CysyncError.RECEIVE_TXN_UNKNOWN_ERROR,
-          langStrings.ERRORS.RECEIVE_TXN_UNKNOWN_ERROR
-        );
+        const cyError = new CyError(CysyncError.RECEIVE_TXN_UNKNOWN_ERROR);
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, { error: e, coinType })
         );
