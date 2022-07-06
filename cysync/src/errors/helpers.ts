@@ -263,11 +263,15 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     // Status Codes
     [CysyncError.DEVICE_HAS_INITIAL_FIRMWARE]: undefined,
-    [CysyncError.DEVICE_IN_BOOTLOADER]: undefined,
+    [CysyncError.DEVICE_IN_BOOTLOADER]: {
+      message: langStrings.ERRORS.DEVICE_MISCONFIGURED
+    },
     [CysyncError.LAST_DEVICE_AUTH_FAILED]: undefined,
     [CysyncError.UNAUTHENTICATED_DEVICE]: undefined,
     [CysyncError.NEW_DEVICE_CONNECTED]: undefined,
-    [CysyncError.DEVICE_IN_TEST_APP]: undefined,
+    [CysyncError.DEVICE_IN_TEST_APP]: {
+      message: langStrings.ERRORS.DEVICE_MISCONFIGURED
+    },
     [CysyncError.DEVICE_IN_PARTIAL_STATE]: undefined,
     [CysyncError.UNKNOWN_CONNECTION_ERROR]: undefined,
     [CysyncError.INCOMPATIBLE_DEVICE]: undefined,

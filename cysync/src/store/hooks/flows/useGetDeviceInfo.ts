@@ -14,7 +14,6 @@ import {
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { deviceDb } from '../../database';
-import { useI18n } from '../../provider';
 
 export type UpdateRequiredType = 'app' | 'device' | 'all' | undefined;
 
@@ -53,8 +52,6 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
   const [completed, setCompleted] = useState(false);
   const getDeviceInfo = new GetDeviceInfo();
 
-  const { langStrings } = useI18n();
-
   // To call resetHooks outside of this function
   const resetHooks = () => {
     setCompleted(false);
@@ -91,12 +88,9 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
       logger.error('GetDeviceInfo: Error occurred');
       const cyError = new CyError();
       if (err instanceof DeviceError) {
-        handleDeviceErrors(cyError, err, langStrings, flowName);
+        handleDeviceErrors(cyError, err, flowName);
       } else {
-        cyError.setError(
-          CysyncError.DEVICE_INFO_UNKNOWN_ERROR,
-          langStrings.ERRORS.DEVICE_INFO_UNKNOWN_ERROR
-        );
+        cyError.setError(CysyncError.DEVICE_INFO_UNKNOWN_ERROR);
       }
       setErrorObj(handleErrors(errorObj, cyError));
     });
@@ -115,10 +109,7 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
         setIsUpdateRequired('all');
       }
 
-      const cyError = new CyError(
-        CysyncError.INCOMPATIBLE_DEVICE,
-        langStrings.ERRORS.INCOMPATIBLE_DEVICE
-      );
+      const cyError = new CyError(CysyncError.INCOMPATIBLE_DEVICE);
       setErrorObj(
         handleErrors(errorObj, cyError, flowName, {
           message: `GetDeviceInfo: This SDK version is not supported. Supported SDK versions are ${ALL_SUPPORTED_SDK_VERSIONS.join(
@@ -162,10 +153,7 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
 
     getDeviceInfo.on('notReady', () => {
       setIsNotReady(true);
-      const cyError = new CyError(
-        CysyncError.DEVICE_NOT_READY,
-        langStrings.ERRORS.DEVICE_NOT_READY
-      );
+      const cyError = new CyError(CysyncError.DEVICE_NOT_READY);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
@@ -186,10 +174,7 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
     } catch (e) {
       setIsInFlow(false);
       getDeviceInfo.removeAllListeners();
-      const cyError = new CyError(
-        CysyncError.DEVICE_INFO_UNKNOWN_ERROR,
-        langStrings.ERRORS.DEVICE_INFO_UNKNOWN_ERROR
-      );
+      const cyError = new CyError(CysyncError.DEVICE_INFO_UNKNOWN_ERROR);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       setCompleted(true);
     }

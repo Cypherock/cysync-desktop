@@ -16,8 +16,7 @@ import {
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { walletDb } from '../../database';
-import { useConnection, useI18n, useWallets } from '../../provider';
-import { useError } from '../useError';
+import { useConnection, useWallets } from '../../provider';
 
 export interface HandleAddWalletOptions {
   connection: DeviceConnection;
@@ -61,7 +60,6 @@ export const useAddWallet: UseAddWallet = () => {
   const [isCancelled, setIsCancelled] = useState(false);
 
   const wallets = useWallets();
-  const { createError } = useError();
   const { deviceSerial } = useConnection();
 
   const resetHooks = () => {
@@ -92,7 +90,7 @@ export const useAddWallet: UseAddWallet = () => {
     logger.info('AddWallet: Initiated');
     if (!connection) {
       setTimeout(() => {
-        const cyError = createError(DeviceErrorType.NOT_CONNECTED);
+        const cyError = new CyError(DeviceErrorType.NOT_CONNECTED);
         setErrorObj(handleErrors(errorObj, cyError, flowName));
       }, 100);
       return;
@@ -130,7 +128,7 @@ export const useAddWallet: UseAddWallet = () => {
     addWallet.on('walletDetails', async (walletDetails: Wallet) => {
       try {
         if (walletDetails === null) {
-          const cyError = createError(CysyncError.ADD_WALLET_REJECTED);
+          const cyError = new CyError(CysyncError.ADD_WALLET_REJECTED);
           setErrorObj(handleErrors(errorObj, cyError, flowName));
           return;
         }
@@ -138,7 +136,7 @@ export const useAddWallet: UseAddWallet = () => {
         logger.verbose('AddWallet: Wallet confirmed');
         const { allWallets } = wallets;
         if (allWallets.length >= 4) {
-          const cyError = createError(CysyncError.ADD_WALLET_LIMIT_EXCEEDED);
+          const cyError = new CyError(CysyncError.ADD_WALLET_LIMIT_EXCEEDED);
           setErrorObj(handleErrors(errorObj, cyError, flowName));
           return;
         }
@@ -149,7 +147,7 @@ export const useAddWallet: UseAddWallet = () => {
           const duplicateWallet = walletWithSameId;
 
           if (duplicateWallet.name === walletDetails.name) {
-            const cyError = createError(CysyncError.ADD_WALLET_DUPLICATE);
+            const cyError = new CyError(CysyncError.ADD_WALLET_DUPLICATE);
             setErrorObj(handleErrors(errorObj, cyError, flowName));
           } else {
             logger.info('AddWallet: Same wallet found with different name');
@@ -158,7 +156,7 @@ export const useAddWallet: UseAddWallet = () => {
             setPasswordSet(walletDetails.passwordSet);
             setPassphraseSet(walletDetails.passphraseSet);
             setIsNameDiff(true);
-            const cyError = createError(
+            const cyError = new CyError(
               CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME
             );
             setErrorObj(handleErrors(errorObj, cyError, flowName));
@@ -179,7 +177,7 @@ export const useAddWallet: UseAddWallet = () => {
           })
           .catch((err: any) => {
             if (err.errorType === 'uniqueViolated') {
-              const cyError = createError(
+              const cyError = new CyError(
                 CysyncError.ADD_WALLET_WITH_SAME_NAME
               );
               setErrorObj(handleErrors(errorObj, cyError, flowName));
@@ -188,13 +186,13 @@ export const useAddWallet: UseAddWallet = () => {
             }
           });
       } catch (error) {
-        const cyError = createError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
+        const cyError = new CyError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
       }
     });
 
     addWallet.on('notReady', () => {
-      const cyError = createError(CysyncError.DEVICE_NOT_READY);
+      const cyError = new CyError(CysyncError.DEVICE_NOT_READY);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
@@ -212,7 +210,7 @@ export const useAddWallet: UseAddWallet = () => {
       setIsInFlow(false);
       logger.error('AddWallet: Some Error');
       logger.error(e);
-      const cyError = createError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
+      const cyError = new CyError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       addWallet.removeAllListeners();
     }
@@ -256,7 +254,7 @@ export const useAddWallet: UseAddWallet = () => {
       setWalletSuccess(true);
     } catch (error) {
       setIsNameDiff(false);
-      const cyError = createError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
+      const cyError = new CyError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
       setErrorObj(
         handleErrors(errorObj, cyError, flowName, {
           error,

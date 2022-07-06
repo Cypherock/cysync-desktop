@@ -18,7 +18,6 @@ import {
 import logger from '../../../utils/logger';
 import { addressDb, Coin, coinDb } from '../../database';
 import { useSync } from '../../provider';
-import { useError } from '../useError';
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -87,7 +86,6 @@ export const useAddCoin: UseAddCoin = () => {
     string[]
   >([]);
 
-  const { createError } = useError();
   const sync = useSync();
   const addCoin = new CoinAdder();
 
@@ -285,7 +283,7 @@ export const useAddCoin: UseAddCoin = () => {
 
     addCoin.on('cardError', () => {
       // CRD_SEC_5500
-      const cyError = createError(CysyncError.UNKNOWN_CARD_ERROR);
+      const cyError = new CyError(CysyncError.UNKNOWN_CARD_ERROR);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
@@ -307,7 +305,7 @@ export const useAddCoin: UseAddCoin = () => {
     });
 
     addCoin.on('locked', () => {
-      const cyError = createError(CysyncError.WALLET_IS_LOCKED);
+      const cyError = new CyError(CysyncError.WALLET_IS_LOCKED);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
@@ -316,7 +314,7 @@ export const useAddCoin: UseAddCoin = () => {
         logger.verbose(`${flowName}: Coins confirmed`);
         setCoinsConfirmed(true);
       } else {
-        const cyError = createError(CysyncError.ADD_COIN_REJECTED);
+        const cyError = new CyError(CysyncError.ADD_COIN_REJECTED);
         setErrorObj(handleErrors(errorObj, cyError, flowName));
       }
     });
@@ -331,7 +329,7 @@ export const useAddCoin: UseAddCoin = () => {
         logger.verbose(`${flowName}: Pin Entered`);
         setPinEntered(true);
       } else {
-        const cyError = createError(
+        const cyError = new CyError(
           CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
         );
         setErrorObj(handleErrors(errorObj, cyError, flowName));
@@ -357,13 +355,13 @@ export const useAddCoin: UseAddCoin = () => {
     });
 
     addCoin.on('unknownError', () => {
-      const cyError = createError(CysyncError.ADD_COIN_UNKNOWN_ERROR);
+      const cyError = new CyError(CysyncError.ADD_COIN_UNKNOWN_ERROR);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       resetHooks();
     });
 
     addCoin.on('notReady', () => {
-      const cyError = createError(CysyncError.DEVICE_NOT_READY);
+      const cyError = new CyError(CysyncError.DEVICE_NOT_READY);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       resetHooks();
     });
@@ -381,7 +379,7 @@ export const useAddCoin: UseAddCoin = () => {
     });
 
     addCoin.on('noWalletOnCard', () => {
-      const cyError = createError(CysyncError.WALLET_NOT_FOUND_IN_CARD);
+      const cyError = new CyError(CysyncError.WALLET_NOT_FOUND_IN_CARD);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       resetHooks();
     });
