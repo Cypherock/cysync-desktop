@@ -1,5 +1,3 @@
-import { ALLCOINS as COINS, CoinGroup } from '@cypherock/communication';
-import wallet from '@cypherock/wallet';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Button from '@mui/material/Button';
@@ -7,20 +5,15 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import QRCode from 'qrcode';
-import React, { useState } from 'react';
+import React from 'react';
 
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
-import { addressDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
   useReceiveTransactionContext,
-  useSelectedWallet,
   useSnackbar,
   useTokenContext
 } from '../../../../../../store/provider';
-import Analytics from '../../../../../../utils/analytics';
-import logger from '../../../../../../utils/logger';
 
 import {
   StepComponentProps,
@@ -101,122 +94,30 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-const getReceiveAddress = async (
-  coinType: string,
-  xpub: string,
-  walletId: string,
-  zpub?: string
-) => {
-  let receiveAddress = '';
-  let w;
-
-  const coin = COINS[coinType];
-
-  if (!coin) {
-    throw new Error(`Invalid coinType ${coinType}`);
-  }
-
-  if (coin.group === CoinGroup.Ethereum) {
-    w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
-    receiveAddress = (await w.newReceiveAddress()).toUpperCase();
-    // To make the first x in lowercase
-    receiveAddress = `0x${receiveAddress.slice(2)}`;
-  } else {
-    w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
-    receiveAddress = await w.newReceiveAddress();
-  }
-  return receiveAddress;
-};
-
 const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const theme = useTheme();
   const snackbar = useSnackbar();
 
   const { receiveTransaction } = useReceiveTransactionContext();
 
-  const [coinAddress, setCoinAddress] = useState(
-    receiveTransaction.receiveAddress
-  );
-  const [coinVerified, setCoinVerified] = useState(true);
-  const [error, setError] = useState(false);
-  const [QRError, setQRError] = useState(false);
-
   const { coinDetails } = useCurrentCoin();
-  const { selectedWallet } = useSelectedWallet();
 
   const { token } = useTokenContext();
 
   const coinAbbr = token ? token.slug : coinDetails.slug;
 
-  React.useEffect(() => {
-    if (!coinAddress || !receiveTransaction.verified) {
-      getReceiveAddress(
-        coinDetails.slug,
-        coinDetails.xpub,
-        coinDetails.walletId,
-        coinDetails.zpub
-      )
-        .then(addr => {
-          setCoinAddress(addr);
-          setCoinVerified(false);
-          receiveTransaction.onNewReceiveAddr(
-            addr,
-            selectedWallet._id,
-            coinDetails.slug
-          );
-          return null;
-        })
-        .catch(err => {
-          logger.error('Error in Generating Unverified receiveAddress');
-          logger.error(err);
-          setError(true);
-          Analytics.Instance.event(
-            Analytics.Categories.RECEIVE_ADDR,
-            Analytics.Actions.ERROR
-          );
-        });
-    }
-  }, []);
-
-  const [imageData, setImageData] = React.useState('');
-
-  React.useEffect(() => {
-    if (coinAddress) {
-      Analytics.Instance.event(
-        Analytics.Categories.RECEIVE_ADDR,
-        Analytics.Actions.COMPLETED
-      );
-      QRCode.toDataURL(coinAddress, {
-        errorCorrectionLevel: 'H',
-        margin: 0.5,
-        color: {
-          dark: '#131619'
-        }
-      })
-        .then(url => {
-          setImageData(url);
-          return null;
-        })
-        .catch(err => {
-          logger.error('Error in building QR Code');
-          logger.error(err);
-          setQRError(true);
-        });
-    }
-  }, [coinAddress]);
-
-  if (error) {
+  if (receiveTransaction.errorObj.isSet) {
     return (
       <ErrorDialog
-        open={error}
+        open={receiveTransaction.errorObj.isSet}
         handleClose={() => handleClose()}
-        text="Failed to communicate with the blockchain. Please check your internet connection and try again later."
+        errorObj={receiveTransaction.errorObj}
         flow="Generating Receive Address"
       />
     );
   }
 
-  if (coinAddress)
+  if (receiveTransaction.coinAddress)
     return (
       <Root className={classes.root}>
         {coinAbbr.toUpperCase() === 'ETHR' && (
@@ -228,14 +129,14 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
         )}
         <div className={classes.addressContainer}>
           <Typography color="secondary" variant="h4">
-            {coinAddress}
+            {receiveTransaction.coinAddress}
           </Typography>
           <Button
             color="secondary"
             variant="outlined"
             className={classes.copyButton}
             onClick={() => {
-              navigator.clipboard.writeText(coinAddress);
+              navigator.clipboard.writeText(receiveTransaction.coinAddress);
               snackbar.showSnackbar('Copied to clipboard.', 'success');
             }}
           >
@@ -243,10 +144,14 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
           </Button>
         </div>
         <Grid container className={classes.qrWrapper}>
-          {!imageData && !QRError ? (
+          {!receiveTransaction.imageData && !receiveTransaction.QRError ? (
             <CircularProgress color="secondary" size={40} />
-          ) : imageData ? (
-            <img src={imageData} alt="QRCode" className={classes.qrImage} />
+          ) : receiveTransaction.imageData ? (
+            <img
+              src={receiveTransaction.imageData}
+              alt="QRCode"
+              className={classes.qrImage}
+            />
           ) : (
             <></>
           )}
@@ -254,7 +159,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             QR Code Receiver Coin Address
           </Typography>
         </Grid>
-        {coinVerified && (
+        {receiveTransaction.coinVerified && (
           <Typography
             color="textPrimary"
             className={classes.text}
@@ -266,7 +171,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             Address Verified
           </Typography>
         )}
-        {coinVerified || (
+        {receiveTransaction.coinVerified || (
           <Typography color="error" className={classes.errorText}>
             <CancelIcon
               style={{ color: theme.palette.error.main, marginRight: '0.5rem' }}

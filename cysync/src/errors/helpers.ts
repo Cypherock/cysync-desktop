@@ -254,6 +254,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [CysyncError.RECEIVE_TXN_DEVICE_MISCONFIGURED]: {
       message: langStrings.ERRORS.RECEIVE_TXN_DEVICE_MISCONFIGURED
     },
+    [CysyncError.RECEIVE_TXN_GENERATE_UNVERIFIED_FAILED]: {
+      message: langStrings.ERRORS.RECEIVE_TXN_GENERATE_UNVERIFIED_FAILED
+    },
     [CysyncError.RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE]: {
       message: langStrings.ERRORS.RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE
     },

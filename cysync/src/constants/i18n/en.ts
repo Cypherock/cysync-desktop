@@ -100,6 +100,8 @@ const en: I18nStrings = {
       `Request was rejected on the X1 Wallet\nPlease restart the process to receive ${coin} on the CySync application`,
     RECEIVE_TXN_DEVICE_MISCONFIGURED:
       'Looks like your device has been misconfigured, do you want to configure it now?',
+    RECEIVE_TXN_GENERATE_UNVERIFIED_FAILED:
+      'Error in Generating Unverified receiveAddress',
     RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE:
       'Some error occurred while fetching the address.',
     RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER: `Please contact cypherock if the addresses on the application did not match the addresses on the device`,
