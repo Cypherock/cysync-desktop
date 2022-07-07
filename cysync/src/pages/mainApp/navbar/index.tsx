@@ -4,6 +4,7 @@ import React from 'react';
 
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import CySync from '../../../designSystem/iconGroups/cySync';
+import { useConnection } from '../../../store/provider';
 import NotificationComponent from '../notification';
 
 import DeviceConnectionStatus from './deviceConnectionStatus';
@@ -75,6 +76,7 @@ const Root = styled('div')(({ theme }) => ({
 
 const Navbar: React.FC = () => {
   const theme = useTheme();
+  const { deviceConnection } = useConnection();
 
   return (
     <Root className={classes.root}>
@@ -113,6 +115,17 @@ const Navbar: React.FC = () => {
             variant="outlined"
             style={{
               color: theme.palette.warning.main,
+              border: '1px solid',
+              margin: 'auto 5px'
+            }}
+          />
+        )}
+        {deviceConnection && (
+          <Chip
+            label={deviceConnection.getPacketVersion()}
+            variant="outlined"
+            style={{
+              color: theme.palette.success.main,
               border: '1px solid',
               margin: 'auto 5px'
             }}
