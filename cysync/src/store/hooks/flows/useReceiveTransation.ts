@@ -5,7 +5,7 @@ import {
   DeviceError,
   DeviceErrorType
 } from '@cypherock/communication';
-import { TransactionReceiver } from '@cypherock/protocols';
+import { TransactionReceiver, WalletStates } from '@cypherock/protocols';
 import wallet from '@cypherock/wallet';
 import QRCode from 'qrcode';
 import { useEffect, useState } from 'react';
@@ -185,17 +185,23 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
-      receiveTransaction.on('noWalletFound', (inPartialState: boolean) => {
+      receiveTransaction.on('noWalletFound', (walletState: WalletStates) => {
         const cyError = new CyError();
-        if (inPartialState) {
-          cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
-        } else {
-          cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
+        switch (walletState) {
+          case WalletStates.NO_WALLET_FOUND:
+            cyError.setError(CysyncError.NO_WALLET_ON_DEVICE);
+            break;
+          case WalletStates.WALLET_NOT_PRESENT:
+            cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
+            break;
+          case WalletStates.WALLET_PARTIAL_STATE:
+            cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
+            break;
         }
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
             coinType,
-            inPartialState
+            walletState
           })
         );
       });

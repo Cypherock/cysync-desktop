@@ -4,7 +4,12 @@ import {
   DeviceError,
   DeviceErrorType
 } from '@cypherock/communication';
-import { CoinAdder, FlowError, FlowErrorType } from '@cypherock/protocols';
+import {
+  CoinAdder,
+  FlowError,
+  FlowErrorType,
+  WalletStates
+} from '@cypherock/protocols';
 import newWallet from '@cypherock/wallet';
 import { useEffect, useState } from 'react';
 
@@ -366,15 +371,20 @@ export const useAddCoin: UseAddCoin = () => {
       resetHooks();
     });
 
-    addCoin.on('noWalletFound', (inPartialState: boolean) => {
-      logger.info(`${flowName}: Wallet not found`, { inPartialState });
+    addCoin.on('noWalletFound', (walletState: WalletStates) => {
       const cyError = new CyError();
-      if (inPartialState) {
-        cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
-      } else {
-        cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
+      switch (walletState) {
+        case WalletStates.NO_WALLET_FOUND:
+          cyError.setError(CysyncError.NO_WALLET_ON_DEVICE);
+          break;
+        case WalletStates.WALLET_NOT_PRESENT:
+          cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
+          break;
+        case WalletStates.WALLET_PARTIAL_STATE:
+          cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
+          break;
       }
-      setErrorObj(handleErrors(errorObj, cyError, flowName));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { walletState }));
       resetHooks();
     });
 

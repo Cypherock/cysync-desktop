@@ -18,7 +18,7 @@ const handleErrors = (
   //TODO:  handle cascade effect properly
   if (currError.isSet) {
     logger.info(currError);
-    return;
+    // return;
   }
 
   // log the original error

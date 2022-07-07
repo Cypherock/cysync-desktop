@@ -38,10 +38,10 @@ class CyError extends DisplayError {
   static map: CodeToErrorMap;
   constructor(code?: ErrorsSet, meta?: string) {
     super(undefined, undefined);
+    this.childErrors = [];
     //Initialising empty Object
     if (!code) return;
     this.setError(code, meta);
-    this.childErrors = [];
   }
   public setError(code: ErrorsSet, meta?: string) {
     this.isSet = true;

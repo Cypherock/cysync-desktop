@@ -12,7 +12,7 @@ import {
   SentReceive,
   Transaction
 } from '@cypherock/database';
-import { TransactionSender } from '@cypherock/protocols';
+import { TransactionSender, WalletStates } from '@cypherock/protocols';
 import Server from '@cypherock/server-wrapper';
 import { WalletError, WalletErrorType } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
@@ -435,17 +435,24 @@ export const useSendTransaction: UseSendTransaction = () => {
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
       });
 
-      sendTransaction.on('noWalletFound', (inPartialState: boolean) => {
+      sendTransaction.on('noWalletFound', (walletState: WalletStates) => {
+        logger.info(`${flowName}: Wallet not found`, { walletState });
         const cyError = new CyError();
-        if (inPartialState) {
-          cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
-        } else {
-          cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
+        switch (walletState) {
+          case WalletStates.NO_WALLET_FOUND:
+            cyError.setError(CysyncError.NO_WALLET_ON_DEVICE);
+            break;
+          case WalletStates.WALLET_NOT_PRESENT:
+            cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
+            break;
+          case WalletStates.WALLET_PARTIAL_STATE:
+            cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
+            break;
         }
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
             coinType,
-            inPartialState
+            walletState
           })
         );
       });
