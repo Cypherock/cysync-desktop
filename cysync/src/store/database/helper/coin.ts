@@ -1,10 +1,26 @@
-import { ALLCOINS, CoinGroup } from '@cypherock/communication';
+import { ALLCOINS, CoinGroup, EthCoinData } from '@cypherock/communication';
 
 import logger from '../../../utils/logger';
 import { coinDb, tokenDb } from '../databaseInit';
 
-export const getLatestPriceForCoin = async (coin: string) => {
-  const coinData = ALLCOINS[coin];
+export const getLatestPriceForCoin = async (
+  coin: string,
+  parentCoin?: string
+) => {
+  let coinData = ALLCOINS[coin];
+  if (parentCoin) {
+    const parentCoinData = ALLCOINS[parentCoin];
+    if (!parentCoinData || !(parentCoinData instanceof EthCoinData)) {
+      throw new Error('Invalid parentCoin: ' + parentCoin);
+    }
+
+    const token = parentCoinData.erc20TokensList[coin];
+    if (!token) {
+      throw new Error('Invalid token: ' + coin);
+    }
+    coinData = token;
+  }
+  if (!coinData) throw new Error('Invalid coin: ' + coin);
   if (coinData && coinData.isTest) return 0;
 
   let res;
@@ -19,10 +35,15 @@ export const getLatestPriceForCoin = async (coin: string) => {
   return res.price;
 };
 
-export const getLatestPriceForCoins = async (coins: string[]) => {
+export const getLatestPriceForCoins = async (
+  coins: Array<[string, string]>
+) => {
   const latestPrices: Record<string, number | undefined> = {};
   for (const coin of coins) {
-    latestPrices[coin.toLowerCase()] = await getLatestPriceForCoin(coin);
+    latestPrices[coin[0].toLowerCase()] = await getLatestPriceForCoin(
+      coin[0],
+      coin[1]
+    );
   }
   return latestPrices;
 };

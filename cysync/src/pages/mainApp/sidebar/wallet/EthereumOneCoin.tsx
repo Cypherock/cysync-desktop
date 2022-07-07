@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS } from '@cypherock/communication';
+import { ALLCOINS as COINS, EthCoinData } from '@cypherock/communication';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -427,7 +427,9 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
               <Grid item xs={12}>
                 <Collapse in={collapseTab} timeout="auto" unmountOnExit>
                   {tokenData.map(token => {
-                    const oneTokenData = COINS[token.slug];
+                    const oneTokenData = (
+                      COINS[initial.toLowerCase()] as EthCoinData
+                    ).erc20TokensList[token.slug];
                     if (!oneTokenData) {
                       throw new Error(`Cannot find coinType: ${token.coin}`);
                     }

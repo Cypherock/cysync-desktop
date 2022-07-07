@@ -59,7 +59,8 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
       if (!(coin instanceof EthCoinData)) {
         throw new Error('Invalid coinType: ' + coinDetails.slug);
       }
-      const tokenData = COINS[token.slug];
+      const tokenData = (COINS[coin.abbr.toLowerCase()] as EthCoinData)
+        .erc20TokensList[token.slug];
       if (!tokenData) {
         throw new Error('Invalid coinType: ' + coinDetails.slug);
       }

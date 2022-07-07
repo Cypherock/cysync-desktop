@@ -89,7 +89,7 @@ export const useToken: UseToken = () => {
         coinObj.multiplier
       );
 
-      const price = await getLatestPriceForCoin(token.slug);
+      const price = await getLatestPriceForCoin(token.slug, parentCoin);
       const value = balance.multipliedBy(price);
 
       coinWithPrice.displayBalance = balance.toString();

@@ -48,9 +48,9 @@ export const useHistory: UseHistory = () => {
     const allWallets = await walletDb.getAll();
     const latestTransactionsWithPrice: DisplayTransaction[] = [];
 
-    const allUniqueCoins = new Set<string>();
+    const allUniqueCoins = new Set<[string, string]>();
     for (const txn of res) {
-      allUniqueCoins.add(txn.slug);
+      allUniqueCoins.add([txn.slug, txn.coin]);
     }
 
     const latestPrices = await getLatestPriceForCoins([...allUniqueCoins]);
