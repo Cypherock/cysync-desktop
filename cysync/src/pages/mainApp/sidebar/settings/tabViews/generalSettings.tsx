@@ -20,6 +20,7 @@ import { triggerClearData } from '../../../../../utils/clearData';
 import logger from '../../../../../utils/logger';
 
 import ChangePassword from './generalSettings/changePassword';
+import ConfirmPassword from './generalSettings/confirmPassword';
 import RemovePasswordComponent from './generalSettings/removePassword';
 
 const PREFIX = 'GeneralSettings';
@@ -84,6 +85,8 @@ const GeneralSettings = () => {
   );
 
   const [removePasswordDialog, setRemovePasswordDialog] = React.useState(false);
+  const [confirmPasswordDialog, setConfirmPasswordDialog] =
+    React.useState(false);
 
   useEffect(() => {
     Analytics.Instance.screenView(Analytics.ScreenViews.GENERAL_SETTINGS);
@@ -219,15 +222,26 @@ const GeneralSettings = () => {
       <Typography align="center" color="textSecondary">
         You will loose all the data stored in your CySync app.
       </Typography>
-      <Typography align="center" color="textSecondary">
-        Please restart the application if it does not starts automatically.
-      </Typography>
+      {!passwordExists() && (
+        <Typography align="center" color="textSecondary">
+          Please restart the application if it does not starts automatically.
+        </Typography>
+      )}
     </div>
   );
 
+  const onResetConfirmation = () => {
+    if (passwordExists()) {
+      setResetAppDialog(false);
+      setConfirmPasswordDialog(true);
+    } else {
+      setResetAppDialog(false);
+      onResetApp();
+    }
+  };
+
   const onResetApp = () => {
     triggerClearData();
-    setResetAppDialog(false);
   };
 
   return (
@@ -240,7 +254,7 @@ const GeneralSettings = () => {
         handleClose={() => {
           setResetAppDialog(false);
         }}
-        handleConfirmation={onResetApp}
+        handleConfirmation={onResetConfirmation}
         restComponents={resetAppConfirmationComponent}
       />
       <RemovePasswordComponent
@@ -249,6 +263,13 @@ const GeneralSettings = () => {
           setRemovePasswordDialog(false);
           setPreviousSetPassword(passwordExists());
         }}
+      />
+      <ConfirmPassword
+        open={confirmPasswordDialog}
+        onClose={() => {
+          setConfirmPasswordDialog(false);
+        }}
+        onSuccess={onResetApp}
       />
       <ChangePassword
         type="change"

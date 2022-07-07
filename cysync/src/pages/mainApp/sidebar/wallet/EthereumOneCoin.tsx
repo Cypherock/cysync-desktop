@@ -201,6 +201,8 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
       setIsLoading(true);
     } else {
       setIsLoading(false);
+      // To open the tokens list right after adding ETH for the first time
+      setCollapseTab(true);
     }
   }, [sync.modulesInExecutionQueue, walletId, initial]);
 

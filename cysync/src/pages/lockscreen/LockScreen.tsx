@@ -11,15 +11,13 @@ import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React from 'react';
 
-import CustomizedDialog from '../../designSystem/designComponents/dialog/newDialogBox';
 import Icon from '../../designSystem/designComponents/icons/Icon';
 import Input from '../../designSystem/designComponents/input/input';
 import CySync from '../../designSystem/iconGroups/cySync';
 import CySyncRound from '../../designSystem/iconGroups/cySyncRound';
-import ErrorExclamation from '../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../designSystem/iconGroups/iconConstants';
 import { initDatabases, passEnDb } from '../../store/database';
-import { FeedbackState, useFeedback } from '../../store/provider';
+import { FeedbackState, useFeedback, useSnackbar } from '../../store/provider';
 import { generateSinglePasswordHash, verifyPassword } from '../../utils/auth';
 import { triggerClearData } from '../../utils/clearData';
 
@@ -84,24 +82,20 @@ interface State {
 
 const LockScreen = (props: any) => {
   const theme = useTheme();
+  const snackbar = useSnackbar();
 
+  const [tries, setTries] = React.useState(0);
   const [values, setValues] = React.useState<State>({
     password: '',
     showPassword: false,
     error: ''
   });
   const [isLoading, setIsLoading] = React.useState(false);
+  const MAX_TRIES = 3;
 
-  // Hook to handle Confirmation Forgot Password
-  const [confirmationDialog, setConfirmationDialog] = React.useState(false);
-
-  const handleCloseConfirmation = () => {
-    setConfirmationDialog(false);
-  };
-  const handleSubmitConfirmation = async () => {
+  const resetHandler = async () => {
     triggerClearData();
     props.handleReset();
-    setConfirmationDialog(false);
   };
 
   const handleChange =
@@ -121,6 +115,7 @@ const LockScreen = (props: any) => {
 
   const handleSubmit = async () => {
     const password = values.password.trim();
+    setTries(t => t + 1);
 
     if (!password) {
       setValues({
@@ -138,15 +133,28 @@ const LockScreen = (props: any) => {
       });
       passEnDb.setPassHash(generateSinglePasswordHash(password));
       await initDatabases();
-      setIsLoading(false);
       props.handleClose();
+    } else if (tries >= MAX_TRIES) {
+      setValues(v => ({
+        ...v,
+        error: ''
+      }));
+      snackbar.showSnackbar(
+        'Maximum Incorrect attempts reached! Cysync self-destructing...',
+        'error',
+        resetHandler,
+        {
+          dontCloseOnClickAway: true,
+          autoHideDuration: 2000
+        }
+      );
     } else {
       setValues({
         ...values,
-        error: 'Please enter correct password'
+        error: `Invalid password, Attempts remaining: ${MAX_TRIES - tries}`
       });
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
@@ -195,28 +203,6 @@ const LockScreen = (props: any) => {
 
   return (
     <Root className={classes.container}>
-      <CustomizedDialog
-        open={confirmationDialog}
-        handleClose={handleCloseConfirmation}
-        onYes={handleSubmitConfirmation}
-      >
-        <Icon
-          size={100}
-          viewBox=" 0 0 55 55"
-          iconGroup={<ErrorExclamation />}
-        />
-        <Typography
-          variant="h3"
-          color="error"
-          gutterBottom
-          style={{ marginTop: '3rem' }}
-        >
-          Are you sure ?
-        </Typography>
-        <Typography style={{ marginBottom: '0rem' }}>
-          This will reset everything on your cySync application.
-        </Typography>
-      </CustomizedDialog>
       <Icon
         size={74}
         height={34}
@@ -308,24 +294,11 @@ const LockScreen = (props: any) => {
                   </Typography>
                 )}
                 <Button
-                  disabled={isLoading}
-                  onClick={() => {
-                    setConfirmationDialog(true);
-                  }}
-                  style={{
-                    textTransform: 'none',
-                    margin: '0rem 0rem 2rem',
-                    color: theme.palette.text.secondary,
-                    letterSpacing: 1
-                  }}
-                >
-                  Forgot Password
-                </Button>
-                <Button
                   fullWidth
                   variant="outlined"
                   className={classes.submitButton}
                   disabled={isLoading}
+                  style={{ marginTop: 20 }}
                   endIcon={
                     !isLoading ? (
                       <Icon
@@ -341,6 +314,8 @@ const LockScreen = (props: any) => {
                 >
                   {isLoading ? (
                     <CircularProgress size={20} color="secondary" />
+                  ) : tries > 0 ? (
+                    'Retry'
                   ) : (
                     'Login'
                   )}

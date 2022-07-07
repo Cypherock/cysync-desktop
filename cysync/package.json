@@ -75,11 +75,11 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@cypherock/communication": "3.0.1-beta.17",
-    "@cypherock/database": "3.0.1-beta.23",
-    "@cypherock/protocols": "3.0.1-beta.34",
+    "@cypherock/communication": "3.0.1-beta.18",
+    "@cypherock/database": "3.0.1-beta.24",
+    "@cypherock/protocols": "3.0.1-beta.35",
     "@cypherock/server-wrapper": "1.0.1-beta.15",
-    "@cypherock/wallet": "3.0.1-beta.30",
+    "@cypherock/wallet": "3.0.1-beta.31",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.6.1",
