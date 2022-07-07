@@ -186,7 +186,7 @@ export interface ErrorProps {
   open: boolean;
   handleClose: () => void;
   errorObj?: CyError;
-  text: string;
+  text?: string;
   actionText?: string;
   closeText?: string;
   handleAction?: () => void;

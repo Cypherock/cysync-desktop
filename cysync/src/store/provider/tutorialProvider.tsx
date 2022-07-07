@@ -78,7 +78,7 @@ export const TutorialProvider: React.FC = ({ children }) => {
       <ErrorDialog
         open={errorObj.isSet}
         handleClose={() => setErrorObj(new CyError())}
-        text={errorObj.showError()}
+        errorObj={errorObj}
         actionText="Retry"
         handleAction={() => getAll()}
         flow="Fetching Tutorials"

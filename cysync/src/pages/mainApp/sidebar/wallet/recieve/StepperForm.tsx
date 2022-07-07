@@ -224,7 +224,6 @@ const ReceiveForm: React.FC<StepperProps> = ({
         closeText={receiveTransaction.xpubMissing ? 'No' : undefined}
         handleClose={handleErrorBoxClose}
         errorObj={receiveTransaction.errorObj}
-        text={receiveTransaction.errorObj.showError()}
         actionText={receiveTransaction.xpubMissing ? 'Yes' : undefined}
         handleAction={
           receiveTransaction.xpubMissing ? onResyncCoins : undefined

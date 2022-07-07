@@ -565,7 +565,6 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         open={sendTransaction.errorObj.isSet}
         handleClose={handleErrorBoxClose}
         errorObj={sendTransaction.errorObj}
-        text={sendTransaction.errorObj.showError()}
         flow="Sending Transaction"
       />
 

@@ -69,7 +69,6 @@ const WalletSend = () => {
           open={sendTransaction.errorObj.isSet}
           handleClose={() => handleSendFormClose(true)}
           errorObj={sendTransaction.errorObj}
-          text={sendTransaction.errorObj.showError()}
           flow="Sending Transaction"
         />
       )}
