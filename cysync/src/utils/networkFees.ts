@@ -46,7 +46,7 @@ const getFees = async (coinType: string) => {
         network: coin.network
       })
       .request();
-    return resp.data / 10 ** coin.decimal;
+    return resp.data;
   }
 
   const res = await Server.bitcoin.transaction.getFees({ coinType }).request();
