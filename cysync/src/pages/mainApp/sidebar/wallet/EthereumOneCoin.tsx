@@ -422,7 +422,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
           </Grid>
         </Grid>
       </Grid>
-      {initial.toUpperCase() !== 'ETHR' && (
+      {
         <>
           {tokenData.length > 0 ? (
             <Grid container>
@@ -512,7 +512,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
             </Grid>
           )}
         </>
-      )}
+      }
     </Root>
   );
 };
