@@ -1,9 +1,9 @@
 import {
+  AbsCoinData,
   BtcCoinData,
   CoinGroup,
   COINS,
-  EthCoinData,
-  AbsCoinData
+  EthCoinData
 } from '@cypherock/communication';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
@@ -26,12 +26,12 @@ import {
   BalanceSyncItem,
   HistorySyncItem,
   LatestPriceSyncItem,
+  ModifiedCoin,
   PriceSyncItem,
   PriceSyncItemOptions,
   SyncItem,
   SyncProviderTypes,
-  SyncQueueItem,
-  ModifiedCoin
+  SyncQueueItem
 } from './types';
 
 const BATCH_SIZE = 5;
@@ -547,9 +547,9 @@ export const SyncProvider: React.FC = ({ children }) => {
     for (const token of tokens) {
       addPriceSyncItemFromCoin(
         {
-          slug: token.coin,
+          slug: token.slug,
           coinGroup: CoinGroup.ERC20Tokens,
-          parentCoin: token.slug
+          parentCoin: token.coin
         } as ModifiedCoin,
         {
           isRefresh,
@@ -573,8 +573,8 @@ export const SyncProvider: React.FC = ({ children }) => {
     for (const token of tokens) {
       addLatestPriceSyncItemFromCoin(
         {
-          slug: token.coin,
-          parentCoin: token.slug,
+          slug: token.slug,
+          parentCoin: token.coin,
           coinGroup: CoinGroup.ERC20Tokens
         } as ModifiedCoin,
         {
