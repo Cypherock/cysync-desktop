@@ -1,6 +1,6 @@
 import {
-  ALLCOINS as COINS,
   CoinGroup,
+  COINS,
   DeviceConnection,
   DeviceError,
   DeviceErrorType,

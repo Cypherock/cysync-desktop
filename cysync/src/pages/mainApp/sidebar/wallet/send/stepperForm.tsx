@@ -1,6 +1,6 @@
 import {
-  ALLCOINS as COINS,
   CoinGroup,
+  COINS,
   Erc20CoinData,
   EthCoinData
 } from '@cypherock/communication';

@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS } from '@cypherock/communication';
+import { COINS } from '@cypherock/communication';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 

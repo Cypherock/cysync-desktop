@@ -1,4 +1,4 @@
-import { ALLCOINS, EthCoinData } from '@cypherock/communication';
+import { COINS, EthCoinData } from '@cypherock/communication';
 import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import React from 'react';
@@ -108,7 +108,7 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
     csize: 'sm' | 'lg' | null | undefined
   ) => {
     if (parentCoin) {
-      const coin = ALLCOINS[parentCoin];
+      const coin = COINS[parentCoin];
       if (!coin || !(coin instanceof EthCoinData)) {
         throw new Error('Invalid parentCoin: ' + parentCoin);
       }

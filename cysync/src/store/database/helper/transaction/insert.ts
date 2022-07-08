@@ -1,7 +1,7 @@
 import {
-  ALLCOINS,
-  CoinGroup,
   BtcCoinData,
+  CoinGroup,
+  COINS,
   EthCoinData
 } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
@@ -51,7 +51,7 @@ export const insertFromFullTxn = async (transaction: {
     }
   }
 
-  const coin = ALLCOINS[coinType.toLowerCase()];
+  const coin = COINS[coinType.toLowerCase()];
   if (!coin) {
     throw new Error('Invalid coin');
   }
@@ -315,7 +315,7 @@ export const insertFromBlockbookTxn = async (transaction: {
     }
   }
 
-  const coin = ALLCOINS[coinType.toLowerCase()];
+  const coin = COINS[coinType.toLowerCase()];
   if (!coin) {
     throw new Error('Invalid coin');
   }

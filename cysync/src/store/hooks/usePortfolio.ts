@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS, CoinGroup } from '@cypherock/communication';
+import { CoinGroup, COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 

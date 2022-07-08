@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS, CoinGroup } from '@cypherock/communication';
+import { CoinGroup, COINS } from '@cypherock/communication';
 import wallet from '@cypherock/wallet';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';

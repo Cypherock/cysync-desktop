@@ -1,4 +1,4 @@
-import { ALLCOINS, CoinGroup } from '@cypherock/communication';
+import { CoinGroup, COINS } from '@cypherock/communication';
 
 import { SyncItem } from './syncItem';
 
@@ -60,7 +60,7 @@ export class HistorySyncItem extends SyncItem {
 
   equals(item: HistorySyncItem | SyncItem) {
     if (item instanceof HistorySyncItem) {
-      const coin = ALLCOINS[item.coinType];
+      const coin = COINS[item.coinType];
       if (coin && coin.group === CoinGroup.Ethereum) {
         return this.xpub === item.xpub && this.coinType === item.coinType;
       }

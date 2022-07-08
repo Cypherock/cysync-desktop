@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS, EthCoinData } from '@cypherock/communication';
+import { COINS, EthCoinData } from '@cypherock/communication';
 import { Typography } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import { styled, Theme } from '@mui/material/styles';

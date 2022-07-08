@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS, EthCoinData } from '@cypherock/communication';
+import { COINS, EthCoinData } from '@cypherock/communication';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';

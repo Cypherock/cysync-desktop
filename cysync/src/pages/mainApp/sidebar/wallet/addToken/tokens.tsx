@@ -1,4 +1,4 @@
-import { ALLCOINS, EthCoinData } from '@cypherock/communication';
+import { COINS, EthCoinData } from '@cypherock/communication';
 
 export interface IInitialToken {
   abbr: string;
@@ -6,7 +6,7 @@ export interface IInitialToken {
 }
 
 const getTokens = (ethCoin: string) => {
-  const coin = ALLCOINS[ethCoin];
+  const coin = COINS[ethCoin];
 
   if (!coin || !(coin instanceof EthCoinData)) {
     throw new Error('Invalid ethCoin: ' + ethCoin);

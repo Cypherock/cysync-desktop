@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS, Erc20CoinData } from '@cypherock/communication';
+import { COINS, Erc20CoinData } from '@cypherock/communication';
 import { Coin } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 

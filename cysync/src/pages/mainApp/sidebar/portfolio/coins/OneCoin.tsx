@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS } from '@cypherock/communication';
+import { COINS } from '@cypherock/communication';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
