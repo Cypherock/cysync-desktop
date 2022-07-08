@@ -171,7 +171,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             Address Verified
           </Typography>
         )}
-        {receiveTransaction.coinVerified || (
+        {!receiveTransaction.coinVerified && (
           <Typography color="error" className={classes.errorText}>
             <CancelIcon
               style={{ color: theme.palette.error.main, marginRight: '0.5rem' }}
