@@ -11,6 +11,7 @@
     "make": "node ./run.js cysync \"yarn make\"",
     "package": "node ./run.js cysync \"yarn package\"",
     "lint": "node ./run.js cysync \"yarn lint\"",
+    "lint-pkgs": "node ./run.js packages \"yarn lint\"",
     "lint:check": "node ./run.js cysync \"yarn lint:check\"",
     "postinstall": "node ./run.js cysync \"yarn --network-timeout 500000\" && husky install",
     "lint-staged": "node ./run.js cysync \"yarn lint-staged\"",
