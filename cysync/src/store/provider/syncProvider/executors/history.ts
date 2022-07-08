@@ -1,8 +1,8 @@
 import {
   BtcCoinData,
+  CoinGroup,
   COINS,
-  EthCoinData,
-  CoinGroup
+  EthCoinData
 } from '@cypherock/communication';
 import {
   batch as batchServer,

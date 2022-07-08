@@ -1,4 +1,5 @@
 import { CoinGroup } from '@cypherock/communication';
+
 import { SyncItem } from './syncItem';
 
 export interface PriceSyncItemOptions {

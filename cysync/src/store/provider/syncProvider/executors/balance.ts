@@ -19,20 +19,18 @@ export const getRequestsMetadata = (
       throw new Error('Unexpected parentCoin: ' + item.parentCoin);
     }
 
-    const coin = parentCoin.erc20TokensList[item.coinType];
+    const token = parentCoin.erc20TokensList[item.coinType];
 
-    if (!coin) {
+    if (!token) {
       throw new Error('Invalid coin in balance sync item: ' + item.coinType);
     }
 
     const address = generateEthAddressFromXpub(item.xpub);
     if (!item.parentCoin) {
-      throw new Error(
-        'Invalid ethCoin found in balance sync item' + item.parentCoin
-      );
+      throw new Error('Invalid ethCoin found in balance sync item' + token);
     }
 
-    const erc20address = coin.address;
+    const erc20address = token.address;
     const balanceMetadata = ethServer.wallet
       .getBalance(
         {
@@ -84,16 +82,14 @@ export const processResponses = async (
       throw new Error('Unexpected parentCoin: ' + item.parentCoin);
     }
 
-    const coin = parentCoin.erc20TokensList[item.coinType];
+    const token = parentCoin.erc20TokensList[item.coinType];
 
-    if (!coin) {
+    if (!token) {
       throw new Error('Invalid coin in balance sync item: ' + item.coinType);
     }
 
     if (!item.parentCoin) {
-      throw new Error(
-        'Invalid ethCoin found in balance sync item' + item.parentCoin
-      );
+      throw new Error('Invalid ethCoin found in balance sync item' + token);
     }
 
     const balanceRes = responses[0];

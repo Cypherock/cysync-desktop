@@ -1,4 +1,5 @@
 import { CoinGroup } from '@cypherock/communication';
+
 import { Coin } from '../../../../store/database/databaseInit';
 
 import { BalanceSyncItem } from './balanceSyncItem';
