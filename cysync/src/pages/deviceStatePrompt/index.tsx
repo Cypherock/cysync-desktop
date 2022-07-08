@@ -60,7 +60,6 @@ const DeviceStatePrompt = () => {
       <ErrorDialog
         open={openErrorPrompt}
         handleClose={() => setOpenErrorPrompt(false)}
-        text={''}
         errorObj={cyError}
       />
     );

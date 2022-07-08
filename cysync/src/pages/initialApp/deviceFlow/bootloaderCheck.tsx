@@ -86,14 +86,6 @@ const BootloaderCheck = (props: any) => {
     }
 
     logger.info('Initiating device update from bootloader check');
-    // if (!deviceConnection) {
-    //   logger.info('Failed due to device not connected');
-    //   setDisplayErrorMessage('Please connect the device and try again.');
-    //   setUpdated(-1);
-    //   setIsCompleted(-1);
-    //   return;
-    // }
-
     startDeviceUpdate();
 
     return () => {

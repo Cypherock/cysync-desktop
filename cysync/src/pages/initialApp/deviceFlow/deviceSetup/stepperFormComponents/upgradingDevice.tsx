@@ -118,16 +118,6 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
 
   useEffect(() => {
     logger.info('Initiating device update from initial setup');
-    // if (!deviceConnection) {
-    //   logger.info('Failed due to device not connected');
-    //   setDisplayErrorMessage('Please connect the device and try again.');
-    //   setUpdated(-1);
-    //   setIsCompleted(-1);
-    //   return () => {
-    //     // empty
-    //   };
-    // }
-
     startDeviceUpdate();
 
     return () => {
