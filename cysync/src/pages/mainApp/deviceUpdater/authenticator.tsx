@@ -1,4 +1,5 @@
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
+import { Tooltip } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
@@ -14,7 +15,7 @@ import ModAvatar from '../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../designSystem/iconGroups/errorExclamation';
 import { useDeviceAuth } from '../../../store/hooks/flows';
-import { useConnection, useFeedback } from '../../../store/provider';
+import { useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
@@ -92,10 +93,14 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
     setIsInFlow
   } = useConnection();
 
-  const { handleDeviceAuth, completed, verified, errorMessage, confirmed } =
-    useDeviceAuth();
-
-  const feedback = useFeedback();
+  const {
+    handleDeviceAuth,
+    completed,
+    verified,
+    errorObj,
+    confirmed,
+    handleFeedbackOpen
+  } = useDeviceAuth();
 
   const startDeviceAuth = () => {
     logger.info('Initiating device auth from prompt');
@@ -121,7 +126,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
   }, []);
 
   useEffect(() => {
-    if (verified === -1 || errorMessage) {
+    if (verified === -1 || errorObj.isSet) {
       Analytics.Instance.event(
         Analytics.Categories.DEVICE_AUTH_PROMPT,
         Analytics.Actions.ERROR
@@ -206,7 +211,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
               </Typography>
             </div>
           )}
-          {errorMessage ? (
+          {errorObj.isSet ? (
             <div className={classes.center}>
               <div>
                 <ListItem color="red">
@@ -219,7 +224,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
                   </ListItemAvatar>
                   <ListItemText
                     className={classes.error}
-                    primary={errorMessage || 'Device Auth Failed'}
+                    primary={errorObj.showError() || 'Device Auth Failed'}
                   />
                 </ListItem>
                 <div className={classes.errorButtons}>
@@ -231,19 +236,27 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
                   >
                     Close
                   </CustomButton>
+                  {!(deviceConnection && firmwareVersion) ? (
+                    <Tooltip
+                      title={'Reconnect the device to retry'}
+                      placement="top"
+                    >
+                      <div>
+                        <CustomButton style={{ margin: '1rem 0rem' }} disabled>
+                          Retry
+                        </CustomButton>
+                      </div>
+                    </Tooltip>
+                  ) : (
+                    <CustomButton
+                      onClick={startDeviceAuth}
+                      style={{ margin: '1rem 0rem' }}
+                    >
+                      Retry
+                    </CustomButton>
+                  )}
                   <CustomButton
-                    disabled={!(deviceConnection && firmwareVersion)}
-                    onClick={() => {
-                      startDeviceAuth();
-                    }}
-                    style={{ margin: '1rem 0rem' }}
-                  >
-                    Retry
-                  </CustomButton>
-                  <CustomButton
-                    onClick={() => {
-                      feedback.showFeedback({ isContact: true });
-                    }}
+                    onClick={handleFeedbackOpen}
                     style={{ margin: '1rem 0rem' }}
                   >
                     Contact Us

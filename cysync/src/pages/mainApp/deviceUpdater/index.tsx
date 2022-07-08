@@ -62,14 +62,16 @@ const DeviceUpdatePopup = () => {
           Analytics.Categories.PARTIAL_DEVICE_UPDATE,
           Analytics.Actions.OPEN
         );
-        logger.info('Device update prompt opened by user');
+        logger.info('Redirecting user to device update settings page');
+        return navigate(`${Routes.settings.device.upgrade}?isRefresh=true`);
       } else if (localUpdateType === 'auth') {
         navigate(Routes.settings.device.auth);
         Analytics.Instance.event(
           Analytics.Categories.DEVICE_AUTH_PROMPT,
           Analytics.Actions.OPEN
         );
-        logger.info('Device auth prompt opened by user');
+        logger.info('Redirecting user to device auth settings page');
+        return navigate(`${Routes.settings.device.auth}?isRefresh=true`);
       } else {
         Analytics.Instance.event(
           Analytics.Categories.INITIAL_FLOW_IN_MAIN,
@@ -77,6 +79,8 @@ const DeviceUpdatePopup = () => {
         );
         logger.info('Intial flow in main opened by user');
       }
+      setIsOpen(true);
+      setUpdateType(localUpdateType);
     } else {
       setIsOpen(false);
     }

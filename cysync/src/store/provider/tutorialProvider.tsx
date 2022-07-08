@@ -4,7 +4,12 @@ import React, { useState } from 'react';
 
 import { version } from '../../../package.json';
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
-import logger from '../../utils/logger';
+import {
+  CyError,
+  CysyncError,
+  handleAxiosErrors,
+  handleErrors
+} from '../../errors';
 
 export interface Tutorial {
   _id: string;
@@ -20,7 +25,7 @@ export interface TutorialContextInterface {
   isLoading: boolean;
   isFetched: boolean;
   getAll: () => void;
-  errorMsg: string;
+  errorObj: CyError;
 }
 
 export const TutorialContext: React.Context<TutorialContextInterface> =
@@ -32,12 +37,12 @@ export const TutorialProvider: React.FC = ({ children }) => {
     TutorialContextInterface['tutorials']
   >([]);
   const [isFetched, setIsFetched] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
 
   const getAll = async () => {
     if (isLoading) return;
     setIsLoading(true);
-    setErrorMsg('');
+    setErrorObj(new CyError());
 
     try {
       const res = await tutorialServer.getAll(version).request();
@@ -48,23 +53,13 @@ export const TutorialProvider: React.FC = ({ children }) => {
         throw new Error('Cannot find tutorials.');
       }
     } catch (error) {
-      logger.error(error);
-
+      const cyError = new CyError();
       if (error.isAxiosError) {
-        if (error.response) {
-          setErrorMsg(
-            'Some internal error occurred while communicating with the server. Please try again later.'
-          );
-        } else {
-          setErrorMsg(
-            'Failed to communicate with the server. Please check your internet connection and try again later.'
-          );
-        }
+        handleAxiosErrors(cyError, error);
       } else {
-        setErrorMsg(
-          'Some internal error occurred while fetching the tutorials.'
-        );
+        cyError.setError(CysyncError.TUTORIALS_UNKNOWN_ERROR);
       }
+      setErrorObj(handleErrors(errorObj, cyError, 'Tutorials', error));
     } finally {
       setIsLoading(false);
     }
@@ -77,13 +72,13 @@ export const TutorialProvider: React.FC = ({ children }) => {
         isLoading,
         isFetched,
         getAll,
-        errorMsg
+        errorObj
       }}
     >
       <ErrorDialog
-        open={!!errorMsg}
-        handleClose={() => setErrorMsg('')}
-        text={errorMsg}
+        open={errorObj.isSet}
+        handleClose={() => setErrorObj(new CyError())}
+        errorObj={errorObj}
         actionText="Retry"
         handleAction={() => getAll()}
         flow="Fetching Tutorials"

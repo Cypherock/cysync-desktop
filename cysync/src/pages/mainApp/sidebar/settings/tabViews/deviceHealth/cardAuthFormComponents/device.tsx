@@ -5,10 +5,7 @@ import React, { useEffect } from 'react';
 
 import { HandleCardAuthOptions } from '../../../../../../../store/hooks/flows';
 import { useConnection } from '../../../../../../../store/provider';
-import {
-  hexToVersion,
-  inTestApp
-} from '../../../../../../../utils/compareVersion';
+import { inTestApp } from '../../../../../../../utils/compareVersion';
 import DynamicTextView from '../dynamicTextView';
 
 type Props = {
@@ -28,7 +25,7 @@ const Device: React.FC<Props> = ({
     deviceConnection,
     deviceSdkVersion,
     firmwareVersion,
-    setIsInFlow,
+
     deviceState
   } = useConnection();
 
@@ -39,8 +36,6 @@ const Device: React.FC<Props> = ({
       handleCardAuth({
         connection: deviceConnection,
         sdkVersion: deviceSdkVersion,
-        setIsInFlow,
-        firmwareVersion: hexToVersion(firmwareVersion),
         isTestApp: inTestApp(deviceState)
       });
     } else {
