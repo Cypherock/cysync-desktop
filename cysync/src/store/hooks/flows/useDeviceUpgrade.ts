@@ -471,7 +471,13 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       logger.info('Initiating auth');
 
       await connection.beforeOperation();
-      await connection.selectPacketVersion();
+      const { sdkVersion, isSupported } = await connection.isDeviceSupported();
+
+      if (!isSupported) {
+        throw new Error(
+          'Device is not supported with sdkVersion: ' + sdkVersion
+        );
+      }
 
       logger.info('handleDeviceAuth Params', {
         deviceState: connection.deviceState,

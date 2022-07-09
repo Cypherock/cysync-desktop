@@ -1,8 +1,9 @@
-import { DeviceConnection, DeviceError } from '@cypherock/communication';
 import {
   ALL_SUPPORTED_SDK_VERSIONS,
-  GetDeviceInfo
-} from '@cypherock/protocols';
+  DeviceConnection,
+  DeviceError
+} from '@cypherock/communication';
+import { GetDeviceInfo } from '@cypherock/protocols';
 import { useState } from 'react';
 
 import {
