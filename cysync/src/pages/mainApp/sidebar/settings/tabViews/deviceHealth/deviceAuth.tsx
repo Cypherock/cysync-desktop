@@ -7,11 +7,13 @@ import { StepIconProps } from '@mui/material/StepIcon';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { styled, Theme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import success from '../../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
@@ -21,11 +23,7 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import { useDeviceAuth } from '../../../../../../store/hooks/flows';
-import {
-  FeedbackState,
-  useConnection,
-  useFeedback
-} from '../../../../../../store/provider';
+import { useConnection } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import logger from '../../../../../../utils/logger';
 
@@ -262,14 +260,25 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     completed,
     verified,
     resetHooks,
-    errorMessage,
+    errorObj,
     cancelDeviceAuth,
-    setErrorMessage,
-    confirmed
+    clearErrorObj,
+    confirmed,
+    handleFeedbackOpen
   } = useDeviceAuth();
 
   const latestDeviceConnection = useRef<any>();
   const latestCompleted = useRef<boolean>();
+
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const isRefresh = Boolean(query.get('isRefresh'));
+
+  useEffect(() => {
+    if (isRefresh) {
+      handleRetry();
+    }
+  }, [isRefresh]);
 
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
@@ -308,7 +317,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
         if (activeStep !== 1) {
           setActiveStep(1);
         }
-      }, 1000);
+      }, 0);
     } else {
       setConnStatus(1);
     }
@@ -325,7 +334,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
         <Authentication
           isCompleted={isCompleted}
           setCompleted={setCompleted}
-          errorMessage={errorMessage}
+          errorObj={errorObj}
           handleDeviceAuth={handleDeviceAuth}
           completed={completed}
           verified={verified}
@@ -339,7 +348,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 
   const handleRetry = () => {
     logger.info('Device authentication retry');
-    setErrorMessage('');
+    clearErrorObj();
     setCompleted(0);
     resetHooks();
     if (deviceConnection && !inBackgroundProcess) {
@@ -347,29 +356,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     } else {
       setActiveStep(0);
     }
-  };
-
-  const { showFeedback } = useFeedback();
-
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: errorMessage,
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: 'Reporting for Error (Authenticating Device)',
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
   };
 
   const onSuccess = () => {
@@ -429,11 +415,14 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
           >
             Device Authentication Failed
           </Typography>
+          <Typography color="textPrimary" style={{ margin: '1rem 0rem 6rem' }}>
+            {errorObj.getCode()}
+          </Typography>
           <Typography
             color="textSecondary"
             style={{ margin: '1rem 0rem 6rem' }}
           >
-            {errorMessage}
+            {errorObj.getMessage()}
           </Typography>
           {verified === -1 ? (
             <div className={classes.errorButtons}>
@@ -454,13 +443,30 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
             </div>
           ) : (
             <div className={classes.errorButtons}>
-              <CustomButton
-                variant="outlined"
-                onClick={handleRetry}
-                style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
-              >
-                Retry
-              </CustomButton>
+              {!latestDeviceConnection.current ? (
+                <Tooltip
+                  title={'Reconnect the device to retry'}
+                  placement="top"
+                >
+                  <div>
+                    <CustomButton
+                      color="primary"
+                      style={{ padding: '0.5rem 2rem' }}
+                      disabled
+                    >
+                      Retry
+                    </CustomButton>
+                  </div>
+                </Tooltip>
+              ) : (
+                <CustomButton
+                  color="primary"
+                  onClick={handleRetry}
+                  style={{ padding: '0.5rem 2rem' }}
+                >
+                  Retry
+                </CustomButton>
+              )}
               <CustomButton
                 color="primary"
                 onClick={handleFeedbackOpen}

@@ -1,7 +1,9 @@
+import { DeviceErrorType } from '@cypherock/communication';
 import { CancelFlow } from '@cypherock/protocols';
 import React, { useState } from 'react';
 
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
+import { CyError } from '../../errors';
 import { useConnection } from '../../store/provider';
 import logger from '../../utils/logger';
 
@@ -53,12 +55,12 @@ const DeviceStatePrompt = () => {
   }
 
   if (openErrorPrompt) {
+    const cyError = new CyError(DeviceErrorType.NOT_CONNECTED);
     return (
       <ErrorDialog
         open={openErrorPrompt}
         handleClose={() => setOpenErrorPrompt(false)}
-        text="Please connect the cypherock X1 wallet before proceeding with this process"
-        flow="Device Disconnected"
+        errorObj={cyError}
       />
     );
   }

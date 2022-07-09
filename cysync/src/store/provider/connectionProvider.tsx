@@ -1,11 +1,13 @@
 import {
   checkForConnection,
   createPort,
-  DeviceConnection
+  DeviceConnection,
+  DeviceErrorType
 } from '@cypherock/communication';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { CysyncError } from '../../errors';
 import { inTestApp } from '../../utils/compareVersion';
 import logger from '../../utils/logger';
 import {
@@ -120,9 +122,9 @@ export const ConnectionProvider: React.FC = ({ children }) => {
     handleGetDeviceInfo,
     authenticated,
     resetHooks,
-    setErrorMessage,
+    clearErrorObj,
     completed,
-    errorMessage,
+    errorObj,
     isNewDevice,
     isUpdateRequired,
     lastAuthFailed,
@@ -262,12 +264,12 @@ export const ConnectionProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (completed && deviceState && inTestApp(deviceState)) {
-      if (errorMessage) {
+      if (errorObj.isSet) {
         logger.info('Error in connecting device on initial', {
           isNewDevice,
           lastAuthFailed,
           isNotReady,
-          errorMessage
+          errorObj
         });
         setUpdateRequiredType(undefined);
         if (isNotReady) {
@@ -281,7 +283,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         }
         setIsDeviceNotReadyCheck(false);
         setInBackgroundProcess(false);
-        setErrorMessage('');
+        clearErrorObj();
         resetHooks();
       } else {
         logger.info('Device connection established in initial application', {
@@ -291,7 +293,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
           deviceState
         });
 
-        setErrorMessage('');
+        clearErrorObj();
         resetHooks();
         setDeviceConnectionState(DeviceConnectionState.IN_TEST_APP);
         setInBackgroundProcess(false);
@@ -299,12 +301,12 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       return;
     }
 
-    if (completed && (authenticated === -1 || errorMessage)) {
+    if (completed && (authenticated === -1 || errorObj.isSet)) {
       logger.info('Device unauthenticated', {
         isNewDevice,
         lastAuthFailed,
         isNotReady,
-        errorMessage,
+        errorObj,
         isUpdateRequired
       });
       let allowConnection = false;
@@ -332,7 +334,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       } else if (isUpdateRequired) {
         setUpdateRequiredType(isUpdateRequired);
         setDeviceConnectionState(DeviceConnectionState.UPDATE_REQUIRED);
-      } else if (errorMessage) {
+      } else if (errorObj.isSet) {
         setDeviceConnectionState(DeviceConnectionState.UNKNOWN_ERROR);
       } else {
         setDeviceConnectionState(DeviceConnectionState.PARTIAL_STATE);
@@ -341,7 +343,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       if (!allowConnection) {
         setIsDeviceNotReadyCheck(false);
         setInBackgroundProcess(false);
-        setErrorMessage('');
+        clearErrorObj();
         resetHooks();
         return;
       }
@@ -354,7 +356,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         inBootloader,
         deviceState
       });
-      setErrorMessage('');
+      clearErrorObj();
       resetHooks();
       setDeviceConnection(internalDeviceConnection);
       setDeviceConnectionState(DeviceConnectionState.VERIFIED);
@@ -365,6 +367,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   }, [completed]);
 
   useEffect(() => {
+    logger.info(`Device Connection Status Code: ${getLogMessage()}`);
     if (deviceConnectionState === DeviceConnectionState.VERIFIED) {
       setIsReady(true);
     } else {
@@ -443,6 +446,41 @@ export const ConnectionProvider: React.FC = ({ children }) => {
     }
 
     setBlockNewConnection(val);
+  };
+
+  const getLogMessage = () => {
+    switch (deviceConnectionState) {
+      case DeviceConnectionState.VERIFIED:
+        return 'Device Verified';
+      case DeviceConnectionState.NOT_CONNECTED:
+        return DeviceErrorType.NOT_CONNECTED;
+      case DeviceConnectionState.IN_TEST_APP:
+        return CysyncError.DEVICE_HAS_INITIAL_FIRMWARE;
+      case DeviceConnectionState.IN_BOOTLOADER:
+        return CysyncError.DEVICE_IN_BOOTLOADER;
+      case DeviceConnectionState.PARTIAL_STATE:
+        return CysyncError.DEVICE_IN_PARTIAL_STATE;
+      case DeviceConnectionState.NEW_DEVICE:
+        return CysyncError.NEW_DEVICE_CONNECTED;
+      case DeviceConnectionState.LAST_AUTH_FAILED:
+        return CysyncError.LAST_DEVICE_AUTH_FAILED;
+      case DeviceConnectionState.DEVICE_NOT_READY:
+        return CysyncError.DEVICE_NOT_READY;
+      case DeviceConnectionState.UNKNOWN_ERROR:
+        return CysyncError.UNKNOWN_CONNECTION_ERROR;
+      case DeviceConnectionState.UPDATE_REQUIRED:
+        if (updateRequiredType === 'app') {
+          return CysyncError.INCOMPATIBLE_DESKTOP;
+        }
+
+        if (updateRequiredType === 'device') {
+          return CysyncError.INCOMPATIBLE_DEVICE;
+        }
+
+        return CysyncError.INCOMPATIBLE_DEVICE_AND_DESKTOP;
+      default:
+        return CysyncError.UNKNOWN_CONNECTION_ERROR;
+    }
   };
 
   return (

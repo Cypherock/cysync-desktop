@@ -555,16 +555,16 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   const handleErrorBoxClose = () => {
     handleClose(false);
-    sendTransaction.setErrorMessage('');
+    sendTransaction.clearErrorObj();
     sendTransaction.resetHooks();
   };
 
   return (
     <Root className={classes.root}>
       <ErrorBox
-        open={!!sendTransaction.errorMessage}
+        open={sendTransaction.errorObj.isSet}
         handleClose={handleErrorBoxClose}
-        text={sendTransaction.errorMessage}
+        errorObj={sendTransaction.errorObj}
         flow="Sending Transaction"
       />
 

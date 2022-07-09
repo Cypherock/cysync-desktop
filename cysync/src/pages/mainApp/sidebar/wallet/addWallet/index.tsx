@@ -73,8 +73,8 @@ const AddWallet = () => {
     handleAddWallet,
     walletName,
     walletSuccess,
-    errorMessage,
-    setErrorMessage,
+    errorObj,
+    clearErrorObj,
     cancelAddWallet,
     completed,
     resetHooks,
@@ -91,7 +91,7 @@ const AddWallet = () => {
   const handleClose = (abort?: boolean, openAddCoinForm?: boolean) => {
     if (abort && deviceConnection) cancelAddWallet(deviceConnection);
     if (completed) {
-      setErrorMessage('');
+      clearErrorObj();
       Analytics.Instance.event(
         Analytics.Categories.ADD_WALLET,
         Analytics.Actions.COMPLETED
@@ -135,18 +135,9 @@ const AddWallet = () => {
     }
   };
 
-  useEffect(() => {
-    if (errorMessage) {
-      Analytics.Instance.event(
-        Analytics.Categories.ADD_WALLET,
-        Analytics.Actions.ERROR
-      );
-    }
-  }, [errorMessage]);
-
   const handleErrorBoxClose = () => {
     handleClose();
-    setErrorMessage('');
+    clearErrorObj();
     resetHooks();
   };
 
@@ -157,11 +148,12 @@ const AddWallet = () => {
   return (
     <Root container className={classes.root}>
       <ErrorBox
-        open={!!errorMessage}
+        open={errorObj.isSet}
         actionText={isNameDiff ? 'Yes' : undefined}
         handleAction={isNameDiff ? onUpdateName : undefined}
         handleClose={handleErrorBoxClose}
-        text={errorMessage}
+        text={errorObj.showError()}
+        errorObj={errorObj}
         flow="Adding Wallet"
       />
       <AddWalletFlow

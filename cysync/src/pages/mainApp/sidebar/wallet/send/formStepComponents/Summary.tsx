@@ -7,6 +7,7 @@ import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
+import { CysyncError } from '../../../../../../errors';
 import { broadcastTxn } from '../../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
@@ -138,7 +139,10 @@ const Summary: React.FC<StepComponentProps> = ({
       })
       .catch(e => {
         setOpen(false);
-        logger.error('Transaction broadcast error', e);
+        logger.error(
+          `${CysyncError.SEND_TXN_BROADCAST_FAILED} Transaction broadcast error`,
+          e
+        );
         if (e.isAxiosError) {
           if (e.response) {
             if (e.response.data && e.response.data.cysyncError) {
