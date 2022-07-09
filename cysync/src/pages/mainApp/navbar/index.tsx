@@ -120,7 +120,7 @@ const Navbar: React.FC = () => {
             }}
           />
         )}
-        {deviceConnection && (
+        {process.env.BUILD_TYPE === 'debug' && deviceConnection && (
           <Chip
             label={deviceConnection.getPacketVersion()}
             variant="outlined"
