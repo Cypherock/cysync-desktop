@@ -77,7 +77,7 @@
   "dependencies": {
     "@cypherock/communication": "3.0.1-beta.19",
     "@cypherock/database": "3.0.1-beta.25",
-    "@cypherock/protocols": "3.0.1-beta.36",
+    "@cypherock/protocols": "3.0.1-beta.37",
     "@cypherock/server-wrapper": "1.0.1-beta.15",
     "@cypherock/wallet": "3.0.1-beta.32",
     "@emotion/react": "^11.9.0",
