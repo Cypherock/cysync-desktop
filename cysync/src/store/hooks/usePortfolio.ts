@@ -142,6 +142,8 @@ export const usePortfolio: UsePortfolio = () => {
       JSON.stringify(latestUnitPrices)
     ) as number[][];
     let transactionHistory: Transaction[] = [];
+    const lastSinceDate = new Date();
+    lastSinceDate.setDate(lastSinceDate.getDate() - days);
 
     if (wallet && wallet !== 'null') {
       if (coinData.group === CoinGroup.ERC20Tokens) {
@@ -167,11 +169,12 @@ export const usePortfolio: UsePortfolio = () => {
         },
         {
           excludeFailed: true,
-          excludePending: true
+          excludePending: true,
+          sinceDate: lastSinceDate
         },
         {
           field: 'confirmed',
-          order: 'desc'
+          order: 'asc'
         }
       );
     } else {
@@ -197,80 +200,63 @@ export const usePortfolio: UsePortfolio = () => {
         },
         {
           excludeFailed: true,
-          excludePending: true
+          excludePending: true,
+          sinceDate: lastSinceDate
         },
         {
           field: 'confirmed',
-          order: 'desc'
+          order: 'asc'
         }
       );
     }
 
-    let prevTransactionIndex: number | null = null;
-    let prevTransactionAmount = new BigNumber(0);
+    let curBalance = totalBalance;
 
-    for (let i = latestUnitPrices.length - 1; i >= 0; i -= 1) {
-      let balance = totalBalance;
-      if (
-        !(computedPrices[i] && computedPrices[i][0] && computedPrices[i][1])
-      ) {
-        logger.warn('Unexpected price from database', {
-          price: computedPrices[i],
-          coin: coinType,
-          days,
-          wallet
-        });
-        continue;
-      }
+    for (
+      let tIndex = transactionHistory.length - 1,
+        pIndex = latestUnitPrices.length - 1;
+      tIndex >= 0 && pIndex > 0;
+      pIndex--
+    ) {
+      const transaction = transactionHistory[tIndex];
+      if (transaction.confirmed) {
+        const transactionTime = new Date(transaction.confirmed).getTime();
+        const prevPricePoint = computedPrices[pIndex - 1][0];
+        const thisPricePoint = computedPrices[pIndex][0];
 
-      for (
-        let j = prevTransactionIndex === null ? 0 : prevTransactionIndex + 1;
-        j < transactionHistory.length;
-        j += 1
-      ) {
-        const transaction = transactionHistory[j];
-
-        if (transaction.confirmed) {
-          const transactionTime = new Date(transaction.confirmed).getTime();
-          if (computedPrices[i][0] <= transactionTime) {
-            if (transaction.sentReceive === SentReceive.SENT) {
-              prevTransactionAmount = prevTransactionAmount.plus(
-                new BigNumber(transaction.amount)
-              );
-              if (coinData.group === CoinGroup.ERC20Tokens) {
-                prevTransactionAmount = prevTransactionAmount.plus(
-                  // TODO: for now using eth as default as there is no parent
-                  // token mapping available. Please remodify this to fetch
-                  // the parent coin and then its multiplier
-                  new BigNumber(transaction.fees || 0)
-                    .dividedBy(COINS.eth.multiplier)
-                    .multipliedBy(coinData.multiplier)
-                );
-              }
-            } else if (transaction.sentReceive === SentReceive.FEES) {
-              prevTransactionAmount = prevTransactionAmount.plus(
-                new BigNumber(transaction.amount)
-              );
-            } else {
-              prevTransactionAmount = prevTransactionAmount.minus(
-                new BigNumber(transaction.amount)
+        if (
+          prevPricePoint < transactionTime &&
+          transactionTime <= thisPricePoint
+        ) {
+          if (transaction.sentReceive === SentReceive.SENT) {
+            curBalance = curBalance.plus(new BigNumber(transaction.amount));
+            if (coinData.group === CoinGroup.ERC20Tokens) {
+              curBalance = curBalance.plus(
+                // TODO: for now using eth as default as there is no parent
+                // token mapping available. Please remodify this to fetch
+                // the parent coin and then its multiplier
+                new BigNumber(transaction.fees || 0)
+                  .dividedBy(COINS.eth.multiplier)
+                  .multipliedBy(coinData.multiplier)
               );
             }
-
-            prevTransactionIndex = j;
+          } else if (transaction.sentReceive === SentReceive.FEES) {
+            curBalance = curBalance.plus(new BigNumber(transaction.amount));
           } else {
-            break;
+            curBalance = curBalance.minus(new BigNumber(transaction.amount));
           }
+          tIndex--;
         }
       }
-
-      balance = balance.plus(prevTransactionAmount);
-
-      computedPrices[i][1] = balance
-        .multipliedBy(computedPrices[i][1])
+      computedPrices[pIndex][1] = curBalance
+        .multipliedBy(computedPrices[pIndex][1])
         .dividedBy(coinData.multiplier)
         .toNumber();
     }
+    computedPrices[0][1] = curBalance
+      .multipliedBy(computedPrices[0][1])
+      .dividedBy(coinData.multiplier)
+      .toNumber();
 
     return {
       totalBalance,
