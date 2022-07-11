@@ -159,7 +159,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             QR Code Receiver Coin Address
           </Typography>
         </Grid>
-        {receiveTransaction.coinVerified && (
+        {receiveTransaction.receiveAddress !== '' ? (
           <Typography
             color="textPrimary"
             className={classes.text}
@@ -170,8 +170,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             />
             Address Verified
           </Typography>
-        )}
-        {!receiveTransaction.coinVerified && (
+        ) : (
           <Typography color="error" className={classes.errorText}>
             <CancelIcon
               style={{ color: theme.palette.error.main, marginRight: '0.5rem' }}
