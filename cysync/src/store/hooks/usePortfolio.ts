@@ -47,8 +47,6 @@ export interface UsePortfolioValues {
   sinceLastTotalPrice: number;
   setSinceLastTotalPrice: React.Dispatch<React.SetStateAction<number>>;
   series: CoinHistory[];
-  setSeries: React.Dispatch<React.SetStateAction<CoinHistory[]>>;
-  setAllCoinSeries: () => void;
   isLoading: boolean;
 }
 
@@ -241,7 +239,12 @@ export const usePortfolio: UsePortfolio = () => {
               );
               if (coinData.group === CoinGroup.ERC20Tokens) {
                 prevTransactionAmount = prevTransactionAmount.plus(
+                  // TODO: for now using eth as default as there is no parent
+                  // token mapping available. Please remodify this to fetch
+                  // the parent coin and then its multiplier
                   new BigNumber(transaction.fees || 0)
+                    .dividedBy(COINS.eth.multiplier)
+                    .multipliedBy(coinData.multiplier)
                 );
               }
             } else if (transaction.sentReceive === SentReceive.FEES) {
@@ -691,8 +694,6 @@ export const usePortfolio: UsePortfolio = () => {
     sinceLastTotalPrice,
     setSinceLastTotalPrice,
     series,
-    setSeries,
-    setAllCoinSeries,
     isLoading
   };
 };
