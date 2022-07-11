@@ -208,8 +208,9 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const handleCoinSpecificDataFormOpen = (e: React.MouseEvent) => {
     prevent(e);
-    handleClose();
-    setCoinSpecificDataForm(true);
+    receiveTransaction.replaceAccountAction.resolve(true);
+    // handleClose();
+    setCoinSpecificDataForm(false);
   };
 
   React.useEffect(() => {
@@ -309,13 +310,13 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             <strong>Please use it at your own Risk.</strong>
           </Typography>
         )}
-        {coinVerified && customAccount && !receiveTransaction.accountExists && (
+        {coinVerified && customAccount && receiveTransaction.replaceAccount && (
           <div className={classes.footer}>
             <CustomButton
               className={classes.footerBtn}
               onClick={handleCoinSpecificDataFormOpen}
             >
-              Save to Device
+              Save to Device?
             </CustomButton>
           </div>
         )}

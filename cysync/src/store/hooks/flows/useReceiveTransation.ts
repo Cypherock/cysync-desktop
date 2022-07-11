@@ -7,6 +7,7 @@ import {
 import { TransactionReceiver } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
 
+import { DeferredReference } from '../../../utils/deferredReference';
 import logger from '../../../utils/logger';
 import { addressDb, receiveAddressDb } from '../../database';
 import { useI18n, useSocket } from '../../provider';
@@ -44,6 +45,9 @@ export interface UseReceiveTransactionValues {
   cancelReceiveTxn: (connection: DeviceConnection) => void;
   coinsConfirmed: boolean;
   accountExists: boolean;
+  replaceAccount: boolean;
+  userAction: DeferredReference<void>;
+  replaceAccountAction: DeferredReference<void>;
 }
 
 export type UseReceiveTransaction = () => UseReceiveTransactionValues;
@@ -61,11 +65,14 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [passphraseEntered, setPassphraseEntered] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const [accountExists, setAccountExists] = useState(false);
-
+  const [replaceAccount, setReplaceAccount] = useState(false);
   const { addReceiveAddressHook } = useSocket();
   let recAddr: string | undefined;
   const receiveTransaction = new TransactionReceiver();
   const { langStrings } = useI18n();
+
+  const userAction = new DeferredReference<void>();
+  const replaceAccountAction = new DeferredReference<void>();
 
   const resetHooks = () => {
     setCoinsConfirmed(false);
@@ -77,6 +84,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     setPassphraseEntered(false);
     setXpubMissing(false);
     setAccountExists(false);
+    setReplaceAccount(false);
     receiveTransaction.removeAllListeners();
   };
 
@@ -229,6 +237,18 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         }
       });
 
+      receiveTransaction.on('replaceAccountRequired', value => {
+        if (value) {
+          logger.verbose(
+            'ReceiveAddress: Device needs to replace an account to add a new one',
+            {
+              coinType
+            }
+          );
+          setReplaceAccount(true);
+        }
+      });
+
       receiveTransaction.on('noXpub', () => {
         logger.info('ReceiveAddress: Xpub missing on device', { coinType });
         setTimeout(() => {
@@ -330,7 +350,9 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           zpub,
           contractAbbr,
           passphraseExists,
-          customAccount
+          customAccount,
+          userAction,
+          replaceAccountAction
         });
 
         setIsInFlow(false);
@@ -403,6 +425,9 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     setXpubMissing,
     passphraseEntered,
     onNewReceiveAddr,
-    accountExists
+    accountExists,
+    replaceAccount,
+    userAction,
+    replaceAccountAction
   } as UseReceiveTransactionValues;
 };

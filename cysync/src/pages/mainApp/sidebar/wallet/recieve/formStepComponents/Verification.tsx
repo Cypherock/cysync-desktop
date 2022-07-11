@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import { shell } from 'electron';
 import React, { useEffect } from 'react';
 
+import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import CustomIconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
 import {
@@ -27,7 +28,9 @@ const classes = {
   root: `${PREFIX}-root`,
   addressContainer: `${PREFIX}-addressContainer`,
   copyButton: `${PREFIX}-copyButton`,
-  transactionId: `${PREFIX}-transactionId`
+  transactionId: `${PREFIX}-transactionId`,
+  footer: `${PREFIX}-footer`,
+  footerBtn: `${PREFIX}-footerBtn`
 };
 
 const Root = styled('div')(() => ({
@@ -59,6 +62,19 @@ const Root = styled('div')(() => ({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  [`& .${classes.footer}`]: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    width: '100%',
+    justifyContent: 'flex-end'
+  },
+  [`& .${classes.footerBtn}`]: {
+    width: '10rem',
+    height: '3rem',
+    marginTop: 15,
+    textTransform: 'none',
+    color: '#fff'
   }
 }));
 
@@ -66,6 +82,8 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
   const { receiveTransaction } = useReceiveTransactionContext();
   const { customAccount } = useCustomAccountContext();
   const { coinDetails } = useCurrentCoin();
+  const [linkOpened, setLinkOpened] = React.useState(false);
+  const [reachedTarget, setReachedTarget] = React.useState(false);
 
   useEffect(() => {
     if (receiveTransaction.verified) {
@@ -76,6 +94,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
   const address = receiveTransaction.receiveAddress;
 
   const handleExternalLink = async () => {
+    setLinkOpened(true);
     const coin = COINS[coinDetails.slug];
 
     if (!coin) {
@@ -102,41 +121,72 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
   };
   return (
     <Root className={classes.root}>
-      <div className={classes.addressContainer}>
-        <Typography color="secondary" variant="h4">
-          {customAccount ? customAccount.name : address}
-        </Typography>
-      </div>
       {customAccount && !receiveTransaction.accountExists ? (
-        <>
-          <div className={classes.transactionId}>
-            <Typography color="textSecondary">Near Explorer</Typography>
-            {/* <Typography
-            style={{ userSelect: 'text' }}
-            color="textPrimary"
-            variant="body1"
-          >
-            Some Text
-          </Typography> */}
-            <CustomIconButton
-              title="Open Link"
-              placement="top-start"
-              onClick={handleExternalLink}
-            >
-              <LaunchIcon fontSize="medium" color="secondary" />
-            </CustomIconButton>
-          </div>
-          <Typography color="textSecondary">
-            Verify Account on Device
-          </Typography>
-          <TextView
-            completed={receiveTransaction.verified}
-            inProgress={!receiveTransaction.verified}
-            text="Please Match the Key from CypherRock X1 and Account Id from desktop with Near Explorer"
-          />
-        </>
+        linkOpened && reachedTarget ? (
+          <>
+            <Typography color="textSecondary">
+              Verify details between the blockchain and the device
+            </Typography>
+            <TextView
+              completed={receiveTransaction.verified}
+              inProgress={!receiveTransaction.verified}
+              text="Verify 'new_account_id' on the device"
+            />
+            <TextView
+              completed={receiveTransaction.verified}
+              inProgress={!receiveTransaction.verified}
+              text="Verify 'new_public_key' on the device"
+            />
+          </>
+        ) : (
+          <>
+            <Typography color="textSecondary">
+              Visit the Near Explorer to veify the account belongs to you
+            </Typography>
+            <TextView
+              completed={linkOpened}
+              inProgress={!linkOpened}
+              text={
+                <div className={classes.transactionId}>
+                  <Typography color="textSecondary">
+                    Go to the Near Explorer
+                  </Typography>
+                  <CustomIconButton
+                    title="Open Link"
+                    placement="top-start"
+                    onClick={handleExternalLink}
+                  >
+                    <LaunchIcon fontSize="medium" color="secondary" />
+                  </CustomIconButton>
+                </div>
+              }
+            />
+            <TextView
+              completed={reachedTarget}
+              inProgress={!reachedTarget}
+              text="Scroll to the section which cointains 'new_account_id', 'new_public_key' as shown below"
+            />
+            <div className={classes.footer}>
+              <CustomButton
+                className={classes.footerBtn}
+                onClick={async () => {
+                  receiveTransaction.userAction.resolve(true);
+                  setReachedTarget(true);
+                }}
+                disabled={!linkOpened}
+              >
+                Next
+              </CustomButton>
+            </div>
+          </>
+        )
       ) : (
         <>
+          <div className={classes.addressContainer}>
+            <Typography color="secondary" variant="h4">
+              {customAccount ? customAccount.name : address}
+            </Typography>
+          </div>
           <Typography color="textSecondary">
             Verify Address on Device
           </Typography>

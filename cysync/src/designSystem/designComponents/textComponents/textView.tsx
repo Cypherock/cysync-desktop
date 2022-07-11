@@ -54,7 +54,7 @@ const Root = styled(CustomPaper)(({ theme }) => ({
 }));
 
 type ToggleButtonProps = {
-  text: string;
+  text: any; // needs to be able to take formatted text
   completed: boolean;
   inProgress: boolean;
   failed?: boolean;
