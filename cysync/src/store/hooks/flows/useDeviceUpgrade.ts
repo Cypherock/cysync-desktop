@@ -549,8 +549,11 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   useEffect(() => {
     // Dont do anything if the auth process hasnt even started
     // as the below logic is only applicable after auth has started
-    if (verified === 0) return;
-    else if (verified === -1 || errorObj.isSet) {
+
+    if (!completed) return;
+    if ([-1, 2].includes(isCompleted)) return;
+
+    if (verified === -1 || errorObj.isSet) {
       retries.current += 1;
 
       if (verified === -1 || retries.current > MAX_RETRIES) {
@@ -578,7 +581,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
 
         timeout.current = setTimeout(initiateDeviceAuth, 2000);
       }
-    } else if (completed && verified === 2) {
+    } else if (verified === 2) {
       logger.info('Device auth completed');
       setAuthenticated(2);
       setIsCompleted(2);
