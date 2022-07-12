@@ -109,7 +109,7 @@ const DeviceUpdatePopup = () => {
     }
   }, [openMisconfiguredPrompt]);
 
-  if (isDeviceUpdating) {
+  if (isDeviceUpdating && updateType !== 'initial') {
     return <></>;
   }
 
