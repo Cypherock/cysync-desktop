@@ -80,7 +80,7 @@ const Root = styled('div')(() => ({
 }));
 
 const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
-  const { showFeedback } = useFeedback();
+  const { showFeedback, closeFeedback } = useFeedback();
 
   const newFeedbackState: FeedbackState = {
     attachLogs: true,
@@ -143,6 +143,12 @@ const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
       }
     }
   }, [deviceConnection, inBackgroundProcess]);
+
+  useEffect(() => {
+    return () => {
+      closeFeedback();
+    };
+  }, []);
 
   return (
     <Root>

@@ -2,7 +2,6 @@ import { feedback as feedbackServer } from '@cypherock/server-wrapper';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { CircularProgress, createSvgIcon, Grid } from '@mui/material';
 import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import InputBase from '@mui/material/InputBase';
@@ -143,6 +142,7 @@ type ShowFeedback = (options?: {
 
 export interface FeedbackContextInterface {
   showFeedback: ShowFeedback;
+  closeFeedback: () => void; // dont add this everywhere, as nested calls can disrupt the flow
 }
 
 export const FeedbackContext: React.Context<FeedbackContextInterface> =
@@ -737,16 +737,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     </>
                   )}
                   <Grid container className={classes.buttonGroup}>
-                    <Button
-                      onClick={onClose}
-                      style={{
-                        padding: '0.3rem 1.5rem',
-                        margin: '0rem 0.5rem',
-                        textTransform: 'none'
-                      }}
-                    >
-                      Close
-                    </Button>
                     <CustomButton
                       disabled={deviceLogsLoading || submitting}
                       onClick={handleSubmit}
@@ -795,7 +785,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
           </Root>
         }
       />
-      <FeedbackContext.Provider value={{ showFeedback }}>
+      <FeedbackContext.Provider
+        value={{ showFeedback, closeFeedback: onClose }}
+      >
         {children}
       </FeedbackContext.Provider>
     </>
