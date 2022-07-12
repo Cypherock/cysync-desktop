@@ -13,9 +13,7 @@ import CustomizedDialog from '../../../../designSystem/designComponents/dialog/n
 import PopOverText from '../../../../designSystem/designComponents/hover/popoverText';
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import DeleteCoinIcon from '../../../../designSystem/iconGroups/deleteCoin';
-// import Dustbin from '../../../../designSystem/iconGroups/dustbin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
-// import { tokenDb } from '../../../../store/database';
 import {
   useReceiveTransaction,
   useSendTransaction
@@ -155,11 +153,6 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
     if (beforeNetworkAction()) setReceiveForm(true);
   };
 
-  // const handleCoinSpecificDataFormOpen = (e: React.MouseEvent) => {
-  //   prevent(e);
-  //   if (beforeNetworkAction()) setCoinSpecificDataForm(true);
-  // };
-
   const onClick = (e: React.MouseEvent) => {
     prevent(e);
     navigate(
@@ -170,11 +163,6 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
   };
 
   const [deleteOpen, setDeleteOpen] = useState(false);
-
-  // const handleDeleteOpen = (e: React.MouseEvent) => {
-  //   prevent(e);
-  //   setDeleteOpen(true);
-  // };
 
   const handleDeleteClose = () => {
     setDeleteOpen(false);
