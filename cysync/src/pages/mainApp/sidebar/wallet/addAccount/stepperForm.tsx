@@ -27,6 +27,7 @@ import { useDebouncedFunction } from '../../../../../store/hooks';
 import { changeFormatOfOutputList } from '../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
+  useCustomAccountContext,
   useSendTransactionContext,
   useTokenContext
 } from '../../../../../store/provider';
@@ -243,6 +244,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   const { coinDetails } = useCurrentCoin();
   const { token } = useTokenContext();
+  const { customAccount } = useCustomAccountContext();
 
   // Change the total according to the current state
   const handleTotal = () => {
@@ -282,7 +284,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         gasLimit,
         contractAddress,
         contractAbbr: token ? coinAbbr.toLowerCase() : undefined
-      }
+      },
+      customAccount?.name
     );
   };
 

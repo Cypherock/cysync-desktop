@@ -169,7 +169,8 @@ export interface UseSendTransactionValues {
     outputList: any[],
     fees: number,
     isSendAll: boolean | undefined,
-    data: any
+    data: any,
+    customAccount: string | undefined
   ) => Promise<void>;
   onTxnBroadcast: (params: {
     walletId: string;
@@ -238,7 +239,16 @@ export const useSendTransaction: UseSendTransaction = () => {
   };
 
   const handleEstimateFee: UseSendTransactionValues['handleEstimateFee'] =
-    async (xpub, zpub, coinType, outputList, fees, isSendAll, data) => {
+    async (
+      xpub,
+      zpub,
+      coinType,
+      outputList,
+      fees,
+      isSendAll,
+      data,
+      customAccount
+    ) => {
       // If it has no input, then set the tx fee and amount to 0.
       if (!isSendAll && outputList.length > 0) {
         let hasInput = false;
@@ -278,7 +288,8 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputList,
           fees,
           isSendAll,
-          data
+          data,
+          customAccount
         )
         .then(() => {
           setEstimationError(undefined);

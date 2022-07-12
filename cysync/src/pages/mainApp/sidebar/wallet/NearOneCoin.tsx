@@ -1,3 +1,4 @@
+import { generateNearAddressFromXpub } from '@cypherock/wallet';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -184,6 +185,8 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
     setCurrentWalletId,
     setCurrentCoin
   } = useCustomAccount();
+
+  const implicitAccount = generateNearAddressFromXpub(coinDetails.xpub);
 
   useEffect(() => {
     const key = `${walletId}-${initial.toLowerCase()}`;
@@ -421,9 +424,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                   {accountData.map(account => {
                     return (
                       <React.Fragment key={account.name}>
-                        <CustomAccountContext.Provider
-                          value={{ customAccount: account }}
-                        >
+                        {account.name === implicitAccount && (
                           <OneNearAccount
                             initial={coinDetails.slug.toUpperCase()}
                             name={account.name}
@@ -434,6 +435,22 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                             isEmpty={account.isEmpty}
                             walletId={walletId}
                           />
+                        )}
+                        <CustomAccountContext.Provider
+                          value={{ customAccount: account }}
+                        >
+                          {account.name === implicitAccount || (
+                            <OneNearAccount
+                              initial={coinDetails.slug.toUpperCase()}
+                              name={account.name}
+                              holding={account.displayBalance}
+                              price={account.displayPrice}
+                              decimal={24}
+                              value={account.displayValue}
+                              isEmpty={account.isEmpty}
+                              walletId={walletId}
+                            />
+                          )}
                         </CustomAccountContext.Provider>
                       </React.Fragment>
                     );

@@ -39,7 +39,7 @@ const Root = styled('div')(() => ({
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    width: 'fit-content',
+    width: 'auto',
     padding: '3rem 10rem 3rem',
     marginLeft: 'auto',
     marginRight: 'auto'
@@ -128,8 +128,8 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
               Verify details between the blockchain and the device
             </Typography>
             <TextView
-              completed={receiveTransaction.verified}
-              inProgress={!receiveTransaction.verified}
+              completed={receiveTransaction.verifiedAccountId}
+              inProgress={!receiveTransaction.verifiedAccountId}
               text="Verify 'new_account_id' on the device"
             />
             <TextView
@@ -183,7 +183,18 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
       ) : (
         <>
           <div className={classes.addressContainer}>
-            <Typography color="secondary" variant="h4">
+            <Typography
+              color="secondary"
+              variant={
+                customAccount
+                  ? customAccount.name.length > 44
+                    ? 'h6'
+                    : 'h4'
+                  : address.length > 44
+                  ? 'h6'
+                  : 'h4'
+              }
+            >
               {customAccount ? customAccount.name : address}
             </Typography>
           </div>

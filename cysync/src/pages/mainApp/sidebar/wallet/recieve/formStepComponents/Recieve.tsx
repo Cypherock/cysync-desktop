@@ -12,9 +12,9 @@ import React, { useState } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
+import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
 import { addressDb } from '../../../../../../store/database';
 import {
-  useCoinSpecificDataContext,
   useCurrentCoin,
   useCustomAccountContext,
   useReceiveTransactionContext,
@@ -162,6 +162,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const [coinVerified, setCoinVerified] = useState(true);
   const [error, setError] = useState(false);
   const [QRError, setQRError] = useState(false);
+  const [replaceAccountScreen, setReplaceAccountScreen] = useState(false);
 
   const { coinDetails } = useCurrentCoin();
   const { selectedWallet } = useSelectedWallet();
@@ -204,13 +205,11 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const [imageData, setImageData] = React.useState('');
 
-  const { setCoinSpecificDataForm } = useCoinSpecificDataContext();
-
-  const handleCoinSpecificDataFormOpen = (e: React.MouseEvent) => {
+  const handleReplaceAccount = (e: React.MouseEvent) => {
     prevent(e);
     receiveTransaction.replaceAccountAction.resolve(true);
+    setReplaceAccountScreen(true);
     // handleClose();
-    setCoinSpecificDataForm(false);
   };
 
   React.useEffect(() => {
@@ -250,7 +249,16 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   }
 
   if (coinAddress)
-    return (
+    return replaceAccountScreen ? (
+      <Root className={classes.root}>
+        <Typography>Save to device</Typography>
+        <TextView
+          completed={receiveTransaction.verifiedReplaceAccount}
+          inProgress={!receiveTransaction.verifiedReplaceAccount}
+          text="Select an Account to replace on the Device"
+        />
+      </Root>
+    ) : (
       <Root className={classes.root}>
         {coinAbbr.toUpperCase() === 'ETHR' && (
           <Typography color="error" style={{ marginBottom: '0.5rem' }}>
@@ -260,7 +268,10 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
           </Typography>
         )}
         <div className={classes.addressContainer}>
-          <Typography color="secondary" variant="h4">
+          <Typography
+            color="secondary"
+            variant={coinAddress.length > 44 ? 'h6' : 'h4'}
+          >
             {coinAddress}
           </Typography>
           <Button
@@ -314,7 +325,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
           <div className={classes.footer}>
             <CustomButton
               className={classes.footerBtn}
-              onClick={handleCoinSpecificDataFormOpen}
+              onClick={handleReplaceAccount}
             >
               Save to Device?
             </CustomButton>

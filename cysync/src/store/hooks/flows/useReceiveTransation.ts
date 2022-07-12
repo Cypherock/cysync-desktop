@@ -48,6 +48,8 @@ export interface UseReceiveTransactionValues {
   replaceAccount: boolean;
   userAction: DeferredReference<void>;
   replaceAccountAction: DeferredReference<void>;
+  verifiedAccountId: boolean;
+  verifiedReplaceAccount: boolean;
 }
 
 export type UseReceiveTransaction = () => UseReceiveTransactionValues;
@@ -66,6 +68,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [isCancelled, setIsCancelled] = useState(false);
   const [accountExists, setAccountExists] = useState(false);
   const [replaceAccount, setReplaceAccount] = useState(false);
+  const [verifiedAccountId, setVerifiedAccountId] = useState(false);
+  const [verifiedReplaceAccount, setVerifiedReplaceAccount] = useState(false);
   const { addReceiveAddressHook } = useSocket();
   let recAddr: string | undefined;
   const receiveTransaction = new TransactionReceiver();
@@ -85,6 +89,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     setXpubMissing(false);
     setAccountExists(false);
     setReplaceAccount(false);
+    setVerifiedAccountId(false);
+    setVerifiedReplaceAccount(false);
     receiveTransaction.removeAllListeners();
   };
 
@@ -246,6 +252,35 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
             }
           );
           setReplaceAccount(true);
+        }
+      });
+
+      receiveTransaction.on('accountVerified', value => {
+        if (value) {
+          logger.verbose('ReceiveAddress: Account confirmed on device', {
+            coinType
+          });
+          setVerifiedAccountId(true);
+        } else {
+          logger.info('ReceiveAddress: Account id rejected on device', {
+            coinType
+          });
+          setErrorMessage(langStrings.ERRORS.RECEIVE_TXN_REJECTED(coin.name));
+        }
+      });
+
+      receiveTransaction.on('replaceAccountVerified', value => {
+        if (value) {
+          logger.verbose(
+            'ReceiveAddress: Replace account confirmed on device',
+            { coinType }
+          );
+          setVerifiedReplaceAccount(true);
+        } else {
+          logger.info('ReceiveAddress: Replace account id rejected on device', {
+            coinType
+          });
+          setErrorMessage(langStrings.ERRORS.RECEIVE_TXN_REJECTED(coin.name));
         }
       });
 
@@ -428,6 +463,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     accountExists,
     replaceAccount,
     userAction,
-    replaceAccountAction
+    replaceAccountAction,
+    verifiedReplaceAccount,
+    verifiedAccountId
   } as UseReceiveTransactionValues;
 };

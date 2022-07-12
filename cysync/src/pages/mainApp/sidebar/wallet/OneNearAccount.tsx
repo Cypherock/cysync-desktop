@@ -17,12 +17,10 @@ import DeleteCoinIcon from '../../../../designSystem/iconGroups/deleteCoin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
 // import { tokenDb } from '../../../../store/database';
 import {
-  useCoinSpecificData,
   useReceiveTransaction,
   useSendTransaction
 } from '../../../../store/hooks/flows';
 import {
-  CoinSpecificDataContext,
   ReceiveTransactionContext,
   SendTransactionContext,
   useConnection
@@ -32,7 +30,6 @@ import prevent from '../../../../utils/preventPropagation';
 
 import Recieve from './recieve';
 import Send from './send';
-import CoinSpecificData from './storeCoinSpecificData';
 
 const PREFIX = 'WalletOneNearAccount';
 
@@ -142,11 +139,7 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
 
   const [sendForm, setSendForm] = useState(false);
 
-  const [coinSpecificDataForm, setCoinSpecificDataForm] = useState(false);
-
   const sendTransaction = useSendTransaction();
-
-  const coinSpecificData = useCoinSpecificData();
 
   const handleSendFormOpen = (e: React.MouseEvent) => {
     prevent(e);
@@ -215,24 +208,15 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
         <Send />
       </SendTransactionContext.Provider>
 
-      <CoinSpecificDataContext.Provider
+      <ReceiveTransactionContext.Provider
         value={{
-          coinSpecificData,
-          coinSpecificDataForm,
-          setCoinSpecificDataForm
+          receiveTransaction,
+          receiveForm,
+          setReceiveForm
         }}
       >
-        <CoinSpecificData />
-        <ReceiveTransactionContext.Provider
-          value={{
-            receiveTransaction,
-            receiveForm,
-            setReceiveForm
-          }}
-        >
-          <Recieve />
-        </ReceiveTransactionContext.Provider>
-      </CoinSpecificDataContext.Provider>
+        <Recieve />
+      </ReceiveTransactionContext.Provider>
 
       <Grid container onClick={onClick} className={classes.root}>
         <Grid item xs={3} className={classes.alignStartCenter}>
@@ -307,22 +291,6 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
           >
             Receive
           </Button>
-          {/* <Button
-            variant="text"
-            className={clsx(classes.recieveButton)}
-            startIcon={
-              <Icon
-                className={classes.icon}
-                viewBox="0 0 14 15"
-                icon={ICONS.walletRecieve}
-                color={theme.palette.info.main}
-              />
-            }
-            onClick={handleCoinSpecificDataFormOpen}
-            style={{ fontSize: '0.9rem' }}
-          >
-            Store
-          </Button> */}
         </Grid>
       </Grid>
     </Root>
