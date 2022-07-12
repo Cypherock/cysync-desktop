@@ -239,6 +239,8 @@ export const usePortfolio: UsePortfolio = () => {
                   .dividedBy(COINS.eth.multiplier)
                   .multipliedBy(coinData.multiplier)
               );
+            } else {
+              curBalance = curBalance.plus(new BigNumber(transaction.fees));
             }
           } else if (transaction.sentReceive === SentReceive.FEES) {
             curBalance = curBalance.plus(new BigNumber(transaction.amount));
