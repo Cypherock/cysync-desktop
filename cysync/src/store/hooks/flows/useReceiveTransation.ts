@@ -76,7 +76,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [isCancelled, setIsCancelled] = useState(false);
 
   const [coinAddress, setCoinAddress] = useState(receiveAddress);
-  const [coinVerified, setCoinVerified] = useState(true);
+  const [coinVerified, setCoinVerified] = useState(false);
 
   const [imageData, setImageData] = useState('');
 
@@ -267,6 +267,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       receiveTransaction.on('receiveAddress', address => {
         logger.info('ReceiveAddress: Address generated', { coinType, address });
         setReceiveAddress(address);
+        setCoinVerified(true);
         recAddr = address;
       });
 
