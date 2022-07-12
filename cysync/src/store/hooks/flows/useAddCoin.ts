@@ -24,6 +24,8 @@ import logger from '../../../utils/logger';
 import { addressDb, Coin, coinDb } from '../../database';
 import { useSync } from '../../provider';
 
+import * as flowHandlers from './handlers';
+
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -372,18 +374,7 @@ export const useAddCoin: UseAddCoin = () => {
     });
 
     addCoin.on('noWalletFound', (walletState: WalletStates) => {
-      const cyError = new CyError();
-      switch (walletState) {
-        case WalletStates.NO_WALLET_FOUND:
-          cyError.setError(CysyncError.NO_WALLET_ON_DEVICE);
-          break;
-        case WalletStates.WALLET_NOT_PRESENT:
-          cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
-          break;
-        case WalletStates.WALLET_PARTIAL_STATE:
-          cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
-          break;
-      }
+      const cyError = flowHandlers.noWalletFound(walletState);
       setErrorObj(handleErrors(errorObj, cyError, flowName, { walletState }));
       resetHooks();
     });

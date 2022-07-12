@@ -31,6 +31,8 @@ import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { addressDb, coinDb, transactionDb } from '../../database';
 
+import * as flowHandlers from './handlers';
+
 const flowName = Analytics.Categories.SEND_TXN;
 
 export const changeFormatOfOutputList = (
@@ -436,19 +438,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
 
       sendTransaction.on('noWalletFound', (walletState: WalletStates) => {
-        logger.info(`${flowName}: Wallet not found`, { walletState });
-        const cyError = new CyError();
-        switch (walletState) {
-          case WalletStates.NO_WALLET_FOUND:
-            cyError.setError(CysyncError.NO_WALLET_ON_DEVICE);
-            break;
-          case WalletStates.WALLET_NOT_PRESENT:
-            cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
-            break;
-          case WalletStates.WALLET_PARTIAL_STATE:
-            cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
-            break;
-        }
+        const cyError = flowHandlers.noWalletFound(walletState);
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
             coinType,

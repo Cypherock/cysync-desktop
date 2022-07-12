@@ -4,7 +4,7 @@ import {
   DeviceErrorType
 } from '@cypherock/communication';
 import { Wallet } from '@cypherock/database';
-import { WalletAdder } from '@cypherock/protocols';
+import { WalletAdder, WalletStates } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
 
 import {
@@ -17,6 +17,8 @@ import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { walletDb } from '../../database';
 import { useConnection, useWallets } from '../../provider';
+
+import * as flowHandlers from './handlers';
 
 export interface HandleAddWalletOptions {
   connection: DeviceConnection;
@@ -114,15 +116,9 @@ export const useAddWallet: UseAddWallet = () => {
       setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
     });
 
-    addWallet.on('noWalletFound', (inPartialState: boolean) => {
-      logger.info('AddWallet: No Wallet found', { inPartialState });
-      const cyError = new CyError();
-      if (inPartialState) {
-        cyError.setError(CysyncError.ALL_WALLET_PARTIAL_STATE);
-      } else {
-        cyError.setError(CysyncError.NO_WALLET_ON_DEVICE);
-      }
-      setErrorObj(handleErrors(errorObj, cyError, flowName));
+    addWallet.on('noWalletFound', (walletState: WalletStates) => {
+      const cyError = flowHandlers.noWalletFound(walletState);
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { walletState }));
     });
 
     addWallet.on('walletDetails', async (walletDetails: Wallet) => {

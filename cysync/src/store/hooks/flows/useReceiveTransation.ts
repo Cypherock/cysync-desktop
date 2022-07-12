@@ -22,6 +22,8 @@ import logger from '../../../utils/logger';
 import { addressDb, receiveAddressDb } from '../../database';
 import { useCurrentCoin, useSelectedWallet, useSocket } from '../../provider';
 
+import * as flowHandlers from './handlers';
+
 export interface HandleReceiveTransactionOptions {
   connection: DeviceConnection;
   sdkVersion: string;
@@ -186,23 +188,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       });
 
       receiveTransaction.on('noWalletFound', (walletState: WalletStates) => {
-        const cyError = new CyError();
-        logger.info('ReceiveAddress: Wallet not found', { walletState });
-
-        switch (walletState) {
-          case WalletStates.NO_WALLET_FOUND:
-            cyError.setError(CysyncError.NO_WALLET_ON_DEVICE);
-            break;
-          case WalletStates.WALLET_NOT_PRESENT:
-            cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
-            break;
-          case WalletStates.WALLET_PARTIAL_STATE:
-            cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
-            break;
-          default:
-            cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
-        }
-
+        const cyError = flowHandlers.noWalletFound(walletState);
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
             coinType,
@@ -281,6 +267,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       receiveTransaction.on('receiveAddress', address => {
         logger.info('ReceiveAddress: Address generated', { coinType, address });
         setReceiveAddress(address);
+        setCoinVerified(true);
         recAddr = address;
       });
 
@@ -412,7 +399,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       )
         .then(addr => {
           setCoinAddress(addr);
-          setCoinVerified(true);
+          setCoinVerified(false);
           onNewReceiveAddr(addr, selectedWallet._id, coinDetails.slug);
           return null;
         })

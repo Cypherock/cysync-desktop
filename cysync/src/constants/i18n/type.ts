@@ -21,6 +21,7 @@ export interface I18nStrings {
     NO_WALLET_ON_DEVICE: string;
     WALLET_IS_LOCKED: string;
     WALLET_LOCKED_DUE_TO_INCORRECT_PIN: string;
+    WALLET_UNKNOWN_STATE: string;
 
     ADD_WALLET_REJECTED: string;
     ADD_WALLET_LIMIT_EXCEEDED: string;
