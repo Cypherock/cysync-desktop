@@ -333,7 +333,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     activeButton,
     changeButton,
     handleVerificationErrors,
-    verifyRecipientAmount,
+    validateInputs,
     transactionFee,
     maxSend,
     setMaxSend,
@@ -342,6 +342,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     setTransactionFee,
     gasLimit,
     setGasLimit,
+    gasLimitError,
     handleNext,
     handleDelete,
     feeType,
@@ -488,9 +489,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const handleRecipientSubmit = () => {
     const isValid = handleCheckAddresses();
-    const isAmountValid = verifyRecipientAmount();
+    const isInputsValid = validateInputs();
 
-    if (isValid && isAmountValid) {
+    if (isValid && isInputsValid) {
       if (!beforeFlowStart()) {
         return;
       }
@@ -724,6 +725,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
                 onChange={e => {
                   setGasLimit(e.target.value);
                 }}
+                error={!!gasLimitError}
+                helperText={gasLimitError}
                 disabled={estimateGasLimit}
               />
             </div>
