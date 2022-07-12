@@ -182,6 +182,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [CysyncError.WALLET_IS_LOCKED]: {
       message: langStrings.ERRORS.WALLET_IS_LOCKED
     },
+    [CysyncError.WALLET_UNKNOWN_STATE]: {
+      message: langStrings.ERRORS.WALLET_UNKNOWN_STATE
+    },
 
     [CysyncError.ADD_COIN_REJECTED]: {
       message: langStrings.ERRORS.ADD_COIN_REJECTED

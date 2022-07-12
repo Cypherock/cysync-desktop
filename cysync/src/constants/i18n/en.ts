@@ -46,6 +46,7 @@ const en: I18nStrings = {
       'Wallet is locked on the device\nPlease unlock it before continuing with any operations on the wallet',
     WALLET_LOCKED_DUE_TO_INCORRECT_PIN:
       'Your wallet is now locked due to multiple incorrect attempts\nPlease unlock it before continuing with any operations on the wallet',
+    WALLET_UNKNOWN_STATE: 'Unknown Wallet state received from device',
 
     ADD_WALLET_REJECTED:
       'Request rejected on X1 wallet. Please restart the process to add a new wallet',

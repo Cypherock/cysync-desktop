@@ -14,6 +14,8 @@ export const noWalletFound = (walletState: WalletStates) => {
     case WalletStates.WALLET_PARTIAL_STATE:
       cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
       break;
+    default:
+      cyError.setError(CysyncError.WALLET_UNKNOWN_STATE);
   }
   return cyError;
 };
