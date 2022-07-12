@@ -22,6 +22,7 @@ import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import DeleteCoinIcon from '../../../../designSystem/iconGroups/deleteCoin';
 import Dustbin from '../../../../designSystem/iconGroups/dustbin';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
+import WarningExclamation from '../../../../designSystem/iconGroups/warningExclamation';
 import { useCustomAccount } from '../../../../store/hooks';
 import {
   useReceiveTransaction,
@@ -63,7 +64,8 @@ const classes = {
   grey: `${PREFIX}-grey`,
   dialogRoot: `${PREFIX}-dialogRoot`,
   near: `${PREFIX}-near`,
-  rootButtonWrapper: `${PREFIX}-rootButtonWrapper`
+  rootButtonWrapper: `${PREFIX}-rootButtonWrapper`,
+  info: `${PREFIX}-info`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -139,6 +141,15 @@ const Root = styled('div')(({ theme }) => ({
     alignItems: 'center',
     justifyContent: 'center',
     borderTop: `1px solid rgba(33, 40, 35, 1)`
+  },
+  [`& .${classes.info}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: theme.palette.secondary.main,
+    background: theme.palette.primary.light,
+    padding: '10px 0px'
   }
 }));
 
@@ -251,7 +262,8 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
 
   const [collapseTab, setCollapseTab] = React.useState(false);
 
-  const lengthThreshold = 1;
+  const lengthThreshold = 1; // number of custom account to not show the collapse tab
+  const maxAccountThreshold = 4; // max number of custom account allowed
 
   const onClick = () => {
     if (beforeAction()) {
@@ -421,25 +433,12 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
             <Grid container>
               <Grid item xs={12}>
                 <Collapse in={collapseTab} timeout="auto" unmountOnExit>
-                  {accountData.map(account => {
-                    return (
-                      <React.Fragment key={account.name}>
-                        {account.name === implicitAccount && (
-                          <OneNearAccount
-                            initial={coinDetails.slug.toUpperCase()}
-                            name={account.name}
-                            holding={account.displayBalance}
-                            price={account.displayPrice}
-                            decimal={24}
-                            value={account.displayValue}
-                            isEmpty={account.isEmpty}
-                            walletId={walletId}
-                          />
-                        )}
-                        <CustomAccountContext.Provider
-                          value={{ customAccount: account }}
-                        >
-                          {account.name === implicitAccount || (
+                  {accountData
+                    .slice(0, maxAccountThreshold + lengthThreshold)
+                    .map(account => {
+                      return (
+                        <React.Fragment key={account.name}>
+                          {account.name === implicitAccount && (
                             <OneNearAccount
                               initial={coinDetails.slug.toUpperCase()}
                               name={account.name}
@@ -451,24 +450,55 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                               walletId={walletId}
                             />
                           )}
-                        </CustomAccountContext.Provider>
-                      </React.Fragment>
-                    );
-                  })}
-                  <CoinCardBtn
-                    onClick={handleAddAccountFormOpen}
-                    fullWidth
-                    startIcon={<AddCircleIcon />}
-                    style={{
-                      borderRadius: '0',
-                      borderTop: '1px solid #222',
-                      padding: '6px'
-                    }}
-                    disabled={isLoading}
-                    disableRipple
-                  >
-                    ADD ACCOUNT
-                  </CoinCardBtn>
+                          <CustomAccountContext.Provider
+                            value={{ customAccount: account }}
+                          >
+                            {account.name === implicitAccount || (
+                              <OneNearAccount
+                                initial={coinDetails.slug.toUpperCase()}
+                                name={account.name}
+                                holding={account.displayBalance}
+                                price={account.displayPrice}
+                                decimal={24}
+                                value={account.displayValue}
+                                isEmpty={account.isEmpty}
+                                walletId={walletId}
+                              />
+                            )}
+                          </CustomAccountContext.Provider>
+                        </React.Fragment>
+                      );
+                    })}
+                  {accountData.length <
+                  maxAccountThreshold + lengthThreshold ? (
+                    <CoinCardBtn
+                      onClick={handleAddAccountFormOpen}
+                      fullWidth
+                      startIcon={<AddCircleIcon />}
+                      style={{
+                        borderRadius: '0',
+                        borderTop: '1px solid #222',
+                        padding: '6px'
+                      }}
+                      disabled={isLoading}
+                      disableRipple
+                    >
+                      ADD ACCOUNT
+                    </CoinCardBtn>
+                  ) : accountData.length ===
+                    maxAccountThreshold + lengthThreshold ? (
+                    <></>
+                  ) : (
+                    <Typography className={classes.info}>
+                      <Icon
+                        size={50}
+                        viewBox=" 0 0 30 50"
+                        iconGroup={<WarningExclamation />}
+                      />
+                      Displaying top accounts {maxAccountThreshold} with most
+                      balance
+                    </Typography>
+                  )}
                 </Collapse>
               </Grid>
               <Grid item xs={12} className={classes.rootButtonWrapper}>
