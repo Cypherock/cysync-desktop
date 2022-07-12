@@ -187,6 +187,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
 
       receiveTransaction.on('noWalletFound', (walletState: WalletStates) => {
         const cyError = new CyError();
+        logger.info('ReceiveAddress: Wallet not found', { walletState });
+
         switch (walletState) {
           case WalletStates.NO_WALLET_FOUND:
             cyError.setError(CysyncError.NO_WALLET_ON_DEVICE);
@@ -197,7 +199,10 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           case WalletStates.WALLET_PARTIAL_STATE:
             cyError.setError(CysyncError.WALLET_PARTIAL_STATE);
             break;
+          default:
+            cyError.setError(CysyncError.WALLET_NOT_FOUND_IN_DEVICE);
         }
+
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
             coinType,
