@@ -211,6 +211,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [maximum, setMaximum] = React.useState(false);
   const [gasLimit, setGasLimit] = React.useState(21000);
+  const [gasLimitError, setGasLimitError] = React.useState<string | undefined>(
+    undefined
+  );
   const [estimateGasLimit, setEstimateGasLimit] = React.useState(true);
 
   // State Management Semaphore for Button of Transaction Type
@@ -478,9 +481,11 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     );
     let isValid = true;
     const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
-    copyBatchRecipientData.forEach((elem, index) => {
+    let index = 0;
+
+    for (const recipient of batchRecipientData) {
       const amount = new BigNumber(
-        elem.amount === undefined ? '' : elem.amount
+        recipient.amount === undefined ? '' : recipient.amount
       );
       let error = '';
       if (amount.isNaN() || amount.isZero() || amount.isNegative()) {
@@ -490,12 +495,30 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
           isValid = false;
         }
       }
+
       copyBatchRecipientData[index].errorAmount = error;
-    });
+      index++;
+    }
 
     addbatchRecipientData(copyBatchRecipientData);
 
     return isValid;
+  };
+
+  const validateInputs = () => {
+    const isAmountValid = verifyRecipientAmount();
+
+    const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
+
+    const isGasLimitValid = isEthereum ? gasLimit > 0 : true;
+
+    if (isGasLimitValid) {
+      setGasLimitError(undefined);
+    } else {
+      setGasLimitError('Gas limit should be more than 0');
+    }
+
+    return isAmountValid && isGasLimitValid;
   };
 
   const handleVerificationErrors = (
@@ -607,10 +630,11 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
             handleTransactionFeeChange,
             handleTransactionFeeChangeSlider,
             handleVerificationErrors,
-            verifyRecipientAmount,
+            validateInputs,
             setTransactionFee,
             buttonDisabled,
             gasLimit,
+            gasLimitError,
             setGasLimit,
             handleCopyFromClipboard,
             maxSend,
