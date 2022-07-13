@@ -293,7 +293,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
 
   useEffect(() => {
     if (isRefresh) {
-      handleRetry();
+      handleNext();
     }
   }, [isRefresh]);
 
