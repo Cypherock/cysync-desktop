@@ -78,7 +78,7 @@ const Root = styled(Grid)(({ theme }) => ({
 
 const Tutorial = () => {
   const theme = useTheme();
-  const { tutorials, isLoading, isFetched, getAll, errorMsg } = useTutorial();
+  const { tutorials, isLoading, isFetched, getAll, errorObj } = useTutorial();
 
   useEffect(() => {
     Analytics.Instance.screenView(Analytics.ScreenViews.TUTORIAL);
@@ -143,9 +143,9 @@ const Tutorial = () => {
         </Typography>
       </Grid>
       <Grid item xs={12}>
-        {errorMsg && (
+        {errorObj.isSet && (
           <Alert severity="error" variant="filled">
-            {errorMsg}
+            {errorObj.showError()}
           </Alert>
         )}
         {getContent()}

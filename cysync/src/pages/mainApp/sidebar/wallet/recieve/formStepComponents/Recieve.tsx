@@ -1,5 +1,3 @@
-import { ALLCOINS as COINS, CoinGroup } from '@cypherock/communication';
-import wallet from '@cypherock/wallet';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Button from '@mui/material/Button';
@@ -7,23 +5,17 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import QRCode from 'qrcode';
 import React, { useState } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
-import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
-import { addressDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
   useCustomAccountContext,
   useReceiveTransactionContext,
-  useSelectedWallet,
   useSnackbar,
   useTokenContext
 } from '../../../../../../store/provider';
-import Analytics from '../../../../../../utils/analytics';
-import logger from '../../../../../../utils/logger';
 import prevent from '../../../../../../utils/preventPropagation';
 
 import {
@@ -120,90 +112,20 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-const getReceiveAddress = async (
-  coinType: string,
-  xpub: string,
-  walletId: string,
-  zpub?: string,
-  customAccount?: string
-) => {
-  let receiveAddress = '';
-  let w;
-
-  const coin = COINS[coinType];
-
-  if (!coin) {
-    throw new Error(`Invalid coinType ${coinType}`);
-  }
-
-  if (coin.group === CoinGroup.Ethereum) {
-    w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
-    receiveAddress = (await w.newReceiveAddress()).toUpperCase();
-    // To make the first x in lowercase
-    receiveAddress = `0x${receiveAddress.slice(2)}`;
-  } else if (coin.group === CoinGroup.Near && customAccount) {
-    receiveAddress = customAccount;
-  } else {
-    w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
-    receiveAddress = await w.newReceiveAddress();
-  }
-  return receiveAddress;
-};
-
-const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
+const Receive: React.FC<StepComponentProps> = () => {
   const theme = useTheme();
   const snackbar = useSnackbar();
 
   const { receiveTransaction } = useReceiveTransactionContext();
 
-  const [coinAddress, setCoinAddress] = useState(
-    receiveTransaction.receiveAddress
-  );
-  const [coinVerified, setCoinVerified] = useState(true);
-  const [error, setError] = useState(false);
-  const [QRError, setQRError] = useState(false);
   const [replaceAccountScreen, setReplaceAccountScreen] = useState(false);
 
   const { coinDetails } = useCurrentCoin();
-  const { selectedWallet } = useSelectedWallet();
 
   const { token } = useTokenContext();
   const { customAccount } = useCustomAccountContext();
 
   const coinAbbr = token ? token.slug : coinDetails.slug;
-
-  React.useEffect(() => {
-    if (!coinAddress || !receiveTransaction.verified) {
-      getReceiveAddress(
-        coinDetails.slug,
-        coinDetails.xpub,
-        coinDetails.walletId,
-        coinDetails.zpub,
-        customAccount?.name
-      )
-        .then(addr => {
-          setCoinAddress(addr);
-          setCoinVerified(false);
-          receiveTransaction.onNewReceiveAddr(
-            addr,
-            selectedWallet._id,
-            coinDetails.slug
-          );
-          return null;
-        })
-        .catch(err => {
-          logger.error('Error in Generating Unverified receiveAddress');
-          logger.error(err);
-          setError(true);
-          Analytics.Instance.event(
-            Analytics.Categories.RECEIVE_ADDR,
-            Analytics.Actions.ERROR
-          );
-        });
-    }
-  }, []);
-
-  const [imageData, setImageData] = React.useState('');
 
   const handleReplaceAccount = (e: React.MouseEvent) => {
     prevent(e);
@@ -212,43 +134,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
     // handleClose();
   };
 
-  React.useEffect(() => {
-    if (coinAddress) {
-      Analytics.Instance.event(
-        Analytics.Categories.RECEIVE_ADDR,
-        Analytics.Actions.COMPLETED
-      );
-      QRCode.toDataURL(coinAddress, {
-        errorCorrectionLevel: 'H',
-        margin: 0.5,
-        color: {
-          dark: '#131619'
-        }
-      })
-        .then(url => {
-          setImageData(url);
-          return null;
-        })
-        .catch(err => {
-          logger.error('Error in building QR Code');
-          logger.error(err);
-          setQRError(true);
-        });
-    }
-  }, [coinAddress]);
-
-  if (error) {
-    return (
-      <ErrorDialog
-        open={error}
-        handleClose={() => handleClose()}
-        text="Failed to communicate with the blockchain. Please check your internet connection and try again later."
-        flow="Generating Receive Address"
-      />
-    );
-  }
-
-  if (coinAddress)
+  if (receiveTransaction.coinAddress)
     return replaceAccountScreen ? (
       <Root className={classes.root}>
         <Typography>Save to device</Typography>
@@ -270,16 +156,16 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
         <div className={classes.addressContainer}>
           <Typography
             color="secondary"
-            variant={coinAddress.length > 44 ? 'h6' : 'h4'}
+            variant={receiveTransaction.coinAddress.length > 44 ? 'h6' : 'h4'}
           >
-            {coinAddress}
+            {receiveTransaction.coinAddress}
           </Typography>
           <Button
             color="secondary"
             variant="outlined"
             className={classes.copyButton}
             onClick={() => {
-              navigator.clipboard.writeText(coinAddress);
+              navigator.clipboard.writeText(receiveTransaction.coinAddress);
               snackbar.showSnackbar('Copied to clipboard.', 'success');
             }}
           >
@@ -287,10 +173,14 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
           </Button>
         </div>
         <Grid container className={classes.qrWrapper}>
-          {!imageData && !QRError ? (
+          {!receiveTransaction.imageData && !receiveTransaction.QRError ? (
             <CircularProgress color="secondary" size={40} />
-          ) : imageData ? (
-            <img src={imageData} alt="QRCode" className={classes.qrImage} />
+          ) : receiveTransaction.imageData ? (
+            <img
+              src={receiveTransaction.imageData}
+              alt="QRCode"
+              className={classes.qrImage}
+            />
           ) : (
             <></>
           )}
@@ -298,7 +188,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             QR Code Receiver Coin Address
           </Typography>
         </Grid>
-        {coinVerified && (
+        {receiveTransaction.coinVerified ? (
           <Typography
             color="textPrimary"
             className={classes.text}
@@ -309,8 +199,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             />
             Address Verified
           </Typography>
-        )}
-        {coinVerified || (
+        ) : (
           <Typography color="error" className={classes.errorText}>
             <CancelIcon
               style={{ color: theme.palette.error.main, marginRight: '0.5rem' }}
@@ -321,16 +210,18 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             <strong>Please use it at your own Risk.</strong>
           </Typography>
         )}
-        {coinVerified && customAccount && receiveTransaction.replaceAccount && (
-          <div className={classes.footer}>
-            <CustomButton
-              className={classes.footerBtn}
-              onClick={handleReplaceAccount}
-            >
-              Save to Device?
-            </CustomButton>
-          </div>
-        )}
+        {receiveTransaction.coinVerified &&
+          customAccount &&
+          receiveTransaction.replaceAccount && (
+            <div className={classes.footer}>
+              <CustomButton
+                className={classes.footerBtn}
+                onClick={handleReplaceAccount}
+              >
+                Save to Device?
+              </CustomButton>
+            </div>
+          )}
       </Root>
     );
 

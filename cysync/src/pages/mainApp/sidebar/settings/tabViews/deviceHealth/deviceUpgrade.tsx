@@ -1,20 +1,18 @@
-import { stmFirmware as firmwareServer } from '@cypherock/server-wrapper';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
-import { Button, Grid } from '@mui/material';
+import { Button, Grid, Tooltip } from '@mui/material';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
 import { StepIconProps } from '@mui/material/StepIcon';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { styled, Theme } from '@mui/material/styles';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import success from '../../../../../../assets/icons/generic/success.png';
 import Routes from '../../../../../../constants/routes';
@@ -28,18 +26,8 @@ import {
   DeviceUpgradeErrorResolutionState,
   useDeviceUpgrade
 } from '../../../../../../store/hooks/flows';
-import {
-  FeedbackState,
-  useConnection,
-  useFeedback,
-  useNetwork
-} from '../../../../../../store/provider';
+import { useNetwork } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
-import {
-  compareVersion,
-  hexToVersion,
-  inTestApp
-} from '../../../../../../utils/compareVersion';
 import logger from '../../../../../../utils/logger';
 
 import Authentication from './deviceUpgradeFormComponents/authentication';
@@ -263,7 +251,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
 
   const [authState, setAuthState] = React.useState<-1 | 0 | 1 | 2>(0);
   const [connStatus, setConnStatus] = React.useState<-1 | 0 | 1 | 2>(1);
-  const [upgradeAvailable, setUpgradeAvailable] = React.useState(false);
   const [initialStart, setInitialStart] = React.useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
 
@@ -278,31 +265,37 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     cancelDeviceUpgrade,
     handleRetry,
     deviceConnection,
-    firmwareVersion,
-    deviceState,
     inBackgroundProcess,
     isCompleted,
     setIsCompleted,
-    displayErrorMessage,
-    errorResolutionState,
-    setDisplayErrorMessage,
     isApproved,
     isInternetSlow,
     updateDownloaded,
-    errorMessage,
+    errorObj,
+    handleFeedbackOpen,
     latestVersion,
-    setLatestVersion,
+    checkLatestFirmware,
+    upgradeAvailable,
     updateProgress,
     isAuthenticated,
     isUpdated,
-    setIsDeviceUpdating
+    setIsDeviceUpdating,
+    errorResolutionState
   } = useDeviceUpgrade();
-
-  const { inBootloader } = useConnection();
 
   const latestDeviceConnection = useRef<any>();
   const latestCompleted = useRef<boolean>();
   const latestStep = useRef<number>();
+
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const isRefresh = Boolean(query.get('isRefresh'));
+
+  useEffect(() => {
+    if (isRefresh) {
+      handleRetry();
+    }
+  }, [isRefresh]);
 
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
@@ -317,7 +310,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   }, [activeStep]);
 
   useEffect(() => {
-    setIsDeviceUpdating(true);
     Analytics.Instance.event(
       Analytics.Categories.DEVICE_UPDATE,
       Analytics.Actions.OPEN
@@ -366,41 +358,14 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
 
   useEffect(() => {
     if (authState === 1) {
-      firmwareServer
-        .getLatest()
-        .request()
-        .then(response => {
-          setLatestVersion(response.data.firmware.version);
-
-          if (
-            (firmwareVersion &&
-              deviceState &&
-              compareVersion(
-                response.data.firmware.version,
-                hexToVersion(firmwareVersion)
-              )) ||
-            inTestApp(deviceState)
-          ) {
-            setUpgradeAvailable(true);
-          }
-
-          if (process.env.BUILD_TYPE === 'debug') {
-            setUpgradeAvailable(true);
-          } else if (inBootloader) {
-            setUpgradeAvailable(true);
-          }
-
-          setAuthState(2);
-          return null;
-        })
-        .catch(error => {
-          logger.error(error);
-          setIsCompleted(-1);
-          setAuthState(-1);
-          setDisplayErrorMessage(
-            'Cannot connect to the server. Please check your internet connection and try again.'
-          );
-        });
+      const onSuccess = () => {
+        setAuthState(2);
+      };
+      const onError = () => {
+        setIsCompleted(-1);
+        setAuthState(-1);
+      };
+      checkLatestFirmware(onSuccess, onError);
     }
   }, [authState]);
 
@@ -487,29 +452,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     } else {
       handleRetry();
     }
-  };
-
-  const { showFeedback } = useFeedback();
-
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: displayErrorMessage || errorMessage,
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: 'Reporting for Error (Upgrading Device)',
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
   };
 
   const getMainContent = () => {
@@ -621,7 +563,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             color="textSecondary"
             style={{ margin: '1rem 0rem 6rem' }}
           >
-            {displayErrorMessage}
+            {errorObj.showError()}
           </Typography>
           <div className={classes.errorButtons}>
             {retryEnabled ? (

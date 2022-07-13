@@ -11,7 +11,7 @@ import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import success from '../../../../../assets/icons/generic/success.png';
 import CreateComponent from '../../../../../components/createComponent';
@@ -241,7 +241,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
   const handleErrorBoxClose = () => {
     handleClose(true);
     setActiveStep(0);
-    coinAdder.setErrorMessage('');
+    coinAdder.clearErrorObj();
     coinAdder.resetHooks();
   };
 
@@ -252,28 +252,20 @@ const AddCoinForm: React.FC<StepperProps> = ({
     );
     logger.info('Add coin form retry');
     setIsAddCoinLoading(false);
-    coinAdder.setErrorMessage('');
+    coinAdder.clearErrorObj();
     setCoins(JSON.parse(JSON.stringify(initialCoins)));
     if (deviceConnection) coinAdder.cancelAddCoin(deviceConnection);
     coinAdder.resetHooks();
     setActiveStep(0);
   };
 
-  useEffect(() => {
-    if (coinAdder.errorMessage) {
-      Analytics.Instance.event(
-        Analytics.Categories.ADD_COIN,
-        Analytics.Actions.ERROR
-      );
-    }
-  }, [coinAdder.errorMessage]);
-
   return (
     <Root className={classes.root}>
       <ErrorBox
-        open={!!coinAdder.errorMessage}
+        open={coinAdder.errorObj.isSet}
         handleClose={handleErrorBoxClose}
-        text={coinAdder.errorMessage}
+        errorObj={coinAdder.errorObj}
+        text={coinAdder.errorObj.showError()}
         actionText="Retry"
         handleAction={onRetry}
         flow="Adding Coin"

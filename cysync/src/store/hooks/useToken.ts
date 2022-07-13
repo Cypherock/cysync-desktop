@@ -2,12 +2,7 @@ import { ALLCOINS as COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
-import {
-  getLatestPriceForCoin,
-  priceHistoryDb,
-  Token,
-  tokenDb
-} from '../database';
+import { priceHistoryDb, Token, tokenDb } from '../database';
 
 import { DisplayToken } from './types';
 import { useDebouncedFunction } from './useDebounce';
@@ -81,7 +76,7 @@ export const useToken: UseToken = () => {
         coinObj.multiplier
       );
 
-      const price = await getLatestPriceForCoin(token.slug);
+      const price = token.price;
       const value = balance.multipliedBy(price);
 
       coinWithPrice.displayBalance = balance.toString();

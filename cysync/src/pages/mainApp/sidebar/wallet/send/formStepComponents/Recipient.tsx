@@ -338,7 +338,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     activeButton,
     changeButton,
     handleVerificationErrors,
-    verifyRecipientAmount,
+    validateInputs,
     transactionFee,
     maxSend,
     setMaxSend,
@@ -347,6 +347,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     setTransactionFee,
     gasLimit,
     setGasLimit,
+    gasLimitError,
     handleNext,
     handleDelete,
     feeType,
@@ -545,7 +546,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
           coinDetails.slug,
           token
         ),
-        fees: floatTransactionFee,
+        //rounding the data to handle decimals for now
+        // TODO: Need to figure out support everywhere properly
+        fees: Math.round(floatTransactionFee),
         isSendAll: maxSend,
         data: {
           gasLimit,
@@ -761,6 +764,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
                 onChange={e => {
                   setGasLimit(e.target.value);
                 }}
+                error={!!gasLimitError}
+                helperText={gasLimitError}
                 disabled={estimateGasLimit}
               />
             </div>
@@ -842,7 +847,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
       )}
       <div className={divider} />
       <div className={recipientFooter}>
-        {sendTransaction.estimationError ? (
+        {sendTransaction.estimationError?.isSet ? (
           <div
             className={classes.center}
             style={{ justifyContent: 'flex-start' }}
@@ -852,7 +857,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               style={{ marginRight: '5px' }}
             />
             <Typography variant="body2" color="textSecondary" align="center">
-              {sendTransaction.estimationError}
+              {sendTransaction.estimationError.getMessage()}
             </Typography>
           </div>
         ) : (

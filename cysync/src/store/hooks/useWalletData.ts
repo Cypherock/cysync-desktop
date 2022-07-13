@@ -6,7 +6,6 @@ import {
   addressDb,
   Coin,
   coinDb,
-  getLatestPriceForCoin,
   priceHistoryDb,
   receiveAddressDb
 } from '../database';
@@ -69,7 +68,7 @@ export const useWalletData: UseWalletData = () => {
 
       coinWithPrice.displayBalance = balance.toString();
 
-      const latestPrice = await getLatestPriceForCoin(coin.slug);
+      const latestPrice = coin.price;
       const value = balance.multipliedBy(latestPrice || 0);
       coinWithPrice.displayValue = value.toFixed(2);
       coinWithPrice.displayPrice = latestPrice.toFixed(2) || '0';

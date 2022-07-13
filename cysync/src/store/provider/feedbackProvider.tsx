@@ -2,7 +2,6 @@ import { feedback as feedbackServer } from '@cypherock/server-wrapper';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { CircularProgress, createSvgIcon, Grid } from '@mui/material';
 import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import InputBase from '@mui/material/InputBase';
@@ -143,6 +142,7 @@ type ShowFeedback = (options?: {
 
 export interface FeedbackContextInterface {
   showFeedback: ShowFeedback;
+  closeFeedback: () => void; // dont add this everywhere, as nested calls can disrupt the flow
 }
 
 export const FeedbackContext: React.Context<FeedbackContextInterface> =
@@ -193,8 +193,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const {
     handleLogFetch,
-    errorMessage: logErrorMessage,
-    setErrorMessage: setLogErrorMessage,
+    errorObj,
+    clearErrorObj,
     completed: logFetchCompleted,
     logFetched: logFetchState,
     requestStatus: logRequestStatus,
@@ -208,7 +208,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     setSubmitting(false);
     setError('');
     resetLogFetcherHooks();
-    setLogErrorMessage('');
+    clearErrorObj();
   };
 
   const showFeedback: ShowFeedback = ({
@@ -257,7 +257,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       firmwareVersion &&
       beforeFlowStart(true)
     ) {
-      setLogErrorMessage('');
+      clearErrorObj();
       resetLogFetcherHooks();
       handleLogFetch({
         connection: deviceConnection,
@@ -273,7 +273,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (!deviceConnection) {
-      setLogErrorMessage('');
+      clearErrorObj();
     }
   }, [deviceConnection]);
 
@@ -462,7 +462,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     logger.info('Feedback: Closed');
 
     resetLogFetcherHooks();
-    setLogErrorMessage('');
+    clearErrorObj();
 
     if (externalHandleClose) {
       externalHandleClose();
@@ -683,7 +683,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                           </Typography>
                         </Grid>
                       )}
-                      {logErrorMessage && (
+                      {errorObj.isSet && (
                         <Grid
                           container
                           className={classes.extras}
@@ -698,7 +698,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                             variant="body2"
                             className={classes.errorColor}
                           >
-                            {logErrorMessage}
+                            {errorObj.getMessage()}
                           </Typography>
                         </Grid>
                       )}
@@ -737,16 +737,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     </>
                   )}
                   <Grid container className={classes.buttonGroup}>
-                    <Button
-                      onClick={onClose}
-                      style={{
-                        padding: '0.3rem 1.5rem',
-                        margin: '0rem 0.5rem',
-                        textTransform: 'none'
-                      }}
-                    >
-                      Close
-                    </Button>
                     <CustomButton
                       disabled={deviceLogsLoading || submitting}
                       onClick={handleSubmit}
@@ -795,7 +785,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
           </Root>
         }
       />
-      <FeedbackContext.Provider value={{ showFeedback }}>
+      <FeedbackContext.Provider
+        value={{ showFeedback, closeFeedback: onClose }}
+      >
         {children}
       </FeedbackContext.Provider>
     </>

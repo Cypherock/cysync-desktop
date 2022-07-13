@@ -12,6 +12,7 @@ import crypto from 'crypto';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 
+import { CysyncError } from '../../../errors';
 import logger from '../../../utils/logger';
 import {
   Coin,
@@ -389,8 +390,10 @@ export const SyncProvider: React.FC = ({ children }) => {
           updateQueueItem = true;
           removeFromQueue = false;
         } else {
-          logger.error('Sync: Error, max retries exceeded', { item });
-          logger.error(result.error);
+          logger.error(
+            `${CysyncError.SYNC_MAX_TRIES_EXCEEDED} Sync: Error, max retries exceeded`
+          );
+          logger.error({ error: result.error, item });
         }
       } else if (
         item instanceof HistorySyncItem &&
@@ -483,6 +486,8 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       updateAllExecutedItems(executionResult);
     } catch (error) {
+      // Since all the tasks for an item are closely related, I understand why this is being done.
+      // TODO: But we should aim to do better to handle a single failing.
       logger.error('Failed to execute batch, hence failing all tasks');
     }
 
@@ -684,7 +689,10 @@ export const SyncProvider: React.FC = ({ children }) => {
               logger.info('Sync: Price Refresh completed');
             })
             .catch(err => {
-              logger.error('Sync: Price Refresh failed', err);
+              logger.error(
+                `${CysyncError.PRICE_REFRESH_FAILED} Sync: Price Refresh failed`
+              );
+              logger.error(err);
             });
           if (connectedRef) {
             notifications
@@ -693,7 +701,10 @@ export const SyncProvider: React.FC = ({ children }) => {
                 logger.info('Sync: Notification Refresh completed');
               })
               .catch(err => {
-                logger.error('Sync: Notification Refresh failed', err);
+                logger.error(
+                  `${CysyncError.NOTIFICATIONS_REFRESH_FAILED} Sync: Notification Refresh failed`
+                );
+                logger.error(err);
               });
           }
           transactionDb
@@ -702,7 +713,10 @@ export const SyncProvider: React.FC = ({ children }) => {
               logger.info('Sync: Transaction Refresh completed');
             })
             .catch(err => {
-              logger.error('Sync: Transaction Refresh failed', err);
+              logger.error(
+                `${CysyncError.HISTORY_REFRESH_FAILED} Sync: Transaction Refresh failed`
+              );
+              logger.error(err);
             });
           fetchAllCustomAccounts()
             .then(() => {
@@ -721,7 +735,9 @@ export const SyncProvider: React.FC = ({ children }) => {
           try {
             addLatestPriceRefresh({ isRefresh: true, module: 'refresh' });
           } catch (error) {
-            logger.error('Sync: Error in refreshing latest price');
+            logger.error(
+              `${CysyncError.LATEST_PRICE_REFRESH_FAILED} Sync: Error in refreshing latest price`
+            );
             logger.error(error);
           }
         }, 1000 * 60 * 15)
