@@ -2,8 +2,10 @@ import {
   ALLCOINS,
   CoinGroup,
   COINS,
-  Erc20CoinData
+  Erc20CoinData,
+  NearCoinData
 } from '@cypherock/communication';
+import { NearWallet } from '@cypherock/wallet';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { Typography } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -41,6 +43,7 @@ import logger from '../../../../../../utils/logger';
 import getFees from '../../../../../../utils/networkFees';
 import Input from '../formComponents/Input';
 import CustomSlider from '../generalComponents/CustomSlider';
+import LabelText from '../generalComponents/LabelText';
 
 import {
   BatchRecipientData,
@@ -331,6 +334,7 @@ BatchRecipient.propTypes = {
 const Recipient: React.FC<StepComponentProps> = props => {
   const {
     batchRecipientData,
+    addbatchRecipientData,
     activeButton,
     changeButton,
     handleVerificationErrors,
@@ -461,7 +465,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
   const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
 
-  const handleCheckAddresses = (skipEmpty = false) => {
+  const handleCheckAddresses = async (skipEmpty = false) => {
     let isValid = true;
     validatedAddresses = [];
 
@@ -489,11 +493,31 @@ const Recipient: React.FC<StepComponentProps> = props => {
     return isValid;
   };
 
-  const handleRecipientSubmit = () => {
+  const checkAccount = async () => {
+    const coin = COINS[coinDetails.slug];
+    if (coin instanceof NearCoinData) {
+      const copyData = [...batchRecipientData];
+      const wallet = new NearWallet(coinDetails.xpub, coin);
+      const check = await wallet.getTotalBalanceCustom(
+        batchRecipientData[0].recipient
+      );
+      if (check.balance.cysyncError && check.balance.cysyncError.length === 0) {
+        copyData[0].errorRecipient = "This account dosen't exists";
+        addbatchRecipientData(copyData);
+        return false;
+      } else if (!check.balance.cysyncError) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const handleRecipientSubmit = async () => {
     const isValid = handleCheckAddresses();
     const isAmountValid = verifyRecipientAmount();
+    const doesExists = await checkAccount();
 
-    if (isValid && isAmountValid) {
+    if (isValid && isAmountValid && doesExists) {
       if (!beforeFlowStart()) {
         return;
       }
@@ -701,6 +725,16 @@ const Recipient: React.FC<StepComponentProps> = props => {
             )}
             )
           </Typography>
+          {customAccount && (
+            <div style={{ marginTop: '5px' }}>
+              <LabelText
+                label="Your Account ID"
+                text={customAccount.name}
+                verified={sendTransaction.verified}
+              />
+            </div>
+          )}
+          {isNear && <div style={{ marginBottom: '10px' }} />}
           {isEthereum && (
             <div style={{ marginTop: '10px' }}>
               <FormControlLabel

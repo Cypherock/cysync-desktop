@@ -598,6 +598,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
             activeButton,
             feeType,
             batchRecipientData,
+            addbatchRecipientData,
             total,
             transactionFee,
             addBatchTransaction,

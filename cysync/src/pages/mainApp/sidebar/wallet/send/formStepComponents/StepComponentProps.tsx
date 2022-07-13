@@ -30,6 +30,7 @@ export interface StepComponentProps {
   activeButton: number;
   feeType: boolean;
   batchRecipientData: BatchRecipientData[];
+  addbatchRecipientData: (recipient: BatchRecipientData[]) => void;
   total: BigNumber;
   transactionFee: string;
   addBatchTransaction: () => void;
@@ -69,6 +70,7 @@ export const StepComponentPropTypes = {
   feeType: PropTypes.bool.isRequired,
   batchRecipientData: PropTypes.arrayOf(PropTypes.exact(BatchRecipientPropType))
     .isRequired,
+  addbatchRecipientData: PropTypes.func.isRequired,
   total: PropTypes.instanceOf(BigNumber).isRequired,
   transactionFee: PropTypes.string.isRequired,
   addBatchTransaction: PropTypes.func.isRequired,

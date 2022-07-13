@@ -4,7 +4,7 @@ import {
   COINS,
   Erc20CoinData
 } from '@cypherock/communication';
-// import { Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
@@ -463,7 +463,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             handleCheckAddresses(true);
           }}
         />
-        <div className={classes.info}>
+        <Typography className={classes.info}>
           <p>Your account ID can contain any of the following:</p>
           <ul>
             <li>Lowercase characters (a-z)</li>
@@ -476,7 +476,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             <li>Fewer than 2 characters</li>
             <li>More than 64 characters (including .testnet)</li>
           </ul>
-        </div>
+        </Typography>
       </div>
       <div className={divider} />
       <div className={recipientFooter}>

@@ -19,7 +19,7 @@ import Verify from './formStepComponents/Verify';
 import StepperForm from './stepperForm';
 
 const SenderData = [
-  ['Custom Account', Recipient],
+  ['Add Account', Recipient],
   ['Verify', Verify],
   ['Device', Device],
   ['Summary', Summary],
