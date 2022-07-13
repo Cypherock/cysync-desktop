@@ -275,12 +275,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   const isRefresh = Boolean(query.get('isRefresh'));
 
   useEffect(() => {
-    if (isRefresh) {
-      handleRetry();
-    }
-  }, [isRefresh]);
-
-  useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
   }, [deviceConnection]);
 
@@ -357,6 +351,10 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
       setActiveStep(0);
     }
   };
+
+  if (isRefresh) {
+    handleRetry();
+  }
 
   const onSuccess = () => {
     retryConnection();
