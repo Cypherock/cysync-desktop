@@ -178,7 +178,7 @@ const LockScreen = (props: any) => {
     }
   };
 
-  const { showFeedback } = useFeedback();
+  const { showFeedback, closeFeedback } = useFeedback();
 
   const newFeedbackState: FeedbackState = {
     attachLogs: true,
@@ -200,6 +200,12 @@ const LockScreen = (props: any) => {
       initFeedbackState: newFeedbackState
     });
   };
+
+  React.useEffect(() => {
+    return () => {
+      closeFeedback();
+    };
+  }, []);
 
   return (
     <Root className={classes.container}>

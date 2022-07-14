@@ -6,7 +6,7 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { shell } from 'electron';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import TextView from '../../../designSystem/designComponents/textComponents/textView2';
 import { FeedbackState, useFeedback } from '../../../store/provider';
@@ -51,7 +51,7 @@ interface StartOptionsProps {
 }
 
 const StartOptions: React.FC<StartOptionsProps> = ({ handleNext }) => {
-  const { showFeedback } = useFeedback();
+  const { showFeedback, closeFeedback } = useFeedback();
 
   const newFeedbackState: FeedbackState = {
     attachLogs: true,
@@ -73,6 +73,12 @@ const StartOptions: React.FC<StartOptionsProps> = ({ handleNext }) => {
       initFeedbackState: newFeedbackState
     });
   };
+
+  useEffect(() => {
+    return () => {
+      closeFeedback();
+    };
+  }, []);
 
   const [state, setState] = React.useState([
     {
