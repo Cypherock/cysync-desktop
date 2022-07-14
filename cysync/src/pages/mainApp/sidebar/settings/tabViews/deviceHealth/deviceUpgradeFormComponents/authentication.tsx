@@ -11,7 +11,7 @@ interface Props {
   isUpdated: -1 | 0 | 1 | 2;
   isApproved: 0 | 2 | 1 | -1;
   isInternetSlow: boolean;
-  updateDownloaded: 0 | 1 | 2 | -1;
+  updateDownloaded: 0 | 1 | 2 | 3 | -1;
   progress: number;
   latestVersion?: string;
 }

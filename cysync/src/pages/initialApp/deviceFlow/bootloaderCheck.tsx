@@ -217,41 +217,46 @@ const BootloaderCheck = (props: any) => {
             )}
           </>
         )}
-        {isCompleted === 1 && updateDownloaded === 2 && (
-          <>
-            <CircularProgress className={classes.progress} size={70} />
-            <Typography
-              variant="h4"
-              color="textPrimary"
-              align="center"
-              style={{ marginBottom: '1.5rem' }}
-            >
-              {`Please wait while Cypherock X1 is Upgrading to version ${latestVersion}`}
-            </Typography>
-            <div className={classes.center} style={{ margin: '15px 0' }}>
-              <AlertIcon
-                className={classes.primaryColor}
-                style={{ marginRight: '5px' }}
-              />
-              <Typography variant="body2" color="textSecondary" align="center">
-                Do not disconnect device while it is being updated. This may
-                take a few minutes.
+        {isCompleted === 1 &&
+          (updateDownloaded === 2 || updateDownloaded === 3) && (
+            <>
+              <CircularProgress className={classes.progress} size={70} />
+              <Typography
+                variant="h4"
+                color="textPrimary"
+                align="center"
+                style={{ marginBottom: '1.5rem' }}
+              >
+                {`Please wait while Cypherock X1 is Upgrading to version ${latestVersion}`}
               </Typography>
-            </div>
-            {connected || (
-              <div style={{ marginTop: '10px' }} className={classes.success}>
-                <Icon
-                  size={50}
-                  viewBox="0 0 60 60"
-                  iconGroup={<ErrorExclamation />}
+              <div className={classes.center} style={{ margin: '15px 0' }}>
+                <AlertIcon
+                  className={classes.primaryColor}
+                  style={{ marginRight: '5px' }}
                 />
-                <Typography variant="body2" color="secondary">
-                  Internet connection is required for this action
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  align="center"
+                >
+                  Do not disconnect device while it is being updated. This may
+                  take a few minutes.
                 </Typography>
               </div>
-            )}
-          </>
-        )}
+              {connected || (
+                <div style={{ marginTop: '10px' }} className={classes.success}>
+                  <Icon
+                    size={50}
+                    viewBox="0 0 60 60"
+                    iconGroup={<ErrorExclamation />}
+                  />
+                  <Typography variant="body2" color="secondary">
+                    Internet connection is required for this action
+                  </Typography>
+                </div>
+              )}
+            </>
+          )}
       </Grid>
       <Grid item xs={2} />
     </Root>

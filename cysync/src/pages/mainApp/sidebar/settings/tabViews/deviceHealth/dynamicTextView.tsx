@@ -39,7 +39,7 @@ const Root = styled(Grid)(({ theme }) => ({
 }));
 
 type DynamicTextViewProps = {
-  state: -1 | 0 | 1 | 2;
+  state: -1 | 0 | 1 | 2 | 3;
   text: string;
 };
 
@@ -61,6 +61,7 @@ const DynamicTextView: React.FC<DynamicTextViewProps> = ({ state, text }) => {
           />
         );
       case 2:
+      case 3:
         return (
           <Icon
             size={15}

@@ -54,7 +54,7 @@ export interface UseDeviceUpgradeValues {
   isDeviceUpdating: boolean;
   setIsDeviceUpdating: ConnectionContextInterface['setIsDeviceUpdating'];
   setBlockNewConnection: ConnectionContextInterface['setBlockNewConnection'];
-  updateDownloaded: 0 | 1 | -1 | 2;
+  updateDownloaded: 0 | 1 | -1 | 2 | 3;
   beforeFlowStart: ConnectionContextInterface['beforeFlowStart'];
   isApproved: 0 | 1 | -1 | 2;
   setApproved: React.Dispatch<React.SetStateAction<number>>;
@@ -116,11 +116,11 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       DeviceUpgradeErrorResolutionState.NO_ERROR
     );
   const [isApproved, setApproved] = React.useState<-1 | 0 | 1 | 2>(0);
-  const [isUpdated, setUpdated] = React.useState<-1 | 0 | 1 | 2>(0);
+  const [isUpdated, setUpdated] = React.useState<-1 | 0 | 1 | 2 | 3>(0);
   const [isAuthenticated, setAuthenticated] = React.useState<-1 | 0 | 1 | 2>(0);
   const [updateProgress, setUpdateProgress] = React.useState(0);
   const [updateDownloaded, setUpdateDownloaded] = React.useState<
-    -1 | 0 | 1 | 2
+    -1 | 0 | 1 | 2 | 3
   >(1);
   const [latestVersion, setLatestVersion] = React.useState('0.0.0');
   const [firmwarePath, setFirmwarePath] = React.useState('');
@@ -156,7 +156,10 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         isInitial
       ) {
         logger.verbose(`Device already on the latest version`);
-        setUpdated(2);
+        setUpdated(3);
+        setUpdateDownloaded(3);
+        setIsCompleted(1);
+        initiateDeviceAuth();
         return null;
       }
       if (
@@ -174,7 +177,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       if (process.env.BUILD_TYPE === 'debug' || inBootloader)
         setUpgradeAvailable(true);
 
-      //What is this sorcery???
       if (onSuccess) onSuccess();
       return response.data.firmware.downloadUrl;
     } catch (error) {
@@ -213,6 +215,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     setErrorResolutionState(DeviceUpgradeErrorResolutionState.NO_ERROR);
     setErrorObj(new CyError());
     resetHooks();
+    retries.current = 0;
 
     setUpdateDownloaded(1);
 
@@ -233,6 +236,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     let downloadUrl;
     try {
       downloadUrl = await checkLatestFirmware();
+      if (downloadUrl === null) return;
     } catch (e) {
       setIsDeviceUpdating(false);
       if (internetSlowTimeout.current) {
@@ -617,6 +621,10 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   const clearErrorObj = () => {
     setErrorObj(new CyError());
   };
+
+  useEffect(() => {
+    if (errorObj.isSet) setIsDeviceUpdating(false);
+  }, [errorObj]);
 
   return {
     startDeviceUpdate,
