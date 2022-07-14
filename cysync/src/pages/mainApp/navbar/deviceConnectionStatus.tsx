@@ -65,10 +65,10 @@ const DeviceConnectionStatus: React.FC<DeviceConnectionStatusProps> = props => {
   } = useConnection();
 
   const getConnectionState = (): ConnectionStatus => {
-    if (isDeviceNotReadyCheck) {
-      return ConnectionStatus.DEVICE_NOT_READY;
-    } else if (isDeviceUpdating) {
+    if (isDeviceUpdating) {
       return ConnectionStatus.UPDATING;
+    } else if (isDeviceNotReadyCheck) {
+      return ConnectionStatus.DEVICE_NOT_READY;
     } else if (inBackgroundProcess) {
       return ConnectionStatus.CONNECTING;
     } else if (blockNewConnection) {
