@@ -57,7 +57,6 @@ export interface UseReceiveTransactionValues {
   coinsConfirmed: boolean;
   coinAddress: string;
   imageData: string;
-  coinVerified: boolean;
   QRError: boolean;
 }
 
@@ -76,7 +75,6 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [isCancelled, setIsCancelled] = useState(false);
 
   const [coinAddress, setCoinAddress] = useState(receiveAddress);
-  const [coinVerified, setCoinVerified] = useState(false);
 
   const [imageData, setImageData] = useState('');
 
@@ -267,7 +265,6 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       receiveTransaction.on('receiveAddress', address => {
         logger.info('ReceiveAddress: Address generated', { coinType, address });
         setReceiveAddress(address);
-        setCoinVerified(true);
         recAddr = address;
       });
 
@@ -399,7 +396,6 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       )
         .then(addr => {
           setCoinAddress(addr);
-          setCoinVerified(false);
           onNewReceiveAddr(addr, selectedWallet._id, coinDetails.slug);
           return null;
         })
@@ -460,7 +456,6 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     onNewReceiveAddr,
     coinAddress,
     imageData,
-    coinVerified,
     QRError
   } as UseReceiveTransactionValues;
 };
