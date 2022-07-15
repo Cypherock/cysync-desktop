@@ -13,6 +13,7 @@ export interface I18nStrings {
     DEVICE_NOT_SUPPORTED: string;
     DEVICE_MISCONFIGURED: string;
     DEVICE_INFO_UNKNOWN_ERROR: string;
+    DEVICE_NOT_IN_UPDATE_RECEIVING_MODE: string;
 
     WALLET_NOT_FOUND_IN_DEVICE: string;
     WALLET_NOT_FOUND_IN_CARD: string;
