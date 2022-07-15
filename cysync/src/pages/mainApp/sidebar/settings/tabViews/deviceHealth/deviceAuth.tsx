@@ -275,12 +275,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   const isRefresh = Boolean(query.get('isRefresh'));
 
   useEffect(() => {
-    if (isRefresh) {
-      handleRetry();
-    }
-  }, [isRefresh]);
-
-  useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
   }, [deviceConnection]);
 
@@ -294,6 +288,10 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
       Analytics.Actions.OPEN
     );
     logger.info('Setting device authentication open');
+    if (isRefresh) {
+      logger.info('Device authentication is refreshing');
+      handleRetry();
+    }
 
     return () => {
       Analytics.Instance.event(

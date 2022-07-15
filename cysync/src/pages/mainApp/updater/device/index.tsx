@@ -61,7 +61,7 @@ const Updater = () => {
 
   const onUpdate = () => {
     finalizeDontShow();
-    navigate(Routes.settings.device.upgrade);
+    navigate(`${Routes.settings.device.upgrade}?isRefresh=true`);
     setIsOpen(false);
   };
 

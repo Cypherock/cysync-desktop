@@ -110,6 +110,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     logger.info('Initial device auth opened');
 
     return () => {
+      feedback.closeFeedback();
       Analytics.Instance.event(
         Analytics.Categories.INITIAL_DEVICE_AUTH,
         Analytics.Actions.CLOSED

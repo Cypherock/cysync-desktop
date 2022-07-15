@@ -406,7 +406,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
       });
   };
 
-  const { showFeedback } = useFeedback();
+  const { showFeedback, closeFeedback } = useFeedback();
 
   const newFeedbackState: FeedbackState = {
     attachLogs: true,
@@ -420,6 +420,12 @@ export const useCardAuth: UseCardAuth = isInitial => {
     subject: 'Reporting for Error (X1 Card Authentication)',
     subjectError: ''
   };
+
+  useEffect(() => {
+    return () => {
+      closeFeedback();
+    };
+  }, []);
 
   const handleFeedbackOpen = () => {
     showFeedback({

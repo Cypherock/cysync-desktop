@@ -11,10 +11,13 @@ import reportCrash from '../utils/reportCrash';
 import getUuid from '../utils/uuid';
 
 const OpenFeedback: React.FC = () => {
-  const { showFeedback } = useFeedback();
+  const { showFeedback, closeFeedback } = useFeedback();
 
   useEffect(() => {
     showFeedback({ disableDeviceLogs: true });
+    return () => {
+      closeFeedback();
+    };
   }, []);
 
   return null;

@@ -57,7 +57,6 @@ const DeviceUpdatePopup = () => {
       setUpdateType(localUpdateType);
 
       if (localUpdateType === 'update') {
-        navigate(Routes.settings.device.upgrade);
         Analytics.Instance.event(
           Analytics.Categories.PARTIAL_DEVICE_UPDATE,
           Analytics.Actions.OPEN
@@ -65,7 +64,6 @@ const DeviceUpdatePopup = () => {
         logger.info('Redirecting user to device update settings page');
         return navigate(`${Routes.settings.device.upgrade}?isRefresh=true`);
       } else if (localUpdateType === 'auth') {
-        navigate(Routes.settings.device.auth);
         Analytics.Instance.event(
           Analytics.Categories.DEVICE_AUTH_PROMPT,
           Analytics.Actions.OPEN
