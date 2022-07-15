@@ -307,6 +307,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           fees,
           isSendAll,
           data,
+          transactionDb,
           customAccount
         )
         .then(() => {
@@ -615,6 +616,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           connection,
           sdkVersion,
           addressDB: addressDb,
+          transactionDB: transactionDb,
           walletId,
           pinExists,
           passphraseExists,

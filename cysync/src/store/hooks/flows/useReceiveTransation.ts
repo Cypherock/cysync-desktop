@@ -21,7 +21,12 @@ import Analytics from '../../../utils/analytics';
 import { DeferredReference } from '../../../utils/deferredReference';
 import logger from '../../../utils/logger';
 import { addressDb, receiveAddressDb } from '../../database';
-import { useCurrentCoin, useSelectedWallet, useSocket } from '../../provider';
+import {
+  useCurrentCoin,
+  useCustomAccountContext,
+  useSelectedWallet,
+  useSocket
+} from '../../provider';
 
 import * as flowHandlers from './handlers';
 
@@ -94,6 +99,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
 
   const { selectedWallet } = useSelectedWallet();
   const { coinDetails } = useCurrentCoin();
+  const { customAccount: customAccountfromContext } = useCustomAccountContext();
   const [QRError, setQRError] = useState(false);
   const { addReceiveAddressHook } = useSocket();
   let recAddr: string | undefined;
@@ -260,10 +266,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           });
           setVerifiedAccountId(true);
         } else {
-          logger.info('ReceiveAddress: Account id rejected on device', {
-            coinType
-          });
-          setErrorMessage(langStrings.ERRORS.RECEIVE_TXN_REJECTED(coin.name));
+          const cyError = new CyError(CysyncError.ADD_COIN_REJECTED, coin.name);
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
 
@@ -275,10 +279,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           );
           setVerifiedReplaceAccount(true);
         } else {
-          logger.info('ReceiveAddress: Replace account id rejected on device', {
-            coinType
-          });
-          setErrorMessage(langStrings.ERRORS.RECEIVE_TXN_REJECTED(coin.name));
+          const cyError = new CyError(CysyncError.ADD_COIN_REJECTED, coin.name);
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
 
@@ -467,6 +469,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       address = (await w.newReceiveAddress()).toUpperCase();
       // To make the first x in lowercase
       address = `0x${address.slice(2)}`;
+    } else if (coin.group === CoinGroup.Near && customAccountfromContext) {
+      address = customAccountfromContext.name;
     } else {
       w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
       address = await w.newReceiveAddress();
