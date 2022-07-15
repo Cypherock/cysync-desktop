@@ -28,18 +28,20 @@ const SingleWalletView = () => {
   const openAddCoinForm = query.get('openAddCoinForm');
   const { walletId } = useParams();
   const navigate = useNavigate();
-  const { allWallets } = useWallets();
+  const { allWallets, isLoading: isWalletLoading } = useWallets();
   const [currentWalletDetails, setCurrentWalletDetails] =
     useState<Wallet | null>(null);
 
   useEffect(() => {
+    if (isWalletLoading) return;
+
     const wallet = allWallets.find(elem => elem._id === walletId);
     if (wallet) {
       setCurrentWalletDetails(wallet);
     } else {
       navigate(RouteLinks.wallet.index);
     }
-  }, [walletId]);
+  }, [walletId, isWalletLoading]);
 
   useEffect(() => {
     Analytics.Instance.screenView(Analytics.ScreenViews.WALLET);
