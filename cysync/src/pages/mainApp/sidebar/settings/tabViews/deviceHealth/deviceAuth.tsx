@@ -288,6 +288,10 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
       Analytics.Actions.OPEN
     );
     logger.info('Setting device authentication open');
+    if (isRefresh) {
+      logger.info('Device authentication is refreshing');
+      handleRetry();
+    }
 
     return () => {
       Analytics.Instance.event(
@@ -351,10 +355,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
       setActiveStep(0);
     }
   };
-
-  if (isRefresh) {
-    handleRetry();
-  }
 
   const onSuccess = () => {
     retryConnection();

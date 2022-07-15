@@ -309,6 +309,10 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
       Analytics.Actions.OPEN
     );
     logger.info('Setting device update open');
+    if (isRefresh) {
+      logger.info('Device Upgrade is refreshing');
+      handleNext();
+    }
 
     return () => {
       setAllowExit(true);
@@ -378,10 +382,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
       setActiveStep(0);
     }
   };
-
-  if (isRefresh) {
-    handleNext();
-  }
 
   const steps = [
     {
