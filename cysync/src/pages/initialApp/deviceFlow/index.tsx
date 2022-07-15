@@ -6,7 +6,6 @@ import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import InternetStatus from '../../InternetStatus';
 
-import BootloaderCheck from './bootloaderCheck';
 import DeviceConnection from './DeviceConnection';
 import DeviceErrorPopup from './deviceError';
 import DeviceSetup from './deviceSetup';
@@ -48,15 +47,14 @@ const InitialDeviceFlow: React.FC<Props> = ({ handleDeviceConnected }) => {
       handleNext={handleNext}
       handleDeviceConnected={handleDeviceConnected}
     />,
-    <BootloaderCheck key={2} handleNext={handleNext} handlePrev={handlePrev} />,
     <DeviceSetup
-      key={3}
+      key={2}
       open={deviceSetup}
       handleClose={handleClose}
       handleDeviceConnected={handleDeviceConnected}
       handlePrev={handlePrev}
     />,
-    <p key={4}>Error</p>
+    <p key={3}>Error</p>
   ];
 
   const getContent = () => {
