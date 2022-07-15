@@ -14,7 +14,6 @@ export * from './addCoinProvider';
 export * from './currentCoinProvider';
 export * from './sendTransactionContextProvider';
 export * from './receiveTransactionContextProvider';
-export * from './coinSpecificDataContextProvider';
 export * from './tokenContextProvider';
 export * from './customAccountContextProvider';
 export * from './i18nProvider';

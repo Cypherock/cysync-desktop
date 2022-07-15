@@ -1,7 +1,6 @@
 import { DeviceErrorType } from '@cypherock/communication';
 import { FlowErrorType } from '@cypherock/protocols';
 import { WalletErrorType } from '@cypherock/wallet';
-
 export enum CysyncError {
   // NETWORK_ERROR = 'DS_CONN_3001',
   NETWORK_FAILURE = 'DS_CONN_3002',

@@ -131,7 +131,6 @@ const Receive: React.FC<StepComponentProps> = () => {
     prevent(e);
     receiveTransaction.replaceAccountAction.resolve(true);
     setReplaceAccountScreen(true);
-    // handleClose();
   };
 
   if (receiveTransaction.coinAddress)
@@ -188,7 +187,7 @@ const Receive: React.FC<StepComponentProps> = () => {
             QR Code Receiver Coin Address
           </Typography>
         </Grid>
-        {receiveTransaction.coinVerified ? (
+        {receiveTransaction.verified ? (
           <Typography
             color="textPrimary"
             className={classes.text}
@@ -210,7 +209,7 @@ const Receive: React.FC<StepComponentProps> = () => {
             <strong>Please use it at your own Risk.</strong>
           </Typography>
         )}
-        {receiveTransaction.coinVerified &&
+        {receiveTransaction.verified &&
           customAccount &&
           receiveTransaction.replaceAccount && (
             <div className={classes.footer}>

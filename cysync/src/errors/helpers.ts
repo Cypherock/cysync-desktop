@@ -86,6 +86,7 @@ const handleWalletErrors = (
 
 export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
   return {
+    0: { message: '' }, // property 0 is required for compilation
     [DeviceErrorType.CONNECTION_CLOSED]: {
       parent: DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW,
       message: 'Device connection closed'
