@@ -1,10 +1,10 @@
 import { CodeToErrorMap, ErrorsSet } from './types';
 
 class DisplayError {
-  protected code: string;
+  protected code: ErrorsSet;
   protected message: string;
   public isSet: boolean;
-  constructor(code: string, message: string) {
+  constructor(code: ErrorsSet, message: string) {
     this.isSet = Boolean(code && message);
     this.code = code;
     this.message = message;

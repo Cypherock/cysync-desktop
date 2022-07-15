@@ -199,10 +199,10 @@
     transform-pouch "^2.0.0"
     winston "^3.6.0"
 
-"@cypherock/protocols@3.0.1-beta.39":
-  version "3.0.1-beta.39"
-  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.39.tgz#d3d0ee1b39415ce26da898b6ddb5bf802c27f093"
-  integrity sha512-5NBl1YAfmnqD1DyDTrOTXWocbewWR+0+0PFqOYQ/tsjIyRigmWV5oAtVKaub57H2hNLTcg0TgxMGq+wr90Ugpw==
+"@cypherock/protocols@3.0.1-beta.40":
+  version "3.0.1-beta.40"
+  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.40.tgz#d1cec19139730a5d37363671d490e1f6ab741cc9"
+  integrity sha512-hG6AQEFROWRo6G2hcO4cWacBBWdz2gDuRwcwmSDgk7JK6pxsHvME2cHM2Zc5kYoExyBIDj9j+7jVHXTyUVI1xQ==
   dependencies:
     "@cypherock/communication" "3.0.1-beta.21"
     "@cypherock/database" "3.0.1-beta.27"

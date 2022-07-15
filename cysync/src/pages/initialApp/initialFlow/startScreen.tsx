@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import StackedCards from '../../../designSystem/iconGroups/cardsStacked';
@@ -71,7 +71,7 @@ interface StartScreenProps {
 }
 
 const StartScreen: React.FC<StartScreenProps> = ({ handleNext }) => {
-  const { showFeedback } = useFeedback();
+  const { showFeedback, closeFeedback } = useFeedback();
 
   const newFeedbackState: FeedbackState = {
     attachLogs: true,
@@ -93,6 +93,12 @@ const StartScreen: React.FC<StartScreenProps> = ({ handleNext }) => {
       initFeedbackState: newFeedbackState
     });
   };
+
+  useEffect(() => {
+    return () => {
+      closeFeedback();
+    };
+  }, []);
 
   return (
     <Root container>
