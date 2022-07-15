@@ -154,8 +154,8 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [CysyncError.NO_WALLET_ON_DEVICE]: {
       message: langStrings.ERRORS.NO_WALLET_ON_DEVICE
     },
-    [CysyncError.ALL_WALLET_PARTIAL_STATE]: {
-      message: langStrings.ERRORS.ALL_WALLET_PARTIAL_STATE
+    [CysyncError.NO_VALID_WALLET_FOUND]: {
+      message: langStrings.ERRORS.NO_VALID_WALLET_FOUND
     },
     [CysyncError.ADD_WALLET_LIMIT_EXCEEDED]: {
       message: langStrings.ERRORS.ADD_WALLET_LIMIT_EXCEEDED

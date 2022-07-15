@@ -18,7 +18,7 @@ export interface I18nStrings {
     WALLET_NOT_FOUND_IN_DEVICE: string;
     WALLET_NOT_FOUND_IN_CARD: string;
     WALLET_PARTIAL_STATE: string;
-    ALL_WALLET_PARTIAL_STATE: string;
+    NO_VALID_WALLET_FOUND: string;
     NO_WALLET_ON_DEVICE: string;
     WALLET_IS_LOCKED: string;
     WALLET_LOCKED_DUE_TO_INCORRECT_PIN: string;
