@@ -38,7 +38,7 @@ const en: I18nStrings = {
       'This wallet does not seem to be present on the X1 Cards',
     WALLET_PARTIAL_STATE:
       'This wallet is misconfigured. Please select the wallet from the main menu on the device to fix it.',
-    ALL_WALLET_PARTIAL_STATE:
+    NO_VALID_WALLET_FOUND:
       'All wallets are misconfigured. Please go to the wallets on the main menu and configure them again.',
     NO_WALLET_ON_DEVICE:
       'No wallet found. Please create a new wallet on the X1 device first',
