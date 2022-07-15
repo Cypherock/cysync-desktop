@@ -27,8 +27,11 @@ const SenderData = [
 ];
 
 const WalletAddAccount = () => {
-  const { sendForm, setSendForm, sendTransaction } =
-    useSendTransactionContext();
+  const {
+    sendForm: addAccountForm,
+    setSendForm: setAddAccountForm,
+    sendTransaction
+  } = useSendTransactionContext();
 
   const { deviceConnection } = useConnection();
 
@@ -38,7 +41,7 @@ const WalletAddAccount = () => {
   const coinAbbr = token ? token.slug : coinDetails.slug;
 
   useEffect(() => {
-    if (sendForm) {
+    if (addAccountForm) {
       Analytics.Instance.event(
         Analytics.Categories.SEND_TXN,
         Analytics.Actions.OPEN,
@@ -46,9 +49,9 @@ const WalletAddAccount = () => {
       );
       logger.info('Add Account form open');
     }
-  }, [sendForm]);
+  }, [addAccountForm]);
 
-  const handleSendFormClose = (abort?: boolean) => {
+  const handleAddAccountFormClose = (abort?: boolean) => {
     if (abort) {
       sendTransaction.cancelSendTxn(deviceConnection);
     }
@@ -59,41 +62,42 @@ const WalletAddAccount = () => {
     );
     logger.info('Add Account form closed');
     sendTransaction.resetHooks();
-    setSendForm(false);
+    setAddAccountForm(false);
   };
 
   useEffect(() => {
-    if (sendTransaction.errorMessage) {
+    if (addAccountForm) {
       Analytics.Instance.event(
         Analytics.Categories.SEND_TXN,
-        Analytics.Actions.ERROR,
+        Analytics.Actions.OPEN,
         coinAbbr
       );
+      logger.info('Add Account form open');
     }
-  }, [sendTransaction.errorMessage]);
+  }, [addAccountForm]);
 
   return (
     <>
-      {sendTransaction.errorMessage && (
+      {sendTransaction.errorObj.isSet && (
         <ErrorDialog
-          open={!!sendTransaction.errorMessage}
-          handleClose={() => handleSendFormClose(true)}
-          text={sendTransaction.errorMessage}
-          flow="Sending Transaction"
+          open={sendTransaction.errorObj.isSet}
+          handleClose={() => handleAddAccountFormClose(true)}
+          errorObj={sendTransaction.errorObj}
+          flow="Adding Account"
         />
       )}
       <DialogBox
         fullWidth
         maxWidth="md"
-        open={sendForm}
-        handleClose={() => handleSendFormClose(true)}
+        open={addAccountForm}
+        handleClose={() => handleAddAccountFormClose(true)}
         disableBackdropClick
         isClosePresent
         dialogHeading="Add Account"
         restComponents={
           <StepperForm
             stepsData={SenderData}
-            handleClose={handleSendFormClose}
+            handleClose={handleAddAccountFormClose}
           />
         }
       />

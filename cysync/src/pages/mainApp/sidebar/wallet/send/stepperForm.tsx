@@ -206,7 +206,7 @@ type StepperProps = {
 };
 
 const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
-  const { sendTransaction } = useSendTransactionContext();
+  const { sendForm, sendTransaction } = useSendTransactionContext();
   const [activeStep, setActiveStep] = useState(0);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
@@ -527,7 +527,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const handleVerificationErrors = (
     id: number,
     address: string,
-    error: boolean
+    error: boolean,
+    errorString?: string
   ) => {
     const copyBatchRecipientData = batchRecipientData.map(recipient => {
       const copyRecipient = recipient;
@@ -541,6 +542,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
           } address`;
         } else {
           copyRecipient.errorRecipient = '';
+        }
+        if (errorString) {
+          copyRecipient.errorRecipient = errorString;
         }
       }
       return copyRecipient;
@@ -588,7 +592,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   return (
     <Root className={classes.root}>
       <ErrorBox
-        open={sendTransaction.errorObj.isSet}
+        open={sendTransaction.errorObj.isSet && sendForm}
         handleClose={handleErrorBoxClose}
         errorObj={sendTransaction.errorObj}
         flow="Sending Transaction"

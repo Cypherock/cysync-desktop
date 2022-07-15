@@ -45,7 +45,8 @@ export interface StepComponentProps {
   handleVerificationErrors: (
     id: number,
     address: string,
-    error: boolean
+    error: boolean,
+    errorString?: string
   ) => void;
   validateInputs: () => boolean;
   setTransactionFee: (val: number) => void;

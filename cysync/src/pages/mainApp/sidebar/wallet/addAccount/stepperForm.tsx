@@ -240,7 +240,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [total, setTotal] = React.useState(new BigNumber(0));
 
   // Set a constant fee default value for each coin in case the api call fails. Regularly update the file.
-  const [transactionFee, setTransactionFee] = React.useState('75');
+  const [transactionFee, setTransactionFee] = React.useState('300000000000000'); // Max gas limit for NEAR.
 
   const { coinDetails } = useCurrentCoin();
   const { token } = useTokenContext();
@@ -504,7 +504,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const handleVerificationErrors = (
     id: number,
     address: string,
-    error: boolean
+    error: boolean,
+    errorString: string
   ) => {
     const copyBatchRecipientData = batchRecipientData.map(recipient => {
       const copyRecipient = recipient;
@@ -518,6 +519,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
           } address`;
         } else {
           copyRecipient.errorRecipient = '';
+        }
+        if (errorString) {
+          copyRecipient.errorRecipient = errorString;
         }
       }
       return copyRecipient;
@@ -558,16 +562,16 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   const handleErrorBoxClose = () => {
     handleClose(false);
-    sendTransaction.setErrorMessage('');
+    sendTransaction.clearErrorObj();
     sendTransaction.resetHooks();
   };
 
   return (
     <Root className={classes.root}>
       <ErrorBox
-        open={!!sendTransaction.errorMessage}
+        open={sendTransaction.errorObj.isSet}
         handleClose={handleErrorBoxClose}
-        text={sendTransaction.errorMessage}
+        errorObj={sendTransaction.errorObj}
         flow="Sending Transaction"
       />
 

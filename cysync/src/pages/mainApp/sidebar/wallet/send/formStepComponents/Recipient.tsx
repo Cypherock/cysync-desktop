@@ -26,6 +26,7 @@ import SwitchButton from '../../../../../../designSystem/designComponents/button
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Checkbox from '../../../../../../designSystem/designComponents/input/checkbox';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
+import { useDebouncedFunction } from '../../../../../../store/hooks';
 import {
   changeFormatOfOutputList,
   verifyAddress
@@ -334,7 +335,6 @@ BatchRecipient.propTypes = {
 const Recipient: React.FC<StepComponentProps> = props => {
   const {
     batchRecipientData,
-    addbatchRecipientData,
     activeButton,
     changeButton,
     handleVerificationErrors,
@@ -488,37 +488,36 @@ const Recipient: React.FC<StepComponentProps> = props => {
     }
 
     for (const data of validatedAddresses) {
-      handleVerificationErrors(data[0], data[1], data[2]);
+      let nearAccExistsError: string | undefined;
+      if (data[2]) nearAccExistsError = await checkNearAccount(data[1]);
+      if (nearAccExistsError) isValid = isValid && false;
+      handleVerificationErrors(data[0], data[1], data[2], nearAccExistsError);
     }
-
     return isValid;
   };
 
-  const checkAccount = async () => {
+  const debouncedHandleCheckAddresses = useDebouncedFunction(
+    () => handleCheckAddresses(true),
+    200
+  );
+  const checkNearAccount = async (address: string) => {
     const coin = COINS[coinDetails.slug];
     if (coin instanceof NearCoinData) {
-      const copyData = [...batchRecipientData];
       const wallet = new NearWallet(coinDetails.xpub, coin);
-      const check = await wallet.getTotalBalanceCustom(
-        batchRecipientData[0].recipient
-      );
-      if (check.balance.cysyncError && check.balance.cysyncError.length === 0) {
-        copyData[0].errorRecipient = "This account dosen't exists";
-        addbatchRecipientData(copyData);
-        return false;
+      const check = await wallet.getTotalBalanceCustom(address);
+      if (check.balance.cysyncError) {
+        return "This account dosen't exists";
       } else if (!check.balance.cysyncError) {
-        return true;
+        return undefined;
       }
     }
-    return false;
+    return undefined;
   };
 
   const handleRecipientSubmit = async () => {
-    const isValid = handleCheckAddresses();
-    const isAmountValid = verifyRecipientAmount();
-    const doesExists = await checkAccount();
-
-    if (isValid && isAmountValid && doesExists) {
+    const isValid = await handleCheckAddresses();
+    const isInputsValid = validateInputs();
+    if (isValid && isInputsValid) {
       if (!beforeFlowStart()) {
         return;
       }
@@ -676,7 +675,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             label="Receiver's Address"
             onChange={e => {
               handleInputChange(e);
-              handleCheckAddresses(true);
+              debouncedHandleCheckAddresses();
             }}
             value={batchRecipientData[0].recipient}
             error={batchRecipientData[0].errorRecipient.length !== 0}
@@ -688,7 +687,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             isClipboardPresent
             handleCopyFromClipboard={e => {
               handleCopyFromClipboard(e);
-              handleCheckAddresses(true);
+              debouncedHandleCheckAddresses();
             }}
           />
           <Input
@@ -781,7 +780,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
                     handleDelete={handleDelete}
                     handleChange={e => {
                       handleInputChange(e);
-                      handleCheckAddresses(true);
+                      debouncedHandleCheckAddresses();
                     }}
                     id={recipient.id.toString()}
                     recipient={recipient}

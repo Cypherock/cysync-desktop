@@ -2,8 +2,10 @@ import {
   ALLCOINS,
   CoinGroup,
   COINS,
-  Erc20CoinData
+  Erc20CoinData,
+  NearCoinData
 } from '@cypherock/communication';
+import { NearWallet } from '@cypherock/wallet';
 import { Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
@@ -14,6 +16,7 @@ import React from 'react';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import CustomIconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
+import { useDebouncedFunction } from '../../../../../../store/hooks';
 import {
   changeFormatOfOutputList,
   verifyAddress
@@ -366,7 +369,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
   // const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
 
-  const handleCheckAddresses = (skipEmpty = false) => {
+  const handleCheckAddresses = async (skipEmpty = false) => {
     let isValid = true;
     validatedAddresses = [];
 
@@ -388,14 +391,35 @@ const Recipient: React.FC<StepComponentProps> = props => {
     }
 
     for (const data of validatedAddresses) {
-      handleVerificationErrors(data[0], data[1], data[2]);
+      let nearAccExistsError: string | undefined;
+      if (data[2]) nearAccExistsError = await checkNearAccount(data[1]);
+      if (nearAccExistsError) isValid = isValid && false;
+      handleVerificationErrors(data[0], data[1], data[2], nearAccExistsError);
     }
 
     return isValid;
   };
 
-  const handleRecipientSubmit = () => {
-    const isValid = handleCheckAddresses();
+  const debouncedHandleCheckAddresses = useDebouncedFunction(
+    () => handleCheckAddresses(true),
+    200
+  );
+  const checkNearAccount = async (address: string) => {
+    const coin = COINS[coinDetails.slug];
+    if (coin instanceof NearCoinData) {
+      const wallet = new NearWallet(coinDetails.xpub, coin);
+      const check = await wallet.getTotalBalanceCustom(address);
+      if (!check.balance.cysyncError) {
+        return 'This account already exists';
+      } else if (check.balance.cysyncError) {
+        return undefined;
+      }
+    }
+    return undefined;
+  };
+
+  const handleRecipientSubmit = async () => {
+    const isValid = await handleCheckAddresses();
     const isAmountValid = true;
 
     if (isValid && isAmountValid) {
@@ -448,7 +472,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           placeHolder="accountid.testnet"
           onChange={e => {
             handleInputChange(e);
-            handleCheckAddresses(true);
+            debouncedHandleCheckAddresses();
           }}
           value={batchRecipientData[0].recipient}
           error={batchRecipientData[0].errorRecipient.length !== 0}
@@ -460,7 +484,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           isClipboardPresent
           handleCopyFromClipboard={e => {
             handleCopyFromClipboard(e);
-            handleCheckAddresses(true);
+            debouncedHandleCheckAddresses();
           }}
         />
         <Typography className={classes.info}>
