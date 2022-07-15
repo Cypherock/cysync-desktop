@@ -31,6 +31,7 @@ const en: I18nStrings = {
     DEVICE_MISCONFIGURED:
       'Your device is misconfigured, Please restart cySync App. If the problem persists, please contact us.',
     DEVICE_INFO_UNKNOWN_ERROR: `Some interal error occured. Please disconnect and then reconnect the device.`,
+    DEVICE_NOT_IN_UPDATE_RECEIVING_MODE: `Some interal error occured. Please disconnect and then reconnect the device.`,
 
     WALLET_NOT_FOUND_IN_DEVICE:
       'This wallet does not seem to be present on the X1 device',
