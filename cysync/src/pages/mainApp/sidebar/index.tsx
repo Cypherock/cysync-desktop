@@ -228,7 +228,7 @@ const CustomCollapse = (props: Omit<TabProps, 'children'> & CollapseProps) => {
 };
 
 const Sidebar = () => {
-  const { allWallets: walletData } = useWallets();
+  const { allWallets: walletData, isLoading: isWalletLoading } = useWallets();
 
   const feedback = useFeedback();
   const [value, setValue] = React.useState(0);
@@ -290,7 +290,7 @@ const Sidebar = () => {
         setValue(pathTab.tab);
       }
     }
-  }, [location.pathname]);
+  }, [location.pathname, isWalletLoading]);
 
   const onImportWallet = () => {
     setWalletIndex(-1);
