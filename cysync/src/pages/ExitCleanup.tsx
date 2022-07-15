@@ -28,17 +28,16 @@ const ExitCleanup = () => {
 
   const runExitCleanup = async () => {
     logger.info('ExitCleanup Started');
-    if (internalDeviceConnection) {
-      try {
-        await cancelFlow.run({
-          connection: internalDeviceConnection,
-          sdkVersion: deviceSdkVersion
-        });
-        passEnDb.destroyHash();
-      } catch (error) {
-        logger.error('Error in exit cleanup');
-        logger.error(error);
-      }
+
+    try {
+      await cancelFlow.run({
+        connection: internalDeviceConnection,
+        sdkVersion: deviceSdkVersion
+      });
+      passEnDb.destroyHash();
+    } catch (error) {
+      logger.error('Error in exit cleanup');
+      logger.error(error);
     }
 
     logger.info('ExitCleanup Completed');

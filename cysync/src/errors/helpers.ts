@@ -58,6 +58,8 @@ const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
     )
   ) {
     cyError.setError(DeviceErrorType.TIMEOUT_ERROR);
+  } else if (DeviceErrorType.NOT_IN_RECEIVING_MODE === err.errorType) {
+    cyError.setError(DeviceErrorType.NOT_IN_RECEIVING_MODE, flow);
   } else {
     cyError.setError(DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR, flow);
   }
@@ -93,6 +95,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [DeviceErrorType.CONNECTION_NOT_OPEN]: {
       parent: DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW,
       message: 'Device connection not open'
+    },
+    [DeviceErrorType.NOT_IN_RECEIVING_MODE]: {
+      message: langStrings.ERRORS.DEVICE_NOT_IN_UPDATE_RECEIVING_MODE
     },
     [DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW]: {
       message: langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW
