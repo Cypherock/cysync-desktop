@@ -123,7 +123,8 @@ const DeviceSettings = ({ allowExit, setAllowExit }: DeviceSettingsProps) => {
 
   const handleDeviceHealthTabOpen = (index: number) => {
     if (beforeNetworkAction()) {
-      if ([0, 1].includes(index) || beforeFlowStart()) {
+      // Device Upgrade Index Screen index is 0
+      if (index === 0 || beforeFlowStart()) {
         navigate(DeviceHealthItems[index].route);
       }
     }

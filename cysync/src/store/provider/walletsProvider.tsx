@@ -14,12 +14,14 @@ export interface WalletsContextInterface {
   allWallets: Wallet[];
   allCoins: Coin[];
   getAll: () => void;
+  isLoading: boolean;
 }
 
 export const WalletsContext: React.Context<WalletsContextInterface> =
   React.createContext<WalletsContextInterface>({} as WalletsContextInterface);
 
 export const WalletsProvider: React.FC = ({ children }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [allWallets, setAllWallets] = useState<Wallet[]>([
     {
       // UI breaks if the list is empty, hence dummy empty wallet. WalletID is null specially for Portfolio, to differenciate between initial state (walletId is 'null') and no wallets (walletId is '')
@@ -35,6 +37,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
 
   const getAll = async () => {
     try {
+      setIsLoading(true);
       logger.verbose('Getting all wallets and xpub data');
       const walletRes = await walletDb.getAll();
 
@@ -79,6 +82,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
     } catch (error) {
       logger.error(error);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -121,7 +125,9 @@ export const WalletsProvider: React.FC = ({ children }) => {
   }, []);
 
   return (
-    <WalletsContext.Provider value={{ allWallets, allCoins, getAll }}>
+    <WalletsContext.Provider
+      value={{ allWallets, allCoins, getAll, isLoading }}
+    >
       {children}
     </WalletsContext.Provider>
   );

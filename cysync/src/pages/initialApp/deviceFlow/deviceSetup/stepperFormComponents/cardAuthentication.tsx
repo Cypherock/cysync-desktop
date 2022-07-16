@@ -1,9 +1,9 @@
 import ReportIcon from '@mui/icons-material/Report';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import success from '../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
@@ -11,16 +11,9 @@ import AvatarIcon from '../../../../../designSystem/designComponents/icons/Avata
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
 import { useCardAuth } from '../../../../../store/hooks/flows';
-import {
-  DeviceConnectionState,
-  FeedbackState,
-  useConnection,
-  useFeedback
-} from '../../../../../store/provider';
+import { useConnection } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
-import { hexToVersion, inTestApp } from '../../../../../utils/compareVersion';
 import logger from '../../../../../utils/logger';
-import sleep from '../../../../../utils/sleep';
 import DynamicTextView from '../../../../mainApp/sidebar/settings/tabViews/deviceHealth/dynamicTextView';
 
 import {
@@ -72,57 +65,25 @@ const Root = styled(Grid)(() => ({
 }));
 
 const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
-  /**
-   * -2 means authentication is remaining
-   * -1 means all cards failed authentication
-   * 0 means some cards failed authentication
-   * 1 means all cards are successfully authenticated
-   */
-  const [cardsStatus, setCardsStatus] = React.useState<-2 | -1 | 0 | 1>(-2);
-  const [connStatus, setConnStatus] = React.useState<-1 | 0 | 1 | 2>(1);
-  const [errorMsg, setErrorMsg] = React.useState('');
-  const [initialStart, setInitialStart] = React.useState(false);
-  const [showRetry, setShowRetry] = React.useState(false);
-  const [cardsAuth, setCardsAuth] = React.useState<{
-    '01': -1 | 0 | 1 | 2;
-    '02': -1 | 0 | 1 | 2;
-    '03': -1 | 0 | 1 | 2;
-    '04': -1 | 0 | 1 | 2;
-  }>({ '01': 0, '02': 0, '03': 0, '04': 0 });
-
-  const [currentCard, setCurrentCard] = useState<
-    '00' | '01' | '02' | '03' | '04'
-  >('00');
-
-  const incrementCurrentCard = (current: string) => {
-    if (current === '01') return '02';
-    if (current === '02') return '03';
-    if (current === '03') return '04';
-    return '00';
-  };
+  const { connected } = useConnection();
 
   const {
-    internalDeviceConnection: deviceConnection,
-    deviceSdkVersion,
-    connected,
-    inBootloader,
-    firmwareVersion,
-    inBackgroundProcess,
-    deviceConnectionState,
-    setIsInFlow,
-    deviceState
-  } = useConnection();
-
-  const {
-    handleCardAuth,
-    verified,
-    pairingFailed,
-    resetHooks,
-    completed,
-    errorMessage
+    cardsStatus,
+    showRetry,
+    connStatus,
+    cardsAuth,
+    handleFeedbackOpen,
+    onRetry,
+    errorObj,
+    setCardsStatus
   } = useCardAuth(true);
 
-  const feedback = useFeedback();
+  const { deviceConnection } = useConnection();
+  const latestDeviceConnection = useRef<any>();
+
+  useEffect(() => {
+    latestDeviceConnection.current = deviceConnection;
+  }, [deviceConnection]);
 
   useEffect(() => {
     Analytics.Instance.event(
@@ -139,109 +100,6 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
       logger.info('InitialCardAuth: Closed');
     };
   }, []);
-
-  useEffect(() => {
-    if (
-      deviceConnection &&
-      !inBackgroundProcess &&
-      [
-        DeviceConnectionState.IN_TEST_APP,
-        DeviceConnectionState.IN_BOOTLOADER
-      ].includes(deviceConnectionState)
-    ) {
-      if (inBootloader) {
-        setShowRetry(false);
-        setErrorMsg(
-          'Your device is misconfigured, Please restart cySync App. If the problem persists, please contact us.'
-        );
-        return;
-      }
-
-      setConnStatus(2);
-
-      if (initialStart) {
-        return;
-      }
-
-      setErrorMsg('');
-      if (currentCard === '00') {
-        setCardsAuth({ ...cardsAuth, '01': 1 });
-        setCurrentCard('01');
-      } else {
-        const temp = { ...cardsAuth };
-        temp[currentCard] = 1;
-        setCardsAuth(temp);
-        // 0.1 second delay to give time to the device for processing
-        sleep(100)
-          .then(() => {
-            if (firmwareVersion) {
-              return handleCardAuth({
-                connection: deviceConnection,
-                sdkVersion: deviceSdkVersion,
-                setIsInFlow,
-                firmwareVersion: hexToVersion(firmwareVersion),
-                cardNumber: currentCard,
-                isTestApp: inTestApp(deviceState)
-              });
-            }
-          })
-          .catch(() => {
-            // empty
-          });
-      }
-      setInitialStart(true);
-    } else {
-      setConnStatus(1);
-    }
-  }, [deviceConnection, connected, inBackgroundProcess]);
-
-  useEffect(() => {
-    const temp = { ...cardsAuth };
-    if (currentCard === '00') {
-      return;
-    }
-    if (completed) {
-      if (errorMessage) {
-        temp[currentCard] = -1;
-
-        // Only show retry when the error is other than not verified
-        if (verified !== -1 || pairingFailed) {
-          setShowRetry(true);
-        }
-
-        setErrorMsg(errorMessage);
-      } else if (verified === 2 && !pairingFailed) {
-        temp[currentCard] = verified;
-        setCurrentCard(incrementCurrentCard);
-        resetHooks();
-      } else {
-        temp[currentCard] = -1;
-        setErrorMsg('Some internal error occurred');
-        setShowRetry(true);
-      }
-    }
-    setCardsAuth(temp);
-  }, [completed]);
-
-  useEffect(() => {
-    if (currentCard !== '00') {
-      const temp = { ...cardsAuth };
-      temp[currentCard] = 1;
-      setCardsAuth(temp);
-      setTimeout(() => {
-        if (deviceConnection && firmwareVersion) {
-          handleCardAuth({
-            connection: deviceConnection,
-            sdkVersion: deviceSdkVersion,
-            setIsInFlow,
-            firmwareVersion: hexToVersion(firmwareVersion),
-            cardNumber: currentCard,
-            isTestApp: inTestApp(deviceState)
-          });
-        }
-      }, 3000);
-    }
-  }, [currentCard]);
 
   useEffect(() => {
     if (cardsAuth['04'] === -1 || cardsAuth['04'] === 2) {
@@ -290,70 +148,6 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     }
   }, [cardsStatus]);
 
-  const newFeedbackState: FeedbackState = {
-    attachLogs: true,
-    attachDeviceLogs: false,
-    categories: ['Report'],
-    category: 'Report',
-    description: errorMsg || errorMessage || 'Something Went Wrong ...',
-    descriptionError: '',
-    email: '',
-    emailError: '',
-    subject: 'Reporting for Error (X1 Card Authentication)',
-    subjectError: ''
-  };
-
-  const handleFeedbackOpen = () => {
-    feedback.showFeedback({
-      isContact: true,
-      heading: 'Report',
-      initFeedbackState: newFeedbackState
-    });
-  };
-
-  const timeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
-  const onRetry = () => {
-    setShowRetry(false);
-    setErrorMsg('');
-
-    if (deviceConnectionState !== DeviceConnectionState.IN_TEST_APP) {
-      setShowRetry(true);
-      setErrorMsg('Please connect the device and try again.');
-      return;
-    }
-
-    const temp = { ...cardsAuth };
-
-    if (currentCard === '00') {
-      return;
-    }
-
-    if (deviceConnection) {
-      temp[currentCard] = 1;
-    } else {
-      temp[currentCard] = 0;
-    }
-    setCardsAuth(temp);
-
-    if (timeout.current) {
-      clearTimeout(timeout.current);
-      timeout.current = undefined;
-    }
-
-    timeout.current = setTimeout(() => {
-      if (deviceConnection && firmwareVersion) {
-        handleCardAuth({
-          connection: deviceConnection,
-          sdkVersion: deviceSdkVersion,
-          setIsInFlow,
-          firmwareVersion: hexToVersion(firmwareVersion),
-          cardNumber: currentCard,
-          isTestApp: inTestApp(deviceState)
-        });
-      }
-    }, 1000);
-  };
-
   return (
     <Root container>
       <Grid item xs={3} />
@@ -375,7 +169,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
         <br />
         <DynamicTextView text={getCardText('04')} state={cardsAuth['04']} />
         <br />
-        {errorMsg && (
+        {errorObj.isSet && (
           <div className={classes.bottomContainer}>
             <div className={classes.success}>
               <Icon
@@ -384,7 +178,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
                 iconGroup={<ErrorExclamation />}
               />
               <Typography variant="body2" color="error">
-                {errorMsg}
+                {errorObj.getMessage()}
               </Typography>
             </div>
             {cardsStatus === -1 && (
@@ -420,20 +214,33 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
               </div>
             )}
             <div className={classes.btnContainer}>
-              {showRetry && (
-                <CustomButton
-                  onClick={() => {
-                    onRetry();
-                  }}
-                  style={{ margin: '1rem 10px 1rem 0' }}
-                >
-                  Retry
-                </CustomButton>
-              )}
+              {showRetry &&
+                (connStatus !== 2 ? (
+                  <Tooltip
+                    title={'Reconnect the device to retry'}
+                    placement="top"
+                  >
+                    <div>
+                      <CustomButton
+                        color="primary"
+                        style={{ margin: '1rem 10px 1rem 0' }}
+                        disabled
+                      >
+                        Retry
+                      </CustomButton>
+                    </div>
+                  </Tooltip>
+                ) : (
+                  <CustomButton
+                    color="primary"
+                    onClick={onRetry}
+                    style={{ margin: '1rem 10px 1rem 0' }}
+                  >
+                    Retry
+                  </CustomButton>
+                ))}
               <CustomButton
-                onClick={() => {
-                  feedback.showFeedback({ isContact: true });
-                }}
+                onClick={handleFeedbackOpen}
                 style={{ margin: '1rem 0rem' }}
               >
                 Contact Us

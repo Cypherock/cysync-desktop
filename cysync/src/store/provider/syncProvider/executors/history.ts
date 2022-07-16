@@ -17,6 +17,7 @@ import {
 } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
+import { CysyncError } from '../../../../errors';
 import logger from '../../../../utils/logger';
 import {
   addressDb,
@@ -110,8 +111,10 @@ export const processResponses = async (
     const response = responses[0];
 
     if (response.isFailed) {
+      const errorMessage = `${CysyncError.TXN_INVALID_RESPONSE} Invalid response from server`;
+      logger.error(errorMessage);
       logger.error(response.data);
-      throw new Error('Invalid response from server');
+      throw new Error(errorMessage);
     }
 
     let balance = new BigNumber(response.data.balance);
@@ -178,7 +181,7 @@ export const processResponses = async (
           // No need to retry if the inserting fails because it'll produce the same error.
         } catch (error) {
           logger.error(
-            'Error while inserting transaction in DB : insertFromBlockbookTxn'
+            `${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insertFromBlockbookTxn`
           );
           logger.error(error);
         }
@@ -381,7 +384,9 @@ export const processResponses = async (
         await transactionDb.insert(txn);
         // No need to retry if the inserting fails because it'll produce the same error.
       } catch (error) {
-        logger.error('Error while inserting transaction in DB : insert');
+        logger.error(
+          ` ${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insert`
+        );
         logger.error(error);
       }
     }

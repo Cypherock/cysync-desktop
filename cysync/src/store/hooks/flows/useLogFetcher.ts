@@ -1,13 +1,15 @@
-import {
-  DeviceConnection,
-  DeviceError,
-  DeviceErrorType
-} from '@cypherock/communication';
+import { DeviceConnection, DeviceError } from '@cypherock/communication';
 import { LogsFetcher } from '@cypherock/protocols';
 import { useState } from 'react';
 
+import {
+  CyError,
+  CysyncError,
+  handleDeviceErrors,
+  handleErrors
+} from '../../../errors';
+import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
-import { useI18n } from '../../provider';
 
 export interface HandleLogFetcherOptions {
   connection: DeviceConnection;
@@ -18,8 +20,8 @@ export interface HandleLogFetcherOptions {
 
 export interface UseLogFetcherValues {
   handleLogFetch: (options: HandleLogFetcherOptions) => Promise<void>;
-  errorMessage: string;
-  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  errorObj: CyError;
+  clearErrorObj: () => void;
   completed: boolean;
   requestStatus: number;
   logFetched: number;
@@ -29,14 +31,14 @@ export interface UseLogFetcherValues {
 
 export type UseLogFetcher = () => UseLogFetcherValues;
 
+const flowName = Analytics.Categories.FETCH_LOG;
+
 export const useLogFetcher: UseLogFetcher = () => {
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [completed, setCompleted] = useState(false);
   const [requestStatus, setRequestStatus] = useState<-1 | 0 | 1 | 2>(0);
   const [logFetched, setLogFetched] = useState<-1 | 0 | 1 | 2>(0);
   const logFetcher = new LogsFetcher();
-
-  const { langStrings } = useI18n();
 
   // To call resetHooks outside of this function
   const resetHooks = () => {
@@ -72,38 +74,20 @@ export const useLogFetcher: UseLogFetcher = () => {
       setRequestStatus(-1);
       setLogFetched(-1);
       setCompleted(true);
-      logger.error('LogFetcher: Error occurred');
-      logger.error(err);
+      const cyError = new CyError();
       if (err instanceof DeviceError) {
-        if (
-          [
-            DeviceErrorType.CONNECTION_CLOSED,
-            DeviceErrorType.CONNECTION_NOT_OPEN
-          ].includes(err.errorType)
-        ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
-        } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
-        } else if (
-          [
-            DeviceErrorType.WRITE_TIMEOUT,
-            DeviceErrorType.READ_TIMEOUT
-          ].includes(err.errorType)
-        ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
-        } else {
-          setErrorMessage(langStrings.ERRORS.LOG_FETCHER_FAILED);
-        }
+        handleDeviceErrors(errorObj, err, flowName);
       } else {
-        setErrorMessage(langStrings.ERRORS.LOG_FETCHER_FAILED);
+        cyError.setError(CysyncError.LOG_FETCHER_UNKNOWN_ERROR);
       }
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
     });
 
     logFetcher.on('loggingDisabled', () => {
-      logger.info('LogFetcher: Logging disabled on device.');
       setRequestStatus(-1);
       setLogFetched(-1);
-      setErrorMessage(langStrings.ERRORS.LOG_FETCHER_DISABLED_ON_DEVICE);
+      const cyError = new CyError(CysyncError.LOG_FETCHER_DISABLED_ON_DEVICE);
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     logFetcher.on('acceptedRequest', acceptedRequest => {
@@ -112,10 +96,10 @@ export const useLogFetcher: UseLogFetcher = () => {
         setRequestStatus(2);
         setLogFetched(1);
       } else {
-        logger.info('LogFetcher: Rejected from device');
         setRequestStatus(-1);
         setLogFetched(-1);
-        setErrorMessage(langStrings.ERRORS.LOG_FETCHER_REJECTED);
+        const cyError = new CyError(CysyncError.LOG_FETCHER_REJECTED);
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
       }
     });
 
@@ -127,10 +111,10 @@ export const useLogFetcher: UseLogFetcher = () => {
     });
 
     logFetcher.on('notReady', () => {
-      logger.info('LogFetcher: Device Not Ready');
       setRequestStatus(-1);
       setLogFetched(-1);
-      setErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY);
+      const cyError = new CyError(CysyncError.DEVICE_NOT_READY_IN_INITIAL);
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     try {
@@ -145,9 +129,8 @@ export const useLogFetcher: UseLogFetcher = () => {
       setCompleted(true);
     } catch (e) {
       setIsInFlow(false);
-      logger.error('LogFetcher: Some error occurred.');
-      logger.error(e);
-      setErrorMessage(langStrings.ERRORS.LOG_FETCHER_FAILED);
+      const cyError = new CyError(CysyncError.LOG_FETCHER_UNKNOWN_ERROR);
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       setRequestStatus(-1);
       setLogFetched(-1);
       setCompleted(true);
@@ -160,14 +143,20 @@ export const useLogFetcher: UseLogFetcher = () => {
       .cancel(connection)
       .then(() => logger.info('LogFetcher: Cancelled'))
       .catch(e => {
-        logger.error('LogFetcher: Error in flow cancel');
+        logger.error(
+          `${CysyncError.LOG_FETCHING_CANCEL_FAILED} LogFetcher: Error in flow cancel`
+        );
         logger.error(e);
       });
   };
 
+  const clearErrorObj = () => {
+    setErrorObj(new CyError());
+  };
+
   return {
-    errorMessage,
-    setErrorMessage,
+    errorObj,
+    clearErrorObj,
     cancelLogFetcher,
     handleLogFetch,
     resetHooks,

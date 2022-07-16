@@ -4,12 +4,21 @@ import {
   DeviceErrorType
 } from '@cypherock/communication';
 import { Wallet } from '@cypherock/database';
-import { WalletAdder } from '@cypherock/protocols';
+import { WalletAdder, WalletStates } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
 
+import {
+  CyError,
+  CysyncError,
+  handleDeviceErrors,
+  handleErrors
+} from '../../../errors';
+import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { walletDb } from '../../database';
-import { useConnection, useI18n, useWallets } from '../../provider';
+import { useConnection, useWallets } from '../../provider';
+
+import * as flowHandlers from './handlers';
 
 export interface HandleAddWalletOptions {
   connection: DeviceConnection;
@@ -23,8 +32,8 @@ export interface UseAddWalletValues {
   setWalletName: React.Dispatch<React.SetStateAction<string>>;
   deviceConnected: boolean;
   setDeviceConnected: React.Dispatch<React.SetStateAction<boolean>>;
-  errorMessage: string;
-  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  errorObj: CyError;
+  clearErrorObj: () => void;
   completed: boolean;
   setCompleted: React.Dispatch<React.SetStateAction<boolean>>;
   resetHooks: () => void;
@@ -37,6 +46,8 @@ export interface UseAddWalletValues {
 
 export type UseAddWallet = () => UseAddWalletValues;
 
+const flowName = Analytics.Categories.ADD_WALLET;
+
 export const useAddWallet: UseAddWallet = () => {
   const addWallet = new WalletAdder();
   const [deviceConnected, setDeviceConnected] = useState(false);
@@ -45,14 +56,12 @@ export const useAddWallet: UseAddWallet = () => {
   const [passwordSet, setPasswordSet] = useState(false);
   const [walletSuccess, setWalletSuccess] = useState(false);
   const [completed, setCompleted] = useState(false);
-  const [externalErrorMsg, setExternalErrorMsg] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [isNameDiff, setIsNameDiff] = useState(false);
   const [walletId, setWalletId] = useState('');
   const [isCancelled, setIsCancelled] = useState(false);
 
   const wallets = useWallets();
-  const { langStrings } = useI18n();
   const { deviceSerial } = useConnection();
 
   const resetHooks = () => {
@@ -69,8 +78,7 @@ export const useAddWallet: UseAddWallet = () => {
     setIsNameDiff(false);
     setPasswordSet(false);
     setPassphraseSet(false);
-    setErrorMessage('');
-    setExternalErrorMsg('');
+    clearErrorObj();
     resetHooks();
   };
 
@@ -83,9 +91,9 @@ export const useAddWallet: UseAddWallet = () => {
 
     logger.info('AddWallet: Initiated');
     if (!connection) {
-      logger.error('AddWallet: Failed - Device not connected');
       setTimeout(() => {
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
+        const cyError = new CyError(DeviceErrorType.NOT_CONNECTED);
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
       }, 100);
       return;
     }
@@ -99,55 +107,33 @@ export const useAddWallet: UseAddWallet = () => {
     });
 
     addWallet.on('error', err => {
-      logger.error('AddWallet: Error occurred');
-      logger.error(err);
+      const cyError = new CyError();
       if (err instanceof DeviceError) {
-        if (
-          [
-            DeviceErrorType.CONNECTION_CLOSED,
-            DeviceErrorType.CONNECTION_NOT_OPEN
-          ].includes(err.errorType)
-        ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
-        } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
-        } else if (
-          [
-            DeviceErrorType.WRITE_TIMEOUT,
-            DeviceErrorType.READ_TIMEOUT
-          ].includes(err.errorType)
-        ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
-        } else {
-          setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
-        }
+        handleDeviceErrors(cyError, err, flowName);
       } else {
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        cyError.setError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
       }
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
     });
 
-    addWallet.on('noWalletFound', (inPartialState: boolean) => {
-      logger.info('AddWallet: No Wallet found', { inPartialState });
-      if (inPartialState) {
-        setErrorMessage(langStrings.ERRORS.ALL_WALLET_PARTIAL_STATE);
-      } else {
-        setErrorMessage(langStrings.ERRORS.NO_WALLET_ON_DEVICE);
-      }
+    addWallet.on('noWalletFound', (walletState: WalletStates) => {
+      const cyError = flowHandlers.noWalletFound(walletState);
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { walletState }));
     });
 
     addWallet.on('walletDetails', async (walletDetails: Wallet) => {
       try {
         if (walletDetails === null) {
-          logger.info('AddWallet: Rejected from device');
-          setErrorMessage(langStrings.ERRORS.ADD_WALLET_REJECTED);
+          const cyError = new CyError(CysyncError.ADD_WALLET_REJECTED);
+          setErrorObj(handleErrors(errorObj, cyError, flowName));
           return;
         }
 
         logger.verbose('AddWallet: Wallet confirmed');
         const { allWallets } = wallets;
         if (allWallets.length >= 4) {
-          logger.info('AddWallet: Cannot add more than 4 wallets');
-          setErrorMessage(langStrings.ERRORS.ADD_WALLET_LIMIT_EXCEEDED);
+          const cyError = new CyError(CysyncError.ADD_WALLET_LIMIT_EXCEEDED);
+          setErrorObj(handleErrors(errorObj, cyError, flowName));
           return;
         }
 
@@ -157,8 +143,8 @@ export const useAddWallet: UseAddWallet = () => {
           const duplicateWallet = walletWithSameId;
 
           if (duplicateWallet.name === walletDetails.name) {
-            logger.info('AddWallet: Duplicate wallet found');
-            setErrorMessage(langStrings.ERRORS.ADD_WALLET_DUPLICATE);
+            const cyError = new CyError(CysyncError.ADD_WALLET_DUPLICATE);
+            setErrorObj(handleErrors(errorObj, cyError, flowName));
           } else {
             logger.info('AddWallet: Same wallet found with different name');
             setWalletName(walletDetails.name);
@@ -166,9 +152,10 @@ export const useAddWallet: UseAddWallet = () => {
             setPasswordSet(walletDetails.passwordSet);
             setPassphraseSet(walletDetails.passphraseSet);
             setIsNameDiff(true);
-            setErrorMessage(
-              langStrings.ERRORS.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME
+            const cyError = new CyError(
+              CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME
             );
+            setErrorObj(handleErrors(errorObj, cyError, flowName));
           }
 
           return;
@@ -186,22 +173,23 @@ export const useAddWallet: UseAddWallet = () => {
           })
           .catch((err: any) => {
             if (err.errorType === 'uniqueViolated') {
-              setErrorMessage(langStrings.ERRORS.ADD_WALLET_WITH_SAME_NAME);
-              logger.error('Wallet already exists');
+              const cyError = new CyError(
+                CysyncError.ADD_WALLET_WITH_SAME_NAME
+              );
+              setErrorObj(handleErrors(errorObj, cyError, flowName));
             } else {
               logger.error(err);
             }
           });
       } catch (error) {
-        logger.error('AddWallet: Same error occurred in adding wallet');
-        logger.error(error);
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        const cyError = new CyError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
       }
     });
 
     addWallet.on('notReady', () => {
-      logger.info('AddWallet: Device not ready');
-      setErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY);
+      const cyError = new CyError(CysyncError.DEVICE_NOT_READY);
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     try {
@@ -218,7 +206,8 @@ export const useAddWallet: UseAddWallet = () => {
       setIsInFlow(false);
       logger.error('AddWallet: Some Error');
       logger.error(e);
-      setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+      const cyError = new CyError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
       addWallet.removeAllListeners();
     }
   };
@@ -257,40 +246,29 @@ export const useAddWallet: UseAddWallet = () => {
       duplicateWallet.passwordSet = passwordSet;
       await walletDb.update(walletWithSameId);
       setIsNameDiff(false);
-      setErrorMessage('');
+      clearErrorObj();
       setWalletSuccess(true);
     } catch (error) {
-      logger.error('AddWallet: Error in updating wallet name');
-      logger.error(error);
       setIsNameDiff(false);
-      setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+      const cyError = new CyError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
+      setErrorObj(
+        handleErrors(errorObj, cyError, flowName, {
+          error,
+          text: 'AddWallet: Error in updating wallet name'
+        })
+      );
     }
   };
 
-  /**
-   * Only set the externalErrorMsg if the flow has not been canclled.
-   *
-   * 2 different vars, errorMessage and externalErrorMsg are being used
-   * because we don't want to display the error after the flow has been
-   * canclled.
-   *
-   * I could not achieve this by using a single var because the `isCancelled`
-   * was not being updated inside the `handle<Flow>` function.
-   */
+  // I think this will work, reset the error obj if its cancelled
   useEffect(() => {
-    if (isCancelled) {
-      setExternalErrorMsg('');
-    } else {
-      setExternalErrorMsg(errorMessage);
+    if (isCancelled && errorObj.isSet) {
+      clearErrorObj();
     }
-  }, [errorMessage]);
+  }, [errorObj]);
 
-  /**
-   * This will be used externally to clear the error msg
-   */
-  const onSetErrorMsg = (msg: string) => {
-    setErrorMessage(msg);
-    setExternalErrorMsg(msg);
+  const clearErrorObj = () => {
+    setErrorObj(new CyError());
   };
 
   return {
@@ -299,8 +277,8 @@ export const useAddWallet: UseAddWallet = () => {
     setWalletName,
     deviceConnected,
     setDeviceConnected,
-    errorMessage: externalErrorMsg,
-    setErrorMessage: onSetErrorMsg,
+    errorObj,
+    clearErrorObj,
     completed,
     setCompleted,
     resetHooks,

@@ -4,9 +4,11 @@ import { Collapse } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React from 'react';
+import React, { useEffect } from 'react';
 
+import { CyError } from '../../../errors';
 import { useFeedback } from '../../../store/provider/feedbackProvider';
+import logger from '../../../utils/logger';
 import prevent from '../../../utils/preventPropagation';
 import ErrorExclamation from '../../iconGroups/errorExclamation';
 import CustomButton from '../buttons/button';
@@ -183,7 +185,8 @@ const Error = (props: any) => {
 export interface ErrorProps {
   open: boolean;
   handleClose: () => void;
-  text: string;
+  errorObj?: CyError;
+  text?: string;
   actionText?: string;
   closeText?: string;
   handleAction?: () => void;
@@ -198,6 +201,7 @@ const errorDialog: React.FC<ErrorProps> = ({
   open,
   handleClose,
   text,
+  errorObj,
   actionText,
   handleAction,
   closeText = 'Ok',
@@ -207,7 +211,12 @@ const errorDialog: React.FC<ErrorProps> = ({
   detailedCTAText,
   disableAction
 }: ErrorProps) => {
-  const { showFeedback } = useFeedback();
+  const { showFeedback, closeFeedback } = useFeedback();
+
+  useEffect(() => {
+    if (errorObj?.isSet)
+      logger.error(`In Error Dialog: ${errorObj.showError()}`);
+  }, [errorObj]);
 
   const handleFeedbackOpen = () => {
     showFeedback({
@@ -218,15 +227,22 @@ const errorDialog: React.FC<ErrorProps> = ({
         attachDeviceLogs: false,
         categories: ['Report'],
         category: 'Report',
-        description: text,
+        description: errorObj.getMessage(),
         descriptionError: '',
         email: '',
         emailError: '',
-        subject: flow ? `Reporting for Error (${flow})` : 'Reporting for Error',
-        subjectError: ''
-      }
+        subject: `Reporting for Error ${errorObj.getCode()}`,
+        subjectError: `${flow || ''}`
+      },
+      handleClose
     });
   };
+
+  useEffect(() => {
+    return () => {
+      closeFeedback();
+    };
+  }, []);
 
   return (
     <DialogBox
@@ -240,7 +256,7 @@ const errorDialog: React.FC<ErrorProps> = ({
       restComponents={
         <Error
           advanceText={advanceText}
-          text={text}
+          text={errorObj?.showError() || text}
           closeText={closeText}
           disableAction={disableAction}
           handleClose={disableAction ? () => {} : handleClose}

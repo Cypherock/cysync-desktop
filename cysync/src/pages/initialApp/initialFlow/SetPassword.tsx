@@ -199,7 +199,7 @@ const SetPassword: React.FC<SetPasswordProps> = ({
     setErrorBox(false);
   };
 
-  const { showFeedback } = useFeedback();
+  const { showFeedback, closeFeedback } = useFeedback();
 
   const newFeedbackState: FeedbackState = {
     attachLogs: true,
@@ -213,6 +213,12 @@ const SetPassword: React.FC<SetPasswordProps> = ({
     subject: 'Reporting for Error (Setting Password)',
     subjectError: ''
   };
+
+  React.useEffect(() => {
+    return () => {
+      closeFeedback();
+    };
+  }, []);
 
   const handleFeedbackOpen = () => {
     showFeedback({

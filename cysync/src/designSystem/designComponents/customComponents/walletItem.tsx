@@ -137,6 +137,7 @@ const WalletItem = (props: WalletItemProps) => {
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const handleDeleteOpen = () => {
     setDeleteOpen(true);
+    handleClose();
   };
   const handleDeleteClose = () => {
     setDeleteOpen(false);

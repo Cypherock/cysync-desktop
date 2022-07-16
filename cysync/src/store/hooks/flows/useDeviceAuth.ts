@@ -1,15 +1,20 @@
-import {
-  DeviceConnection,
-  DeviceError,
-  DeviceErrorType
-} from '@cypherock/communication';
+import { DeviceConnection, DeviceError } from '@cypherock/communication';
 import { Device } from '@cypherock/database';
 import { DeviceAuthenticator } from '@cypherock/protocols';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import {
+  CyError,
+  CysyncError,
+  DisplayError,
+  handleAxiosErrors,
+  handleDeviceErrors,
+  handleErrors
+} from '../../../errors';
+import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { deviceDb } from '../../database';
-import { useI18n } from '../../provider';
+import { FeedbackState, useConnection, useFeedback } from '../../provider';
 
 export interface HandleDeviceAuthOptions {
   connection: DeviceConnection;
@@ -23,24 +28,30 @@ export interface HandleDeviceAuthOptions {
 export interface UseDeviceAuthValues {
   handleDeviceAuth: (options: HandleDeviceAuthOptions) => Promise<void>;
   verified: 0 | -1 | 1 | 2;
-  errorMessage: string;
-  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  errorObj: CyError;
+  setErrorObj: React.Dispatch<React.SetStateAction<DisplayError>>;
+  clearErrorObj: () => void;
   completed: boolean;
   confirmed: 0 | -1 | 1 | 2;
   resetHooks: () => void;
   cancelDeviceAuth: (connection: DeviceConnection) => void;
+  handleFeedbackOpen: () => void;
 }
 
 export type UseDeviceAuth = (isInitial?: boolean) => UseDeviceAuthValues;
 
+const flowName = Analytics.Categories.DEVICE_AUTH;
+
 export const useDeviceAuth: UseDeviceAuth = isInitial => {
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [verified, setVerified] = useState<-1 | 0 | 1 | 2>(0);
   const [confirmed, setConfirmed] = useState<-1 | 0 | 1 | 2>(0);
   const [completed, setCompleted] = useState(false);
   const deviceAuth = new DeviceAuthenticator();
 
-  const { langStrings } = useI18n();
+  const { showFeedback, closeFeedback } = useFeedback();
+  const { setDeviceConnectionStatus, deviceConnection } = useConnection();
+
   let deviceSerial: string | null = null;
 
   // To call resetHooks outside of this function
@@ -51,6 +62,12 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
     setCompleted(false);
     deviceAuth.removeAllListeners();
   };
+
+  useEffect(() => {
+    if (completed && !deviceConnection) {
+      setDeviceConnectionStatus(false);
+    }
+  }, [completed]);
 
   const onDeviceAuthenticate = (firmwareVersion: string, auth: boolean) => {
     try {
@@ -89,7 +106,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       localStorage.getItem('disableProvision') === 'true';
 
     setConfirmed(1);
-    setErrorMessage('');
+    setErrorObj(new CyError());
     logger.info('DeviceAuth: initiated');
     if (mockAuth) {
       logger.info('DeviceAuth: Mocking device auth in debug build');
@@ -105,38 +122,16 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
 
     deviceAuth.on('error', err => {
       logger.error('DeviceAuth: Error occurred in device auth flow');
-      logger.error(err);
+      const cyError = new CyError();
       if (err.isAxiosError) {
-        if (err.response) {
-          setErrorMessage(langStrings.ERRORS.NETWORK_ERROR);
-        } else {
-          setErrorMessage(langStrings.ERRORS.NETWORK_ERROR_WITH_NO_RESPONSE);
-        }
+        handleAxiosErrors(cyError, err);
       } else if (err instanceof DeviceError) {
-        if (
-          [
-            DeviceErrorType.CONNECTION_CLOSED,
-            DeviceErrorType.CONNECTION_NOT_OPEN
-          ].includes(err.errorType)
-        ) {
-          setConfirmed(_confirmed => (_confirmed === 1 ? -1 : _confirmed));
-          setVerified(_verified => (_verified === 1 ? -1 : _verified));
-          setErrorMessage(langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW);
-        } else if (err.errorType === DeviceErrorType.NOT_CONNECTED) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_NOT_CONNECTED);
-        } else if (
-          [
-            DeviceErrorType.WRITE_TIMEOUT,
-            DeviceErrorType.READ_TIMEOUT
-          ].includes(err.errorType)
-        ) {
-          setErrorMessage(langStrings.ERRORS.DEVICE_TIMEOUT_ERROR);
-        } else {
-          setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
-        }
+        handleDeviceErrors(cyError, err, flowName);
       } else {
-        setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+        // unknown flow error
+        cyError.setError(CysyncError.DEVICE_AUTH_UNKNOWN_ERROR);
       }
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
     });
 
     deviceAuth.on('confirmed', (v: boolean) => {
@@ -146,7 +141,8 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
         setVerified(1);
       } else {
         logger.info('DeviceAuth: Rejected from device');
-        setErrorMessage(langStrings.ERRORS.DEVICE_AUTH_REJECTED);
+        const cyError = new CyError(CysyncError.DEVICE_AUTH_REJECTED);
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
         setConfirmed(-1);
       }
     });
@@ -162,20 +158,23 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       if (v) {
         logger.info('DeviceAuth: verified');
         setVerified(2);
-        setErrorMessage('');
+        setErrorObj(new CyError());
       } else {
         logger.info('DeviceAuth: not verified');
         setVerified(-1);
-        setErrorMessage(langStrings.ERRORS.DEVICE_AUTH_FAILED);
+        const cyError = new CyError(CysyncError.DEVICE_AUTH_FAILED);
+        setErrorObj(handleErrors(errorObj, cyError, flowName));
       }
     });
 
     deviceAuth.on('notReady', () => {
+      const cyError = new CyError();
       if (isInitial) {
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY_IN_INITIAL);
+        cyError.setError(CysyncError.DEVICE_NOT_READY_IN_INITIAL);
       } else {
-        setErrorMessage(langStrings.ERRORS.DEVICE_NOT_READY);
+        cyError.setError(CysyncError.DEVICE_NOT_READY);
       }
+      setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 
     try {
@@ -196,9 +195,8 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       setCompleted(true);
     } catch (e) {
       setIsInFlow(false);
-      logger.error('DeviceAuth: Some error occurred.');
-      logger.error(e);
-      setErrorMessage(langStrings.ERRORS.UNKNOWN_FLOW_ERROR);
+      const cyError = new CyError(CysyncError.DEVICE_AUTH_UNKNOWN_ERROR);
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
       deviceAuth.removeAllListeners();
     }
   };
@@ -217,14 +215,47 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       });
   };
 
+  const handleFeedbackOpen = () => {
+    const newFeedbackState: FeedbackState = {
+      attachLogs: true,
+      attachDeviceLogs: false,
+      categories: ['Report'],
+      category: 'Report',
+      description: errorObj.getMessage(),
+      descriptionError: '',
+      email: '',
+      emailError: '',
+      subject: `Reporting for Error ${errorObj.getCode()} (Authenticating Device)`,
+      subjectError: ''
+    };
+
+    showFeedback({
+      isContact: true,
+      heading: 'Report',
+      initFeedbackState: newFeedbackState
+    });
+  };
+
+  const clearErrorObj = () => {
+    setErrorObj(new CyError());
+  };
+
+  useEffect(() => {
+    return () => {
+      closeFeedback();
+    };
+  }, []);
+
   return {
-    errorMessage,
-    setErrorMessage,
+    errorObj,
+    setErrorObj,
+    clearErrorObj,
     cancelDeviceAuth,
     handleDeviceAuth,
     resetHooks,
     verified,
     completed,
-    confirmed
+    confirmed,
+    handleFeedbackOpen
   } as UseDeviceAuthValues;
 };

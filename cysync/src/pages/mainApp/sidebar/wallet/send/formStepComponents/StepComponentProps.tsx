@@ -46,11 +46,12 @@ export interface StepComponentProps {
     address: string,
     error: boolean
   ) => void;
-  verifyRecipientAmount: () => boolean;
+  validateInputs: () => boolean;
   setTransactionFee: (val: number) => void;
   buttonDisabled: boolean;
   isButtonLoading: boolean;
   gasLimit: number;
+  gasLimitError: string | undefined;
   setGasLimit: (val: number) => void;
   handleCopyFromClipboard: (id: string) => void;
   maxSend: boolean;
@@ -85,6 +86,7 @@ export const StepComponentPropTypes = {
   buttonDisabled: PropTypes.bool.isRequired,
   isButtonLoading: PropTypes.bool.isRequired,
   gasLimit: PropTypes.number.isRequired,
+  gasLimitError: PropTypes.string,
   setGasLimit: PropTypes.func.isRequired,
   handleCopyFromClipboard: PropTypes.func.isRequired,
   maxSend: PropTypes.bool.isRequired,
@@ -92,5 +94,6 @@ export const StepComponentPropTypes = {
   handleClose: PropTypes.func.isRequired,
   estimateGasLimit: PropTypes.bool.isRequired,
   setEstimateGasLimit: PropTypes.func.isRequired,
-  duplicateBatchAddresses: PropTypes.array.isRequired
+  duplicateBatchAddresses: PropTypes.array.isRequired,
+  validateInputs: PropTypes.func.isRequired
 };
