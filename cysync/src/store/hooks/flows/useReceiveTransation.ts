@@ -125,7 +125,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       xpub,
       zpub,
       contractAbbr,
-      passphraseExists
+      passphraseExists,
+      coinName
     }) => {
       clearAll();
 
@@ -201,10 +202,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           logger.verbose('ReceiveAddress: Confirmed on device', { coinType });
           setCoinsConfirmed(true);
         } else {
-          const cyError = new CyError(
-            CysyncError.ADD_COIN_REJECTED,
-            coins.name
-          );
+          const cyError = new CyError(CysyncError.ADD_COIN_REJECTED, coinName);
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
