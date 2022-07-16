@@ -44,7 +44,7 @@ const Root = styled('div')(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     padding: '3rem 8rem 3rem'
   },
   [`& .${classes.addressContainer}`]: {

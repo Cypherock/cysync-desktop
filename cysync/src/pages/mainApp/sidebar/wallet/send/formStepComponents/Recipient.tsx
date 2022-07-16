@@ -728,7 +728,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             )
           </Typography>
           {customAccount && (
-            <div style={{ marginTop: '5px' }}>
+            <div style={{ marginTop: '5px', padding: '0.2rem 0.5rem' }}>
               <LabelText
                 label="Your Account ID"
                 text={customAccount.name}

@@ -101,7 +101,7 @@ const CustomAlert = withStyles((theme: Theme) =>
 )(Alert);
 
 const Verify = (props: any) => {
-  const { batchRecipientData, maxSend, activeButton } = props;
+  const { batchRecipientData, activeButton } = props;
 
   const { coinDetails } = useCurrentCoin();
 
@@ -116,8 +116,6 @@ const Verify = (props: any) => {
   const { sendTransaction } = useSendTransactionContext();
 
   const [open, setOpen] = useState(true);
-
-  const coinPrice = token ? token.displayPrice : coinDetails.displayPrice;
 
   useEffect(() => {
     if (sendTransaction.metadataSent) setOpen(false);
@@ -184,25 +182,8 @@ const Verify = (props: any) => {
               verified={sendTransaction.verified}
             />
             <LabelText
-              label={`Amount ${coinAbbr.toUpperCase()}`}
-              text={
-                !maxSend
-                  ? `${0.1} ~( $${formatDisplayAmount(
-                      batchRecipientData[0].amount * parseFloat(coinPrice),
-                      2,
-                      true
-                    )}) `
-                  : `${sendTransaction.sendMaxAmount} ~( $${formatDisplayAmount(
-                      sendTransaction.sendMaxAmount * parseFloat(coinPrice),
-                      2,
-                      true
-                    )}) `
-              }
-              verified={sendTransaction.verified}
-            />
-            <LabelText
               label="Transaction Fees"
-              text={`~ ${0.0012} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
+              text={`~ ${0.1012} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
                 sendTransaction.totalFees *
                   parseFloat(coinDetails.displayPrice),
                 2,

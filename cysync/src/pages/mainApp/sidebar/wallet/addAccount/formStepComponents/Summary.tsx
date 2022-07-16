@@ -238,17 +238,11 @@ const Summary: React.FC<StepComponentProps> = ({
             verified
           />
         )}
-        {activeButton !== 0 && (
-          <LabelText
-            label={`Amount ${coinAbbr.toUpperCase()}`}
-            text={formatDisplayAmount(total, undefined, true)}
-            verified
-          />
-        )}
         <LabelText
           label="Transaction Fees"
-          text={`~ ${0.0012} ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
-            sendTransaction.totalFees * parseFloat(coinDetails.displayPrice),
+          text={`~ ${0.1012} ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
+            (total.toNumber() + sendTransaction.totalFees) *
+              parseFloat(coinDetails.displayPrice),
             2,
             true
           )})`}
