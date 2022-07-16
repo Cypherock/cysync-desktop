@@ -1,4 +1,4 @@
-import { COINS } from '@cypherock/communication';
+import { COINS, EthCoinData } from '@cypherock/communication';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -60,6 +60,7 @@ interface OneCoinProps {
   coinPortfolio: string;
   decimal: number;
   index: number;
+  coinParent: string | undefined;
 }
 
 const OneCoin: React.FC<OneCoinProps> = props => {
@@ -70,7 +71,8 @@ const OneCoin: React.FC<OneCoinProps> = props => {
     coinValue,
     decimal,
     coinPortfolio,
-    index
+    index,
+    coinParent
   } = props;
 
   const navigate = useNavigate();
@@ -80,7 +82,14 @@ const OneCoin: React.FC<OneCoinProps> = props => {
     navigate(`${Routes.transactions.index}?slug=${coinInitial.toLowerCase()}`);
   };
 
-  const coin = COINS[coinInitial];
+  let coin;
+  if (coinParent) {
+    const parent = COINS[coinParent];
+    if (!parent) {
+      throw new Error(`Cannot find coinType: ${coinParent}`);
+    }
+    coin = (parent as EthCoinData).erc20TokensList[coinInitial];
+  } else coin = COINS[coinInitial];
 
   if (!coin) {
     throw new Error(`Cannot find coinType: ${coinInitial}`);
@@ -89,10 +98,18 @@ const OneCoin: React.FC<OneCoinProps> = props => {
   return (
     <Root onClick={onClick} container>
       <Grid item xs={3} className={classes.coin}>
-        <CoinIcons
-          initial={coinInitial.toUpperCase()}
-          style={{ marginRight: '10px' }}
-        />
+        {coinParent ? (
+          <CoinIcons
+            initial={coinInitial.toUpperCase()}
+            parentCoin={coinParent.toLowerCase()}
+            style={{ marginRight: '10px' }}
+          />
+        ) : (
+          <CoinIcons
+            initial={coinInitial.toUpperCase()}
+            style={{ marginRight: '10px' }}
+          />
+        )}
         <div className={classes.coinText}>
           <Typography
             variant="body2"

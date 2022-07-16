@@ -1,4 +1,4 @@
-import { CoinGroup, COINS } from '@cypherock/communication';
+import { CoinGroup, COINS, EthCoinData } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
@@ -123,9 +123,15 @@ export const usePortfolio: UsePortfolio = () => {
   const getCoinPriceHistory = async (
     coinType: string,
     days: number,
-    wallet = ''
+    wallet = '',
+    parent?: string
   ) => {
-    const coinData = COINS[coinType];
+    let coinData;
+    if (parent) {
+      const parentData = COINS[parent] as EthCoinData;
+      if (!parentData) throw new Error(`Parent coin ${parent} not found`);
+      coinData = parentData.erc20TokensList[coinType];
+    } else coinData = COINS[coinType];
     if (!coinData) {
       throw new Error(`Cannot find coinType: ${coinType}`);
     }
@@ -312,19 +318,45 @@ export const usePortfolio: UsePortfolio = () => {
     const allCoinPriceHistory: CoinHistory[] = [];
     const allCoinList: string[] = ['All Coins'];
     let prevTotal = new BigNumber(0);
+    const allCoins = await coinDb.getAll();
+    const allTokens = await tokenDb.getAll();
+    const allItems = [
+      ...allCoins
+        .map(coin => {
+          return { parent: undefined, slug: coin.slug };
+        })
+        .filter((coin, index, self) => self.indexOf(coin) === index),
+      ...allTokens
+        .map(token => {
+          return { parent: token.coin, slug: token.slug };
+        })
+        .filter((token, index, self) => self.indexOf(token) === index)
+    ];
 
-    for (const coinType of Object.keys(COINS)) {
-      const coin = COINS[coinType];
+    for (const item of allItems) {
+      let coin;
+      if (item.parent) {
+        const parent = COINS[item.parent];
+        coin = (parent as EthCoinData).erc20TokensList[item.slug];
+      } else {
+        coin = COINS[item.slug];
+      }
+
       if (!coin) {
         continue;
       }
       if (coin.isTest) continue;
-      const coinPrices = await getCoinPriceHistory(coinType, days, wallet);
+      const coinPrices = await getCoinPriceHistory(
+        item.slug,
+        days,
+        wallet,
+        item.parent
+      );
       if (!coinPrices || !coinPrices.pricesToDisplay) continue;
 
-      allCoinList.push(coinType);
+      allCoinList.push(item.slug);
       const tempCoin: CoinHistory = {
-        name: coinType,
+        name: item.slug,
         data: coinPrices.pricesToDisplay
       };
 
@@ -333,7 +365,7 @@ export const usePortfolio: UsePortfolio = () => {
       if (!coinPrices.unitPrices[0]) {
         logger.warn('Unexpected unitPrices variable', {
           unitPrices: coinPrices.unitPrices,
-          coinType,
+          item,
           days,
           wallet
         });
@@ -357,14 +389,39 @@ export const usePortfolio: UsePortfolio = () => {
       const allCoinholding: number[] = [];
       const setOfCoins: CoinDetails[] = [];
 
-      for (const coinType of Object.keys(COINS)) {
-        const coinData = COINS[coinType];
+      const allCoins = await coinDb.getAll();
+      const allTokens = await tokenDb.getAll();
+      const allItems = [
+        ...allCoins
+          .map(coin => {
+            return { parent: undefined, slug: coin.slug };
+          })
+          .filter((coin, index, self) => self.indexOf(coin) === index),
+        ...allTokens
+          .map(token => {
+            return { parent: token.coin, slug: token.slug };
+          })
+          .filter((token, index, self) => self.indexOf(token) === index)
+      ];
+      for (const item of allItems) {
+        let coinData;
+        if (item.parent) {
+          const parent = COINS[item.parent];
+          if (!parent) {
+            throw new Error(`Cannot find coinType: ${item.parent}`);
+          }
+
+          coinData = (parent as EthCoinData).erc20TokensList[item.slug];
+        } else {
+          coinData = COINS[item.slug];
+        }
         if (!coinData) {
-          throw new Error(`Cannot find coinType: ${coinType}`);
+          throw new Error(`Cannot find coinType: ${item.slug}`);
         }
         let totalBalance = new BigNumber(0);
         const currentTempCoin: CoinDetails = {
-          name: coinType,
+          name: item.slug,
+          parent: item.parent,
           decimal: coinData.decimal,
           balance: '0',
           value: '0',
@@ -375,12 +432,12 @@ export const usePortfolio: UsePortfolio = () => {
           if (coinData.group === CoinGroup.ERC20Tokens) {
             const token = await tokenDb.getOne({
               walletId,
-              slug: coinType
+              slug: item.slug
             });
             if (token) totalBalance = new BigNumber(token.balance);
             else continue;
           } else {
-            const xpub = await coinDb.getOne({ walletId, slug: coinType });
+            const xpub = await coinDb.getOne({ walletId, slug: item.slug });
             if (xpub)
               totalBalance = new BigNumber(
                 xpub.totalBalance ? xpub.totalBalance : 0
@@ -389,13 +446,13 @@ export const usePortfolio: UsePortfolio = () => {
           }
         }
         if (coinData.group === CoinGroup.ERC20Tokens) {
-          const tokens = await tokenDb.getAll({ slug: coinType });
+          const tokens = await tokenDb.getAll({ slug: item.slug });
           if (tokens.length === 0) continue;
           for (const token of tokens) {
             totalBalance = totalBalance.plus(token.balance);
           }
         } else {
-          const coinsData = await coinDb.getAll({ slug: coinType });
+          const coinsData = await coinDb.getAll({ slug: item.slug });
           if (coinsData.length === 0) continue;
           for (const coin of coinsData) {
             totalBalance = totalBalance.plus(
@@ -409,7 +466,7 @@ export const usePortfolio: UsePortfolio = () => {
         }
 
         const res = await priceHistoryDb.getOne({
-          slug: coinType,
+          slug: item.slug,
           interval: 7
         });
 
@@ -418,12 +475,12 @@ export const usePortfolio: UsePortfolio = () => {
           if (!latestUnitPrices[latestUnitPrices.length - 1]) {
             logger.warn('Unexpected latestUnitPrice from DB', {
               latestUnitPrices,
-              coinType
+              slug: item.slug
             });
           }
         }
 
-        const latestPrice = await getLatestPriceForCoin(coinType);
+        const latestPrice = await getLatestPriceForCoin(item.slug, item.parent);
 
         const balance = totalBalance.dividedBy(coinData.multiplier);
 

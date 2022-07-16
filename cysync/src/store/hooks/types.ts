@@ -92,4 +92,5 @@ export interface CoinDetails {
   balance: string;
   value: string;
   price: string;
+  parent: string | undefined;
 }
