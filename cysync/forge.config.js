@@ -5,11 +5,16 @@ const config = {
     appCopyright: 'Cypherock',
     appBundleId: 'com.hodl.cypherock',
     osxSign: {
-      identity: 'Apple Distribution: HODL Tech Private Limited (664633TYV2)',
+      identity:
+        'Developer ID Application: HODL Tech Private Limited (664633TYV2)',
       'hardened-runtime': true,
       entitlements: 'entitlements.plist',
       'entitlements-inherit': 'entitlements.plist',
       'signature-flags': 'library'
+    },
+    osxNotarize: {
+      appleId: process.env.APPLE_ID || '',
+      appleIdPassword: process.env.APPLE_ID_PASSWORD || ''
     }
   },
   makers: [
