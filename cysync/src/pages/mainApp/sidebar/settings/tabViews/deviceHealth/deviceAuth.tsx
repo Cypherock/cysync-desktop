@@ -252,7 +252,8 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     internalDeviceConnection: deviceConnection,
     inBackgroundProcess,
     connected,
-    retryConnection
+    retryConnection,
+    setBlockConnectionPopup
   } = useConnection();
 
   const {
@@ -320,6 +321,14 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
       setConnStatus(1);
     }
   }, [deviceConnection, inBackgroundProcess]);
+
+  useEffect(() => {
+    setBlockConnectionPopup(true);
+
+    return () => {
+      setBlockConnectionPopup(false);
+    };
+  }, []);
 
   const steps = [
     {

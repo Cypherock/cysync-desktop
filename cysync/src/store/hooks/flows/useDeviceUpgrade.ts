@@ -61,6 +61,7 @@ export interface UseDeviceUpgradeValues {
   isInternetSlow: boolean;
   isUpdated: 0 | 1 | -1 | 2;
   isAuthenticated: 0 | 1 | -1 | 2;
+  setBlockConnectionPopup: ConnectionContextInterface['setBlockConnectionPopup'];
   setDeviceSerial: ConnectionContextInterface['setDeviceSerial'];
   verified: number;
   errorObj: DisplayError;
@@ -103,7 +104,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     setDeviceSerial,
     inBackgroundProcess,
     setIsInFlow,
-    setBlockNewConnection
+    setBlockNewConnection,
+    setBlockConnectionPopup
   } = useConnection();
 
   const deviceUpdater = new DeviceUpdater();
@@ -188,7 +190,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       );
       setUpdateDownloaded(-1);
       setIsCompleted(-1);
-      setBlockNewConnection(false);
+      setIsDeviceUpdating(false);
       if (internetSlowTimeout.current) {
         clearTimeout(internetSlowTimeout.current);
         internetSlowTimeout.current = undefined;
@@ -226,6 +228,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         DeviceUpgradeErrorResolutionState.NO_RECONNECT_REQUIRED
       );
       setIsCompleted(-1);
+      setIsDeviceUpdating(false);
       return;
     }
 
@@ -274,7 +277,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       );
       setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
       setIsCompleted(-1);
-      setBlockNewConnection(false);
+      setIsDeviceUpdating(false);
       setUpdateDownloaded(-1);
     });
   };
@@ -309,7 +312,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setUpdated(-1);
       setApproved(val => (val === 2 ? val : -1));
       setIsCompleted(-1);
-      setBlockNewConnection(false);
+      setIsDeviceUpdating(false);
       deviceUpdater.removeAllListeners();
       return;
     }
@@ -339,9 +342,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           DeviceUpgradeErrorResolutionState.NO_RECONNECT_REQUIRED
         );
         setUpdated(-1);
-        setIsDeviceUpdating(false);
         setIsCompleted(-1);
-        setBlockNewConnection(false);
+        setIsDeviceUpdating(false);
         deviceUpdater.removeAllListeners();
       }
     });
@@ -363,7 +365,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setUpdated(-1);
       setApproved(-1);
       setIsCompleted(-1);
-      setBlockNewConnection(false);
+      setIsDeviceUpdating(false);
       deviceUpdater.removeAllListeners();
     });
 
@@ -383,6 +385,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setUpdated(-1);
       setApproved(val => (val === 2 ? val : -1));
       setIsCompleted(-1);
+      setIsDeviceUpdating(false);
       deviceUpdater.removeAllListeners();
     });
 
@@ -390,7 +393,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
       setUpdated(-1);
       setApproved(-1);
       setIsCompleted(-1);
-      setBlockNewConnection(false);
+      setIsDeviceUpdating(false);
       const cyError = new CyError(CysyncError.DEVICE_UPGRADE_FAILED);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
       setErrorResolutionState(
@@ -423,11 +426,10 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         DeviceUpgradeErrorResolutionState.RECONNECT_REQUIRED
       );
       deviceUpdater.removeAllListeners();
-      setBlockNewConnection(false);
     }
 
     if (waitForCancel.current && !alreadyCancelled.current) {
-      setBlockNewConnection(false);
+      setIsDeviceUpdating(false);
     }
   };
 
@@ -443,7 +445,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         );
         setUpdated(-1);
         setIsCompleted(-1);
-        setBlockNewConnection(false);
+        setIsDeviceUpdating(false);
         return;
       }
       setBlockNewConnection(true);
@@ -518,7 +520,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           DeviceUpgradeErrorResolutionState.DEVICE_AUTH_REQUIRED
         );
         setIsCompleted(-1);
-        setBlockNewConnection(false);
+        setIsDeviceUpdating(false);
       } else {
         logger.warn('Error in device auth, retrying...');
         logger.error(error);
@@ -527,8 +529,8 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
           clearTimeout(timeout.current);
           timeout.current = undefined;
         }
-        if (!errorObj.isSet)
-          timeout.current = setTimeout(initiateDeviceAuth, 2000);
+
+        timeout.current = setTimeout(initiateDeviceAuth, 2000);
       }
     }
   };
@@ -569,7 +571,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         const cyError = new CyError(CysyncError.DEVICE_AUTH_FAILED);
         setErrorObj(handleErrors(errorObj, cyError, flowName));
         setIsCompleted(-1);
-        setBlockNewConnection(false);
+        setIsDeviceUpdating(false);
       } else {
         logger.warn('Error in device auth, retrying...');
         logger.warn(errorObj);
@@ -653,6 +655,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     clearErrorObj,
     updateProgress,
     isAuthenticated,
-    errorResolutionState
-  } as UseDeviceUpgradeValues;
+    errorResolutionState,
+    setBlockConnectionPopup
+  };
 };

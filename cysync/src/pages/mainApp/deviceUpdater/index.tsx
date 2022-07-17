@@ -23,7 +23,8 @@ const DeviceUpdatePopup = () => {
     openMisconfiguredPrompt,
     setOpenMisconfiguredPrompt,
     updateRequiredType,
-    isDeviceUpdating
+    isDeviceUpdating,
+    blockConnectionPopup
   } = useConnection();
 
   const onConfirmation = (val: boolean) => {
@@ -126,6 +127,7 @@ const DeviceUpdatePopup = () => {
   }
 
   if (
+    !blockConnectionPopup &&
     deviceConnectionState !== DeviceConnectionState.VERIFIED &&
     deviceConnectionState !== DeviceConnectionState.NOT_CONNECTED
   ) {
