@@ -255,6 +255,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       !feedbackInput.attachDeviceLogs &&
       deviceConnection &&
       firmwareVersion &&
+      !deviceConnection.inBootloader &&
       beforeFlowStart(true)
     ) {
       clearErrorObj();
@@ -414,6 +415,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       deviceConnection &&
       [
         DeviceConnectionState.VERIFIED,
+        DeviceConnectionState.LAST_AUTH_FAILED,
+        DeviceConnectionState.NEW_DEVICE,
+        DeviceConnectionState.PARTIAL_STATE,
         DeviceConnectionState.IN_TEST_APP
       ].includes(deviceConnectionState)
     );
@@ -483,6 +487,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         return 'Looks like the device authentication failed the last time.';
       case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Looks like the device is not in the main menu.';
+      case DeviceConnectionState.UPDATE_REQUIRED:
+        return 'This device is not supported on the current version of cysync.';
       case DeviceConnectionState.UNKNOWN_ERROR:
         return 'An unknown error occurred while connecting the device.';
       default:
