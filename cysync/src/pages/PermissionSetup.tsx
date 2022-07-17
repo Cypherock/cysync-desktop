@@ -24,7 +24,7 @@ const classes = {
   icon: `${PREFIX}-icon`
 };
 
-const StyledGrid = styled(Grid)({
+const StyledGrid = styled(Grid)(() => ({
   [`&.${classes.root}`]: {
     width: '100%',
     height: '100%',
@@ -46,6 +46,7 @@ const StyledGrid = styled(Grid)({
   },
   [`& .${classes.button}`]: {
     background: '#E0B36A',
+    color: '#000',
     textTransform: 'none',
     '&:hover': {
       background: '#DAA147'
@@ -56,7 +57,7 @@ const StyledGrid = styled(Grid)({
     color: '#DAA147',
     marginBottom: '2rem'
   }
-});
+}));
 
 const PermissionSetup = () => {
   const [hasPermission, setHasPermission] = useState({
@@ -134,9 +135,33 @@ const PermissionSetup = () => {
             onClick={addUserGroup}
             variant="contained"
             className={classes.button}
+            sx={{ mb: 2 }}
           >
             Continue
           </Button>
+          <div style={{ userSelect: 'text' }}>
+            <Typography variant="body2" sx={{ color: '#eee' }}>
+              If the above button does not work please follow the instructions
+              given below:
+            </Typography>
+
+            <Typography variant="body2" sx={{ color: '#eee' }}>
+              <ol>
+                <li>
+                  Execute{' '}
+                  <Typography
+                    variant="caption"
+                    sx={{ color: 'secondary.main' }}
+                  >
+                    sudo usermod -a -G dialout $USER
+                  </Typography>{' '}
+                  command in your terminal
+                </li>
+
+                <li>Restart your system and open cysync again</li>
+              </ol>
+            </Typography>
+          </div>
         </Grid>
       )}
     </StyledGrid>
