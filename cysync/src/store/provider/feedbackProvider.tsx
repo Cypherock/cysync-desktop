@@ -142,7 +142,7 @@ type ShowFeedback = (options?: {
 
 export interface FeedbackContextInterface {
   showFeedback: ShowFeedback;
-  closeFeedback: () => void; // dont add this everywhere, as nested calls can disrupt the flow
+  closeFeedback: () => void; // use this to cleanup feedback component
 }
 
 export const FeedbackContext: React.Context<FeedbackContextInterface> =

@@ -211,7 +211,7 @@ const errorDialog: React.FC<ErrorProps> = ({
   detailedCTAText,
   disableAction
 }: ErrorProps) => {
-  const { showFeedback } = useFeedback();
+  const { showFeedback, closeFeedback } = useFeedback();
 
   useEffect(() => {
     if (errorObj?.isSet)
@@ -237,6 +237,12 @@ const errorDialog: React.FC<ErrorProps> = ({
       handleClose
     });
   };
+
+  useEffect(() => {
+    return () => {
+      closeFeedback();
+    };
+  }, []);
 
   return (
     <DialogBox

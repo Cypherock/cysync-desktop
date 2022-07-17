@@ -292,12 +292,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   const isRefresh = Boolean(query.get('isRefresh'));
 
   useEffect(() => {
-    if (isRefresh) {
-      handleRetry();
-    }
-  }, [isRefresh]);
-
-  useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
   }, [deviceConnection]);
 
@@ -315,6 +309,10 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
       Analytics.Actions.OPEN
     );
     logger.info('Setting device update open');
+    if (isRefresh) {
+      logger.info('Device Upgrade is refreshing');
+      handleNext();
+    }
 
     return () => {
       setAllowExit(true);
