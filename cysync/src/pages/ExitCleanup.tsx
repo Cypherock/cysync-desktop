@@ -20,29 +20,49 @@ const StyledBackdrop = styled(Backdrop)(({ theme }) => ({
   }
 }));
 
-const ExitCleanup = () => {
+export interface ExitCleanupProps {
+  setDoCleanupFunction?: (func: () => Promise<void>) => void;
+}
+
+const ExitCleanup: React.FC<ExitCleanupProps> = ({ setDoCleanupFunction }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { internalDeviceConnection, deviceSdkVersion } = useConnection();
 
   const cancelFlow = new CancelFlow();
 
-  const runExitCleanup = async () => {
-    logger.info('ExitCleanup Started');
-
+  const exitCleanup = async () => {
     try {
-      await cancelFlow.run({
+      const response = await cancelFlow.run({
         connection: internalDeviceConnection,
         sdkVersion: deviceSdkVersion
       });
+      logger.info('Exit cleanup cancel response', { response });
       passEnDb.destroyHash();
     } catch (error) {
       logger.error('Error in exit cleanup');
       logger.error(error);
     }
+  };
+
+  const runExitCleanup = async () => {
+    logger.info('ExitCleanup Started');
+
+    await exitCleanup();
 
     logger.info('ExitCleanup Completed');
     ipcRenderer.send('exit-app');
   };
+
+  const onLockscreen = async () => {
+    logger.info('Exit cleanup triggred from lockscreen');
+    await exitCleanup();
+  };
+
+  useEffect(() => {
+    if (setDoCleanupFunction) {
+      setDoCleanupFunction(onLockscreen);
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {

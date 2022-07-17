@@ -26,6 +26,7 @@ export interface LockscreenContextInterface {
   isPasswordSet: boolean;
   setIsPasswordSet: React.Dispatch<React.SetStateAction<boolean>>;
   handleDeviceConnected: () => void;
+  setDoCleanupFunction: (func: () => Promise<void>) => void;
 }
 
 export const LockscreenContext: React.Context<LockscreenContextInterface> =
@@ -43,6 +44,7 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   const [isInitialFlow, setInitialFlow] = useState(isFirstBoot());
   const [autoLock, setAutoLock] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(false);
+  const doCleanupFunction = useRef<() => Promise<void> | undefined>(undefined);
 
   const lockscreenRef = useRef<boolean | null>(lockscreen);
   const isPasswordSetRef = useRef<boolean | null>(isPasswordSet);
@@ -66,13 +68,13 @@ export const LockscreenProvider: React.FC = ({ children }) => {
     const val =
       !lockscreenRef.current && isPasswordSetRef.current && autoLockRef.current;
     if (val) {
-      setLockScreen(true);
+      showLockscreen();
     }
   };
 
   const handleLockScreenClickOpen = () => {
     if (!lockscreen) {
-      setLockScreen(true);
+      showLockscreen();
     }
   };
 
@@ -90,10 +92,10 @@ export const LockscreenProvider: React.FC = ({ children }) => {
     setAutoLock(autoLockFlag);
 
     const hasPassword = passwordExists();
-    if (!hasPassword) {
-      setLockScreen(hasPassword);
+    if (hasPassword) {
+      showLockscreen();
     } else {
-      setLockScreen(hasPassword);
+      hideLockscreen();
     }
     initDatabases().then(() => {
       setLockscreenLoading(false);
@@ -102,7 +104,7 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   }, []);
 
   const handleLockScreenClose = () => {
-    setLockScreen(false);
+    hideLockscreen();
   };
 
   const handleSkipPassword = () => {
@@ -113,12 +115,27 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   };
 
   const handleInitialFlowClose = () => {
-    if (!passwordExists()) setLockScreen(false);
+    if (!passwordExists()) hideLockscreen();
     setInitialFlow(false);
   };
 
   const handleInitialFlowOpen = () => {
     setInitialFlow(true);
+  };
+
+  const showLockscreen = async () => {
+    if (doCleanupFunction.current) {
+      await doCleanupFunction.current();
+    }
+    setLockScreen(true);
+  };
+
+  const hideLockscreen = () => {
+    setLockScreen(false);
+  };
+
+  const setDoCleanupFunction = (func: () => Promise<void>) => {
+    doCleanupFunction.current = func;
   };
 
   return (
@@ -137,7 +154,8 @@ export const LockscreenProvider: React.FC = ({ children }) => {
         isDeviceConnected,
         handleDeviceConnected,
         isPasswordSet,
-        setIsPasswordSet
+        setIsPasswordSet,
+        setDoCleanupFunction
       }}
     >
       {children}

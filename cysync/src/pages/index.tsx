@@ -15,7 +15,8 @@ const Index = () => {
     handleInitialFlowClose,
     handleSkipPassword,
     isDeviceConnected,
-    handleDeviceConnected
+    handleDeviceConnected,
+    setDoCleanupFunction
   } = useLockscreen();
 
   const snackbar = useSnackbar();
@@ -50,7 +51,7 @@ const Index = () => {
 
   return (
     <>
-      <ExitCleanup />
+      <ExitCleanup setDoCleanupFunction={setDoCleanupFunction} />
       <InternetStatus />
       <Grid container style={{ height: '100%' }}>
         {renderComponent()}
