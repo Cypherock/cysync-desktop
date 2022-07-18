@@ -15,7 +15,8 @@ import {
   DisplayError,
   handleAxiosErrors,
   handleDeviceErrors,
-  handleErrors
+  handleErrors,
+  handleFirmwareUpdateErrors
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
 import {
@@ -376,6 +377,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         DeviceUpgradeErrorResolutionState.RECONNECT_REQUIRED
       );
       if (err instanceof DeviceError) {
+        handleFirmwareUpdateErrors(cyError, err);
         handleDeviceErrors(cyError, err, flowName);
       } else {
         // unknown flow error

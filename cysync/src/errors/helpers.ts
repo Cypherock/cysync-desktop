@@ -41,7 +41,24 @@ const handleErrors = (
   return err;
 };
 
+const handleFirmwareUpdateErrors = (cyError: CyError, err: any) => {
+  cyError.pushSubErrors(err.code);
+  if (
+    [
+      DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED,
+      DeviceErrorType.WRONG_FIRMWARE_VERSION,
+      DeviceErrorType.WRONG_HARDWARE_VERSION,
+      DeviceErrorType.WRONG_MAGIC_NUMBER,
+      DeviceErrorType.SIGNATURE_NOT_VERIFIED,
+      DeviceErrorType.LOWER_FIRMWARE_VERSION
+    ].includes(err.errorType)
+  ) {
+    cyError.setError(CysyncError.DEVICE_UPGRADE_KNOWN_ERROR);
+  }
+};
+
 const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
+  if (cyError.isSet) return;
   cyError.pushSubErrors(err.code);
   if (
     [
@@ -137,6 +154,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     [CysyncError.DEVICE_UPGRADE_UNKNOWN_ERROR]: {
       message: langStrings.ERRORS.DEVICE_UPGRADE_UNKNOWN_ERROR
+    },
+    [CysyncError.DEVICE_UPGRADE_KNOWN_ERROR]: {
+      message: langStrings.ERRORS.DEVICE_UPGRADE_KNOWN_ERROR
     },
 
     [CysyncError.DEVICE_NOT_READY]: {
@@ -399,5 +419,6 @@ export {
   handleErrors,
   handleDeviceErrors,
   handleAxiosErrors,
-  handleWalletErrors
+  handleWalletErrors,
+  handleFirmwareUpdateErrors
 };

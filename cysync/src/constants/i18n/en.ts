@@ -88,6 +88,8 @@ const en: I18nStrings = {
       'Error in downloading the firmware. Please check your internet connection and try again.',
     DEVICE_UPGRADE_CONNECTION_FAILED_IN_AUTH:
       'Error connecting to the device. Please reconnect the device and try again.',
+    DEVICE_UPGRADE_KNOWN_ERROR:
+      'An internal error occured. Please report it to Cypherock immediately.',
     DEVICE_UPGRADE_UNKNOWN_ERROR: `Some internal error occured. Please disconnect and then reconnect the device and retry upgrading the device.`,
 
     LOG_FETCHER_REJECTED:
