@@ -51,7 +51,6 @@ const handleFirmwareUpdateErrors = (cyError: CyError, err: any) => {
   if (
     [
       DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED,
-      DeviceErrorType.WRONG_FIRMWARE_VERSION,
       DeviceErrorType.WRONG_HARDWARE_VERSION,
       DeviceErrorType.WRONG_MAGIC_NUMBER,
       DeviceErrorType.SIGNATURE_NOT_VERIFIED,
@@ -379,9 +378,6 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     [DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED]: {
       message: 'Firmware Size Limit Exceed'
-    },
-    [DeviceErrorType.WRONG_FIRMWARE_VERSION]: {
-      message: 'Wrong Firmware version'
     },
     [DeviceErrorType.WRONG_HARDWARE_VERSION]: {
       message: 'Wrong Hardware version'
