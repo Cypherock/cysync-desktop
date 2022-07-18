@@ -289,6 +289,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   };
 
   const cancelDeviceUpgrade = async (connection: DeviceConnection) => {
+    logger.info('DeviceUpgrade: In cancel Upgrade');
     alreadyCancelled.current = true;
     deviceUpdater
       .cancel(connection)
@@ -570,8 +571,9 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         setErrorResolutionState(
           DeviceUpgradeErrorResolutionState.DEVICE_AUTH_REQUIRED
         );
-        const cyError = new CyError(CysyncError.DEVICE_AUTH_FAILED);
-        setErrorObj(handleErrors(errorObj, cyError, flowName));
+        // if()
+        // const cyError = new CyError(CysyncError.DEVICE_AUTH_FAILED);
+        // setErrorObj(handleErrors(errorObj, cyError, flowName));
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
       } else {

@@ -71,6 +71,10 @@ class CyError extends DisplayError {
     this.childErrors.push(dispError);
     return dispError;
   }
+
+  public compare(err: CyError) {
+    return this.getCode() === err.getCode();
+  }
 }
 
 export { DisplayError, CyError };

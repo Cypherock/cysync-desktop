@@ -9,16 +9,21 @@ import logger from '../utils/logger';
 import { CyError } from './error';
 import { CodeToErrorMap, CysyncError } from './types';
 
+const isUnknownError = (code: string) => {
+  return /^([A-Z]{2}_[A-Z]{3,4}_55[0-9]{2})$/.test(code);
+};
+
 const handleErrors = (
   currError: CyError,
   err: CyError,
   flow?: string,
   metadata?: any
-) => {
+): CyError => {
   //TODO:  handle cascade effect properly
   if (currError.isSet) {
+    if (isUnknownError(err.getCode()) || currError.compare(err))
+      return currError;
     logger.info(currError);
-    // return;
   }
 
   // log the original error
