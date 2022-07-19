@@ -400,6 +400,18 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [DeviceErrorType.WRITE_REJECTED]: {
       message: 'The write packet operation was rejected by the device'
     },
+    [DeviceErrorType.FLASH_WRITE_ERROR]: {
+      message: 'Flash Write Error'
+    },
+    [DeviceErrorType.FLASH_CRC_MISMATCH]: {
+      message: 'Flash CRC Mismatch'
+    },
+    [DeviceErrorType.FLASH_TIMEOUT_ERROR]: {
+      message: 'Flash Timeout Error'
+    },
+    [DeviceErrorType.FLASH_NACK]: {
+      message: 'Flash Negative Acknowledgement'
+    },
     [DeviceErrorType.EXECUTING_OTHER_COMMAND]: {
       message: 'The device is executing some other command'
     },
