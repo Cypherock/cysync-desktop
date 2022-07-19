@@ -273,13 +273,13 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       if (coin.parentCoin) {
         const parentCoinData = COINS[coin.parentCoin];
-        if (!parentCoinData || !(parentCoinData instanceof EthCoinData)) {
+        if (!parentCoinData) {
           logger.warn('Invalid parentCoin in add price sync item', {
             coinType: coin.parentCoin
           });
           return;
         }
-        coinData = parentCoinData.erc20TokensList[coin.slug];
+        coinData = parentCoinData.tokenList[coin.slug];
       } else {
         coinData = COINS[coinName];
       }
@@ -337,13 +337,13 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       if (coin.parentCoin) {
         const parentCoinData = COINS[coin.parentCoin];
-        if (!parentCoinData || !(parentCoinData instanceof EthCoinData)) {
+        if (!parentCoinData) {
           logger.warn('Invalid parentCoin in add latest price sync item', {
             coinType: coin.parentCoin
           });
           return;
         }
-        coinData = parentCoinData.erc20TokensList[coin.slug];
+        coinData = parentCoinData.tokenList[coin.slug];
       } else {
         coinData = COINS[coinName];
       }

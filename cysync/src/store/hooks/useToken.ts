@@ -1,4 +1,4 @@
-import { COINS, EthCoinData } from '@cypherock/communication';
+import { COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
@@ -63,11 +63,11 @@ export const useToken: UseToken = () => {
     for (const token of tokens) {
       const coin = COINS[token.coin.toLowerCase()];
 
-      if (!coin || !(coin instanceof EthCoinData)) {
+      if (!coin) {
         throw new Error(`Cannot find parentCoin: ${coin}`);
       }
 
-      const coinObj = coin.erc20TokensList[token.slug.toLowerCase()];
+      const coinObj = coin.tokenList[token.slug.toLowerCase()];
       if (!coinObj) {
         throw new Error(`Cannot find coinType: ${token.slug}`);
       }
@@ -128,22 +128,22 @@ export const useToken: UseToken = () => {
           [...tokens].sort((a, b) => {
             const coinA = COINS[a.coin.toLowerCase()];
 
-            if (!coinA || !(coinA instanceof EthCoinData)) {
+            if (!coinA) {
               throw new Error(`Cannot find parentCoin: ${coinA}`);
             }
 
-            const coinObjA = coinA.erc20TokensList[a.slug.toLowerCase()];
+            const coinObjA = coinA.tokenList[a.slug.toLowerCase()];
             if (!coinObjA) {
               throw new Error(`Cannot find coinType: ${a.slug}`);
             }
 
             const coinB = COINS[b.coin.toLowerCase()];
 
-            if (!coinB || !(coinB instanceof EthCoinData)) {
+            if (!coinB) {
               throw new Error(`Cannot find parentCoin: ${coinB}`);
             }
 
-            const coinObjB = coinB.erc20TokensList[a.slug.toLowerCase()];
+            const coinObjB = coinB.tokenList[a.slug.toLowerCase()];
             if (!coinObjB) {
               throw new Error(`Cannot find coinType: ${b.slug}`);
             }
@@ -159,22 +159,22 @@ export const useToken: UseToken = () => {
           [...tokens].sort((a, b) => {
             const coinA = COINS[a.coin.toLowerCase()];
 
-            if (!coinA || !(coinA instanceof EthCoinData)) {
+            if (!coinA) {
               throw new Error(`Cannot find parentCoin: ${coinA}`);
             }
 
-            const coinObjA = coinA.erc20TokensList[a.slug.toLowerCase()];
+            const coinObjA = coinA.tokenList[a.slug.toLowerCase()];
             if (!coinObjA) {
               throw new Error(`Cannot find coinType: ${a.slug}`);
             }
 
             const coinB = COINS[b.coin.toLowerCase()];
 
-            if (!coinB || !(coinB instanceof EthCoinData)) {
+            if (!coinB) {
               throw new Error(`Cannot find parentCoin: ${coinB}`);
             }
 
-            const coinObjB = coinB.erc20TokensList[a.slug.toLowerCase()];
+            const coinObjB = coinB.tokenList[a.slug.toLowerCase()];
             if (!coinObjB) {
               throw new Error(`Cannot find coinType: ${b.slug}`);
             }

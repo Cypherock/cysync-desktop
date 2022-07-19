@@ -265,7 +265,7 @@ export const processResponses = async (
       // If it is a failed transaction, then check if it is a token transaction.
       if (txn.status === 2) {
         let amount = '0';
-        const token = Object.values(coinData.erc20TokensList).find(
+        const token = Object.values(coinData.tokenList).find(
           t => t.address === ele.to.toLowerCase()
         );
 
@@ -305,7 +305,7 @@ export const processResponses = async (
     }
 
     for (const ele of erc20history) {
-      const tokenObj = coinData.erc20TokensList[ele.tokenSymbol.toLowerCase()];
+      const tokenObj = coinData.tokenList[ele.tokenSymbol.toLowerCase()];
       const fromAddr = formatEthAddress(ele.from);
       const toAddr = formatEthAddress(ele.to);
 

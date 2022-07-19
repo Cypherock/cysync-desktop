@@ -230,7 +230,7 @@ export const insertFromFullTxn = async (transaction: {
         return;
       }
 
-      const tokenData = coin.erc20TokensList[token];
+      const tokenData = coin.tokenList[token];
       if (!tokenData || tokenData.group !== CoinGroup.ERC20Tokens) {
         logger.warn('Invalid tokenAbbr in transaction', { token });
         return;
@@ -504,7 +504,7 @@ export const insertFromBlockbookTxn = async (transaction: {
         return;
       }
 
-      const tokenData = coin.erc20TokensList[token];
+      const tokenData = coin.tokenList[token];
       if (!tokenData || tokenData.group !== CoinGroup.ERC20Tokens) {
         logger.warn('Invalid tokenAbbr in transaction', { token });
         return;

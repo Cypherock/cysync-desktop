@@ -1,4 +1,4 @@
-import { COINS, EthCoinData } from '@cypherock/communication';
+import { COINS } from '@cypherock/communication';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
@@ -56,11 +56,10 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
     name = coin.name;
 
     if (token) {
-      if (!(coin instanceof EthCoinData)) {
+      if (!coin) {
         throw new Error('Invalid coinType: ' + coinDetails.slug);
       }
-      const tokenData = (COINS[coin.abbr.toLowerCase()] as EthCoinData)
-        .erc20TokensList[token.slug];
+      const tokenData = COINS[coin.abbr.toLowerCase()].tokenList[token.slug];
       if (!tokenData) {
         throw new Error('Invalid coinType: ' + coinDetails.slug);
       }

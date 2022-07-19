@@ -15,11 +15,11 @@ export const getRequestsMetadata = (
 ): IRequestMetadata[] => {
   if (item.parentCoin) {
     const parentCoin = COINS[item.parentCoin];
-    if (!(parentCoin instanceof EthCoinData)) {
+    if (!parentCoin || !(parentCoin instanceof EthCoinData)) {
       throw new Error('Unexpected parentCoin: ' + item.parentCoin);
     }
 
-    const token = parentCoin.erc20TokensList[item.coinType];
+    const token = parentCoin.tokenList[item.coinType];
 
     if (!token) {
       throw new Error('Invalid coin in balance sync item: ' + item.coinType);
@@ -78,11 +78,11 @@ export const processResponses = async (
   }
   if (item.parentCoin) {
     const parentCoin = COINS[item.parentCoin];
-    if (!(parentCoin instanceof EthCoinData)) {
+    if (!parentCoin) {
       throw new Error('Unexpected parentCoin: ' + item.parentCoin);
     }
 
-    const token = parentCoin.erc20TokensList[item.coinType];
+    const token = parentCoin.tokenList[item.coinType];
 
     if (!token) {
       throw new Error('Invalid coin in balance sync item: ' + item.coinType);

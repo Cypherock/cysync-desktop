@@ -1,4 +1,4 @@
-import { COINS, EthCoinData } from '@cypherock/communication';
+import { COINS } from '@cypherock/communication';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -88,7 +88,7 @@ const OneCoin: React.FC<OneCoinProps> = props => {
     if (!parent) {
       throw new Error(`Cannot find coinType: ${coinParent}`);
     }
-    coin = (parent as EthCoinData).erc20TokensList[coinInitial];
+    coin = parent.tokenList[coinInitial];
   } else coin = COINS[coinInitial];
 
   if (!coin) {

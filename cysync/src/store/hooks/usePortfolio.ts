@@ -1,4 +1,4 @@
-import { CoinGroup, COINS, EthCoinData } from '@cypherock/communication';
+import { CoinGroup, COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
@@ -126,9 +126,9 @@ export const usePortfolio: UsePortfolio = () => {
   ) => {
     let coinData;
     if (parent) {
-      const parentData = COINS[parent] as EthCoinData;
+      const parentData = COINS[parent];
       if (!parentData) throw new Error(`Parent coin ${parent} not found`);
-      coinData = parentData.erc20TokensList[coinType];
+      coinData = parentData.tokenList[coinType];
     } else coinData = COINS[coinType];
     if (!coinData) {
       throw new Error(`Cannot find coinType: ${coinType}`);
@@ -328,7 +328,7 @@ export const usePortfolio: UsePortfolio = () => {
       let coin;
       if (item.parent) {
         const parent = COINS[item.parent];
-        coin = (parent as EthCoinData).erc20TokensList[item.slug];
+        coin = parent.tokenList[item.slug];
       } else {
         coin = COINS[item.slug];
       }
@@ -399,10 +399,9 @@ export const usePortfolio: UsePortfolio = () => {
         if (item.parent) {
           const parent = COINS[item.parent];
           if (!parent) {
-            throw new Error(`Cannot find coinType: ${item.parent}`);
+            throw new Error(`Cannot find parent coinType: ${item.parent}`);
           }
-
-          coinData = (parent as EthCoinData).erc20TokensList[item.slug];
+          coinData = parent.tokenList[item.slug];
         } else {
           coinData = COINS[item.slug];
         }

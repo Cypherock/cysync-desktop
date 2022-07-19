@@ -1,4 +1,4 @@
-import { CoinGroup, COINS, EthCoinData } from '@cypherock/communication';
+import { CoinGroup, COINS } from '@cypherock/communication';
 
 import logger from '../../../utils/logger';
 import { coinDb, tokenDb } from '../databaseInit';
@@ -10,11 +10,11 @@ export const getLatestPriceForCoin = async (
   let coinData: any = COINS[coin];
   if (parentCoin) {
     const parentCoinData = COINS[parentCoin];
-    if (!parentCoinData || !(parentCoinData instanceof EthCoinData)) {
+    if (!parentCoinData) {
       throw new Error('Invalid parentCoin: ' + parentCoin);
     }
 
-    const token = parentCoinData.erc20TokensList[coin];
+    const token = parentCoinData.tokenList[coin];
     if (!token) {
       throw new Error('Invalid token: ' + coin);
     }
