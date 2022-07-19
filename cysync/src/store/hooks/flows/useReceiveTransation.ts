@@ -205,7 +205,10 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           logger.verbose('ReceiveAddress: Confirmed on device', { coinType });
           setCoinsConfirmed(true);
         } else {
-          const cyError = new CyError(CysyncError.ADD_COIN_REJECTED, coin.name);
+          const cyError = new CyError(
+            CysyncError.RECEIVE_TXN_REJECTED,
+            coin.name
+          );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });

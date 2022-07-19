@@ -16,7 +16,7 @@ const handleErrors = (
   metadata?: any
 ) => {
   //TODO:  handle cascade effect properly
-  if (currError.isSet) {
+  if (currError?.isSet) {
     logger.info(currError);
     // return;
   }
@@ -255,6 +255,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     [CysyncError.SEND_TXN_UNKNOWN_ERROR]: {
       message: langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
+    },
+    [CysyncError.RECEIVE_TXN_REJECTED]: {
+      message: (coin: string) => langStrings.ERRORS.RECEIVE_TXN_REJECTED(coin)
     },
     [CysyncError.RECEIVE_TXN_XPUB_MISSING]: {
       message: langStrings.ERRORS.RECEIVE_TXN_XPUB_MISSING
