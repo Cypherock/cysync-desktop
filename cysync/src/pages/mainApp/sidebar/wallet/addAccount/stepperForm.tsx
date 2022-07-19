@@ -34,8 +34,8 @@ import {
 import logger from '../../../../../utils/logger';
 
 import {
-  BatchRecipientData,
-  DuplicateBatchAddresses
+  DuplicateBatchAddresses,
+  RecipientData
 } from './formStepComponents/StepComponentProps';
 
 const QontoConnector = withStyles((theme: Theme) =>
@@ -226,9 +226,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [maxSend, setMaxSend] = useState(false);
 
   // State for all the data related to the Recipient
-  const [batchRecipientData, addbatchRecipientData] = React.useState<
-    BatchRecipientData[]
-  >([
+  const [recipientData, addrecipientData] = React.useState<RecipientData[]>([
     { id: 1, recipient: ' ', amount: '', errorRecipient: '', errorAmount: '' }
   ]);
 
@@ -252,7 +250,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       setTotal(new BigNumber(sendTransaction.sendMaxAmount));
     } else {
       let tempTotal = new BigNumber(0);
-      batchRecipientData.forEach(recipient => {
+      recipientData.forEach(recipient => {
         if (recipient.amount) {
           tempTotal = tempTotal.plus(new BigNumber(recipient.amount));
         }
@@ -263,7 +261,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   useEffect(() => {
     handleTotal();
-  }, [sendTransaction.sendMaxAmount, batchRecipientData]);
+  }, [sendTransaction.sendMaxAmount, recipientData]);
 
   const triggerCalcFee = () => {
     const coinAbbr = token ? token.slug : coinDetails.slug;
@@ -277,7 +275,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       coinDetails.xpub,
       coinDetails.zpub,
       coinDetails.slug,
-      changeFormatOfOutputList(batchRecipientData, coinDetails.slug, token),
+      changeFormatOfOutputList(recipientData, coinDetails.slug, token),
       parseInt(transactionFee, 10) || 0,
       maxSend,
       {
@@ -297,8 +295,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       !(
         estimateGasLimit &&
         coin instanceof EthCoinData &&
-        batchRecipientData.length > 0 &&
-        batchRecipientData[0].recipient.length === 42
+        recipientData.length > 0 &&
+        recipientData[0].recipient.length === 42
       )
     ) {
       return;
@@ -312,17 +310,14 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     setIsButtonLoading(true);
     const wallet = new EthereumWallet(coinDetails.xpub, coin);
     const fromAddress = wallet.address;
-    const toAddress = batchRecipientData[0].recipient.trim();
+    const toAddress = recipientData[0].recipient.trim();
     const { network } = coin;
     const tokenData = ERC20TOKENS[token.slug];
     const contractAddress = tokenData.address;
     // According to our research, amount does not matter in estimating gas limit, small or large,
     let amount = 1;
-    if (
-      batchRecipientData[0].amount &&
-      Number(batchRecipientData[0].amount) > 0
-    ) {
-      amount = Number(batchRecipientData[0].amount) * tokenData.multiplier;
+    if (recipientData[0].amount && Number(recipientData[0].amount) > 0) {
+      amount = Number(recipientData[0].amount) * tokenData.multiplier;
     }
 
     const estimatedLimit = await sendTransaction.handleEstimateGasLimit(
@@ -342,14 +337,14 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const debouncedCaclGasLimit = useDebouncedFunction(triggerCalcGasLimit, 500);
 
   const handleMaxSend = (isMaxSend: boolean) => {
-    const newBatchRecipientData = batchRecipientData.map(data => {
+    const newRecipientData = recipientData.map(data => {
       return {
         ...data,
         amount: isMaxSend ? undefined : ''
       };
     });
 
-    addbatchRecipientData([...newBatchRecipientData]);
+    addrecipientData([...newRecipientData]);
   };
 
   useEffect(() => {
@@ -372,21 +367,21 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     } else {
       setButtonDisabled(false);
     }
-  }, [transactionFee, batchRecipientData]);
+  }, [transactionFee, recipientData]);
 
   useEffect(() => {
     debouncedCaclGasLimit();
-  }, [batchRecipientData]);
+  }, [recipientData]);
 
   useEffect(() => {
     handleMaxSend(maxSend);
   }, [maxSend]);
 
   const addBatchTransaction = () => {
-    const lastElement = batchRecipientData[batchRecipientData.length - 1];
+    const lastElement = recipientData[recipientData.length - 1];
     const lastElementId = lastElement.id;
-    addbatchRecipientData([
-      ...batchRecipientData,
+    addrecipientData([
+      ...recipientData,
       {
         id: lastElementId + 1,
         recipient: '',
@@ -397,7 +392,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     ]);
   };
 
-  const updateDuplicateAddresses = (batchRecipients: BatchRecipientData[]) => {
+  const updateDuplicateAddresses = (batchRecipients: RecipientData[]) => {
     const temp: DuplicateBatchAddresses = {};
     const dupIds: string[] = [];
     batchRecipients.forEach(data => {
@@ -425,12 +420,10 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   const handleDelete = (e: any) => {
     const { id } = e;
-    const newState = batchRecipientData.filter(
-      data => data.id !== parseInt(id, 10)
-    );
+    const newState = recipientData.filter(data => data.id !== parseInt(id, 10));
     if (newState.length > 0) {
       updateDuplicateAddresses(newState);
-      addbatchRecipientData([...newState]);
+      addrecipientData([...newState]);
     } else {
       logger.warning('Must have at-least one Recipient');
     }
@@ -438,7 +431,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   const handleInputChange = (e: any) => {
     e.persist();
-    const copyStateBatchRecipientData = batchRecipientData.map(data => {
+    const copyStateRecipientData = recipientData.map(data => {
       const dataCopy = data;
       if (dataCopy.id === parseInt(e.target.id, 10)) {
         if (e.target.name === 'reciever_addr') {
@@ -456,32 +449,32 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     });
 
     if (e.target.name === 'reciever_addr') {
-      updateDuplicateAddresses(copyStateBatchRecipientData);
+      updateDuplicateAddresses(copyStateRecipientData);
     }
 
-    addbatchRecipientData([...copyStateBatchRecipientData]);
+    addrecipientData([...copyStateRecipientData]);
   };
 
   const handleCopyFromClipboard = (id: string) => {
     const clipBoardText = clipboard.readText().trim();
 
-    const copyStateBatchRecipientData = batchRecipientData.map(data => {
+    const copyStateRecipientData = recipientData.map(data => {
       const dataCopy = data;
       if (dataCopy.id === parseInt(id, 10)) {
         dataCopy.recipient = clipBoardText;
       }
       return dataCopy;
     });
-    addbatchRecipientData([...copyStateBatchRecipientData]);
+    addrecipientData([...copyStateRecipientData]);
   };
 
   const verifyRecipientAmount = () => {
-    const copyBatchRecipientData: BatchRecipientData[] = JSON.parse(
-      JSON.stringify(batchRecipientData)
+    const copyRecipientData: RecipientData[] = JSON.parse(
+      JSON.stringify(recipientData)
     );
     let isValid = true;
     const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
-    copyBatchRecipientData.forEach((elem, index) => {
+    copyRecipientData.forEach((elem, index) => {
       const amount = new BigNumber(
         elem.amount === undefined ? '' : elem.amount
       );
@@ -493,10 +486,10 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
           isValid = false;
         }
       }
-      copyBatchRecipientData[index].errorAmount = error;
+      copyRecipientData[index].errorAmount = error;
     });
 
-    addbatchRecipientData(copyBatchRecipientData);
+    addrecipientData(copyRecipientData);
 
     return isValid;
   };
@@ -507,7 +500,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     error: boolean,
     errorString: string
   ) => {
-    const copyBatchRecipientData = batchRecipientData.map(recipient => {
+    const copyRecipientData = recipientData.map(recipient => {
       const copyRecipient = recipient;
       if (
         copyRecipient.id === id &&
@@ -526,7 +519,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       }
       return copyRecipient;
     });
-    addbatchRecipientData([...copyBatchRecipientData]);
+    addrecipientData([...copyRecipientData]);
   };
 
   const handleFeeType = () => {
@@ -535,7 +528,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   const changeButton = (currentButton: number) => {
     if (currentButton === 0) {
-      addbatchRecipientData(batchRecipientData.filter((_elem, i) => i === 0));
+      addrecipientData(recipientData.filter((_elem, i) => i === 0));
     }
     setButton(currentButton);
   };
@@ -601,7 +594,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
             maximum,
             activeButton,
             feeType,
-            batchRecipientData,
+            recipientData,
             total,
             transactionFee,
             addBatchTransaction,

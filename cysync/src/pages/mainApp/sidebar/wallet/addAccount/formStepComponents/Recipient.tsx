@@ -16,6 +16,7 @@ import React from 'react';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import CustomIconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
+import Dustbin from '../../../../../../designSystem/iconGroups/dustbin';
 import { useDebouncedFunction } from '../../../../../../store/hooks';
 import {
   changeFormatOfOutputList,
@@ -32,8 +33,8 @@ import {
 import Input from '../formComponents/Input';
 
 import {
-  BatchRecipientData,
   BatchRecipientPropType,
+  RecipientData,
   StepComponentProps,
   StepComponentPropTypes
 } from './StepComponentProps';
@@ -214,7 +215,7 @@ type BatchRecipientProps = {
   handleDelete: (e: any) => void;
   handleChange: (e: any) => void;
   id: string | undefined;
-  recipient: BatchRecipientData;
+  recipient: RecipientData;
   coinAbbr: string;
   handleCopyFromClipboard: (id: string) => void;
   index: number;
@@ -281,30 +282,7 @@ const BatchRecipient: React.FC<BatchRecipientProps> = props => {
             }}
             title="Delete Recipient"
           >
-            <Icon
-              size={24}
-              viewBox="0 0 20 24"
-              iconGroup={
-                <g>
-                  <path
-                    d="M12.9982 9.15283C12.7047 9.15283 12.4668 9.39071 12.4668 9.68423V19.7276C12.4668 20.0209 12.7047 20.2589 12.9982 20.2589C13.2917 20.2589 13.5296 20.0209 13.5296 19.7276V9.68423C13.5296 9.39071 13.2917 9.15283 12.9982 9.15283Z"
-                    fill="#DF2D2D"
-                  />
-                  <path
-                    d="M6.72768 9.15283C6.43417 9.15283 6.19629 9.39071 6.19629 9.68423V19.7276C6.19629 20.0209 6.43417 20.2589 6.72768 20.2589C7.02119 20.2589 7.25908 20.0209 7.25908 19.7276V9.68423C7.25908 9.39071 7.02119 9.15283 6.72768 9.15283Z"
-                    fill="#DF2D2D"
-                  />
-                  <path
-                    d="M2.15768 7.68779V20.7802C2.15768 21.554 2.44143 22.2807 2.93712 22.8021C3.43053 23.325 4.11718 23.6219 4.83581 23.6231H14.8899C15.6087 23.6219 16.2954 23.325 16.7886 22.8021C17.2843 22.2807 17.568 21.554 17.568 20.7802V7.68779C18.5534 7.42625 19.1919 6.47431 19.0601 5.46321C18.9281 4.45233 18.0668 3.69613 17.0472 3.69592H14.3265V3.03168C14.3297 2.4731 14.1088 1.93673 13.7134 1.54213C13.3179 1.14773 12.7807 0.92812 12.2222 0.932687H7.50356C6.94498 0.92812 6.40777 1.14773 6.01234 1.54213C5.61691 1.93673 5.39605 2.4731 5.39917 3.03168V3.69592H2.67848C1.65887 3.69613 0.797646 4.45233 0.665628 5.46321C0.533818 6.47431 1.17232 7.42625 2.15768 7.68779ZM14.8899 22.5603H4.83581C3.92725 22.5603 3.22046 21.7798 3.22046 20.7802V7.7345H16.5053V20.7802C16.5053 21.7798 15.7985 22.5603 14.8899 22.5603ZM6.46195 3.03168C6.45842 2.75499 6.56719 2.48867 6.76356 2.29334C6.95971 2.09801 7.22666 1.9907 7.50356 1.99547H12.2222C12.4991 1.9907 12.766 2.09801 12.9622 2.29334C13.1585 2.48846 13.2673 2.75499 13.2638 3.03168V3.69592H6.46195V3.03168ZM2.67848 4.75871H17.0472C17.5755 4.75871 18.0037 5.18693 18.0037 5.71521C18.0037 6.24349 17.5755 6.67171 17.0472 6.67171H2.67848C2.1502 6.67171 1.72198 6.24349 1.72198 5.71521C1.72198 5.18693 2.1502 4.75871 2.67848 4.75871Z"
-                    fill="#DF2D2D"
-                  />
-                  <path
-                    d="M9.8644 9.15283C9.57089 9.15283 9.33301 9.39071 9.33301 9.68423V19.7276C9.33301 20.0209 9.57089 20.2589 9.8644 20.2589C10.1579 20.2589 10.3958 20.0209 10.3958 19.7276V9.68423C10.3958 9.39071 10.1579 9.15283 9.8644 9.15283Z"
-                    fill="#DF2D2D"
-                  />
-                </g>
-              }
-            />
+            <Icon size={24} viewBox="0 0 20 24" iconGroup={<Dustbin />} />
           </CustomIconButton>
         </Grid>
       )}
@@ -325,7 +303,7 @@ BatchRecipient.propTypes = {
 
 const Recipient: React.FC<StepComponentProps> = props => {
   const {
-    batchRecipientData,
+    recipientData,
     handleVerificationErrors,
     transactionFee,
     maxSend,
@@ -373,7 +351,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     let isValid = true;
     validatedAddresses = [];
 
-    for (const recipient of batchRecipientData) {
+    for (const recipient of recipientData) {
       const { recipient: recipient1, id } = recipient;
       let { slug } = coinDetails;
       if (isEthereum) {
@@ -443,10 +421,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
         customAccount: customAccount?.name,
-        newAccountId: batchRecipientData[0].recipient,
+        newAccountId: recipientData[0].recipient,
         coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
-          batchRecipientData,
+          recipientData,
           coinDetails.slug,
           token
         ),
@@ -474,11 +452,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
             handleInputChange(e);
             debouncedHandleCheckAddresses();
           }}
-          value={batchRecipientData[0].recipient}
-          error={batchRecipientData[0].errorRecipient.length !== 0}
+          value={recipientData[0].recipient}
+          error={recipientData[0].errorRecipient.length !== 0}
           helperText={
-            batchRecipientData[0].errorRecipient.length !== 0
-              ? batchRecipientData[0].errorRecipient
+            recipientData[0].errorRecipient.length !== 0
+              ? recipientData[0].errorRecipient
               : undefined
           }
           isClipboardPresent

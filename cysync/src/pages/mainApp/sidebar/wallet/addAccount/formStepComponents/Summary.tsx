@@ -87,7 +87,7 @@ const Root = styled('div')(({ theme }) => ({
 const Summary: React.FC<StepComponentProps> = ({
   handleNext,
   total,
-  batchRecipientData,
+  recipientData,
   maxSend,
   handleClose,
   activeButton
@@ -214,7 +214,7 @@ const Summary: React.FC<StepComponentProps> = ({
         {activeButton === 0 && (
           <LabelText
             label="Receiver's Address"
-            text={batchRecipientData[0].recipient}
+            text={recipientData[0].recipient}
             verified
           />
         )}
@@ -224,7 +224,7 @@ const Summary: React.FC<StepComponentProps> = ({
             text={
               !maxSend
                 ? `${0.1} ~( $${formatDisplayAmount(
-                    parseFloat(batchRecipientData[0].amount || '0') *
+                    parseFloat(recipientData[0].amount || '0') *
                       parseFloat(coinPrice),
                     2,
                     true
