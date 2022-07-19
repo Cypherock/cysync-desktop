@@ -571,9 +571,6 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
         setErrorResolutionState(
           DeviceUpgradeErrorResolutionState.DEVICE_AUTH_REQUIRED
         );
-        // if()
-        // const cyError = new CyError(CysyncError.DEVICE_AUTH_FAILED);
-        // setErrorObj(handleErrors(errorObj, cyError, flowName));
         setIsCompleted(-1);
         setIsDeviceUpdating(false);
       } else {
