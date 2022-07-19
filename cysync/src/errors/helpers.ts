@@ -80,8 +80,8 @@ const handleWalletErrors = (
     coinType: string;
   }
 ) => {
-  if (error.errorType === WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE)
-    cyError.setError(WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE);
+  if (error.errorType === WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE)
+    cyError.setError(WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE);
   else if (error.errorType === WalletErrorType.INSUFFICIENT_FUNDS)
     cyError.setError(WalletErrorType.INSUFFICIENT_FUNDS, metadata.coinType);
 };
@@ -385,8 +385,8 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [DeviceErrorType.EXECUTING_OTHER_COMMAND]: {
       message: 'The device is executing some other command'
     },
-    [WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE]: {
-      message: langStrings.ERRORS.SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE
+    [WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE]: {
+      message: langStrings.ERRORS.SEND_TXN_BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE
     },
     [WalletErrorType.INSUFFICIENT_FUNDS]: {
       message: (coin: string) =>
