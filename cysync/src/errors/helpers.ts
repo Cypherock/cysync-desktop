@@ -16,7 +16,7 @@ const handleErrors = (
   metadata?: any
 ) => {
   //TODO:  handle cascade effect properly
-  if (currError.isSet) {
+  if (currError?.isSet) {
     logger.info(currError);
     // return;
   }
