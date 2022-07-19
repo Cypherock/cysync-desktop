@@ -5,10 +5,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import {
+  useConnection,
   useCurrentCoin,
   useReceiveTransactionContext,
   useSnackbar,
@@ -99,12 +100,19 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const snackbar = useSnackbar();
 
   const { receiveTransaction } = useReceiveTransactionContext();
+  const { deviceConnection } = useConnection();
 
   const { coinDetails } = useCurrentCoin();
 
   const { token } = useTokenContext();
 
   const coinAbbr = token ? token.slug : coinDetails.slug;
+
+  useEffect(() => {
+    if (!deviceConnection) {
+      receiveTransaction.getUnverifiedReceiveAddress();
+    }
+  }, []);
 
   if (receiveTransaction.errorObj.isSet) {
     return (
@@ -117,7 +125,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
     );
   }
 
-  if (receiveTransaction.coinAddress)
+  if (receiveTransaction.receiveAddress)
     return (
       <Root className={classes.root}>
         {coinAbbr.toUpperCase() === 'ETHR' && (
@@ -129,14 +137,14 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
         )}
         <div className={classes.addressContainer}>
           <Typography color="secondary" variant="h4">
-            {receiveTransaction.coinAddress}
+            {receiveTransaction.receiveAddress}
           </Typography>
           <Button
             color="secondary"
             variant="outlined"
             className={classes.copyButton}
             onClick={() => {
-              navigator.clipboard.writeText(receiveTransaction.coinAddress);
+              navigator.clipboard.writeText(receiveTransaction.receiveAddress);
               snackbar.showSnackbar('Copied to clipboard.', 'success');
             }}
           >
