@@ -13,7 +13,7 @@ const handleErrors = (
   currError: CyError,
   err: CyError,
   flow?: string,
-  metadata?: any
+  metadata?: Record<string, any>
 ) => {
   //TODO:  handle cascade effect properly
   if (currError.isSet) {
@@ -32,7 +32,13 @@ const handleErrors = (
   // logging the metadata
   if (metadata) {
     logger.info('Metadata for the error');
-    logger.info(metadata);
+    if (typeof metadata === 'object') {
+      Object.keys(metadata).forEach(key => {
+        logger.info(`Metadata key: ${key}`, metadata[key]);
+      });
+    } else {
+      logger.info(metadata);
+    }
   }
 
   // report to analytics
