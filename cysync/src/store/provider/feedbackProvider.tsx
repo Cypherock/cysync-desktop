@@ -180,7 +180,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     deviceSerial,
     deviceConnectionState,
     beforeFlowStart,
-    setIsInFlow
+    setIsInFlow,
+    isInFlow
   } = useConnection();
   const [feedbackInput, setFeedbackInput] =
     React.useState<FeedbackState>(initFeedbackState);
@@ -412,6 +413,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const isDeviceConnected = () => {
     return (
+      !isInFlow &&
       deviceConnection &&
       [
         DeviceConnectionState.VERIFIED,
@@ -474,6 +476,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   };
 
   const getDeviceStateErrorMsg = () => {
+    if (isInFlow) return 'Device is busy performing an operation';
     const defaultText = 'Looks like the device is not configured.';
     switch (deviceConnectionState) {
       case DeviceConnectionState.NOT_CONNECTED:

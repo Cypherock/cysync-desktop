@@ -8,6 +8,7 @@ import {
   handleDeviceErrors,
   handleErrors
 } from '../../../errors';
+import { useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
@@ -40,6 +41,8 @@ export const useLogFetcher: UseLogFetcher = () => {
   const [logFetched, setLogFetched] = useState<-1 | 0 | 1 | 2>(0);
   const logFetcher = new LogsFetcher();
 
+  const { beforeFlowStart } = useConnection();
+
   // To call resetHooks outside of this function
   const resetHooks = () => {
     setLogFetched(0);
@@ -57,6 +60,7 @@ export const useLogFetcher: UseLogFetcher = () => {
     resetHooks();
 
     logger.info('LogFetcher: initiated');
+    if (!beforeFlowStart()) return;
 
     setLogFetched(0);
     setRequestStatus(1);
