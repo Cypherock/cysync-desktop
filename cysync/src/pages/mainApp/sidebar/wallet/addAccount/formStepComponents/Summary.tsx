@@ -88,7 +88,6 @@ const Summary: React.FC<StepComponentProps> = ({
   handleNext,
   total,
   recipientData,
-  maxSend,
   handleClose,
   activeButton
 }) => {
@@ -106,8 +105,6 @@ const Summary: React.FC<StepComponentProps> = ({
   const { connected } = useNetwork();
 
   const coinAbbr = token ? token.slug : coinDetails.slug;
-
-  const coinPrice = token ? token.displayPrice : coinDetails.displayPrice;
 
   const { sendTransaction } = useSendTransactionContext();
 
@@ -213,28 +210,8 @@ const Summary: React.FC<StepComponentProps> = ({
         )}
         {activeButton === 0 && (
           <LabelText
-            label="Receiver's Address"
+            label="New Account Id"
             text={recipientData[0].recipient}
-            verified
-          />
-        )}
-        {activeButton === 0 && (
-          <LabelText
-            label={`Amount ${coinAbbr.toUpperCase()}`}
-            text={
-              !maxSend
-                ? `${0.1} ~( $${formatDisplayAmount(
-                    parseFloat(recipientData[0].amount || '0') *
-                      parseFloat(coinPrice),
-                    2,
-                    true
-                  )}) `
-                : `${sendTransaction.sendMaxAmount} ~( $${formatDisplayAmount(
-                    sendTransaction.sendMaxAmount * parseFloat(coinPrice),
-                    2,
-                    true
-                  )}) `
-            }
             verified
           />
         )}
