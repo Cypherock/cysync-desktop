@@ -94,7 +94,6 @@ const handleWalletErrors = (
 
 export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
   return {
-    0: { message: '' }, // property 0 is required for compilation
     [DeviceErrorType.CONNECTION_CLOSED]: {
       parent: DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW,
       message: 'Device connection closed'
@@ -398,6 +397,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     [FlowErrorType.UNKNOWN_FLOW_ERROR]: {
       message: 'Unknown Flow error at Protocols'
+    },
+    [WalletErrorType.INACCESSIBLE_ACCOUNT]: {
+      message: 'Acccount is not accessible with wallet'
     }
   };
 };
