@@ -55,9 +55,9 @@ export interface UseReceiveTransactionValues {
   resetHooks: () => void;
   cancelReceiveTxn: (connection: DeviceConnection) => void;
   coinsConfirmed: boolean;
-  coinAddress: string;
   imageData: string;
   QRError: boolean;
+  getUnverifiedReceiveAddress: () => void;
 }
 
 export type UseReceiveTransaction = () => UseReceiveTransactionValues;
@@ -73,8 +73,6 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [cardTapped, setCardTapped] = useState(false);
   const [passphraseEntered, setPassphraseEntered] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
-
-  const [coinAddress, setCoinAddress] = useState(receiveAddress);
 
   const [imageData, setImageData] = useState('');
 
@@ -362,66 +360,57 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     }
   }, [errorObj.isSet]);
 
-  const getReceiveAddress = async (
-    coinType: string,
-    xpub: string,
-    walletId: string,
-    zpub?: string
-  ) => {
-    let address = '';
-    let w;
+  const getReceiveAddress = async () => {
+    try {
+      const coinType = coinDetails.slug;
+      const xpub = coinDetails.xpub;
+      const walletId = coinDetails.walletId;
+      const zpub = coinDetails.zpub;
 
-    const coin = COINS[coinType];
+      let address = '';
+      let w;
 
-    if (!coin) {
-      throw new Error(`Invalid coinType ${coinType}`);
+      if (receiveAddress) {
+        return;
+      }
+
+      const coin = COINS[coinType];
+
+      if (!coin) {
+        throw new Error(`Invalid coinType ${coinType}`);
+      }
+
+      if (coin.group === CoinGroup.Ethereum) {
+        w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
+        address = (await w.newReceiveAddress()).toUpperCase();
+        // To make the first x in lowercase
+        address = `0x${address.slice(2)}`;
+      } else {
+        w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
+        address = await w.newReceiveAddress();
+      }
+
+      setReceiveAddress(address);
+      onNewReceiveAddr(address, selectedWallet._id, coinDetails.slug);
+    } catch (err) {
+      const cyError = new CyError(
+        CysyncError.RECEIVE_TXN_GENERATE_UNVERIFIED_FAILED
+      );
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
+      Analytics.Instance.event(
+        Analytics.Categories.RECEIVE_ADDR,
+        Analytics.Actions.ERROR
+      );
     }
-
-    if (coin.group === CoinGroup.Ethereum) {
-      w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
-      address = (await w.newReceiveAddress()).toUpperCase();
-      // To make the first x in lowercase
-      address = `0x${address.slice(2)}`;
-    } else {
-      w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
-      address = await w.newReceiveAddress();
-    }
-    return address;
   };
 
   useEffect(() => {
-    if (!coinAddress || !verified) {
-      getReceiveAddress(
-        coinDetails.slug,
-        coinDetails.xpub,
-        coinDetails.walletId,
-        coinDetails.zpub
-      )
-        .then(addr => {
-          setCoinAddress(addr);
-          onNewReceiveAddr(addr, selectedWallet._id, coinDetails.slug);
-          return null;
-        })
-        .catch(err => {
-          const cyError = new CyError(
-            CysyncError.RECEIVE_TXN_GENERATE_UNVERIFIED_FAILED
-          );
-          setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
-          Analytics.Instance.event(
-            Analytics.Categories.RECEIVE_ADDR,
-            Analytics.Actions.ERROR
-          );
-        });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (coinAddress) {
+    if (receiveAddress) {
       Analytics.Instance.event(
         Analytics.Categories.RECEIVE_ADDR,
         Analytics.Actions.COMPLETED
       );
-      QRCode.toDataURL(coinAddress, {
+      QRCode.toDataURL(receiveAddress, {
         errorCorrectionLevel: 'H',
         margin: 0.5,
         color: {
@@ -438,7 +427,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           setQRError(true);
         });
     }
-  }, [coinAddress]);
+  }, [receiveAddress]);
 
   return {
     handleReceiveTransaction,
@@ -457,8 +446,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     setXpubMissing,
     passphraseEntered,
     onNewReceiveAddr,
-    coinAddress,
     imageData,
-    QRError
-  } as UseReceiveTransactionValues;
+    QRError,
+    getUnverifiedReceiveAddress: getReceiveAddress
+  };
 };
