@@ -216,9 +216,11 @@ const GeneralSettings = () => {
         />
       )
     });
+  }
 
+  if (process.env.ALLOW_PRERELEASE === 'true') {
     ListData.push({
-      name: 'Use Pre Released firmware',
+      name: 'Enable Pre-release Firmware update',
       secondaryText:
         '(This will allow for the installation of pre released firmware on your device)',
       element: (

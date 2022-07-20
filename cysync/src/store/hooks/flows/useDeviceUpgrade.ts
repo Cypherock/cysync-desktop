@@ -141,7 +141,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
   ): Promise<string | undefined> => {
     try {
       const usePrerelease =
-        process.env.BUILD_TYPE === 'debug' &&
+        process.env.ALLOW_PRERELEASE === 'true' &&
         localStorage.getItem('usePrereleaseFirmware') === 'true';
 
       const response = await firmwareServer

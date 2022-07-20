@@ -18,13 +18,15 @@ const BUILD_TYPE_CONFIG = {
     LOG_LEVEL: "silly",
     SERVER_ENV: "development",
     GITHUB_REPO: "Cypherock/cysync-desktop-dev",
+    ALLOW_PRERELEASE: true,
     SIMULATE_PRODUCTION: false,
   },
   debug: {
-    BUILD_TYPE: "debug",
+    BUILD_TYPE: "production",
     LOG_LEVEL: "silly",
     SERVER_ENV: "production",
     GITHUB_REPO: "Cypherock/cysync-desktop-debug",
+    ALLOW_PRERELEASE: true,
     SIMULATE_PRODUCTION: false,
   },
   rc: {
@@ -32,6 +34,7 @@ const BUILD_TYPE_CONFIG = {
     LOG_LEVEL: "info",
     SERVER_ENV: "production",
     GITHUB_REPO: "Cypherock/cysync-desktop-rc",
+    ALLOW_PRERELEASE: false,
     SIMULATE_PRODUCTION: false,
   },
   prod: {
@@ -39,6 +42,7 @@ const BUILD_TYPE_CONFIG = {
     LOG_LEVEL: "info",
     SERVER_ENV: "production",
     GITHUB_REPO: "Cypherock/cysync-desktop",
+    ALLOW_PRERELEASE: false,
     SIMULATE_PRODUCTION: false,
   },
 };
