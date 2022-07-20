@@ -135,10 +135,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   };
 
   useEffect(() => {
-    if (
-      !receiveTransaction.errorObj.isSet &&
-      !receiveTransaction.receiveAddress
-    )
+    if (!receiveTransaction.verified)
       receiveTransaction.getUnverifiedReceiveAddress();
   }, []);
 
