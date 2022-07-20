@@ -5,11 +5,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
+import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
 import {
+  useConnection,
   useCurrentCoin,
   useCustomAccountContext,
   useReceiveTransactionContext,
@@ -112,11 +114,12 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-const Receive: React.FC<StepComponentProps> = () => {
+const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const theme = useTheme();
   const snackbar = useSnackbar();
 
   const { receiveTransaction } = useReceiveTransactionContext();
+  const { deviceConnection } = useConnection();
 
   const [replaceAccountScreen, setReplaceAccountScreen] = useState(false);
 
@@ -133,7 +136,22 @@ const Receive: React.FC<StepComponentProps> = () => {
     setReplaceAccountScreen(true);
   };
 
-  if (receiveTransaction.coinAddress)
+  useEffect(() => {
+    receiveTransaction.getUnverifiedReceiveAddress();
+  }, []);
+
+  if (receiveTransaction.errorObj.isSet) {
+    return (
+      <ErrorDialog
+        open={receiveTransaction.errorObj.isSet}
+        handleClose={() => handleClose()}
+        errorObj={receiveTransaction.errorObj}
+        flow="Generating Receive Address"
+      />
+    );
+  }
+
+  if (receiveTransaction.receiveAddress)
     return replaceAccountScreen ? (
       <Root className={classes.root}>
         <Typography>Save to device</Typography>
@@ -155,16 +173,18 @@ const Receive: React.FC<StepComponentProps> = () => {
         <div className={classes.addressContainer}>
           <Typography
             color="secondary"
-            variant={receiveTransaction.coinAddress.length > 44 ? 'h6' : 'h4'}
+            variant={
+              receiveTransaction.receiveAddress.length > 44 ? 'h6' : 'h4'
+            }
           >
-            {receiveTransaction.coinAddress}
+            {receiveTransaction.receiveAddress}
           </Typography>
           <Button
             color="secondary"
             variant="outlined"
             className={classes.copyButton}
             onClick={() => {
-              navigator.clipboard.writeText(receiveTransaction.coinAddress);
+              navigator.clipboard.writeText(receiveTransaction.receiveAddress);
               snackbar.showSnackbar('Copied to clipboard.', 'success');
             }}
           >

@@ -280,7 +280,9 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     isAuthenticated,
     isUpdated,
     setIsDeviceUpdating,
-    errorResolutionState
+    setBlockNewConnection,
+    errorResolutionState,
+    setBlockConnectionPopup
   } = useDeviceUpgrade();
 
   const latestDeviceConnection = useRef<any>();
@@ -290,12 +292,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const isRefresh = Boolean(query.get('isRefresh'));
-
-  useEffect(() => {
-    if (isRefresh) {
-      handleRetry();
-    }
-  }, [isRefresh]);
 
   useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
@@ -310,21 +306,27 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   }, [activeStep]);
 
   useEffect(() => {
+    setBlockConnectionPopup(true);
     Analytics.Instance.event(
       Analytics.Categories.DEVICE_UPDATE,
       Analytics.Actions.OPEN
     );
     logger.info('Setting device update open');
+    if (isRefresh) {
+      logger.info('Device Upgrade is refreshing');
+      handleNext();
+    }
 
     return () => {
+      setBlockConnectionPopup(false);
       setAllowExit(true);
       setIsDeviceUpdating(false);
-      if (
-        latestStep.current !== 0 &&
-        !latestCompleted.current &&
-        latestDeviceConnection.current
-      ) {
-        cancelDeviceUpgrade(latestDeviceConnection.current);
+      if (latestStep.current !== 0 && !latestCompleted.current) {
+        if (latestDeviceConnection.current) {
+          cancelDeviceUpgrade(latestDeviceConnection.current);
+        } else {
+          setBlockNewConnection(false);
+        }
       }
       logger.info('Setting device update closed');
       Analytics.Instance.event(

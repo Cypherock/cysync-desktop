@@ -92,7 +92,6 @@ const Transaction = () => {
   const {
     setDays,
     isLoading,
-    setIsLoading,
     showTxn,
     setShowTxn,
     allTxn,
@@ -114,6 +113,7 @@ const Transaction = () => {
   const [weekIndex, setWeekIndex] = React.useState(3);
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<DisplayTransaction[]>([]);
+  const [isSearchLoading, setSearchLoading] = React.useState(false);
 
   useEffect(() => {
     Analytics.Instance.screenView(Analytics.ScreenViews.LAST_TRANSACTIONS);
@@ -175,13 +175,13 @@ const Transaction = () => {
     });
 
     setSearchResults(results);
-    setIsLoading(false);
+    setSearchLoading(false);
   };
 
   const debouncedhandleSearch = useDebouncedFunction(handleSearch, 800);
 
   useEffect(() => {
-    setIsLoading(true);
+    setSearchLoading(true);
     debouncedhandleSearch();
   }, [search]);
 
@@ -240,7 +240,7 @@ const Transaction = () => {
   };
 
   const getMainTxnContent = () => {
-    if (isLoading) {
+    if (isLoading || isSearchLoading) {
       return (
         <Grid container>
           <Grid item xs={12}>

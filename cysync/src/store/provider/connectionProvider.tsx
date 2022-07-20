@@ -52,6 +52,8 @@ export interface ConnectionContextInterface {
   setOpenCancelFlowPrompt: React.Dispatch<React.SetStateAction<boolean>>;
   updateRequiredType: UpdateRequiredType;
   isDeviceAvailable: boolean;
+  blockConnectionPopup: boolean;
+  setBlockConnectionPopup: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ConnectionContext: React.Context<ConnectionContextInterface> =
@@ -83,6 +85,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
 
   const [isDeviceUpdating, setIsDeviceUpdating] = useState(false);
   const [blockNewConnection, setBlockNewConnection] = useState(false);
+  const [blockConnectionPopup, setBlockConnectionPopup] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [inBackgroundProcess, setInBackgroundProcess] = useState(false);
   const [openErrorPrompt, setOpenErrorPrompt] = useState(false);
@@ -261,6 +264,10 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   useEffect(() => {
     retryConnection();
   }, [internalDeviceConnection, inBootloader, blockNewConnection]);
+
+  useEffect(() => {
+    logger.info('Block new connection status', { blockNewConnection });
+  }, [blockNewConnection]);
 
   useEffect(() => {
     if (completed && deviceState && inTestApp(deviceState)) {
@@ -517,7 +524,9 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         updateRequiredType,
         blockNewConnection,
         setBlockNewConnection: externalSetBlockNewConnection,
-        isDeviceAvailable: deviceConnectionStatus
+        isDeviceAvailable: deviceConnectionStatus,
+        setBlockConnectionPopup,
+        blockConnectionPopup
       }}
     >
       {children}

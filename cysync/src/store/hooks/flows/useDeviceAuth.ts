@@ -49,7 +49,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
   const [completed, setCompleted] = useState(false);
   const deviceAuth = new DeviceAuthenticator();
 
-  const { showFeedback } = useFeedback();
+  const { showFeedback, closeFeedback } = useFeedback();
   const { setDeviceConnectionStatus, deviceConnection } = useConnection();
 
   let deviceSerial: string | null = null;
@@ -239,6 +239,12 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
   const clearErrorObj = () => {
     setErrorObj(new CyError());
   };
+
+  useEffect(() => {
+    return () => {
+      closeFeedback();
+    };
+  }, []);
 
   return {
     errorObj,

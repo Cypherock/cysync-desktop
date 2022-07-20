@@ -126,18 +126,16 @@ const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
       !inBackgroundProcess &&
       deviceConnectionState !== DeviceConnectionState.NOT_CONNECTED
     ) {
-      if (
-        [
-          DeviceConnectionState.IN_TEST_APP,
-          DeviceConnectionState.IN_BOOTLOADER
-        ].includes(deviceConnectionState)
-      ) {
-        // When in bootloader or test app, start initialFlow
-        logger.info('Device connected in bootloader mode or test app.');
+      if (deviceConnectionState === DeviceConnectionState.IN_TEST_APP) {
+        // When in test app, start initialFlow
+        logger.info('Device connected in test app.');
         handleConnected();
-      } else if (!inTestApp(deviceState)) {
-        // When in main, skip initialFlow
-        logger.info('Device connected in main app.');
+      } else if (
+        !inTestApp(deviceState) ||
+        deviceConnectionState === DeviceConnectionState.IN_BOOTLOADER
+      ) {
+        // When in main or bootloader, skip initialFlow
+        logger.info('Device connected in main app or bootloader mode.');
         localStorage.setItem('initialFlow', 'true');
         handleDeviceConnected();
       }

@@ -252,7 +252,8 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     internalDeviceConnection: deviceConnection,
     inBackgroundProcess,
     connected,
-    retryConnection
+    retryConnection,
+    setBlockConnectionPopup
   } = useConnection();
 
   const {
@@ -275,12 +276,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   const isRefresh = Boolean(query.get('isRefresh'));
 
   useEffect(() => {
-    if (isRefresh) {
-      handleRetry();
-    }
-  }, [isRefresh]);
-
-  useEffect(() => {
     latestDeviceConnection.current = deviceConnection;
   }, [deviceConnection]);
 
@@ -294,6 +289,10 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
       Analytics.Actions.OPEN
     );
     logger.info('Setting device authentication open');
+    if (isRefresh) {
+      logger.info('Device authentication is refreshing');
+      handleRetry();
+    }
 
     return () => {
       Analytics.Instance.event(
@@ -322,6 +321,14 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
       setConnStatus(1);
     }
   }, [deviceConnection, inBackgroundProcess]);
+
+  useEffect(() => {
+    setBlockConnectionPopup(true);
+
+    return () => {
+      setBlockConnectionPopup(false);
+    };
+  }, []);
 
   const steps = [
     {

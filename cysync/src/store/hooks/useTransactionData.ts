@@ -150,7 +150,8 @@ export const useTransactionData: UseTransactionData = () => {
     }
 
     if (sortFunc) {
-      setAllTxn([...txns].sort(sortFunc));
+      const sortedData = [...txns].sort(sortFunc);
+      setAllTxn(sortedData);
     }
   };
 

@@ -13,7 +13,7 @@ const handleErrors = (
   currError: CyError,
   err: CyError,
   flow?: string,
-  metadata?: any
+  metadata?: Record<string, any>
 ) => {
   //TODO:  handle cascade effect properly
   if (currError?.isSet) {
@@ -32,7 +32,13 @@ const handleErrors = (
   // logging the metadata
   if (metadata) {
     logger.info('Metadata for the error');
-    logger.info(metadata);
+    if (typeof metadata === 'object') {
+      Object.keys(metadata).forEach(key => {
+        logger.info(`Metadata key: ${key}`, metadata[key]);
+      });
+    } else {
+      logger.info(metadata);
+    }
   }
 
   // report to analytics
@@ -58,6 +64,8 @@ const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
     )
   ) {
     cyError.setError(DeviceErrorType.TIMEOUT_ERROR);
+  } else if (DeviceErrorType.NOT_IN_RECEIVING_MODE === err.errorType) {
+    cyError.setError(DeviceErrorType.NOT_IN_RECEIVING_MODE, flow);
   } else {
     cyError.setError(DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR, flow);
   }
@@ -94,6 +102,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [DeviceErrorType.CONNECTION_NOT_OPEN]: {
       parent: DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW,
       message: 'Device connection not open'
+    },
+    [DeviceErrorType.NOT_IN_RECEIVING_MODE]: {
+      message: langStrings.ERRORS.DEVICE_NOT_IN_UPDATE_RECEIVING_MODE
     },
     [DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW]: {
       message: langStrings.ERRORS.DEVICE_DISCONNECTED_IN_FLOW
@@ -150,8 +161,8 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [CysyncError.NO_WALLET_ON_DEVICE]: {
       message: langStrings.ERRORS.NO_WALLET_ON_DEVICE
     },
-    [CysyncError.ALL_WALLET_PARTIAL_STATE]: {
-      message: langStrings.ERRORS.ALL_WALLET_PARTIAL_STATE
+    [CysyncError.NO_VALID_WALLET_FOUND]: {
+      message: langStrings.ERRORS.NO_VALID_WALLET_FOUND
     },
     [CysyncError.ADD_WALLET_LIMIT_EXCEEDED]: {
       message: langStrings.ERRORS.ADD_WALLET_LIMIT_EXCEEDED

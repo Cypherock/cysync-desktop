@@ -20,30 +20,49 @@ const StyledBackdrop = styled(Backdrop)(({ theme }) => ({
   }
 }));
 
-const ExitCleanup = () => {
+export interface ExitCleanupProps {
+  setDoCleanupFunction?: (func: () => Promise<void>) => void;
+}
+
+const ExitCleanup: React.FC<ExitCleanupProps> = ({ setDoCleanupFunction }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { internalDeviceConnection, deviceSdkVersion } = useConnection();
 
   const cancelFlow = new CancelFlow();
 
+  const exitCleanup = async () => {
+    try {
+      const response = await cancelFlow.run({
+        connection: internalDeviceConnection,
+        sdkVersion: deviceSdkVersion
+      });
+      logger.info('Exit cleanup cancel response', { response });
+      passEnDb.destroyHash();
+    } catch (error) {
+      logger.error('Error in exit cleanup');
+      logger.error(error);
+    }
+  };
+
   const runExitCleanup = async () => {
     logger.info('ExitCleanup Started');
-    if (internalDeviceConnection) {
-      try {
-        await cancelFlow.run({
-          connection: internalDeviceConnection,
-          sdkVersion: deviceSdkVersion
-        });
-        passEnDb.destroyHash();
-      } catch (error) {
-        logger.error('Error in exit cleanup');
-        logger.error(error);
-      }
-    }
+
+    await exitCleanup();
 
     logger.info('ExitCleanup Completed');
     ipcRenderer.send('exit-app');
   };
+
+  const onLockscreen = async () => {
+    logger.info('Exit cleanup triggred from lockscreen');
+    await exitCleanup();
+  };
+
+  useEffect(() => {
+    if (setDoCleanupFunction) {
+      setDoCleanupFunction(onLockscreen);
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
