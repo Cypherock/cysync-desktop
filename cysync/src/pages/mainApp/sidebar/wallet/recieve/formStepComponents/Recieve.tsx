@@ -107,10 +107,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const coinAbbr = token ? token.slug : coinDetails.slug;
 
   useEffect(() => {
-    if (
-      !receiveTransaction.receiveAddress &&
-      !receiveTransaction.errorObj.isSet
-    )
+    if (!receiveTransaction.verified)
       receiveTransaction.getUnverifiedReceiveAddress();
   }, []);
 
