@@ -83,6 +83,9 @@ const GeneralSettings = () => {
   const [disableProvision, setDisableProvision] = React.useState(
     localStorage.getItem('disableProvision') === 'true'
   );
+  const [usePrereleaseFirmware, setUsePrereleaseFirmware] = React.useState(
+    localStorage.getItem('usePrereleaseFirmware') === 'true'
+  );
 
   const [removePasswordDialog, setRemovePasswordDialog] = React.useState(false);
   const [confirmPasswordDialog, setConfirmPasswordDialog] =
@@ -112,6 +115,14 @@ const GeneralSettings = () => {
       disableProvision ? 'false' : 'true'
     );
     setDisableProvision(!disableProvision);
+  };
+
+  const handleUsePrereleaseFirmwareClick = () => {
+    localStorage.setItem(
+      'usePrereleaseFirmware',
+      usePrereleaseFirmware ? 'false' : 'true'
+    );
+    setUsePrereleaseFirmware(!usePrereleaseFirmware);
   };
 
   const ListData = [
@@ -202,6 +213,19 @@ const GeneralSettings = () => {
           name="disableProvision"
           completed={disableProvision}
           handleChange={handleDisableProvisionClick}
+        />
+      )
+    });
+
+    ListData.push({
+      name: 'Use Pre Released firmware',
+      secondaryText:
+        '(This will allow for the installation of pre released firmware on your device)',
+      element: (
+        <SwitchButton
+          name="usePrereleaseFirmware"
+          completed={usePrereleaseFirmware}
+          handleChange={handleUsePrereleaseFirmwareClick}
         />
       )
     });
