@@ -11,7 +11,6 @@ import CustomButton from '../../../../../../designSystem/designComponents/button
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
 import {
-  useConnection,
   useCurrentCoin,
   useCustomAccountContext,
   useReceiveTransactionContext,
@@ -119,7 +118,6 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const snackbar = useSnackbar();
 
   const { receiveTransaction } = useReceiveTransactionContext();
-  const { deviceConnection } = useConnection();
 
   const [replaceAccountScreen, setReplaceAccountScreen] = useState(false);
 
@@ -137,7 +135,11 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   };
 
   useEffect(() => {
-    receiveTransaction.getUnverifiedReceiveAddress();
+    if (
+      !receiveTransaction.errorObj.isSet &&
+      !receiveTransaction.receiveAddress
+    )
+      receiveTransaction.getUnverifiedReceiveAddress();
   }, []);
 
   if (receiveTransaction.errorObj.isSet) {
