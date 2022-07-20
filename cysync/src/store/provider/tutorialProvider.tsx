@@ -48,7 +48,6 @@ export const TutorialProvider: React.FC = ({ children }) => {
       const res = await tutorialServer.getAll(version).request();
       if (res.data && res.data.tutorials) {
         const sortedTutorials = res.data.tutorials;
-        sortedTutorials.sort((a: any, b: any) => (a._id < b._id ? -1 : 1));
         setTutorials(sortedTutorials);
         setIsFetched(true);
       } else {
