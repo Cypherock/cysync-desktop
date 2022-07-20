@@ -17,6 +17,7 @@ import { transactionDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
   useSendTransactionContext,
+  useSync,
   useTokenContext
 } from '../../../../../../store/provider';
 import logger from '../../../../../../utils/logger';
@@ -126,6 +127,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const [imageData, setImageData] = React.useState('');
   const [isQRBuilding, setQRBuilding] = React.useState(true);
+  const { fetchAllCustomAccounts } = useSync();
 
   React.useEffect(() => {
     QRCode.toDataURL(sendTransaction.hash)
@@ -137,6 +139,10 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
         setQRBuilding(false);
       });
   }, [sendTransaction.hash]);
+
+  React.useEffect(() => {
+    fetchAllCustomAccounts();
+  }, []);
 
   const handleExternalLink = async () => {
     const coin = COINS[coinDetails.slug];
@@ -229,8 +235,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
         </div>
         <div className={classes.transactionId}>
           <Typography color="textSecondary">
-            {' '}
-            Transaction hash : &nbsp;
+            &nbsp; Transaction hash : &nbsp;
           </Typography>
           <Typography
             style={{ userSelect: 'text' }}

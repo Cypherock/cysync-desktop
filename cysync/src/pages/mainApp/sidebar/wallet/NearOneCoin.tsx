@@ -495,7 +495,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                         viewBox=" 0 0 30 50"
                         iconGroup={<WarningExclamation />}
                       />
-                      Displaying top accounts {maxAccountThreshold} with most
+                      Displaying top {maxAccountThreshold} accounts with most
                       balance
                     </Typography>
                   )}

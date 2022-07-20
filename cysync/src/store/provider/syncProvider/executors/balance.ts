@@ -145,10 +145,17 @@ export const processResponses = async (
         balance: balance.toString()
       });
     } else {
+      const customAccounts = await customAccountDb.getAll({
+        walletId: item.walletId
+      });
+      let totalBalance = new BigNumber(0);
+      for (const customAccount of customAccounts) {
+        totalBalance = totalBalance.plus(new BigNumber(customAccount.balance));
+      }
       await coinDb.updateTotalBalance({
         xpub: item.xpub,
         slug: item.coinType,
-        totalBalance: balance.toString(),
+        totalBalance: totalBalance.toString(),
         totalUnconfirmedBalance: '0'
       });
     }

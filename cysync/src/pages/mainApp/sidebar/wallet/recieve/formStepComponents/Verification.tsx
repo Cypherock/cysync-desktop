@@ -8,7 +8,6 @@ import { shell } from 'electron';
 import React, { useEffect } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
-import CustomIconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
 import {
   useCurrentCoin,
@@ -30,7 +29,8 @@ const classes = {
   copyButton: `${PREFIX}-copyButton`,
   transactionId: `${PREFIX}-transactionId`,
   footer: `${PREFIX}-footer`,
-  footerBtn: `${PREFIX}-footerBtn`
+  footerBtn: `${PREFIX}-footerBtn`,
+  link: `${PREFIX}-link`
 };
 
 const Root = styled('div')(() => ({
@@ -75,6 +75,10 @@ const Root = styled('div')(() => ({
     marginTop: 15,
     textTransform: 'none',
     color: '#fff'
+  },
+  [`& .${classes.link}`]: {
+    display: 'flex',
+    cursor: 'pointer'
   }
 }));
 
@@ -103,7 +107,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
     }
 
     if (!(coin instanceof NearCoinData)) {
-      logger.error('Non near coin');
+      logger.error('Not a near coin');
       return;
     } else {
       const w = wallet({
@@ -149,15 +153,12 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
               text={
                 <div className={classes.transactionId}>
                   <Typography color="textSecondary">
-                    Go to the Near Explorer
+                    Go to the &nbsp;
                   </Typography>
-                  <CustomIconButton
-                    title="Open Link"
-                    placement="top-start"
-                    onClick={handleExternalLink}
-                  >
+                  <div className={classes.link} onClick={handleExternalLink}>
+                    <Typography color="secondary"> Near Explorer </Typography>
                     <LaunchIcon fontSize="medium" color="secondary" />
-                  </CustomIconButton>
+                  </div>
                 </div>
               }
             />

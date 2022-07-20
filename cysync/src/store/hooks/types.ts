@@ -29,6 +29,7 @@ export interface DisplayCustomAccount extends CustomAccount {
   displayPrice: string;
   displayBalance: string;
   isEmpty: boolean;
+  isImplicit: boolean;
 }
 
 export interface DisplayInputOutput extends InputOutput {

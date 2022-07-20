@@ -69,6 +69,7 @@ export interface SyncContextInterface {
     coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
+  fetchAllCustomAccounts: () => Promise<void>;
 }
 
 export const SyncContext: React.Context<SyncContextInterface> =
@@ -784,7 +785,8 @@ export const SyncProvider: React.FC = ({ children }) => {
         addTokenTask,
         reSync,
         addBalanceSyncItemFromCoin,
-        addHistorySyncItemFromCoin
+        addHistorySyncItemFromCoin,
+        fetchAllCustomAccounts
       }}
     >
       {children}

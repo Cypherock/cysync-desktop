@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS } from '@cypherock/communication';
+import { ALLCOINS as COINS, CoinGroup } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
@@ -68,12 +68,12 @@ export const useCustomAccount: UseCustomAccount = () => {
     const customAccountWithPrice: DisplayCustomAccount[] = [];
     for (const account of accounts) {
       const coinObj = COINS[account.coin.toLowerCase()];
-      if (!coinObj) {
+      if (!coinObj || coinObj.group !== CoinGroup.Near) {
         throw new Error(`Cannot find coinType: ${account.coin}`);
       }
-
       const coinWithPrice: DisplayCustomAccount = {
         ...account,
+        isImplicit: account.name.length === 64,
         isEmpty: true,
         displayPrice: '0',
         displayValue: '0',
@@ -96,6 +96,8 @@ export const useCustomAccount: UseCustomAccount = () => {
     }
 
     return customAccountWithPrice.sort((a, b) => {
+      if (a.isImplicit) return -1;
+      if (b.isImplicit) return 1;
       if (a.displayValue > b.displayValue) return -1;
       if (a.displayValue < b.displayValue) return 1;
       return 0;
@@ -106,6 +108,8 @@ export const useCustomAccount: UseCustomAccount = () => {
     accounts => {
       setCustomAccountData(
         [...accounts].sort((a, b) => {
+          if (a.isImplicit) return -1;
+          if (b.isImplicit) return 1;
           const numA = new BigNumber(a.displayBalance);
           const numB = new BigNumber(b.displayBalance);
           return numB.comparedTo(numA);
