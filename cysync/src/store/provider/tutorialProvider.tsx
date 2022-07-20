@@ -45,9 +45,11 @@ export const TutorialProvider: React.FC = ({ children }) => {
     setErrorObj(new CyError());
 
     try {
-      const res = await tutorialServer.getAll(version).request();
+      const res = await tutorialServer.getAll(version.slice(1)).request();
       if (res.data && res.data.tutorials) {
-        setTutorials(res.data.tutorials);
+        const sortedTutorials = res.data.tutorials;
+        sortedTutorials.sort((a: any, b: any) => (a._id < b._id ? -1 : 1));
+        setTutorials(sortedTutorials);
         setIsFetched(true);
       } else {
         throw new Error('Cannot find tutorials.');
