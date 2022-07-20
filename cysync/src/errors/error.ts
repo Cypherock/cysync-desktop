@@ -72,7 +72,7 @@ class CyError extends DisplayError {
     return dispError;
   }
 
-  public compare(err: CyError) {
+  public isEqualTo(err: CyError) {
     return this.getCode() === err.getCode();
   }
 }

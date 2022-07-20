@@ -21,7 +21,9 @@ const handleErrors = (
 ): CyError => {
   //TODO:  handle cascade effect properly
   if (currError.isSet) {
-    if (isUnknownError(err.getCode()) || currError.compare(err))
+    // Drop the incoming Unknown Error if there is already a specific error set.
+    // Do not set the same error again as it serves no purpose.
+    if (isUnknownError(err.getCode()) || currError.isEqualTo(err))
       return currError;
     logger.info(currError);
   }
@@ -48,21 +50,9 @@ const handleErrors = (
 
 const handleFirmwareUpdateErrors = (cyError: CyError, err: any) => {
   cyError.pushSubErrors(err.code);
-  if (
-    [
-      DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED,
-      DeviceErrorType.WRONG_HARDWARE_VERSION,
-      DeviceErrorType.WRONG_MAGIC_NUMBER,
-      DeviceErrorType.SIGNATURE_NOT_VERIFIED,
-      DeviceErrorType.LOWER_FIRMWARE_VERSION
-    ].includes(err.errorType)
-  ) {
-    cyError.setError(CysyncError.DEVICE_UPGRADE_KNOWN_ERROR);
-  }
 };
 
 const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
-  if (cyError.isSet) return;
   cyError.pushSubErrors(err.code);
   if (
     [
@@ -81,6 +71,16 @@ const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
     cyError.setError(DeviceErrorType.TIMEOUT_ERROR);
   } else if (DeviceErrorType.NOT_IN_RECEIVING_MODE === err.errorType) {
     cyError.setError(DeviceErrorType.NOT_IN_RECEIVING_MODE, flow);
+  } else if (
+    [
+      DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED,
+      DeviceErrorType.WRONG_HARDWARE_VERSION,
+      DeviceErrorType.WRONG_MAGIC_NUMBER,
+      DeviceErrorType.SIGNATURE_NOT_VERIFIED,
+      DeviceErrorType.LOWER_FIRMWARE_VERSION
+    ].includes(err.errorType)
+  ) {
+    cyError.setError(CysyncError.DEVICE_UPGRADE_KNOWN_ERROR);
   } else {
     cyError.setError(DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR, flow);
   }
