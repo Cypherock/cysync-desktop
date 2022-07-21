@@ -78,5 +78,6 @@ export interface I18nStrings {
     INCOMPATIBLE_DEVICE_AND_DESKTOP: string;
 
     TUTORIALS_UNKNOWN_ERROR: string;
+    STOP_ONGOING_FLOW: string;
   };
 }

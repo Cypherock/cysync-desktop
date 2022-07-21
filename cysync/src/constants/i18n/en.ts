@@ -125,7 +125,8 @@ const en: I18nStrings = {
     INCOMPATIBLE_DEVICE_AND_DESKTOP: 'Both needs upgrade',
 
     TUTORIALS_UNKNOWN_ERROR:
-      'Some internal error occured while fetching tutorials.'
+      'Some internal error occured while fetching tutorials.',
+    STOP_ONGOING_FLOW: 'Stopping an ongoing flow'
   }
 };
 
