@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import { shell } from 'electron';
 import React, { useEffect } from 'react';
 
+import NearExplorerImage from '../../../../../../assets/appScreens/nearExplorerInfo.png';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
 import {
@@ -167,6 +168,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
               inProgress={!reachedTarget}
               text="Scroll to the section which cointains 'new_account_id', 'new_public_key' as shown below"
             />
+            <img src={NearExplorerImage} style={{ width: '100%' }} />
             <div className={classes.footer}>
               <CustomButton
                 className={classes.footerBtn}
