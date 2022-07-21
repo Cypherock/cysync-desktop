@@ -33,6 +33,11 @@ const validateJsonConfig = () => {
   if (typeof jsonConfig.SIMULATE_PRODUCTION !== 'boolean') {
     throw new Error('Invalid SIMULATE_PRODUCTION in json config');
   }
+
+  // When you want to enable the donwload of prerelease firmware
+  if (typeof jsonConfig.ALLOW_PRERELEASE !== 'boolean') {
+    throw new Error('Invalid ALLOW_PRERELEASE in json config');
+  }
 };
 
 /**
@@ -64,6 +69,12 @@ const setConfig = () => {
   process.env.SERVER_ENV = jsonConfig.SERVER_ENV;
   process.env.GITHUB_REPO = jsonConfig.GITHUB_REPO;
   process.env.BUILD_VERSION = jsonConfig.BUILD_VERSION;
+
+  if (jsonConfig.ALLOW_PRERELEASE) {
+    process.env.ALLOW_PRERELEASE = 'true';
+  } else {
+    process.env.ALLOW_PRERELEASE = 'false';
+  }
 
   if (process.env.NODE_ENV === 'production') {
     process.env.IS_PRODUCTION = 'true';
