@@ -17,6 +17,7 @@ const handleErrors = (
 ) => {
   //TODO:  handle cascade effect properly
   if (currError?.isSet) {
+    logger.info('Current Error');
     logger.info(currError);
     // return;
   }
@@ -27,6 +28,7 @@ const handleErrors = (
     err.childErrors.forEach(e => logger.error(e));
   }
   // log the display error
+  logger.info('Incoming Error');
   logger.error(`${flow ? flow : ''}: ${err.showError()}`);
 
   // logging the metadata
@@ -66,6 +68,8 @@ const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
     cyError.setError(DeviceErrorType.TIMEOUT_ERROR);
   } else if (DeviceErrorType.NOT_IN_RECEIVING_MODE === err.errorType) {
     cyError.setError(DeviceErrorType.NOT_IN_RECEIVING_MODE, flow);
+  } else if (DeviceErrorType.PROCESS_ABORTED_BY_USER === err.errorType) {
+    cyError.setError(DeviceErrorType.PROCESS_ABORTED_BY_USER, flow);
   } else {
     cyError.setError(DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR, flow);
   }
@@ -403,6 +407,10 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     [CysyncError.STOP_ONGOING_FLOW]: {
       message: langStrings.ERRORS.STOP_ONGOING_FLOW
+    },
+    [DeviceErrorType.PROCESS_ABORTED_BY_USER]: {
+      message: (flow: string) =>
+        langStrings.ERRORS.PROCESS_ABORTED_BY_USER(flow)
     }
   };
 };

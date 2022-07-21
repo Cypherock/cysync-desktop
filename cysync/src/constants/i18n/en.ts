@@ -126,7 +126,8 @@ const en: I18nStrings = {
 
     TUTORIALS_UNKNOWN_ERROR:
       'Some internal error occured while fetching tutorials.',
-    STOP_ONGOING_FLOW: 'Stopping an ongoing flow'
+    STOP_ONGOING_FLOW: 'Stopping an ongoing flow',
+    PROCESS_ABORTED_BY_USER: (flow: string) => `${flow} was stopped by user`
   }
 };
 

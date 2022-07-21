@@ -36,8 +36,8 @@ const DeviceStatePrompt = () => {
         logger.error(error);
       }
     }
-    setIsCancelRunning(false);
     setOpenCancelFlowPrompt(false);
+    setIsCancelRunning(false);
     setIsInFlow(false);
   };
 
@@ -53,6 +53,7 @@ const DeviceStatePrompt = () => {
         actionText="Stop"
         disableAction={isCancelRunning}
         handleAction={runCancelFlow}
+        // TODO: remove this and put it below somewhere
         flow="Another action is in progress"
       />
     );
