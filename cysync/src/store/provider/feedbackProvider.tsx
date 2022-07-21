@@ -138,11 +138,11 @@ type ShowFeedback = (options?: {
   initFeedbackState?: FeedbackData['isInitFeedbackState'];
   handleClose?: FeedbackData['handleClose'];
   disableDeviceLogs?: boolean;
-}) => void;
+}) => string;
 
 export interface FeedbackContextInterface {
   showFeedback: ShowFeedback;
-  closeFeedback: () => void; // use this to cleanup feedback component
+  closeFeedback: (id?: string) => void; // use this to cleanup feedback component
 }
 
 export const FeedbackContext: React.Context<FeedbackContextInterface> =
@@ -172,6 +172,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   const [isContact, setIsContact] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [openId, setOpenId] = useState('');
 
   const {
     internalDeviceConnection: deviceConnection,
@@ -249,6 +250,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     }
 
     setIsOpen(true);
+
+    const randomId = Date.now().toString();
+    setOpenId(randomId);
+    return randomId;
   };
 
   const fetchLogs = () => {
@@ -259,6 +264,11 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       !deviceConnection.inBootloader &&
       beforeFlowStart(true)
     ) {
+      // Open Device State prompt if there is an ongoing flow
+      if (isInFlow) {
+        beforeFlowStart();
+        return;
+      }
       clearErrorObj();
       resetLogFetcherHooks();
       handleLogFetch({
@@ -413,7 +423,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const isDeviceConnected = () => {
     return (
-      !isInFlow &&
       deviceConnection &&
       [
         DeviceConnectionState.VERIFIED,
@@ -444,7 +453,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     }
   }, [isOpen]);
 
-  const onClose = () => {
+  const onClose = (id = '') => {
+    if (id !== openId) return;
     if (deviceLogsLoading) {
       if (logRequestStatus === 2) {
         snackbar.showSnackbar(
@@ -454,7 +464,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         return;
       }
 
-      if (deviceConnection) {
+      if (deviceConnection && logFetchCompleted) {
         cancelLogFetcher(deviceConnection);
       }
     }
@@ -476,7 +486,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   };
 
   const getDeviceStateErrorMsg = () => {
-    if (isInFlow) return 'Device is busy performing an operation';
     const defaultText = 'Looks like the device is not configured.';
     switch (deviceConnectionState) {
       case DeviceConnectionState.NOT_CONNECTED:
@@ -506,7 +515,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         maxWidth="sm"
         isClosePresent
         open={isOpen}
-        handleClose={onClose}
+        handleClose={() => onClose(openId)}
         restComponents={
           <Root container>
             {!isSubmitted &&

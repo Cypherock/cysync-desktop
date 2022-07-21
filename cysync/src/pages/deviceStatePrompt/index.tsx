@@ -3,7 +3,7 @@ import { CancelFlow } from '@cypherock/protocols';
 import React, { useState } from 'react';
 
 import ErrorDialog from '../../designSystem/designComponents/dialog/errorDialog';
-import { CyError } from '../../errors';
+import { CyError, CysyncError } from '../../errors';
 import { useConnection } from '../../store/provider';
 import logger from '../../utils/logger';
 
@@ -30,6 +30,7 @@ const DeviceStatePrompt = () => {
           connection: internalDeviceConnection,
           sdkVersion: deviceSdkVersion
         });
+        logger.info('Stopped the existing flow');
       } catch (error) {
         logger.error('Error in canceling existing flow');
         logger.error(error);
@@ -41,11 +42,14 @@ const DeviceStatePrompt = () => {
   };
 
   if (openCancelFlowPrompt) {
+    const cyError = new CyError(CysyncError.STOP_ONGOING_FLOW);
     return (
       <ErrorDialog
         open={openCancelFlowPrompt}
         handleClose={() => setOpenCancelFlowPrompt(false)}
         text="Some action is already is in progress, do you want to stop it?"
+        errorObj={cyError}
+        overrideErrorObj={true}
         actionText="Stop"
         disableAction={isCancelRunning}
         handleAction={runCancelFlow}
