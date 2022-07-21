@@ -188,6 +188,7 @@ const createWindow = async () => {
       build_type: process.env.BUILD_TYPE,
       server_env: process.env.SERVER_ENV,
       github_repo: process.env.GITHUB_REPO,
+      allow_prerelease: process.env.ALLOW_PRERELEASE,
       node_env: process.env.NODE_ENV
     });
 

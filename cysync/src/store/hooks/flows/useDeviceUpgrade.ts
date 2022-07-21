@@ -140,7 +140,13 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     onError?: () => void
   ): Promise<string | undefined> => {
     try {
-      const response = await firmwareServer.getLatest().request();
+      const usePrerelease =
+        process.env.ALLOW_PRERELEASE === 'true' &&
+        localStorage.getItem('usePrereleaseFirmware') === 'true';
+
+      const response = await firmwareServer
+        .getLatest({ prerelease: usePrerelease })
+        .request();
 
       setLatestVersion(response.data.firmware.version);
       logger.verbose(
