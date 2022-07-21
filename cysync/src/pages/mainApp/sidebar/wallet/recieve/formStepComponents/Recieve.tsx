@@ -9,7 +9,6 @@ import React, { useEffect } from 'react';
 
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import {
-  useConnection,
   useCurrentCoin,
   useReceiveTransactionContext,
   useSnackbar,
@@ -100,7 +99,6 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const snackbar = useSnackbar();
 
   const { receiveTransaction } = useReceiveTransactionContext();
-  const { deviceConnection } = useConnection();
 
   const { coinDetails } = useCurrentCoin();
 
@@ -109,9 +107,8 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const coinAbbr = token ? token.slug : coinDetails.slug;
 
   useEffect(() => {
-    if (!deviceConnection) {
+    if (!receiveTransaction.verified)
       receiveTransaction.getUnverifiedReceiveAddress();
-    }
   }, []);
 
   if (receiveTransaction.errorObj.isSet) {
