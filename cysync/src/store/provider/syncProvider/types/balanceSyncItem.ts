@@ -42,7 +42,11 @@ export class BalanceSyncItem extends SyncItem {
 
   equals(item: BalanceSyncItem | SyncItem) {
     if (item instanceof BalanceSyncItem) {
-      return this.xpub === item.xpub && this.coinType === item.coinType;
+      return (
+        this.xpub === item.xpub &&
+        this.coinType === item.coinType &&
+        this.customAccount === item.customAccount
+      );
     }
 
     return false;

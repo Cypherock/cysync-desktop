@@ -528,7 +528,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                   borderTop: '1px solid #222',
                   padding: '6px'
                 }}
-                disabled={isLoading}
+                disabled={isLoading || parseFloat(holding) < 0.2}
                 disableRipple
               >
                 ADD ACCOUNT

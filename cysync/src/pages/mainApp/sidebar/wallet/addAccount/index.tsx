@@ -65,17 +65,6 @@ const WalletAddAccount = () => {
     setAddAccountForm(false);
   };
 
-  useEffect(() => {
-    if (addAccountForm) {
-      Analytics.Instance.event(
-        Analytics.Categories.SEND_TXN,
-        Analytics.Actions.OPEN,
-        coinAbbr
-      );
-      logger.info('Add Account form open');
-    }
-  }, [addAccountForm]);
-
   return (
     <>
       {sendTransaction.errorObj.isSet && (
