@@ -139,7 +139,10 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
             />
             <TextView
               completed={receiveTransaction.verified}
-              inProgress={!receiveTransaction.verified}
+              inProgress={
+                receiveTransaction.verifiedAccountId &&
+                !receiveTransaction.verified
+              }
               text="Verify 'new_public_key' on the device"
             />
           </>
@@ -165,7 +168,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
             />
             <TextView
               completed={reachedTarget}
-              inProgress={!reachedTarget}
+              inProgress={linkOpened && !reachedTarget}
               text="Scroll to the section which cointains 'new_account_id', 'new_public_key' as shown below"
             />
             <img src={NearExplorerImage} style={{ width: '100%' }} />
