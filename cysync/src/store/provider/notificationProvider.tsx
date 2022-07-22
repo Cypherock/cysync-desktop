@@ -63,6 +63,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
       for (const notifData of serverLatestNotif) {
         const notif: Notification = {
           _id: notifData._id,
+          dbId: notifData._id,
           title: notifData.title,
           description: notifData.description,
           type: notifData.type,
@@ -71,7 +72,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
         };
 
         if (prevNotif) {
-          notif.prevDbId = prevNotif._id;
+          notif.prevDbId = prevNotif.dbId;
         }
 
         prevNotif = notif;
@@ -158,7 +159,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
       // Fetch from server if data is not syncronized.
       if (!isInDb) {
         const res = await NotificationServer.get(
-          lastNotif._id,
+          lastNotif.dbId,
           perPageLimit
         ).request();
         let serverLatestNotif = [];
@@ -174,6 +175,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
         for (const notifData of serverLatestNotif) {
           const notif: Notification = {
             _id: notifData._id,
+            dbId: notifData._id,
             title: notifData.title,
             description: notifData.description,
             type: notifData.type,
@@ -189,7 +191,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
 
           prevNotif = notif;
 
-          notifications.push(notif);
+          serverNotifications.push(notif);
 
           const alreadyPresent = await NotificationDB.getById(notif._id);
 
