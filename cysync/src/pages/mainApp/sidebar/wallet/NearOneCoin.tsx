@@ -147,6 +147,7 @@ const Root = styled('div')(({ theme }) => ({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    fontSize: '0.9rem',
     color: theme.palette.secondary.main,
     background: theme.palette.primary.light,
     padding: '10px 0px'
@@ -491,7 +492,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                   ) : (
                     <Typography className={classes.info}>
                       <Icon
-                        size={50}
+                        size={40}
                         viewBox=" 0 0 30 50"
                         iconGroup={<WarningExclamation />}
                       />
