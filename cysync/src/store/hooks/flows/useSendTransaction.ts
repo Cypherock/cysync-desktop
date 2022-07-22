@@ -112,11 +112,13 @@ export const verifyAddress = (address: string, coin: string) => {
   }
 
   if (coinDetails.group === CoinGroup.Near) {
-    const regex =
+    const regexImplicit = /^[a-f0-9]{64}$/;
+    const regexRegistered =
       coinDetails.validatorNetworkType === 'testnet'
-        ? /^([a-z0-9]{2,56}[-_]?)+\.testnet$|^[a-f0-9]{64}$/
-        : /^([a-z0-9]{2,59}[-_]?)+\.near$|^[a-f0-9]{64}$/;
-    return regex.test(address);
+        ? /^([a-z0-9]{2,56}[-_]?)+\.testnet$/
+        : /^([a-z0-9]{2,59}[-_]?)+\.near$/;
+
+    return regexImplicit.test(address) || regexRegistered.test(address);
   }
   return WAValidator.validate(
     address,

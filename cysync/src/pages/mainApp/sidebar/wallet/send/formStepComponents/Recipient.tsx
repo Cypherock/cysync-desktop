@@ -503,6 +503,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const checkNearAccount = async (address: string) => {
     const coin = COINS[coinDetails.slug];
     if (coin instanceof NearCoinData) {
+      if (address.length === 64) return undefined;
       const wallet = new NearWallet(coinDetails.xpub, coin);
       const check = await wallet.getTotalBalanceCustom(address);
       if (check.balance.cysyncError) {
