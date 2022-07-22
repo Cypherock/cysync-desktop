@@ -148,7 +148,7 @@ const Verify = (props: any) => {
                 alignItems: 'center'
               }}
             >
-              <div>Confirm the Amount & Address on Device</div>
+              <div>Confirm the Account on Device</div>
             </div>
           </CustomAlert>
         </div>
