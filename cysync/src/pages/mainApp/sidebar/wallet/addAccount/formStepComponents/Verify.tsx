@@ -17,7 +17,7 @@ import {
   useTokenContext
 } from '../../../../../../store/provider';
 import formatDisplayAmount from '../../../../../../utils/formatDisplayAmount';
-import LabelText from '../generalComponents/LabelText';
+import LabelText from '../../send/generalComponents/LabelText';
 
 const PREFIX = 'WalletAddAccountVerify';
 

@@ -194,10 +194,6 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
     }
   };
 
-  const goToTransactions = () => {
-    handleClose();
-  };
-
   return (
     <Root className={classes.root}>
       <div className={classes.confirmationDetails}>
@@ -255,7 +251,12 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
       </div>
       <div className={classes.divider} />
       <div className={classes.footer}>
-        <CustomButton className={classes.footerBtn} onClick={goToTransactions}>
+        <CustomButton
+          className={classes.footerBtn}
+          onClick={() => {
+            handleClose();
+          }}
+        >
           Close
         </CustomButton>
       </div>

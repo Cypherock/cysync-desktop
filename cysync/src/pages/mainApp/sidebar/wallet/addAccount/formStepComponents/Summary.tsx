@@ -19,7 +19,7 @@ import {
 import Analytics from '../../../../../../utils/analytics';
 import formatDisplayAmount from '../../../../../../utils/formatDisplayAmount';
 import logger from '../../../../../../utils/logger';
-import LabelText from '../generalComponents/LabelText';
+import LabelText from '../../send/generalComponents/LabelText';
 
 import {
   StepComponentProps,

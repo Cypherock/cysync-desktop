@@ -144,21 +144,21 @@ export const processResponses = async (
         name: item.customAccount,
         balance: balance.toString()
       });
-    } else {
-      const customAccounts = await customAccountDb.getAll({
-        walletId: item.walletId
-      });
-      let totalBalance = new BigNumber(0);
-      for (const customAccount of customAccounts) {
-        totalBalance = totalBalance.plus(new BigNumber(customAccount.balance));
-      }
-      await coinDb.updateTotalBalance({
-        xpub: item.xpub,
-        slug: item.coinType,
-        totalBalance: totalBalance.toString(),
-        totalUnconfirmedBalance: '0'
-      });
     }
+    const customAccounts = await customAccountDb.getAll({
+      walletId: item.walletId,
+      coin: item.coinType
+    });
+    let totalBalance = new BigNumber(0);
+    for (const customAccount of customAccounts) {
+      totalBalance = totalBalance.plus(new BigNumber(customAccount.balance));
+    }
+    await coinDb.updateTotalBalance({
+      xpub: item.xpub,
+      slug: item.coinType,
+      totalBalance: totalBalance.toString(),
+      totalUnconfirmedBalance: '0'
+    });
   } else {
     throw new Error('Invalid coin in balance sync item: ' + item.coinType);
   }

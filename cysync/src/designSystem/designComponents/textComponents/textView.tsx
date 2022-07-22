@@ -54,7 +54,12 @@ const Root = styled(CustomPaper)(({ theme }) => ({
 }));
 
 type ToggleButtonProps = {
-  text: any; // needs to be able to take formatted text
+  text:
+    | string
+    | React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLDivElement>,
+        HTMLDivElement
+      >;
   completed: boolean;
   inProgress: boolean;
   failed?: boolean;

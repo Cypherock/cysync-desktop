@@ -507,8 +507,6 @@ const Recipient: React.FC<StepComponentProps> = props => {
       const check = await wallet.getTotalBalanceCustom(address);
       if (check.balance.cysyncError) {
         return "This account dosen't exists";
-      } else if (!check.balance.cysyncError) {
-        return undefined;
       }
     }
     return undefined;

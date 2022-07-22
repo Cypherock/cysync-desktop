@@ -69,7 +69,7 @@ export interface SyncContextInterface {
     coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
-  fetchAllCustomAccounts: () => Promise<void>;
+  fetchAllCustomAccounts: (coin?: Coin) => Promise<void>;
 }
 
 export const SyncContext: React.Context<SyncContextInterface> =
@@ -574,12 +574,12 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
   };
 
-  const addCoinTask = async (coin: Coin, { module = 'default' }) => {
+  const addCoinTask = (coin: Coin, { module = 'default' }) => {
     addBalanceSyncItemFromCoin(coin, { module, isRefresh: true });
     addHistorySyncItemFromCoin(coin, { module, isRefresh: true });
     addPriceSyncItemFromCoin(coin, { module, isRefresh: true });
     addLatestPriceSyncItemFromCoin(coin, { module, isRefresh: true });
-    await fetchAllCustomAccounts();
+    fetchAllCustomAccounts(coin);
   };
 
   const addTokenTask = async (
@@ -636,10 +636,15 @@ export const SyncProvider: React.FC = ({ children }) => {
     await notifications.updateLatest();
   };
 
-  const fetchAllCustomAccounts = async () => {
+  const fetchAllCustomAccounts = async (coinParam?: Coin) => {
+    if (coinParam && coinParam.slug !== 'near') return;
     const wallets = await walletDb.getAll();
     for (const w of wallets) {
-      const coins = await coinDb.getAll({ walletId: w._id });
+      if (coinParam && w._id !== coinParam.walletId) continue;
+      const coins = await coinDb.getAll({
+        walletId: w._id,
+        slug: coinParam?.slug || 'near'
+      });
       for (const coin of coins) {
         const coinObj = COINS[coin.slug];
         if (coinObj.group === CoinGroup.Near) {
@@ -666,7 +671,10 @@ export const SyncProvider: React.FC = ({ children }) => {
               balance: bal.data.toString()
             });
           }
-          await customAccountDb.rebuild(data, { walletId: w._id });
+          await customAccountDb.rebuild(data, {
+            walletId: w._id,
+            coin: coin.slug
+          });
         }
       }
     }

@@ -9,14 +9,6 @@ export interface RecipientData {
   errorAmount: string;
 }
 
-export const BatchRecipientPropType = {
-  id: PropTypes.number.isRequired,
-  recipient: PropTypes.string.isRequired,
-  amount: PropTypes.string,
-  errorRecipient: PropTypes.string.isRequired,
-  errorAmount: PropTypes.string.isRequired
-};
-
 export interface DuplicateBatchAddresses {
   [addr: string]: {
     ids: string[];
@@ -39,8 +31,6 @@ export interface StepComponentProps {
   handleFeeType: () => void;
   changeButton: (index: number) => void;
   handleChange: () => void;
-  handleTransactionFeeChange: (e: any) => void;
-  handleTransactionFeeChangeSlider: (fee: number) => void;
   handleVerificationErrors: (
     id: number,
     address: string,
@@ -68,8 +58,6 @@ export const StepComponentPropTypes = {
   maximum: PropTypes.bool.isRequired,
   activeButton: PropTypes.number.isRequired,
   feeType: PropTypes.bool.isRequired,
-  recipientData: PropTypes.arrayOf(PropTypes.exact(BatchRecipientPropType))
-    .isRequired,
   total: PropTypes.instanceOf(BigNumber).isRequired,
   transactionFee: PropTypes.string.isRequired,
   addBatchTransaction: PropTypes.func.isRequired,

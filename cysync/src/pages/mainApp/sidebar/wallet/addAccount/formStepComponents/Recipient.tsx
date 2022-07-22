@@ -10,13 +10,9 @@ import { Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
-import CustomIconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
-import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
-import Dustbin from '../../../../../../designSystem/iconGroups/dustbin';
 import { useDebouncedFunction } from '../../../../../../store/hooks';
 import {
   changeFormatOfOutputList,
@@ -30,11 +26,9 @@ import {
   useSendTransactionContext,
   useTokenContext
 } from '../../../../../../store/provider';
-import Input from '../formComponents/Input';
+import Input from '../../send/formComponents/Input';
 
 import {
-  BatchRecipientPropType,
-  RecipientData,
   StepComponentProps,
   StepComponentPropTypes
 } from './StepComponentProps';
@@ -210,96 +204,6 @@ const Root = styled(Grid)(({ theme }) => ({
     color: theme.palette.info
   }
 }));
-
-type BatchRecipientProps = {
-  handleDelete: (e: any) => void;
-  handleChange: (e: any) => void;
-  id: string | undefined;
-  recipient: RecipientData;
-  coinAbbr: string;
-  handleCopyFromClipboard: (id: string) => void;
-  index: number;
-  allowDelete: boolean;
-};
-
-const BatchRecipient: React.FC<BatchRecipientProps> = props => {
-  const dustbinStyles = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    paddingBottom: '1.8rem'
-  };
-  const {
-    id,
-    handleChange,
-    handleDelete,
-    recipient,
-    coinAbbr,
-    handleCopyFromClipboard,
-    index,
-    allowDelete
-  } = props;
-  const coin = ALLCOINS[coinAbbr];
-  if (!coin) throw new Error(`Cannot find coinType: ${coinAbbr}`);
-  return (
-    <Grid container spacing={2}>
-      <Grid item xs={6}>
-        <Input
-          id={id}
-          name="reciever_addr"
-          label={`Receiver's Address ${index}`}
-          value={recipient.recipient}
-          error={recipient.errorRecipient.length !== 0}
-          helperText={
-            recipient.errorRecipient.length !== 0
-              ? recipient.errorRecipient
-              : undefined
-          }
-          onChange={handleChange}
-          isClipboardPresent
-          handleCopyFromClipboard={handleCopyFromClipboard}
-        />
-      </Grid>
-      <Grid item xs={5}>
-        <Input
-          id={id}
-          name="amount"
-          label="Amount"
-          type="number"
-          value={recipient.amount}
-          error={!!recipient.errorAmount}
-          helperText={recipient.errorAmount}
-          onChange={handleChange}
-          decimal={coin.decimal}
-          customIconStyle={{ height: '24px', padding: '12px' }}
-        />
-      </Grid>
-      {allowDelete && (
-        <Grid item xs={1} style={dustbinStyles}>
-          <CustomIconButton
-            onClick={() => {
-              handleDelete(props);
-            }}
-            title="Delete Recipient"
-          >
-            <Icon size={24} viewBox="0 0 20 24" iconGroup={<Dustbin />} />
-          </CustomIconButton>
-        </Grid>
-      )}
-    </Grid>
-  );
-};
-
-BatchRecipient.propTypes = {
-  handleDelete: PropTypes.func.isRequired,
-  handleChange: PropTypes.func.isRequired,
-  id: PropTypes.string.isRequired,
-  recipient: PropTypes.exact(BatchRecipientPropType),
-  coinAbbr: PropTypes.string.isRequired,
-  handleCopyFromClipboard: PropTypes.func.isRequired,
-  index: PropTypes.number.isRequired,
-  allowDelete: PropTypes.bool.isRequired
-};
 
 const Recipient: React.FC<StepComponentProps> = props => {
   const {

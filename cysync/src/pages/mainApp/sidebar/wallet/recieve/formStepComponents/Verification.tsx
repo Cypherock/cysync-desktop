@@ -188,15 +188,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
           <div className={classes.addressContainer}>
             <Typography
               color="secondary"
-              variant={
-                customAccount
-                  ? customAccount.name.length > 44
-                    ? 'h6'
-                    : 'h4'
-                  : address.length > 44
-                  ? 'h6'
-                  : 'h4'
-              }
+              variant={(customAccount?.name || address).length ? 'h6' : 'h4'}
             >
               {customAccount ? customAccount.name : address}
             </Typography>
