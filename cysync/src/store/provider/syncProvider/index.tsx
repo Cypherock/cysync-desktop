@@ -574,12 +574,12 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
   };
 
-  const addCoinTask = (coin: Coin, { module = 'default' }) => {
+  const addCoinTask = async (coin: Coin, { module = 'default' }) => {
+    await fetchAllCustomAccounts(coin);
     addBalanceSyncItemFromCoin(coin, { module, isRefresh: true });
     addHistorySyncItemFromCoin(coin, { module, isRefresh: true });
     addPriceSyncItemFromCoin(coin, { module, isRefresh: true });
     addLatestPriceSyncItemFromCoin(coin, { module, isRefresh: true });
-    fetchAllCustomAccounts(coin);
   };
 
   const addTokenTask = async (
