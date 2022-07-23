@@ -205,15 +205,23 @@ export const SyncProvider: React.FC = ({ children }) => {
         });
         addToQueue(newItem);
       } else if (coinData instanceof NearCoinData) {
-        const newItem = new HistorySyncItem({
-          xpub: coin.xpub,
-          walletName: '',
-          walletId: coin.walletId,
-          coinType: coinData.abbr,
-          isRefresh,
-          module
+        const customAccounts = await customAccountDb.getAll({
+          coin: coin.slug,
+          walletId: coin.walletId
         });
-        addToQueue(newItem);
+        for (const account of customAccounts) {
+          const customAccount = account.name;
+          const newItem = new HistorySyncItem({
+            xpub: coin.xpub,
+            walletName: '',
+            walletId: coin.walletId,
+            coinType: coinData.abbr,
+            isRefresh,
+            customAccount,
+            module
+          });
+          addToQueue(newItem);
+        }
       } else {
         logger.warn('Xpub with invalid coin found', {
           coinData,
@@ -228,10 +236,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     };
 
   const addBalanceSyncItemFromCoin: SyncProviderTypes['addBalanceSyncItemFromCoin'] =
-    (
-      coin: Coin,
-      { token, module = 'default', isRefresh = false, customAccount }
-    ) => {
+    async (coin: Coin, { token, module = 'default', isRefresh = false }) => {
       const coinData = COINS[coin.slug];
 
       if (!coinData) {
@@ -276,17 +281,23 @@ export const SyncProvider: React.FC = ({ children }) => {
           })
         );
       } else if (coinData.group === CoinGroup.Near) {
-        addToQueue(
-          new BalanceSyncItem({
+        const customAccounts = await customAccountDb.getAll({
+          coin: coin.slug,
+          walletId: coin.walletId
+        });
+        for (const account of customAccounts) {
+          const customAccount = account.name;
+          const newItem = new BalanceSyncItem({
             xpub: coin.xpub,
             zpub: coin.zpub,
             walletId: coin.walletId,
             coinType: coin.slug,
-            customAccount,
+            isRefresh,
             module,
-            isRefresh
-          })
-        );
+            customAccount
+          });
+          addToQueue(newItem);
+        }
       } else {
         // If BTC fork, we get the balance from the txn api
         addHistorySyncItemFromCoin(coin, { module, isRefresh });
@@ -577,7 +588,10 @@ export const SyncProvider: React.FC = ({ children }) => {
   const addCoinTask = async (coin: Coin, { module = 'default' }) => {
     await fetchAllCustomAccounts(coin);
     addBalanceSyncItemFromCoin(coin, { module, isRefresh: true });
-    addHistorySyncItemFromCoin(coin, { module, isRefresh: true });
+    addHistorySyncItemFromCoin(coin, {
+      module,
+      isRefresh: true
+    });
     addPriceSyncItemFromCoin(coin, { module, isRefresh: true });
     addLatestPriceSyncItemFromCoin(coin, { module, isRefresh: true });
   };
@@ -615,11 +629,11 @@ export const SyncProvider: React.FC = ({ children }) => {
   const setupInitial = async () => {
     logger.info('Sync: Adding Initial items');
     if (process.env.IS_PRODUCTION === 'true') {
+      await fetchAllCustomAccounts();
       await addBalanceRefresh({ isRefresh: true });
       await addHistoryRefresh({ isRefresh: true });
       await addPriceRefresh({ isRefresh: true });
       await addLatestPriceRefresh({ isRefresh: true });
-      await fetchAllCustomAccounts();
     }
 
     setInitialSetupDone(true);

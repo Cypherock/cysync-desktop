@@ -15,7 +15,6 @@ import {
 import {
   formatEthAddress,
   generateEthAddressFromXpub,
-  generateNearAddressFromXpub,
   getEthAmountFromInput
 } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
@@ -84,10 +83,11 @@ export const getRequestsMetadata = (
   }
 
   if (coin instanceof NearCoinData) {
-    const address = generateNearAddressFromXpub(item.xpub);
-
     const nearTxnMetadata = nearServer.transaction
-      .getHistory({ address, network: coin.network }, item.isRefresh)
+      .getHistory(
+        { address: item.customAccount, network: coin.network },
+        item.isRefresh
+      )
       .getMetadata();
 
     return [nearTxnMetadata];
@@ -436,6 +436,75 @@ export const processResponses = async (
           isRefresh: true,
           module: 'default'
         });
+      }
+    }
+  }
+
+  if (coinData instanceof NearCoinData) {
+    if (responses[0].isFailed) {
+      throw new Error('Did not find responses while processing');
+    }
+    const history: Transaction[] = [];
+    const rawHistory = responses[0].data;
+
+    if (!rawHistory) {
+      throw new Error('Invalid near history from server');
+    }
+
+    for (const ele of rawHistory) {
+      const fees = new BigNumber(ele.tokens_burnt).plus(
+        ele.receipt_conversion_tokens_burnt
+      );
+
+      const fromAddr = ele.signer_account_id;
+      const toAddr = ele.receiver_account_id;
+      const address = ele.address_parameter;
+
+      const txn: Transaction = {
+        hash: ele.transaction_hash,
+        amount: String(ele.args.deposit),
+        fees: fees.toString(),
+        total: new BigNumber(ele.args.deposit).plus(fees).toString(),
+        confirmations: 0,
+        walletId: item.walletId,
+        slug: item.coinType,
+        status: ele.status ? 1 : 2,
+        sentReceive:
+          address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
+        confirmed: new Date(parseInt(ele.block_timestamp, 10) / 1000000), //conversion from timestamp in nanoseconds
+        blockHeight: parseInt(ele.block_height, 10) || 0,
+        coin: item.coinType,
+        inputs: [
+          {
+            address: fromAddr,
+            value: String(ele.args.deposit),
+            indexNumber: 0,
+            isMine: address === fromAddr,
+            type: IOtype.INPUT
+          }
+        ],
+        outputs: [
+          {
+            address: toAddr,
+            value: String(ele.args.deposit),
+            indexNumber: 0,
+            isMine: address === toAddr,
+            type: IOtype.OUTPUT
+          }
+        ]
+      };
+      history.push(txn);
+    }
+
+    for (const txn of history) {
+      try {
+        await transactionDb.insert(txn);
+        // No need to retry if the inserting fails because it'll produce the same error.
+      } catch (error) {
+        logger.error(
+          ` ${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insert`
+        );
+        logger.error(error);
       }
     }
   }

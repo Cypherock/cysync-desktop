@@ -15,7 +15,7 @@ export interface SyncProviderTypes {
   addToQueue: (item: SyncQueueItem) => void;
   addHistorySyncItemFromCoin: (
     coin: Coin,
-    options: { module?: string; isRefresh?: boolean }
+    options: { module?: string; isRefresh?: boolean; customAccount?: string }
   ) => void;
   addBalanceSyncItemFromCoin: (
     coin: Coin,
