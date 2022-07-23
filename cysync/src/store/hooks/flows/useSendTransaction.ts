@@ -115,8 +115,8 @@ export const verifyAddress = (address: string, coin: string) => {
     const regexImplicit = /^[a-f0-9]{64}$/;
     const regexRegistered =
       coinDetails.validatorNetworkType === 'testnet'
-        ? /^([a-z0-9]{2,56}[-_]?)+\.testnet$/
-        : /^([a-z0-9]{2,59}[-_]?)+\.near$/;
+        ? /^([a-z0-9]{2,56}[-_.]?)+\.testnet$/
+        : /^([a-z0-9]{2,59}[-_.]?)+\.near$/;
 
     return regexImplicit.test(address) || regexRegistered.test(address);
   }
