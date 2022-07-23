@@ -431,7 +431,12 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
       {
         <>
           {accountData.length > lengthThreshold ? (
-            <Grid container>
+            <Grid
+              container
+              className={clsx({
+                [classes.loading]: isLoading
+              })}
+            >
               <Grid item xs={12}>
                 <Collapse in={collapseTab} timeout="auto" unmountOnExit>
                   {accountData
@@ -508,6 +513,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                     prevent(e);
                     setCollapseTab(!collapseTab);
                   }}
+                  disabled={isLoading}
                   fullWidth
                   style={{
                     borderRadius: '0 0 5px 5px'
@@ -519,7 +525,14 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
               </Grid>
             </Grid>
           ) : (
-            <Grid item xs={12} className={classes.rootButtonWrapper}>
+            <Grid
+              item
+              xs={12}
+              className={clsx({
+                [classes.rootButtonWrapper]: true,
+                [classes.loading]: isLoading
+              })}
+            >
               <CoinCardBtn
                 onClick={handleAddAccountFormOpen}
                 fullWidth
