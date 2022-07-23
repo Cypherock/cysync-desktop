@@ -30,6 +30,10 @@ export interface SyncProviderTypes {
     coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
+  addCustomAccountSyncItemFromCoin: (
+    coin: Coin,
+    options: { module?: string; isRefresh?: boolean }
+  ) => void;
   addLatestPriceSyncItemFromCoin: (
     coin: Coin,
     options: { module?: string; isRefresh?: boolean }

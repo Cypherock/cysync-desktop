@@ -6,8 +6,6 @@ import {
   EthCoinData,
   NearCoinData
 } from '@cypherock/communication';
-import { near } from '@cypherock/server-wrapper';
-import { NearWallet } from '@cypherock/wallet';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
@@ -21,8 +19,7 @@ import {
   getTopBlock,
   priceHistoryDb,
   tokenDb,
-  transactionDb,
-  walletDb
+  transactionDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
@@ -30,6 +27,7 @@ import { useNotifications } from '../notificationProvider';
 import { executeBatch, ExecutionResult } from './executors';
 import {
   BalanceSyncItem,
+  CustomAccountSyncItem,
   HistorySyncItem,
   LatestPriceSyncItem,
   PriceSyncItem,
@@ -69,7 +67,10 @@ export interface SyncContextInterface {
     coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
-  fetchAllCustomAccounts: (coin?: Coin) => Promise<void>;
+  addCustomAccountSyncItemFromCoin: (
+    coin: Coin,
+    options: { module?: string; isRefresh?: boolean }
+  ) => void;
 }
 
 export const SyncContext: React.Context<SyncContextInterface> =
@@ -301,6 +302,40 @@ export const SyncProvider: React.FC = ({ children }) => {
       } else {
         // If BTC fork, we get the balance from the txn api
         addHistorySyncItemFromCoin(coin, { module, isRefresh });
+      }
+    };
+
+  const addCustomAccountSyncItemFromCoin: SyncProviderTypes['addCustomAccountSyncItemFromCoin'] =
+    async (coin: Coin, { module = 'default', isRefresh = false }) => {
+      const coinData = COINS[coin.slug];
+
+      if (!coinData) {
+        logger.warn('Xpub with invalid coin found', {
+          coinData,
+          coinType: coin.slug
+        });
+        logger.debug(
+          'Xpub with invalid coin found addCustomAccountSyncItemFromCoin',
+          {
+            coinData,
+            coinType: coin.slug,
+            coin
+          }
+        );
+        return;
+      }
+
+      if (coinData.group === CoinGroup.Near) {
+        const newItem = new CustomAccountSyncItem({
+          xpub: coin.xpub,
+          walletId: coin.walletId,
+          coinType: coin.slug,
+          isRefresh,
+          module
+        });
+        addToQueue(newItem);
+      } else {
+        throw new Error('Invalid coin found addCustomAccountSyncItemFromCoin');
       }
     };
 
@@ -550,6 +585,17 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
   };
 
+  const addCustomAccountRefresh = async ({
+    isRefresh = false,
+    module = 'default'
+  }) => {
+    const coins = await coinDb.getAll();
+
+    for (const coin of coins) {
+      addCustomAccountSyncItemFromCoin(coin, { isRefresh, module });
+    }
+  };
+
   const addPriceRefresh = async ({ isRefresh = false, module = 'default' }) => {
     const allXpubs = await coinDb.getAll();
     const tokens = await tokenDb.getAll();
@@ -585,13 +631,10 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
   };
 
-  const addCoinTask = async (coin: Coin, { module = 'default' }) => {
-    await fetchAllCustomAccounts(coin);
+  const addCoinTask = (coin: Coin, { module = 'default' }) => {
+    addCustomAccountSyncItemFromCoin(coin, { module, isRefresh: true });
     addBalanceSyncItemFromCoin(coin, { module, isRefresh: true });
-    addHistorySyncItemFromCoin(coin, {
-      module,
-      isRefresh: true
-    });
+    addHistorySyncItemFromCoin(coin, { module, isRefresh: true });
     addPriceSyncItemFromCoin(coin, { module, isRefresh: true });
     addLatestPriceSyncItemFromCoin(coin, { module, isRefresh: true });
   };
@@ -629,7 +672,7 @@ export const SyncProvider: React.FC = ({ children }) => {
   const setupInitial = async () => {
     logger.info('Sync: Adding Initial items');
     if (process.env.IS_PRODUCTION === 'true') {
-      await fetchAllCustomAccounts();
+      await addCustomAccountRefresh({ isRefresh: true });
       await addBalanceRefresh({ isRefresh: true });
       await addHistoryRefresh({ isRefresh: true });
       await addPriceRefresh({ isRefresh: true });
@@ -642,56 +685,12 @@ export const SyncProvider: React.FC = ({ children }) => {
   const reSync = async () => {
     logger.info('Sync: ReSyncing items');
 
-    await fetchAllCustomAccounts();
+    await addCustomAccountRefresh({});
     await addBalanceRefresh({});
     await addHistoryRefresh({});
     await addPriceRefresh({});
     await addLatestPriceRefresh({});
     await notifications.updateLatest();
-  };
-
-  const fetchAllCustomAccounts = async (coinParam?: Coin) => {
-    if (coinParam && coinParam.slug !== 'near') return;
-    const wallets = await walletDb.getAll();
-    for (const w of wallets) {
-      if (coinParam && w._id !== coinParam.walletId) continue;
-      const coins = await coinDb.getAll({
-        walletId: w._id,
-        slug: coinParam?.slug || 'near'
-      });
-      for (const coin of coins) {
-        const coinObj = COINS[coin.slug];
-        if (coinObj.group === CoinGroup.Near) {
-          const wallet = new NearWallet(coin.xpub, coinObj as NearCoinData);
-          const res = await near.wallet
-            .getAccounts({
-              address: wallet.nearPublicKey,
-              network: (coinObj as NearCoinData).network
-            })
-            .request();
-          const data = [];
-          for (const d of res.data) {
-            const bal = await near.wallet
-              .getBalance({
-                address: d.account_id,
-                network: (coinObj as NearCoinData).network
-              })
-              .request();
-            data.push({
-              name: d.account_id,
-              walletId: w._id,
-              coin: coinObj.abbr,
-              price: coin.price.toString(),
-              balance: bal.data.toString()
-            });
-          }
-          await customAccountDb.rebuild(data, {
-            walletId: w._id,
-            coin: coin.slug
-          });
-        }
-      }
-    }
   };
 
   const intervals = useRef<NodeJS.Timeout[]>([]);
@@ -742,13 +741,6 @@ export const SyncProvider: React.FC = ({ children }) => {
               );
               logger.error(err);
             });
-          fetchAllCustomAccounts()
-            .then(() => {
-              logger.info('Sync: Custom Accounts Refresh completed');
-            })
-            .catch(err => {
-              logger.error('Sync: Custom Accounts Refresh failed', err);
-            });
         }, 1000 * 60 * 60)
       );
 
@@ -764,6 +756,13 @@ export const SyncProvider: React.FC = ({ children }) => {
             );
             logger.error(error);
           }
+          addCustomAccountRefresh({ isRefresh: true, module: 'refresh' })
+            .then(() => {
+              logger.info('Sync: Custom Accounts Refresh completed');
+            })
+            .catch(err => {
+              logger.error('Sync: Custom Accounts Refresh failed', err);
+            });
         }, 1000 * 60 * 15)
       );
     }
@@ -808,7 +807,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         reSync,
         addBalanceSyncItemFromCoin,
         addHistorySyncItemFromCoin,
-        fetchAllCustomAccounts
+        addCustomAccountSyncItemFromCoin
       }}
     >
       {children}
