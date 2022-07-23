@@ -91,6 +91,7 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
       if (err instanceof DeviceError) {
         handleDeviceErrors(cyError, err, flowName);
       } else {
+        logger.error('Unknown error in get device info', err);
         cyError.setError(CysyncError.DEVICE_INFO_UNKNOWN_ERROR);
       }
       setErrorObj(handleErrors(errorObj, cyError));
