@@ -50,8 +50,8 @@ const WalletReceive = () => {
     );
     logger.info('Receive address form closed');
     receiveTransaction.resetHooks();
-    receiveTransaction.userAction.reject(false);
-    receiveTransaction.replaceAccountAction.reject(false);
+    receiveTransaction.userAction.resolve(false);
+    receiveTransaction.replaceAccountAction.resolve(false);
     receiveTransaction.setXpubMissing(false);
     setReceiveForm(false);
   };
