@@ -66,6 +66,8 @@ const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
     cyError.setError(DeviceErrorType.TIMEOUT_ERROR);
   } else if (DeviceErrorType.NOT_IN_RECEIVING_MODE === err.errorType) {
     cyError.setError(DeviceErrorType.NOT_IN_RECEIVING_MODE, flow);
+  } else if (DeviceErrorType.DEVICE_ABORT === err.errorType) {
+    cyError.setError(DeviceErrorType.DEVICE_ABORT, flow);
   } else {
     cyError.setError(DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR, flow);
   }
@@ -387,6 +389,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     [DeviceErrorType.EXECUTING_OTHER_COMMAND]: {
       message: 'The device is executing some other command'
+    },
+    [DeviceErrorType.DEVICE_ABORT]: {
+      message: 'The request was timed out on the device'
     },
     [WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE]: {
       message: langStrings.ERRORS.SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE
