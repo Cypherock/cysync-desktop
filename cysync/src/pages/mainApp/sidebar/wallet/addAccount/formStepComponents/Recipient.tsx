@@ -1,6 +1,5 @@
 import {
   ALLCOINS,
-  CoinGroup,
   COINS,
   Erc20CoinData,
   NearCoinData
@@ -244,12 +243,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const intTransactionFee = parseInt(transactionFee, 10) || 0;
 
-  // Used to get previous mediumFee for the coin from localStorage
-
   let validatedAddresses: any[any] = [];
-
-  const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
-  // const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
 
   const handleCheckAddresses = async (skipEmpty = false) => {
     let isValid = true;
@@ -257,10 +251,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
     for (const recipient of recipientData) {
       const { recipient: recipient1, id } = recipient;
-      let { slug } = coinDetails;
-      if (isEthereum) {
-        slug = 'eth';
-      }
+      const { slug } = coinDetails;
 
       let addressValid;
       if (skipEmpty && recipient1.trim().length === 0) addressValid = true;
@@ -304,9 +295,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const handleRecipientSubmit = async () => {
     const isValid = await handleCheckAddresses();
-    const isAmountValid = true;
 
-    if (isValid && isAmountValid) {
+    if (isValid) {
       if (!beforeFlowStart()) {
         return;
       }

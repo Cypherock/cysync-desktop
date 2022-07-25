@@ -234,34 +234,12 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     string[]
   >([]);
 
-  // State Maintaining the Total of all
-  const [total, setTotal] = React.useState(new BigNumber(0));
-
   // Set a constant fee default value for each coin in case the api call fails. Regularly update the file.
   const [transactionFee, setTransactionFee] = React.useState('300000000000000'); // Max gas limit for NEAR.
 
   const { coinDetails } = useCurrentCoin();
   const { token } = useTokenContext();
   const { customAccount } = useCustomAccountContext();
-
-  // Change the total according to the current state
-  const handleTotal = () => {
-    if (maxSend) {
-      setTotal(new BigNumber(sendTransaction.sendMaxAmount));
-    } else {
-      let tempTotal = new BigNumber(0);
-      recipientData.forEach(recipient => {
-        if (recipient.amount) {
-          tempTotal = tempTotal.plus(new BigNumber(recipient.amount));
-        }
-      });
-      setTotal(new BigNumber(tempTotal));
-    }
-  };
-
-  useEffect(() => {
-    handleTotal();
-  }, [sendTransaction.sendMaxAmount, recipientData]);
 
   const triggerCalcFee = () => {
     const coinAbbr = token ? token.slug : coinDetails.slug;
@@ -595,12 +573,10 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
             activeButton,
             feeType,
             recipientData,
-            total,
             transactionFee,
             addBatchTransaction,
             handleDelete,
             handleInputChange,
-            handleTotal,
             handleFeeType,
             changeButton,
             handleChange,

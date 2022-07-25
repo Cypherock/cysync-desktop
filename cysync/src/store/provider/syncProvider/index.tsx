@@ -589,8 +589,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     isRefresh = false,
     module = 'default'
   }) => {
-    const coins = await coinDb.getAll();
-
+    const coins = await coinDb.getAll({ slug: 'near' });
     for (const coin of coins) {
       addCustomAccountSyncItemFromCoin(coin, { isRefresh, module });
     }
