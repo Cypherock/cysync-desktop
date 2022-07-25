@@ -366,10 +366,10 @@ const createWindow = async () => {
       await currentWindow.webContents.session.clearStorageData();
       await currentWindow.webContents.session.clearCache();
       await rimrafPromise(databasePath, {});
-      app.relaunch();
     } catch (error) {
       logger.error(error);
     } finally {
+      app.relaunch();
       app.exit(0);
     }
   });
