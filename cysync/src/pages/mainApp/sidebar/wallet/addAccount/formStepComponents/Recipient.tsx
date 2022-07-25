@@ -6,7 +6,6 @@ import {
 } from '@cypherock/communication';
 import { NearWallet } from '@cypherock/wallet';
 import { Typography } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import React from 'react';
@@ -209,13 +208,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
     recipientData,
     handleVerificationErrors,
     transactionFee,
-    maxSend,
     handleInputChange,
     handleCopyFromClipboard,
-    gasLimit,
-    handleNext,
-    buttonDisabled,
-    isButtonLoading
+    handleNext
   } = props;
   const {
     divider,
@@ -325,9 +320,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
           token
         ),
         fees: intTransactionFee,
-        isSendAll: maxSend,
+        isSendAll: false,
         data: {
-          gasLimit,
+          gasLimit: 0,
           contractAddress,
           contractAbbr: token ? coinAbbr.toUpperCase() : undefined
         }
@@ -379,17 +374,12 @@ const Recipient: React.FC<StepComponentProps> = props => {
       <div className={divider} />
       <div className={recipientFooter}>
         <CustomButton
-          disabled={
-            buttonDisabled ||
-            isButtonLoading ||
-            sendTransaction.estimationError !== undefined
-          }
           className={recipientContinueButton}
           onClick={() => {
             handleRecipientSubmit();
           }}
         >
-          {isButtonLoading ? <CircularProgress size={25} /> : 'Add Account'}
+          {'Add Account'}
         </CustomButton>
       </div>
     </Root>

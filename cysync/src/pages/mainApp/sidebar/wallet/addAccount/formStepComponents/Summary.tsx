@@ -86,10 +86,8 @@ const Root = styled('div')(({ theme }) => ({
 
 const Summary: React.FC<StepComponentProps> = ({
   handleNext,
-  total,
   recipientData,
-  handleClose,
-  activeButton
+  handleClose
 }) => {
   const [broadcastError, setBroadcastError] = useState('');
   const [advanceError, setAdvanceError] = useState('');
@@ -208,18 +206,15 @@ const Summary: React.FC<StepComponentProps> = ({
             transaction only ]
           </Typography>
         )}
-        {activeButton === 0 && (
-          <LabelText
-            label="New Account Id"
-            text={recipientData[0].recipient}
-            verified
-          />
-        )}
+        <LabelText
+          label="New Account Id"
+          text={recipientData[0].recipient}
+          verified
+        />
         <LabelText
           label="Transaction Fees"
           text={`~ ${0.1012} ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
-            (total.toNumber() + sendTransaction.totalFees) *
-              parseFloat(coinDetails.displayPrice),
+            0.1012 * parseFloat(coinDetails.displayPrice),
             2,
             true
           )})`}

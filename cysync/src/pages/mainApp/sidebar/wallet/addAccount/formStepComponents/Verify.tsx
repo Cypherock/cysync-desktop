@@ -100,7 +100,7 @@ const CustomAlert = withStyles((theme: Theme) =>
 )(Alert);
 
 const Verify = (props: any) => {
-  const { recipientData, activeButton } = props;
+  const { recipientData } = props;
 
   const { coinDetails } = useCurrentCoin();
 
@@ -159,41 +159,36 @@ const Verify = (props: any) => {
             transaction only ]
           </Typography>
         )}
-        {activeButton === 0 ? (
-          <>
+        <>
+          <LabelText
+            label="Coin"
+            text={(COINS[coinAbbr] || { name: '' }).name}
+            verified={sendTransaction.pinEntered}
+          />
+          {customAccount ? (
             <LabelText
-              label="Coin"
-              text={(COINS[coinAbbr] || { name: '' }).name}
-              verified={sendTransaction.pinEntered}
-            />
-            {customAccount ? (
-              <LabelText
-                label="Sender"
-                text={customAccount.name}
-                verified={sendTransaction.verified}
-              />
-            ) : (
-              <></>
-            )}
-            <LabelText
-              label="New Account Id"
-              text={recipientData[0].recipient}
+              label="Sender"
+              text={customAccount.name}
               verified={sendTransaction.verified}
             />
-            <LabelText
-              label="Transaction Fees"
-              text={`~ ${0.1012} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
-                sendTransaction.totalFees *
-                  parseFloat(coinDetails.displayPrice),
-                2,
-                true
-              )})`}
-              verified={sendTransaction.verified}
-            />
-          </>
-        ) : (
-          <></>
-        )}
+          ) : (
+            <></>
+          )}
+          <LabelText
+            label="New Account Id"
+            text={recipientData[0].recipient}
+            verified={sendTransaction.verified}
+          />
+          <LabelText
+            label="Transaction Fees"
+            text={`~ ${0.1012} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
+              sendTransaction.totalFees * parseFloat(coinDetails.displayPrice),
+              2,
+              true
+            )})`}
+            verified={sendTransaction.verified}
+          />
+        </>
 
         {connected || (
           <div style={{ marginTop: '10px' }} className={classes.center}>

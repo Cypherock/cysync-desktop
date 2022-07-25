@@ -1,11 +1,4 @@
-import {
-  ALLCOINS as COINS,
-  CoinGroup,
-  Erc20CoinData,
-  ERC20TOKENS,
-  EthCoinData
-} from '@cypherock/communication';
-import { EthereumWallet } from '@cypherock/wallet';
+import { ALLCOINS as COINS } from '@cypherock/communication';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
@@ -15,28 +8,19 @@ import Stepper from '@mui/material/Stepper';
 import { styled, Theme } from '@mui/material/styles';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
-import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import { clipboard } from 'electron';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import CreateComponent from '../../../../../components/createComponent';
 import ErrorBox from '../../../../../designSystem/designComponents/dialog/errorDialog';
-import { useDebouncedFunction } from '../../../../../store/hooks';
-import { changeFormatOfOutputList } from '../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
-  useCustomAccountContext,
-  useSendTransactionContext,
-  useTokenContext
+  useSendTransactionContext
 } from '../../../../../store/provider';
-import logger from '../../../../../utils/logger';
 
-import {
-  DuplicateBatchAddresses,
-  RecipientData
-} from './formStepComponents/StepComponentProps';
+import { RecipientData } from './formStepComponents/StepComponentProps';
 
 const QontoConnector = withStyles((theme: Theme) =>
   createStyles({
@@ -208,204 +192,16 @@ type StepperProps = {
 const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const { sendTransaction } = useSendTransactionContext();
   const [activeStep, setActiveStep] = useState(0);
-  const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const [maximum, setMaximum] = React.useState(false);
-  const [gasLimit, setGasLimit] = React.useState(21000);
-  const [estimateGasLimit, setEstimateGasLimit] = React.useState(true);
-
-  // State Management Semaphore for Button of Transaction Type
-  // 0 => Single Transaction
-  // 1 => Batch Transaction
-  const [activeButton, setButton] = React.useState(0);
-
-  // State Management Semaphore for Transaction Fee
-  // true => slider
-  // false => manual
-  const [feeType, setFeeType] = React.useState(true);
-  const [maxSend, setMaxSend] = useState(false);
 
   // State for all the data related to the Recipient
   const [recipientData, addrecipientData] = React.useState<RecipientData[]>([
     { id: 1, recipient: ' ', amount: '', errorRecipient: '', errorAmount: '' }
   ]);
 
-  const [duplicateBatchAddresses, setDuplicateBatchAddresses] = useState<
-    string[]
-  >([]);
-
   // Set a constant fee default value for each coin in case the api call fails. Regularly update the file.
   const [transactionFee, setTransactionFee] = React.useState('300000000000000'); // Max gas limit for NEAR.
 
   const { coinDetails } = useCurrentCoin();
-  const { token } = useTokenContext();
-  const { customAccount } = useCustomAccountContext();
-
-  const triggerCalcFee = () => {
-    const coinAbbr = token ? token.slug : coinDetails.slug;
-    const coin = COINS[coinAbbr];
-    let contractAddress: string | undefined;
-    if (token && coin instanceof Erc20CoinData) {
-      contractAddress = coin.address;
-    }
-
-    sendTransaction.handleEstimateFee(
-      coinDetails.xpub,
-      coinDetails.zpub,
-      coinDetails.slug,
-      changeFormatOfOutputList(recipientData, coinDetails.slug, token),
-      parseInt(transactionFee, 10) || 0,
-      maxSend,
-      {
-        gasLimit,
-        contractAddress,
-        contractAbbr: token ? coinAbbr.toLowerCase() : undefined
-      },
-      customAccount?.name
-    );
-  };
-
-  const debouncedCaclFee = useDebouncedFunction(triggerCalcFee, 500);
-
-  const triggerCalcGasLimit = async () => {
-    const coin = COINS[coinDetails.slug];
-    if (
-      !(
-        estimateGasLimit &&
-        coin instanceof EthCoinData &&
-        recipientData.length > 0 &&
-        recipientData[0].recipient.length === 42
-      )
-    ) {
-      return;
-    }
-
-    if (!token) {
-      setGasLimit(21000);
-      return;
-    }
-
-    setIsButtonLoading(true);
-    const wallet = new EthereumWallet(coinDetails.xpub, coin);
-    const fromAddress = wallet.address;
-    const toAddress = recipientData[0].recipient.trim();
-    const { network } = coin;
-    const tokenData = ERC20TOKENS[token.slug];
-    const contractAddress = tokenData.address;
-    // According to our research, amount does not matter in estimating gas limit, small or large,
-    let amount = 1;
-    if (recipientData[0].amount && Number(recipientData[0].amount) > 0) {
-      amount = Number(recipientData[0].amount) * tokenData.multiplier;
-    }
-
-    const estimatedLimit = await sendTransaction.handleEstimateGasLimit(
-      fromAddress,
-      toAddress,
-      network,
-      contractAddress,
-      amount
-    );
-
-    if (estimatedLimit) {
-      setGasLimit(estimatedLimit);
-    }
-    setIsButtonLoading(false);
-  };
-
-  const debouncedCaclGasLimit = useDebouncedFunction(triggerCalcGasLimit, 500);
-
-  const handleMaxSend = (isMaxSend: boolean) => {
-    const newRecipientData = recipientData.map(data => {
-      return {
-        ...data,
-        amount: isMaxSend ? undefined : ''
-      };
-    });
-
-    addrecipientData([...newRecipientData]);
-  };
-
-  useEffect(() => {
-    const coin = COINS[coinDetails.slug];
-    if (coin instanceof EthCoinData) {
-      debouncedCaclFee();
-    }
-  }, [gasLimit]);
-
-  useEffect(() => {
-    if (estimateGasLimit) {
-      debouncedCaclGasLimit();
-    }
-  }, [estimateGasLimit]);
-
-  useEffect(() => {
-    debouncedCaclFee();
-    if (!transactionFee || (parseInt(transactionFee, 10) || 0) <= 0) {
-      setButtonDisabled(true);
-    } else {
-      setButtonDisabled(false);
-    }
-  }, [transactionFee, recipientData]);
-
-  useEffect(() => {
-    debouncedCaclGasLimit();
-  }, [recipientData]);
-
-  useEffect(() => {
-    handleMaxSend(maxSend);
-  }, [maxSend]);
-
-  const addBatchTransaction = () => {
-    const lastElement = recipientData[recipientData.length - 1];
-    const lastElementId = lastElement.id;
-    addrecipientData([
-      ...recipientData,
-      {
-        id: lastElementId + 1,
-        recipient: '',
-        amount: '',
-        errorRecipient: '',
-        errorAmount: ''
-      }
-    ]);
-  };
-
-  const updateDuplicateAddresses = (batchRecipients: RecipientData[]) => {
-    const temp: DuplicateBatchAddresses = {};
-    const dupIds: string[] = [];
-    batchRecipients.forEach(data => {
-      if (temp[data.recipient]) {
-        if (!temp[data.recipient].ids.includes(data.id.toString())) {
-          temp[data.recipient].ids.push(data.id.toString());
-        }
-      } else {
-        temp[data.recipient.trim()] = {
-          ids: [data.id.toString()]
-        };
-      }
-    });
-    Object.keys(temp).forEach(addr => {
-      if (temp[addr].ids.length > 1) {
-        temp[addr].ids.forEach(id => {
-          if (temp[addr].ids[0] !== id) {
-            dupIds.push(id);
-          }
-        });
-      }
-    });
-    setDuplicateBatchAddresses(dupIds);
-  };
-
-  const handleDelete = (e: any) => {
-    const { id } = e;
-    const newState = recipientData.filter(data => data.id !== parseInt(id, 10));
-    if (newState.length > 0) {
-      updateDuplicateAddresses(newState);
-      addrecipientData([...newState]);
-    } else {
-      logger.warning('Must have at-least one Recipient');
-    }
-  };
 
   const handleInputChange = (e: any) => {
     e.persist();
@@ -426,13 +222,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       return dataCopy;
     });
 
-    if (e.target.name === 'reciever_addr') {
-      updateDuplicateAddresses(copyStateRecipientData);
-    }
-
     addrecipientData([...copyStateRecipientData]);
   };
-
   const handleCopyFromClipboard = (id: string) => {
     const clipBoardText = clipboard.readText().trim();
 
@@ -444,32 +235,6 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       return dataCopy;
     });
     addrecipientData([...copyStateRecipientData]);
-  };
-
-  const verifyRecipientAmount = () => {
-    const copyRecipientData: RecipientData[] = JSON.parse(
-      JSON.stringify(recipientData)
-    );
-    let isValid = true;
-    const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
-    copyRecipientData.forEach((elem, index) => {
-      const amount = new BigNumber(
-        elem.amount === undefined ? '' : elem.amount
-      );
-      let error = '';
-      if (amount.isNaN() || amount.isZero() || amount.isNegative()) {
-        // Allow `0` amount transaction on ETH, and 0 amount is valid when it's a max send txn
-        if (!(amount.isZero() && isEthereum) && !maxSend) {
-          error = 'Please enter a valid amount.';
-          isValid = false;
-        }
-      }
-      copyRecipientData[index].errorAmount = error;
-    });
-
-    addrecipientData(copyRecipientData);
-
-    return isValid;
   };
 
   const handleVerificationErrors = (
@@ -498,33 +263,6 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       return copyRecipient;
     });
     addrecipientData([...copyRecipientData]);
-  };
-
-  const handleFeeType = () => {
-    setFeeType(!feeType);
-  };
-
-  const changeButton = (currentButton: number) => {
-    if (currentButton === 0) {
-      addrecipientData(recipientData.filter((_elem, i) => i === 0));
-    }
-    setButton(currentButton);
-  };
-
-  const handleChange = () => {
-    if (maximum) {
-      setMaximum(false);
-    } else {
-      setMaximum(true);
-    }
-  };
-
-  const handleTransactionFeeChange = (e: any) => {
-    setTransactionFee(e.target.value);
-  };
-
-  const handleTransactionFeeChangeSlider = (fee: number) => {
-    setTransactionFee(fee.toString());
   };
 
   const handleNext = () => {
@@ -567,35 +305,14 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         <CreateComponent
           component={stepsData[activeStep][1]}
           props={{
-            handleMaxSend,
             handleNext,
-            maximum,
-            activeButton,
-            feeType,
             recipientData,
             transactionFee,
-            addBatchTransaction,
-            handleDelete,
             handleInputChange,
-            handleFeeType,
-            changeButton,
-            handleChange,
-            handleTransactionFeeChange,
-            handleTransactionFeeChangeSlider,
             handleVerificationErrors,
-            verifyRecipientAmount,
             setTransactionFee,
-            buttonDisabled,
-            gasLimit,
-            setGasLimit,
             handleCopyFromClipboard,
-            maxSend,
-            setMaxSend,
-            handleClose,
-            estimateGasLimit,
-            setEstimateGasLimit,
-            duplicateBatchAddresses,
-            isButtonLoading
+            handleClose
           }}
         />
       </div>
