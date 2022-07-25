@@ -208,7 +208,6 @@ const errorDialog: React.FC<ErrorProps> = ({
   handleAction,
   closeText = 'Ok',
   advanceText,
-  flow,
   detailedText,
   detailedCTAText,
   disableAction
@@ -235,7 +234,7 @@ const errorDialog: React.FC<ErrorProps> = ({
         email: '',
         emailError: '',
         subject: `Reporting for Error ${errorObj?.getCode()}`,
-        subjectError: `${flow || ''}`
+        subjectError: ``
       },
       handleClose
     });

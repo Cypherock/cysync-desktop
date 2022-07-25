@@ -11,6 +11,7 @@ import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
+import * as uuid from 'uuid';
 
 import packageJson from '../../../package.json';
 import success from '../../assets/icons/generic/success.png';
@@ -181,8 +182,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     deviceSerial,
     deviceConnectionState,
     beforeFlowStart,
-    setIsInFlow,
-    isInFlow
+    setIsInFlow
   } = useConnection();
   const [feedbackInput, setFeedbackInput] =
     React.useState<FeedbackState>(initFeedbackState);
@@ -249,10 +249,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       });
     }
 
+    const randomId = uuid.v4();
+    setOpenId(randomId);
     setIsOpen(true);
 
-    const randomId = Date.now().toString();
-    setOpenId(randomId);
     return randomId;
   };
 
@@ -264,11 +264,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       !deviceConnection.inBootloader &&
       beforeFlowStart(true)
     ) {
-      // Open Device State prompt if there is an ongoing flow
-      if (isInFlow) {
-        beforeFlowStart();
-        return;
-      }
       clearErrorObj();
       resetLogFetcherHooks();
       handleLogFetch({
@@ -464,7 +459,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         return;
       }
 
-      if (deviceConnection && logFetchCompleted) {
+      if (deviceConnection) {
         cancelLogFetcher(deviceConnection);
       }
     }
