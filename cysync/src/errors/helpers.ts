@@ -16,7 +16,8 @@ const handleErrors = (
   metadata?: Record<string, any>
 ) => {
   //TODO:  handle cascade effect properly
-  if (currError.isSet) {
+  if (currError?.isSet) {
+    logger.info('Current Error');
     logger.info(currError);
     // return;
   }
@@ -27,6 +28,7 @@ const handleErrors = (
     err.childErrors.forEach(e => logger.error(e));
   }
   // log the display error
+  logger.info('Incoming Error');
   logger.error(`${flow ? flow : ''}: ${err.showError()}`);
 
   // logging the metadata
@@ -66,6 +68,8 @@ const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
     cyError.setError(DeviceErrorType.TIMEOUT_ERROR);
   } else if (DeviceErrorType.NOT_IN_RECEIVING_MODE === err.errorType) {
     cyError.setError(DeviceErrorType.NOT_IN_RECEIVING_MODE, flow);
+  } else if (DeviceErrorType.PROCESS_ABORTED_BY_USER === err.errorType) {
+    cyError.setError(DeviceErrorType.PROCESS_ABORTED_BY_USER, flow);
   } else if (DeviceErrorType.DEVICE_ABORT === err.errorType) {
     cyError.setError(DeviceErrorType.DEVICE_ABORT, flow);
   } else {
@@ -88,8 +92,8 @@ const handleWalletErrors = (
     coinType: string;
   }
 ) => {
-  if (error.errorType === WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE)
-    cyError.setError(WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE);
+  if (error.errorType === WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE)
+    cyError.setError(WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE);
   else if (error.errorType === WalletErrorType.INSUFFICIENT_FUNDS)
     cyError.setError(WalletErrorType.INSUFFICIENT_FUNDS, metadata.coinType);
 };
@@ -264,6 +268,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [CysyncError.SEND_TXN_UNKNOWN_ERROR]: {
       message: langStrings.ERRORS.SEND_TXN_UNKNOWN_ERROR
     },
+    [CysyncError.RECEIVE_TXN_REJECTED]: {
+      message: (coin: string) => langStrings.ERRORS.RECEIVE_TXN_REJECTED(coin)
+    },
     [CysyncError.RECEIVE_TXN_XPUB_MISSING]: {
       message: langStrings.ERRORS.RECEIVE_TXN_XPUB_MISSING
     },
@@ -390,11 +397,11 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [DeviceErrorType.EXECUTING_OTHER_COMMAND]: {
       message: 'The device is executing some other command'
     },
+    [WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE]: {
+      message: langStrings.ERRORS.SEND_TXN_BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE
+    },
     [DeviceErrorType.DEVICE_ABORT]: {
       message: 'The request was timed out on the device'
-    },
-    [WalletErrorType.SUFFICIENT_CONFIRMED_BALANCE]: {
-      message: langStrings.ERRORS.SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE
     },
     [WalletErrorType.INSUFFICIENT_FUNDS]: {
       message: (coin: string) =>
@@ -402,6 +409,13 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     [FlowErrorType.UNKNOWN_FLOW_ERROR]: {
       message: 'Unknown Flow error at Protocols'
+    },
+    [CysyncError.STOP_ONGOING_FLOW]: {
+      message: langStrings.ERRORS.STOP_ONGOING_FLOW
+    },
+    [DeviceErrorType.PROCESS_ABORTED_BY_USER]: {
+      message: (flow: string) =>
+        langStrings.ERRORS.PROCESS_ABORTED_BY_USER(flow)
     }
   };
 };

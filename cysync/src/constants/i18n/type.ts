@@ -68,7 +68,7 @@ export interface I18nStrings {
 
     SEND_TXN_REJECTED: (coin: string) => string;
     SEND_TXN_INSUFFICIENT_BALANCE: (coin: string) => string;
-    SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE: string;
+    SEND_TXN_BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE: string;
     SEND_TXN_SIZE_TOO_LARGE: string;
     SEND_TXN_BROADCAST_FAILED: string;
     SEND_TXN_UNKNOWN_ERROR: string;
@@ -78,5 +78,7 @@ export interface I18nStrings {
     INCOMPATIBLE_DEVICE_AND_DESKTOP: string;
 
     TUTORIALS_UNKNOWN_ERROR: string;
+    STOP_ONGOING_FLOW: string;
+    PROCESS_ABORTED_BY_USER: (flow: string) => string;
   };
 }
