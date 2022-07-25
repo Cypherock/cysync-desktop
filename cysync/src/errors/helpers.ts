@@ -70,6 +70,8 @@ const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
     cyError.setError(DeviceErrorType.NOT_IN_RECEIVING_MODE, flow);
   } else if (DeviceErrorType.PROCESS_ABORTED_BY_USER === err.errorType) {
     cyError.setError(DeviceErrorType.PROCESS_ABORTED_BY_USER, flow);
+  } else if (DeviceErrorType.DEVICE_ABORT === err.errorType) {
+    cyError.setError(DeviceErrorType.DEVICE_ABORT, flow);
   } else {
     cyError.setError(DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR, flow);
   }
@@ -397,6 +399,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     [WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE]: {
       message: langStrings.ERRORS.SEND_TXN_BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE
+    },
+    [DeviceErrorType.DEVICE_ABORT]: {
+      message: 'The request was timed out on the device'
     },
     [WalletErrorType.INSUFFICIENT_FUNDS]: {
       message: (coin: string) =>

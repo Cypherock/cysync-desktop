@@ -63,8 +63,11 @@ export const getAllTxns = async (
     }
   }
   innerQuery = { ...innerQuery, ...query };
+
   // Sort field must be a part of the selector
-  if (sorting?.field) innerQuery[sorting.field] = { $gte: null };
+  if (!innerQuery.confirmed && sorting?.field) {
+    innerQuery[sorting.field] = { $gte: null };
+  }
 
   if (andQuery.length > 0) {
     for (const queryKey of Object.keys(innerQuery)) {
@@ -75,7 +78,9 @@ export const getAllTxns = async (
     dbQuery = { ...innerQuery };
   }
 
-  return transactionDb.executeQuery(dbQuery, sorting);
+  const data = await transactionDb.executeQuery(dbQuery, sorting);
+
+  return data;
 };
 
 export const getTopBlock = async (query: TxQuery, options: TxQueryOptions) => {
