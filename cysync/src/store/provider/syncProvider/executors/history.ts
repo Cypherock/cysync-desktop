@@ -85,7 +85,12 @@ export const getRequestsMetadata = (
   if (coin instanceof NearCoinData) {
     const nearTxnMetadata = nearServer.transaction
       .getHistory(
-        { address: item.customAccount, network: coin.network },
+        {
+          address: item.customAccount,
+          network: coin.network,
+          limit: 100,
+          from: item.afterBlock
+        },
         item.isRefresh
       )
       .getMetadata();
@@ -445,7 +450,8 @@ export const processResponses = async (
       throw new Error('Did not find responses while processing');
     }
     const history: Transaction[] = [];
-    const rawHistory = responses[0].data;
+    const rawHistory = responses[0].data.data;
+    const more = responses[0].data.more;
 
     if (!rawHistory) {
       throw new Error('Invalid near history from server');
@@ -506,6 +512,11 @@ export const processResponses = async (
         );
         logger.error(error);
       }
+    }
+    if (more && rawHistory) {
+      return {
+        after: rawHistory[rawHistory.length - 1].block_height
+      };
     }
   }
 };

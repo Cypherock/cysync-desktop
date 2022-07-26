@@ -210,6 +210,13 @@ export const SyncProvider: React.FC = ({ children }) => {
           coin: coin.slug,
           walletId: coin.walletId
         });
+        const topBlock = await getTopBlock(
+          {
+            walletId: coin.walletId,
+            slug: coinData.abbr
+          },
+          {}
+        );
         for (const account of customAccounts) {
           const customAccount = account.name;
           const newItem = new HistorySyncItem({
@@ -217,6 +224,7 @@ export const SyncProvider: React.FC = ({ children }) => {
             walletName: '',
             walletId: coin.walletId,
             coinType: coinData.abbr,
+            afterBlock: topBlock,
             isRefresh,
             customAccount,
             module
@@ -334,8 +342,6 @@ export const SyncProvider: React.FC = ({ children }) => {
           module
         });
         addToQueue(newItem);
-      } else {
-        throw new Error('Invalid coin found addCustomAccountSyncItemFromCoin');
       }
     };
 
