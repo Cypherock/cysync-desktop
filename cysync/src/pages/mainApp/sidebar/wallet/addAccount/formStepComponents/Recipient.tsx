@@ -238,32 +238,30 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const intTransactionFee = parseInt(transactionFee, 10) || 0;
 
-  let validatedAddresses: any[any] = [];
-
   const handleCheckAddresses = async (skipEmpty = false) => {
     let isValid = true;
-    validatedAddresses = [];
 
-    for (const recipient of recipientData) {
-      const { recipient: recipient1, id } = recipient;
-      const { slug } = coinDetails;
+    const { recipient: recipient1, id } = recipientData;
+    const { slug } = coinDetails;
 
-      let addressValid;
-      if (skipEmpty && recipient1.trim().length === 0) addressValid = true;
-      else addressValid = verifyAddress(recipient1.trim(), slug);
+    let addressValid;
+    if (skipEmpty && recipient1.trim().length === 0) addressValid = true;
+    else addressValid = verifyAddress(recipient1.trim(), slug);
 
-      if (!addressValid) {
-        isValid = false;
-      }
-      validatedAddresses.push([id, recipient1.trim(), addressValid]);
+    if (!addressValid) {
+      isValid = false;
     }
 
-    for (const data of validatedAddresses) {
-      let nearAccExistsError: string | undefined;
-      if (data[2]) nearAccExistsError = await checkNearAccount(data[1]);
-      if (nearAccExistsError) isValid = isValid && false;
-      handleVerificationErrors(data[0], data[1], data[2], nearAccExistsError);
-    }
+    let nearAccExistsError: string | undefined;
+    if (addressValid)
+      nearAccExistsError = await checkNearAccount(recipient1.trim());
+    if (nearAccExistsError) isValid = false;
+    handleVerificationErrors(
+      id,
+      recipient1.trim(),
+      addressValid,
+      nearAccExistsError
+    );
 
     return isValid;
   };
@@ -312,10 +310,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
         customAccount: customAccount?.name,
-        newAccountId: recipientData[0].recipient,
+        newAccountId: recipientData.recipient,
         coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
-          recipientData,
+          [recipientData],
           coinDetails.slug,
           token
         ),
@@ -343,11 +341,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
             handleInputChange(e);
             debouncedHandleCheckAddresses();
           }}
-          value={recipientData[0].recipient}
-          error={recipientData[0].errorRecipient.length !== 0}
+          value={recipientData.recipient}
+          error={recipientData.errorRecipient.length !== 0}
           helperText={
-            recipientData[0].errorRecipient.length !== 0
-              ? recipientData[0].errorRecipient
+            recipientData.errorRecipient.length !== 0
+              ? recipientData.errorRecipient
               : undefined
           }
           isClipboardPresent

@@ -194,9 +194,13 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [activeStep, setActiveStep] = useState(0);
 
   // State for all the data related to the Recipient
-  const [recipientData, addrecipientData] = React.useState<RecipientData[]>([
-    { id: 1, recipient: ' ', amount: '', errorRecipient: '', errorAmount: '' }
-  ]);
+  const [recipientData, setRecipientData] = React.useState<RecipientData>({
+    id: 1,
+    recipient: ' ',
+    amount: '',
+    errorRecipient: '',
+    errorAmount: ''
+  });
 
   // Set a constant fee default value for each coin in case the api call fails. Regularly update the file.
   const [transactionFee, setTransactionFee] = React.useState('300000000000000'); // Max gas limit for NEAR.
@@ -205,36 +209,29 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   const handleInputChange = (e: any) => {
     e.persist();
-    const copyStateRecipientData = recipientData.map(data => {
+    const copyStateRecipientData = [recipientData].map(data => {
       const dataCopy = data;
-      if (dataCopy.id === parseInt(e.target.id, 10)) {
-        if (e.target.name === 'reciever_addr') {
-          dataCopy.recipient = e.target.value
-            ? e.target.value.trim()
-            : e.target.value;
-        }
-        if (e.target.name === 'amount') {
-          if (Number(e.target.value) >= 0 || e.target.value === '') {
-            dataCopy.amount = e.target.value;
-          }
-        }
+      if (e.target.name === 'reciever_addr') {
+        dataCopy.recipient = e.target.value
+          ? e.target.value.trim()
+          : e.target.value;
       }
       return dataCopy;
     });
 
-    addrecipientData([...copyStateRecipientData]);
+    setRecipientData({ ...copyStateRecipientData[0] });
   };
   const handleCopyFromClipboard = (id: string) => {
     const clipBoardText = clipboard.readText().trim();
 
-    const copyStateRecipientData = recipientData.map(data => {
+    const copyStateRecipientData = [recipientData].map(data => {
       const dataCopy = data;
       if (dataCopy.id === parseInt(id, 10)) {
         dataCopy.recipient = clipBoardText;
       }
       return dataCopy;
     });
-    addrecipientData([...copyStateRecipientData]);
+    setRecipientData({ ...copyStateRecipientData[0] });
   };
 
   const handleVerificationErrors = (
@@ -243,7 +240,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     error: boolean,
     errorString: string
   ) => {
-    const copyRecipientData = recipientData.map(recipient => {
+    const copyRecipientData = [recipientData].map(recipient => {
       const copyRecipient = recipient;
       if (
         copyRecipient.id === id &&
@@ -262,7 +259,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       }
       return copyRecipient;
     });
-    addrecipientData([...copyRecipientData]);
+    setRecipientData({ ...copyRecipientData[0] });
   };
 
   const handleNext = () => {

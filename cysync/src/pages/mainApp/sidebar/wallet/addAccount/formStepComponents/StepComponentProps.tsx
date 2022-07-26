@@ -10,7 +10,7 @@ export interface RecipientData {
 
 export interface StepComponentProps {
   handleNext: () => void;
-  recipientData: RecipientData[];
+  recipientData: RecipientData;
   transactionFee: string;
   handleInputChange: (e: any) => void;
   handleVerificationErrors: (

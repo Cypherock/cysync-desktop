@@ -208,7 +208,7 @@ const Summary: React.FC<StepComponentProps> = ({
         )}
         <LabelText
           label="New Account Id"
-          text={recipientData[0].recipient}
+          text={recipientData.recipient}
           verified
         />
         <LabelText
