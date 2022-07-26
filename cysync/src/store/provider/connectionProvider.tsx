@@ -422,24 +422,30 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       return false;
     }
 
+    if (isInFlow) {
+      setOpenCancelFlowPrompt(true);
+      return false;
+    }
+
     if (useInternal) {
       if (internalDeviceConnection && !inBackgroundProcess) {
         return true;
       }
 
-      setOpenErrorPrompt(true);
-      return false;
-    }
-
-    if (isInFlow) {
-      setOpenCancelFlowPrompt(true);
+      snackbar.showSnackbar(
+        'Please connect the device and try again',
+        'warning'
+      );
       return false;
     }
 
     if (isReady) return true;
 
     if (deviceConnectionState === DeviceConnectionState.NOT_CONNECTED) {
-      setOpenErrorPrompt(true);
+      snackbar.showSnackbar(
+        'Please connect the device and try again',
+        'warning'
+      );
     } else {
       setOpenMisconfiguredPrompt(true);
     }

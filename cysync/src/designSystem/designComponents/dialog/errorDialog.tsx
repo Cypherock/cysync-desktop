@@ -4,7 +4,7 @@ import { Collapse } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { CyError } from '../../../errors';
 import { useFeedback } from '../../../store/provider/feedbackProvider';
@@ -186,6 +186,7 @@ export interface ErrorProps {
   open: boolean;
   handleClose: () => void;
   errorObj?: CyError;
+  overrideErrorObj?: boolean;
   text?: string;
   actionText?: string;
   closeText?: string;
@@ -202,16 +203,17 @@ const errorDialog: React.FC<ErrorProps> = ({
   handleClose,
   text,
   errorObj,
+  overrideErrorObj,
   actionText,
   handleAction,
   closeText = 'Ok',
   advanceText,
-  flow,
   detailedText,
   detailedCTAText,
   disableAction
 }: ErrorProps) => {
   const { showFeedback, closeFeedback } = useFeedback();
+  const feedbackIdRef = useRef<string>('');
 
   useEffect(() => {
     if (errorObj?.isSet)
@@ -219,7 +221,7 @@ const errorDialog: React.FC<ErrorProps> = ({
   }, [errorObj]);
 
   const handleFeedbackOpen = () => {
-    showFeedback({
+    const showId = showFeedback({
       isContact: true,
       heading: 'Report',
       initFeedbackState: {
@@ -227,20 +229,21 @@ const errorDialog: React.FC<ErrorProps> = ({
         attachDeviceLogs: false,
         categories: ['Report'],
         category: 'Report',
-        description: errorObj.getMessage(),
+        description: errorObj?.getMessage(),
         descriptionError: '',
         email: '',
         emailError: '',
-        subject: `Reporting for Error ${errorObj.getCode()}`,
-        subjectError: `${flow || ''}`
+        subject: `Reporting for Error ${errorObj?.getCode()}`,
+        subjectError: ``
       },
       handleClose
     });
+    feedbackIdRef.current = showId;
   };
 
   useEffect(() => {
     return () => {
-      closeFeedback();
+      closeFeedback(feedbackIdRef.current);
     };
   }, []);
 
@@ -256,7 +259,7 @@ const errorDialog: React.FC<ErrorProps> = ({
       restComponents={
         <Error
           advanceText={advanceText}
-          text={errorObj?.showError() || text}
+          text={overrideErrorObj ? text : errorObj?.showError()}
           closeText={closeText}
           disableAction={disableAction}
           handleClose={disableAction ? () => {} : handleClose}
