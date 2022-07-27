@@ -11,13 +11,15 @@ import logger from '../../../../../utils/logger';
 
 import Device from './formStepComponents/Device';
 import Recieve from './formStepComponents/Recieve';
+import Replace from './formStepComponents/Replace';
 import Verification from './formStepComponents/Verification';
 import StepperForm from './StepperForm';
 
 const ReceiveFormComponents = [
   ['Device', Device],
   ['Verification', Verification],
-  ['Receive', Recieve]
+  ['Receive', Recieve],
+  ['Replace', Replace]
 ];
 
 const WalletReceive = () => {
@@ -70,7 +72,11 @@ const WalletReceive = () => {
         open={receiveForm}
         isClosePresent
         handleClose={handleClose}
-        dialogHeading="Receive"
+        dialogHeading={
+          !receiveTransaction.replaceAccountStarted
+            ? 'Receive'
+            : 'Save Account to Device'
+        }
         disableBackdropClick
         restComponents={
           <StepperForm

@@ -5,11 +5,10 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
-import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
 import {
   useCurrentCoin,
   useCustomAccountContext,
@@ -113,13 +112,11 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
+const Receive: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
   const theme = useTheme();
   const snackbar = useSnackbar();
 
   const { receiveTransaction } = useReceiveTransactionContext();
-
-  const [replaceAccountScreen, setReplaceAccountScreen] = useState(false);
 
   const { coinDetails } = useCurrentCoin();
 
@@ -131,7 +128,8 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const handleReplaceAccount = (e: React.MouseEvent) => {
     prevent(e);
     receiveTransaction.replaceAccountAction.resolve(true);
-    setReplaceAccountScreen(true);
+    receiveTransaction.setReplaceAccountStarted(true);
+    handleNext();
   };
 
   useEffect(() => {
@@ -151,16 +149,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   }
 
   if (receiveTransaction.receiveAddress)
-    return replaceAccountScreen ? (
-      <Root className={classes.root}>
-        <Typography>Save to device</Typography>
-        <TextView
-          completed={receiveTransaction.verifiedReplaceAccount}
-          inProgress={!receiveTransaction.verifiedReplaceAccount}
-          text="Select an Account to replace on the Device"
-        />
-      </Root>
-    ) : (
+    return (
       <Root className={classes.root}>
         {coinAbbr.toUpperCase() === 'ETHR' && (
           <Typography color="error" style={{ marginBottom: '0.5rem' }}>

@@ -68,6 +68,8 @@ export interface UseReceiveTransactionValues {
   replaceAccountAction: DeferredReference<void>;
   verifiedAccountId: boolean;
   verifiedReplaceAccount: boolean;
+  replaceAccountStarted: boolean;
+  setReplaceAccountStarted: React.Dispatch<React.SetStateAction<boolean>>;
   imageData: string;
   QRError: boolean;
   getUnverifiedReceiveAddress: () => void;
@@ -90,6 +92,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [replaceAccount, setReplaceAccount] = useState(false);
   const [verifiedAccountId, setVerifiedAccountId] = useState(false);
   const [verifiedReplaceAccount, setVerifiedReplaceAccount] = useState(false);
+  const [replaceAccountStarted, setReplaceAccountStarted] = useState(false);
 
   const [imageData, setImageData] = useState('');
 
@@ -118,6 +121,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     setReplaceAccount(false);
     setVerifiedAccountId(false);
     setVerifiedReplaceAccount(false);
+    setReplaceAccountStarted(false);
     receiveTransaction.removeAllListeners();
   };
 
@@ -265,7 +269,10 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           });
           setVerifiedAccountId(true);
         } else {
-          const cyError = new CyError(CysyncError.ADD_COIN_REJECTED, coin.name);
+          const cyError = new CyError(
+            CysyncError.RECEIVE_TXN_REJECTED,
+            coin.name
+          );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
@@ -278,7 +285,10 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           );
           setVerifiedReplaceAccount(true);
         } else {
-          const cyError = new CyError(CysyncError.ADD_COIN_REJECTED, coin.name);
+          const cyError = new CyError(
+            CysyncError.RECEIVE_TXN_REJECTED,
+            coin.name
+          );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
@@ -541,6 +551,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     replaceAccountAction,
     verifiedReplaceAccount,
     verifiedAccountId,
+    replaceAccountStarted,
+    setReplaceAccountStarted,
     imageData,
     QRError,
     getUnverifiedReceiveAddress: getReceiveAddress

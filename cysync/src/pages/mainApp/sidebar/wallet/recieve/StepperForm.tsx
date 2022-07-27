@@ -202,7 +202,7 @@ const ReceiveForm: React.FC<StepperProps> = ({
     receiveTransaction.setXpubMissing(false);
     receiveTransaction.resetHooks();
     // Go to the Receive address component to display the unverified address
-    setActiveStep(stepsData.length - 1);
+    setActiveStep(stepsData.length - 2);
   };
 
   const onResyncCoins = () => {
@@ -231,23 +231,29 @@ const ReceiveForm: React.FC<StepperProps> = ({
         flow="Receiving Transaction"
       />
 
-      <Stepper
-        alternativeLabel
-        activeStep={activeStep}
-        className={classes.stepperRoot}
-        connector={<QontoConnector />}
-      >
-        {stepsData.map(data => (
-          <Step key={data[0]}>
-            <StyledStepLabel
-              StepIconComponent={QontoStepIcon}
-              className={classes.stepLabel}
-            >
-              {data[0]}
-            </StyledStepLabel>
-          </Step>
-        ))}
-      </Stepper>
+      {stepsData[activeStep][0] === 'Replace' || (
+        <Stepper
+          alternativeLabel
+          activeStep={activeStep}
+          className={classes.stepperRoot}
+          connector={<QontoConnector />}
+        >
+          {stepsData
+            .filter(data => {
+              return data[0] !== 'Replace';
+            })
+            .map(data => (
+              <Step key={data[0]}>
+                <StyledStepLabel
+                  StepIconComponent={QontoStepIcon}
+                  className={classes.stepLabel}
+                >
+                  {data[0]}
+                </StyledStepLabel>
+              </Step>
+            ))}
+        </Stepper>
+      )}
       <div>
         <CreateComponent
           component={stepsData[activeStep][1]}
