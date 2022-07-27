@@ -8,17 +8,16 @@ import Typography from '@mui/material/Typography';
 import { shell } from 'electron';
 import QRCode from 'qrcode';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import CheckMarkSuccessIcon from '../../../../../../assets/icons/checkmarkSuccess.svg';
-import Routes from '../../../../../../constants/routes';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import CustomIconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import AvatarIcon from '../../../../../../designSystem/designComponents/icons/AvatarIcon';
-import { transactionDb } from '../../../../../../store/database';
+import { coinDb, transactionDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
   useSendTransactionContext,
+  useSync,
   useTokenContext
 } from '../../../../../../store/provider';
 import logger from '../../../../../../utils/logger';
@@ -28,7 +27,7 @@ import {
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const PREFIX = 'WalletSendConfirmation';
+const PREFIX = 'WalletAddAccountConfirmation';
 
 const classes = {
   root: `${PREFIX}-root`,
@@ -118,8 +117,6 @@ const Root = styled('div')(({ theme }) => ({
 }));
 
 const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
-  const navigate = useNavigate();
-
   const { sendTransaction } = useSendTransactionContext();
 
   const { coinDetails } = useCurrentCoin();
@@ -130,6 +127,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const [imageData, setImageData] = React.useState('');
   const [isQRBuilding, setQRBuilding] = React.useState(true);
+  const { addCustomAccountSyncItemFromCoin } = useSync();
 
   React.useEffect(() => {
     QRCode.toDataURL(sendTransaction.hash)
@@ -141,6 +139,17 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
         setQRBuilding(false);
       });
   }, [sendTransaction.hash]);
+
+  React.useEffect(() => {
+    (async () => {
+      const coins = await coinDb.getAll({
+        walletId: coinDetails.walletId,
+        slug: coinDetails.slug
+      });
+      if (coins.length < 1) throw new Error('No coins found');
+      addCustomAccountSyncItemFromCoin(coins[0], {});
+    })();
+  }, []);
 
   const handleExternalLink = async () => {
     const coin = COINS[coinDetails.slug];
@@ -192,11 +201,6 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
     }
   };
 
-  const goToTransactions = () => {
-    navigate(Routes.transactions.index);
-    handleClose();
-  };
-
   return (
     <Root className={classes.root}>
       <div className={classes.confirmationDetails}>
@@ -229,13 +233,12 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
             color="secondary"
             style={{ margin: '1.5rem 0rem' }}
           >
-            Sent Successfully
+            Account Created
           </Typography>
         </div>
         <div className={classes.transactionId}>
           <Typography color="textSecondary">
-            {' '}
-            Transaction hash : &nbsp;
+            &nbsp; Transaction hash : &nbsp;
           </Typography>
           <Typography
             style={{ userSelect: 'text' }}
@@ -255,8 +258,13 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
       </div>
       <div className={classes.divider} />
       <div className={classes.footer}>
-        <CustomButton className={classes.footerBtn} onClick={goToTransactions}>
-          Check Transactions
+        <CustomButton
+          className={classes.footerBtn}
+          onClick={() => {
+            handleClose();
+          }}
+        >
+          Close
         </CustomButton>
       </div>
     </Root>

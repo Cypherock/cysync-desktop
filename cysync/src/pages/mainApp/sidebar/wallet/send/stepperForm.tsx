@@ -27,6 +27,7 @@ import { useDebouncedFunction } from '../../../../../store/hooks';
 import { changeFormatOfOutputList } from '../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
+  useCustomAccountContext,
   useSendTransactionContext,
   useTokenContext
 } from '../../../../../store/provider';
@@ -205,7 +206,7 @@ type StepperProps = {
 };
 
 const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
-  const { sendTransaction } = useSendTransactionContext();
+  const { sendForm, sendTransaction } = useSendTransactionContext();
   const [activeStep, setActiveStep] = useState(0);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
@@ -246,6 +247,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   const { coinDetails } = useCurrentCoin();
   const { token } = useTokenContext();
+  const { customAccount } = useCustomAccountContext();
 
   // Change the total according to the current state
   const handleTotal = () => {
@@ -285,7 +287,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         gasLimit,
         contractAddress,
         contractAbbr: token ? coinAbbr.toLowerCase() : undefined
-      }
+      },
+      customAccount?.name
     );
   };
 
@@ -524,7 +527,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const handleVerificationErrors = (
     id: number,
     address: string,
-    error: boolean
+    error: boolean,
+    errorString?: string
   ) => {
     const copyBatchRecipientData = batchRecipientData.map(recipient => {
       const copyRecipient = recipient;
@@ -538,6 +542,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
           } address`;
         } else {
           copyRecipient.errorRecipient = '';
+        }
+        if (errorString) {
+          copyRecipient.errorRecipient = errorString;
         }
       }
       return copyRecipient;
@@ -585,7 +592,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   return (
     <Root className={classes.root}>
       <ErrorBox
-        open={sendTransaction.errorObj.isSet}
+        open={sendTransaction.errorObj.isSet && sendForm}
         handleClose={handleErrorBoxClose}
         errorObj={sendTransaction.errorObj}
         flow="Sending Transaction"
@@ -618,6 +625,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
             activeButton,
             feeType,
             batchRecipientData,
+            addbatchRecipientData,
             total,
             transactionFee,
             addBatchTransaction,

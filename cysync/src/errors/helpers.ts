@@ -410,6 +410,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [FlowErrorType.UNKNOWN_FLOW_ERROR]: {
       message: 'Unknown Flow error at Protocols'
     },
+    [WalletErrorType.INACCESSIBLE_ACCOUNT]: {
+      message: 'Acccount is not accessible with wallet'
+    },
     [CysyncError.STOP_ONGOING_FLOW]: {
       message: langStrings.ERRORS.STOP_ONGOING_FLOW
     },

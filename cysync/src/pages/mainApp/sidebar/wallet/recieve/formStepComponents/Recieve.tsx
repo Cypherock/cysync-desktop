@@ -7,13 +7,16 @@ import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
+import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import {
   useCurrentCoin,
+  useCustomAccountContext,
   useReceiveTransactionContext,
   useSnackbar,
   useTokenContext
 } from '../../../../../../store/provider';
+import prevent from '../../../../../../utils/preventPropagation';
 
 import {
   StepComponentProps,
@@ -31,7 +34,9 @@ const classes = {
   link: `${PREFIX}-link`,
   externalLinkContainer: `${PREFIX}-externalLinkContainer`,
   qrWrapper: `${PREFIX}-qrWrapper`,
-  qrImage: `${PREFIX}-qrImage`
+  qrImage: `${PREFIX}-qrImage`,
+  footer: `${PREFIX}-footer`,
+  footerBtn: `${PREFIX}-footerBtn`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -39,7 +44,7 @@ const Root = styled('div')(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     padding: '3rem 8rem 3rem'
   },
   [`& .${classes.addressContainer}`]: {
@@ -91,10 +96,23 @@ const Root = styled('div')(({ theme }) => ({
   [`& .${classes.qrImage}`]: {
     height: 150,
     width: 150
+  },
+  [`& .${classes.footer}`]: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    width: '100%',
+    justifyContent: 'flex-end'
+  },
+  [`& .${classes.footerBtn}`]: {
+    width: '10rem',
+    height: '3rem',
+    marginTop: 15,
+    textTransform: 'none',
+    color: '#fff'
   }
 }));
 
-const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
+const Receive: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
   const theme = useTheme();
   const snackbar = useSnackbar();
 
@@ -103,8 +121,16 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
   const { coinDetails } = useCurrentCoin();
 
   const { token } = useTokenContext();
+  const { customAccount } = useCustomAccountContext();
 
   const coinAbbr = token ? token.slug : coinDetails.slug;
+
+  const handleReplaceAccount = (e: React.MouseEvent) => {
+    prevent(e);
+    receiveTransaction.replaceAccountAction.resolve(true);
+    receiveTransaction.setReplaceAccountStarted(true);
+    handleNext();
+  };
 
   useEffect(() => {
     if (!receiveTransaction.verified)
@@ -133,7 +159,12 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
           </Typography>
         )}
         <div className={classes.addressContainer}>
-          <Typography color="secondary" variant="h4">
+          <Typography
+            color="secondary"
+            variant={
+              receiveTransaction.receiveAddress.length > 44 ? 'h6' : 'h4'
+            }
+          >
             {receiveTransaction.receiveAddress}
           </Typography>
           <Button
@@ -186,6 +217,18 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose }) => {
             <strong>Please use it at your own Risk.</strong>
           </Typography>
         )}
+        {receiveTransaction.verified &&
+          customAccount &&
+          receiveTransaction.replaceAccount && (
+            <div className={classes.footer}>
+              <CustomButton
+                className={classes.footerBtn}
+                onClick={handleReplaceAccount}
+              >
+                Save to Device?
+              </CustomButton>
+            </div>
+          )}
       </Root>
     );
 

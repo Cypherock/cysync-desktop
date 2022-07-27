@@ -15,13 +15,22 @@ export interface SyncProviderTypes {
   addToQueue: (item: SyncQueueItem) => void;
   addHistorySyncItemFromCoin: (
     coin: Coin,
-    options: { module?: string; isRefresh?: boolean }
+    options: { module?: string; isRefresh?: boolean; customAccount?: string }
   ) => void;
   addBalanceSyncItemFromCoin: (
     coin: Coin,
-    options: { token?: string; module?: string; isRefresh?: boolean }
+    options: {
+      token?: string;
+      module?: string;
+      isRefresh?: boolean;
+      customAccount?: string;
+    }
   ) => void;
   addPriceSyncItemFromCoin: (
+    coin: Coin,
+    options: { module?: string; isRefresh?: boolean }
+  ) => void;
+  addCustomAccountSyncItemFromCoin: (
     coin: Coin,
     options: { module?: string; isRefresh?: boolean }
   ) => void;

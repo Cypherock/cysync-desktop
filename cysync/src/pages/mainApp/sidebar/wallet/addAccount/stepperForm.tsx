@@ -1,3 +1,4 @@
+import { ALLCOINS as COINS } from '@cypherock/communication';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
@@ -8,14 +9,18 @@ import { styled, Theme } from '@mui/material/styles';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
+import { clipboard } from 'electron';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import CreateComponent from '../../../../../components/createComponent';
 import ErrorBox from '../../../../../designSystem/designComponents/dialog/errorDialog';
-import { useReceiveTransactionContext } from '../../../../../store/provider';
-import Analytics from '../../../../../utils/analytics';
-import logger from '../../../../../utils/logger';
+import {
+  useCurrentCoin,
+  useSendTransactionContext
+} from '../../../../../store/provider';
+
+import { RecipientData } from './formStepComponents/StepComponentProps';
 
 const QontoConnector = withStyles((theme: Theme) =>
   createStyles({
@@ -42,7 +47,7 @@ const QontoConnector = withStyles((theme: Theme) =>
   })
 )(StepConnector);
 
-const STEP_PREFIX = 'WalletReceive-Step';
+const STEP_PREFIX = 'WalletAddAccount-Step';
 
 const stepClasses = {
   active: `${STEP_PREFIX}-active`,
@@ -116,7 +121,11 @@ const QontoStepIcon: React.FC<StepIconProps> = ({
               [stepClasses.activeCircle]: active
             })}
           >
-            <span className={clsx({ [stepClasses.activeText]: active })}>
+            <span
+              className={clsx({
+                [stepClasses.activeText]: active
+              })}
+            >
               {icon}
             </span>
           </div>
@@ -140,7 +149,7 @@ const StyledStepLabel = withStyles((theme: Theme) =>
   })
 )(StepLabel);
 
-const PREFIX = 'WalletReceive';
+const PREFIX = 'WalletAddAccount';
 
 const classes = {
   root: `${PREFIX}-root`,
@@ -178,87 +187,128 @@ const Root = styled('div')(({ theme }) => ({
 type StepperProps = {
   stepsData: any[][];
   handleClose: (abort?: boolean) => void;
-  handleXpubMissing: () => void;
 };
 
-const ReceiveForm: React.FC<StepperProps> = ({
-  stepsData,
-  handleClose,
-  handleXpubMissing
-}) => {
-  const { receiveTransaction } = useReceiveTransactionContext();
+const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
+  const { sendTransaction } = useSendTransactionContext();
   const [activeStep, setActiveStep] = useState(0);
 
+  // State for all the data related to the Recipient
+  const [recipientData, setRecipientData] = React.useState<RecipientData>({
+    id: 1,
+    recipient: ' ',
+    amount: '',
+    errorRecipient: '',
+    errorAmount: ''
+  });
+
+  // Set a constant fee default value for each coin in case the api call fails. Regularly update the file.
+  const [transactionFee, setTransactionFee] = React.useState('300000000000000'); // Max gas limit for NEAR.
+
+  const { coinDetails } = useCurrentCoin();
+
+  const handleInputChange = (e: any) => {
+    e.persist();
+    const copyStateRecipientData = [recipientData].map(data => {
+      const dataCopy = data;
+      if (e.target.name === 'reciever_addr') {
+        dataCopy.recipient = e.target.value
+          ? e.target.value.trim()
+          : e.target.value;
+      }
+      return dataCopy;
+    });
+
+    setRecipientData({ ...copyStateRecipientData[0] });
+  };
+  const handleCopyFromClipboard = (id: string) => {
+    const clipBoardText = clipboard.readText().trim();
+
+    const copyStateRecipientData = [recipientData].map(data => {
+      const dataCopy = data;
+      if (dataCopy.id === parseInt(id, 10)) {
+        dataCopy.recipient = clipBoardText;
+      }
+      return dataCopy;
+    });
+    setRecipientData({ ...copyStateRecipientData[0] });
+  };
+
+  const handleVerificationErrors = (
+    id: number,
+    address: string,
+    error: boolean,
+    errorString: string
+  ) => {
+    const copyRecipientData = [recipientData].map(recipient => {
+      const copyRecipient = recipient;
+      if (
+        copyRecipient.id === id &&
+        copyRecipient.recipient.trim() === address.trim()
+      ) {
+        if (!error) {
+          copyRecipient.errorRecipient = `This is not a valid ${
+            COINS[coinDetails.slug].name
+          } address`;
+        } else {
+          copyRecipient.errorRecipient = '';
+        }
+        if (errorString) {
+          copyRecipient.errorRecipient = errorString;
+        }
+      }
+      return copyRecipient;
+    });
+    setRecipientData({ ...copyRecipientData[0] });
+  };
+
   const handleNext = () => {
-    if (stepsData.length > activeStep + 1) {
-      setActiveStep(prevActiveStep => prevActiveStep + 1);
-    } else {
-      setActiveStep(0);
-    }
+    setActiveStep(prevActiveStep => prevActiveStep + 1);
   };
 
   const handleErrorBoxClose = () => {
-    receiveTransaction.clearErrorObj();
-    receiveTransaction.setXpubMissing(false);
-    receiveTransaction.resetHooks();
-    // Go to the Receive address component to display the unverified address
-    setActiveStep(stepsData.length - 2);
-  };
-
-  const onResyncCoins = () => {
-    Analytics.Instance.event(
-      Analytics.Categories.RESYNC_COIN,
-      Analytics.Actions.CLICKED
-    );
-    logger.info('Resync coin initiated');
-    handleClose(true);
-    receiveTransaction.clearErrorObj();
-    receiveTransaction.setXpubMissing(false);
-    handleXpubMissing();
+    handleClose(false);
+    sendTransaction.clearErrorObj();
+    sendTransaction.resetHooks();
   };
 
   return (
     <Root className={classes.root}>
       <ErrorBox
-        open={receiveTransaction.errorObj.isSet}
-        closeText={receiveTransaction.xpubMissing ? 'No' : undefined}
+        open={sendTransaction.errorObj.isSet}
         handleClose={handleErrorBoxClose}
-        errorObj={receiveTransaction.errorObj}
-        actionText={receiveTransaction.xpubMissing ? 'Yes' : undefined}
-        handleAction={
-          receiveTransaction.xpubMissing ? onResyncCoins : undefined
-        }
-        flow="Receiving Transaction"
+        errorObj={sendTransaction.errorObj}
+        flow="Sending Transaction"
       />
 
-      {stepsData[activeStep][0] === 'Replace' || (
-        <Stepper
-          alternativeLabel
-          activeStep={activeStep}
-          className={classes.stepperRoot}
-          connector={<QontoConnector />}
-        >
-          {stepsData
-            .filter(data => {
-              return data[0] !== 'Replace';
-            })
-            .map(data => (
-              <Step key={data[0]}>
-                <StyledStepLabel
-                  StepIconComponent={QontoStepIcon}
-                  className={classes.stepLabel}
-                >
-                  {data[0]}
-                </StyledStepLabel>
-              </Step>
-            ))}
-        </Stepper>
-      )}
-      <div>
+      <Stepper
+        alternativeLabel
+        activeStep={activeStep}
+        className={classes.stepperRoot}
+        connector={<QontoConnector />}
+      >
+        {stepsData.map(data => (
+          <Step key={data[0]}>
+            <StyledStepLabel
+              StepIconComponent={QontoStepIcon}
+              className={classes.stepLabel}
+            >
+              {data[0]}
+            </StyledStepLabel>
+          </Step>
+        ))}
+      </Stepper>
+      <div style={{ marginTop: '10px' }}>
         <CreateComponent
           component={stepsData[activeStep][1]}
           props={{
             handleNext,
+            recipientData,
+            transactionFee,
+            handleInputChange,
+            handleVerificationErrors,
+            setTransactionFee,
+            handleCopyFromClipboard,
             handleClose
           }}
         />
@@ -267,10 +317,9 @@ const ReceiveForm: React.FC<StepperProps> = ({
   );
 };
 
-ReceiveForm.propTypes = {
+SendForm.propTypes = {
   stepsData: PropTypes.array.isRequired,
-  handleClose: PropTypes.func.isRequired,
-  handleXpubMissing: PropTypes.func.isRequired
+  handleClose: PropTypes.func.isRequired
 };
 
-export default ReceiveForm;
+export default SendForm;

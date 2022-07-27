@@ -7,7 +7,6 @@ import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
-import { CysyncError } from '../../../../../../errors';
 import { broadcastTxn } from '../../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
@@ -20,14 +19,14 @@ import {
 import Analytics from '../../../../../../utils/analytics';
 import formatDisplayAmount from '../../../../../../utils/formatDisplayAmount';
 import logger from '../../../../../../utils/logger';
-import LabelText from '../generalComponents/LabelText';
+import LabelText from '../../send/generalComponents/LabelText';
 
 import {
   StepComponentProps,
   StepComponentPropTypes
 } from './StepComponentProps';
 
-const PREFIX = 'WalletSendSummary';
+const PREFIX = 'WalletAddAccountSummary';
 
 const classes = {
   root: `${PREFIX}-root`,
@@ -87,11 +86,8 @@ const Root = styled('div')(({ theme }) => ({
 
 const Summary: React.FC<StepComponentProps> = ({
   handleNext,
-  total,
-  batchRecipientData,
-  maxSend,
-  handleClose,
-  activeButton
+  recipientData,
+  handleClose
 }) => {
   const [broadcastError, setBroadcastError] = useState('');
   const [advanceError, setAdvanceError] = useState('');
@@ -108,9 +104,7 @@ const Summary: React.FC<StepComponentProps> = ({
 
   const coinAbbr = token ? token.slug : coinDetails.slug;
 
-  const coinPrice = token ? token.displayPrice : coinDetails.displayPrice;
-
-  const { sendForm, sendTransaction } = useSendTransactionContext();
+  const { sendTransaction } = useSendTransactionContext();
 
   const [open, setOpen] = useState(false);
 
@@ -139,10 +133,7 @@ const Summary: React.FC<StepComponentProps> = ({
       })
       .catch(e => {
         setOpen(false);
-        logger.error(
-          `${CysyncError.SEND_TXN_BROADCAST_FAILED} Transaction broadcast error`,
-          e
-        );
+        logger.error('Transaction broadcast error', e);
         if (e.isAxiosError) {
           if (e.response) {
             if (e.response.data && e.response.data.cysyncError) {
@@ -189,7 +180,7 @@ const Summary: React.FC<StepComponentProps> = ({
     <Root className={classes.root}>
       {broadcastError && (
         <ErrorDialog
-          open={!!broadcastError && sendForm}
+          open={!!broadcastError}
           handleClose={() => handleClose(true)}
           actionText="Retry"
           handleAction={handleRetry}
@@ -215,46 +206,15 @@ const Summary: React.FC<StepComponentProps> = ({
             transaction only ]
           </Typography>
         )}
-        {activeButton === 0 && (
-          <LabelText
-            label="Receiver's Address"
-            text={batchRecipientData[0].recipient}
-            verified
-          />
-        )}
-        {activeButton === 0 && (
-          <LabelText
-            label={`Amount ${coinAbbr.toUpperCase()}`}
-            text={
-              !maxSend
-                ? `${batchRecipientData[0].amount} ~( $${formatDisplayAmount(
-                    parseFloat(batchRecipientData[0].amount || '0') *
-                      parseFloat(coinPrice),
-                    2,
-                    true
-                  )}) `
-                : `${sendTransaction.sendMaxAmount} ~( $${formatDisplayAmount(
-                    sendTransaction.sendMaxAmount * parseFloat(coinPrice),
-                    2,
-                    true
-                  )}) `
-            }
-            verified
-          />
-        )}
-        {activeButton !== 0 && (
-          <LabelText
-            label={`Amount ${coinAbbr.toUpperCase()}`}
-            text={formatDisplayAmount(total, undefined, true)}
-            verified
-          />
-        )}
+        <LabelText
+          label="New Account Id"
+          text={recipientData.recipient}
+          verified
+        />
         <LabelText
           label="Transaction Fees"
-          text={`~ ${
-            sendTransaction.totalFees
-          } ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
-            sendTransaction.totalFees * parseFloat(coinDetails.displayPrice),
+          text={`~ ${0.1012} ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
+            0.1012 * parseFloat(coinDetails.displayPrice),
             2,
             true
           )})`}

@@ -2,12 +2,14 @@ import {
   BtcCoinData,
   COINS,
   ERC20TOKENS,
-  EthCoinData
+  EthCoinData,
+  NearCoinData
 } from '@cypherock/communication';
 import {
   batch as batchServer,
   eth as ethServer,
   IRequestMetadata,
+  near as nearServer,
   v2 as v2Server
 } from '@cypherock/server-wrapper';
 import {
@@ -78,6 +80,22 @@ export const getRequestsMetadata = (
       )
       .getMetadata();
     return [ethTxnMetadata, erc20Metadata];
+  }
+
+  if (coin instanceof NearCoinData) {
+    const nearTxnMetadata = nearServer.transaction
+      .getHistory(
+        {
+          address: item.customAccount,
+          network: coin.network,
+          limit: 100,
+          from: item.afterBlock
+        },
+        item.isRefresh
+      )
+      .getMetadata();
+
+    return [nearTxnMetadata];
   }
 
   logger.warn('Invalid coin in sync queue', {
@@ -424,6 +442,81 @@ export const processResponses = async (
           module: 'default'
         });
       }
+    }
+  }
+
+  if (coinData instanceof NearCoinData) {
+    if (responses[0].isFailed) {
+      throw new Error('Did not find responses while processing');
+    }
+    const history: Transaction[] = [];
+    const rawHistory = responses[0].data.data;
+    const more = responses[0].data.more;
+
+    if (!rawHistory) {
+      throw new Error('Invalid near history from server');
+    }
+
+    for (const ele of rawHistory) {
+      const fees = new BigNumber(ele.tokens_burnt).plus(
+        ele.receipt_conversion_tokens_burnt
+      );
+
+      const fromAddr = ele.signer_account_id;
+      const toAddr = ele.receiver_account_id;
+      const address = ele.address_parameter;
+
+      const txn: Transaction = {
+        hash: ele.transaction_hash,
+        amount: String(ele.args.deposit),
+        fees: fees.toString(),
+        total: new BigNumber(ele.args.deposit).plus(fees).toString(),
+        confirmations: 0,
+        walletId: item.walletId,
+        slug: item.coinType,
+        status: ele.status ? 1 : 2,
+        sentReceive:
+          address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
+        confirmed: new Date(parseInt(ele.block_timestamp, 10) / 1000000), //conversion from timestamp in nanoseconds
+        blockHeight: parseInt(ele.block_height, 10) || 0,
+        coin: item.coinType,
+        inputs: [
+          {
+            address: fromAddr,
+            value: String(ele.args.deposit),
+            indexNumber: 0,
+            isMine: address === fromAddr,
+            type: IOtype.INPUT
+          }
+        ],
+        outputs: [
+          {
+            address: toAddr,
+            value: String(ele.args.deposit),
+            indexNumber: 0,
+            isMine: address === toAddr,
+            type: IOtype.OUTPUT
+          }
+        ]
+      };
+      history.push(txn);
+    }
+
+    for (const txn of history) {
+      try {
+        await transactionDb.insert(txn);
+        // No need to retry if the inserting fails because it'll produce the same error.
+      } catch (error) {
+        logger.error(
+          ` ${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insert`
+        );
+        logger.error(error);
+      }
+    }
+    if (more && rawHistory) {
+      return {
+        after: rawHistory[rawHistory.length - 1].block_height
+      };
     }
   }
 };

@@ -4,5 +4,6 @@ export * from './useDebounce';
 export * from './useHistory';
 export * from './usePortfolio';
 export * from './useToken';
+export * from './useCustomAccount';
 export * from './useTransactionData';
 export * from './useWalletData';
