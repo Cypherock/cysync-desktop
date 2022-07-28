@@ -5,7 +5,8 @@ const config = {
     appCopyright: 'Cypherock',
     appBundleId: 'com.hodl.cypherock',
     osxSign: {
-      identity: 'Apple Distribution: HODL Tech Private Limited (664633TYV2)',
+      identity:
+        'Developer ID Application: HODL Tech Private Limited (664633TYV2)',
       'hardened-runtime': true,
       entitlements: 'entitlements.plist',
       'entitlements-inherit': 'entitlements.plist',
@@ -100,6 +101,13 @@ const config = {
     ]
   ]
 };
+
+if (process.env.APPLE_ID && process.env.APPLE_ID_PASSWORD) {
+  config.packagerConfig.osxNotarize = {
+    appleId: process.env.APPLE_ID,
+    appleIdPassword: process.env.APPLE_ID_PASSWORD
+  };
+}
 
 if (process.platform === 'win32') {
   config.packagerConfig.name = 'Cypherock CySync';
