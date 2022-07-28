@@ -582,7 +582,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         new BalanceSyncItem({
           xpub: ethXpub.xpub,
           walletId: token.walletId,
-          coinType: token.coin,
+          coinType: token.slug,
           ethCoin: token.coin,
           module,
           isRefresh
@@ -610,7 +610,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
 
     for (const token of tokens) {
-      addPriceSyncItemFromCoin({ slug: token.coin } as Coin, {
+      addPriceSyncItemFromCoin({ slug: token.slug } as Coin, {
         isRefresh,
         module
       });
@@ -629,7 +629,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
 
     for (const token of tokens) {
-      addLatestPriceSyncItemFromCoin({ slug: token.coin } as Coin, {
+      addLatestPriceSyncItemFromCoin({ slug: token.slug } as Coin, {
         isRefresh,
         module
       });
