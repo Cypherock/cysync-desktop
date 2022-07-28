@@ -135,8 +135,5 @@
     "*.{js,jsx,json,md,html,css}": [
       "prettier --write"
     ]
-  },
-  "resolutions": {
-    "**/@electron-forge/maker-dmg/electron-installer-dmg/appdmg": "^0.6.4"
   }
 }

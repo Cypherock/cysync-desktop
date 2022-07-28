@@ -3,7 +3,7 @@ name: Build CI
 on:
   push:
     tags:
-      - '*'
+      - "*"
     branches:
       - dev
       - debug
@@ -20,23 +20,23 @@ jobs:
         node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
-    - run: sudo apt-get install fakeroot dpkg rpm -y
-    - run: yarn
-    - run: yarn lint:check
-    - run: yarn pretty:check
-    - run: node scripts/prebuild.js
-    - run: yarn make
-    - uses: actions/upload-artifact@v3
-      with:
-        name: build-linux
-        path: cysync/out/make/*
-        retention-days: 1
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+      - run: sudo apt-get install fakeroot dpkg rpm -y
+      - run: yarn
+      - run: yarn lint:check
+      - run: yarn pretty:check
+      - run: node scripts/prebuild.js
+      - run: yarn make
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build-linux
+          path: cysync/out/make/*
+          retention-days: 1
 
   build-win:
     runs-on: windows-latest
@@ -46,20 +46,20 @@ jobs:
         node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
-    - run: yarn
-    - run: node scripts\prebuild.js
-    - run: yarn make
-    - uses: actions/upload-artifact@v3
-      with:
-        name: build-win
-        path: cysync/out/make/*
-        retention-days: 1
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+      - run: yarn
+      - run: node scripts\prebuild.js
+      - run: yarn make
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build-win
+          path: cysync/out/make/*
+          retention-days: 1
 
   build-macos:
     runs-on: macos-latest
@@ -73,13 +73,13 @@ jobs:
         run: |
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          
+
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
-          
+
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          
+
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
       - name: Build Macos Arm64 & Intel
@@ -87,8 +87,7 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
         run: |
-          ./scripts/install-nvm-mac.sh
-          arch -arm64 ./scripts/build-mac.sh
+          # arch -arm64 ./scripts/build-mac.sh
           arch -x86_64 ./scripts/build-mac.sh
       - uses: actions/upload-artifact@v3
         with:
@@ -105,13 +104,13 @@ jobs:
         node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
-    - uses: actions/download-artifact@v3
-    - run: yarn --ignore-scripts
-    - run: node scripts/prebuild.js
-    - run: node scripts/postbuild.js "build-win,build-linux,build-macos"
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+      - uses: actions/download-artifact@v3
+      - run: yarn --ignore-scripts
+      - run: node scripts/prebuild.js
+      - run: node scripts/postbuild.js "build-win,build-linux,build-macos"

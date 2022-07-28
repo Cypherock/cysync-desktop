@@ -5,5 +5,7 @@ npm install yarn -g
 rm -rf ./cysync/node_modules
 yarn install
 node scripts/prebuild.js
+yarn install
 yarn make
+nvm deactivate
 nvm uninstall 16

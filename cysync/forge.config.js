@@ -11,10 +11,6 @@ const config = {
       entitlements: 'entitlements.plist',
       'entitlements-inherit': 'entitlements.plist',
       'signature-flags': 'library'
-    },
-    osxNotarize: {
-      appleId: process.env.APPLE_ID || '',
-      appleIdPassword: process.env.APPLE_ID_PASSWORD || ''
     }
   },
   makers: [
@@ -105,6 +101,13 @@ const config = {
     ]
   ]
 };
+
+if (process.env.APPLE_ID && process.env.APPLE_ID_PASSWORD) {
+  config.packagerConfig.osxNotarize = {
+    appleId: process.env.APPLE_ID,
+    appleIdPassword: process.env.APPLE_ID_PASSWORD
+  };
+}
 
 if (process.platform === 'win32') {
   config.packagerConfig.name = 'Cypherock CySync';
