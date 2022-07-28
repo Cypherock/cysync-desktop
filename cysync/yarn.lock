@@ -199,10 +199,10 @@
     transform-pouch "^2.0.0"
     winston "^3.6.0"
 
-"@cypherock/protocols@3.0.1-beta.48":
-  version "3.0.1-beta.48"
-  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.48.tgz#22c6034240d22919cc79c66d468b5a00d2e64fcf"
-  integrity sha512-e+WF8I9QB74DUUkejE+o3bnMLNsygyYw1VtMMEt8JxTFGNxEhhcEE/4nPJUbrYEhbTPljeTw0YkXJBnYs/urWg==
+"@cypherock/protocols@3.0.1-beta.49":
+  version "3.0.1-beta.49"
+  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.49.tgz#6f32a0f2be615e01db424c12a9346dec6e94dd5a"
+  integrity sha512-sb8rW6Ae9kHAHGjjQ6qd9pYFXuEFy1wdlWTnG2t59cDwl36y6qqfYz3KCDwZYafsLXrdgDIxBB/h6B827nbsgg==
   dependencies:
     "@cypherock/communication" "3.0.1-beta.24"
     "@cypherock/database" "3.0.1-beta.31"
@@ -2649,7 +2649,7 @@ apexcharts@^3.32.1:
     svg.resize.js "^1.4.3"
     svg.select.js "^3.0.1"
 
-appdmg@^0.6.0, appdmg@^0.6.4:
+appdmg@^0.6.0:
   version "0.6.4"
   resolved "https://registry.yarnpkg.com/appdmg/-/appdmg-0.6.4.tgz#283b85cc761c1d924f2370bd5cdbd92824b12ef3"
   integrity sha512-YTilgNF0DF2DSRzGzzGDxaTMLXlhe3b3HB8RAaoJJ/VJXZbOlzIAcZ7gdPniHUVUuHjGwnS7fUMd4FvO2Rp94A==
