@@ -52,6 +52,8 @@ export interface ConnectionContextInterface {
   setOpenCancelFlowPrompt: React.Dispatch<React.SetStateAction<boolean>>;
   updateRequiredType: UpdateRequiredType;
   isDeviceAvailable: boolean;
+  blockConnectionPopup: boolean;
+  setBlockConnectionPopup: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ConnectionContext: React.Context<ConnectionContextInterface> =
@@ -83,6 +85,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
 
   const [isDeviceUpdating, setIsDeviceUpdating] = useState(false);
   const [blockNewConnection, setBlockNewConnection] = useState(false);
+  const [blockConnectionPopup, setBlockConnectionPopup] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [inBackgroundProcess, setInBackgroundProcess] = useState(false);
   const [openErrorPrompt, setOpenErrorPrompt] = useState(false);
@@ -263,6 +266,10 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   }, [internalDeviceConnection, inBootloader, blockNewConnection]);
 
   useEffect(() => {
+    logger.info('Block new connection status', { blockNewConnection });
+  }, [blockNewConnection]);
+
+  useEffect(() => {
     if (completed && deviceState && inTestApp(deviceState)) {
       if (errorObj.isSet) {
         logger.info('Error in connecting device on initial', {
@@ -415,24 +422,30 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       return false;
     }
 
+    if (isInFlow) {
+      setOpenCancelFlowPrompt(true);
+      return false;
+    }
+
     if (useInternal) {
       if (internalDeviceConnection && !inBackgroundProcess) {
         return true;
       }
 
-      setOpenErrorPrompt(true);
-      return false;
-    }
-
-    if (isInFlow) {
-      setOpenCancelFlowPrompt(true);
+      snackbar.showSnackbar(
+        'Please connect the device and try again',
+        'warning'
+      );
       return false;
     }
 
     if (isReady) return true;
 
     if (deviceConnectionState === DeviceConnectionState.NOT_CONNECTED) {
-      setOpenErrorPrompt(true);
+      snackbar.showSnackbar(
+        'Please connect the device and try again',
+        'warning'
+      );
     } else {
       setOpenMisconfiguredPrompt(true);
     }
@@ -517,7 +530,9 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         updateRequiredType,
         blockNewConnection,
         setBlockNewConnection: externalSetBlockNewConnection,
-        isDeviceAvailable: deviceConnectionStatus
+        isDeviceAvailable: deviceConnectionStatus,
+        setBlockConnectionPopup,
+        blockConnectionPopup
       }}
     >
       {children}

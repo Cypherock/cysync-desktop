@@ -66,7 +66,7 @@ const WalletSend = () => {
     <>
       {sendTransaction.errorObj.isSet && (
         <ErrorDialog
-          open={sendTransaction.errorObj.isSet}
+          open={sendTransaction.errorObj.isSet && sendForm}
           handleClose={() => handleSendFormClose(true)}
           errorObj={sendTransaction.errorObj}
           flow="Sending Transaction"

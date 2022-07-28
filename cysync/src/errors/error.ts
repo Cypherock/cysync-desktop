@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { CodeToErrorMap, ErrorsSet } from './types';
 
 class DisplayError {
@@ -14,7 +16,7 @@ class DisplayError {
    * @returns formatted error string
    */
   public showError() {
-    if (this.isSet) return this.getCode() + ' : ' + this.getMessage();
+    if (this.isSet) return this.getCode() + ': ' + this.getMessage();
     return '';
   }
   /**
@@ -36,6 +38,7 @@ class DisplayError {
 class CyError extends DisplayError {
   public childErrors: DisplayError[];
   static map: CodeToErrorMap;
+
   constructor(code?: ErrorsSet, meta?: string) {
     super(undefined, undefined);
     this.childErrors = [];
@@ -43,6 +46,7 @@ class CyError extends DisplayError {
     if (!code) return;
     this.setError(code, meta);
   }
+
   public setError(code: ErrorsSet, meta?: string) {
     this.isSet = true;
     let parentCode = code;
@@ -61,14 +65,24 @@ class CyError extends DisplayError {
       this.message = messageUnion;
     }
   }
+
   public pushSubErrors(code: ErrorsSet, meta?: string) {
     const messageUnion = CyError.map[code].message;
     let dispError;
-    if (messageUnion === 'string')
+    if (typeof messageUnion === 'string') {
       dispError = new DisplayError(code, messageUnion);
-    else if (meta && typeof messageUnion === 'function')
+    } else if (meta && typeof messageUnion === 'function') {
       dispError = new DisplayError(code, messageUnion(meta));
-    this.childErrors.push(dispError);
+    }
+
+    if (!dispError) {
+      logger.error('Cannot find proper messageUnion for the error code', {
+        code,
+        meta
+      });
+    } else {
+      this.childErrors.push(dispError);
+    }
     return dispError;
   }
 }

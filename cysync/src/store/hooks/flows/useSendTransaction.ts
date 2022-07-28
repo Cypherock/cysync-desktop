@@ -4,7 +4,8 @@ import {
   DeviceConnection,
   DeviceError,
   DeviceErrorType,
-  EthCoinData
+  EthCoinData,
+  NearCoinData
 } from '@cypherock/communication';
 import {
   InputOutput,
@@ -81,15 +82,26 @@ export const broadcastTxn = async (
       throw new Error('brodcast-failed');
     }
     return resp.data.result.toUpperCase();
+  } else if (coin instanceof NearCoinData) {
+    const resp = await Server.near.transaction
+      .broadcastTxn({
+        transaction: signedTxn,
+        network: coin.network
+      })
+      .request();
+    if (resp.status === 0) {
+      throw new Error('brodcast-failed');
+    }
+    return resp.data.transaction.hash;
+  } else {
+    const res = await Server.bitcoin.transaction
+      .broadcastTxn({
+        transaction: signedTxn,
+        coinType
+      })
+      .request();
+    return res.data.tx.hash;
   }
-
-  const res = await Server.bitcoin.transaction
-    .broadcastTxn({
-      transaction: signedTxn,
-      coinType
-    })
-    .request();
-  return res.data.tx.hash;
 };
 
 export const verifyAddress = (address: string, coin: string) => {
@@ -99,6 +111,15 @@ export const verifyAddress = (address: string, coin: string) => {
     throw new Error(`Cannot find coin details for coin: ${coin}`);
   }
 
+  if (coinDetails.group === CoinGroup.Near) {
+    const regexImplicit = /^[a-f0-9]{64}$/;
+    const regexRegistered =
+      coinDetails.validatorNetworkType === 'testnet'
+        ? /^([a-z0-9]{2,56}[-_.]?)+\.testnet$/
+        : /^([a-z0-9]{2,59}[-_.]?)+\.near$/;
+
+    return regexImplicit.test(address) || regexRegistered.test(address);
+  }
   return WAValidator.validate(
     address,
     coinDetails.validatorCoinName,
@@ -115,6 +136,8 @@ export interface HandleSendTransactionOptions {
   passphraseExists: boolean;
   xpub: string;
   zpub: string | undefined;
+  customAccount: string | undefined;
+  newAccountId: string | undefined;
   coinType: string;
   outputList: any[];
   fees: number;
@@ -160,7 +183,8 @@ export interface UseSendTransactionValues {
     outputList: any[],
     fees: number,
     isSendAll: boolean | undefined,
-    data: any
+    data: any,
+    customAccount: string | undefined
   ) => Promise<void>;
   onTxnBroadcast: (params: {
     walletId: string;
@@ -228,7 +252,16 @@ export const useSendTransaction: UseSendTransaction = () => {
   };
 
   const handleEstimateFee: UseSendTransactionValues['handleEstimateFee'] =
-    async (xpub, zpub, coinType, outputList, fees, isSendAll, data) => {
+    async (
+      xpub,
+      zpub,
+      coinType,
+      outputList,
+      fees,
+      isSendAll,
+      data,
+      customAccount
+    ) => {
       // If it has no input, then set the tx fee and amount to 0.
       if (!isSendAll && outputList.length > 0) {
         let hasInput = false;
@@ -276,7 +309,8 @@ export const useSendTransaction: UseSendTransaction = () => {
           fees,
           isSendAll,
           data,
-          transactionDb
+          transactionDb,
+          customAccount
         )
         .then(() => {
           setEstimationError(undefined);
@@ -353,6 +387,8 @@ export const useSendTransaction: UseSendTransaction = () => {
       passphraseExists,
       xpub,
       zpub,
+      customAccount,
+      newAccountId,
       coinType,
       outputList,
       fees,
@@ -588,6 +624,8 @@ export const useSendTransaction: UseSendTransaction = () => {
           passphraseExists,
           xpub,
           zpub,
+          customAccount,
+          newAccountId,
           coinType,
           outputList,
           fee: fees,
@@ -717,14 +755,14 @@ export const useSendTransaction: UseSendTransaction = () => {
         transactionDb.insert(feeTxn);
       } else {
         tx = {
-          hash: txHash.toLowerCase(),
+          hash: coin.toLowerCase() === 'near' ? txHash : txHash.toLowerCase(),
           amount: amount.toString(),
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
           walletId,
           slug: coin.toLowerCase(),
           confirmations: 0,
-          status: 0,
+          status: coin.toLowerCase() === 'near' ? 1 : 0,
           sentReceive: SentReceive.SENT,
           confirmed: new Date(),
           blockHeight: -1,

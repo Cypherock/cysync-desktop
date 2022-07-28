@@ -11,6 +11,7 @@ import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
+import * as uuid from 'uuid';
 
 import packageJson from '../../../package.json';
 import success from '../../assets/icons/generic/success.png';
@@ -138,11 +139,11 @@ type ShowFeedback = (options?: {
   initFeedbackState?: FeedbackData['isInitFeedbackState'];
   handleClose?: FeedbackData['handleClose'];
   disableDeviceLogs?: boolean;
-}) => void;
+}) => string;
 
 export interface FeedbackContextInterface {
   showFeedback: ShowFeedback;
-  closeFeedback: () => void; // use this to cleanup feedback component
+  closeFeedback: (id?: string) => void; // use this to cleanup feedback component
 }
 
 export const FeedbackContext: React.Context<FeedbackContextInterface> =
@@ -172,6 +173,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   const [isContact, setIsContact] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [openId, setOpenId] = useState('');
 
   const {
     internalDeviceConnection: deviceConnection,
@@ -247,7 +249,11 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       });
     }
 
+    const randomId = uuid.v4();
+    setOpenId(randomId);
     setIsOpen(true);
+
+    return randomId;
   };
 
   const fetchLogs = () => {
@@ -255,6 +261,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       !feedbackInput.attachDeviceLogs &&
       deviceConnection &&
       firmwareVersion &&
+      !deviceConnection.inBootloader &&
       beforeFlowStart(true)
     ) {
       clearErrorObj();
@@ -414,6 +421,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       deviceConnection &&
       [
         DeviceConnectionState.VERIFIED,
+        DeviceConnectionState.LAST_AUTH_FAILED,
+        DeviceConnectionState.NEW_DEVICE,
+        DeviceConnectionState.PARTIAL_STATE,
         DeviceConnectionState.IN_TEST_APP
       ].includes(deviceConnectionState)
     );
@@ -438,7 +448,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     }
   }, [isOpen]);
 
-  const onClose = () => {
+  const onClose = (id = '') => {
+    if (id !== openId) return;
     if (deviceLogsLoading) {
       if (logRequestStatus === 2) {
         snackbar.showSnackbar(
@@ -483,6 +494,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         return 'Looks like the device authentication failed the last time.';
       case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Looks like the device is not in the main menu.';
+      case DeviceConnectionState.UPDATE_REQUIRED:
+        return 'This device is not supported on the current version of cysync.';
       case DeviceConnectionState.UNKNOWN_ERROR:
         return 'An unknown error occurred while connecting the device.';
       default:
@@ -497,7 +510,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         maxWidth="sm"
         isClosePresent
         open={isOpen}
-        handleClose={onClose}
+        handleClose={() => onClose(openId)}
         restComponents={
           <Root container>
             {!isSubmitted &&

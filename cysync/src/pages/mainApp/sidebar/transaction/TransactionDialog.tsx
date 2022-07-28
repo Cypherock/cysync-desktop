@@ -1,7 +1,13 @@
-import { ETHCOINS } from '@cypherock/communication';
+import {
+  CoinGroup,
+  COINS,
+  ETHCOINS,
+  NearCoinData
+} from '@cypherock/communication';
 import {
   bitcoin as bitcoinServer,
-  eth as ethServer
+  eth as ethServer,
+  near as nearServer
 } from '@cypherock/server-wrapper';
 import CopyIcon from '@mui/icons-material/FileCopyOutlined';
 import Chip from '@mui/material/Chip';
@@ -161,19 +167,31 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   };
 
   const openTxn = () => {
+    const coin = COINS[txn.slug];
+    if (!coin) {
+      logger.error('Invalid COIN in txn: ' + txn.coinName);
+      return;
+    }
     if (ETHCOINS[txn.coin] || txn.isErc20) {
-      const coin = ETHCOINS[txn.coin];
+      const ecoin = ETHCOINS[txn.coin];
 
-      if (!coin) {
+      if (!ecoin) {
         logger.error('Invalid ETH COIN in txn: ' + txn.coin);
         return;
       }
 
       shell.openExternal(
         ethServer.transaction.getOpenTxnLink({
-          network: coin.network,
+          network: ecoin.network,
           txHash: txn.hash,
           isConfirmed: txn.confirmations && txn.confirmations > 0
+        })
+      );
+    } else if (coin.group === CoinGroup.Near) {
+      shell.openExternal(
+        nearServer.transaction.getOpenTxnLink({
+          network: (coin as NearCoinData).network,
+          txHash: txn.hash
         })
       );
     } else {

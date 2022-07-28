@@ -6,6 +6,7 @@ import { flatMap } from 'lodash';
 
 import {
   BalanceSyncItem,
+  CustomAccountSyncItem,
   HistorySyncItem,
   LatestPriceSyncItem,
   PriceSyncItem,
@@ -13,6 +14,7 @@ import {
   SyncQueueItem
 } from '../types';
 
+import { customAccountExecutor } from '.';
 import * as balanceExecutor from './balance';
 import * as historyExecutor from './history';
 import * as latestPriceExecutor from './latestPrice';
@@ -49,6 +51,8 @@ const getAllMetadata = (items: SyncQueueItem[]) => {
         meta = historyExecutor.getRequestsMetadata(item);
       } else if (item instanceof BalanceSyncItem) {
         meta = balanceExecutor.getRequestsMetadata(item);
+      } else if (item instanceof CustomAccountSyncItem) {
+        meta = customAccountExecutor.getRequestsMetadata(item);
       } else if (item instanceof PriceSyncItem) {
         meta = priceExecutor.getRequestsMetadata(item);
       } else if (item instanceof LatestPriceSyncItem) {
@@ -123,6 +127,12 @@ const getAllProcessResponses = async (
         );
       } else if (item instanceof BalanceSyncItem) {
         processResult = await balanceExecutor.processResponses(item, resList);
+      } else if (item instanceof CustomAccountSyncItem) {
+        processResult = await customAccountExecutor.processResponses(
+          item,
+          resList,
+          options
+        );
       } else if (item instanceof PriceSyncItem) {
         processResult = await priceExecutor.processResponses(item, resList);
       } else if (item instanceof LatestPriceSyncItem) {

@@ -1,7 +1,6 @@
 import { DeviceErrorType } from '@cypherock/communication';
 import { FlowErrorType } from '@cypherock/protocols';
 import { WalletErrorType } from '@cypherock/wallet';
-
 export enum CysyncError {
   // NETWORK_ERROR = 'DS_CONN_3001',
   NETWORK_FAILURE = 'DS_CONN_3002',
@@ -59,6 +58,7 @@ export enum CysyncError {
   SEND_TXN_VERIFICATION_FAILED = 'DS_OPTS_1002',
   SEND_TXN_UNKNOWN_ERROR = 'DS_MISC_5501',
 
+  RECEIVE_TXN_REJECTED = 'HD_UACT_1507',
   RECEIVE_TXN_XPUB_MISSING = 'HD_OPS_1502',
   RECEIVE_TXN_DEVICE_MISCONFIGURED = 'DS_OPTS_2500',
   RECEIVE_TXN_GENERATE_UNVERIFIED_FAILED = 'DS_OSPT_1508',
@@ -95,7 +95,8 @@ export enum CysyncError {
   NOTIFICATIONS_REFRESH_FAILED = 'DS_SYNC_5503',
   PRICE_REFRESH_FAILED = 'DS_SYNC_5501',
   SYNC_MAX_TRIES_EXCEEDED = 'DS_SYNC_1002',
-  TUTORIALS_UNKNOWN_ERROR = 'DS_MISC_5503'
+  TUTORIALS_UNKNOWN_ERROR = 'DS_MISC_5503',
+  STOP_ONGOING_FLOW = 'DS_MISC_1001'
 }
 export type ErrorsSet =
   | CysyncError

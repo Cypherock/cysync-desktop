@@ -112,7 +112,7 @@ const en: I18nStrings = {
       `Request was rejected on the X1 Wallet\nPlease restart the process to send ${coin} on the CySync application`,
     SEND_TXN_INSUFFICIENT_BALANCE: (coin: string) =>
       `You do not have enough ${coin} to make this transaction`,
-    SEND_TXN_SUFFICIENT_CONFIRMED_BALANCE: `This transaction requires UTXOs from your previous transaction. Wait for few minutes before retrying`,
+    SEND_TXN_BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE: `This transaction requires UTXOs from your previous transaction. Wait for few minutes before retrying`,
     SEND_TXN_SIZE_TOO_LARGE: 'This transaction cannot be performed.',
     SEND_TXN_BROADCAST_FAILED: 'Error trying to broadcast transaction.',
     SEND_TXN_UNKNOWN_ERROR: `Some internal occured. Please disconnect and then reconnect the device and retry.`,
@@ -125,7 +125,9 @@ const en: I18nStrings = {
     INCOMPATIBLE_DEVICE_AND_DESKTOP: 'Both needs upgrade',
 
     TUTORIALS_UNKNOWN_ERROR:
-      'Some internal error occured while fetching tutorials.'
+      'Some internal error occured while fetching tutorials.',
+    STOP_ONGOING_FLOW: 'Stopping an ongoing flow',
+    PROCESS_ABORTED_BY_USER: (flow: string) => `${flow} was stopped by user`
   }
 };
 

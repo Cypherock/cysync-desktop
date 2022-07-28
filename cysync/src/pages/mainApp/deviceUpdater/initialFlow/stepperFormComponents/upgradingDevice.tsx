@@ -89,6 +89,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     deviceConnection,
     isCompleted,
     setBlockNewConnection,
+    setIsDeviceUpdating,
     isInternetSlow,
     updateDownloaded,
     handleFeedbackOpen,
@@ -103,6 +104,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const onClose = () => {
     setBlockNewConnection(false);
+    setIsDeviceUpdating(false);
     handleClose();
   };
 
@@ -127,6 +129,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     startDeviceUpdate();
 
     return () => {
+      setIsDeviceUpdating(false);
       setBlockNewConnection(false);
       logger.info('Closed device update screen');
     };
