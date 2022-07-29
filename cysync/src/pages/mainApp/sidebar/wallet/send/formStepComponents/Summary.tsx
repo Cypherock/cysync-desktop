@@ -234,7 +234,8 @@ const Summary: React.FC<StepComponentProps> = ({
                     true
                   )}) `
                 : `${sendTransaction.sendMaxAmount} ~( $${formatDisplayAmount(
-                    sendTransaction.sendMaxAmount * parseFloat(coinPrice),
+                    parseFloat(sendTransaction.sendMaxAmount) *
+                      parseFloat(coinPrice),
                     2,
                     true
                   )}) `
