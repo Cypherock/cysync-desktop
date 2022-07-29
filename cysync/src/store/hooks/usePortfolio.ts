@@ -312,16 +312,20 @@ export const usePortfolio: UsePortfolio = () => {
     const allCoins = await coinDb.getAll();
     const allTokens = await tokenDb.getAll();
     const allItems = [
-      ...allCoins
-        .map(coin => {
-          return { parent: undefined, slug: coin.slug };
-        })
-        .filter((coin, index, self) => self.indexOf(coin) === index),
-      ...allTokens
-        .map(token => {
-          return { parent: token.coin, slug: token.slug };
-        })
-        .filter((token, index, self) => self.indexOf(token) === index)
+      ...new Map(
+        allCoins
+          .map(coin => {
+            return { parent: undefined, slug: coin.slug };
+          })
+          .map(item => [JSON.stringify(item), item])
+      ).values(),
+      ...new Map(
+        allTokens
+          .map(token => {
+            return { parent: token.coin, slug: token.slug };
+          })
+          .map(item => [JSON.stringify(item), item])
+      ).values()
     ];
 
     for (const item of allItems) {
@@ -383,16 +387,20 @@ export const usePortfolio: UsePortfolio = () => {
       const allCoins = await coinDb.getAll();
       const allTokens = await tokenDb.getAll();
       const allItems = [
-        ...allCoins
-          .map(coin => {
-            return { parent: undefined, slug: coin.slug };
-          })
-          .filter((coin, index, self) => self.indexOf(coin) === index),
-        ...allTokens
-          .map(token => {
-            return { parent: token.coin, slug: token.slug };
-          })
-          .filter((token, index, self) => self.indexOf(token) === index)
+        ...new Map(
+          allCoins
+            .map(coin => {
+              return { parent: undefined, slug: coin.slug };
+            })
+            .map(item => [JSON.stringify(item), item])
+        ).values(),
+        ...new Map(
+          allTokens
+            .map(token => {
+              return { parent: token.coin, slug: token.slug };
+            })
+            .map(item => [JSON.stringify(item), item])
+        ).values()
       ];
       for (const item of allItems) {
         let coinData;

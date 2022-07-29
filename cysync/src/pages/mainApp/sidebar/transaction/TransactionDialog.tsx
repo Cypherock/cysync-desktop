@@ -130,7 +130,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         })
         .catch(logger.error);
 
-      if (txn.coin) {
+      if (txn.coin && txn.coin !== txn.slug) {
         getLatestPriceForCoin(txn.slug.toLowerCase(), txn.coin.toLowerCase())
           .then(price => {
             setEthCoinPrice(price);

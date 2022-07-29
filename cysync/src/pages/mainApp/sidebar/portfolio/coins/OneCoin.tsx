@@ -98,18 +98,11 @@ const OneCoin: React.FC<OneCoinProps> = props => {
   return (
     <Root onClick={onClick} container>
       <Grid item xs={3} className={classes.coin}>
-        {coinParent ? (
-          <CoinIcons
-            initial={coinInitial.toUpperCase()}
-            parentCoin={coinParent.toLowerCase()}
-            style={{ marginRight: '10px' }}
-          />
-        ) : (
-          <CoinIcons
-            initial={coinInitial.toUpperCase()}
-            style={{ marginRight: '10px' }}
-          />
-        )}
+        <CoinIcons
+          initial={coinInitial.toUpperCase()}
+          parentCoin={coinParent?.toLowerCase()}
+          style={{ marginRight: '10px' }}
+        />
         <div className={classes.coinText}>
           <Typography
             variant="body2"

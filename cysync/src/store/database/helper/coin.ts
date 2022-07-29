@@ -16,7 +16,9 @@ export const getLatestPriceForCoin = async (
 
     const token = parentCoinData.tokenList[coin];
     if (!token) {
-      throw new Error('Invalid token: ' + coin);
+      throw new Error(
+        'Invalid token: ' + coin + ' in parentCoin: ' + parentCoin
+      );
     }
     coinData = token;
   }
@@ -36,13 +38,13 @@ export const getLatestPriceForCoin = async (
 };
 
 export const getLatestPriceForCoins = async (
-  coins: Array<[string, string]>
+  coins: Array<{ slug: string; parent?: string }>
 ) => {
   const latestPrices: Record<string, number | undefined> = {};
   for (const coin of coins) {
-    latestPrices[coin[0].toLowerCase()] = await getLatestPriceForCoin(
-      coin[0],
-      coin[1]
+    latestPrices[coin.slug.toLowerCase()] = await getLatestPriceForCoin(
+      coin.slug,
+      coin.parent
     );
   }
   return latestPrices;

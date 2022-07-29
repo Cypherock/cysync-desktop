@@ -1,4 +1,4 @@
-import { COINS, Erc20CoinData } from '@cypherock/communication';
+import { AbsCoinData, COINS } from '@cypherock/communication';
 import { Coin } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 
@@ -48,16 +48,45 @@ export const useHistory: UseHistory = () => {
     const allWallets = await walletDb.getAll();
     const latestTransactionsWithPrice: DisplayTransaction[] = [];
 
-    const allUniqueCoins = new Set<[string, string]>();
-    for (const txn of res) {
-      allUniqueCoins.add([txn.slug, txn.coin]);
-    }
+    const allUniqueCoins = [
+      ...new Map(
+        res
+          .map(txn => {
+            return {
+              parent: txn.slug !== txn.coin ? txn.coin : undefined,
+              slug: txn.slug
+            };
+          })
+          .map(item => [JSON.stringify(item), item])
+      ).values()
+    ];
 
     const latestPrices = await getLatestPriceForCoins([...allUniqueCoins]);
 
     // Make all the conversions here. [ex: Satoshi to BTC]
     for (const txn of res) {
-      const coin = COINS[txn.slug.toLowerCase()];
+      let coin: AbsCoinData;
+      let isToken = false;
+      if (txn.coin && txn.coin !== txn.slug) {
+        const parent = COINS[txn.coin.toLowerCase()];
+        if (!parent) {
+          logger.warn(`Cannot find parent coin ${txn.coin}`);
+          continue;
+        }
+        coin = parent.tokenList[txn.slug.toLowerCase()];
+        isToken = true;
+      } else {
+        coin = COINS[txn.slug.toLowerCase()];
+      }
+
+      if (!coin) {
+        logger.warn(`Cannot find coinType: ${txn.slug}`);
+        continue;
+      }
+      const feeCoinMultiplier = isToken
+        ? COINS[txn.coin.toLowerCase()].multiplier
+        : coin.multiplier;
+
       const newTxn: DisplayTransaction = {
         ...txn,
         coinDecimal: coin.decimal,
@@ -73,15 +102,10 @@ export const useHistory: UseHistory = () => {
       let inputs: DisplayInputOutput[] = [];
       let outputs: DisplayInputOutput[] = [];
 
-      if (!coin) {
-        logger.warn(`Cannot find coinType: ${newTxn.slug}`);
-        continue;
-      }
-
       if (txn.inputs) {
         inputs = txn.inputs.map(elem => {
           const val = new BigNumber(elem.value || 0)
-            .dividedBy(coin.multiplier)
+            .dividedBy(feeCoinMultiplier)
             .toString();
 
           return {
@@ -94,7 +118,7 @@ export const useHistory: UseHistory = () => {
       if (txn.outputs) {
         outputs = txn.outputs.map(elem => {
           const val = new BigNumber(elem.value || 0)
-            .dividedBy(coin.multiplier)
+            .dividedBy(feeCoinMultiplier)
             .toString();
 
           return {
@@ -105,18 +129,6 @@ export const useHistory: UseHistory = () => {
       }
 
       const amount = new BigNumber(txn.amount || 0).dividedBy(coin.multiplier);
-
-      let feeCoinMultiplier = coin.multiplier;
-      let isErc20 = false;
-
-      if (COINS[newTxn.slug.toLowerCase()] instanceof Erc20CoinData) {
-        if (!newTxn.coin || !COINS[newTxn.coin]) {
-          throw new Error(`Cannot find ETH coin for token: ${newTxn.coin}`);
-        }
-        // the currency units correspond to ETH units and not the token decimals
-        feeCoinMultiplier = COINS[newTxn.coin].multiplier;
-        isErc20 = true;
-      }
 
       const fees = new BigNumber(txn.fees || 0).dividedBy(feeCoinMultiplier);
 
@@ -134,7 +146,7 @@ export const useHistory: UseHistory = () => {
       newTxn.inputs = inputs;
       newTxn.outputs = outputs;
 
-      newTxn.isErc20 = isErc20;
+      newTxn.isErc20 = isToken;
 
       const wallet = allWallets.find(ob => ob._id === newTxn.walletId);
       if (!wallet) {
