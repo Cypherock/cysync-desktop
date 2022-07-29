@@ -2,17 +2,22 @@ import {
   ALLCOINS,
   COINS,
   Erc20CoinData,
-  EthCoinData
+  EthCoinData,
+  NearCoinData
 } from '@cypherock/communication';
 import {
   batch as batchServer,
   eth as ethServer,
-  IRequestMetadata
+  IRequestMetadata,
+  near as nearServer
 } from '@cypherock/server-wrapper';
-import { generateEthAddressFromXpub } from '@cypherock/wallet';
+import {
+  generateEthAddressFromXpub,
+  generateNearAddressFromXpub
+} from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
-import { coinDb, tokenDb } from '../../../database';
+import { coinDb, customAccountDb, tokenDb } from '../../../database';
 import { BalanceSyncItem } from '../types';
 
 export const getRequestsMetadata = (
@@ -63,6 +68,22 @@ export const getRequestsMetadata = (
         'Invalid ethCoin found in balance sync item' + item.ethCoin
       );
     }
+  } else if (coin instanceof NearCoinData) {
+    const address = item.customAccount
+      ? item.customAccount
+      : generateNearAddressFromXpub(item.xpub);
+    const balanceMetadata = nearServer.wallet
+      .getBalance(
+        {
+          address,
+          network: coin.network
+        },
+        item.isRefresh
+      )
+      .getMetadata();
+    return [balanceMetadata];
+  } else {
+    throw new Error('Invalid coin in balance sync item: ' + item.coinType);
   }
 };
 
@@ -113,5 +134,32 @@ export const processResponses = async (
         'Invalid ethCoin found in balance sync item' + item.ethCoin
       );
     }
+  } else if (coin instanceof NearCoinData) {
+    const balanceRes = responses[0];
+
+    const balance = new BigNumber(balanceRes.data);
+    if (item.customAccount) {
+      await customAccountDb.updateBalance({
+        walletId: item.walletId,
+        name: item.customAccount,
+        balance: balance.toString()
+      });
+    }
+    const customAccounts = await customAccountDb.getAll({
+      walletId: item.walletId,
+      coin: item.coinType
+    });
+    let totalBalance = new BigNumber(0);
+    for (const customAccount of customAccounts) {
+      totalBalance = totalBalance.plus(new BigNumber(customAccount.balance));
+    }
+    await coinDb.updateTotalBalance({
+      xpub: item.xpub,
+      slug: item.coinType,
+      totalBalance: totalBalance.toString(),
+      totalUnconfirmedBalance: '0'
+    });
+  } else {
+    throw new Error('Invalid coin in balance sync item: ' + item.coinType);
   }
 };

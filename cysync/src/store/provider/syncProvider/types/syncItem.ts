@@ -1,5 +1,11 @@
 export interface SyncItemOptions {
-  type: 'history' | 'price' | 'balance' | 'wallet-setup' | 'latestPrice';
+  type:
+    | 'history'
+    | 'price'
+    | 'balance'
+    | 'wallet-setup'
+    | 'latestPrice'
+    | 'customAccount';
   coinType: string;
   module: string;
   isRefresh?: boolean;

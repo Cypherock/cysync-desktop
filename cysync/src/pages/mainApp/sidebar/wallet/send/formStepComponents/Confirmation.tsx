@@ -1,4 +1,4 @@
-import { COINS, EthCoinData } from '@cypherock/communication';
+import { COINS, EthCoinData, NearCoinData } from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
 import LaunchIcon from '@mui/icons-material/Launch';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -172,6 +172,13 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
           network: coin.network,
           txHash: sendTransaction.hash,
           isConfirmed
+        })
+      );
+    } else if (coin instanceof NearCoinData) {
+      shell.openExternal(
+        Server.near.transaction.getOpenTxnLink({
+          network: coin.network,
+          txHash: sendTransaction.hash
         })
       );
     } else {

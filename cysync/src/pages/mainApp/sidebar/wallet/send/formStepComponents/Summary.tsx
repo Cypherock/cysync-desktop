@@ -110,7 +110,7 @@ const Summary: React.FC<StepComponentProps> = ({
 
   const coinPrice = token ? token.displayPrice : coinDetails.displayPrice;
 
-  const { sendTransaction } = useSendTransactionContext();
+  const { sendForm, sendTransaction } = useSendTransactionContext();
 
   const [open, setOpen] = useState(false);
 
@@ -189,7 +189,7 @@ const Summary: React.FC<StepComponentProps> = ({
     <Root className={classes.root}>
       {broadcastError && (
         <ErrorDialog
-          open={!!broadcastError}
+          open={!!broadcastError && sendForm}
           handleClose={() => handleClose(true)}
           actionText="Retry"
           handleAction={handleRetry}
