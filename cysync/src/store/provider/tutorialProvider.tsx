@@ -47,7 +47,8 @@ export const TutorialProvider: React.FC = ({ children }) => {
     try {
       const res = await tutorialServer.getAll(version).request();
       if (res.data && res.data.tutorials) {
-        setTutorials(res.data.tutorials);
+        const sortedTutorials = res.data.tutorials;
+        setTutorials(sortedTutorials);
         setIsFetched(true);
       } else {
         throw new Error('Cannot find tutorials.');

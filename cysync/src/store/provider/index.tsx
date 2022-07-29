@@ -15,4 +15,5 @@ export * from './currentCoinProvider';
 export * from './sendTransactionContextProvider';
 export * from './receiveTransactionContextProvider';
 export * from './tokenContextProvider';
+export * from './customAccountContextProvider';
 export * from './i18nProvider';

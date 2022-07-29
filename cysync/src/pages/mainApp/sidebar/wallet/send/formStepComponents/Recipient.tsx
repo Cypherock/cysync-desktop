@@ -1,4 +1,10 @@
-import { CoinGroup, COINS, Erc20CoinData } from '@cypherock/communication';
+import {
+  CoinGroup,
+  COINS,
+  Erc20CoinData,
+  NearCoinData
+} from '@cypherock/communication';
+import { NearWallet } from '@cypherock/wallet';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { Typography } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -19,6 +25,7 @@ import SwitchButton from '../../../../../../designSystem/designComponents/button
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Checkbox from '../../../../../../designSystem/designComponents/input/checkbox';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
+import { useDebouncedFunction } from '../../../../../../store/hooks';
 import {
   changeFormatOfOutputList,
   verifyAddress
@@ -26,6 +33,7 @@ import {
 import {
   useConnection,
   useCurrentCoin,
+  useCustomAccountContext,
   useSelectedWallet,
   useSendTransactionContext,
   useTokenContext
@@ -35,6 +43,7 @@ import logger from '../../../../../../utils/logger';
 import getFees from '../../../../../../utils/networkFees';
 import Input from '../formComponents/Input';
 import CustomSlider from '../generalComponents/CustomSlider';
+import LabelText from '../generalComponents/LabelText';
 
 import {
   BatchRecipientData,
@@ -369,6 +378,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = classes;
 
   const { coinDetails } = useCurrentCoin();
+  const { customAccount } = useCustomAccountContext();
 
   const {
     selectedWallet: { passwordSet, passphraseSet, _id }
@@ -453,8 +463,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
   let validatedAddresses: any[any] = [];
 
   const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
+  const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
 
-  const handleCheckAddresses = (skipEmpty = false) => {
+  const handleCheckAddresses = async (skipEmpty = false) => {
     let isValid = true;
     validatedAddresses = [];
 
@@ -476,16 +487,34 @@ const Recipient: React.FC<StepComponentProps> = props => {
     }
 
     for (const data of validatedAddresses) {
-      handleVerificationErrors(data[0], data[1], data[2]);
+      let nearAccExistsError: string | undefined;
+      if (data[2]) nearAccExistsError = await checkNearAccount(data[1]);
+      if (nearAccExistsError) isValid = isValid && false;
+      handleVerificationErrors(data[0], data[1], data[2], nearAccExistsError);
     }
-
     return isValid;
   };
 
-  const handleRecipientSubmit = () => {
-    const isValid = handleCheckAddresses();
-    const isInputsValid = validateInputs();
+  const debouncedHandleCheckAddresses = useDebouncedFunction(
+    () => handleCheckAddresses(true),
+    200
+  );
+  const checkNearAccount = async (address: string) => {
+    const coin = COINS[coinDetails.slug];
+    if (coin instanceof NearCoinData) {
+      if (address.length === 64) return undefined;
+      const wallet = new NearWallet(coinDetails.xpub, coin);
+      const check = await wallet.getTotalBalanceCustom(address);
+      if (check.balance.cysyncError) {
+        return "This account dosen't exists";
+      }
+    }
+    return undefined;
+  };
 
+  const handleRecipientSubmit = async () => {
+    const isValid = await handleCheckAddresses();
+    const isInputsValid = validateInputs();
     if (isValid && isInputsValid) {
       if (!beforeFlowStart()) {
         return;
@@ -506,6 +535,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
         passphraseExists: passphraseSet,
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
+        customAccount: customAccount?.name,
+        newAccountId: null,
         coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
           batchRecipientData,
@@ -607,7 +638,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   return (
     <Root container className={root}>
-      {!isEthereum && (
+      {!isEthereum && !isNear && (
         <ButtonGroup
           disableElevation
           aria-label="outlined secondary button group"
@@ -642,7 +673,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             label="Receiver's Address"
             onChange={e => {
               handleInputChange(e);
-              handleCheckAddresses(true);
+              debouncedHandleCheckAddresses();
             }}
             value={batchRecipientData[0].recipient}
             error={batchRecipientData[0].errorRecipient.length !== 0}
@@ -654,7 +685,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             isClipboardPresent
             handleCopyFromClipboard={e => {
               handleCopyFromClipboard(e);
-              handleCheckAddresses(true);
+              debouncedHandleCheckAddresses();
             }}
           />
           <Input
@@ -694,6 +725,16 @@ const Recipient: React.FC<StepComponentProps> = props => {
             )}
             )
           </Typography>
+          {customAccount && (
+            <div style={{ marginTop: '5px', padding: '0.2rem 0.5rem' }}>
+              <LabelText
+                label="Your Account ID"
+                text={customAccount.name}
+                verified={sendTransaction.verified}
+              />
+            </div>
+          )}
+          {isNear && <div style={{ marginBottom: '10px' }} />}
           {isEthereum && (
             <div style={{ marginTop: '10px' }}>
               <FormControlLabel
@@ -737,7 +778,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
                     handleDelete={handleDelete}
                     handleChange={e => {
                       handleInputChange(e);
-                      handleCheckAddresses(true);
+                      debouncedHandleCheckAddresses();
                     }}
                     id={recipient.id.toString()}
                     recipient={recipient}
@@ -772,33 +813,35 @@ const Recipient: React.FC<StepComponentProps> = props => {
           </Grid>
         </Grid>
       )}
-      <div className={networkFees}>
-        <div className={networkLabel}>
-          <Typography className="text" color="textPrimary">
-            {`Network Fees ${isEthereum ? '( Gas Price )' : ''} :`}
-          </Typography>
-          <SwitchButton completed={feeType} handleChange={handleFeeType} />
-          <Typography color="secondary">
-            {feeType ? 'Slider' : 'Manual'}
-          </Typography>
-        </div>
-        {getFeeInput()}
-        {floatTransactionFee < lowFeePercentage * mediumFee && (
-          <div style={{ textAlign: 'center' }}>
-            <Typography
-              className="text"
-              color="secondary"
-              style={{ margin: 'auto', marginTop: '1.5rem' }}
-            >
-              <AlertIcon
-                className={classes.primaryColor}
-                style={{ marginRight: '5px', verticalAlign: 'bottom' }}
-              />
-              Transaction might be cancelled due to low fees
+      {!isNear && (
+        <div className={networkFees}>
+          <div className={networkLabel}>
+            <Typography className="text" color="textPrimary">
+              {`Network Fees ${isEthereum ? '( Gas Price )' : ''} :`}
+            </Typography>
+            <SwitchButton completed={feeType} handleChange={handleFeeType} />
+            <Typography color="secondary">
+              {feeType ? 'Slider' : 'Manual'}
             </Typography>
           </div>
-        )}
-      </div>
+          {getFeeInput()}
+          {floatTransactionFee < lowFeePercentage * mediumFee && (
+            <div style={{ textAlign: 'center' }}>
+              <Typography
+                className="text"
+                color="secondary"
+                style={{ margin: 'auto', marginTop: '1.5rem' }}
+              >
+                <AlertIcon
+                  className={classes.primaryColor}
+                  style={{ marginRight: '5px', verticalAlign: 'bottom' }}
+                />
+                Transaction might be cancelled due to low fees
+              </Typography>
+            </div>
+          )}
+        </div>
+      )}
       <div className={divider} />
       <div className={recipientFooter}>
         {sendTransaction.estimationError?.isSet ? (

@@ -1,6 +1,7 @@
 import {
   AddressDB,
   CoinDB,
+  CustomAccountDB,
   DeviceDB,
   NotificationDB,
   PassEncrypt,
@@ -19,6 +20,7 @@ export const deviceDb = new DeviceDB();
 export const walletDb = new WalletDB();
 export const coinDb = new CoinDB(passEnDb);
 export const tokenDb = new TokenDB();
+export const customAccountDb = new CustomAccountDB();
 export const addressDb = new AddressDB();
 export const receiveAddressDb = new ReceiveAddressDB();
 export const transactionDb = new TransactionDB();
@@ -35,6 +37,7 @@ export const initDatabases = async () => {
   await walletDb.intialise();
   await coinDb.intialise();
   await tokenDb.intialise();
+  await customAccountDb.intialise();
   await addressDb.intialise();
   await receiveAddressDb.intialise();
 };

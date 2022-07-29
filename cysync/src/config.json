@@ -3,6 +3,7 @@
   "LOG_LEVEL": "silly",
   "SERVER_ENV": "development",
   "GITHUB_REPO": "Cypherock/cysync-desktop-dev",
-  "BUILD_VERSION": "DEVELOPMENT",
-  "SIMULATE_PRODUCTION": true
+  "ALLOW_PRERELEASE": true,
+  "SIMULATE_PRODUCTION": false,
+  "BUILD_VERSION": "DEVELOPMENT"
 }

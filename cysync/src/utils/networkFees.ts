@@ -1,4 +1,4 @@
-import { COINS, EthCoinData } from '@cypherock/communication';
+import { COINS, EthCoinData, NearCoinData } from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
 import BigNumber from 'bignumber.js';
 
@@ -40,6 +40,13 @@ const getFees = async (coinType: string) => {
     }
 
     return fees;
+  } else if (coin instanceof NearCoinData) {
+    const resp = await Server.near.transaction
+      .getFees({
+        network: coin.network
+      })
+      .request();
+    return resp.data;
   }
 
   const res = await Server.bitcoin.transaction.getFees({ coinType }).request();

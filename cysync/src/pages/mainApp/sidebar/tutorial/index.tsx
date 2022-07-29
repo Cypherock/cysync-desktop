@@ -106,7 +106,7 @@ const Tutorial = () => {
     return (
       <Root container>
         {tutorials.map(tutorial => (
-          <Grid key={tutorial._id} item xs={6}>
+          <Grid key={tutorial._id} item xs={4}>
             <div style={{ padding: '20px' }}>
               <CustomPlayer url={tutorial.link} />
             </div>

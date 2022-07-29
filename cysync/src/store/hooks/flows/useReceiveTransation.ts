@@ -18,9 +18,15 @@ import {
   handleErrors
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
+import { DeferredReference } from '../../../utils/deferredReference';
 import logger from '../../../utils/logger';
 import { addressDb, receiveAddressDb } from '../../database';
-import { useCurrentCoin, useSelectedWallet, useSocket } from '../../provider';
+import {
+  useCurrentCoin,
+  useCustomAccountContext,
+  useSelectedWallet,
+  useSocket
+} from '../../provider';
 
 import * as flowHandlers from './handlers';
 
@@ -35,6 +41,7 @@ export interface HandleReceiveTransactionOptions {
   zpub?: string;
   contractAbbr?: string;
   passphraseExists?: boolean;
+  customAccount?: string;
 }
 
 export interface UseReceiveTransactionValues {
@@ -56,9 +63,17 @@ export interface UseReceiveTransactionValues {
   resetHooks: () => void;
   cancelReceiveTxn: (connection: DeviceConnection) => void;
   coinsConfirmed: boolean;
-  coinAddress: string;
+  accountExists: boolean;
+  replaceAccount: boolean;
+  userAction: DeferredReference<void>;
+  replaceAccountAction: DeferredReference<void>;
+  verifiedAccountId: boolean;
+  verifiedReplaceAccount: boolean;
+  replaceAccountStarted: boolean;
+  setReplaceAccountStarted: React.Dispatch<React.SetStateAction<boolean>>;
   imageData: string;
   QRError: boolean;
+  getUnverifiedReceiveAddress: () => void;
 }
 
 export type UseReceiveTransaction = () => UseReceiveTransactionValues;
@@ -74,17 +89,24 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [cardTapped, setCardTapped] = useState(false);
   const [passphraseEntered, setPassphraseEntered] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
-
-  const [coinAddress, setCoinAddress] = useState(receiveAddress);
+  const [accountExists, setAccountExists] = useState(false);
+  const [replaceAccount, setReplaceAccount] = useState(false);
+  const [verifiedAccountId, setVerifiedAccountId] = useState(false);
+  const [verifiedReplaceAccount, setVerifiedReplaceAccount] = useState(false);
+  const [replaceAccountStarted, setReplaceAccountStarted] = useState(false);
 
   const [imageData, setImageData] = useState('');
 
   const { selectedWallet } = useSelectedWallet();
   const { coinDetails } = useCurrentCoin();
+  const { customAccount: customAccountfromContext } = useCustomAccountContext();
   const [QRError, setQRError] = useState(false);
   const { addReceiveAddressHook } = useSocket();
   let recAddr: string | undefined;
   const receiveTransaction = new TransactionReceiver();
+
+  const userAction = new DeferredReference<void>();
+  const replaceAccountAction = new DeferredReference<void>();
 
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const resetHooks = () => {
@@ -96,6 +118,11 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     setCardTapped(false);
     setPassphraseEntered(false);
     setXpubMissing(false);
+    setAccountExists(false);
+    setReplaceAccount(false);
+    setVerifiedAccountId(false);
+    setVerifiedReplaceAccount(false);
+    setReplaceAccountStarted(false);
     receiveTransaction.removeAllListeners();
   };
 
@@ -126,7 +153,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       zpub,
       contractAbbr,
       passphraseExists,
-      coinName
+      coinName,
+      customAccount
     }) => {
       clearAll();
 
@@ -202,7 +230,62 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           logger.verbose('ReceiveAddress: Confirmed on device', { coinType });
           setCoinsConfirmed(true);
         } else {
-          const cyError = new CyError(CysyncError.ADD_COIN_REJECTED, coinName);
+          const cyError = new CyError(
+            CysyncError.RECEIVE_TXN_REJECTED,
+            coinName
+          );
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
+        }
+      });
+
+      receiveTransaction.on('customAccountExists', exists => {
+        if (exists) {
+          logger.verbose('ReceiveAddress: Custom Account exits on device', {
+            coinType
+          });
+          setAccountExists(true);
+        }
+      });
+
+      receiveTransaction.on('replaceAccountRequired', value => {
+        if (value) {
+          logger.verbose(
+            'ReceiveAddress: Device needs to replace an account to add a new one',
+            {
+              coinType
+            }
+          );
+          setReplaceAccount(true);
+        }
+      });
+
+      receiveTransaction.on('accountVerified', value => {
+        if (value) {
+          logger.verbose('ReceiveAddress: Account confirmed on device', {
+            coinType
+          });
+          setVerifiedAccountId(true);
+        } else {
+          const cyError = new CyError(
+            CysyncError.RECEIVE_TXN_REJECTED,
+            coinName
+          );
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
+        }
+      });
+
+      receiveTransaction.on('replaceAccountVerified', value => {
+        if (value) {
+          logger.verbose(
+            'ReceiveAddress: Replace account confirmed on device',
+            { coinType }
+          );
+          setVerifiedReplaceAccount(true);
+        } else {
+          const cyError = new CyError(
+            CysyncError.RECEIVE_TXN_REJECTED,
+            coinName
+          );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
       });
@@ -238,7 +321,10 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
             }
           );
 
-          if (!recAddr || recAddr.toLowerCase() !== val.toLowerCase()) {
+          if (
+            !customAccount &&
+            (!recAddr || recAddr.toLowerCase() !== val.toLowerCase())
+          ) {
             cyError.setError(
               CysyncError.RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE
             );
@@ -252,6 +338,15 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
             setVerified(true);
             onNewReceiveAddr(recAddr, walletId, coinType);
           }
+          if (customAccount) {
+            logger.verbose(
+              'ReceiveAddress: Address comparision skipped, found customAccount',
+              coinType
+            );
+          }
+
+          setVerified(true);
+          onNewReceiveAddr(recAddr, walletId, coinType);
         } else {
           cyError.setError(CysyncError.RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER);
         }
@@ -302,7 +397,10 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           xpub,
           zpub,
           contractAbbr,
-          passphraseExists
+          passphraseExists,
+          customAccount,
+          userAction,
+          replaceAccountAction
         });
 
         setIsInFlow(false);
@@ -356,66 +454,59 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     }
   }, [errorObj.isSet]);
 
-  const getReceiveAddress = async (
-    coinType: string,
-    xpub: string,
-    walletId: string,
-    zpub?: string
-  ) => {
-    let address = '';
-    let w;
+  const getReceiveAddress = async () => {
+    try {
+      const coinType = coinDetails.slug;
+      const xpub = coinDetails.xpub;
+      const walletId = coinDetails.walletId;
+      const zpub = coinDetails.zpub;
 
-    const coin = COINS[coinType];
+      let address = '';
+      let w;
 
-    if (!coin) {
-      throw new Error(`Invalid coinType ${coinType}`);
+      if (receiveAddress) {
+        return;
+      }
+
+      const coin = COINS[coinType];
+
+      if (!coin) {
+        throw new Error(`Invalid coinType ${coinType}`);
+      }
+
+      if (coin.group === CoinGroup.Ethereum) {
+        w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
+        address = (await w.newReceiveAddress()).toUpperCase();
+        // To make the first x in lowercase
+        address = `0x${address.slice(2)}`;
+      } else if (coin.group === CoinGroup.Near && customAccountfromContext) {
+        address = customAccountfromContext.name;
+      } else {
+        w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
+        address = await w.newReceiveAddress();
+      }
+
+      setReceiveAddress(address);
+      onNewReceiveAddr(address, selectedWallet._id, coinDetails.slug);
+    } catch (err) {
+      const cyError = new CyError(
+        CysyncError.RECEIVE_TXN_GENERATE_UNVERIFIED_FAILED
+      );
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
+      Analytics.Instance.event(
+        Analytics.Categories.RECEIVE_ADDR,
+        Analytics.Actions.ERROR
+      );
     }
-
-    if (coin.group === CoinGroup.Ethereum) {
-      w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
-      address = (await w.newReceiveAddress()).toUpperCase();
-      // To make the first x in lowercase
-      address = `0x${address.slice(2)}`;
-    } else {
-      w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
-      address = await w.newReceiveAddress();
-    }
-    return address;
   };
 
   useEffect(() => {
-    if (!coinAddress || !verified) {
-      getReceiveAddress(
-        coinDetails.slug,
-        coinDetails.xpub,
-        coinDetails.walletId,
-        coinDetails.zpub
-      )
-        .then(addr => {
-          setCoinAddress(addr);
-          onNewReceiveAddr(addr, selectedWallet._id, coinDetails.slug);
-          return null;
-        })
-        .catch(err => {
-          const cyError = new CyError(
-            CysyncError.RECEIVE_TXN_GENERATE_UNVERIFIED_FAILED
-          );
-          setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
-          Analytics.Instance.event(
-            Analytics.Categories.RECEIVE_ADDR,
-            Analytics.Actions.ERROR
-          );
-        });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (coinAddress) {
+    if (receiveAddress) {
       Analytics.Instance.event(
         Analytics.Categories.RECEIVE_ADDR,
         Analytics.Actions.COMPLETED
       );
-      QRCode.toDataURL(coinAddress, {
+      QRCode.toDataURL(receiveAddress, {
         errorCorrectionLevel: 'H',
         margin: 0.5,
         color: {
@@ -432,7 +523,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           setQRError(true);
         });
     }
-  }, [coinAddress]);
+  }, [receiveAddress]);
 
   return {
     handleReceiveTransaction,
@@ -451,8 +542,16 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     setXpubMissing,
     passphraseEntered,
     onNewReceiveAddr,
-    coinAddress,
+    accountExists,
+    replaceAccount,
+    userAction,
+    replaceAccountAction,
+    verifiedReplaceAccount,
+    verifiedAccountId,
+    replaceAccountStarted,
+    setReplaceAccountStarted,
     imageData,
-    QRError
-  } as UseReceiveTransactionValues;
+    QRError,
+    getUnverifiedReceiveAddress: getReceiveAddress
+  };
 };

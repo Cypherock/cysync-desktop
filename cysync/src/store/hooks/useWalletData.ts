@@ -6,6 +6,7 @@ import {
   addressDb,
   Coin,
   coinDb,
+  customAccountDb,
   priceHistoryDb,
   receiveAddressDb
 } from '../database';
@@ -195,6 +196,7 @@ export const useWalletData: UseWalletData = () => {
   ) => {
     await addressDb.delete({ walletId, coinType: coin });
     await receiveAddressDb.delete({ walletId, coinType: coin });
+    await customAccountDb.delete({ walletId, coin });
     await coinDb.delete({ xpub, slug: coin });
     refreshCoinsDebounced();
   };

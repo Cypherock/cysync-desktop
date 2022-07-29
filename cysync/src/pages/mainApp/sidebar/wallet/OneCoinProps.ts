@@ -35,3 +35,12 @@ export const EthereumOneCoinPropTypes = {
   ...OneCoinPropTypes,
   sortIndex: PropTypes.number.isRequired
 };
+
+export interface NearOneCoinProps extends OneCoinProps {
+  sortIndex: number;
+}
+
+export const NearOneCoinPropTypes = {
+  ...OneCoinPropTypes,
+  sortIndex: PropTypes.number.isRequired
+};

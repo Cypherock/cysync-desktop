@@ -10,6 +10,7 @@ export interface BalanceSyncItemOptions {
   parentCoin?: string;
   coinGroup: CoinGroup;
   zpub?: string;
+  customAccount?: string;
   isRefresh?: boolean;
 }
 
@@ -20,6 +21,8 @@ export class BalanceSyncItem extends SyncItem {
 
   public zpub?: string;
 
+  public customAccount?: string;
+
   constructor({
     xpub,
     zpub,
@@ -27,6 +30,7 @@ export class BalanceSyncItem extends SyncItem {
     walletId,
     parentCoin,
     coinGroup,
+    customAccount,
     module,
     isRefresh
   }: BalanceSyncItemOptions) {
@@ -41,6 +45,7 @@ export class BalanceSyncItem extends SyncItem {
     this.xpub = xpub;
     this.zpub = zpub;
     this.walletId = walletId;
+    this.customAccount = customAccount;
   }
 
   equals(item: BalanceSyncItem | SyncItem) {
@@ -48,7 +53,8 @@ export class BalanceSyncItem extends SyncItem {
       return (
         this.xpub === item.xpub &&
         this.coinType === item.coinType &&
-        this.coinGroup === item.coinGroup
+        this.coinGroup === item.coinGroup &&
+        this.customAccount === item.customAccount
       );
     }
 
@@ -63,6 +69,7 @@ export class BalanceSyncItem extends SyncItem {
       walletId: this.walletId,
       parentCoin: this.parentCoin,
       coinGroup: this.coinGroup,
+      customAccount: this.customAccount,
       module: this.module,
       isRefresh: this.isRefresh
     });

@@ -8,6 +8,7 @@ import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop'
 import {
   useConnection,
   useCurrentCoin,
+  useCustomAccountContext,
   useReceiveTransactionContext,
   useSelectedWallet,
   useTokenContext
@@ -29,6 +30,7 @@ const Root = styled('div')(() => ({
 
 const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
   const { coinDetails } = useCurrentCoin();
+  const { customAccount } = useCustomAccountContext();
 
   const { selectedWallet } = useSelectedWallet();
 
@@ -76,6 +78,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         coinName: name,
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
+        customAccount: customAccount?.name,
         contractAbbr: token ? token.slug : undefined,
         passphraseExists: selectedWallet.passphraseSet
       })
