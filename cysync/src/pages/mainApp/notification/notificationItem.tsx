@@ -159,7 +159,7 @@ const NotificationItem: React.FC<Props> = ({ notification, handleClose }) => {
 
   const onClick = () => {
     if (type === NotificationTypes.DEVICE_UPDATE) {
-      navigate(Routes.settings.device.upgrade);
+      navigate(`${Routes.settings.device.upgrade}?isRefresh=true`);
       handleClose();
     }
   };
