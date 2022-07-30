@@ -72,6 +72,7 @@ interface OneTransactionProps {
   time: string;
   walletName: string;
   initial: string;
+  coinParent: string;
   amount: string;
   value: string;
   result: string;
@@ -88,6 +89,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
     time,
     walletName,
     initial,
+    coinParent,
     amount,
     decimal,
     value,
@@ -129,7 +131,11 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
             display: 'flex'
           }}
         >
-          <CoinIcons initial={initial} style={{ marginRight: '10px' }} />
+          <CoinIcons
+            initial={initial}
+            style={{ marginRight: '10px' }}
+            parentCoin={coinParent?.toLowerCase()}
+          />
           <div
             className={clsx(classes.alignStartCenter, classes.flexColumn)}
             style={{ justifyContent: 'center' }}
@@ -213,6 +219,7 @@ OneTransaction.propTypes = {
   time: PropTypes.string.isRequired,
   walletName: PropTypes.string.isRequired,
   initial: PropTypes.string.isRequired,
+  coinParent: PropTypes.string,
   amount: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   result: PropTypes.string.isRequired,

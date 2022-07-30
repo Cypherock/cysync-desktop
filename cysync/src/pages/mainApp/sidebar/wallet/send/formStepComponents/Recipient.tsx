@@ -1,5 +1,4 @@
 import {
-  ALLCOINS,
   CoinGroup,
   COINS,
   Erc20CoinData,
@@ -247,7 +246,7 @@ const BatchRecipient: React.FC<BatchRecipientProps> = props => {
     index,
     allowDelete
   } = props;
-  const coin = ALLCOINS[coinAbbr];
+  const coin = COINS[coinAbbr];
   if (!coin) throw new Error(`Cannot find coinType: ${coinAbbr}`);
   return (
     <Grid container spacing={2}>
@@ -521,7 +520,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         return;
       }
 
-      const coin = ALLCOINS[coinAbbr];
+      const coin = COINS[coinAbbr];
       let contractAddress: string | undefined;
       if (token && coin instanceof Erc20CoinData) {
         contractAddress = coin.address;
@@ -703,7 +702,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             error={!!batchRecipientData[0].errorAmount}
             helperText={batchRecipientData[0].errorAmount}
             placeHolder="0"
-            decimal={(ALLCOINS[coinAbbr] || { decimal: 18 }).decimal}
+            decimal={(COINS[coinAbbr] || { decimal: 18 }).decimal}
             disabled={maxSend}
             customIcon={
               <Button

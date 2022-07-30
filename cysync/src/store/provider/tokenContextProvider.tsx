@@ -4,6 +4,7 @@ import { DisplayToken } from '../hooks/types';
 
 export interface TokenContextInterface {
   token: DisplayToken;
+  ethCoin: string;
 }
 
 export const TokenContext: React.Context<TokenContextInterface> =

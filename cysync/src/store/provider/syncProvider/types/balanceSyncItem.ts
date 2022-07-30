@@ -1,3 +1,5 @@
+import { CoinGroup } from '@cypherock/communication';
+
 import { SyncItem } from './syncItem';
 
 export interface BalanceSyncItemOptions {
@@ -5,7 +7,8 @@ export interface BalanceSyncItemOptions {
   xpub: string;
   walletId: string;
   module: string;
-  ethCoin?: string;
+  parentCoin?: string;
+  coinGroup: CoinGroup;
   zpub?: string;
   customAccount?: string;
   isRefresh?: boolean;
@@ -18,8 +21,6 @@ export class BalanceSyncItem extends SyncItem {
 
   public zpub?: string;
 
-  public ethCoin?: string;
-
   public customAccount?: string;
 
   constructor({
@@ -27,16 +28,23 @@ export class BalanceSyncItem extends SyncItem {
     zpub,
     coinType,
     walletId,
-    ethCoin,
+    parentCoin,
+    coinGroup,
     customAccount,
     module,
     isRefresh
   }: BalanceSyncItemOptions) {
-    super({ type: 'balance', coinType, isRefresh, module });
+    super({
+      type: 'balance',
+      coinType,
+      isRefresh,
+      module,
+      coinGroup,
+      parentCoin
+    });
     this.xpub = xpub;
     this.zpub = zpub;
     this.walletId = walletId;
-    this.ethCoin = ethCoin;
     this.customAccount = customAccount;
   }
 
@@ -45,6 +53,7 @@ export class BalanceSyncItem extends SyncItem {
       return (
         this.xpub === item.xpub &&
         this.coinType === item.coinType &&
+        this.coinGroup === item.coinGroup &&
         this.customAccount === item.customAccount
       );
     }
@@ -58,7 +67,8 @@ export class BalanceSyncItem extends SyncItem {
       zpub: this.zpub,
       coinType: this.coinType,
       walletId: this.walletId,
-      ethCoin: this.ethCoin,
+      parentCoin: this.parentCoin,
+      coinGroup: this.coinGroup,
       customAccount: this.customAccount,
       module: this.module,
       isRefresh: this.isRefresh

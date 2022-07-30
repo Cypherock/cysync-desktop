@@ -1,6 +1,6 @@
 import {
-  ALLCOINS as COINS,
   CoinGroup,
+  COINS,
   DeviceConnection,
   DeviceError,
   DeviceErrorType
@@ -36,6 +36,7 @@ export interface HandleReceiveTransactionOptions {
   setIsInFlow: (val: boolean) => void;
   walletId: string;
   coinType: string;
+  coinName: string;
   xpub: string;
   zpub?: string;
   contractAbbr?: string;
@@ -152,13 +153,9 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       zpub,
       contractAbbr,
       passphraseExists,
+      coinName,
       customAccount
     }) => {
-      const coin = COINS[coinType];
-      if (!coin) {
-        throw new Error(`Cannot find coinType: ${coinType}`);
-      }
-
       clearAll();
 
       logger.info('ReceiveAddress: Initiated', { coinType });
@@ -235,7 +232,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         } else {
           const cyError = new CyError(
             CysyncError.RECEIVE_TXN_REJECTED,
-            coin.name
+            coinName
           );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
@@ -271,7 +268,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         } else {
           const cyError = new CyError(
             CysyncError.RECEIVE_TXN_REJECTED,
-            coin.name
+            coinName
           );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
@@ -287,7 +284,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         } else {
           const cyError = new CyError(
             CysyncError.RECEIVE_TXN_REJECTED,
-            coin.name
+            coinName
           );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
