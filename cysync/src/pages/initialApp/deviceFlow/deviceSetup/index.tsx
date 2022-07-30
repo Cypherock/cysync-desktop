@@ -35,6 +35,7 @@ const InitialDeviceSetup: React.FC<Props> = ({
       handleClose={handleClose}
       isClosePresent={false}
       disableBackdropClick
+      disableEscapeKeyDown
       restComponents={
         <DeviceSetupFormFlow
           stepsData={deviceSetupData}
