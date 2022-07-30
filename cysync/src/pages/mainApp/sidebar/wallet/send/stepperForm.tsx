@@ -1,8 +1,7 @@
 import {
-  ALLCOINS as COINS,
   CoinGroup,
+  COINS,
   Erc20CoinData,
-  ERC20TOKENS,
   EthCoinData
 } from '@cypherock/communication';
 import { EthereumWallet } from '@cypherock/wallet';
@@ -317,7 +316,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     const fromAddress = wallet.address;
     const toAddress = batchRecipientData[0].recipient.trim();
     const { network } = coin;
-    const tokenData = ERC20TOKENS[token.slug];
+    const tokenData = coin.tokenList[token.slug];
     const contractAddress = tokenData.address;
     // According to our research, amount does not matter in estimating gas limit, small or large,
     let amount = '1';

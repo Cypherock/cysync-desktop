@@ -17,7 +17,7 @@ import { tokenDb } from '../../../../../store/database';
 import { useDebouncedFunction } from '../../../../../store/hooks';
 import { useSelectedWallet, useSync } from '../../../../../store/provider';
 
-import initialTokens, { IInitialToken } from './tokens';
+import getTokens, { IInitialToken } from './tokens';
 
 const PREFIX = 'AddTokenForm';
 
@@ -111,7 +111,7 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
   // Using useRef because this variable will not change throught the lifecycle
   // of this component.
   const tokens = useRef<IInitialToken[]>(
-    JSON.parse(JSON.stringify(initialTokens))
+    JSON.parse(JSON.stringify(getTokens(ethCoin.toLowerCase())))
   );
 
   const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
@@ -197,6 +197,7 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
           <div className={classes.flexRow}>
             <CoinIcons
               initial={abbr.toUpperCase()}
+              parentCoin={ethCoin.toLowerCase()}
               style={{ marginRight: '10px' }}
             />
             <Typography color="textPrimary">{name}</Typography>

@@ -1,4 +1,4 @@
-import { ALLCOINS, NearCoinData } from '@cypherock/communication';
+import { CoinGroup, COINS, NearCoinData } from '@cypherock/communication';
 import {
   batch as batchServer,
   IRequestMetadata,
@@ -17,7 +17,7 @@ import {
 export const getRequestsMetadata = (
   item: CustomAccountSyncItem
 ): IRequestMetadata[] => {
-  const coin = ALLCOINS[item.coinType];
+  const coin = COINS[item.coinType];
   if (!coin) {
     throw new Error(
       'Invalid coin in customAccount sync item: ' + item.coinType
@@ -53,7 +53,7 @@ export const processResponses = async (
     addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
   }
 ): Promise<any> => {
-  const coin = ALLCOINS[item.coinType];
+  const coin = COINS[item.coinType];
   if (!coin) {
     throw new Error(
       'Invalid coin in customAccount sync item: ' + item.coinType
@@ -84,6 +84,7 @@ export const processResponses = async (
           coinType: item.coinType,
           module: item.module,
           customAccount: account.account_id,
+          coinGroup: CoinGroup.Near,
           isRefresh: true
         })
       );
@@ -95,6 +96,7 @@ export const processResponses = async (
           coinType: item.coinType,
           isRefresh: true,
           customAccount: account.account_id,
+          coinGroup: CoinGroup.Near,
           module: item.module
         })
       );

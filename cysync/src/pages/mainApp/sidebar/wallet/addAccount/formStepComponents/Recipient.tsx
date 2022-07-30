@@ -1,9 +1,4 @@
-import {
-  ALLCOINS,
-  COINS,
-  Erc20CoinData,
-  NearCoinData
-} from '@cypherock/communication';
+import { COINS, Erc20CoinData, NearCoinData } from '@cypherock/communication';
 import { NearWallet } from '@cypherock/wallet';
 import { Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
@@ -294,7 +289,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         return;
       }
 
-      const coin = ALLCOINS[coinAbbr];
+      const coin = COINS[coinAbbr];
       let contractAddress: string | undefined;
       if (token && coin instanceof Erc20CoinData) {
         contractAddress = coin.address;

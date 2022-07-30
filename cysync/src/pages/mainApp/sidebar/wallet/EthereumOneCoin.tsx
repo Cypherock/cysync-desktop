@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS } from '@cypherock/communication';
+import { COINS } from '@cypherock/communication';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -426,20 +426,23 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
           </Grid>
         </Grid>
       </Grid>
-      {initial.toUpperCase() !== 'ETHR' && (
+      {
         <>
           {tokenData.length > 0 ? (
             <Grid container>
               <Grid item xs={12}>
                 <Collapse in={collapseTab} timeout="auto" unmountOnExit>
                   {tokenData.map(token => {
-                    const oneTokenData = COINS[token.slug];
+                    const oneTokenData =
+                      COINS[initial.toLowerCase()].tokenList[token.slug];
                     if (!oneTokenData) {
                       throw new Error(`Cannot find coinType: ${token.coin}`);
                     }
                     return (
                       <React.Fragment key={token.slug}>
-                        <TokenContext.Provider value={{ token }}>
+                        <TokenContext.Provider
+                          value={{ token, ethCoin: initial }}
+                        >
                           <OneToken
                             initial={token.slug.toUpperCase()}
                             name={oneTokenData.name}
@@ -512,7 +515,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
             </Grid>
           )}
         </>
-      )}
+      }
     </Root>
   );
 };
