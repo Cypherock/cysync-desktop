@@ -320,12 +320,25 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     const tokenData = ERC20TOKENS[token.slug];
     const contractAddress = tokenData.address;
     // According to our research, amount does not matter in estimating gas limit, small or large,
-    let amount = 1;
+    let amount = '1';
+
+    if (
+      maxSend &&
+      sendTransaction.sendMaxAmount &&
+      Number(sendTransaction.sendMaxAmount) > 0
+    ) {
+      amount = new BigNumber(sendTransaction.sendMaxAmount)
+        .multipliedBy(tokenData.multiplier)
+        .toString(10);
+    }
+
     if (
       batchRecipientData[0].amount &&
       Number(batchRecipientData[0].amount) > 0
     ) {
-      amount = Number(batchRecipientData[0].amount) * tokenData.multiplier;
+      amount = new BigNumber(batchRecipientData[0].amount)
+        .multipliedBy(tokenData.multiplier)
+        .toString(10);
     }
 
     const estimatedLimit = await sendTransaction.handleEstimateGasLimit(
@@ -379,7 +392,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   useEffect(() => {
     debouncedCaclGasLimit();
-  }, [batchRecipientData]);
+  }, [batchRecipientData, sendTransaction.sendMaxAmount]);
 
   useEffect(() => {
     handleMaxSend(maxSend);

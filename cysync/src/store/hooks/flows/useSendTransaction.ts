@@ -154,7 +154,7 @@ export interface UseSendTransactionValues {
     toAddress: string,
     network: string,
     contractAddress: string,
-    amount: number
+    amount: string
   ) => Promise<any>;
   deviceConnected: boolean;
   setDeviceConnected: React.Dispatch<React.SetStateAction<boolean>>;
@@ -173,7 +173,7 @@ export interface UseSendTransactionValues {
   setHash: React.Dispatch<React.SetStateAction<string>>;
   totalFees: number;
   approxTotalFee: number;
-  sendMaxAmount: number;
+  sendMaxAmount: string;
   resetHooks: () => void;
   cancelSendTxn: (connection: DeviceConnection) => void;
   handleEstimateFee: (
@@ -221,7 +221,7 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [txnInputs, setTxnInputs] = useState<TxInputOutput[]>([]);
   const [txnOutputs, setTxnOutputs] = useState<TxInputOutput[]>([]);
   const [approxTotalFee, setApproxTotalFees] = useState(0);
-  const [sendMaxAmount, setSendMaxAmount] = useState(0);
+  const [sendMaxAmount, setSendMaxAmount] = useState('0');
   const [isCancelled, setIsCancelled] = useState(false);
 
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
@@ -241,7 +241,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     setMetadataSent(false);
     setEstimationError(undefined);
     setTotalFees(0);
-    setSendMaxAmount(0);
+    setSendMaxAmount('0');
     sendTransaction.removeAllListeners();
   };
 
@@ -273,7 +273,7 @@ export const useSendTransaction: UseSendTransaction = () => {
 
         if (!hasInput) {
           setApproxTotalFees(0);
-          setSendMaxAmount(0);
+          setSendMaxAmount('0');
           setEstimationError(undefined);
           return;
         }
@@ -295,7 +295,7 @@ export const useSendTransaction: UseSendTransaction = () => {
             ','
           )}`
         );
-        setSendMaxAmount(Number(amt));
+        setSendMaxAmount(amt);
       });
 
       const { walletId } = await coinDb.getOne({ xpub, slug: coinType });
@@ -342,7 +342,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     toAddress: string,
     network: string,
     contractAddress: string,
-    amount: number
+    amount: string
   ) => {
     return new Promise(resolve => {
       const subFlowName = Analytics.Categories.ESTIMATE_GAS_LIMIT;
@@ -367,7 +367,9 @@ export const useSendTransaction: UseSendTransaction = () => {
           // Don't show any other error because it may be due to
           // incorrect amount or address which the user may change.
           if (e.isAxiosError) {
-            handleAxiosErrors(cyError, e);
+            if (!e.response) {
+              handleAxiosErrors(cyError, e);
+            }
           } else {
             cyError.setError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
           }
@@ -491,14 +493,6 @@ export const useSendTransaction: UseSendTransaction = () => {
       sendTransaction.on('totalFees', fee => {
         logger.info('SendTransaction: Total fee generated', { coinType, fee });
         setTotalFees(fee);
-      });
-
-      sendTransaction.on('sendMaxAmount', amt => {
-        logger.info('SendTransaction: Send Max amount generated', {
-          coinType,
-          amt
-        });
-        setSendMaxAmount(Number(amt));
       });
 
       sendTransaction.on('inputOutput', ({ inputs, outputs }) => {
