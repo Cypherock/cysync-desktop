@@ -85,7 +85,8 @@ export const NetworkProvider: React.FC = ({ children }) => {
     }
 
     snackbar.showSnackbar(text, 'error', undefined, {
-      dontCloseOnClickAway: true
+      dontCloseOnClickAway: true,
+      autoHideDuration: 5000
     });
 
     return false;
