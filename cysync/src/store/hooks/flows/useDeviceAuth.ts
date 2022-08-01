@@ -105,7 +105,12 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       process.env.BUILD_TYPE === 'debug' &&
       localStorage.getItem('disableProvision') === 'true';
 
-    setConfirmed(1);
+    if (inTestApp) {
+      setConfirmed(2);
+      setVerified(1);
+    } else {
+      setConfirmed(1);
+    }
     setErrorObj(new CyError());
     logger.info('DeviceAuth: initiated');
     if (mockAuth) {

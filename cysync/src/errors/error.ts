@@ -85,6 +85,10 @@ class CyError extends DisplayError {
     }
     return dispError;
   }
+
+  public isEqualTo(err: CyError) {
+    return this.getCode() === err.getCode();
+  }
 }
 
 export { DisplayError, CyError };
