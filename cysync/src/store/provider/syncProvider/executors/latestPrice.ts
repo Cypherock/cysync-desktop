@@ -1,4 +1,4 @@
-import { ERC20TOKENS } from '@cypherock/communication';
+import { CoinGroup } from '@cypherock/communication';
 import {
   batch as batchServer,
   IRequestMetadata,
@@ -30,7 +30,7 @@ export const processResponses = async (
 
   const res = responses[0];
 
-  if (ERC20TOKENS[item.coinType.toLowerCase()])
+  if (item.coinGroup === CoinGroup.ERC20Tokens)
     await tokenDb.findAndUpdate(
       { slug: item.coinType },
       { price: res.data.data.price }

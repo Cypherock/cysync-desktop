@@ -1,3 +1,5 @@
+import { CoinGroup } from '@cypherock/communication';
+
 import { SyncItem } from './syncItem';
 
 export interface CustomAccountSyncItemOptions {
@@ -19,7 +21,13 @@ export class CustomAccountSyncItem extends SyncItem {
     module,
     isRefresh
   }: CustomAccountSyncItemOptions) {
-    super({ type: 'customAccount', coinType, isRefresh, module });
+    super({
+      type: 'customAccount',
+      coinGroup: CoinGroup.Near,
+      coinType,
+      isRefresh,
+      module
+    });
     this.walletId = walletId;
     this.xpub = xpub;
   }

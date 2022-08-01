@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS } from '@cypherock/communication';
+import { COINS } from '@cypherock/communication';
 import { Typography } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import { styled, Theme } from '@mui/material/styles';
@@ -110,6 +110,10 @@ const Verify = (props: any) => {
 
   const coinAbbr = token ? token.slug : coinDetails.slug;
 
+  const coinName = token
+    ? COINS[coinDetails.slug]?.tokenList[token.slug]?.name
+    : COINS[coinDetails.slug].name;
+
   const { sendTransaction } = useSendTransactionContext();
 
   const [open, setOpen] = useState(true);
@@ -163,7 +167,7 @@ const Verify = (props: any) => {
           <>
             <LabelText
               label="Coin"
-              text={(COINS[coinAbbr] || { name: '' }).name}
+              text={coinName}
               verified={sendTransaction.pinEntered}
             />
             <LabelText
@@ -181,7 +185,8 @@ const Verify = (props: any) => {
                       true
                     )}) `
                   : `${sendTransaction.sendMaxAmount} ~( $${formatDisplayAmount(
-                      sendTransaction.sendMaxAmount * parseFloat(coinPrice),
+                      parseFloat(sendTransaction.sendMaxAmount) *
+                        parseFloat(coinPrice),
                       2,
                       true
                     )}) `

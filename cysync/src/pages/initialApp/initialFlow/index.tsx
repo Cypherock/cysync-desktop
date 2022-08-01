@@ -54,6 +54,7 @@ const InitialFlow: React.FC<Props> = ({
       handleClose={handleClose}
       isClosePresent={false}
       TransitionComponent={TransitionRef}
+      disableEscapeKeyDown
       restComponents={
         <RootInitial
           handleClose={handleClose}

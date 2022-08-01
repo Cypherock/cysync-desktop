@@ -1,4 +1,4 @@
-import { ALLCOINS as COINS } from '@cypherock/communication';
+import { COINS } from '@cypherock/communication';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';

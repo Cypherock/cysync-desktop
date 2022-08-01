@@ -225,7 +225,11 @@ const OneToken: React.FC<OneTokenProps> = ({
       <Grid container onClick={onClick} className={classes.root}>
         <Grid item xs={3} className={classes.alignStartCenter}>
           <Grid wrap="nowrap" container className={classes.nameWrapper}>
-            <CoinIcons initial={initial.toUpperCase()} size="sm" />
+            <CoinIcons
+              initial={initial.toUpperCase()}
+              parentCoin={ethCoin.toLowerCase()}
+              size="sm"
+            />
             <Typography color="textPrimary" style={{ fontSize: '0.9rem' }}>
               {name}
             </Typography>

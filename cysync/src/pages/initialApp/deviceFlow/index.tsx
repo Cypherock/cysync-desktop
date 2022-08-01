@@ -88,6 +88,7 @@ const InitialDeviceFlow: React.FC<Props> = ({ handleDeviceConnected }) => {
         open
         handleClose={handleClose}
         restComponents={getContent()}
+        disableEscapeKeyDown
       />
     </>
   );

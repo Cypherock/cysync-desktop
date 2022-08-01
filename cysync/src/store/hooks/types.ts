@@ -22,6 +22,7 @@ export interface DisplayToken extends Token {
   displayPrice: string;
   displayBalance: string;
   isEmpty: boolean;
+  parentCoin: string;
 }
 
 export interface DisplayCustomAccount extends CustomAccount {
@@ -100,4 +101,5 @@ export interface CoinDetails {
   balance: string;
   value: string;
   price: string;
+  parent: string | undefined;
 }

@@ -1,3 +1,4 @@
+import { COINS } from '@cypherock/communication';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
@@ -48,6 +49,25 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
       return;
     }
 
+    let name = '';
+    const coin = COINS[coinDetails.slug];
+    if (!coin) {
+      throw new Error('Invalid coinType: ' + coinDetails.slug);
+    }
+
+    name = coin.name;
+
+    if (token) {
+      if (!coin) {
+        throw new Error('Invalid coinType: ' + coinDetails.slug);
+      }
+      const tokenData = COINS[coin.abbr.toLowerCase()].tokenList[token.slug];
+      if (!tokenData) {
+        throw new Error('Invalid coinType: ' + coinDetails.slug);
+      }
+      name = tokenData.name;
+    }
+
     receiveTransaction
       .handleReceiveTransaction({
         connection: deviceConnection,
@@ -55,6 +75,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         setIsInFlow,
         walletId: selectedWallet._id,
         coinType: coinDetails.slug,
+        coinName: name,
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
         customAccount: customAccount?.name,

@@ -1,4 +1,4 @@
-import { ALLCOINS, CoinGroup } from '@cypherock/communication';
+import { CoinGroup, COINS } from '@cypherock/communication';
 
 import { SyncItem } from './syncItem';
 
@@ -11,6 +11,8 @@ export interface HistorySyncItemOptions {
   zpub?: string;
   page?: number;
   afterBlock?: number;
+  parentCoin?: string;
+  coinGroup: CoinGroup;
   isRefresh?: boolean;
   customAccount?: string;
 }
@@ -40,9 +42,18 @@ export class HistorySyncItem extends SyncItem {
     page,
     afterBlock,
     isRefresh,
+    parentCoin,
+    coinGroup,
     customAccount
   }: HistorySyncItemOptions) {
-    super({ type: 'history', coinType, isRefresh, module });
+    super({
+      type: 'history',
+      coinType,
+      isRefresh,
+      module,
+      parentCoin,
+      coinGroup
+    });
     this.xpub = xpub;
     this.zpub = zpub;
     this.walletName = walletName;
@@ -54,7 +65,7 @@ export class HistorySyncItem extends SyncItem {
 
   equals(item: HistorySyncItem | SyncItem) {
     if (item instanceof HistorySyncItem) {
-      const coin = ALLCOINS[item.coinType];
+      const coin = COINS[item.coinType];
       if (coin && coin.group === CoinGroup.Ethereum) {
         return this.xpub === item.xpub && this.coinType === item.coinType;
       }
@@ -79,6 +90,8 @@ export class HistorySyncItem extends SyncItem {
       page: this.page,
       afterBlock: this.afterBlock,
       isRefresh: this.isRefresh,
+      coinGroup: this.coinGroup,
+      parentCoin: this.parentCoin,
       customAccount: this.customAccount
     });
 
