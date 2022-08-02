@@ -173,8 +173,8 @@ const OneCoin: React.FC<OneCoinProps> = ({
   };
 
   const handleDeleteConfirmation = async () => {
-    await deleteHistory(coinDetails);
     await deleteCoin(coinDetails.xpub, coinDetails.slug, walletId);
+    await deleteHistory(coinDetails);
   };
 
   const [sendForm, setSendForm] = useState(false);
