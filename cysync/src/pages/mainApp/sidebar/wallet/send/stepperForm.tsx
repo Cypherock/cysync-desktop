@@ -280,7 +280,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       coinDetails.zpub,
       coinDetails.slug,
       changeFormatOfOutputList(batchRecipientData, coinDetails.slug, token),
-      parseInt(transactionFee, 10) || 0,
+      parseFloat(transactionFee) || 0,
       maxSend,
       {
         gasLimit,
