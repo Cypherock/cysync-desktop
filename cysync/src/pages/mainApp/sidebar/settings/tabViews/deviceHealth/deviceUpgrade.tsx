@@ -312,10 +312,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
       Analytics.Actions.OPEN
     );
     logger.info('Setting device update open');
-    if (isRefresh) {
-      logger.info('Device Upgrade is refreshing');
-      handleNext();
-    }
 
     return () => {
       setBlockConnectionPopup(false);
@@ -358,16 +354,24 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     }
   }, [deviceConnection, inBackgroundProcess]);
 
+  const handleCheckLatestFirmware = () => {
+    const onSuccess = () => {
+      setAuthState(2);
+      if (isRefresh) {
+        logger.info('Device Upgrade is refreshing');
+        handleNext();
+      }
+    };
+    const onError = () => {
+      setIsCompleted(-1);
+      setAuthState(-1);
+    };
+    checkLatestFirmware(onSuccess, onError);
+  };
+
   useEffect(() => {
     if (authState === 1) {
-      const onSuccess = () => {
-        setAuthState(2);
-      };
-      const onError = () => {
-        setIsCompleted(-1);
-        setAuthState(-1);
-      };
-      checkLatestFirmware(onSuccess, onError);
+      handleCheckLatestFirmware();
     }
   }, [authState]);
 
@@ -452,7 +456,11 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     ) {
       navigate(Routes.settings.device.index);
     } else {
-      handleRetry();
+      if (activeStep === 0) {
+        handleCheckLatestFirmware();
+      } else {
+        handleRetry();
+      }
     }
   };
 
