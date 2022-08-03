@@ -12,10 +12,11 @@ const getFees = async (coinType: string) => {
   if (coin instanceof EthCoinData) {
     const resp = await Server.eth.transaction
       .getFees({
-        network: coin.network
+        network: coin.network,
+        responseType: 'v2'
       })
       .request();
-    const value = new BigNumber(resp.data, 16);
+    const value = new BigNumber(resp.data.fees, 16);
 
     if (value.isNaN()) {
       throw new Error(

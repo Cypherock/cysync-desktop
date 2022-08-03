@@ -1,4 +1,9 @@
-import { COINS, EthCoinData, NearCoinData } from '@cypherock/communication';
+import {
+  CoinGroup,
+  COINS,
+  EthCoinData,
+  NearCoinData
+} from '@cypherock/communication';
 import {
   batch as batchServer,
   eth as ethServer,
@@ -40,7 +45,8 @@ export const getRequestsMetadata = (
         {
           address,
           network: parentCoin.network,
-          contractAddress: erc20address
+          contractAddress: erc20address,
+          responseType: 'v2'
         },
         item.isRefresh
       )
@@ -60,7 +66,8 @@ export const getRequestsMetadata = (
       .getBalance(
         {
           address,
-          network: coin.network
+          network: coin.network,
+          responseType: 'v2'
         },
         item.isRefresh
       )
@@ -110,7 +117,13 @@ export const processResponses = async (
 
     const balanceRes = responses[0];
 
-    const balance = new BigNumber(balanceRes.data);
+    let balance: BigNumber;
+    if (parentCoin.group === CoinGroup.Ethereum) {
+      balance = new BigNumber(balanceRes.data.balance);
+    } else {
+      balance = new BigNumber(balanceRes.data);
+    }
+
     await tokenDb.updateBalance({
       walletId: item.walletId,
       slug: item.coinType,
@@ -128,7 +141,7 @@ export const processResponses = async (
   if (coin instanceof EthCoinData) {
     const balanceRes = responses[0];
 
-    const balance = new BigNumber(balanceRes.data);
+    const balance = new BigNumber(balanceRes.data.balance);
 
     await coinDb.updateTotalBalance({
       xpub: item.xpub,

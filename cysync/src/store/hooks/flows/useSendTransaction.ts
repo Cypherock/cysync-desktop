@@ -353,12 +353,13 @@ export const useSendTransaction: UseSendTransaction = () => {
           toAddress: toAddress.trim(),
           network,
           contractAddress,
-          amount
+          amount,
+          responseType: 'v2'
         })
         .request()
         .then(res => {
           logger.info(`${subFlowName}: Completed', ${contractAddress}`);
-          resolve(res.data);
+          resolve(res.data.fees);
         })
         .catch(e => {
           logger.info(`${subFlowName}: Error', ${contractAddress}`);
