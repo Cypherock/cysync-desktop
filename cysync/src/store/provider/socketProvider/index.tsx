@@ -9,8 +9,8 @@ import logger from '../../../utils/logger';
 import {
   addressDb,
   coinDb,
-  insertFromBlockbookTxn,
   insertFromFullTxn,
+  prepareFromBlockbookTxn,
   receiveAddressDb,
   Status,
   transactionDb,
@@ -502,7 +502,7 @@ export const SocketProvider: React.FC = ({ children }) => {
             });
 
             if (coin) {
-              insertFromBlockbookTxn({
+              const newTxn = await prepareFromBlockbookTxn({
                 txn: payload.txn,
                 xpub: coin.xpub,
                 addresses: [],
@@ -510,6 +510,7 @@ export const SocketProvider: React.FC = ({ children }) => {
                 coinType: payload.coinType,
                 addressDB: addressDb
               });
+              await transactionDb.insert(newTxn);
 
               if (isConfirmed) {
                 addBalanceSyncItemFromCoin(coin, {

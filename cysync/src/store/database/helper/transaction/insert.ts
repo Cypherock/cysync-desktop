@@ -282,7 +282,7 @@ export const insertFromFullTxn = async (transaction: {
   }
 };
 
-export const insertFromBlockbookTxn = async (transaction: {
+export const prepareFromBlockbookTxn = async (transaction: {
   txn: any;
   xpub: string;
   addresses: any[];
@@ -291,7 +291,7 @@ export const insertFromBlockbookTxn = async (transaction: {
   addressDB: AddressDB;
   walletName?: string;
   status?: 'PENDING' | 'SUCCESS' | 'FAILED';
-}) => {
+}): Promise<Transaction> => {
   const {
     txn,
     xpub,
@@ -463,7 +463,7 @@ export const insertFromBlockbookTxn = async (transaction: {
         { hash: txn.txid, walletId }
       );
     }
-    await transactionDb.insert(newTxn);
+    return newTxn;
   } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
     const myAddress =
@@ -528,7 +528,7 @@ export const insertFromBlockbookTxn = async (transaction: {
         outputs: []
       };
 
-      await transactionDb.insert(feeTxn);
+      return feeTxn;
     }
 
     const newTxn: Transaction = {
@@ -552,6 +552,6 @@ export const insertFromBlockbookTxn = async (transaction: {
       outputs
     };
 
-    await transactionDb.insert(newTxn);
+    return newTxn;
   }
 };
