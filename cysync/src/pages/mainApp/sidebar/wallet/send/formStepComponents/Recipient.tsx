@@ -72,6 +72,7 @@ const classes = {
   sendMaxBtn: `${PREFIX}-sendMaxBtn`,
   sendMaxBtnActive: `${PREFIX}-sendMaxBtnActive`,
   amountUSD: `${PREFIX}-amountUSD`,
+  feeUnit: `${PREFIX}-amountUSD`,
   center: `${PREFIX}-center`,
   manualFeeErrorInfo: `${PREFIX}-manualFeeErrorInfo`,
   sliderFeeErrorInfo: `${PREFIX}-sliderFeeErrorInfo`,
@@ -183,6 +184,10 @@ const Root = styled(Grid)(({ theme }) => ({
   },
   [`& .${classes.amountUSD}`]: {
     marginLeft: '1rem',
+    color: theme.palette.info.light
+  },
+  [`& .${classes.feeUnit}`]: {
+    textAlign: 'center',
     color: theme.palette.info.light
   },
   [`&.${classes.center}`]: {
@@ -602,12 +607,15 @@ const Recipient: React.FC<StepComponentProps> = props => {
     return (
       <>
         <Input
-          placeHolder={`Enter transaction fees in ${
-            COINS[coinDetails.slug.toLowerCase()].fees
-          }`}
+          placeHolder="Enter transaction fees"
           onChange={handleTransactionFeeChange}
           type="number"
           value={transactionFee}
+          customIcon={
+            <Typography className={classes.feeUnit}>
+              {COINS[coinDetails.slug.toLowerCase()]?.fees}
+            </Typography>
+          }
         />
         {mediumFeeError && getFeeErrorInfo()}
       </>
