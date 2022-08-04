@@ -13,7 +13,10 @@ import CustomButton from '../../../../../designSystem/designComponents/buttons/b
 import AvatarIcon from '../../../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
-import { useDeviceUpgrade } from '../../../../../store/hooks/flows';
+import {
+  DeviceUpgradeErrorResolutionState,
+  useDeviceUpgrade
+} from '../../../../../store/hooks/flows';
 import { useNetwork } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import logger from '../../../../../utils/logger';
@@ -95,11 +98,19 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
     handleFeedbackOpen,
     latestVersion,
     errorObj,
-    inBackgroundProcess
+    inBackgroundProcess,
+    errorResolutionState
   } = useDeviceUpgrade(true);
 
   const refreshComponent = () => {
-    handleRetry();
+    if (
+      errorResolutionState ===
+      DeviceUpgradeErrorResolutionState.DEVICE_AUTH_REQUIRED
+    ) {
+      onClose();
+    } else {
+      handleRetry();
+    }
   };
 
   const onClose = () => {
@@ -151,6 +162,11 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
       setTimeout(onClose, 350);
     }
   }, [isCompleted]);
+
+  const isAuthFailed =
+    errorResolutionState ===
+    DeviceUpgradeErrorResolutionState.DEVICE_AUTH_REQUIRED;
+
   return (
     <Root container>
       <Grid item xs={2} />
@@ -232,7 +248,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
                     style={{ marginTop: '2rem' }}
                     disabled={inBackgroundProcess || !deviceConnection}
                   >
-                    Try Again
+                    {isAuthFailed ? 'Ok' : 'Try Again'}
                   </CustomButton>
                 </div>
               </StyledToolTip>
