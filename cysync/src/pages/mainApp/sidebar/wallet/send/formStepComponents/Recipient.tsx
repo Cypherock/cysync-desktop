@@ -72,7 +72,7 @@ const classes = {
   sendMaxBtn: `${PREFIX}-sendMaxBtn`,
   sendMaxBtnActive: `${PREFIX}-sendMaxBtnActive`,
   amountUSD: `${PREFIX}-amountUSD`,
-  feeUnit: `${PREFIX}-amountUSD`,
+  feeUnit: `${PREFIX}-feeUnit`,
   center: `${PREFIX}-center`,
   manualFeeErrorInfo: `${PREFIX}-manualFeeErrorInfo`,
   sliderFeeErrorInfo: `${PREFIX}-sliderFeeErrorInfo`,
