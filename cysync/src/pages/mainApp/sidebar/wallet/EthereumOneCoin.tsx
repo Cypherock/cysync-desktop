@@ -239,11 +239,13 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   const handleDeleteConfirmation = async () => {
     await deleteHistory(coinDetails);
     await deleteCoin(coinDetails.xpub, coinDetails.slug, walletId);
-    tokenList.map(async token => {
-      await addressDb.delete({ coinType: token, walletId });
-      await receiveAddressDb.delete({ walletId, coinType: token });
-      await transactionDb.delete({ walletId, slug: token });
-    });
+    await Promise.all(
+      tokenList.map(async token => {
+        await addressDb.delete({ coinType: token, walletId });
+        await receiveAddressDb.delete({ walletId, coinType: token });
+        await transactionDb.delete({ walletId, slug: token });
+      })
+    );
     await tokenDb.delete({
       walletId: selectedWallet._id,
       coin: coinDetails.slug
