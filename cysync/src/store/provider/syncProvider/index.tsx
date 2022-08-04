@@ -410,6 +410,7 @@ export const SyncProvider: React.FC = ({ children }) => {
               coinType: coinData.abbr,
               coinGroup: coinData.group,
               parentCoin: coin.parentCoin,
+              id: coinData.id,
               isRefresh,
               module
             });
