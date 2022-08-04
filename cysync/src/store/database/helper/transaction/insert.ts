@@ -455,12 +455,12 @@ export const prepareFromBlockbookTxn = async (transaction: {
     // Update the confirmations of txns with same hash
     if (existingTxns && existingTxns.length > 0) {
       await transactionDb.findAndUpdate(
+        { hash: txn.txid, walletId },
         {
           confirmations: newTxn.confirmations,
           blockHeight: newTxn.blockHeight,
           status: newTxn.status
-        },
-        { hash: txn.txid, walletId }
+        }
       );
     }
     return newTxn;
