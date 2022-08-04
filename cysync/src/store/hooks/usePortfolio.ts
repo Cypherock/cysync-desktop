@@ -221,11 +221,11 @@ export const usePortfolio: UsePortfolio = () => {
     for (
       let tIndex = transactionHistory.length - 1,
         pIndex = latestUnitPrices.length - 1;
-      tIndex >= 0 && pIndex > 0;
+      pIndex > 0;
       pIndex--
     ) {
       const transaction = transactionHistory[tIndex];
-      if (transaction.confirmed) {
+      if (transaction?.confirmed) {
         const transactionTime = new Date(transaction.confirmed).getTime();
         const prevPricePoint = computedPrices[pIndex - 1][0];
         const thisPricePoint = computedPrices[pIndex][0];

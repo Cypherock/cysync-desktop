@@ -9,17 +9,23 @@ import logger from '../utils/logger';
 import { CyError } from './error';
 import { CodeToErrorMap, CysyncError } from './types';
 
+const isUnknownError = (code: string) => {
+  return /^([A-Z]{2}_[A-Z]{3,4}_55[0-9]{2})$/.test(code);
+};
+
 const handleErrors = (
   currError: CyError,
   err: CyError,
   flow?: string,
-  metadata?: Record<string, any>
-) => {
+  metadata?: any
+): CyError => {
   //TODO:  handle cascade effect properly
   if (currError?.isSet) {
-    logger.info('Current Error');
+    // Drop the incoming Unknown Error if there is already a specific error set.
+    // Do not set the same error again as it serves no purpose.
+    if (isUnknownError(err.getCode()) || currError.isEqualTo(err))
+      return currError;
     logger.info(currError);
-    // return;
   }
 
   // log the original error
@@ -49,6 +55,10 @@ const handleErrors = (
   return err;
 };
 
+const handleFirmwareUpdateErrors = (cyError: CyError, err: any) => {
+  cyError.pushSubErrors(err.code);
+};
+
 const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
   cyError.pushSubErrors(err.code);
   if (
@@ -68,6 +78,16 @@ const handleDeviceErrors = (cyError: CyError, err: any, flow: string) => {
     cyError.setError(DeviceErrorType.TIMEOUT_ERROR);
   } else if (DeviceErrorType.NOT_IN_RECEIVING_MODE === err.errorType) {
     cyError.setError(DeviceErrorType.NOT_IN_RECEIVING_MODE, flow);
+  } else if (
+    [
+      DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED,
+      DeviceErrorType.WRONG_HARDWARE_VERSION,
+      DeviceErrorType.WRONG_MAGIC_NUMBER,
+      DeviceErrorType.SIGNATURE_NOT_VERIFIED,
+      DeviceErrorType.LOWER_FIRMWARE_VERSION
+    ].includes(err.errorType)
+  ) {
+    cyError.setError(CysyncError.DEVICE_UPGRADE_KNOWN_ERROR);
   } else if (DeviceErrorType.PROCESS_ABORTED_BY_USER === err.errorType) {
     cyError.setError(DeviceErrorType.PROCESS_ABORTED_BY_USER, flow);
   } else if (DeviceErrorType.DEVICE_ABORT === err.errorType) {
@@ -149,6 +169,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     [CysyncError.DEVICE_UPGRADE_UNKNOWN_ERROR]: {
       message: langStrings.ERRORS.DEVICE_UPGRADE_UNKNOWN_ERROR
+    },
+    [CysyncError.DEVICE_UPGRADE_KNOWN_ERROR]: {
+      message: langStrings.ERRORS.DEVICE_UPGRADE_KNOWN_ERROR
     },
 
     [CysyncError.DEVICE_NOT_READY]: {
@@ -370,9 +393,6 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED]: {
       message: 'Firmware Size Limit Exceed'
     },
-    [DeviceErrorType.WRONG_FIRMWARE_VERSION]: {
-      message: 'Wrong Firmware version'
-    },
     [DeviceErrorType.WRONG_HARDWARE_VERSION]: {
       message: 'Wrong Hardware version'
     },
@@ -393,6 +413,18 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     },
     [DeviceErrorType.WRITE_REJECTED]: {
       message: 'The write packet operation was rejected by the device'
+    },
+    [DeviceErrorType.FLASH_WRITE_ERROR]: {
+      message: 'Flash Write Error'
+    },
+    [DeviceErrorType.FLASH_CRC_MISMATCH]: {
+      message: 'Flash CRC Mismatch'
+    },
+    [DeviceErrorType.FLASH_TIMEOUT_ERROR]: {
+      message: 'Flash Timeout Error'
+    },
+    [DeviceErrorType.FLASH_NACK]: {
+      message: 'Flash Negative Acknowledgement'
     },
     [DeviceErrorType.EXECUTING_OTHER_COMMAND]: {
       message: 'The device is executing some other command'
@@ -427,5 +459,6 @@ export {
   handleErrors,
   handleDeviceErrors,
   handleAxiosErrors,
-  handleWalletErrors
+  handleWalletErrors,
+  handleFirmwareUpdateErrors
 };
