@@ -502,7 +502,7 @@ export const SocketProvider: React.FC = ({ children }) => {
             });
 
             if (coin) {
-              const newTxn = await prepareFromBlockbookTxn({
+              const newTxns = await prepareFromBlockbookTxn({
                 txn: payload.txn,
                 xpub: coin.xpub,
                 addresses: [],
@@ -510,7 +510,9 @@ export const SocketProvider: React.FC = ({ children }) => {
                 coinType: payload.coinType,
                 addressDB: addressDb
               });
-              await transactionDb.insert(newTxn);
+              await Promise.all(
+                newTxns.map(newTxn => transactionDb.insert(newTxn))
+              );
 
               if (isConfirmed) {
                 addBalanceSyncItemFromCoin(coin, {

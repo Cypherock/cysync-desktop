@@ -182,30 +182,22 @@ export const processResponses = async (
       });
     }
 
-    const transactionDbList = [];
+    const transactionDbList: Transaction[] = [];
 
     if (response.data.transactions) {
       for (const txn of response.data.transactions) {
-        try {
-          const newTxn = await prepareFromBlockbookTxn({
-            txn,
-            xpub: item.xpub,
-            addresses: response.data.tokens
-              ? response.data.tokens.map((elem: any) => elem.name)
-              : [],
-            walletId: item.walletId,
-            coinType: item.coinType,
-            addressDB: addressDb,
-            walletName: item.walletName
-          });
-          transactionDbList.push(newTxn);
-          // No need to retry if the inserting fails because it'll produce the same error.
-        } catch (error) {
-          logger.error(
-            `${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : prepareFromBlockbookTxn`
-          );
-          logger.error(error);
-        }
+        const newTxns = await prepareFromBlockbookTxn({
+          txn,
+          xpub: item.xpub,
+          addresses: response.data.tokens
+            ? response.data.tokens.map((elem: any) => elem.name)
+            : [],
+          walletId: item.walletId,
+          coinType: item.coinType,
+          addressDB: addressDb,
+          walletName: item.walletName
+        });
+        newTxns.forEach(newTxn => transactionDbList.push(newTxn));
       }
 
       // If there are more txs, return the last block height
@@ -220,8 +212,15 @@ export const processResponses = async (
         };
       }
     }
-
-    await transactionDb.insertMany(transactionDbList);
+    try {
+      await transactionDb.insertMany(transactionDbList);
+    } catch (error) {
+      // No need to retry if the inserting fails because it'll produce the same error.
+      logger.error(
+        `${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : prepareFromBlockbookTxn`
+      );
+      logger.error(error);
+    }
     return undefined;
   }
 
