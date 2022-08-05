@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../constants/routes';
+import { useNetwork } from '../../../store/provider';
 
 const PREFIX = 'NotificationItem';
 
@@ -134,6 +135,7 @@ type Props = {
 
 const NotificationItem: React.FC<Props> = ({ notification, handleClose }) => {
   const navigate = useNavigate();
+  const { beforeNetworkAction } = useNetwork();
 
   const [title, setTitle] = useState('');
   const [description, setDesciption] = useState('');
@@ -159,8 +161,10 @@ const NotificationItem: React.FC<Props> = ({ notification, handleClose }) => {
 
   const onClick = () => {
     if (type === NotificationTypes.DEVICE_UPDATE) {
-      navigate(Routes.settings.device.upgrade);
-      handleClose();
+      if (beforeNetworkAction()) {
+        navigate(`${Routes.settings.device.upgrade}?isRefresh=true`);
+        handleClose();
+      }
     }
   };
 
