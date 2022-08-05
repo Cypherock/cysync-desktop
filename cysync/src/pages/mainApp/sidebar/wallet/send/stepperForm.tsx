@@ -595,7 +595,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   };
 
   const handleTransactionFeeChangeSlider = (fee: number) => {
-    setTransactionFee((isBtcFork ? Math.round(fee) : fee).toString());
+    setTransactionFee(fee.toString());
   };
 
   const handleNext = () => {

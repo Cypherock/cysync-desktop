@@ -383,6 +383,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = classes;
 
   const { coinDetails } = useCurrentCoin();
+  const isBtcFork = COINS[coinDetails.slug]?.group === CoinGroup.BitcoinForks;
   const { customAccount } = useCustomAccountContext();
 
   const {
@@ -598,6 +599,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             handleTransactionFeeChangeSlider={handleTransactionFeeChangeSlider}
             mediumFee={mediumFee}
             fee={floatTransactionFee}
+            step={isBtcFork ? 1 : undefined}
           />
           {mediumFeeError && getFeeErrorInfo()}
         </>
