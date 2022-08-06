@@ -129,6 +129,7 @@ type CustomSliderProps = {
   handleTransactionFeeChangeSlider: (e: any) => void;
   mediumFee: number;
   fee: number;
+  step?: number;
   valueLabelDisplay?: SliderProps['valueLabelDisplay'];
   valueLabelFormat?: SliderProps['valueLabelFormat'];
 };
@@ -137,6 +138,7 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
   handleTransactionFeeChangeSlider,
   mediumFee,
   fee,
+  step,
   valueLabelFormat,
   valueLabelDisplay
 }) => {
@@ -144,7 +146,7 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
     handleTransactionFeeChangeSlider(v);
   };
 
-  const step = mediumFee < 5 ? 0.1 : 0.2;
+  const stepValue = step ?? (mediumFee < 5 ? 0.1 : 0.2);
 
   return (
     <Root className={classes.root}>
@@ -158,7 +160,7 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
         value={fee}
         min={0}
         max={mediumFee * 2}
-        step={step} // number of steps is dynamically calculated based on the mediumFee
+        step={stepValue} // number of steps is dynamically calculated based on the mediumFee or from the props
         onChange={handleChange}
         valueLabelDisplay={valueLabelDisplay}
         valueLabelFormat={valueLabelFormat}
