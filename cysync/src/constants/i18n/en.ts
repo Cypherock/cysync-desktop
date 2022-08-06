@@ -29,7 +29,7 @@ const en: I18nStrings = {
       'The connected device is not supported, please make sure that CySync and X1 device are up to date.',
     // I dont understand how this message would be helpful.
     DEVICE_MISCONFIGURED:
-      'Your device is misconfigured, Please restart cySync App. If the problem persists, please contact us.',
+      'Your device is misconfigured. Please upgrade your device. If the problem persists, please contact us.',
     DEVICE_INFO_UNKNOWN_ERROR: `Some interal error occured. Please disconnect and then reconnect the device.`,
     DEVICE_NOT_IN_UPDATE_RECEIVING_MODE: `Some interal error occured. Please disconnect and then reconnect the device.`,
 
