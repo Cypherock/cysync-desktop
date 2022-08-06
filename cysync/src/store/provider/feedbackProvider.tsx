@@ -525,6 +525,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     if (externalHandleClose) {
       externalHandleClose();
     }
+    setOpenId('');
   };
 
   const getDeviceStateErrorMsg = () => {
