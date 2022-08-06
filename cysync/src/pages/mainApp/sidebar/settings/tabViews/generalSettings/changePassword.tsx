@@ -55,6 +55,7 @@ interface State {
   oldPassword: string;
   password: string;
   confirmPassword: string;
+  showOldPassword: boolean;
   showPassword: boolean;
   showConfirmPassword: boolean;
 }
@@ -77,6 +78,7 @@ const ChangePassword: React.FC<Props> = ({
     oldPassword: '',
     password: '',
     confirmPassword: '',
+    showOldPassword: false,
     showPassword: false,
     showConfirmPassword: false
   };
@@ -103,6 +105,10 @@ const ChangePassword: React.FC<Props> = ({
     if (event.keyCode === ENTER_KEY) {
       setIsLoading(true);
     }
+  };
+
+  const handleClickShowOldPassword = () => {
+    setValues({ ...values, showOldPassword: !values.showOldPassword });
   };
 
   const handleClickShowPassword = () => {
@@ -220,7 +226,7 @@ const ChangePassword: React.FC<Props> = ({
             {type === 'change' ? (
               <Input
                 fullWidth
-                type={values.showPassword ? 'text' : 'password'}
+                type={values.showOldPassword ? 'text' : 'password'}
                 size="small"
                 value={values.oldPassword}
                 placeholder="Enter Old Password"
@@ -233,10 +239,10 @@ const ChangePassword: React.FC<Props> = ({
                       <MIconButton
                         tabIndex={-1}
                         aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
+                        onClick={handleClickShowOldPassword}
                         onMouseDown={handleMouseDownPassword}
                       >
-                        {values.showPassword ? (
+                        {values.showOldPassword ? (
                           <Visibility
                             style={{ color: theme.palette.text.secondary }}
                           />
