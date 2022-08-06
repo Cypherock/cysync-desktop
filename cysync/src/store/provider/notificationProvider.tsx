@@ -172,6 +172,7 @@ export const NotificationProvider: React.FC = ({ children }) => {
 
         const serverNotifications: Notification[] = [];
         let prevNotif: Notification | undefined;
+        const notificationDBList = [];
         for (const notifData of serverLatestNotif) {
           const notif: Notification = {
             _id: notifData._id,
@@ -196,9 +197,10 @@ export const NotificationProvider: React.FC = ({ children }) => {
           const alreadyPresent = await NotificationDB.getById(notif._id);
 
           if (!alreadyPresent) {
-            await NotificationDB.insert(notif);
+            notificationDBList.push(notif);
           }
         }
+        await NotificationDB.insertMany(notificationDBList);
 
         setNotifications([...notifications, ...serverNotifications]);
         setHasNextPage(hasNext);
