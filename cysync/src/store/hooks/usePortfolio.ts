@@ -221,11 +221,11 @@ export const usePortfolio: UsePortfolio = () => {
     for (
       let tIndex = transactionHistory.length - 1,
         pIndex = latestUnitPrices.length - 1;
-      tIndex >= 0 && pIndex > 0;
+      pIndex > 0;
       pIndex--
     ) {
       const transaction = transactionHistory[tIndex];
-      if (transaction.confirmed) {
+      if (transaction?.confirmed) {
         const transactionTime = new Date(transaction.confirmed).getTime();
         const prevPricePoint = computedPrices[pIndex - 1][0];
         const thisPricePoint = computedPrices[pIndex][0];
@@ -442,20 +442,21 @@ export const usePortfolio: UsePortfolio = () => {
               );
             else continue;
           }
-        }
-        if (coinData.group === CoinGroup.ERC20Tokens) {
-          const tokens = await tokenDb.getAll({ slug: item.slug });
-          if (tokens.length === 0) continue;
-          for (const token of tokens) {
-            totalBalance = totalBalance.plus(token.balance);
-          }
         } else {
-          const coinsData = await coinDb.getAll({ slug: item.slug });
-          if (coinsData.length === 0) continue;
-          for (const coin of coinsData) {
-            totalBalance = totalBalance.plus(
-              coin.totalBalance ? coin.totalBalance : 0
-            );
+          if (coinData.group === CoinGroup.ERC20Tokens) {
+            const tokens = await tokenDb.getAll({ slug: item.slug });
+            if (tokens.length === 0) continue;
+            for (const token of tokens) {
+              totalBalance = totalBalance.plus(token.balance);
+            }
+          } else {
+            const coinsData = await coinDb.getAll({ slug: item.slug });
+            if (coinsData.length === 0) continue;
+            for (const coin of coinsData) {
+              totalBalance = totalBalance.plus(
+                coin.totalBalance ? coin.totalBalance : 0
+              );
+            }
           }
         }
 
