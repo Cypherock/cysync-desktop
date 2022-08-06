@@ -52,6 +52,7 @@ const LockscreenIndex: React.FC<Props> = ({
       handleClose={handleClose}
       TransitionComponent={TransitionRef}
       isClosePresent={false}
+      disableEscapeKeyDown
       restComponents={
         <LockScreen handleClose={handleClose} handleReset={handleReset} />
       }
