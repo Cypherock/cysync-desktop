@@ -137,7 +137,9 @@ const Input: React.FC<InputProps> = ({
       if (decimal !== undefined) {
         const decimalPlaces = decimal;
         const newVal = event.target.value;
-        const newValArr = newVal.split('.');
+        const newValArr = newVal
+          .split('.')
+          .map((val: string) => val.replace(/[^0-9]*/, '')); // to remove all non numeric characters
         let isValid = true;
 
         if (newValArr.length > 1 && newValArr[1].length > decimalPlaces) {
@@ -179,7 +181,7 @@ const Input: React.FC<InputProps> = ({
         id={id}
         name={name}
         className={classes.input}
-        type={type}
+        type="text"
         placeholder={placeHolder}
         onChange={onInput}
         value={value}
