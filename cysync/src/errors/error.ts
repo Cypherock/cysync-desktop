@@ -33,6 +33,15 @@ class DisplayError {
   public getCode() {
     return this.code || '';
   }
+  /**
+   * Errors are structure in a way that the second sentence of the error
+   * message can be substituted for the action message.
+   * Mostly needed on Tooltips
+   * @returns action message
+   */
+  public getActionMessage() {
+    return this.message.split('.')[1];
+  }
 }
 /* tslint:disable-next-line */
 class CyError extends DisplayError {
