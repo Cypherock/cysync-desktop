@@ -81,8 +81,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
     deviceState,
     setDeviceSerial,
     deviceConnectionState,
-    setIsInFlow,
-    connected
+    setIsInFlow
   } = useConnection();
   const latestDeviceConnection = useRef<any>();
 
@@ -215,7 +214,10 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
         >
           Follow the Steps on Device
         </Typography>
-        <DynamicTextView text="Connect X1 wallet" state={connected ? 2 : 1} />
+        <DynamicTextView
+          text="Connect X1 wallet"
+          state={latestDeviceConnection.current ? 2 : 1}
+        />
         <br />
         <DynamicTextView
           text="Authenticating Device"
