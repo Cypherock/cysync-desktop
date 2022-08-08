@@ -33,7 +33,6 @@ export const UpdateProvider = ({ children }: any) => {
   const [appState, setAppState] = useState(0);
   const [_isAppUpdateAvailable, setIsAppUpdateAvailable] = useState(false);
   const [isAppOpen, setIsAppOpen] = useState(true);
-  const [appUpdateInitiated, setAppUpdateInitiated] = useState(false);
   const [isPersistentAppOpen, setIsPersistentAppOpen] = useState(false);
   const [appUpdateVersion, setAppUpdateVersion] = useState<string>('');
 
@@ -94,11 +93,13 @@ export const UpdateProvider = ({ children }: any) => {
   };
 
   useEffect(() => {
-    if (connected && !appUpdateInitiated) {
+    if (connected) {
       if (allowAppUpdate()) {
-        setAppUpdateInitiated(true);
         logger.info('Checking for app update');
         ipcRenderer.send('check-for-update');
+      } else {
+        logger.info('Checking fo auto update');
+        ipcRenderer.send('retry-auto-update');
       }
 
       logger.info('Checking for device update');
