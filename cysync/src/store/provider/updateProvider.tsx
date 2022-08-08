@@ -33,7 +33,7 @@ export const UpdateProvider = ({ children }: any) => {
   const [appState, setAppState] = useState(0);
   const [_isAppUpdateAvailable, setIsAppUpdateAvailable] = useState(false);
   const [isAppOpen, setIsAppOpen] = useState(true);
-  const [appUpdateInitiated, setAppUpdateInitiated] = useState(false);
+  const [deviceUpdateInitiated, setDeviceUpdateInitiated] = useState(false);
   const [isPersistentAppOpen, setIsPersistentAppOpen] = useState(false);
   const [appUpdateVersion, setAppUpdateVersion] = useState<string>('');
 
@@ -73,6 +73,8 @@ export const UpdateProvider = ({ children }: any) => {
   }, []);
 
   const checkDeviceUpdate = async () => {
+    if (deviceUpdateInitiated) return;
+    setDeviceUpdateInitiated(true);
     try {
       const usePrerelease =
         process.env.ALLOW_PRERELEASE === 'true' &&
@@ -94,9 +96,8 @@ export const UpdateProvider = ({ children }: any) => {
   };
 
   useEffect(() => {
-    if (connected && !appUpdateInitiated) {
+    if (connected) {
       if (allowAppUpdate()) {
-        setAppUpdateInitiated(true);
         logger.info('Checking for app update');
         ipcRenderer.send('check-for-update');
       }
