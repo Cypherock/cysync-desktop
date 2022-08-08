@@ -100,6 +100,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
     completed,
     errorObj,
     confirmed,
+    enableRetry,
     handleFeedbackOpen,
     clearErrorObj
   } = useDeviceAuth(true);
@@ -255,11 +256,8 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
                 Close
               </CustomButton>
               {verified !== -1 &&
-                (!latestDeviceConnection.current ? (
-                  <Tooltip
-                    title={'Reconnect the device to retry'}
-                    placement="top"
-                  >
+                (!enableRetry ? (
+                  <Tooltip title={errorObj.getActionMessage()} placement="top">
                     <div>
                       <CustomButton
                         style={{ margin: '1rem 10px 1rem 0' }}
