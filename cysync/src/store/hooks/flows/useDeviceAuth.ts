@@ -64,7 +64,10 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
   };
 
   useEffect(() => {
-    if (completed && !deviceConnection) {
+    // Retry device connection when the device is not in connected state
+    // and the device has been established to be a verified or compromised
+    // device.
+    if (completed && [-1, 2].includes(verified) && !deviceConnection) {
       setDeviceConnectionStatus(false);
     }
   }, [completed]);
