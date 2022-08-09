@@ -311,7 +311,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
           <Icon size={16} viewBox="0 0 14 14" icon={ICONS.close} color="red" />
         </IconButton>
       </Grid>
-      {verified === 2 && activeStep === 1 ? (
+      {completed && activeStep === 1 ? (
         <Grid
           style={{
             display: 'flex',
@@ -432,13 +432,18 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
             className={classes.stepperRoot}
             connector={<QontoConnector />}
           >
-            {steps.map(step => (
-              <Step key={step.name}>
+            {steps.map((data, step) => (
+              <Step
+                key={data.name}
+                completed={
+                  step === steps.length - 1 ? verified === 2 : step < activeStep
+                }
+              >
                 <StyledStepLabel
                   StepIconComponent={QontoStepIcon}
                   className={classes.stepLabel}
                 >
-                  {step.name}
+                  {data.name}
                 </StyledStepLabel>
               </Step>
             ))}
