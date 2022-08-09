@@ -561,29 +561,31 @@ export const prepareFromBlockbookTxn = async (transaction: {
 
 export const handleBumpedTxn = (t1: any) => {
   const storedTxns = getTxnPayloads();
-  storedTxns.forEach(async (t2: any, tIndex: number) => {
-    const hit =
+  const tIndex = storedTxns.findIndex(async (t2: any) => {
+    return (
       t1.address === t2.address &&
       t1.coinType === t2.coinType &&
       t1.txn.blockHeight === t2.txn.blockHeight &&
       t1.txn.vout.find((out: any) => out.addresses.includes(t1.address))
         .value ===
-        t2.txn.vout.find((out: any) => out.addresses.includes(t2.address))
-          .value;
-
-    if (hit) {
-      storedTxns[tIndex] = t1;
-      storeTxnPayloads(storedTxns);
-      await transactionDb.findAndUpdate(
-        { hash: t2.txn.txid, status: Status.PENDING },
-        { status: Status.DISCARDED }
-      );
-      return true;
-    }
+        t2.txn.vout.find((out: any) => out.addresses.includes(t2.address)).value
+    );
   });
-  storedTxns.push(t1);
-  storeTxnPayloads(storedTxns);
-  return false;
+
+  if (tIndex !== -1) {
+    const oldTxnHash = storedTxns[tIndex].txn.txid;
+    transactionDb.findAndUpdate(
+      { hash: oldTxnHash, status: Status.PENDING },
+      { status: Status.DISCARDED }
+    );
+    storedTxns[tIndex] = t1;
+    storeTxnPayloads(storedTxns);
+    return true;
+  } else {
+    storedTxns.push(t1);
+    storeTxnPayloads(storedTxns);
+    return false;
+  }
 };
 
 const getTxnPayloads = () => {
@@ -597,9 +599,7 @@ const storeTxnPayloads = (payloads: any) => {
 };
 
 export const clearTxnPayloads = (slug: string) => {
-  const txnPayloads = getTxnPayloads();
-  const filteredTxns = txnPayloads.filter(
-    (payload: any) => payload.coinType !== slug
-  );
-  storeTxnPayloads(filteredTxns);
+  const data = getTxnPayloads();
+  co.filter((payload: any) => payload.coinType !== slug);
+  storeTxnPayloads(data);
 };
