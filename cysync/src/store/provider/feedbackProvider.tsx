@@ -1,3 +1,4 @@
+import { DeviceError, DeviceErrorType } from '@cypherock/communication';
 import { feedback as feedbackServer } from '@cypherock/server-wrapper';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { CircularProgress, createSvgIcon, Grid } from '@mui/material';
@@ -20,6 +21,12 @@ import DialogBox from '../../designSystem/designComponents/dialog/dialogBox';
 import ModAvatar from '../../designSystem/designComponents/icons/AvatarIcon';
 import CustomCheckbox from '../../designSystem/designComponents/input/checkbox';
 import Input from '../../designSystem/designComponents/input/input';
+import {
+  CyError,
+  CysyncError,
+  handleDeviceErrors,
+  handleErrors
+} from '../../errors';
 import Analytics from '../../utils/analytics';
 import { hexToVersion } from '../../utils/compareVersion';
 import { getDesktopLogs, getDeviceLogs } from '../../utils/getLogs';
@@ -181,8 +188,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     firmwareVersion,
     deviceSerial,
     deviceConnectionState,
-    beforeFlowStart,
-    setIsInFlow
+    setIsInFlow,
+    blockNewConnection,
+    isDeviceAvailable
   } = useConnection();
   const [feedbackInput, setFeedbackInput] =
     React.useState<FeedbackState>(initFeedbackState);
@@ -196,6 +204,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   const {
     handleLogFetch,
     errorObj,
+    setErrorObj,
     clearErrorObj,
     completed: logFetchCompleted,
     logFetched: logFetchState,
@@ -256,23 +265,60 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     return randomId;
   };
 
-  const fetchLogs = () => {
-    if (
-      !feedbackInput.attachDeviceLogs &&
-      deviceConnection &&
-      firmwareVersion &&
-      !deviceConnection.inBootloader &&
-      beforeFlowStart(true)
-    ) {
-      clearErrorObj();
-      resetLogFetcherHooks();
-      handleLogFetch({
-        connection: deviceConnection,
-        sdkVersion: deviceSdkVersion,
-        setIsInFlow,
-        firmwareVersion
-      });
-      setDeviceLogsLoading(true);
+  const fetchLogs = async () => {
+    if (!feedbackInput.attachDeviceLogs) {
+      try {
+        let sdkVersion: string = deviceSdkVersion;
+
+        if (!deviceConnection) {
+          throw new DeviceError(DeviceErrorType.NOT_CONNECTED);
+        }
+
+        if (deviceConnection.inBootloader) {
+          throw new CyError(CysyncError.DEVICE_IN_BOOTLOADER);
+        }
+
+        if (blockNewConnection && isDeviceAvailable) {
+          setDeviceLogsLoading(true);
+
+          try {
+            await deviceConnection.beforeOperation();
+            const response = await deviceConnection.isDeviceSupported();
+            sdkVersion = response.sdkVersion;
+
+            if (!response.isSupported) {
+              throw new CyError(CysyncError.INCOMPATIBLE_DEVICE_AND_DESKTOP);
+            }
+          } catch (error) {
+            await deviceConnection.afterOperation();
+            throw error;
+          }
+        }
+
+        clearErrorObj();
+        resetLogFetcherHooks();
+        handleLogFetch({
+          connection: deviceConnection,
+          sdkVersion,
+          setIsInFlow,
+          firmwareVersion
+        });
+        setDeviceLogsLoading(true);
+      } catch (error) {
+        const flowName = Analytics.Categories.FETCH_LOG;
+        const cyError = new CyError();
+        if (error instanceof CyError) {
+          setErrorObj(handleErrors(errorObj, error, flowName, { error }));
+        } else {
+          if (error instanceof DeviceError) {
+            handleDeviceErrors(cyError, error, flowName);
+          } else {
+            cyError.setError(CysyncError.LOG_FETCHER_UNKNOWN_ERROR);
+          }
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
+        }
+        setDeviceLogsLoading(false);
+      }
     } else if (feedbackInput.attachDeviceLogs) {
       setFeedbackInput({ ...feedbackInput, attachDeviceLogs: false });
     }
@@ -418,14 +464,15 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const isDeviceConnected = () => {
     return (
-      deviceConnection &&
-      [
-        DeviceConnectionState.VERIFIED,
-        DeviceConnectionState.LAST_AUTH_FAILED,
-        DeviceConnectionState.NEW_DEVICE,
-        DeviceConnectionState.PARTIAL_STATE,
-        DeviceConnectionState.IN_TEST_APP
-      ].includes(deviceConnectionState)
+      (deviceConnection &&
+        [
+          DeviceConnectionState.VERIFIED,
+          DeviceConnectionState.LAST_AUTH_FAILED,
+          DeviceConnectionState.NEW_DEVICE,
+          DeviceConnectionState.PARTIAL_STATE,
+          DeviceConnectionState.IN_TEST_APP
+        ].includes(deviceConnectionState)) ||
+      (blockNewConnection && isDeviceAvailable)
     );
   };
 
@@ -478,6 +525,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     if (externalHandleClose) {
       externalHandleClose();
     }
+    setOpenId('');
   };
 
   const getDeviceStateErrorMsg = () => {

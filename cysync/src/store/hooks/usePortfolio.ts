@@ -442,20 +442,21 @@ export const usePortfolio: UsePortfolio = () => {
               );
             else continue;
           }
-        }
-        if (coinData.group === CoinGroup.ERC20Tokens) {
-          const tokens = await tokenDb.getAll({ slug: item.slug });
-          if (tokens.length === 0) continue;
-          for (const token of tokens) {
-            totalBalance = totalBalance.plus(token.balance);
-          }
         } else {
-          const coinsData = await coinDb.getAll({ slug: item.slug });
-          if (coinsData.length === 0) continue;
-          for (const coin of coinsData) {
-            totalBalance = totalBalance.plus(
-              coin.totalBalance ? coin.totalBalance : 0
-            );
+          if (coinData.group === CoinGroup.ERC20Tokens) {
+            const tokens = await tokenDb.getAll({ slug: item.slug });
+            if (tokens.length === 0) continue;
+            for (const token of tokens) {
+              totalBalance = totalBalance.plus(token.balance);
+            }
+          } else {
+            const coinsData = await coinDb.getAll({ slug: item.slug });
+            if (coinsData.length === 0) continue;
+            for (const coin of coinsData) {
+              totalBalance = totalBalance.plus(
+                coin.totalBalance ? coin.totalBalance : 0
+              );
+            }
           }
         }
 

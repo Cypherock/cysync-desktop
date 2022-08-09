@@ -245,6 +245,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [transactionFee, setTransactionFee] = React.useState('75');
 
   const { coinDetails } = useCurrentCoin();
+  const isBtcFork = COINS[coinDetails.slug]?.group === CoinGroup.BitcoinForks;
   const { token } = useTokenContext();
   const { customAccount } = useCustomAccountContext();
 
@@ -588,7 +589,13 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   };
 
   const handleTransactionFeeChange = (e: any) => {
-    setTransactionFee(e.target.value);
+    setTransactionFee(
+      e.target.value
+        ? isBtcFork
+          ? Math.round(e.target.value)
+          : e.target.value
+        : e.target.value
+    );
   };
 
   const handleTransactionFeeChangeSlider = (fee: number) => {
