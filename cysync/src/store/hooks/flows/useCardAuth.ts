@@ -120,7 +120,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
 
   useEffect(() => {
     if (errorObj.isSet && internetConnected) setShowRetry(true);
-  }, [internetConnected]);
+  }, [internetConnected, errorObj]);
 
   // To call resetHooks outside of this function
   const resetHooks = () => {

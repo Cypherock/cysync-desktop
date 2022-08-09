@@ -70,7 +70,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
   const {
     cardsStatus,
     showRetry,
-    connStatus,
+    enableRetry,
     cardsAuth,
     handleFeedbackOpen,
     onRetry,
@@ -218,11 +218,8 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
             )}
             <div className={classes.btnContainer}>
               {showRetry &&
-                (connStatus !== 2 ? (
-                  <Tooltip
-                    title={'Reconnect the device to retry'}
-                    placement="top"
-                  >
+                (!enableRetry ? (
+                  <Tooltip title={errorObj.getActionMessage()} placement="top">
                     <div>
                       <CustomButton
                         color="primary"
