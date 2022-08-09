@@ -78,12 +78,12 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     setCardsStatus
   } = useCardAuth(true);
 
-  const { deviceConnection } = useConnection();
+  const { internalDeviceConnection } = useConnection();
   const latestDeviceConnection = useRef<any>();
 
   useEffect(() => {
-    latestDeviceConnection.current = deviceConnection;
-  }, [deviceConnection]);
+    latestDeviceConnection.current = internalDeviceConnection;
+  }, [internalDeviceConnection]);
 
   useEffect(() => {
     Analytics.Instance.event(
@@ -159,7 +159,10 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
         >
           Follow the Steps on Device
         </Typography>
-        <DynamicTextView text="Connect X1 wallet" state={connStatus} />
+        <DynamicTextView
+          text="Connect X1 wallet"
+          state={latestDeviceConnection.current ? 2 : 1}
+        />
         <br />
         <DynamicTextView text={getCardText('01')} state={cardsAuth['01']} />
         <br />
