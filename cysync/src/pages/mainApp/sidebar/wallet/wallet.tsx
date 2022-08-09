@@ -250,7 +250,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
                 color="textPrimary"
                 style={{ marginBottom: '2rem' }}
               >
-                Please add a coin in your wallet.
+                Add a coin in your wallet.
               </Typography>
               <Button
                 variant="text"

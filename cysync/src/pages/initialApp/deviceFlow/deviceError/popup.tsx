@@ -51,11 +51,11 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
   const getQuestion = () => {
     switch (deviceConnectionState) {
       case DeviceConnectionState.DEVICE_NOT_READY:
-        return 'Please bring the device to the main menu and try again.';
+        return 'Bring the device to the main menu and try again.';
       case DeviceConnectionState.UNKNOWN_ERROR:
-        return 'Please reconnect the device and try again';
+        return 'Reconnect the device and try again';
       default:
-        return 'Please reconnect the device and try again';
+        return 'Reconnect the device and try again';
     }
   };
 

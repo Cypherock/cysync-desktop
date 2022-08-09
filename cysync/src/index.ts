@@ -34,7 +34,7 @@ const handleMainProcessError = async (error: any) => {
   logger.error('Unhandled error on main process');
   logger.error(error);
 
-  const title = 'Some error occurred, Please contact cypherock for support.';
+  const title = 'Some error occurred, Contact cypherock for support.';
   let errorMsg = 'Unknown error';
 
   if (error) {

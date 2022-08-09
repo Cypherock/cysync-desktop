@@ -132,7 +132,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
       ) {
         if (inBootloader) {
           setErrorMsg(
-            'Your device is misconfigured, Please restart cySync App. If the problem persists, please contact us.'
+            'Your device is misconfigured, Restart cySync App. If the problem persists, contact us.'
           );
           return;
         }
@@ -206,7 +206,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     }
 
     if (deviceConnectionState !== DeviceConnectionState.IN_TEST_APP) {
-      setErrorMsg('Please connect the device and try again.');
+      setErrorMsg('Connect the device and try again.');
       return;
     }
 
