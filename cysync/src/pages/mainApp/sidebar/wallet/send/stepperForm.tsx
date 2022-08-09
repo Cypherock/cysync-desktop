@@ -630,7 +630,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         {stepsData.map((data, step) => (
           <Step
             key={data[0]}
-            completed={activeStep === 4 ? true : step < activeStep}
+            completed={
+              activeStep === stepsData.length - 1 ? true : step < activeStep
+            }
           >
             <StyledStepLabel
               StepIconComponent={QontoStepIcon}
