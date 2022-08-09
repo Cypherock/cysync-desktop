@@ -242,8 +242,15 @@ const ReceiveForm: React.FC<StepperProps> = ({
             .filter(data => {
               return data[0] !== 'Replace';
             })
-            .map(data => (
-              <Step key={data[0]}>
+            .map((data, step) => (
+              <Step
+                key={data[0]}
+                completed={
+                  step === 2
+                    ? Boolean(receiveTransaction.receiveAddress)
+                    : step < activeStep
+                }
+              >
                 <StyledStepLabel
                   StepIconComponent={QontoStepIcon}
                   className={classes.stepLabel}
