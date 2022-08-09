@@ -180,16 +180,20 @@ export const insertFromFullTxn = async (transaction: {
       outputs
     };
 
-    // Update the confirmations of txns with same hash
-    await transactionDb.findAndUpdate(
-      { hash: txn.hash, walletId },
-      {
-        confirmations: newTxn.confirmations,
-        blockHeight: newTxn.blockHeight,
-        status: newTxn.status
-      }
-    );
-    await transactionDb.insert(newTxn);
+    if (existingTxns && existingTxns.length > 0) {
+      // Update the confirmations of txns with same hash
+      await transactionDb.findAndUpdate(
+        { hash: txn.hash, walletId, slug: coinType },
+        {
+          confirmed: newTxn.confirmed,
+          confirmations: newTxn.confirmations,
+          blockHeight: newTxn.blockHeight,
+          status: newTxn.status
+        }
+      );
+    } else {
+      await transactionDb.insert(newTxn);
+    }
   } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
     const myAddress =
@@ -553,4 +557,49 @@ export const prepareFromBlockbookTxn = async (transaction: {
 
     return [newTxn, feeTxn];
   }
+};
+
+export const handleBumpedTxn = (t1: any) => {
+  const storedTxns = getTxnPayloads();
+  storedTxns.forEach(async (t2: any, tIndex: number) => {
+    const hit =
+      t1.address === t2.address &&
+      t1.coinType === t2.coinType &&
+      t1.txn.blockHeight === t2.txn.blockHeight &&
+      t1.txn.vout.find((out: any) => out.addresses.includes(t1.address))
+        .value ===
+        t2.txn.vout.find((out: any) => out.addresses.includes(t2.address))
+          .value;
+
+    if (hit) {
+      storedTxns[tIndex] = t1;
+      storeTxnPayloads(storedTxns);
+      await transactionDb.findAndUpdate(
+        { hash: t2.txn.txid, status: Status.PENDING },
+        { status: Status.DISCARDED }
+      );
+      return true;
+    }
+  });
+  storedTxns.push(t1);
+  storeTxnPayloads(storedTxns);
+  return false;
+};
+
+const getTxnPayloads = () => {
+  const data = localStorage.getItem('txnPayloads');
+  if (data) return JSON.parse(data);
+  return [];
+};
+
+const storeTxnPayloads = (payloads: any) => {
+  localStorage.setItem('txnPayloads', JSON.stringify(payloads));
+};
+
+export const clearTxnPayloads = (slug: string) => {
+  const txnPayloads = getTxnPayloads();
+  const filteredTxns = txnPayloads.filter(
+    (payload: any) => payload.coinType !== slug
+  );
+  storeTxnPayloads(filteredTxns);
 };

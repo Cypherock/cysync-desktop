@@ -8,7 +8,9 @@ import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
   addressDb,
+  clearTxnPayloads,
   coinDb,
+  handleBumpedTxn,
   insertFromFullTxn,
   prepareFromBlockbookTxn,
   receiveAddressDb,
@@ -487,6 +489,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       try {
         logger.info('Received txn from blockbookSocket', { payload });
         if (payload && payload.coinType && payload.txn) {
+          handleBumpedTxn(payload);
           const allAddresses = await getDetailsFromTxn(
             payload.coinType,
             payload.txn
@@ -566,6 +569,7 @@ export const SocketProvider: React.FC = ({ children }) => {
                 });
               }
             }
+            clearTxnPayloads(payload.coinType);
           }
         } else {
           logger.warn('Receive new block hook does not have proper data', {
