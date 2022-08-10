@@ -204,7 +204,6 @@ const Recipient: React.FC<StepComponentProps> = props => {
     handleVerificationErrors,
     transactionFee,
     handleInputChange,
-    handleCopyFromClipboard,
     handleNext
   } = props;
   const {
@@ -216,6 +215,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = classes;
 
   const { coinDetails } = useCurrentCoin();
+  const coinNetwork = COINS[coinDetails.slug] as NearCoinData;
+  const nearSuffix = coinNetwork.network === 'testnet' ? '.testnet' : '.near';
   const { customAccount } = useCustomAccountContext();
 
   const {
@@ -268,10 +269,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const checkNearAccount = async (address: string) => {
     const coin = COINS[coinDetails.slug];
     if (coin instanceof NearCoinData) {
-      if (address.split('.').length !== 2)
-        return 'This is not a valid Near address';
+      if (address.includes('.')) return 'This is not a valid Near address';
       const wallet = new NearWallet(coinDetails.xpub, coin);
-      const check = await wallet.getTotalBalanceCustom(address);
+      const check = await wallet.getTotalBalanceCustom(address + nearSuffix);
       if (!check.balance.cysyncError) {
         return 'This account already exists';
       } else if (check.balance.cysyncError) {
@@ -331,7 +331,6 @@ const Recipient: React.FC<StepComponentProps> = props => {
           name="reciever_addr"
           id="1"
           label="New Account ID"
-          placeHolder="accountid.testnet"
           onChange={e => {
             handleInputChange(e);
             debouncedHandleCheckAddresses();
@@ -343,11 +342,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               ? recipientData.errorRecipient
               : undefined
           }
-          isClipboardPresent
-          handleCopyFromClipboard={e => {
-            handleCopyFromClipboard(e);
-            debouncedHandleCheckAddresses();
-          }}
+          customIcon={<Typography>{nearSuffix}</Typography>}
         />
         <Typography className={classes.info}>
           <p>Your account ID can contain any of the following:</p>
@@ -360,7 +355,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           <ul>
             <li>Characters "@" or "."</li>
             <li>Fewer than 2 characters</li>
-            <li>More than 64 characters (including .testnet)</li>
+            <li>More than 64 characters (including {nearSuffix})</li>
           </ul>
         </Typography>
       </div>
