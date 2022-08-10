@@ -492,13 +492,18 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
             className={classes.stepperRoot}
             connector={<QontoConnector />}
           >
-            {steps.map(step => (
-              <Step key={step.name}>
+            {steps.map((data, step) => (
+              <Step
+                key={data.name}
+                completed={
+                  step === steps.length - 1 ? verified === 2 : step < activeStep
+                }
+              >
                 <StyledStepLabel
                   StepIconComponent={QontoStepIcon}
                   className={classes.stepLabel}
                 >
-                  {step.name}
+                  {data.name}
                 </StyledStepLabel>
               </Step>
             ))}
