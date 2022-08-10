@@ -461,7 +461,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           setCoinsConfirmed(true);
         } else {
           const cyError = new CyError(
-            CysyncError.ADD_COIN_REJECTED,
+            CysyncError.SEND_TXN_REJECTED,
             COINS[coinType].name
           );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
