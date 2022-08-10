@@ -13,6 +13,7 @@ import {
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
+import sleep from '../../../utils/sleep';
 import { deviceDb } from '../../database';
 import {
   FeedbackState,
@@ -213,6 +214,8 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       });
       setIsInFlow(false);
       logger.info('DeviceAuth: completed.');
+      // Solely for UI purpose, to wait and give a UX feeback
+      await sleep(1000);
       setCompleted(true);
     } catch (e) {
       setIsInFlow(false);

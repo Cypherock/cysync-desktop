@@ -60,22 +60,21 @@ export const WalletsProvider: React.FC = ({ children }) => {
     try {
       const coins = await coinDb.getAll();
       const erc20Res = await tokenDb.getAll();
-      const coinTypeList = new Set<string>();
+      const coinTypeSet = new Set<string>();
+      const coinList: Coin[] = [];
       for (const coin of coins) {
-        coinTypeList.add(coin.slug);
+        if (coinTypeSet.has(coin.slug)) continue;
+        const { name, abbr } = COINS[coin.slug];
+        coinList.push({ name, abbr });
+        coinTypeSet.add(coin.slug);
       }
 
       for (const erc of erc20Res) {
-        coinTypeList.add(erc.slug);
-      }
-
-      const coinList: Coin[] = [];
-
-      for (const coinType of coinTypeList) {
-        const coin = COINS[coinType];
-        if (coin) {
-          coinList.push({ name: coin.name, abbr: coin.abbr });
-        }
+        if (coinTypeSet.has(erc.slug)) continue;
+        const parentData = COINS[erc.coin];
+        const { name, abbr } = parentData.tokenList[erc.slug];
+        coinList.push({ name, abbr });
+        coinTypeSet.add(erc.slug);
       }
 
       setAllCoins(coinList);

@@ -395,6 +395,8 @@ export const useCardAuth: UseCardAuth = isInitial => {
       });
       setIsInFlow(false);
       logger.info('CardAuth: completed.');
+      // Solely for UI purpose, to wait and give a UX feeback
+      await sleep(1000);
       setCompleted(true);
     } catch (e) {
       setIsInFlow(false);

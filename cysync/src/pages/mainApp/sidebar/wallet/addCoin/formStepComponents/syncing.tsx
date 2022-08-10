@@ -11,6 +11,7 @@ import {
   useNetwork
 } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
+import sleep from '../../../../../../utils/sleep';
 
 import {
   StepComponentProps,
@@ -51,8 +52,11 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
         Analytics.Categories.ADD_COIN,
         Analytics.Actions.COMPLETED
       );
-      coinAdder.resetHooks();
-      handleNext();
+      // Solely for UI purpose, to wait and give a UX feeback
+      sleep(1000).then(() => {
+        coinAdder.resetHooks();
+        handleNext();
+      });
     }
   }, [coinAdder.addCoinCompleted]);
 
