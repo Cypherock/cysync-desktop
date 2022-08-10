@@ -81,8 +81,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
     deviceState,
     setDeviceSerial,
     deviceConnectionState,
-    setIsInFlow,
-    connected
+    setIsInFlow
   } = useConnection();
   const latestDeviceConnection = useRef<any>();
 
@@ -100,6 +99,7 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
     completed,
     errorObj,
     confirmed,
+    enableRetry,
     handleFeedbackOpen,
     clearErrorObj
   } = useDeviceAuth(true);
@@ -214,7 +214,10 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
         >
           Follow the Steps on Device
         </Typography>
-        <DynamicTextView text="Connect X1 wallet" state={connected ? 2 : 1} />
+        <DynamicTextView
+          text="Connect X1 wallet"
+          state={latestDeviceConnection.current ? 2 : 1}
+        />
         <br />
         <DynamicTextView
           text="Authenticating Device"
@@ -255,11 +258,8 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
                 Close
               </CustomButton>
               {verified !== -1 &&
-                (!latestDeviceConnection.current ? (
-                  <Tooltip
-                    title={'Reconnect the device to retry'}
-                    placement="top"
-                  >
+                (!enableRetry ? (
+                  <Tooltip title={errorObj.getActionMessage()} placement="top">
                     <div>
                       <CustomButton
                         style={{ margin: '1rem 10px 1rem 0' }}
