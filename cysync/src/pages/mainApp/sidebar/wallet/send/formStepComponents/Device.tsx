@@ -130,7 +130,7 @@ const Device: React.FC<StepComponentProps> = ({ handleNext }) => {
                 ? false
                 : !sendTransaction.cardsTapped
             }
-            text="Tap any X1 Cards"
+            text="Tap any X1 Card"
             stylex={{ marginTop: '0px' }}
           />
         )}
