@@ -287,8 +287,13 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         className={classes.stepperRoot}
         connector={<QontoConnector />}
       >
-        {stepsData.map(data => (
-          <Step key={data[0]}>
+        {stepsData.map((data, step) => (
+          <Step
+            key={data[0]}
+            completed={
+              activeStep === stepsData.length - 1 ? true : step < activeStep
+            }
+          >
             <StyledStepLabel
               StepIconComponent={QontoStepIcon}
               className={classes.stepLabel}
