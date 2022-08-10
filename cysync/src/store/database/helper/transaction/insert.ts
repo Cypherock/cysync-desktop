@@ -282,7 +282,7 @@ export const insertFromFullTxn = async (transaction: {
   }
 };
 
-export const prepareFromBlockbookTxn = async (transaction: {
+export const insertFromBlockbookTxn = async (transaction: {
   txn: any;
   xpub: string;
   addresses: any[];
@@ -291,7 +291,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
   addressDB: AddressDB;
   walletName?: string;
   status?: 'PENDING' | 'SUCCESS' | 'FAILED';
-}): Promise<Transaction[]> => {
+}) => {
   const {
     txn,
     xpub,
@@ -463,12 +463,11 @@ export const prepareFromBlockbookTxn = async (transaction: {
         }
       );
     }
-    return [newTxn];
+    await transactionDb.insert(newTxn);
   } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
     const myAddress =
       utils.HDNode.fromExtendedKey(xpub).derivePath(`0/0`).address;
-    let feeTxn: Transaction;
 
     const amount = new BigNumber(txn.value);
     const fromAddr = txn.from;
@@ -511,7 +510,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
         return;
       }
 
-      feeTxn = {
+      const feeTxn: Transaction = {
         hash: txn.hash,
         amount: fees.toString(),
         fees: '0',
@@ -528,6 +527,8 @@ export const prepareFromBlockbookTxn = async (transaction: {
         inputs: [],
         outputs: []
       };
+
+      await transactionDb.insert(feeTxn);
     }
 
     const newTxn: Transaction = {
@@ -551,6 +552,6 @@ export const prepareFromBlockbookTxn = async (transaction: {
       outputs
     };
 
-    return [newTxn, feeTxn];
+    await transactionDb.insert(newTxn);
   }
 };
