@@ -98,8 +98,8 @@ export const UpdateProvider = ({ children }: any) => {
         logger.info('Checking for app update');
         ipcRenderer.send('check-for-update');
       } else {
-        logger.info('Checking fo auto update');
-        ipcRenderer.send('retry-auto-update');
+        logger.info('Checking for auto update');
+        ipcRenderer.send('check-auto-update');
       }
 
       logger.info('Checking for device update');

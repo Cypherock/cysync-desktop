@@ -10,25 +10,25 @@ import logger from './logger';
 
 export default class Updater {
   private checkingForUpdate: boolean;
-  private autoUpdateInProgress: boolean;
+  private autoUpdateInitiated: boolean;
   private latestReleaseUrl: string;
 
   private renderer: WebContents;
 
   constructor(mainWindow: WebContents) {
     this.checkingForUpdate = false;
-    this.autoUpdateInProgress = false;
+    this.autoUpdateInitiated = false;
     this.renderer = mainWindow;
     this.latestReleaseUrl = `https://api.github.com/repos/${process.env.GITHUB_REPO}/releases/latest`;
   }
   private async startAutoUpdate() {
     if (
       this.isAutoupdateAvailable() &&
-      !this.autoUpdateInProgress &&
+      !this.autoUpdateInitiated &&
       process.env.NODE_ENV !== 'development'
     ) {
       logger.info('Starting autoupdate');
-      this.autoUpdateInProgress = true;
+      this.autoUpdateInitiated = true;
       autoUpdater({
         repo: process.env.GITHUB_REPO,
         // Winston logger is incompatable with `update-electron-app`, thus it needs to be modified.
@@ -70,7 +70,7 @@ export default class Updater {
       this.checkForUpdates();
     });
 
-    ipcMain.on('retry-auto-update', () => {
+    ipcMain.on('check-auto-update', () => {
       this.startAutoUpdate();
     });
   }
