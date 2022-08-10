@@ -10,47 +10,53 @@ import logger from './logger';
 
 export default class Updater {
   private checkingForUpdate: boolean;
+  private autoUpdateInitiated: boolean;
   private latestReleaseUrl: string;
 
   private renderer: WebContents;
 
   constructor(mainWindow: WebContents) {
     this.checkingForUpdate = false;
+    this.autoUpdateInitiated = false;
     this.renderer = mainWindow;
     this.latestReleaseUrl = `https://api.github.com/repos/${process.env.GITHUB_REPO}/releases/latest`;
-
-    if (this.isAutoupdateAvailable()) {
-      if (process.env.NODE_ENV !== 'development') {
-        logger.info('Starting autoupdate');
-        autoUpdater({
-          repo: process.env.GITHUB_REPO,
-          // Winston logger is incompatable with `update-electron-app`, thus it needs to be modified.
-          logger: {
-            log: (...args: any) => {
-              if (args.length > 0) {
-                logger.info(args[0], { params: args.slice(1) });
-              }
-            },
-            info: (...args: any) => {
-              if (args.length > 0) {
-                logger.info(args[0], { params: args.slice(1) });
-              }
-            },
-            error: (...args: any) => {
-              if (args.length > 0) {
-                logger.error(args[0], { params: args.slice(1) });
-              }
-            },
-            warn: (...args: any) => {
-              if (args.length > 0) {
-                logger.warn(args[0], { params: args.slice(1) });
-              }
+  }
+  private async startAutoUpdate() {
+    if (
+      this.isAutoupdateAvailable() &&
+      !this.autoUpdateInitiated &&
+      process.env.NODE_ENV !== 'development'
+    ) {
+      logger.info('Starting autoupdate');
+      this.autoUpdateInitiated = true;
+      autoUpdater({
+        repo: process.env.GITHUB_REPO,
+        // Winston logger is incompatable with `update-electron-app`, thus it needs to be modified.
+        logger: {
+          log: (...args: any) => {
+            if (args.length > 0) {
+              logger.info(args[0], { params: args.slice(1) });
             }
           },
+          info: (...args: any) => {
+            if (args.length > 0) {
+              logger.info(args[0], { params: args.slice(1) });
+            }
+          },
+          error: (...args: any) => {
+            if (args.length > 0) {
+              logger.error(args[0], { params: args.slice(1) });
+            }
+          },
+          warn: (...args: any) => {
+            if (args.length > 0) {
+              logger.warn(args[0], { params: args.slice(1) });
+            }
+          }
+        },
 
-          notifyUser: true
-        });
-      }
+        notifyUser: true
+      });
     }
   }
 
@@ -62,6 +68,10 @@ export default class Updater {
   public setupListeners() {
     ipcMain.on('check-for-update', () => {
       this.checkForUpdates();
+    });
+
+    ipcMain.on('check-auto-update', () => {
+      this.startAutoUpdate();
     });
   }
 
