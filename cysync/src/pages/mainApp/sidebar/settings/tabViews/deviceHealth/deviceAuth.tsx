@@ -422,15 +422,26 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
           >
             Device Authentication Failed
           </Typography>
-          <Typography color="textPrimary" style={{ margin: '1rem 0rem 6rem' }}>
-            {errorObj.getCode()}
-          </Typography>
-          <Typography
-            color="textSecondary"
-            style={{ margin: '1rem 0rem 6rem' }}
+          <Grid
+            item
+            container
+            xs={12}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              width: '100%',
+              height: '100%'
+            }}
           >
-            {errorObj.getMessage()}
-          </Typography>
+            <Typography
+              color="textSecondary"
+              style={{ margin: '1rem 0rem 6rem' }}
+            >
+              {errorObj.showError()}
+            </Typography>
+          </Grid>
           {verified === -1 ? (
             <div className={classes.errorButtons}>
               <CustomButton
