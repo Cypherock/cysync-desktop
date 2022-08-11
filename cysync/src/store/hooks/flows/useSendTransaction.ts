@@ -727,7 +727,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           confirmations: 0,
           status: 0,
           sentReceive: SentReceive.SENT,
-          confirmed: new Date(),
+          confirmed: new Date().toISOString(),
           blockHeight: -1,
           coin,
           inputs: formattedInputs,
@@ -743,7 +743,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           confirmations: 0,
           status: 0,
           sentReceive: SentReceive.FEES,
-          confirmed: new Date(),
+          confirmed: new Date().toISOString(),
           blockHeight: -1,
           coin
         };
@@ -759,7 +759,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           confirmations: 0,
           status: coin.toLowerCase() === 'near' ? 1 : 0,
           sentReceive: SentReceive.SENT,
-          confirmed: new Date(),
+          confirmed: new Date().toISOString(),
           blockHeight: -1,
           inputs: formattedInputs,
           outputs: formattedOutputs

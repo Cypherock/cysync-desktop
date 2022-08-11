@@ -174,7 +174,7 @@ export const insertFromFullTxn = async (transaction: {
       slug: coinType,
       sentReceive,
       status: statusCode,
-      confirmed: new Date(txn.confirmed),
+      confirmed: new Date(txn.confirmed).toISOString(),
       blockHeight: txn.block_height,
       inputs,
       outputs
@@ -247,7 +247,7 @@ export const insertFromFullTxn = async (transaction: {
         // 2 for failed, 1 for pass
         status: txn.isError ? 2 : 1,
         sentReceive: SentReceive.FEES,
-        confirmed: new Date(txn.timeStamp),
+        confirmed: new Date(txn.timeStamp).toISOString(),
         blockHeight: txn.blockNumber,
         slug: coinType,
         inputs: [],
@@ -271,7 +271,7 @@ export const insertFromFullTxn = async (transaction: {
         myAddress.toLowerCase() === fromAddr.toLowerCase()
           ? SentReceive.SENT
           : SentReceive.RECEIVED,
-      confirmed: new Date(txn.timeStamp),
+      confirmed: new Date(txn.timeStamp).toISOString(),
       blockHeight: txn.blockNumber,
       coin: coinType,
       inputs,
@@ -446,7 +446,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
       slug: coinType,
       sentReceive,
       status: statusCode,
-      confirmed,
+      confirmed: confirmed.toISOString(),
       blockHeight: txn.blockHeight,
       inputs,
       outputs
@@ -522,7 +522,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
         // 2 for failed, 1 for pass
         status: txn.isError ? 2 : 1,
         sentReceive: SentReceive.FEES,
-        confirmed: new Date(txn.timeStamp),
+        confirmed: new Date(txn.timeStamp).toISOString(),
         blockHeight: txn.blockNumber,
         coin: coinType,
         inputs: [],
@@ -544,7 +544,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
         myAddress.toLowerCase() === fromAddr.toLowerCase()
           ? SentReceive.SENT
           : SentReceive.RECEIVED,
-      confirmed: new Date(txn.timeStamp),
+      confirmed: new Date(txn.timeStamp).toISOString(),
       blockHeight: txn.blockNumber,
       coin: coinType,
       inputs,
