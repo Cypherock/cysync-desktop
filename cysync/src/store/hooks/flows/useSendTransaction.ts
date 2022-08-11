@@ -374,7 +374,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           } else {
             cyError.setError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
           }
-          setErrorObj(handleErrors(errorObj, cyError, subFlowName, { e }));
+          setErrorObj(handleErrors(errorObj, cyError, subFlowName, { err: e }));
           resolve(null);
         });
     });
