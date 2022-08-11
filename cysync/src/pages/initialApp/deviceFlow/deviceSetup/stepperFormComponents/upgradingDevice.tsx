@@ -93,7 +93,9 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
     latestVersion,
     setBlockNewConnection,
     setIsDeviceUpdating,
-    errorResolutionState
+    errorResolutionState,
+    inBackgroundProcess,
+    deviceConnection
   } = useDeviceUpgrade(true);
 
   const refreshComponent = () => {
@@ -220,6 +222,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
               <CustomButton
                 onClick={refreshComponent}
                 style={{ marginTop: '2rem' }}
+                disabled={inBackgroundProcess || !deviceConnection}
               >
                 {isAuthFailed ? 'Ok' : 'Try Again'}
               </CustomButton>
