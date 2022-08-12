@@ -182,7 +182,8 @@ const Verify = (props: any) => {
           <LabelText
             label="Transaction Fees"
             text={`~ ${0.1012} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
-              sendTransaction.totalFees * parseFloat(coinDetails.displayPrice),
+              parseFloat(sendTransaction.totalFees) *
+                parseFloat(coinDetails.displayPrice),
               2,
               true
             )})`}
