@@ -431,7 +431,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     } catch (e) {
       setIsInFlow(true);
       const cyError = new CyError(CysyncError.DEVICE_UPGRADE_UNKNOWN_ERROR);
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err: e }));
       setErrorResolutionState(
         DeviceUpgradeErrorResolutionState.RECONNECT_REQUIRED
       );

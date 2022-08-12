@@ -168,7 +168,7 @@ export interface UseSendTransactionValues {
   signedTxn: string;
   hash: string;
   setHash: React.Dispatch<React.SetStateAction<string>>;
-  totalFees: number;
+  totalFees: string;
   approxTotalFee: number;
   sendMaxAmount: string;
   resetHooks: () => void;
@@ -214,7 +214,7 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [hash, setHash] = useState('');
   const [metadataSent, setMetadataSent] = useState(false);
   const sendTransaction = new TransactionSender();
-  const [totalFees, setTotalFees] = useState(0);
+  const [totalFees, setTotalFees] = useState('0');
   const [txnInputs, setTxnInputs] = useState<TxInputOutput[]>([]);
   const [txnOutputs, setTxnOutputs] = useState<TxInputOutput[]>([]);
   const [approxTotalFee, setApproxTotalFees] = useState(0);
@@ -237,7 +237,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     setCompleted(false);
     setMetadataSent(false);
     setEstimationError(undefined);
-    setTotalFees(0);
+    setTotalFees('0');
     setSendMaxAmount('0');
     sendTransaction.removeAllListeners();
   };
@@ -371,7 +371,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           } else {
             cyError.setError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
           }
-          setErrorObj(handleErrors(errorObj, cyError, subFlowName, { e }));
+          setErrorObj(handleErrors(errorObj, cyError, subFlowName, { err: e }));
           resolve(null);
         });
     });
