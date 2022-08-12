@@ -255,7 +255,8 @@ const Summary: React.FC<StepComponentProps> = ({
           text={`~ ${
             sendTransaction.totalFees
           } ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
-            sendTransaction.totalFees * parseFloat(coinDetails.displayPrice),
+            parseFloat(sendTransaction.totalFees) *
+              parseFloat(coinDetails.displayPrice),
             2,
             true
           )})`}

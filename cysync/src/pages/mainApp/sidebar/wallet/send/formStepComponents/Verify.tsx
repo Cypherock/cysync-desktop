@@ -198,7 +198,7 @@ const Verify = (props: any) => {
               text={`~ ${
                 sendTransaction.totalFees
               } ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
-                sendTransaction.totalFees *
+                parseFloat(sendTransaction.totalFees) *
                   parseFloat(coinDetails.displayPrice),
                 2,
                 true
@@ -245,7 +245,7 @@ const Verify = (props: any) => {
                 text={`~ ${
                   sendTransaction.totalFees
                 } ${coinDetails.slug.toUpperCase()} ~( $${
-                  sendTransaction.totalFees *
+                  parseFloat(sendTransaction.totalFees) *
                   parseFloat(coinDetails.displayPrice)
                 })`}
                 verified={sendTransaction.verified}
