@@ -49,6 +49,14 @@ const handleErrors = (
     }
   }
 
+  //USB Modem Device Disconnection Unknown error
+  if (
+    isUnknownError(err.getCode()) &&
+    metadata?.err?.message &&
+    metadata?.err?.message.match('cannot open /dev/tty.usbmodem')
+  )
+    err.setError(DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW);
+
   // report to analytics
   Analytics.Instance.event(flow, Analytics.Actions.ERROR);
 

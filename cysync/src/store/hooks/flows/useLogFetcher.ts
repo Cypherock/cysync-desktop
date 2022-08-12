@@ -131,7 +131,7 @@ export const useLogFetcher: UseLogFetcher = () => {
     } catch (e) {
       setIsInFlow(false);
       const cyError = new CyError(CysyncError.LOG_FETCHER_UNKNOWN_ERROR);
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err: e }));
       setRequestStatus(-1);
       setLogFetched(-1);
       setCompleted(true);
