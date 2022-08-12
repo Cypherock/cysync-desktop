@@ -214,7 +214,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
             This Receive Address was&nbsp;
             <strong>NOT VERIFIED</strong>
             &nbsp; by the Device.&nbsp;
-            <strong>Please use it at your own Risk.</strong>
+            <strong>Use it at your own Risk.</strong>
           </Typography>
         )}
         {receiveTransaction.verified &&
