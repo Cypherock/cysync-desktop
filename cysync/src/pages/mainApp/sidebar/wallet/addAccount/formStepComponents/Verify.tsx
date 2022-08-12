@@ -176,7 +176,7 @@ const Verify = (props: any) => {
           )}
           <LabelText
             label="New Account Id"
-            text={recipientData.recipient}
+            text={recipientData[0].recipient}
             verified={sendTransaction.verified}
           />
           <LabelText
