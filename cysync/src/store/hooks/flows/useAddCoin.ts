@@ -405,7 +405,7 @@ export const useAddCoin: UseAddCoin = () => {
     } catch (e) {
       setIsInFlow(false);
       const cyError = new CyError(CysyncError.ADD_COIN_UNKNOWN_ERROR);
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err: e }));
       addCoin.removeAllListeners();
     }
   };
