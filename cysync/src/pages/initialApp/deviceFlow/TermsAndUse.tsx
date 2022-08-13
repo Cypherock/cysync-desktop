@@ -3,6 +3,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
 import { styled } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { shell } from 'electron';
 import PropTypes from 'prop-types';
@@ -56,6 +57,7 @@ interface TermsAndUseProps {
 
 const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
   const [agreement, setAgreement] = React.useState(false);
+  const [agreeEnabled, setAgreeEnabled] = React.useState(false);
 
   const handleAgreementChange = () => {
     setAgreement(!agreement);
@@ -66,13 +68,23 @@ const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
     shell.openExternal('https://cypherock.com/privacy');
   };
 
+  const onScroll = (event: any) => {
+    const scrollPercent =
+      ((event.target.clientHeight + event.target.scrollTop) * 100) /
+      event.target.scrollHeight;
+
+    if (!agreeEnabled && scrollPercent >= 98) {
+      setAgreeEnabled(true);
+    }
+  };
+
   return (
     <Root container>
       <Grid item xs={12} className={classes.middle}>
         <Typography variant="h2" color="textPrimary" align="center">
           Terms of Use
         </Typography>
-        <Grid container className={classes.content}>
+        <Grid onScroll={onScroll} container className={classes.content}>
           <br />
           <br />
           <Typography variant="caption" color="textPrimary">
@@ -979,18 +991,37 @@ const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
           <br />
         </Grid>
         <div className={classes.buttons}>
-          <FormControlLabel
-            control={
-              <CustomCheckBox
-                checked={agreement}
-                onChange={handleAgreementChange}
-                color="secondary"
+          {!agreeEnabled ? (
+            <Tooltip title="Read the terms of use till end">
+              <FormControlLabel
+                control={
+                  <CustomCheckBox
+                    checked={agreement}
+                    onChange={handleAgreementChange}
+                    disabled={!agreeEnabled}
+                    color="secondary"
+                  />
+                }
+                color={'textPrimary'}
+                label="I have read and agree with the Terms of Use and Privacy Policy"
+                style={{ width: '50%' }}
               />
-            }
-            color="textSecondary"
-            label="I have read and agree with the Terms of Use and Privacy Policy"
-            style={{ width: '50%' }}
-          />
+            </Tooltip>
+          ) : (
+            <FormControlLabel
+              control={
+                <CustomCheckBox
+                  checked={agreement}
+                  onChange={handleAgreementChange}
+                  disabled={!agreeEnabled}
+                  color="secondary"
+                />
+              }
+              color={'textSecondary'}
+              label="I have read and agree with the Terms of Use and Privacy Policy"
+              style={{ width: '50%' }}
+            />
+          )}
           <CustomButton
             onClick={() => {
               localStorage.setItem('tnc', 'true');
