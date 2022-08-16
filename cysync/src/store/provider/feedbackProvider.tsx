@@ -190,7 +190,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     deviceConnectionState,
     setIsInFlow,
     blockNewConnection,
-    isDeviceAvailable
+    isDeviceAvailable,
+    isDeviceUpdating
   } = useConnection();
   const [feedbackInput, setFeedbackInput] =
     React.useState<FeedbackState>(initFeedbackState);
@@ -714,7 +715,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                   </Grid>
                   {!feedbackInput.disableDeviceLogs && (
                     <>
-                      {isDeviceConnected() && (
+                      {isDeviceConnected && !isDeviceUpdating && (
                         <Grid
                           container
                           className={classes.extras}
@@ -738,6 +739,25 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                           )}
                           <Typography color="textPrimary">
                             Attach Device Logs
+                          </Typography>
+                        </Grid>
+                      )}
+                      {isDeviceUpdating && (
+                        <Grid
+                          container
+                          className={classes.extras}
+                          style={{ marginLeft: '0', marginBottom: '10px' }}
+                          wrap="nowrap"
+                        >
+                          <AlertIcon
+                            className={classes.errorColor}
+                            style={{ marginRight: '5px' }}
+                          />
+                          <Typography
+                            variant="body2"
+                            className={classes.errorColor}
+                          >
+                            {'Device is busy.'}
                           </Typography>
                         </Grid>
                       )}
