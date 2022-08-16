@@ -1,9 +1,4 @@
-import {
-  CoinGroup,
-  COINS,
-  Erc20CoinData,
-  NearCoinData
-} from '@cypherock/communication';
+import { CoinGroup, COINS, NearCoinData } from '@cypherock/communication';
 import { NearWallet } from '@cypherock/wallet';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { Typography } from '@mui/material';
@@ -526,10 +521,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
         return;
       }
 
-      const coin = COINS[coinAbbr];
       let contractAddress: string | undefined;
-      if (token && coin instanceof Erc20CoinData) {
-        contractAddress = coin.address;
+      if (token) {
+        const tokenData = COINS[token.parentCoin].tokenList[token.slug];
+        contractAddress = tokenData.address;
       }
 
       sendTransaction.handleSendTransaction({
