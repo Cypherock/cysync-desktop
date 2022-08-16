@@ -141,8 +141,8 @@ const PermissionSetup = () => {
           </Button>
           <div style={{ userSelect: 'text' }}>
             <Typography variant="body2" sx={{ color: '#eee' }}>
-              If the above button does not work please follow the instructions
-              given below:
+              If the above button does not work follow the instructions given
+              below:
             </Typography>
 
             <Typography variant="body2" sx={{ color: '#eee' }}>
