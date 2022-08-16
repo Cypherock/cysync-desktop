@@ -9,6 +9,7 @@ import {
   removePassword
 } from '../../utils/auth';
 import { getAutoLock } from '../../utils/autolock';
+import logger from '../../utils/logger';
 import { initDatabases } from '../database';
 
 export interface LockscreenContextInterface {
@@ -65,6 +66,7 @@ export const LockscreenProvider: React.FC = ({ children }) => {
   };
 
   const onDesktopLock = () => {
+    logger.info('CySync lock triggred from desktop lockscreen');
     const val =
       !lockscreenRef.current && isPasswordSetRef.current && autoLockRef.current;
     if (val) {

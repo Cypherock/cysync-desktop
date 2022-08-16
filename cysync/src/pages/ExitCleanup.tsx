@@ -1,8 +1,9 @@
+import { DeviceConnection } from '@cypherock/communication';
 import { CancelFlow } from '@cypherock/protocols';
 import { Backdrop, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { ipcRenderer } from 'electron';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { passEnDb } from '../store/database';
 import { useConnection } from '../store/provider';
@@ -28,12 +29,20 @@ const ExitCleanup: React.FC<ExitCleanupProps> = ({ setDoCleanupFunction }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { internalDeviceConnection, deviceSdkVersion } = useConnection();
 
+  const latestDeviceConnection = useRef<DeviceConnection | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    latestDeviceConnection.current = internalDeviceConnection;
+  }, [internalDeviceConnection]);
+
   const cancelFlow = new CancelFlow();
 
   const exitCleanup = async () => {
     try {
       const response = await cancelFlow.run({
-        connection: internalDeviceConnection,
+        connection: latestDeviceConnection.current,
         sdkVersion: deviceSdkVersion
       });
       logger.info('Exit cleanup cancel response', { response });
