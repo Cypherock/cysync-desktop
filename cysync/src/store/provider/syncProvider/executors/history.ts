@@ -200,6 +200,16 @@ export const processResponses = async (
         newTxns.forEach(newTxn => transactionDbList.push(newTxn));
       }
 
+      try {
+        await transactionDb.insertMany(transactionDbList);
+      } catch (error) {
+        // No need to retry if the inserting fails because it'll produce the same error.
+        logger.error(
+          `${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : prepareFromBlockbookTxn`
+        );
+        logger.error(error);
+      }
+
       // If there are more txs, return the last block height
       if (
         response.data.page &&
@@ -211,15 +221,6 @@ export const processResponses = async (
           page: response.data.page + 1
         };
       }
-    }
-    try {
-      await transactionDb.insertMany(transactionDbList);
-    } catch (error) {
-      // No need to retry if the inserting fails because it'll produce the same error.
-      logger.error(
-        `${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : prepareFromBlockbookTxn`
-      );
-      logger.error(error);
     }
     return undefined;
   }

@@ -52,6 +52,9 @@ export const getAllTxns = async (
       andQuery.push({ $not: { status: Status.PENDING } });
     }
 
+    // Omitting Discarded Txns by default
+    andQuery.push({ $not: { status: Status.DISCARDED } });
+
     if (options.sinceDate) {
       innerQuery.confirmed = { $gt: options.sinceDate };
       delete options.sinceDate;
