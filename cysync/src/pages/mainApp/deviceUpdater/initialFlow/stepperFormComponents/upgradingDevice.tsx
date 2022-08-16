@@ -243,13 +243,22 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
               >
                 {/* An extra div is required for tooltip to work on disabled button */}
                 <div style={{ display: 'inline-block' }}>
-                  <CustomButton
-                    onClick={refreshComponent}
-                    style={{ marginTop: '2rem' }}
-                    disabled={inBackgroundProcess || !deviceConnection}
-                  >
-                    {isAuthFailed ? 'Ok' : 'Try Again'}
-                  </CustomButton>
+                  {isAuthFailed ? (
+                    <CustomButton
+                      onClick={refreshComponent}
+                      style={{ marginTop: '2rem' }}
+                    >
+                      Ok
+                    </CustomButton>
+                  ) : (
+                    <CustomButton
+                      onClick={refreshComponent}
+                      style={{ marginTop: '2rem' }}
+                      disabled={inBackgroundProcess || !deviceConnection}
+                    >
+                      Retry
+                    </CustomButton>
+                  )}
                 </div>
               </StyledToolTip>
               <CustomButton
