@@ -60,7 +60,7 @@ const UpdateInfoComponent: React.FC<UpdateInfoComponentProps> = ({
         {`New CySync Version ${version} Available!`}
       </Typography>
       <Typography className={classes.versionText} variant="body2">
-        Please download the latest CySync app from the Cypherock website.
+        Download the latest CySync app from the Cypherock website.
       </Typography>
       <Button onClick={onUpdate} size="large" className={classes.button}>
         Update

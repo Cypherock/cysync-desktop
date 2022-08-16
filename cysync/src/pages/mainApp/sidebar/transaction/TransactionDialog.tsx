@@ -55,7 +55,8 @@ const classes = {
 
 const Root = styled('div')(({ theme }) => ({
   padding: '0 25px',
-  minWidth: '300px',
+  minWidth: '50rem',
+  maxWidth: '70rem',
   [`& .${classes.dateTimeContainer}`]: {
     marginBottom: '20px'
   },
@@ -307,7 +308,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         spacing={2}
         className={clsx(classes.dataContainer, classes.inputOutputContainer)}
       >
-        <Grid item xs={6}>
+        <Grid item xs={6} style={{ overflow: 'auto' }}>
           <Typography style={{ marginBottom: '10px' }} color="textSecondary">
             Sender
           </Typography>
