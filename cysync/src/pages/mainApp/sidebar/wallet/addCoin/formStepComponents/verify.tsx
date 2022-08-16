@@ -93,7 +93,7 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
               ? false
               : !coinAdder.cardTap
           }
-          text="Please tap any X1 Card"
+          text="Tap any X1 Card"
         />
       )}
 

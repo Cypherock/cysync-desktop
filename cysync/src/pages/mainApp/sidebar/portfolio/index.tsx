@@ -123,7 +123,7 @@ const Portfolio = () => {
               color="textPrimary"
               style={{ marginBottom: '2rem' }}
             >
-              Please import a wallet from Cypherock X1
+              Import a wallet from Cypherock X1
             </Typography>
             <CustomButton
               style={{ padding: '0.5rem 2rem ' }}

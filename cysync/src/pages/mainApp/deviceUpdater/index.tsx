@@ -78,8 +78,6 @@ const DeviceUpdatePopup = () => {
         );
         logger.info('Intial flow in main opened by user');
       }
-      setIsOpen(true);
-      setUpdateType(localUpdateType);
     } else {
       setIsOpen(false);
     }
@@ -87,6 +85,7 @@ const DeviceUpdatePopup = () => {
 
   const handleClose = () => {
     setIsOpen(false);
+    setOpenMisconfiguredPrompt(false);
     Analytics.Instance.event(
       updateType === 'update'
         ? Analytics.Categories.PARTIAL_DEVICE_UPDATE

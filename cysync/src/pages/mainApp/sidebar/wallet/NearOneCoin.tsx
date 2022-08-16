@@ -212,7 +212,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   const beforeAction = () => {
     if (isLoading) {
       snackbar.showSnackbar(
-        `Please wait while we fetch the balance and latest price rates for ${name}`,
+        `Wait while we fetch the balance and latest price rates for ${name}`,
         'warning'
       );
       return false;

@@ -93,7 +93,9 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
     latestVersion,
     setBlockNewConnection,
     setIsDeviceUpdating,
-    errorResolutionState
+    errorResolutionState,
+    inBackgroundProcess,
+    deviceConnection
   } = useDeviceUpgrade(true);
 
   const refreshComponent = () => {
@@ -174,8 +176,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
               align="center"
               style={{ marginBottom: '1.5rem' }}
             >
-              Please wait while we download the latest firmware from the
-              internet
+              Wait while we download the latest firmware from the internet
             </Typography>
             <Typography variant="body2" color="textPrimary" align="center">
               It might take a few seconds ...
@@ -220,6 +221,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
               <CustomButton
                 onClick={refreshComponent}
                 style={{ marginTop: '2rem' }}
+                disabled={inBackgroundProcess || !deviceConnection}
               >
                 {isAuthFailed ? 'Ok' : 'Try Again'}
               </CustomButton>
@@ -241,7 +243,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
               align="center"
               style={{ marginBottom: '1.5rem' }}
             >
-              {`Please confirm the update on the device to version ${latestVersion}`}
+              {`Confirm the update on the device to version ${latestVersion}`}
             </Typography>
             <div className={classes.center} style={{ margin: '15px 0' }}>
               <AlertIcon
@@ -276,7 +278,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
               align="center"
               style={{ marginBottom: '1.5rem' }}
             >
-              {`Please wait while Cypherock X1 is Upgrading to version ${latestVersion}`}
+              {`Wait while Cypherock X1 is Upgrading to version ${latestVersion}`}
             </Typography>
             <div className={classes.center} style={{ margin: '15px 0' }}>
               <AlertIcon

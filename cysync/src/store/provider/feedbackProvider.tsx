@@ -190,7 +190,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     deviceConnectionState,
     setIsInFlow,
     blockNewConnection,
-    isDeviceAvailable
+    isDeviceAvailable,
+    isDeviceUpdating
   } = useConnection();
   const [feedbackInput, setFeedbackInput] =
     React.useState<FeedbackState>(initFeedbackState);
@@ -373,9 +374,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       logger.info('Feedback: Verification failed');
       setFeedbackInput({
         ...feedbackInput,
-        subjectError: checkArray[0] ? 'Please Enter a Subject' : '',
-        emailError: checkArray[1] ? 'Please Enter a Valid Email Address' : '',
-        descriptionError: checkArray[2] ? 'Please Enter a description' : ''
+        subjectError: checkArray[0] ? 'Enter a Subject' : '',
+        emailError: checkArray[1] ? 'Enter a Valid Email Address' : '',
+        descriptionError: checkArray[2] ? 'Enter a description' : ''
       });
     } else {
       setSubmitting(true);
@@ -451,7 +452,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
           );
           setSubmitted(false);
           setSubmitting(false);
-          setError('Failed to submit feedback, please try again later.');
+          setError('Failed to submit feedback, try again later.');
           logger.error('Feedback: Error');
           logger.error(e);
         });
@@ -499,10 +500,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     if (id !== openId) return;
     if (deviceLogsLoading) {
       if (logRequestStatus === 2) {
-        snackbar.showSnackbar(
-          'Please wait while the logs are being fetched.',
-          'info'
-        );
+        snackbar.showSnackbar('Wait while the logs are being fetched.', 'info');
         return;
       }
 
@@ -532,7 +530,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     const defaultText = 'Looks like the device is not configured.';
     switch (deviceConnectionState) {
       case DeviceConnectionState.NOT_CONNECTED:
-        return 'Please connect the device to attach device logs.';
+        return 'Connect the device to attach device logs.';
       case DeviceConnectionState.IN_BOOTLOADER:
       case DeviceConnectionState.PARTIAL_STATE:
         return 'Looks like your device was disconnected while upgrading.';
@@ -717,7 +715,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                   </Grid>
                   {!feedbackInput.disableDeviceLogs && (
                     <>
-                      {isDeviceConnected() && (
+                      {isDeviceConnected && !isDeviceUpdating && (
                         <Grid
                           container
                           className={classes.extras}
@@ -741,6 +739,25 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                           )}
                           <Typography color="textPrimary">
                             Attach Device Logs
+                          </Typography>
+                        </Grid>
+                      )}
+                      {isDeviceUpdating && (
+                        <Grid
+                          container
+                          className={classes.extras}
+                          style={{ marginLeft: '0', marginBottom: '10px' }}
+                          wrap="nowrap"
+                        >
+                          <AlertIcon
+                            className={classes.errorColor}
+                            style={{ marginRight: '5px' }}
+                          />
+                          <Typography
+                            variant="body2"
+                            className={classes.errorColor}
+                          >
+                            {'Device is busy.'}
                           </Typography>
                         </Grid>
                       )}
@@ -775,7 +792,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                             style={{ marginRight: '5px' }}
                           />
                           <Typography variant="body2" color="textSecondary">
-                            Please confirm the request on device.
+                            Confirm the request on device.
                           </Typography>
                         </Grid>
                       )}

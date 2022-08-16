@@ -200,6 +200,16 @@ export const processResponses = async (
         newTxns.forEach(newTxn => transactionDbList.push(newTxn));
       }
 
+      try {
+        await transactionDb.insertMany(transactionDbList);
+      } catch (error) {
+        // No need to retry if the inserting fails because it'll produce the same error.
+        logger.error(
+          `${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : prepareFromBlockbookTxn`
+        );
+        logger.error(error);
+      }
+
       // If there are more txs, return the last block height
       if (
         response.data.page &&
@@ -211,15 +221,6 @@ export const processResponses = async (
           page: response.data.page + 1
         };
       }
-    }
-    try {
-      await transactionDb.insertMany(transactionDbList);
-    } catch (error) {
-      // No need to retry if the inserting fails because it'll produce the same error.
-      logger.error(
-        `${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : prepareFromBlockbookTxn`
-      );
-      logger.error(error);
     }
     return undefined;
   }
@@ -261,7 +262,7 @@ export const processResponses = async (
         status: ele.isError === '0' ? 1 : 2,
         sentReceive:
           address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
-        confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
+        confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
         blockHeight: ele.blockNumber,
         coin: item.coinType,
         inputs: [
@@ -311,7 +312,9 @@ export const processResponses = async (
               slug: item.coinType,
               status: 1,
               sentReceive: SentReceive.FEES,
-              confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
+              confirmed: new Date(
+                parseInt(ele.timeStamp, 10) * 1000
+              ).toISOString(),
               blockHeight: ele.blockNumber as number,
               coin: item.coinType
             });
@@ -353,7 +356,7 @@ export const processResponses = async (
           status: 1,
           sentReceive:
             address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
-          confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
+          confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
           blockHeight: ele.blockNumber as number,
           coin: item.coinType,
           inputs: [
@@ -394,7 +397,7 @@ export const processResponses = async (
           slug: item.coinType,
           status: 1,
           sentReceive: SentReceive.FEES,
-          confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
+          confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
           blockHeight: ele.blockNumber as number,
           coin: item.coinType
         });
@@ -484,7 +487,9 @@ export const processResponses = async (
         status: ele.status ? 1 : 2,
         sentReceive:
           address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
-        confirmed: new Date(parseInt(ele.block_timestamp, 10) / 1000000), //conversion from timestamp in nanoseconds
+        confirmed: new Date(
+          parseInt(ele.block_timestamp, 10) / 1000000
+        ).toISOString(), //conversion from timestamp in nanoseconds
         blockHeight: parseInt(ele.block_height, 10) || 0,
         coin: item.coinType,
         inputs: [
