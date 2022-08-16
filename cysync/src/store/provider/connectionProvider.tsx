@@ -415,10 +415,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
 
   const beforeFlowStart = (useInternal?: boolean) => {
     if (inBackgroundProcess) {
-      snackbar.showSnackbar(
-        'Please wait while the device is connecting',
-        'warning'
-      );
+      snackbar.showSnackbar('Wait while the device is connecting', 'warning');
       return false;
     }
 
@@ -432,20 +429,14 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         return true;
       }
 
-      snackbar.showSnackbar(
-        'Please connect the device and try again',
-        'warning'
-      );
+      snackbar.showSnackbar('Connect the device and try again', 'warning');
       return false;
     }
 
     if (isReady) return true;
 
     if (deviceConnectionState === DeviceConnectionState.NOT_CONNECTED) {
-      snackbar.showSnackbar(
-        'Please connect the device and try again',
-        'warning'
-      );
+      snackbar.showSnackbar('Connect the device and try again', 'warning');
     } else {
       setOpenMisconfiguredPrompt(true);
     }

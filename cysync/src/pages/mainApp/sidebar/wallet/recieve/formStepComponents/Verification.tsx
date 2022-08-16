@@ -39,7 +39,7 @@ const Root = styled('div')(() => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     width: 'auto',
     padding: '3rem 10rem 3rem',
     marginLeft: 'auto',
@@ -47,8 +47,7 @@ const Root = styled('div')(() => ({
   },
   [`& .${classes.addressContainer}`]: {
     background: 'rgba(0,0,0,0.2)',
-    minWidth: '92%',
-    padding: '1.5rem',
+    padding: '5%',
     marginBottom: '1.5rem',
     borderRadius: 10,
     display: 'flex',
@@ -191,7 +190,9 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
           <div className={classes.addressContainer}>
             <Typography
               color="secondary"
-              variant={(customAccount?.name || address).length ? 'h6' : 'h4'}
+              variant={
+                (customAccount?.name || address).length > 44 ? 'h6' : 'h4'
+              }
             >
               {customAccount ? customAccount.name : address}
             </Typography>
@@ -202,7 +203,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
           <TextView
             completed={receiveTransaction.verified}
             inProgress={!receiveTransaction.verified}
-            text="Please Match the Address on CypherRock X1"
+            text="Match the Address on CypherRock X1"
           />
         </>
       )}

@@ -220,7 +220,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
     } catch (e) {
       setIsInFlow(false);
       const cyError = new CyError(CysyncError.DEVICE_AUTH_UNKNOWN_ERROR);
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err: e }));
       deviceAuth.removeAllListeners();
     }
   };

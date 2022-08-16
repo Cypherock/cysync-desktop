@@ -250,7 +250,7 @@ const GeneralSettings = () => {
       </Typography>
       {!passwordExists() && (
         <Typography align="center" color="textSecondary">
-          Please restart the application if it does not starts automatically.
+          Restart the application if it does not starts automatically.
         </Typography>
       )}
     </div>

@@ -101,7 +101,7 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
   const handleConfirmPassword = async () => {
     try {
       if (!values.curPassword.trim()) {
-        setError('Please enter your password.');
+        setError('Enter your password.');
       } else {
         setError('');
         if (await verifyPassword(values.curPassword.trim())) {
@@ -185,7 +185,7 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
           </Typography>
           {isLoading && passwordVerified && (
             <Typography align="center" color="textSecondary">
-              Please restart the application if it does not start automatically.
+              Restart the application if it does not start automatically.
             </Typography>
           )}
           <Input

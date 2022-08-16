@@ -511,7 +511,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       if (amount.isNaN() || amount.isZero() || amount.isNegative()) {
         // Allow `0` amount transaction on ETH, and 0 amount is valid when it's a max send txn
         if (!(amount.isZero() && isEthereum) && !maxSend) {
-          error = 'Please enter a valid amount.';
+          error = 'Enter a valid amount.';
           isValid = false;
         }
       }
