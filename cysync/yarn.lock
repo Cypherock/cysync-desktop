@@ -199,6 +199,33 @@
     transform-pouch "^2.0.0"
     winston "^3.6.0"
 
+"@cypherock/database@3.0.1-beta.34":
+  version "3.0.1-beta.34"
+  resolved "https://registry.yarnpkg.com/@cypherock/database/-/database-3.0.1-beta.34.tgz#7c8236ecaaa6ad6e0ec97324f8ae49cfa7090944"
+  integrity sha512-28yVD1p+aDuBIZlBYI0HGQ2upJlRbeFxU0/2koI+Vtfy+HJYjjtu46pZgZUM2WuEoXQQVgUh0uEawGYIODkwXA==
+  dependencies:
+    "@cypherock/communication" "3.0.1-beta.26"
+    "@types/bignumber.js" "^5.0.0"
+    "@types/pouchdb" "^6.4.0"
+    "@types/pouchdb-adapter-websql" "^6.1.4"
+    "@types/pouchdb-find" "^6.3.7"
+    "@types/pouchdb-upsert" "^2.2.6"
+    "@types/transform-pouch" "^1.0.1"
+    "@types/websql" "^0.0.27"
+    aes-js "^3.1.2"
+    bignumber.js "^9.0.2"
+    ethereum-input-data-decoder "^0.3.5"
+    ethers "^5.5.4"
+    events "^3.3.0"
+    nedb "^1.8.0"
+    pouchdb "^7.3.0"
+    pouchdb-adapter-memory "^7.3.0"
+    pouchdb-adapter-websql "^7.0.0"
+    pouchdb-find "^7.3.0"
+    pouchdb-upsert "^2.2.0"
+    transform-pouch "^2.0.0"
+    winston "^3.6.0"
+
 "@cypherock/protocols@3.0.1-beta.55":
   version "3.0.1-beta.55"
   resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.55.tgz#8d2242d4886075d7e25f5f0cc30e460b787b3f54"
