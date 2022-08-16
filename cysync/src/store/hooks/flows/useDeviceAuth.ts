@@ -13,8 +13,14 @@ import {
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
+import sleep from '../../../utils/sleep';
 import { deviceDb } from '../../database';
-import { FeedbackState, useConnection, useFeedback } from '../../provider';
+import {
+  FeedbackState,
+  useConnection,
+  useFeedback,
+  useNetwork
+} from '../../provider';
 
 export interface HandleDeviceAuthOptions {
   connection: DeviceConnection;
@@ -33,6 +39,7 @@ export interface UseDeviceAuthValues {
   clearErrorObj: () => void;
   completed: boolean;
   confirmed: 0 | -1 | 1 | 2;
+  enableRetry: boolean;
   resetHooks: () => void;
   cancelDeviceAuth: (connection: DeviceConnection) => void;
   handleFeedbackOpen: () => void;
@@ -47,10 +54,20 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
   const [verified, setVerified] = useState<-1 | 0 | 1 | 2>(0);
   const [confirmed, setConfirmed] = useState<-1 | 0 | 1 | 2>(0);
   const [completed, setCompleted] = useState(false);
+  const [enableRetry, setEnableRetry] = useState(true);
   const deviceAuth = new DeviceAuthenticator();
 
   const { showFeedback, closeFeedback } = useFeedback();
-  const { setDeviceConnectionStatus, deviceConnection } = useConnection();
+  const {
+    setDeviceConnectionStatus,
+    deviceConnection,
+    internalDeviceConnection
+  } = useConnection();
+  const { connected: internetConnected } = useNetwork();
+
+  useEffect(() => {
+    setEnableRetry(!!internalDeviceConnection && internetConnected);
+  }, [internalDeviceConnection, internetConnected]);
 
   let deviceSerial: string | null = null;
 
@@ -200,11 +217,13 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       });
       setIsInFlow(false);
       logger.info('DeviceAuth: completed.');
+      // Solely for UI purpose, to wait and give a UX feeback
+      await sleep(1000);
       setCompleted(true);
     } catch (e) {
       setIsInFlow(false);
       const cyError = new CyError(CysyncError.DEVICE_AUTH_UNKNOWN_ERROR);
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err: e }));
       deviceAuth.removeAllListeners();
     }
   };
@@ -263,6 +282,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
     resetHooks,
     verified,
     completed,
+    enableRetry,
     confirmed,
     handleFeedbackOpen
   } as UseDeviceAuthValues;

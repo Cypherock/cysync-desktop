@@ -120,7 +120,7 @@ const LockScreen = (props: any) => {
     if (!password) {
       setValues({
         ...values,
-        error: 'Please enter a password'
+        error: 'Enter a password'
       });
       setIsLoading(false);
       return;

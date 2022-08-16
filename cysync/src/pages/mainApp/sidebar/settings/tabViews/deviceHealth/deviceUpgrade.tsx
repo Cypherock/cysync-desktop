@@ -585,7 +585,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
                 {isAuthFailed ? 'Ok' : 'Retry'}
               </CustomButton>
             ) : (
-              <Tooltip title="Please reconnect the X1 wallet to retry">
+              <Tooltip title="Reconnect the X1 wallet to retry">
                 <span>
                   <CustomButton
                     variant="outlined"
@@ -618,13 +618,20 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
           className={classes.stepperRoot}
           connector={<QontoConnector />}
         >
-          {steps.map(step => (
-            <Step key={step.name}>
+          {steps.map((data, step) => (
+            <Step
+              key={data.name}
+              completed={
+                step === steps.length - 1
+                  ? isAuthenticated === 2
+                  : step < activeStep
+              }
+            >
               <StyledStepLabel
                 StepIconComponent={QontoStepIcon}
                 className={classes.stepLabel}
               >
-                {step.name}
+                {data.name}
               </StyledStepLabel>
             </Step>
           ))}

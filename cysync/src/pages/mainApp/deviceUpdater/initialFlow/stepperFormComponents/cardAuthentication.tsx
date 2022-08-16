@@ -3,7 +3,7 @@ import { IconButton, Tooltip } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
 import success from '../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
@@ -68,12 +68,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
   handleNext,
   handleClose
 }) => {
-  const { connected, deviceConnection } = useConnection();
-  const latestDeviceConnection = useRef<any>();
-
-  useEffect(() => {
-    latestDeviceConnection.current = deviceConnection;
-  }, [deviceConnection]);
+  const { connected } = useConnection();
 
   const {
     handleFeedbackOpen,
@@ -83,7 +78,8 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
     cardsAuth,
     connStatus,
     cardsStatus,
-    setCardsStatus
+    setCardsStatus,
+    enableRetry
   } = useCardAuth(true);
 
   useEffect(() => {
@@ -225,11 +221,8 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
               </CustomButton>
 
               {showRetry &&
-                (!latestDeviceConnection.current ? (
-                  <Tooltip
-                    title={'Reconnect the device to retry'}
-                    placement="top"
-                  >
+                (!enableRetry ? (
+                  <Tooltip title={errorObj.getActionMessage()} placement="top">
                     <div>
                       <CustomButton
                         style={{ margin: '1rem 10px 1rem 0' }}

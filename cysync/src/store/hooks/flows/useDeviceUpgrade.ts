@@ -26,6 +26,7 @@ import {
   inTestApp
 } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
+import sleep from '../../../utils/sleep';
 import {
   ConnectionContextInterface,
   FeedbackState,
@@ -430,7 +431,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     } catch (e) {
       setIsInFlow(true);
       const cyError = new CyError(CysyncError.DEVICE_UPGRADE_UNKNOWN_ERROR);
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err: e }));
       setErrorResolutionState(
         DeviceUpgradeErrorResolutionState.RECONNECT_REQUIRED
       );
@@ -593,12 +594,15 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     } else if (verified === 2) {
       logger.info('Device auth completed');
       setAuthenticated(2);
-      setIsCompleted(2);
-      setTimeout(() => {
-        setIsDeviceUpdating(false);
-        setBlockNewConnection(false);
-      }, 500);
-      resetHooks();
+      // Solely for UI purpose, to wait and give a UX feeback
+      sleep(1000).then(() => {
+        setIsCompleted(2);
+        setTimeout(() => {
+          setIsDeviceUpdating(false);
+          setBlockNewConnection(false);
+        }, 500);
+        resetHooks();
+      });
     }
   }, [verified, errorObj, completed]);
 

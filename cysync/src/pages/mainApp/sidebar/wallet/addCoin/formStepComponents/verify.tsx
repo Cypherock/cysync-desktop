@@ -10,6 +10,7 @@ import {
   useNetwork,
   useSelectedWallet
 } from '../../../../../../store/provider';
+import sleep from '../../../../../../utils/sleep';
 
 import {
   StepComponentProps,
@@ -48,7 +49,10 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
 
   useEffect(() => {
     if (coinAdder.cardTap) {
-      handleNext();
+      // Solely for UI purpose, to wait and give a UX feeback
+      sleep(1000).then(() => {
+        handleNext();
+      });
     }
   }, [coinAdder.cardTap]);
 
@@ -89,7 +93,7 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
               ? false
               : !coinAdder.cardTap
           }
-          text="Please tap any X1 Card"
+          text="Tap any X1 Card"
         />
       )}
 

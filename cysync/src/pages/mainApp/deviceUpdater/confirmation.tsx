@@ -79,19 +79,19 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
       case DeviceConnectionState.LAST_AUTH_FAILED:
         return 'Do you want to retry the authentication now?';
       case DeviceConnectionState.DEVICE_NOT_READY:
-        return 'Please bring the device to the main menu and try again.';
+        return 'Bring the device to the main menu and try again.';
       case DeviceConnectionState.UNKNOWN_ERROR:
-        return 'Please reconnect the device and try again';
+        return 'Reconnect the device and try again';
       case DeviceConnectionState.UPDATE_REQUIRED:
         if (updateRequiredType === 'app') {
-          return 'Please update CySync from https://cypherock.com/gs';
+          return 'Update CySync from https://cypherock.com/gs';
         }
 
         if (updateRequiredType === 'device') {
-          return 'Please update the X1 wallet';
+          return 'Update the X1 wallet';
         }
 
-        return 'Please make sure both CySync and X1 wallet are updated from https://cypherock.com/gs';
+        return 'Make sure both CySync and X1 wallet are updated from https://cypherock.com/gs';
       default:
         return defaultText;
     }
