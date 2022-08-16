@@ -203,7 +203,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
           <TextView
             completed={receiveTransaction.verified}
             inProgress={!receiveTransaction.verified}
-            text="Please Match the Address on CypherRock X1"
+            text="Match the Address on CypherRock X1"
           />
         </>
       )}

@@ -71,7 +71,7 @@ class FeedbackErrorBoundary extends React.Component<
           <Typography color="textPrimary" gutterBottom align="center">
             Something went wrong,
             <br />
-            Please contact us at support@cypherock.com.
+            contact us at support@cypherock.com.
           </Typography>
         </Root>
       );
