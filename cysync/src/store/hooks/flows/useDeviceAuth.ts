@@ -57,7 +57,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
   const [enableRetry, setEnableRetry] = useState(true);
   const deviceAuth = new DeviceAuthenticator();
 
-  const { showFeedback, closeFeedback } = useFeedback();
+  const { showFeedback, closeFeedback, submitFeedback } = useFeedback();
   const {
     setDeviceConnectionStatus,
     deviceConnection,
@@ -272,6 +272,26 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
       closeFeedback();
     };
   }, []);
+
+  // Automatically report Auth Failures
+  useEffect(() => {
+    if (errorObj.getCode() === CysyncError.DEVICE_AUTH_FAILED) {
+      const newFeedbackState: FeedbackState = {
+        attachLogs: true,
+        attachDeviceLogs: false,
+        categories: ['Report'],
+        category: 'Report',
+        description: errorObj.getMessage(),
+        descriptionError: '',
+        email: localStorage.getItem('email') || '',
+        emailError: '',
+        subject: `[Auto] Reporting for Error ${errorObj.getCode()} (Authenticating Device)`,
+        subjectError: ''
+      };
+
+      submitFeedback(newFeedbackState);
+    }
+  }, [errorObj]);
 
   return {
     errorObj,
