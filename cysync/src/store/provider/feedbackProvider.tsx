@@ -407,6 +407,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         deviceInfo?: any;
         desktopLogs?: any;
         appVersion: string;
+        attachmentUrl?: string;
       } = {
         subject: feedbackInput.subject,
         category: feedbackInput.category,
@@ -429,6 +430,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       }
       if (feedbackInput.attachDeviceLogs) {
         data.deviceLogs = await getDeviceLogs();
+      }
+      if (attachmentUrl) {
+        data.attachmentUrl = attachmentUrl;
       }
 
       feedbackServer
