@@ -12,6 +12,7 @@ import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
+import { RecordRTCPromisesHandler } from 'recordrtc';
 import * as uuid from 'uuid';
 
 import packageJson from '../../../package.json';
@@ -31,6 +32,7 @@ import Analytics from '../../utils/analytics';
 import { hexToVersion } from '../../utils/compareVersion';
 import { getDesktopLogs, getDeviceLogs } from '../../utils/getLogs';
 import logger from '../../utils/logger';
+import { initRecorder, stopRecorder } from '../../utils/recorder';
 import { getSystemInfo } from '../../utils/systemInfo';
 import getUUID from '../../utils/uuid';
 import { useLogFetcher } from '../hooks/flows/useLogFetcher';
@@ -181,6 +183,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [openId, setOpenId] = useState('');
+  const [recorder, setRecorder] = useState<
+    RecordRTCPromisesHandler | undefined
+  >(undefined);
 
   const {
     internalDeviceConnection: deviceConnection,
@@ -485,6 +490,15 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     }
   };
 
+  const startRecording = async () => {
+    const recorderObj = await initRecorder();
+    setRecorder(recorderObj);
+  };
+
+  const stopRecording = async () => {
+    const buffer = await stopRecorder(recorder);
+  };
+
   useEffect(() => {
     if (isOpen) {
       resetFeedbackState();
@@ -699,6 +713,19 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                       {feedbackInput.descriptionError}
                     </Typography>
                   )}
+                  <Grid container>
+                    <Grid item>
+                      <div>
+                        <CustomButton onClick={startRecording}>
+                          Start Recording
+                        </CustomButton>
+                        <CustomButton onClick={stopRecording}>
+                          Stop Recording
+                        </CustomButton>
+                      </div>
+                    </Grid>
+                  </Grid>
+
                   <Grid container className={classes.extras}>
                     <CustomCheckbox
                       checked={feedbackInput.attachLogs}
