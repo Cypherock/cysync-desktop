@@ -992,7 +992,10 @@ const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
         </Grid>
         <div className={classes.buttons}>
           {!agreeEnabled ? (
-            <Tooltip title="Read the terms of use till end">
+            <Tooltip
+              title="Read the terms of use till end"
+              placement="bottom-start"
+            >
               <FormControlLabel
                 control={
                   <CustomCheckBox
