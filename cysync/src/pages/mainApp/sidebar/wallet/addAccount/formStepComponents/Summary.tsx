@@ -1,3 +1,4 @@
+import { COINS, NearCoinData } from '@cypherock/communication';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useState } from 'react';
@@ -97,6 +98,8 @@ const Summary: React.FC<StepComponentProps> = ({
   const { selectedWallet } = useSelectedWallet();
 
   const { coinDetails } = useCurrentCoin();
+  const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
+  const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
 
   const { token } = useTokenContext();
 
@@ -208,7 +211,7 @@ const Summary: React.FC<StepComponentProps> = ({
         )}
         <LabelText
           label="New Account Id"
-          text={recipientData[0].recipient}
+          text={recipientData[0].recipient + nearSuffix}
           verified
         />
         <LabelText
