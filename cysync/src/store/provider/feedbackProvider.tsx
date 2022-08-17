@@ -10,6 +10,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { shell } from 'electron';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { RecordRTCPromisesHandler } from 'recordrtc';
@@ -186,6 +187,11 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   const [recorder, setRecorder] = useState<
     RecordRTCPromisesHandler | undefined
   >(undefined);
+  const [attachmentUrl, setAttachmentUrl] = useState<string | undefined>(
+    undefined
+  );
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [recording, setRecording] = useState(false);
 
   const {
     internalDeviceConnection: deviceConnection,
@@ -491,12 +497,27 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   };
 
   const startRecording = async () => {
+    setRecording(true);
     const recorderObj = await initRecorder();
     setRecorder(recorderObj);
   };
 
   const stopRecording = async () => {
+    setRecording(false);
+    setUploadingAttachment(true);
     const buffer = await stopRecorder(recorder);
+    try {
+      const response = await feedbackServer
+        .uploadAttachment({ attachment: buffer })
+        .request();
+      const recordingUrl = response.data.url;
+      setAttachmentUrl(recordingUrl);
+    } catch (e: any) {
+      logger.error('Error uploading attachment');
+      logger.error(e);
+    } finally {
+      setUploadingAttachment(false);
+    }
   };
 
   useEffect(() => {
@@ -561,6 +582,47 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       default:
         return defaultText;
     }
+  };
+
+  const getAttachmentComponent = () => {
+    if (uploadingAttachment)
+      return (
+        <CustomButton disabled>
+          Uploading <CircularProgress />
+        </CustomButton>
+      );
+    if (attachmentUrl)
+      return (
+        <Typography color="textPrimary">
+          File Attached successfully!{' '}
+          <CustomButton
+            onClick={() => {
+              shell.openExternal(attachmentUrl);
+            }}
+          >
+            View Attachment
+          </CustomButton>
+          <CustomButton
+            onClick={() => {
+              setAttachmentUrl(undefined);
+            }}
+          >
+            Remove Attachment
+          </CustomButton>
+        </Typography>
+      );
+    if (recording)
+      return (
+        <div>
+          <CustomButton disabled>
+            Recording <CircularProgress />{' '}
+          </CustomButton>
+          <CustomButton onClick={stopRecording}>Stop Recording</CustomButton>
+        </div>
+      );
+    return (
+      <CustomButton onClick={startRecording}>Start Recording</CustomButton>
+    );
   };
 
   return (
@@ -714,16 +776,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     </Typography>
                   )}
                   <Grid container>
-                    <Grid item>
-                      <div>
-                        <CustomButton onClick={startRecording}>
-                          Start Recording
-                        </CustomButton>
-                        <CustomButton onClick={stopRecording}>
-                          Stop Recording
-                        </CustomButton>
-                      </div>
-                    </Grid>
+                    <Grid item>{getAttachmentComponent()}</Grid>
                   </Grid>
 
                   <Grid container className={classes.extras}>

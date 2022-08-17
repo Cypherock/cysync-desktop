@@ -1,5 +1,5 @@
 import { desktopCapturer } from 'electron';
-import { invokeSaveAsDialog, RecordRTCPromisesHandler } from 'recordrtc';
+import { RecordRTCPromisesHandler } from 'recordrtc';
 
 export async function initRecorder() {
   const inputSources = await desktopCapturer.getSources({
@@ -28,7 +28,6 @@ export async function initRecorder() {
 export async function stopRecorder(recorder: RecordRTCPromisesHandler) {
   await recorder.stopRecording();
   const blob = await recorder.getBlob();
-  invokeSaveAsDialog(blob, 'feedback.webm');
   const buffer = Buffer.from(await blob.arrayBuffer());
   return buffer;
 }
