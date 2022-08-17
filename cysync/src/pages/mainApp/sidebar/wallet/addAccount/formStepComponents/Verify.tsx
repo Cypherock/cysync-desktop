@@ -1,4 +1,4 @@
-import { COINS } from '@cypherock/communication';
+import { COINS, NearCoinData } from '@cypherock/communication';
 import { Typography } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import { styled, Theme } from '@mui/material/styles';
@@ -103,6 +103,8 @@ const Verify = (props: any) => {
   const { recipientData } = props;
 
   const { coinDetails } = useCurrentCoin();
+  const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
+  const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
 
   const { token } = useTokenContext();
 
@@ -176,7 +178,7 @@ const Verify = (props: any) => {
           )}
           <LabelText
             label="New Account Id"
-            text={recipientData[0].recipient}
+            text={recipientData[0].recipient + nearSuffix}
             verified={sendTransaction.verified}
           />
           <LabelText
