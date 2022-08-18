@@ -161,6 +161,8 @@ export interface FeedbackContextInterface {
    * use this to silently submit feedback behind the scenes
    */
   submitFeedback: (_feedbackInput: FeedbackState) => void;
+  isRecording: boolean;
+  stopRecording: () => void;
 }
 
 export const FeedbackContext: React.Context<FeedbackContextInterface> =
@@ -241,6 +243,12 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     clearErrorObj();
   };
 
+  const resetRecordingState = () => {
+    setRecording(false);
+    setRecorder(undefined);
+    setAttachmentUrl(undefined);
+  };
+
   const showFeedback: ShowFeedback = ({
     isContact: _isContact,
     heading: _heading,
@@ -249,6 +257,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     disableDeviceLogs
   } = {}) => {
     resetFeedbackState();
+    resetRecordingState();
 
     setExternalHandleClose(_handleClose);
     setIsContact(_isContact || false);
@@ -511,10 +520,12 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     setRecording(true);
     const recorderObj = await initRecorder();
     setRecorder(recorderObj);
+    setIsOpen(false);
   };
 
   const stopRecording = async () => {
     setRecording(false);
+    setIsOpen(true);
     setUploadingAttachment(true);
     const buffer = await stopRecorder(recorder);
     try {
@@ -628,7 +639,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
           <CustomButton disabled>
             Recording <CircularProgress />{' '}
           </CustomButton>
-          <CustomButton onClick={stopRecording}>Stop Recording</CustomButton>
         </div>
       );
     return (
@@ -960,7 +970,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         value={{
           showFeedback,
           closeFeedback: onClose,
-          submitFeedback: handleSubmit
+          submitFeedback: handleSubmit,
+          isRecording: recording,
+          stopRecording
         }}
       >
         {children}
