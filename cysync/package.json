@@ -101,6 +101,7 @@
     "electron-log": "^4.4.6",
     "electron-squirrel-startup": "^1.0.0",
     "electron-updater": "^4.6.5",
+    "file-type": "^17.1.6",
     "github-url-to-object": "^4.0.6",
     "lodash": "^4.17.21",
     "multicoin-address-validator": "^0.5.8",

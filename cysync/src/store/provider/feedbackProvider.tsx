@@ -1,5 +1,6 @@
 import { DeviceError, DeviceErrorType } from '@cypherock/communication';
 import { feedback as feedbackServer } from '@cypherock/server-wrapper';
+import { CheckCircle, Error } from '@mui/icons-material';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { CircularProgress, createSvgIcon, Grid } from '@mui/material';
 import Alert from '@mui/material/Alert';
@@ -10,7 +11,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import { shell } from 'electron';
+import { fileTypeFromBuffer } from 'file-type';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { RecordRTCPromisesHandler } from 'recordrtc';
@@ -196,10 +197,21 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   const [recorder, setRecorder] = useState<
     RecordRTCPromisesHandler | undefined
   >(undefined);
-  const [attachmentUrl, setAttachmentUrl] = useState<string | undefined>(
+  const [attachmentBuffer, setAttachmentBuffer] = useState<Buffer | undefined>(
     undefined
   );
-  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [attachmentMimeType, setAttachmentMimeType] = useState<
+    string | undefined
+  >(undefined);
+  /**
+   * -1 - upload error
+   * 0 - not uploading
+   * 1 - uploading
+   * 2 - upload finished
+   */
+  const [uploadAttachmentStatus, setUploadAttachmentStatus] = useState<
+    -1 | 0 | 1 | 2
+  >(0);
   const [recording, setRecording] = useState(false);
 
   const {
@@ -246,7 +258,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   const resetRecordingState = () => {
     setRecording(false);
     setRecorder(undefined);
-    setAttachmentUrl(undefined);
+    setAttachmentBuffer(undefined);
+    setAttachmentMimeType(undefined);
   };
 
   const showFeedback: ShowFeedback = ({
@@ -447,8 +460,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       if (_feedbackInput.attachDeviceLogs) {
         data.deviceLogs = await getDeviceLogs();
       }
-      if (attachmentUrl) {
-        data.attachmentUrl = attachmentUrl;
+      if (attachmentBuffer) {
+        data.attachmentUrl = await submitAttachment();
       }
 
       feedbackServer
@@ -526,19 +539,25 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   const stopRecording = async () => {
     setRecording(false);
     setIsOpen(true);
-    setUploadingAttachment(true);
     const buffer = await stopRecorder(recorder);
+    const fileType = await fileTypeFromBuffer(buffer);
+    setAttachmentMimeType(fileType.mime);
+    setAttachmentBuffer(buffer);
+  };
+
+  const submitAttachment = async () => {
+    setUploadAttachmentStatus(1);
     try {
       const response = await feedbackServer
-        .uploadAttachment({ attachment: buffer })
+        .uploadAttachment({ attachment: attachmentBuffer })
         .request();
       const recordingUrl = response.data.url;
-      setAttachmentUrl(recordingUrl);
+      setUploadAttachmentStatus(2);
+      return recordingUrl;
     } catch (e: any) {
       logger.error('Error uploading attachment');
       logger.error(e);
-    } finally {
-      setUploadingAttachment(false);
+      setUploadAttachmentStatus(-1);
     }
   };
 
@@ -607,32 +626,26 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   };
 
   const getAttachmentComponent = () => {
-    if (uploadingAttachment)
-      return (
-        <CustomButton disabled>
-          Uploading <CircularProgress />
-        </CustomButton>
-      );
-    if (attachmentUrl)
-      return (
-        <Typography color="textPrimary">
-          File Attached successfully!{' '}
-          <CustomButton
-            onClick={() => {
-              shell.openExternal(attachmentUrl);
-            }}
-          >
-            View Attachment
+    switch (uploadAttachmentStatus) {
+      case 1:
+        return (
+          <CustomButton disabled>
+            Uploading <CircularProgress />
           </CustomButton>
-          <CustomButton
-            onClick={() => {
-              setAttachmentUrl(undefined);
-            }}
-          >
-            Remove Attachment
+        );
+      case 2:
+        return (
+          <CustomButton disabled>
+            Uploaded <CheckCircle />
           </CustomButton>
-        </Typography>
-      );
+        );
+      case -1:
+        return (
+          <CustomButton disabled>
+            Upload failed <Error />
+          </CustomButton>
+        );
+    }
     if (recording)
       return (
         <div>
@@ -641,6 +654,28 @@ export const FeedbackProvider: React.FC = ({ children }) => {
           </CustomButton>
         </div>
       );
+    // Embed the recorded video from buffer
+    if (attachmentBuffer && attachmentMimeType) {
+      const sourceString = `data:${attachmentMimeType};base64,${attachmentBuffer.toString(
+        'base64'
+      )}`;
+      return (
+        <div>
+          <div>
+            <CustomButton
+              onClick={() => {
+                setAttachmentBuffer(undefined);
+              }}
+            >
+              Remove Attachment
+            </CustomButton>
+          </div>
+          <video controls style={{ width: '100%' }}>
+            <source type={attachmentMimeType} src={sourceString} />
+          </video>
+        </div>
+      );
+    }
     return (
       <CustomButton onClick={startRecording}>Start Recording</CustomButton>
     );
