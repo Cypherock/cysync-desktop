@@ -347,7 +347,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             ))}
         </Grid>
 
-        <Grid item xs={6}>
+        <Grid item xs={6} style={{ overflow: 'auto' }}>
           <Typography style={{ marginBottom: '10px' }} color="textSecondary">
             Receiver
           </Typography>

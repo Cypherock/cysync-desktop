@@ -153,7 +153,14 @@ type ShowFeedback = (options?: {
 
 export interface FeedbackContextInterface {
   showFeedback: ShowFeedback;
-  closeFeedback: (id?: string) => void; // use this to cleanup feedback component
+  /**
+   * use this to cleanup feedback component
+   */
+  closeFeedback: (id?: string) => void;
+  /**
+   * use this to silently submit feedback behind the scenes
+   */
+  submitFeedback: (_feedbackInput: FeedbackState) => void;
 }
 
 export const FeedbackContext: React.Context<FeedbackContextInterface> =
@@ -358,24 +365,24 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (_feedbackInput: FeedbackState) => {
     setError('');
     const checkArray: boolean[] = [];
 
-    if (feedbackInput.subject.trim().length === 0) {
+    if (_feedbackInput.subject.trim().length === 0) {
       checkArray.push(true);
     } else {
       checkArray.push(false);
     }
 
-    if (feedbackInput.email.trim().length === 0) {
+    if (_feedbackInput.email.trim().length === 0) {
       checkArray.push(true);
     } else {
       const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-      checkArray.push(!feedbackInput.email.trim().match(emailPattern));
+      checkArray.push(!_feedbackInput.email.trim().match(emailPattern));
     }
 
-    if (feedbackInput.description.trim().length === 0) {
+    if (_feedbackInput.description.trim().length === 0) {
       checkArray.push(true);
     } else {
       checkArray.push(false);
@@ -384,7 +391,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     if (checkArray[0] || checkArray[1] || checkArray[2]) {
       logger.info('Feedback: Verification failed');
       setFeedbackInput({
-        ...feedbackInput,
+        ..._feedbackInput,
         subjectError: checkArray[0] ? 'Enter a Subject' : '',
         emailError: checkArray[1] ? 'Enter a Valid Email Address' : '',
         descriptionError: checkArray[2] ? 'Enter a description' : ''
@@ -392,8 +399,8 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     } else {
       setSubmitting(true);
 
-      if (feedbackInput.email) {
-        localStorage.setItem('email', feedbackInput.email);
+      if (_feedbackInput.email) {
+        localStorage.setItem('email', _feedbackInput.email);
       }
 
       const data: {
@@ -409,10 +416,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         appVersion: string;
         attachmentUrl?: string;
       } = {
-        subject: feedbackInput.subject,
-        category: feedbackInput.category,
-        email: feedbackInput.email,
-        description: feedbackInput.description,
+        subject: _feedbackInput.subject,
+        category: _feedbackInput.category,
+        email: _feedbackInput.email,
+        description: _feedbackInput.description,
         systemInfo: await getSystemInfo(),
         uuid: await getUUID(),
         appVersion: packageJson.version,
@@ -425,10 +432,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
             : undefined
       };
 
-      if (feedbackInput.attachLogs) {
+      if (_feedbackInput.attachLogs) {
         data.desktopLogs = await getDesktopLogs();
       }
-      if (feedbackInput.attachDeviceLogs) {
+      if (_feedbackInput.attachDeviceLogs) {
         data.deviceLogs = await getDeviceLogs();
       }
       if (attachmentUrl) {
@@ -901,7 +908,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                   <Grid container className={classes.buttonGroup}>
                     <CustomButton
                       disabled={deviceLogsLoading || submitting}
-                      onClick={handleSubmit}
+                      onClick={() => {
+                        handleSubmit(feedbackInput);
+                      }}
                       style={{
                         padding: '0.3rem 1.5rem',
                         margin: '0rem 0.5rem'
@@ -948,7 +957,11 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         }
       />
       <FeedbackContext.Provider
-        value={{ showFeedback, closeFeedback: onClose }}
+        value={{
+          showFeedback,
+          closeFeedback: onClose,
+          submitFeedback: handleSubmit
+        }}
       >
         {children}
       </FeedbackContext.Provider>
