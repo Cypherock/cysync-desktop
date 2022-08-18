@@ -5,6 +5,11 @@ import getUUID from './uuid';
 
 const setErrorHandler = () => {
   window.onerror = async (error, url, line) => {
+    if ((error as string)?.includes('Writing to COM port')) {
+      logger.warn('Ignoring COM port error in error handler');
+      return;
+    }
+
     const userId = await getUUID();
     logger.error('Error caught in error handler', {
       error,

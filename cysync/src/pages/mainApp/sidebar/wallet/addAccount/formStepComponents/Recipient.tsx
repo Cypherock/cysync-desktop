@@ -215,8 +215,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = classes;
 
   const { coinDetails } = useCurrentCoin();
-  const coinNetwork = COINS[coinDetails.slug] as NearCoinData;
-  const nearSuffix = coinNetwork.network === 'testnet' ? '.testnet' : '.near';
+  const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
+  const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
   const { customAccount } = useCustomAccountContext();
 
   const {
@@ -307,7 +307,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
         customAccount: customAccount?.name,
-        newAccountId: recipientData[0].recipient,
+        newAccountId: recipientData[0].recipient + nearSuffix,
         coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
           recipientData,

@@ -53,7 +53,8 @@ const handleErrors = (
   if (
     isUnknownError(err.getCode()) &&
     metadata?.err?.message &&
-    metadata?.err?.message.match('cannot open /dev/tty.usbmodem')
+    (metadata?.err?.message.match('cannot open /dev/tty.usbmodem') ||
+      metadata?.err?.message.match('Writing to COM port'))
   )
     err.setError(DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW);
 
