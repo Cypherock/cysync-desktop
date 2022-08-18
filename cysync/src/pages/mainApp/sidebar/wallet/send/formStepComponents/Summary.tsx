@@ -1,3 +1,4 @@
+import { CoinGroup, COINS } from '@cypherock/communication';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useState } from 'react';
@@ -8,6 +9,7 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import { CysyncError } from '../../../../../../errors';
+import { coinDb } from '../../../../../../store/database';
 import { broadcastTxn } from '../../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
@@ -15,6 +17,7 @@ import {
   useSelectedWallet,
   useSendTransactionContext,
   useSocket,
+  useSync,
   useTokenContext
 } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
@@ -101,6 +104,7 @@ const Summary: React.FC<StepComponentProps> = ({
   const { selectedWallet } = useSelectedWallet();
 
   const { coinDetails } = useCurrentCoin();
+  const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
 
   const { token } = useTokenContext();
 
@@ -113,6 +117,8 @@ const Summary: React.FC<StepComponentProps> = ({
   const { sendForm, sendTransaction } = useSendTransactionContext();
 
   const [open, setOpen] = useState(false);
+
+  const { addCustomAccountSyncItemFromCoin } = useSync();
 
   const handleSend = () => {
     setOpen(true);
@@ -129,6 +135,15 @@ const Summary: React.FC<StepComponentProps> = ({
           token: token ? token.coin : undefined
         });
         addTxnConfirmAddressHook(res, coinDetails.slug, selectedWallet._id);
+        if (isNear)
+          (async () => {
+            const coins = await coinDb.getAll({
+              walletId: coinDetails.walletId,
+              slug: coinDetails.slug
+            });
+            if (coins.length >= 1)
+              addCustomAccountSyncItemFromCoin(coins[0], {});
+          })();
         handleNext();
         Analytics.Instance.event(
           Analytics.Categories.SEND_TXN,

@@ -3,10 +3,13 @@ import { NearWallet } from '@cypherock/wallet';
 import { Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
-import { useDebouncedFunction } from '../../../../../../store/hooks';
+import {
+  useCustomAccount,
+  useDebouncedFunction
+} from '../../../../../../store/hooks';
 import {
   changeFormatOfOutputList,
   verifyAddress
@@ -14,7 +17,6 @@ import {
 import {
   useConnection,
   useCurrentCoin,
-  useCustomAccountContext,
   useSelectedWallet,
   useSendTransactionContext,
   useTokenContext
@@ -202,6 +204,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const {
     recipientData,
     handleVerificationErrors,
+    creatorAccount,
+    setCreatorAccount,
     transactionFee,
     handleInputChange,
     handleNext
@@ -215,13 +219,38 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = classes;
 
   const { coinDetails } = useCurrentCoin();
+
+  const { customAccountData, setCurrentWalletId, setCurrentCoin } =
+    useCustomAccount();
+
+  const [availableAccounts, setAvailableAccounts] = useState<string[]>([]);
   const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
   const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
-  const { customAccount } = useCustomAccountContext();
 
   const {
     selectedWallet: { passwordSet, passphraseSet, _id }
   } = useSelectedWallet();
+
+  useEffect(() => {
+    setCurrentWalletId(_id);
+    setCurrentCoin(coinDetails.slug);
+  }, [_id]);
+
+  useEffect(() => {
+    if (customAccountData.length > 0) {
+      setAvailableAccounts(
+        customAccountData
+          .filter(acc => parseFloat(acc.displayBalance) >= 0.25)
+          .map(({ name }) => name)
+      );
+    }
+  }, [customAccountData]);
+
+  useEffect(() => {
+    if (availableAccounts.length > 0) {
+      setCreatorAccount(availableAccounts[0]);
+    }
+  }, [availableAccounts]);
 
   const { token } = useTokenContext();
 
@@ -235,6 +264,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const intTransactionFee = parseInt(transactionFee, 10) || 0;
 
   let validatedAddresses: any[any] = [];
+
+  const handleCreatorAccountChange = (e: any) => {
+    setCreatorAccount(e.target.value);
+  };
 
   const handleCheckAddresses = async (skipEmpty = false) => {
     let isValid = true;
@@ -306,7 +339,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         passphraseExists: passphraseSet,
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
-        customAccount: customAccount?.name,
+        customAccount: creatorAccount,
         newAccountId: recipientData[0].recipient + nearSuffix,
         coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
@@ -329,6 +362,15 @@ const Recipient: React.FC<StepComponentProps> = props => {
   return (
     <Root container className={root}>
       <div className={singleTransaction}>
+        <Input
+          name="creatorAccount"
+          label="Create From"
+          onChange={handleCreatorAccountChange}
+          value={creatorAccount}
+          items={availableAccounts}
+          disabled={availableAccounts.length <= 1}
+        />
+
         <Input
           name="reciever_addr"
           id="1"
