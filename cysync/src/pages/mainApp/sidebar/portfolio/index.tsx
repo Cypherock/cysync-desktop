@@ -63,7 +63,10 @@ const Portfolio = () => {
 
   useEffect(() => {
     if (allWallets[0]._id === '') setOpen(true);
-    else setOpen(false);
+    else {
+      setCurrentWallet(allWallets[0]._id);
+      setOpen(false);
+    }
   }, [allWallets]);
 
   const onAddCoin = React.useCallback((walletId: string) => {
@@ -123,7 +126,7 @@ const Portfolio = () => {
               color="textPrimary"
               style={{ marginBottom: '2rem' }}
             >
-              Please import a wallet from Cypherock X1
+              Import a wallet from Cypherock X1
             </Typography>
             <CustomButton
               style={{ padding: '0.5rem 2rem ' }}

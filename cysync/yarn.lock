@@ -164,26 +164,27 @@
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
-"@cypherock/communication@3.0.1-beta.26":
-  version "3.0.1-beta.26"
-  resolved "https://registry.yarnpkg.com/@cypherock/communication/-/communication-3.0.1-beta.26.tgz#5005eb8255fce306fa0e4aad67572e08046bac09"
-  integrity sha512-/Oi4YR8M/HofmJJa1TGqDyirv+SWpaOHREuCrno+eHyaLB602xM2hRwPSPiMgFoMMNbLO4E0wEn0fzIxnZgRIQ==
+"@cypherock/communication@3.0.1-beta.27":
+  version "3.0.1-beta.27"
+  resolved "https://registry.yarnpkg.com/@cypherock/communication/-/communication-3.0.1-beta.27.tgz#110c9cbb5c038145f9be4bb0f7b61f9fe3fb9d70"
+  integrity sha512-124URXfYoan8BIU1sxl1IbT29LcXKJMQpvYaepTp6b5orzgdq84MEmAJR3/2DjW9fXic9IDFNNKmhS/ZJ0kQEw==
   dependencies:
     compare-versions "^4.1.3"
     serialport "10.0.0"
     uuid "^8.3.2"
     winston "^3.5.1"
 
-"@cypherock/database@3.0.1-beta.33":
-  version "3.0.1-beta.33"
-  resolved "https://registry.yarnpkg.com/@cypherock/database/-/database-3.0.1-beta.33.tgz#a83338a5b4da05a65f1ad834b78f3fc7dd375725"
-  integrity sha512-GjivYxhvsykZ0eU2zmzGr2SZyeLcwH6O3oNafbOKdBkGU6elPVNlTiRfCk8HhRPNmRABsChCJkdbjig+I1+CQA==
+"@cypherock/database@3.0.1-beta.35":
+  version "3.0.1-beta.35"
+  resolved "https://registry.yarnpkg.com/@cypherock/database/-/database-3.0.1-beta.35.tgz#f86a3bb804496d3c2de1aa5f28f913165d5240f3"
+  integrity sha512-OkY26E8wdYOCEDLjwCd3JT8VFHkQBDkrIYOM3CrnNqUOWr91OqP9b2CV9mGJKDx53d9JajivxadFE1Rf3p/HtA==
   dependencies:
-    "@cypherock/communication" "3.0.1-beta.26"
+    "@cypherock/communication" "3.0.1-beta.27"
     "@types/bignumber.js" "^5.0.0"
     "@types/pouchdb" "^6.4.0"
     "@types/pouchdb-adapter-websql" "^6.1.4"
     "@types/pouchdb-find" "^6.3.7"
+    "@types/pouchdb-upsert" "^2.2.6"
     "@types/transform-pouch" "^1.0.1"
     "@types/websql" "^0.0.27"
     aes-js "^3.1.2"
@@ -196,39 +197,40 @@
     pouchdb-adapter-memory "^7.3.0"
     pouchdb-adapter-websql "^7.0.0"
     pouchdb-find "^7.3.0"
+    pouchdb-upsert "^2.2.0"
     transform-pouch "^2.0.0"
     winston "^3.6.0"
 
-"@cypherock/protocols@3.0.1-beta.52":
-  version "3.0.1-beta.52"
-  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.52.tgz#ea0f72e0e2ffe7c23f19a7b990275d14d49b6c75"
-  integrity sha512-YDaAtZWC5Y6s8+f5oTb/Su/8Ll6FniVxz2z7aoUCxE+XWQYjUaZG0+qDn7LCj2x5se15Ea2B1cBkqjPNpSnq0g==
+"@cypherock/protocols@3.0.1-beta.57":
+  version "3.0.1-beta.57"
+  resolved "https://registry.yarnpkg.com/@cypherock/protocols/-/protocols-3.0.1-beta.57.tgz#82e6d134427aca715380914da04dbf1bab211166"
+  integrity sha512-+dhUM35dwk8OfzUuBzxddJKa0vCGSVwLpFHUmZ6r0jGh/gJquKUvDot7SqlU/gIEl0BaWsuV3KGeuJA1eq9pfA==
   dependencies:
-    "@cypherock/communication" "3.0.1-beta.26"
-    "@cypherock/database" "3.0.1-beta.33"
-    "@cypherock/server-wrapper" "1.0.1-beta.18"
-    "@cypherock/wallet" "3.0.1-beta.43"
+    "@cypherock/communication" "3.0.1-beta.27"
+    "@cypherock/database" "3.0.1-beta.35"
+    "@cypherock/server-wrapper" "1.0.1-beta.19"
+    "@cypherock/wallet" "3.0.1-beta.48"
     bignumber.js "^9.0.2"
     winston "^3.5.1"
 
-"@cypherock/server-wrapper@1.0.1-beta.18":
-  version "1.0.1-beta.18"
-  resolved "https://registry.yarnpkg.com/@cypherock/server-wrapper/-/server-wrapper-1.0.1-beta.18.tgz#3a2f1b708afbe76fc297d7921cfebe9d87b0922e"
-  integrity sha512-N+3n9eP+n4UIZLTQVplj1JLHA6/gCYgehJdkq23PIludszQ9JC14l1wCOGLF+eEJbIljc02P5cmWuZQ7xztcug==
+"@cypherock/server-wrapper@1.0.1-beta.19":
+  version "1.0.1-beta.19"
+  resolved "https://registry.yarnpkg.com/@cypherock/server-wrapper/-/server-wrapper-1.0.1-beta.19.tgz#29e8650004e047a4d5871ec19b4276328e684333"
+  integrity sha512-cOxAOOzhuYcM2YYVU7jame7iXaq/SZNSCPvzFyPF7zxRwo4oKTsXxGllm3UivmP589qHD2k0PFl1tpMaT2eekA==
   dependencies:
     axios "^0.25.0"
     node-cache "^5.1.2"
     winston "^3.5.1"
 
-"@cypherock/wallet@3.0.1-beta.43":
-  version "3.0.1-beta.43"
-  resolved "https://registry.yarnpkg.com/@cypherock/wallet/-/wallet-3.0.1-beta.43.tgz#4ba578bc9dd34466e1922d71b191eaee45dbb6e5"
-  integrity sha512-1Dq3bYsr6Wk7exheOFoq2kHFWtr89lJWLaSKhz6RUgWxe59VSrNlWm3GwG6/3aErSm2JJdAjcNvLUzz8H9iLkg==
+"@cypherock/wallet@3.0.1-beta.48":
+  version "3.0.1-beta.48"
+  resolved "https://registry.yarnpkg.com/@cypherock/wallet/-/wallet-3.0.1-beta.48.tgz#141f964cf1bd74433e53612c86b576e2d700eefb"
+  integrity sha512-FH2Nafmzwq2YEyvM6Eo1ZaADlTjYNuhqIGFF0e1jOHXpcljeRWYs2P7Et97EqDDJv4S58Ph9LpGzXERh/z/FQg==
   dependencies:
     "@bitauth/libauth" "^1.19.1"
-    "@cypherock/communication" "3.0.1-beta.26"
-    "@cypherock/database" "3.0.1-beta.33"
-    "@cypherock/server-wrapper" "1.0.1-beta.18"
+    "@cypherock/communication" "3.0.1-beta.27"
+    "@cypherock/database" "3.0.1-beta.35"
+    "@cypherock/server-wrapper" "1.0.1-beta.19"
     "@ethereumjs/common" "^2.6.2"
     "@ethereumjs/tx" "^3.5.0"
     axios "^0.25.0"
@@ -1765,9 +1767,9 @@
     "@types/node" "*"
 
 "@types/lodash@^4.14.181":
-  version "4.14.181"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.181.tgz#d1d3740c379fda17ab175165ba04e2d03389385d"
-  integrity sha512-n3tyKthHJbkiWhDZs3DkhkCzt2MexYHXlX0td5iMplyfwketaOeKboEVBqzceH7juqvEg3q5oUoBFxSLu7zFag==
+  version "4.14.182"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.182.tgz#05301a4d5e62963227eaafe0ce04dd77c54ea5c2"
+  integrity sha512-/THyiqyQAP9AfARo4pF+aCGcyiQ94tX/Is2I7HofNRqoYLgN1PBoOWu2/zTA5zMxzP5EFutMtWtGAFRKUe961Q==
 
 "@types/mime@^1":
   version "1.3.2"
@@ -1960,6 +1962,13 @@
   dependencies:
     "@types/pouchdb-core" "*"
     "@types/pouchdb-find" "*"
+
+"@types/pouchdb-upsert@^2.2.6":
+  version "2.2.6"
+  resolved "https://registry.yarnpkg.com/@types/pouchdb-upsert/-/pouchdb-upsert-2.2.6.tgz#f3a745cc049825a6ed08c47a4cac519b5dad26e7"
+  integrity sha512-twSau/vlyPM14Fboss0fv81ombRLtN0A7/1dQi6btLjRfF/Gw0kEBTZOg+Jttjr/9366JYhlK6HAzjybDIxN/A==
+  dependencies:
+    "@types/pouchdb-core" "*"
 
 "@types/pouchdb@^6.4.0":
   version "6.4.0"
@@ -7885,7 +7894,7 @@ lodash.get@^4.0.0:
 lodash.isequal@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
-  integrity sha1-QVxEePK8wwEgwizhDtMib30+GOA=
+  integrity sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==
 
 lodash.merge@^4.6.2:
   version "4.6.2"
@@ -9635,6 +9644,13 @@ pouchdb-merge@7.3.0:
   resolved "https://registry.yarnpkg.com/pouchdb-merge/-/pouchdb-merge-7.3.0.tgz#dfde5b54aa6dd203ac62d768fe33e7bdbd56e38e"
   integrity sha512-E7LmchMzwYFm6V8OBxejzARLisanpksOju2LEfuiYnotGfNDeW7MByP0qBH0/zF8BfUyyjA1cl7ByaEpsapkeQ==
 
+pouchdb-promise@^6.1.2:
+  version "6.4.3"
+  resolved "https://registry.yarnpkg.com/pouchdb-promise/-/pouchdb-promise-6.4.3.tgz#74516f4acf74957b54debd0fb2c0e5b5a68ca7b3"
+  integrity sha512-ruJaSFXwzsxRHQfwNHjQfsj58LBOY1RzGzde4PM5CWINZwFjCQAhZwfMrch2o/0oZT6d+Xtt0HTWhq35p3b0qw==
+  dependencies:
+    lie "3.1.1"
+
 pouchdb-selector-core@7.3.0:
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/pouchdb-selector-core/-/pouchdb-selector-core-7.3.0.tgz#1860afeec069ba4d5b79583b4b520dd2b643e3a3"
@@ -9642,6 +9658,13 @@ pouchdb-selector-core@7.3.0:
   dependencies:
     pouchdb-collate "7.3.0"
     pouchdb-utils "7.3.0"
+
+pouchdb-upsert@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/pouchdb-upsert/-/pouchdb-upsert-2.2.0.tgz#42b15e420848f3b294c35060589fdb51cf7f7f5f"
+  integrity sha512-hZceBqSnBLodlHtsJJdGJP9ZN+OHj3IXj8+YCBoHUPpzgLw04wfIOp+PLYROqyL6BODeYF00VFdiX8iIGcCtUw==
+  dependencies:
+    pouchdb-promise "^6.1.2"
 
 pouchdb-utils@7.0.0:
   version "7.0.0"

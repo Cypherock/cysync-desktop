@@ -1,3 +1,4 @@
+import { COINS, NearCoinData } from '@cypherock/communication';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useState } from 'react';
@@ -97,6 +98,8 @@ const Summary: React.FC<StepComponentProps> = ({
   const { selectedWallet } = useSelectedWallet();
 
   const { coinDetails } = useCurrentCoin();
+  const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
+  const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
 
   const { token } = useTokenContext();
 
@@ -141,21 +144,21 @@ const Summary: React.FC<StepComponentProps> = ({
             }
             if (selectedWallet.passphraseSet) {
               setBroadcastError(
-                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet\nPlease try again in sometime.\nThis may be due to incorrect passphrase.'
+                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet\nTry again in sometime.\nThis may be due to incorrect passphrase.'
               );
             } else {
               setBroadcastError(
-                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet\nPlease try again in sometime.'
+                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet\nTry again in sometime.'
               );
             }
           } else {
             setBroadcastError(
-              'Failed to broadcast the transaction. Please check your internet connection and try again.'
+              'Failed to broadcast the transaction. Check your internet connection and try again.'
             );
           }
         } else {
           setBroadcastError(
-            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet\nPlease try again in sometime.'
+            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet\nTry again in sometime.'
           );
         }
         Analytics.Instance.event(
@@ -208,7 +211,7 @@ const Summary: React.FC<StepComponentProps> = ({
         )}
         <LabelText
           label="New Account Id"
-          text={recipientData.recipient}
+          text={recipientData[0].recipient + nearSuffix}
           verified
         />
         <LabelText

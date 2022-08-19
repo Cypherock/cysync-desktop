@@ -110,12 +110,14 @@ const Device: React.FC<StepComponentProps> = ({ handleNext }) => {
         {selectedWallet.passwordSet && (
           <>
             <TextView
-              completed={sendTransaction.pinEntered}
+              completed={
+                sendTransaction.pinEntered && sendTransaction.cardsTapped
+              }
               inProgress={
                 selectedWallet.passphraseSet &&
                 !sendTransaction.passphraseEntered
                   ? false
-                  : !sendTransaction.pinEntered
+                  : !sendTransaction.pinEntered || !sendTransaction.cardsTapped
               }
               text="Enter PIN and Tap any X1 Card"
             />
@@ -130,7 +132,7 @@ const Device: React.FC<StepComponentProps> = ({ handleNext }) => {
                 ? false
                 : !sendTransaction.cardsTapped
             }
-            text="Please tap any X1 Cards"
+            text="Tap any X1 Card"
             stylex={{ marginTop: '0px' }}
           />
         )}

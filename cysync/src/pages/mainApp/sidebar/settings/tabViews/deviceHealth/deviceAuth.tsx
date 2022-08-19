@@ -422,15 +422,26 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
           >
             Device Authentication Failed
           </Typography>
-          <Typography color="textPrimary" style={{ margin: '1rem 0rem 6rem' }}>
-            {errorObj.getCode()}
-          </Typography>
-          <Typography
-            color="textSecondary"
-            style={{ margin: '1rem 0rem 6rem' }}
+          <Grid
+            item
+            container
+            xs={12}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              width: '100%',
+              height: '100%'
+            }}
           >
-            {errorObj.getMessage()}
-          </Typography>
+            <Typography
+              color="textSecondary"
+              style={{ margin: '1rem 0rem 6rem' }}
+            >
+              {errorObj.showError()}
+            </Typography>
+          </Grid>
           {verified === -1 ? (
             <div className={classes.errorButtons}>
               <CustomButton
@@ -492,13 +503,18 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
             className={classes.stepperRoot}
             connector={<QontoConnector />}
           >
-            {steps.map(step => (
-              <Step key={step.name}>
+            {steps.map((data, step) => (
+              <Step
+                key={data.name}
+                completed={
+                  step === steps.length - 1 ? verified === 2 : step < activeStep
+                }
+              >
                 <StyledStepLabel
                   StepIconComponent={QontoStepIcon}
                   className={classes.stepLabel}
                 >
-                  {step.name}
+                  {data.name}
                 </StyledStepLabel>
               </Step>
             ))}

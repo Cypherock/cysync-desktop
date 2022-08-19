@@ -13,7 +13,10 @@ import CustomButton from '../../../../../designSystem/designComponents/buttons/b
 import AvatarIcon from '../../../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
-import { useDeviceUpgrade } from '../../../../../store/hooks/flows';
+import {
+  DeviceUpgradeErrorResolutionState,
+  useDeviceUpgrade
+} from '../../../../../store/hooks/flows';
 import { useNetwork } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import logger from '../../../../../utils/logger';
@@ -89,11 +92,21 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
     errorObj,
     latestVersion,
     setBlockNewConnection,
-    setIsDeviceUpdating
+    setIsDeviceUpdating,
+    errorResolutionState,
+    inBackgroundProcess,
+    deviceConnection
   } = useDeviceUpgrade(true);
 
   const refreshComponent = () => {
-    handleRetry();
+    if (
+      errorResolutionState ===
+      DeviceUpgradeErrorResolutionState.DEVICE_AUTH_REQUIRED
+    ) {
+      onClose();
+    } else {
+      handleRetry();
+    }
   };
 
   const onClose = () => {
@@ -134,9 +147,13 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
         Analytics.Actions.COMPLETED
       );
       logger.info('InitialDeviceUpdate: Completed');
-      setTimeout(onClose, 350);
+      setTimeout(onClose, 1350);
     }
   }, [isCompleted]);
+
+  const isAuthFailed =
+    errorResolutionState ===
+    DeviceUpgradeErrorResolutionState.DEVICE_AUTH_REQUIRED;
 
   return (
     <Root container>
@@ -159,8 +176,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
               align="center"
               style={{ marginBottom: '1.5rem' }}
             >
-              Please wait while we download the latest firmware from the
-              internet
+              Wait while we download the latest firmware from the internet
             </Typography>
             <Typography variant="body2" color="textPrimary" align="center">
               It might take a few seconds ...
@@ -205,8 +221,9 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
               <CustomButton
                 onClick={refreshComponent}
                 style={{ marginTop: '2rem' }}
+                disabled={inBackgroundProcess || !deviceConnection}
               >
-                Try Again
+                {isAuthFailed ? 'Ok' : 'Try Again'}
               </CustomButton>
               <CustomButton
                 onClick={handleFeedbackOpen}
@@ -226,7 +243,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
               align="center"
               style={{ marginBottom: '1.5rem' }}
             >
-              {`Please confirm the update on the device to version ${latestVersion}`}
+              {`Confirm the update on the device to version ${latestVersion}`}
             </Typography>
             <div className={classes.center} style={{ margin: '15px 0' }}>
               <AlertIcon
@@ -261,7 +278,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
               align="center"
               style={{ marginBottom: '1.5rem' }}
             >
-              {`Please wait while Cypherock X1 is Upgrading to version ${latestVersion}`}
+              {`Wait while Cypherock X1 is Upgrading to version ${latestVersion}`}
             </Typography>
             <div className={classes.center} style={{ margin: '15px 0' }}>
               <AlertIcon

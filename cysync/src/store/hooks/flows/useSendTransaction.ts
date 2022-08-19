@@ -114,10 +114,7 @@ export const verifyAddress = (address: string, coin: string) => {
   if (coinDetails.group === CoinGroup.Near) {
     const regexImplicit = /^[a-f0-9]{64}$/;
     const regexRegistered =
-      coinDetails.validatorNetworkType === 'testnet'
-        ? /^([a-z0-9]{2,56}[-_.]?)+\.testnet$/
-        : /^([a-z0-9]{2,59}[-_.]?)+\.near$/;
-
+      /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/; // any number of top level accounts are valid here
     return regexImplicit.test(address) || regexRegistered.test(address);
   }
   return WAValidator.validate(
@@ -171,7 +168,7 @@ export interface UseSendTransactionValues {
   signedTxn: string;
   hash: string;
   setHash: React.Dispatch<React.SetStateAction<string>>;
-  totalFees: number;
+  totalFees: string;
   approxTotalFee: number;
   sendMaxAmount: string;
   resetHooks: () => void;
@@ -217,7 +214,7 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [hash, setHash] = useState('');
   const [metadataSent, setMetadataSent] = useState(false);
   const sendTransaction = new TransactionSender();
-  const [totalFees, setTotalFees] = useState(0);
+  const [totalFees, setTotalFees] = useState('0');
   const [txnInputs, setTxnInputs] = useState<TxInputOutput[]>([]);
   const [txnOutputs, setTxnOutputs] = useState<TxInputOutput[]>([]);
   const [approxTotalFee, setApproxTotalFees] = useState(0);
@@ -240,7 +237,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     setCompleted(false);
     setMetadataSent(false);
     setEstimationError(undefined);
-    setTotalFees(0);
+    setTotalFees('0');
     setSendMaxAmount('0');
     sendTransaction.removeAllListeners();
   };
@@ -353,12 +350,13 @@ export const useSendTransaction: UseSendTransaction = () => {
           toAddress: toAddress.trim(),
           network,
           contractAddress,
-          amount
+          amount,
+          responseType: 'v2'
         })
         .request()
         .then(res => {
           logger.info(`${subFlowName}: Completed', ${contractAddress}`);
-          resolve(res.data);
+          resolve(res.data.fees);
         })
         .catch(e => {
           logger.info(`${subFlowName}: Error', ${contractAddress}`);
@@ -373,7 +371,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           } else {
             cyError.setError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
           }
-          setErrorObj(handleErrors(errorObj, cyError, subFlowName, { e }));
+          setErrorObj(handleErrors(errorObj, cyError, subFlowName, { err: e }));
           resolve(null);
         });
     });
@@ -463,7 +461,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           setCoinsConfirmed(true);
         } else {
           const cyError = new CyError(
-            CysyncError.ADD_COIN_REJECTED,
+            CysyncError.SEND_TXN_REJECTED,
             COINS[coinType].name
           );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
@@ -726,7 +724,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           confirmations: 0,
           status: 0,
           sentReceive: SentReceive.SENT,
-          confirmed: new Date(),
+          confirmed: new Date().toISOString(),
           blockHeight: -1,
           coin,
           inputs: formattedInputs,
@@ -742,7 +740,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           confirmations: 0,
           status: 0,
           sentReceive: SentReceive.FEES,
-          confirmed: new Date(),
+          confirmed: new Date().toISOString(),
           blockHeight: -1,
           coin
         };
@@ -758,7 +756,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           confirmations: 0,
           status: coin.toLowerCase() === 'near' ? 1 : 0,
           sentReceive: SentReceive.SENT,
-          confirmed: new Date(),
+          confirmed: new Date().toISOString(),
           blockHeight: -1,
           inputs: formattedInputs,
           outputs: formattedOutputs

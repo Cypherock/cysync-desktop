@@ -301,8 +301,13 @@ const AddCoinForm: React.FC<StepperProps> = ({
             className={classes.stepperRoot}
             connector={<QontoConnector />}
           >
-            {stepsData.map(data => (
-              <Step key={data[0]}>
+            {stepsData.map((data, step) => (
+              <Step
+                key={data[0]}
+                completed={
+                  step === 3 ? coinAdder.addCoinCompleted : step < activeStep
+                }
+              >
                 <StyledStepLabel
                   StepIconComponent={QontoStepIcon}
                   className={classes.stepLabel}

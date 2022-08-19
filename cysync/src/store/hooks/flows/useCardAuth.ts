@@ -13,7 +13,8 @@ import {
   DeviceConnectionState,
   FeedbackState,
   useConnection,
-  useFeedback
+  useFeedback,
+  useNetwork
 } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../utils/compareVersion';
@@ -41,6 +42,7 @@ export interface UseCardAuthValues {
   connStatus: 0 | 1 | -1 | 2;
   cardsAuth: ICardAuthState;
   showRetry: boolean;
+  enableRetry: boolean;
   onRetry: () => void;
   setCardsStatus: React.Dispatch<React.SetStateAction<0 | 1 | -1 | 2>>;
   completed: boolean;
@@ -69,6 +71,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
   const [processStatus, setProcessStatus] = useState<-1 | 0 | 1 | 2>(0);
   const [completed, setCompleted] = useState(false);
   const [showRetry, setShowRetry] = useState(false);
+  const [enableRetry, setEnableRetry] = useState(true);
   /**
    * -2 means authentication is remaining
    * -1 means all cards failed authentication
@@ -109,6 +112,15 @@ export const useCardAuth: UseCardAuth = isInitial => {
     setIsInFlow,
     deviceState
   } = useConnection();
+  const { connected: internetConnected } = useNetwork();
+
+  useEffect(() => {
+    setEnableRetry(!!deviceConnection && internetConnected);
+  }, [deviceConnection, internetConnected]);
+
+  useEffect(() => {
+    if (errorObj.isSet && internetConnected) setShowRetry(true);
+  }, [internetConnected, errorObj]);
 
   // To call resetHooks outside of this function
   const resetHooks = () => {
@@ -315,7 +327,8 @@ export const useCardAuth: UseCardAuth = isInitial => {
       } else {
         cyError.setError(CysyncError.CARD_AUTH_UNKNOWN_ERROR);
       }
-      setErrorObj(handleErrors(errorObj, cyError, flowName));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
+      setEnableRetry(false);
     });
 
     cardAuth.on('acceptedRequest', acceptedRequest => {
@@ -382,6 +395,8 @@ export const useCardAuth: UseCardAuth = isInitial => {
       });
       setIsInFlow(false);
       logger.info('CardAuth: completed.');
+      // Solely for UI purpose, to wait and give a UX feeback
+      await sleep(1000);
       setCompleted(true);
     } catch (e) {
       setIsInFlow(false);
@@ -453,6 +468,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
     connStatus,
     cardsStatus,
     showRetry,
+    enableRetry,
     onRetry,
     setCardsStatus,
     completed,

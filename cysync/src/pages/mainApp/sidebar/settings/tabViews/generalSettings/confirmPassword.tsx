@@ -13,6 +13,7 @@ import Input from '../../../../../../designSystem/designComponents/input/input';
 import { useSnackbar } from '../../../../../../store/provider';
 import { verifyPassword } from '../../../../../../utils/auth';
 import logger from '../../../../../../utils/logger';
+import sleep from '../../../../../../utils/sleep';
 
 const PREFIX = 'ConfirmPassword';
 
@@ -67,7 +68,7 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
     ...INITIAL_VALUES
   });
   const [isLoading, setIsLoading] = React.useState(false);
-
+  const [passwordVerified, setPasswordVerified] = React.useState(false);
   const [error, setError] = React.useState('');
 
   const resetState = () => {
@@ -100,10 +101,12 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
   const handleConfirmPassword = async () => {
     try {
       if (!values.curPassword.trim()) {
-        setError('Please enter your password.');
+        setError('Enter your password.');
       } else {
+        setError('');
         if (await verifyPassword(values.curPassword.trim())) {
-          setError('');
+          setPasswordVerified(true);
+          await sleep(5000);
           closeDialogBox();
           snackbar.showSnackbar(
             'Password matched! Restarting Cysync',
@@ -111,7 +114,7 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
             onSuccess,
             {
               dontCloseOnClickAway: true,
-              autoHideDuration: 4000
+              autoHideDuration: 2500
             }
           );
           return;
@@ -180,9 +183,9 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
           >
             Confirm your password
           </Typography>
-          {isLoading && (
+          {isLoading && passwordVerified && (
             <Typography align="center" color="textSecondary">
-              Please restart the application if it does not start automatically.
+              Restart the application if it does not start automatically.
             </Typography>
           )}
           <Input

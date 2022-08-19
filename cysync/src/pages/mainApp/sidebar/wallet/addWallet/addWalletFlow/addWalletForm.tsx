@@ -82,7 +82,7 @@ const AddWalletForm: React.FC<AddWalletFormProps> = ({
               <Typography color="error" style={{ display: 'flex' }}>
                 <ErrorOutlineIcon style={{ marginRight: '0.5rem' }} />
                 <span>
-                  {` No wallet found on X1 wallet, Please add a wallet on device
+                  {` No wallet found on X1 wallet, Add a wallet on device
                   first`}
                 </span>
               </Typography>

@@ -1,3 +1,4 @@
+import { DeviceError, DeviceErrorType } from '@cypherock/communication';
 import { feedback as feedbackServer } from '@cypherock/server-wrapper';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { CircularProgress, createSvgIcon, Grid } from '@mui/material';
@@ -20,6 +21,12 @@ import DialogBox from '../../designSystem/designComponents/dialog/dialogBox';
 import ModAvatar from '../../designSystem/designComponents/icons/AvatarIcon';
 import CustomCheckbox from '../../designSystem/designComponents/input/checkbox';
 import Input from '../../designSystem/designComponents/input/input';
+import {
+  CyError,
+  CysyncError,
+  handleDeviceErrors,
+  handleErrors
+} from '../../errors';
 import Analytics from '../../utils/analytics';
 import { hexToVersion } from '../../utils/compareVersion';
 import { getDesktopLogs, getDeviceLogs } from '../../utils/getLogs';
@@ -143,7 +150,14 @@ type ShowFeedback = (options?: {
 
 export interface FeedbackContextInterface {
   showFeedback: ShowFeedback;
-  closeFeedback: (id?: string) => void; // use this to cleanup feedback component
+  /**
+   * use this to cleanup feedback component
+   */
+  closeFeedback: (id?: string) => void;
+  /**
+   * use this to silently submit feedback behind the scenes
+   */
+  submitFeedback: (_feedbackInput: FeedbackState) => void;
 }
 
 export const FeedbackContext: React.Context<FeedbackContextInterface> =
@@ -181,8 +195,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     firmwareVersion,
     deviceSerial,
     deviceConnectionState,
-    beforeFlowStart,
-    setIsInFlow
+    setIsInFlow,
+    blockNewConnection,
+    isDeviceAvailable,
+    isDeviceUpdating
   } = useConnection();
   const [feedbackInput, setFeedbackInput] =
     React.useState<FeedbackState>(initFeedbackState);
@@ -196,6 +212,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   const {
     handleLogFetch,
     errorObj,
+    setErrorObj,
     clearErrorObj,
     completed: logFetchCompleted,
     logFetched: logFetchState,
@@ -256,23 +273,60 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     return randomId;
   };
 
-  const fetchLogs = () => {
-    if (
-      !feedbackInput.attachDeviceLogs &&
-      deviceConnection &&
-      firmwareVersion &&
-      !deviceConnection.inBootloader &&
-      beforeFlowStart(true)
-    ) {
-      clearErrorObj();
-      resetLogFetcherHooks();
-      handleLogFetch({
-        connection: deviceConnection,
-        sdkVersion: deviceSdkVersion,
-        setIsInFlow,
-        firmwareVersion
-      });
-      setDeviceLogsLoading(true);
+  const fetchLogs = async () => {
+    if (!feedbackInput.attachDeviceLogs) {
+      try {
+        let sdkVersion: string = deviceSdkVersion;
+
+        if (!deviceConnection) {
+          throw new DeviceError(DeviceErrorType.NOT_CONNECTED);
+        }
+
+        if (deviceConnection.inBootloader) {
+          throw new CyError(CysyncError.DEVICE_IN_BOOTLOADER);
+        }
+
+        if (blockNewConnection && isDeviceAvailable) {
+          setDeviceLogsLoading(true);
+
+          try {
+            await deviceConnection.beforeOperation();
+            const response = await deviceConnection.isDeviceSupported();
+            sdkVersion = response.sdkVersion;
+
+            if (!response.isSupported) {
+              throw new CyError(CysyncError.INCOMPATIBLE_DEVICE_AND_DESKTOP);
+            }
+          } catch (error) {
+            await deviceConnection.afterOperation();
+            throw error;
+          }
+        }
+
+        clearErrorObj();
+        resetLogFetcherHooks();
+        handleLogFetch({
+          connection: deviceConnection,
+          sdkVersion,
+          setIsInFlow,
+          firmwareVersion
+        });
+        setDeviceLogsLoading(true);
+      } catch (error) {
+        const flowName = Analytics.Categories.FETCH_LOG;
+        const cyError = new CyError();
+        if (error instanceof CyError) {
+          setErrorObj(handleErrors(errorObj, error, flowName, { error }));
+        } else {
+          if (error instanceof DeviceError) {
+            handleDeviceErrors(cyError, error, flowName);
+          } else {
+            cyError.setError(CysyncError.LOG_FETCHER_UNKNOWN_ERROR);
+          }
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
+        }
+        setDeviceLogsLoading(false);
+      }
     } else if (feedbackInput.attachDeviceLogs) {
       setFeedbackInput({ ...feedbackInput, attachDeviceLogs: false });
     }
@@ -300,24 +354,24 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (_feedbackInput: FeedbackState) => {
     setError('');
     const checkArray: boolean[] = [];
 
-    if (feedbackInput.subject.trim().length === 0) {
+    if (_feedbackInput.subject.trim().length === 0) {
       checkArray.push(true);
     } else {
       checkArray.push(false);
     }
 
-    if (feedbackInput.email.trim().length === 0) {
+    if (_feedbackInput.email.trim().length === 0) {
       checkArray.push(true);
     } else {
       const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-      checkArray.push(!feedbackInput.email.trim().match(emailPattern));
+      checkArray.push(!_feedbackInput.email.trim().match(emailPattern));
     }
 
-    if (feedbackInput.description.trim().length === 0) {
+    if (_feedbackInput.description.trim().length === 0) {
       checkArray.push(true);
     } else {
       checkArray.push(false);
@@ -326,16 +380,16 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     if (checkArray[0] || checkArray[1] || checkArray[2]) {
       logger.info('Feedback: Verification failed');
       setFeedbackInput({
-        ...feedbackInput,
-        subjectError: checkArray[0] ? 'Please Enter a Subject' : '',
-        emailError: checkArray[1] ? 'Please Enter a Valid Email Address' : '',
-        descriptionError: checkArray[2] ? 'Please Enter a description' : ''
+        ..._feedbackInput,
+        subjectError: checkArray[0] ? 'Enter a Subject' : '',
+        emailError: checkArray[1] ? 'Enter a Valid Email Address' : '',
+        descriptionError: checkArray[2] ? 'Enter a description' : ''
       });
     } else {
       setSubmitting(true);
 
-      if (feedbackInput.email) {
-        localStorage.setItem('email', feedbackInput.email);
+      if (_feedbackInput.email) {
+        localStorage.setItem('email', _feedbackInput.email);
       }
 
       const data: {
@@ -350,10 +404,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         desktopLogs?: any;
         appVersion: string;
       } = {
-        subject: feedbackInput.subject,
-        category: feedbackInput.category,
-        email: feedbackInput.email,
-        description: feedbackInput.description,
+        subject: _feedbackInput.subject,
+        category: _feedbackInput.category,
+        email: _feedbackInput.email,
+        description: _feedbackInput.description,
         systemInfo: await getSystemInfo(),
         uuid: await getUUID(),
         appVersion: packageJson.version,
@@ -366,10 +420,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
             : undefined
       };
 
-      if (feedbackInput.attachLogs) {
+      if (_feedbackInput.attachLogs) {
         data.desktopLogs = await getDesktopLogs();
       }
-      if (feedbackInput.attachDeviceLogs) {
+      if (_feedbackInput.attachDeviceLogs) {
         data.deviceLogs = await getDeviceLogs();
       }
 
@@ -405,7 +459,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
           );
           setSubmitted(false);
           setSubmitting(false);
-          setError('Failed to submit feedback, please try again later.');
+          setError('Failed to submit feedback, try again later.');
           logger.error('Feedback: Error');
           logger.error(e);
         });
@@ -418,14 +472,15 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const isDeviceConnected = () => {
     return (
-      deviceConnection &&
-      [
-        DeviceConnectionState.VERIFIED,
-        DeviceConnectionState.LAST_AUTH_FAILED,
-        DeviceConnectionState.NEW_DEVICE,
-        DeviceConnectionState.PARTIAL_STATE,
-        DeviceConnectionState.IN_TEST_APP
-      ].includes(deviceConnectionState)
+      (deviceConnection &&
+        [
+          DeviceConnectionState.VERIFIED,
+          DeviceConnectionState.LAST_AUTH_FAILED,
+          DeviceConnectionState.NEW_DEVICE,
+          DeviceConnectionState.PARTIAL_STATE,
+          DeviceConnectionState.IN_TEST_APP
+        ].includes(deviceConnectionState)) ||
+      (blockNewConnection && isDeviceAvailable)
     );
   };
 
@@ -452,10 +507,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     if (id !== openId) return;
     if (deviceLogsLoading) {
       if (logRequestStatus === 2) {
-        snackbar.showSnackbar(
-          'Please wait while the logs are being fetched.',
-          'info'
-        );
+        snackbar.showSnackbar('Wait while the logs are being fetched.', 'info');
         return;
       }
 
@@ -478,13 +530,14 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     if (externalHandleClose) {
       externalHandleClose();
     }
+    setOpenId('');
   };
 
   const getDeviceStateErrorMsg = () => {
     const defaultText = 'Looks like the device is not configured.';
     switch (deviceConnectionState) {
       case DeviceConnectionState.NOT_CONNECTED:
-        return 'Please connect the device to attach device logs.';
+        return 'Connect the device to attach device logs.';
       case DeviceConnectionState.IN_BOOTLOADER:
       case DeviceConnectionState.PARTIAL_STATE:
         return 'Looks like your device was disconnected while upgrading.';
@@ -669,7 +722,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                   </Grid>
                   {!feedbackInput.disableDeviceLogs && (
                     <>
-                      {isDeviceConnected() && (
+                      {isDeviceConnected && !isDeviceUpdating && (
                         <Grid
                           container
                           className={classes.extras}
@@ -693,6 +746,25 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                           )}
                           <Typography color="textPrimary">
                             Attach Device Logs
+                          </Typography>
+                        </Grid>
+                      )}
+                      {isDeviceUpdating && (
+                        <Grid
+                          container
+                          className={classes.extras}
+                          style={{ marginLeft: '0', marginBottom: '10px' }}
+                          wrap="nowrap"
+                        >
+                          <AlertIcon
+                            className={classes.errorColor}
+                            style={{ marginRight: '5px' }}
+                          />
+                          <Typography
+                            variant="body2"
+                            className={classes.errorColor}
+                          >
+                            {'Device is busy.'}
                           </Typography>
                         </Grid>
                       )}
@@ -727,7 +799,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                             style={{ marginRight: '5px' }}
                           />
                           <Typography variant="body2" color="textSecondary">
-                            Please confirm the request on device.
+                            Confirm the request on device.
                           </Typography>
                         </Grid>
                       )}
@@ -752,7 +824,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                   <Grid container className={classes.buttonGroup}>
                     <CustomButton
                       disabled={deviceLogsLoading || submitting}
-                      onClick={handleSubmit}
+                      onClick={() => {
+                        handleSubmit(feedbackInput);
+                      }}
                       style={{
                         padding: '0.3rem 1.5rem',
                         margin: '0rem 0.5rem'
@@ -799,7 +873,11 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         }
       />
       <FeedbackContext.Provider
-        value={{ showFeedback, closeFeedback: onClose }}
+        value={{
+          showFeedback,
+          closeFeedback: onClose,
+          submitFeedback: handleSubmit
+        }}
       >
         {children}
       </FeedbackContext.Provider>

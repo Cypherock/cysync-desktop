@@ -77,11 +77,11 @@ export const NetworkProvider: React.FC = ({ children }) => {
     if (connected) return true;
 
     let text =
-      'This action is not available due to no internet connectivity. Please check your internet connection and try again later.';
+      'This action is not available due to no internet connectivity. Check your internet connection and try again later.';
 
     if (serverError) {
       text =
-        "Can't reach the server at the moment. Please check your internet connection and try again later.";
+        "Can't reach the server at the moment. Check your internet connection and try again later.";
     }
 
     snackbar.showSnackbar(text, 'error', undefined, {

@@ -245,6 +245,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [transactionFee, setTransactionFee] = React.useState('75');
 
   const { coinDetails } = useCurrentCoin();
+  const isBtcFork = COINS[coinDetails.slug]?.group === CoinGroup.BitcoinForks;
   const { token } = useTokenContext();
   const { customAccount } = useCustomAccountContext();
 
@@ -268,8 +269,12 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   }, [sendTransaction.sendMaxAmount, batchRecipientData]);
 
   const triggerCalcFee = () => {
-    const coinAbbr = token ? token.slug : coinDetails.slug;
-    const coin = COINS[coinAbbr];
+    let coin;
+    if (token) {
+      coin = COINS[token.coin].tokenList[token.slug];
+    } else {
+      coin = COINS[coinDetails.slug];
+    }
     let contractAddress: string | undefined;
     if (token && coin instanceof Erc20CoinData) {
       contractAddress = coin.address;
@@ -285,7 +290,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       {
         gasLimit,
         contractAddress,
-        contractAbbr: token ? coinAbbr.toLowerCase() : undefined
+        contractAbbr: token ? token.slug.toLowerCase() : undefined
       },
       customAccount?.name
     );
@@ -506,7 +511,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       if (amount.isNaN() || amount.isZero() || amount.isNegative()) {
         // Allow `0` amount transaction on ETH, and 0 amount is valid when it's a max send txn
         if (!(amount.isZero() && isEthereum) && !maxSend) {
-          error = 'Please enter a valid amount.';
+          error = 'Enter a valid amount.';
           isValid = false;
         }
       }
@@ -584,7 +589,13 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   };
 
   const handleTransactionFeeChange = (e: any) => {
-    setTransactionFee(e.target.value);
+    setTransactionFee(
+      e.target.value
+        ? isBtcFork
+          ? Math.round(e.target.value)
+          : e.target.value
+        : e.target.value
+    );
   };
 
   const handleTransactionFeeChangeSlider = (fee: number) => {
@@ -616,8 +627,13 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         className={classes.stepperRoot}
         connector={<QontoConnector />}
       >
-        {stepsData.map(data => (
-          <Step key={data[0]}>
+        {stepsData.map((data, step) => (
+          <Step
+            key={data[0]}
+            completed={
+              activeStep === stepsData.length - 1 ? true : step < activeStep
+            }
+          >
             <StyledStepLabel
               StepIconComponent={QontoStepIcon}
               className={classes.stepLabel}

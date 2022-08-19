@@ -21,6 +21,7 @@ export interface HandleLogFetcherOptions {
 export interface UseLogFetcherValues {
   handleLogFetch: (options: HandleLogFetcherOptions) => Promise<void>;
   errorObj: CyError;
+  setErrorObj: (error: CyError) => void;
   clearErrorObj: () => void;
   completed: boolean;
   requestStatus: number;
@@ -130,7 +131,7 @@ export const useLogFetcher: UseLogFetcher = () => {
     } catch (e) {
       setIsInFlow(false);
       const cyError = new CyError(CysyncError.LOG_FETCHER_UNKNOWN_ERROR);
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { e }));
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { err: e }));
       setRequestStatus(-1);
       setLogFetched(-1);
       setCompleted(true);
@@ -162,6 +163,7 @@ export const useLogFetcher: UseLogFetcher = () => {
     resetHooks,
     logFetched,
     completed,
-    requestStatus
+    requestStatus,
+    setErrorObj
   };
 };

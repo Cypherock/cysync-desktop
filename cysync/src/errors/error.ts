@@ -33,6 +33,18 @@ class DisplayError {
   public getCode() {
     return this.code || '';
   }
+  /**
+   * Errors are structure in a way that the second sentence of the error
+   * message can be substituted for the action message.
+   * Mostly needed on Tooltips
+   * @returns action message
+   */
+  public getActionMessage() {
+    const sentences = this.message.split('.');
+    if (sentences.length > 1) return sentences[1];
+    logger.warn(`Action Message not found for error: ${this.showError()}`);
+    return 'Please restart the process altogether and try again.';
+  }
 }
 /* tslint:disable-next-line */
 class CyError extends DisplayError {

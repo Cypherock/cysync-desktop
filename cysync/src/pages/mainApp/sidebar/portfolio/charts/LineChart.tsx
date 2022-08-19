@@ -89,8 +89,13 @@ const ApexChart = (props: any) => {
     colors: ['#DB953C', '#328332', '#F3BA2F'],
     annotations: {},
     xaxis: {
+      labels: {
+        style: {
+          colors: theme.palette.text.primary,
+          fontWeight: 600
+        }
+      },
       type: 'datetime',
-      tickAmount: 6,
       tooltip: {
         enabled: false
       }
@@ -153,6 +158,10 @@ const ApexChart = (props: any) => {
     },
     yaxis: {
       labels: {
+        style: {
+          colors: theme.palette.text.primary,
+          fontWeight: 600
+        },
         formatter(value: any) {
           return `$ ${formatDisplayAmount(value, 2, true)}`;
         }

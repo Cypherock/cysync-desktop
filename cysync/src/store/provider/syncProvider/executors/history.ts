@@ -25,8 +25,8 @@ import {
   addressDb,
   Coin,
   coinDb,
-  insertFromBlockbookTxn,
   IOtype,
+  prepareFromBlockbookTxn,
   SentReceive,
   tokenDb,
   Transaction,
@@ -182,27 +182,32 @@ export const processResponses = async (
       });
     }
 
+    const transactionDbList: Transaction[] = [];
+
     if (response.data.transactions) {
       for (const txn of response.data.transactions) {
-        try {
-          await insertFromBlockbookTxn({
-            txn,
-            xpub: item.xpub,
-            addresses: response.data.tokens
-              ? response.data.tokens.map((elem: any) => elem.name)
-              : [],
-            walletId: item.walletId,
-            coinType: item.coinType,
-            addressDB: addressDb,
-            walletName: item.walletName
-          });
-          // No need to retry if the inserting fails because it'll produce the same error.
-        } catch (error) {
-          logger.error(
-            `${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insertFromBlockbookTxn`
-          );
-          logger.error(error);
-        }
+        const newTxns = await prepareFromBlockbookTxn({
+          txn,
+          xpub: item.xpub,
+          addresses: response.data.tokens
+            ? response.data.tokens.map((elem: any) => elem.name)
+            : [],
+          walletId: item.walletId,
+          coinType: item.coinType,
+          addressDB: addressDb,
+          walletName: item.walletName
+        });
+        newTxns.forEach(newTxn => transactionDbList.push(newTxn));
+      }
+
+      try {
+        await transactionDb.insertMany(transactionDbList);
+      } catch (error) {
+        // No need to retry if the inserting fails because it'll produce the same error.
+        logger.error(
+          `${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : prepareFromBlockbookTxn`
+        );
+        logger.error(error);
       }
 
       // If there are more txs, return the last block height
@@ -257,7 +262,7 @@ export const processResponses = async (
         status: ele.isError === '0' ? 1 : 2,
         sentReceive:
           address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
-        confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
+        confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
         blockHeight: ele.blockNumber,
         coin: item.coinType,
         inputs: [
@@ -307,7 +312,9 @@ export const processResponses = async (
               slug: item.coinType,
               status: 1,
               sentReceive: SentReceive.FEES,
-              confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
+              confirmed: new Date(
+                parseInt(ele.timeStamp, 10) * 1000
+              ).toISOString(),
               blockHeight: ele.blockNumber as number,
               coin: item.coinType
             });
@@ -349,7 +356,7 @@ export const processResponses = async (
           status: 1,
           sentReceive:
             address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
-          confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
+          confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
           blockHeight: ele.blockNumber as number,
           coin: item.coinType,
           inputs: [
@@ -390,23 +397,25 @@ export const processResponses = async (
           slug: item.coinType,
           status: 1,
           sentReceive: SentReceive.FEES,
-          confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000),
+          confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
           blockHeight: ele.blockNumber as number,
           coin: item.coinType
         });
       }
     }
 
+    const transactionDbList = [];
     for (const txn of history) {
-      try {
-        await transactionDb.insert(txn);
-        // No need to retry if the inserting fails because it'll produce the same error.
-      } catch (error) {
-        logger.error(
-          ` ${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insert`
-        );
-        logger.error(error);
-      }
+      transactionDbList.push(txn);
+    }
+    try {
+      await transactionDb.insertMany(transactionDbList);
+      // No need to retry if the inserting fails because it'll produce the same error.
+    } catch (error) {
+      logger.error(
+        ` ${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insert`
+      );
+      logger.error(error);
     }
 
     for (const tokenName of erc20Tokens) {
@@ -478,7 +487,9 @@ export const processResponses = async (
         status: ele.status ? 1 : 2,
         sentReceive:
           address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
-        confirmed: new Date(parseInt(ele.block_timestamp, 10) / 1000000), //conversion from timestamp in nanoseconds
+        confirmed: new Date(
+          parseInt(ele.block_timestamp, 10) / 1000000
+        ).toISOString(), //conversion from timestamp in nanoseconds
         blockHeight: parseInt(ele.block_height, 10) || 0,
         coin: item.coinType,
         inputs: [
@@ -503,16 +514,18 @@ export const processResponses = async (
       history.push(txn);
     }
 
+    const transactionDbList = [];
     for (const txn of history) {
-      try {
-        await transactionDb.insert(txn);
-        // No need to retry if the inserting fails because it'll produce the same error.
-      } catch (error) {
-        logger.error(
-          ` ${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insert`
-        );
-        logger.error(error);
-      }
+      transactionDbList.push(txn);
+    }
+    try {
+      await transactionDb.insertMany(transactionDbList);
+      // No need to retry if the inserting fails because it'll produce the same error.
+    } catch (error) {
+      logger.error(
+        ` ${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insert`
+      );
+      logger.error(error);
     }
     if (more && rawHistory) {
       return {

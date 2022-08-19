@@ -1,9 +1,4 @@
-import {
-  CoinGroup,
-  COINS,
-  Erc20CoinData,
-  NearCoinData
-} from '@cypherock/communication';
+import { CoinGroup, COINS, NearCoinData } from '@cypherock/communication';
 import { NearWallet } from '@cypherock/wallet';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { Typography } from '@mui/material';
@@ -72,6 +67,7 @@ const classes = {
   sendMaxBtn: `${PREFIX}-sendMaxBtn`,
   sendMaxBtnActive: `${PREFIX}-sendMaxBtnActive`,
   amountUSD: `${PREFIX}-amountUSD`,
+  feeUnit: `${PREFIX}-feeUnit`,
   center: `${PREFIX}-center`,
   manualFeeErrorInfo: `${PREFIX}-manualFeeErrorInfo`,
   sliderFeeErrorInfo: `${PREFIX}-sliderFeeErrorInfo`,
@@ -183,6 +179,10 @@ const Root = styled(Grid)(({ theme }) => ({
   },
   [`& .${classes.amountUSD}`]: {
     marginLeft: '1rem',
+    color: theme.palette.info.light
+  },
+  [`& .${classes.feeUnit}`]: {
+    textAlign: 'center',
     color: theme.palette.info.light
   },
   [`&.${classes.center}`]: {
@@ -378,6 +378,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = classes;
 
   const { coinDetails } = useCurrentCoin();
+  const isBtcFork = COINS[coinDetails.slug]?.group === CoinGroup.BitcoinForks;
   const { customAccount } = useCustomAccountContext();
 
   const {
@@ -520,10 +521,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
         return;
       }
 
-      const coin = COINS[coinAbbr];
       let contractAddress: string | undefined;
-      if (token && coin instanceof Erc20CoinData) {
-        contractAddress = coin.address;
+      if (token) {
+        const tokenData = COINS[token.parentCoin].tokenList[token.slug];
+        contractAddress = tokenData.address;
       }
 
       sendTransaction.handleSendTransaction({
@@ -593,6 +594,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             handleTransactionFeeChangeSlider={handleTransactionFeeChangeSlider}
             mediumFee={mediumFee}
             fee={floatTransactionFee}
+            step={isBtcFork ? 1 : undefined}
           />
           {mediumFeeError && getFeeErrorInfo()}
         </>
@@ -602,12 +604,15 @@ const Recipient: React.FC<StepComponentProps> = props => {
     return (
       <>
         <Input
-          placeHolder={`Enter transaction fees in ${
-            COINS[coinDetails.slug.toLowerCase()].fees
-          }`}
+          placeHolder="Enter transaction fees"
           onChange={handleTransactionFeeChange}
           type="number"
           value={transactionFee}
+          customIcon={
+            <Typography className={classes.feeUnit}>
+              {COINS[coinDetails.slug.toLowerCase()]?.fees}
+            </Typography>
+          }
         />
         {mediumFeeError && getFeeErrorInfo()}
       </>

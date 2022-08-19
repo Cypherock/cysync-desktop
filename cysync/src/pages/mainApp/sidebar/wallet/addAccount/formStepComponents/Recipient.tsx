@@ -204,7 +204,6 @@ const Recipient: React.FC<StepComponentProps> = props => {
     handleVerificationErrors,
     transactionFee,
     handleInputChange,
-    handleCopyFromClipboard,
     handleNext
   } = props;
   const {
@@ -216,6 +215,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = classes;
 
   const { coinDetails } = useCurrentCoin();
+  const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
+  const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
   const { customAccount } = useCustomAccountContext();
 
   const {
@@ -233,30 +234,32 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const intTransactionFee = parseInt(transactionFee, 10) || 0;
 
+  let validatedAddresses: any[any] = [];
+
   const handleCheckAddresses = async (skipEmpty = false) => {
     let isValid = true;
+    validatedAddresses = [];
 
-    const { recipient: recipient1, id } = recipientData;
-    const { slug } = coinDetails;
+    for (const recipient of recipientData) {
+      const { recipient: recipient1, id } = recipient;
+      const { slug } = coinDetails;
 
-    let addressValid;
-    if (skipEmpty && recipient1.trim().length === 0) addressValid = true;
-    else addressValid = verifyAddress(recipient1.trim(), slug);
+      let addressValid;
+      if (skipEmpty && recipient1.trim().length === 0) addressValid = true;
+      else addressValid = verifyAddress(recipient1.trim(), slug);
 
-    if (!addressValid) {
-      isValid = false;
+      if (!addressValid) {
+        isValid = false;
+      }
+      validatedAddresses.push([id, recipient1.trim(), addressValid]);
     }
 
-    let nearAccExistsError: string | undefined;
-    if (addressValid)
-      nearAccExistsError = await checkNearAccount(recipient1.trim());
-    if (nearAccExistsError) isValid = false;
-    handleVerificationErrors(
-      id,
-      recipient1.trim(),
-      addressValid,
-      nearAccExistsError
-    );
+    for (const data of validatedAddresses) {
+      let nearAccExistsError: string | undefined;
+      if (data[2]) nearAccExistsError = await checkNearAccount(data[1]);
+      if (nearAccExistsError) isValid = isValid && false;
+      handleVerificationErrors(data[0], data[1], data[2], nearAccExistsError);
+    }
 
     return isValid;
   };
@@ -268,10 +271,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const checkNearAccount = async (address: string) => {
     const coin = COINS[coinDetails.slug];
     if (coin instanceof NearCoinData) {
-      if (address.split('.').length !== 2)
-        return 'This is not a valid Near address';
+      if (address.includes('.')) return 'This is not a valid Near address';
       const wallet = new NearWallet(coinDetails.xpub, coin);
-      const check = await wallet.getTotalBalanceCustom(address);
+      const check = await wallet.getTotalBalanceCustom(address + nearSuffix);
       if (!check.balance.cysyncError) {
         return 'This account already exists';
       } else if (check.balance.cysyncError) {
@@ -305,10 +307,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
         xpub: coinDetails.xpub,
         zpub: coinDetails.zpub,
         customAccount: customAccount?.name,
-        newAccountId: recipientData.recipient,
+        newAccountId: recipientData[0].recipient + nearSuffix,
         coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
-          [recipientData],
+          recipientData,
           coinDetails.slug,
           token
         ),
@@ -331,23 +333,18 @@ const Recipient: React.FC<StepComponentProps> = props => {
           name="reciever_addr"
           id="1"
           label="New Account ID"
-          placeHolder="accountid.testnet"
           onChange={e => {
             handleInputChange(e);
             debouncedHandleCheckAddresses();
           }}
-          value={recipientData.recipient}
-          error={recipientData.errorRecipient.length !== 0}
+          value={recipientData[0].recipient}
+          error={recipientData[0].errorRecipient.length !== 0}
           helperText={
-            recipientData.errorRecipient.length !== 0
-              ? recipientData.errorRecipient
+            recipientData[0].errorRecipient.length !== 0
+              ? recipientData[0].errorRecipient
               : undefined
           }
-          isClipboardPresent
-          handleCopyFromClipboard={e => {
-            handleCopyFromClipboard(e);
-            debouncedHandleCheckAddresses();
-          }}
+          customIcon={<Typography>{nearSuffix}</Typography>}
         />
         <Typography className={classes.info}>
           <p>Your account ID can contain any of the following:</p>
@@ -360,7 +357,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           <ul>
             <li>Characters "@" or "."</li>
             <li>Fewer than 2 characters</li>
-            <li>More than 64 characters (including .testnet)</li>
+            <li>More than 64 characters (including {nearSuffix})</li>
           </ul>
         </Typography>
       </div>

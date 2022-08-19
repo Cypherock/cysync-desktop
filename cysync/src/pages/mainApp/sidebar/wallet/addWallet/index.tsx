@@ -85,31 +85,50 @@ const AddWallet = () => {
 
   const [open, setOpen] = useState(false);
 
-  const { deviceConnection, deviceSdkVersion, beforeFlowStart, setIsInFlow } =
-    useConnection();
+  const {
+    deviceConnection,
+    deviceSdkVersion,
+    beforeFlowStart,
+    beforeNetworkAction,
+    setIsInFlow
+  } = useConnection();
 
   const handleClose = (abort?: boolean, openAddCoinForm?: boolean) => {
     if (abort && deviceConnection) cancelAddWallet(deviceConnection);
+    let stopClose = false;
+
     if (completed) {
-      clearErrorObj();
-      Analytics.Instance.event(
-        Analytics.Categories.ADD_WALLET,
-        Analytics.Actions.COMPLETED
-      );
+      let isCompleted = false;
       if (openAddCoinForm) {
-        navigate(`${Routes.wallet.index}/${walletId}?openAddCoinForm=true`);
+        if (beforeNetworkAction()) {
+          isCompleted = true;
+          navigate(`${Routes.wallet.index}/${walletId}?openAddCoinForm=true`);
+        } else {
+          stopClose = true;
+        }
       } else {
+        isCompleted = true;
         navigate(`${Routes.wallet.index}/${walletId}`);
+      }
+
+      if (isCompleted) {
+        clearErrorObj();
+        Analytics.Instance.event(
+          Analytics.Categories.ADD_WALLET,
+          Analytics.Actions.COMPLETED
+        );
       }
     }
 
-    Analytics.Instance.event(
-      Analytics.Categories.ADD_WALLET,
-      Analytics.Actions.CLOSED
-    );
-    logger.info('Add wallet form closed');
-    resetHooks();
-    setOpen(false);
+    if (!stopClose) {
+      Analytics.Instance.event(
+        Analytics.Categories.ADD_WALLET,
+        Analytics.Actions.CLOSED
+      );
+      logger.info('Add wallet form closed');
+      resetHooks();
+      setOpen(false);
+    }
   };
 
   const handleOpen = async () => {
