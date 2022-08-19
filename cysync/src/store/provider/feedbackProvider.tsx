@@ -13,7 +13,7 @@ import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { fileTypeFromBuffer } from 'file-type';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { RecordRTCPromisesHandler } from 'recordrtc';
 import * as uuid from 'uuid';
 
@@ -213,6 +213,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     -1 | 0 | 1 | 2
   >(0);
   const [recording, setRecording] = useState(false);
+  const attachmentEl = useRef(null);
 
   const {
     internalDeviceConnection: deviceConnection,
@@ -260,6 +261,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     setRecorder(undefined);
     setAttachmentBuffer(undefined);
     setAttachmentMimeType(undefined);
+    setUploadAttachmentStatus(0);
   };
 
   const showFeedback: ShowFeedback = ({
@@ -549,7 +551,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     setUploadAttachmentStatus(1);
     try {
       const response = await feedbackServer
-        .uploadAttachment({ attachment: attachmentBuffer })
+        .uploadAttachment({
+          attachment: attachmentBuffer
+        })
         .request();
       const recordingUrl = response.data.url;
       setUploadAttachmentStatus(2);
@@ -670,14 +674,46 @@ export const FeedbackProvider: React.FC = ({ children }) => {
               Remove Attachment
             </CustomButton>
           </div>
-          <video controls style={{ width: '100%' }}>
-            <source type={attachmentMimeType} src={sourceString} />
-          </video>
+          {attachmentMimeType.includes('video') ? (
+            <video controls style={{ width: '100%' }}>
+              <source type={attachmentMimeType} src={sourceString} />
+            </video>
+          ) : (
+            <img
+              src={sourceString}
+              alt="attachment"
+              style={{ width: '100%' }}
+            />
+          )}
         </div>
       );
     }
     return (
-      <CustomButton onClick={startRecording}>Start Recording</CustomButton>
+      <>
+        <CustomButton
+          onClick={() => {
+            attachmentEl.current.click();
+          }}
+        >
+          Upload File
+        </CustomButton>
+        <input
+          ref={attachmentEl}
+          type="file"
+          style={{ visibility: 'hidden' }}
+          placeholder="upload file"
+          accept="image/png, image/jpeg, video/mp4"
+          onChange={async (e: any) => {
+            const file = new Blob([e.target.files[0]], {
+              type: e.target.files[0].type
+            });
+            const fileBuffer = Buffer.from(await file.arrayBuffer());
+            setAttachmentMimeType(e.target.files[0].type);
+            setAttachmentBuffer(fileBuffer);
+          }}
+        />
+        <CustomButton onClick={startRecording}>Start Recording</CustomButton>
+      </>
     );
   };
 
