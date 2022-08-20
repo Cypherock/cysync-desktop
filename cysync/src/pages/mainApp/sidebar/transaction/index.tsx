@@ -433,19 +433,26 @@ const Transaction = () => {
           >
             Transactions
           </Typography>
-          <DropMenu
-            options={['All Wallets', ...allWallets.map(wallet => wallet.name)]}
-            handleMenuItemSelectionChange={handleWalletChange}
-            index={walletIndex}
-            bg={false}
-            style={{ marginRight: '10px' }}
-          />
-          <DropMenu
-            options={['All Coins', ...allCoins.map(coin => coin.name)]}
-            handleMenuItemSelectionChange={handleCoinChange}
-            index={coinIndex}
-            bg={false}
-          />
+          {allWallets[0].name !== '' && (
+            <DropMenu
+              options={[
+                'All Wallets',
+                ...allWallets.map(wallet => wallet.name)
+              ]}
+              handleMenuItemSelectionChange={handleWalletChange}
+              index={walletIndex}
+              bg={false}
+              style={{ marginRight: '10px' }}
+            />
+          )}
+          {allCoins.length !== 0 && (
+            <DropMenu
+              options={['All Coins', ...allCoins.map(coin => coin.name)]}
+              handleMenuItemSelectionChange={handleCoinChange}
+              index={coinIndex}
+              bg={false}
+            />
+          )}
         </Grid>
         <Grid
           item
