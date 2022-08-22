@@ -8,7 +8,7 @@ export const getLatestPriceForCoin = async (
   parentCoin?: string
 ) => {
   let coinData: any = COINS[coin];
-  if (parentCoin) {
+  if (parentCoin && parentCoin !== coin) {
     const parentCoinData = COINS[parentCoin];
     if (!parentCoinData) {
       throw new Error('Invalid parentCoin: ' + parentCoin);
@@ -22,6 +22,7 @@ export const getLatestPriceForCoin = async (
     }
     coinData = token;
   }
+
   if (!coinData) throw new Error('Invalid coin: ' + coin);
   if (coinData && coinData.isTest) return 0;
 
