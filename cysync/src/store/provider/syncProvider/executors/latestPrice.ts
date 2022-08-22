@@ -37,7 +37,7 @@ export const processResponses = async (
   const usesNewApi = Boolean(item.id);
   let data;
   if (usesNewApi) {
-    data = res.data?.get(item.id)?.get('usd');
+    data = res.data[item.id].usd;
   } else {
     data = res.data.data.price;
   }
