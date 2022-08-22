@@ -386,6 +386,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   }, [estimateGasLimit]);
 
   useEffect(() => {
+    sendTransaction.setIsEstimatingFees(true);
     debouncedCaclFee();
     if (!transactionFee || (parseInt(transactionFee, 10) || 0) <= 0) {
       setButtonDisabled(true);
