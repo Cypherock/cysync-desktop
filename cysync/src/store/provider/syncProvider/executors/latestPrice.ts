@@ -11,10 +11,14 @@ import { LatestPriceSyncItem } from '../types';
 export const getRequestsMetadata = (
   item: LatestPriceSyncItem
 ): IRequestMetadata[] => {
+  const usesNewApi = Boolean(item.id);
   const pricingMetadata = pricingServer
-    .getLatest({
-      coin: item.coinType
-    })
+    .getLatest(
+      {
+        coin: usesNewApi ? item.id : item.coinType
+      },
+      usesNewApi
+    )
     .getMetadata();
 
   return [pricingMetadata];
@@ -30,14 +34,15 @@ export const processResponses = async (
 
   const res = responses[0];
 
+  const usesNewApi = Boolean(item.id);
+  let data;
+  if (usesNewApi) {
+    data = res.data?.get(item.id)?.get('usd');
+  } else {
+    data = res.data.data.price;
+  }
+
   if (item.coinGroup === CoinGroup.ERC20Tokens)
-    await tokenDb.findAndUpdate(
-      { slug: item.coinType },
-      { price: res.data.data.price }
-    );
-  else
-    await coinDb.findAndUpdate(
-      { slug: item.coinType },
-      { price: res.data.data.price }
-    );
+    await tokenDb.findAndUpdate({ slug: item.coinType }, { price: data });
+  else await coinDb.findAndUpdate({ slug: item.coinType }, { price: data });
 };
