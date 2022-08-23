@@ -11,6 +11,8 @@ export interface RecipientData {
 export interface StepComponentProps {
   handleNext: () => void;
   recipientData: RecipientData[];
+  creatorAccount: string;
+  setCreatorAccount: (val: string) => void;
   transactionFee: string;
   handleInputChange: (e: any) => void;
   handleVerificationErrors: (
