@@ -164,7 +164,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
       return ((parseFloat(txn.displayFees) || 0) * ethCoinPrice).toFixed(2);
     }
 
-    return getPriceForCoin(txn.displayFees);
+    return formatDisplayAmount(getPriceForCoin(txn.displayFees));
   };
 
   const openTxn = () => {
