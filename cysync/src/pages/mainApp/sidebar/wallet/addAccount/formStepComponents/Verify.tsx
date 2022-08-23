@@ -11,7 +11,6 @@ import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop'
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import {
   useCurrentCoin,
-  useCustomAccountContext,
   useNetwork,
   useSendTransactionContext,
   useTokenContext
@@ -100,15 +99,13 @@ const CustomAlert = withStyles((theme: Theme) =>
 )(Alert);
 
 const Verify = (props: any) => {
-  const { recipientData } = props;
+  const { recipientData, creatorAccount } = props;
 
   const { coinDetails } = useCurrentCoin();
   const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
   const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
 
   const { token } = useTokenContext();
-
-  const { customAccount } = useCustomAccountContext();
 
   const { connected } = useNetwork();
 
@@ -167,25 +164,29 @@ const Verify = (props: any) => {
             text={(COINS[coinAbbr] || { name: '' }).name}
             verified={sendTransaction.pinEntered}
           />
-          {customAccount ? (
-            <LabelText
-              label="Sender"
-              text={customAccount.name}
-              verified={sendTransaction.verified}
-            />
-          ) : (
-            <></>
-          )}
+          <LabelText
+            label="Create From"
+            text={creatorAccount}
+            verified={sendTransaction.verified}
+          />
           <LabelText
             label="New Account Id"
             text={recipientData[0].recipient + nearSuffix}
             verified={sendTransaction.verified}
           />
           <LabelText
+            label="Amount"
+            text={`~ ${0.1} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
+              0.1 * parseFloat(coinDetails.displayPrice),
+              2,
+              true
+            )})`}
+            verified={sendTransaction.verified}
+          />
+          <LabelText
             label="Transaction Fees"
-            text={`~ ${0.1012} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
-              parseFloat(sendTransaction.totalFees) *
-                parseFloat(coinDetails.displayPrice),
+            text={`~ ${0.0012} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
+              0.0012 * parseFloat(coinDetails.displayPrice),
               2,
               true
             )})`}

@@ -183,6 +183,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   const theme = useTheme();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [canAddAccounts, setCanAddAccounts] = useState(false);
   const sync = useSync();
   const snackbar = useSnackbar();
 
@@ -208,6 +209,12 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
       setIsLoading(false);
     }
   }, [sync.modulesInExecutionQueue, walletId, initial]);
+
+  useEffect(() => {
+    setCanAddAccounts(
+      Math.max(...accountData.map(acc => parseFloat(acc.displayBalance))) < 0.25
+    );
+  }, [accountData]);
 
   const beforeAction = () => {
     if (isLoading) {
@@ -486,7 +493,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                         borderTop: '1px solid #222',
                         padding: '6px'
                       }}
-                      disabled={isLoading}
+                      disabled={isLoading || canAddAccounts}
                       disableRipple
                     >
                       ADD ACCOUNT
@@ -542,7 +549,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                   borderTop: '1px solid #222',
                   padding: '6px'
                 }}
-                disabled={isLoading || parseFloat(holding) < 0.2}
+                disabled={isLoading || canAddAccounts}
                 disableRipple
               >
                 ADD ACCOUNT

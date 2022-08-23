@@ -198,6 +198,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     { id: 1, recipient: ' ', amount: '', errorRecipient: '', errorAmount: '' }
   ]);
 
+  const [creatorAccount, setCreatorAccount] = React.useState<string>('');
+
   // Set a constant fee default value for each coin in case the api call fails. Regularly update the file.
   const [transactionFee, setTransactionFee] = React.useState('300000000000000'); // Max gas limit for NEAR.
 
@@ -312,6 +314,8 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
           props={{
             handleNext,
             recipientData,
+            creatorAccount,
+            setCreatorAccount,
             transactionFee,
             handleInputChange,
             handleVerificationErrors,
