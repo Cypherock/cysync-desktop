@@ -1,4 +1,4 @@
-import { AlertProps } from '@mui/lab/';
+import { AlertProps } from '@mui/lab';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -33,6 +33,8 @@ export const SnackbarProvider: React.FC = ({ children }) => {
     SnackbarData | undefined
   >();
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isCloseCooldown, setIsCloseCooldown] = React.useState(false);
+  const cooldownTimeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   const showSnackbar: ShowSnackbar = (
     text,
@@ -40,7 +42,21 @@ export const SnackbarProvider: React.FC = ({ children }) => {
     _handleClose,
     options
   ) => {
-    setSnackbarData({ text, severity, handleClose: _handleClose, options });
+    setSnackbarData({
+      text,
+      severity,
+      handleClose: _handleClose,
+      options
+    });
+
+    setIsCloseCooldown(true);
+    if (cooldownTimeout.current) {
+      clearTimeout(cooldownTimeout.current);
+    }
+    cooldownTimeout.current = setTimeout(() => {
+      setIsCloseCooldown(false);
+    }, 500);
+
     setIsOpen(true);
   };
 
@@ -54,7 +70,10 @@ export const SnackbarProvider: React.FC = ({ children }) => {
         return;
       }
 
-      setIsOpen(false);
+      if (!isCloseCooldown) {
+        setIsOpen(false);
+      }
+
       if (snackbarData.handleClose) {
         snackbarData.handleClose();
       }
