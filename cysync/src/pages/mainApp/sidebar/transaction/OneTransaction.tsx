@@ -167,7 +167,9 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
           />
         </Grid>
         <Grid item xs={1} className={classes.alignStartCenter}>
-          <Typography color="textPrimary">{`$ ${value}`}</Typography>
+          <Typography color="textPrimary">{`$ ${formatDisplayAmount(
+            value
+          )}`}</Typography>
         </Grid>
         <Grid
           item
