@@ -1,5 +1,6 @@
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import { MenuItem } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import { styled, Theme } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -119,6 +120,7 @@ type InputProps = {
   customIcon?: JSX.Element;
   disabled?: boolean;
   customIconStyle?: object | undefined;
+  showLoading?: boolean;
   items?: string[];
 };
 
@@ -141,6 +143,7 @@ const Input: React.FC<InputProps> = ({
   handleCopyFromClipboard,
   customIcon,
   customIconStyle,
+  showLoading,
   items
 }) => {
   const onInput = (event: any) => {
@@ -203,9 +206,9 @@ const Input: React.FC<InputProps> = ({
         name={name}
         className={classes.input}
         type="text"
-        placeholder={placeHolder}
+        placeholder={showLoading ? '' : placeHolder}
         onChange={onInput}
-        value={value}
+        value={showLoading ? '' : value}
         error={error}
         helperText={helperText}
         InputProps={{
@@ -223,6 +226,9 @@ const Input: React.FC<InputProps> = ({
           ) : (
             customIcon
           ),
+          startAdornment: showLoading ? (
+            <CircularProgress size={30} color="secondary" />
+          ) : undefined,
           inputProps: { min, max }
         }}
         select={items ? true : false}
@@ -256,7 +262,8 @@ Input.propTypes = {
   isClipboardPresent: PropTypes.bool,
   handleCopyFromClipboard: PropTypes.func,
   customIcon: PropTypes.element,
-  customIconStyle: PropTypes.object
+  customIconStyle: PropTypes.object,
+  showLoading: PropTypes.bool
 };
 
 Input.defaultProps = {
@@ -277,7 +284,8 @@ Input.defaultProps = {
   isClipboardPresent: undefined,
   handleCopyFromClipboard: undefined,
   customIcon: undefined,
-  customIconStyle: undefined
+  customIconStyle: undefined,
+  showLoading: undefined
 };
 
 export default Input;
