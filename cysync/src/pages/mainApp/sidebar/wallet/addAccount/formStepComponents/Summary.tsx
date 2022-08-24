@@ -88,6 +88,7 @@ const Root = styled('div')(({ theme }) => ({
 const Summary: React.FC<StepComponentProps> = ({
   handleNext,
   recipientData,
+  creatorAccount,
   handleClose
 }) => {
   const [broadcastError, setBroadcastError] = useState('');
@@ -209,15 +210,25 @@ const Summary: React.FC<StepComponentProps> = ({
             transaction only ]
           </Typography>
         )}
+        <LabelText label="Create From" text={creatorAccount} verified />
         <LabelText
           label="New Account Id"
           text={recipientData[0].recipient + nearSuffix}
           verified
         />
         <LabelText
+          label="Amount"
+          text={`~ ${0.1} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
+            0.1 * parseFloat(coinDetails.displayPrice),
+            2,
+            true
+          )})`}
+          verified={sendTransaction.verified}
+        />
+        <LabelText
           label="Transaction Fees"
-          text={`~ ${0.1012} ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
-            0.1012 * parseFloat(coinDetails.displayPrice),
+          text={`~ ${0.0012} ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
+            0.0012 * parseFloat(coinDetails.displayPrice),
             2,
             true
           )})`}

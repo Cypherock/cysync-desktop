@@ -4,7 +4,7 @@ import React from 'react';
 
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import CySync from '../../../designSystem/iconGroups/cySync';
-import { useConnection } from '../../../store/provider';
+import { useConnection, useFeedback } from '../../../store/provider';
 import NotificationComponent from '../notification';
 
 import DeviceConnectionStatus from './deviceConnectionStatus';
@@ -77,6 +77,20 @@ const Root = styled('div')(({ theme }) => ({
 const Navbar: React.FC = () => {
   const theme = useTheme();
   const { deviceConnection } = useConnection();
+  const { isRecording, stopRecording } = useFeedback();
+
+  const RecordingButton = () => (
+    <Chip
+      label={'Stop Recording'}
+      variant="outlined"
+      style={{
+        color: 'red',
+        border: '1px solid',
+        margin: 'auto 5px'
+      }}
+      onClick={stopRecording}
+    />
+  );
 
   return (
     <Root className={classes.root}>
@@ -133,6 +147,8 @@ const Navbar: React.FC = () => {
         )}
       </div>
       <div className={classes.rightContent}>
+        {isRecording && <RecordingButton />}
+
         <SyncStatus loaderIconClassName={classes.loaderIcon} />
 
         <DeviceConnectionStatus loaderIconClassName={classes.loaderIcon} />

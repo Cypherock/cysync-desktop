@@ -16,7 +16,8 @@ const classes = {
   root: `${PREFIX}-root`,
   left: `${PREFIX}-left`,
   right: `${PREFIX}-right`,
-  loadingOverlay: `${PREFIX}-loading-overlay`
+  loadingOverlay: `${PREFIX}-loading-overlay`,
+  donut: `${PREFIX}-donut`
 };
 
 const Root = styled(Grid)(({ theme }) => ({
@@ -51,6 +52,9 @@ const Root = styled(Grid)(({ theme }) => ({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: '4rem'
+  },
+  [`& .${classes.donut} svg`]: {
+    overflow: 'visible'
   }
 }));
 
@@ -153,7 +157,7 @@ const PortfolioCharts = ({
                 {sinceText}
               </Typography>
             </div>
-            <div>
+            <div className={classes.donut}>
               <DonutChart
                 hasCoins={hasCoins}
                 series={

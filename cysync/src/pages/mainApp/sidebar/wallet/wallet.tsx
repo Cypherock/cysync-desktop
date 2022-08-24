@@ -110,9 +110,13 @@ const Root = styled(Grid)(({ theme }) => ({
 
 interface WalletViewProps {
   openAddCoinForm?: boolean;
+  addCoinOpened?: () => void;
 }
 
-const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
+const WalletView: React.FC<WalletViewProps> = ({
+  openAddCoinForm,
+  addCoinOpened
+}) => {
   const theme = useTheme();
 
   const {
@@ -188,6 +192,7 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
   useEffect(() => {
     if (openAddCoinForm) {
       setAddCoinFormOpen(true);
+      addCoinOpened();
     }
   }, [openAddCoinForm]);
 
@@ -523,11 +528,13 @@ const WalletView: React.FC<WalletViewProps> = ({ openAddCoinForm }) => {
 };
 
 WalletView.propTypes = {
-  openAddCoinForm: PropTypes.bool
+  openAddCoinForm: PropTypes.bool,
+  addCoinOpened: PropTypes.func
 };
 
 WalletView.defaultProps = {
-  openAddCoinForm: false
+  openAddCoinForm: false,
+  addCoinOpened: undefined
 };
 
 export default WalletView;

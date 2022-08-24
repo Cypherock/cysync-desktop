@@ -11,7 +11,7 @@ import BigNumber from 'bignumber.js';
  */
 const formatDisplayAmount = (
   amount: string | number | BigNumber,
-  precision = 8,
+  precision = 4,
   isFixed = false
 ) => {
   if (
