@@ -1,5 +1,6 @@
 import { DeviceError, DeviceErrorType } from '@cypherock/communication';
 import { feedback as feedbackServer } from '@cypherock/server-wrapper';
+import { CheckCircle, Error } from '@mui/icons-material';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { CircularProgress, createSvgIcon, Grid } from '@mui/material';
 import Alert from '@mui/material/Alert';
@@ -10,8 +11,10 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { fileTypeFromBuffer } from 'file-type';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { RecordRTCPromisesHandler } from 'recordrtc';
 import * as uuid from 'uuid';
 
 import packageJson from '../../../package.json';
@@ -31,6 +34,7 @@ import Analytics from '../../utils/analytics';
 import { hexToVersion } from '../../utils/compareVersion';
 import { getDesktopLogs, getDeviceLogs } from '../../utils/getLogs';
 import logger from '../../utils/logger';
+import { initRecorder, stopRecorder } from '../../utils/recorder';
 import { getSystemInfo } from '../../utils/systemInfo';
 import getUUID from '../../utils/uuid';
 import { useLogFetcher } from '../hooks/flows/useLogFetcher';
@@ -158,6 +162,8 @@ export interface FeedbackContextInterface {
    * use this to silently submit feedback behind the scenes
    */
   submitFeedback: (_feedbackInput: FeedbackState) => void;
+  isRecording: boolean;
+  stopRecording: () => void;
 }
 
 export const FeedbackContext: React.Context<FeedbackContextInterface> =
@@ -188,6 +194,26 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [openId, setOpenId] = useState('');
+  const [recorder, setRecorder] = useState<
+    RecordRTCPromisesHandler | undefined
+  >(undefined);
+  const [attachmentBuffer, setAttachmentBuffer] = useState<Buffer | undefined>(
+    undefined
+  );
+  const [attachmentMimeType, setAttachmentMimeType] = useState<
+    string | undefined
+  >(undefined);
+  /**
+   * -1 - upload error
+   * 0 - not uploading
+   * 1 - uploading
+   * 2 - upload finished
+   */
+  const [uploadAttachmentStatus, setUploadAttachmentStatus] = useState<
+    -1 | 0 | 1 | 2
+  >(0);
+  const [recording, setRecording] = useState(false);
+  const attachmentEl = useRef(null);
 
   const {
     internalDeviceConnection: deviceConnection,
@@ -230,6 +256,14 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     clearErrorObj();
   };
 
+  const resetRecordingState = () => {
+    setRecording(false);
+    setRecorder(undefined);
+    setAttachmentBuffer(undefined);
+    setAttachmentMimeType(undefined);
+    setUploadAttachmentStatus(0);
+  };
+
   const showFeedback: ShowFeedback = ({
     isContact: _isContact,
     heading: _heading,
@@ -238,6 +272,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     disableDeviceLogs
   } = {}) => {
     resetFeedbackState();
+    resetRecordingState();
 
     setExternalHandleClose(_handleClose);
     setIsContact(_isContact || false);
@@ -403,6 +438,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         deviceInfo?: any;
         desktopLogs?: any;
         appVersion: string;
+        attachmentUrl?: string;
       } = {
         subject: _feedbackInput.subject,
         category: _feedbackInput.category,
@@ -425,6 +461,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       }
       if (_feedbackInput.attachDeviceLogs) {
         data.deviceLogs = await getDeviceLogs();
+      }
+      if (attachmentBuffer) {
+        data.attachmentUrl = await submitAttachment();
       }
 
       feedbackServer
@@ -492,6 +531,40 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     }
   };
 
+  const startRecording = async () => {
+    setRecording(true);
+    const recorderObj = await initRecorder();
+    setRecorder(recorderObj);
+    setIsOpen(false);
+  };
+
+  const stopRecording = async () => {
+    setRecording(false);
+    setIsOpen(true);
+    const buffer = await stopRecorder(recorder);
+    const fileType = await fileTypeFromBuffer(buffer);
+    setAttachmentMimeType(fileType.mime);
+    setAttachmentBuffer(buffer);
+  };
+
+  const submitAttachment = async () => {
+    setUploadAttachmentStatus(1);
+    try {
+      const response = await feedbackServer
+        .uploadAttachment({
+          attachment: attachmentBuffer
+        })
+        .request();
+      const recordingUrl = response.data.url;
+      setUploadAttachmentStatus(2);
+      return recordingUrl;
+    } catch (e: any) {
+      logger.error('Error uploading attachment');
+      logger.error(e);
+      setUploadAttachmentStatus(-1);
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       resetFeedbackState();
@@ -554,6 +627,94 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       default:
         return defaultText;
     }
+  };
+
+  const getAttachmentComponent = () => {
+    switch (uploadAttachmentStatus) {
+      case 1:
+        return (
+          <CustomButton disabled>
+            Uploading <CircularProgress />
+          </CustomButton>
+        );
+      case 2:
+        return (
+          <CustomButton disabled>
+            Uploaded <CheckCircle />
+          </CustomButton>
+        );
+      case -1:
+        return (
+          <CustomButton disabled>
+            Upload failed <Error />
+          </CustomButton>
+        );
+    }
+    if (recording)
+      return (
+        <div>
+          <CustomButton disabled>
+            Recording <CircularProgress />{' '}
+          </CustomButton>
+        </div>
+      );
+    // Embed the recorded video from buffer
+    if (attachmentBuffer && attachmentMimeType) {
+      const sourceString = `data:${attachmentMimeType};base64,${attachmentBuffer.toString(
+        'base64'
+      )}`;
+      return (
+        <div>
+          <div>
+            <CustomButton
+              onClick={() => {
+                setAttachmentBuffer(undefined);
+              }}
+            >
+              Remove Attachment
+            </CustomButton>
+          </div>
+          {attachmentMimeType.includes('video') ? (
+            <video controls style={{ width: '100%' }}>
+              <source type={attachmentMimeType} src={sourceString} />
+            </video>
+          ) : (
+            <img
+              src={sourceString}
+              alt="attachment"
+              style={{ width: '100%' }}
+            />
+          )}
+        </div>
+      );
+    }
+    return (
+      <>
+        <CustomButton
+          onClick={() => {
+            attachmentEl.current.click();
+          }}
+        >
+          Upload File
+        </CustomButton>
+        <input
+          ref={attachmentEl}
+          type="file"
+          style={{ visibility: 'hidden' }}
+          placeholder="upload file"
+          accept="image/png, image/jpeg, video/mp4"
+          onChange={async (e: any) => {
+            const file = new Blob([e.target.files[0]], {
+              type: e.target.files[0].type
+            });
+            const fileBuffer = Buffer.from(await file.arrayBuffer());
+            setAttachmentMimeType(e.target.files[0].type);
+            setAttachmentBuffer(fileBuffer);
+          }}
+        />
+        <CustomButton onClick={startRecording}>Start Recording</CustomButton>
+      </>
+    );
   };
 
   return (
@@ -706,6 +867,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                       {feedbackInput.descriptionError}
                     </Typography>
                   )}
+                  <Grid container>
+                    <Grid item>{getAttachmentComponent()}</Grid>
+                  </Grid>
+
                   <Grid container className={classes.extras}>
                     <CustomCheckbox
                       checked={feedbackInput.attachLogs}
@@ -876,7 +1041,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         value={{
           showFeedback,
           closeFeedback: onClose,
-          submitFeedback: handleSubmit
+          submitFeedback: handleSubmit,
+          isRecording: recording,
+          stopRecording
         }}
       >
         {children}
