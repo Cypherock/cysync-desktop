@@ -246,7 +246,7 @@ const ReceiveForm: React.FC<StepperProps> = ({
               <Step
                 key={data[0]}
                 completed={
-                  step === stepsData.length - 1
+                  activeStep === stepsData.length - 2
                     ? Boolean(receiveTransaction.receiveAddress)
                     : step < activeStep
                 }
