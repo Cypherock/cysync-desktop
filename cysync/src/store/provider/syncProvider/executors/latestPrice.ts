@@ -36,13 +36,22 @@ export const processResponses = async (
 
   const usesNewApi = Boolean(item.id);
   let data;
+  let priceLastUpdatedAt = 0;
   if (usesNewApi) {
     data = res.data[item.id].usd;
+    priceLastUpdatedAt = res.data[item.id].last_updated_at;
   } else {
     data = res.data.data.price;
   }
 
   if (item.coinGroup === CoinGroup.ERC20Tokens)
-    await tokenDb.findAndUpdate({ slug: item.coinType }, { price: data });
-  else await coinDb.findAndUpdate({ slug: item.coinType }, { price: data });
+    await tokenDb.findAndUpdate(
+      { slug: item.coinType },
+      { price: data, priceLastUpdatedAt }
+    );
+  else
+    await coinDb.findAndUpdate(
+      { slug: item.coinType },
+      { price: data, priceLastUpdatedAt }
+    );
 };

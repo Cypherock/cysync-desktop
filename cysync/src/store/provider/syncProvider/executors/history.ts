@@ -430,7 +430,8 @@ export const processResponses = async (
           slug: tokenName.toLowerCase(),
           coin: item.coinType,
           balance: '0',
-          price: 0
+          price: 0,
+          priceLastUpdatedAt: 0
         });
         options.addToQueue(
           new BalanceSyncItem({

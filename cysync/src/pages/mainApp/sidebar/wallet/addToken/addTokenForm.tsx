@@ -148,7 +148,8 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
         slug: tokenName,
         coin: ethCoin.toLowerCase(),
         balance: '0',
-        price: 0
+        price: 0,
+        priceLastUpdatedAt: 0
       });
       sync.addTokenTask(selectedWallet._id, tokenName, ethCoin.toLowerCase());
     });
