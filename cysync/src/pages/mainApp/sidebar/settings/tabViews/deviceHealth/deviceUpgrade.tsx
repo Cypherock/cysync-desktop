@@ -585,7 +585,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
                 {isAuthFailed ? 'Ok' : 'Retry'}
               </CustomButton>
             ) : (
-              <Tooltip title="Reconnect the X1 wallet to retry">
+              <Tooltip title="Kindly remove and the reconnect the device">
                 <span>
                   <CustomButton
                     variant="outlined"

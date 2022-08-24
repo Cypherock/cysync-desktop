@@ -1,25 +1,8 @@
 import { TypographyProps } from '@mui/material';
 import Popover from '@mui/material/Popover';
-import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
-
-const PREFIX = 'PopOverText';
-
-const classes = {
-  popover: `${PREFIX}-popover`,
-  paper: `${PREFIX}-paper`
-};
-
-const Root = styled('div')(({ theme }) => ({
-  [`& .${classes.popover}`]: {
-    pointerEvents: 'none'
-  },
-  [`& .${classes.paper}`]: {
-    padding: theme.spacing(1)
-  }
-}));
 
 type MouseOverProps = {
   text: string;
@@ -31,7 +14,7 @@ type MouseOverProps = {
 };
 
 const PopOverText: React.FC<MouseOverProps> = props => {
-  const { text, hoverText, variant, className } = props;
+  const { text, hoverText, variant } = props;
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
   const handlePopoverOpen = (
@@ -47,7 +30,7 @@ const PopOverText: React.FC<MouseOverProps> = props => {
   const open = Boolean(anchorEl);
 
   return (
-    <Root>
+    <div>
       <Typography
         variant={variant}
         aria-owns={open ? 'mouse-over-popover' : undefined}
@@ -57,15 +40,13 @@ const PopOverText: React.FC<MouseOverProps> = props => {
         color={props.color}
         style={props.style}
         className={props.className}
-        id="popOverBaseText"
       >
-        <span className={className}>{text}</span>
+        {text}
       </Typography>
       <Popover
         id="mouse-over-popover"
-        className={classes.popover}
-        classes={{
-          paper: classes.paper
+        sx={{
+          pointerEvents: 'none'
         }}
         open={open}
         anchorEl={anchorEl}
@@ -80,9 +61,11 @@ const PopOverText: React.FC<MouseOverProps> = props => {
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
-        <Typography variant="body2">{hoverText}</Typography>
+        <Typography sx={{ p: 1 }} variant="body2">
+          {hoverText}
+        </Typography>
       </Popover>
-    </Root>
+    </div>
   );
 };
 

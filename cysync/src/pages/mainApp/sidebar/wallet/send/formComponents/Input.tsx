@@ -1,4 +1,5 @@
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
+import { MenuItem } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { styled, Theme } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
@@ -30,6 +31,24 @@ const ValidationTextField = withStyles((theme: Theme) => ({
     }
   }
 }))(TextField);
+
+export const StyledMenuItem = withStyles(theme => ({
+  root: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '0.5rem 2rem',
+    fontSize: '0.9rem',
+    color: theme.palette.text.secondary,
+    '&:focus': {
+      background: '#272A2F'
+    }
+  },
+  selected: {
+    background: '#272A2F',
+    color: theme.palette.text.primary
+  }
+}))(MenuItem);
 
 const PREFIX = 'WalletSendInput';
 
@@ -102,6 +121,7 @@ type InputProps = {
   disabled?: boolean;
   customIconStyle?: object | undefined;
   showLoading?: boolean;
+  items?: string[];
 };
 
 const Input: React.FC<InputProps> = ({
@@ -123,7 +143,8 @@ const Input: React.FC<InputProps> = ({
   handleCopyFromClipboard,
   customIcon,
   customIconStyle,
-  showLoading
+  showLoading,
+  items
 }) => {
   const onInput = (event: any) => {
     let isChanged = true;
@@ -152,7 +173,7 @@ const Input: React.FC<InputProps> = ({
         if (!isValid) {
           isChanged = false;
         } else {
-          const wholeNumber = new BigNumber(newValArr[0]).toFixed();
+          const wholeNumber = new BigNumber(newValArr[0] || 0).toFixed();
           if (newValArr.length > 1) {
             event.target.value = `${wholeNumber}.${newValArr[1]}`;
           } else {
@@ -210,7 +231,15 @@ const Input: React.FC<InputProps> = ({
           ) : undefined,
           inputProps: { min, max }
         }}
-      />
+        select={items ? true : false}
+      >
+        {items &&
+          items.map((item: string) => (
+            <StyledMenuItem key={item} value={item}>
+              {item}
+            </StyledMenuItem>
+          ))}
+      </ValidationTextField>
     </Root>
   );
 };

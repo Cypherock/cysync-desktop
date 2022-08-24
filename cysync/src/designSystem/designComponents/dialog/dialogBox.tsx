@@ -135,7 +135,15 @@ const DialogBox: React.FC<Props> = ({
             placement="bottom-end"
             tooltipClassName={classes.closeButton}
           >
-            <Icon icon={ICONS.close} color="#cccccc" viewBox="0 0 14 14" />
+            <Icon
+              icon={ICONS.close}
+              color="#cccccc"
+              viewBox="0 0 14 14"
+              style={{
+                display: 'inline-block',
+                verticalAlign: 'middle'
+              }}
+            />
           </IconButton>
         ) : null}
 
