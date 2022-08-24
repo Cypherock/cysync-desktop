@@ -5,9 +5,9 @@ import React, { useEffect, useState } from 'react';
 import {
   Route,
   Routes,
-  useLocation,
   useNavigate,
-  useParams
+  useParams,
+  useSearchParams
 } from 'react-router-dom';
 
 import RouteLinks from '../../../../constants/routes';
@@ -23,14 +23,19 @@ import AddWallet from './addWallet';
 import WalletView from './wallet';
 
 const SingleWalletView = () => {
-  const location = useLocation();
-  const query = new URLSearchParams(location.search);
-  const openAddCoinForm = query.get('openAddCoinForm');
-  const { walletId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const openAddCoinForm = searchParams.get('openAddCoinForm');
+
+  const { walletId } = useParams();
   const { allWallets, isLoading: isWalletLoading } = useWallets();
   const [currentWalletDetails, setCurrentWalletDetails] =
     useState<Wallet | null>(null);
+
+  const afterAddCoinOpen = () => {
+    setSearchParams({});
+  };
 
   useEffect(() => {
     if (isWalletLoading) return;
@@ -56,7 +61,10 @@ const SingleWalletView = () => {
             selectedWallet: currentWalletDetails
           }}
         >
-          <WalletView openAddCoinForm={openAddCoinForm === 'true'} />
+          <WalletView
+            openAddCoinForm={openAddCoinForm === 'true'}
+            addCoinOpened={afterAddCoinOpen}
+          />
         </SelectedWalletContext.Provider>
       </AddCoinProvider>
     );
