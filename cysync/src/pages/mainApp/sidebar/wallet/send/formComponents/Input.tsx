@@ -170,7 +170,7 @@ const Input: React.FC<InputProps> = ({
         if (!isValid) {
           isChanged = false;
         } else {
-          const wholeNumber = new BigNumber(newValArr[0]).toFixed();
+          const wholeNumber = new BigNumber(newValArr[0] || 0).toFixed();
           if (newValArr.length > 1) {
             event.target.value = `${wholeNumber}.${newValArr[1]}`;
           } else {
