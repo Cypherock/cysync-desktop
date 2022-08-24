@@ -125,7 +125,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
   useEffect(() => {
     if (txn && txn.slug) {
-      getLatestPriceForCoin(txn.slug.toLowerCase())
+      getLatestPriceForCoin(txn.slug.toLowerCase(), txn.coin?.toLowerCase())
         .then(price => {
           setCoinPrice(price);
         })
@@ -169,10 +169,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
   const openTxn = () => {
     const coin = COINS[txn.slug];
-    if (!coin) {
-      logger.error('Invalid COIN in txn: ' + txn.coinName);
-      return;
-    }
+
     if (ETHCOINS[txn.coin] || txn.isErc20) {
       const ecoin = ETHCOINS[txn.coin];
 
@@ -188,7 +185,15 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           isConfirmed: txn.confirmations && txn.confirmations > 0
         })
       );
-    } else if (coin.group === CoinGroup.Near) {
+      return;
+    }
+
+    if (!coin) {
+      logger.error('Invalid COIN in txn: ' + txn.coinName);
+      return;
+    }
+
+    if (coin.group === CoinGroup.Near) {
       shell.openExternal(
         nearServer.transaction.getOpenTxnLink({
           network: (coin as NearCoinData).network,
