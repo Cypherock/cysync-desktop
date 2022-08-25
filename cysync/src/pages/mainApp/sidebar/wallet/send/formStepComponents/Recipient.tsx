@@ -704,6 +704,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
                 ? batchRecipientData[0].amount
                 : sendTransaction.sendMaxAmount
             }
+            showLoading={maxSend && sendTransaction.isEstimatingFees}
             error={!!batchRecipientData[0].errorAmount}
             helperText={batchRecipientData[0].errorAmount}
             placeHolder="0"

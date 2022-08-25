@@ -190,6 +190,8 @@ export interface UseSendTransactionValues {
     token?: string;
   }) => void;
   estimationError: CyError;
+  isEstimatingFees: boolean;
+  setIsEstimatingFees: (val: boolean) => void;
 }
 
 export type UseSendTransaction = () => UseSendTransactionValues;
@@ -225,6 +227,7 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [estimationError, setEstimationError] = useState<CyError>(
     new CyError()
   );
+  const [isEstimatingFees, setIsEstimatingFees] = useState(false);
 
   const resetHooks = () => {
     setDeviceConnected(false);
@@ -237,6 +240,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     setCompleted(false);
     setMetadataSent(false);
     setEstimationError(undefined);
+    setIsEstimatingFees(false);
     setTotalFees('0');
     setSendMaxAmount('0');
     sendTransaction.removeAllListeners();
@@ -272,9 +276,11 @@ export const useSendTransaction: UseSendTransaction = () => {
           setApproxTotalFees(0);
           setSendMaxAmount('0');
           setEstimationError(undefined);
+          setIsEstimatingFees(false);
           return;
         }
       }
+      setIsEstimatingFees(true);
 
       const subFlowName = Analytics.Categories.ESTIMATE_FEE;
       logger.info(
@@ -311,6 +317,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         )
         .then(() => {
           setEstimationError(undefined);
+          setIsEstimatingFees(false);
           logger.info(`${subFlowName}: Completed', ${coinType}`);
         })
         .catch(error => {
@@ -331,6 +338,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           setEstimationError(
             handleErrors(estimationError, cyError, subFlowName, { error })
           );
+          setIsEstimatingFees(false);
         });
     };
 
@@ -809,6 +817,8 @@ export const useSendTransaction: UseSendTransaction = () => {
     handleEstimateFee,
     sendMaxAmount,
     onTxnBroadcast,
-    estimationError
-  } as UseSendTransactionValues;
+    estimationError,
+    isEstimatingFees,
+    setIsEstimatingFees
+  };
 };
