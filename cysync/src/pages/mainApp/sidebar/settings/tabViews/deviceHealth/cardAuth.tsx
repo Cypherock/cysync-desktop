@@ -311,7 +311,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
           <Icon size={16} viewBox="0 0 14 14" icon={ICONS.close} color="red" />
         </IconButton>
       </Grid>
-      {completed && activeStep === 1 ? (
+      {completed && verified === 2 ? (
         <Grid
           style={{
             display: 'flex',
