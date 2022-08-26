@@ -128,7 +128,12 @@ const en: I18nStrings = {
     TUTORIALS_UNKNOWN_ERROR:
       'Some internal error occured while fetching tutorials.',
     STOP_ONGOING_FLOW: 'Stopping an ongoing flow',
-    PROCESS_ABORTED_BY_USER: (flow: string) => `${flow} was stopped by user`
+    PROCESS_ABORTED_BY_USER: (flow: string) => `${flow} was stopped by user`,
+
+    RETRY_DISABLED_DUE_TO_NO_DEVICE_CONNECTION:
+      'Reconnect the Cypherock X1 device',
+    RETRY_DISABLED_DUE_TO_NO_INTERNET:
+      'Check your internet connection and try again'
   }
 };
 
