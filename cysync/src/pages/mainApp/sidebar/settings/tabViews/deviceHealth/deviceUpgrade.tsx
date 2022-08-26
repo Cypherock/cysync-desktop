@@ -585,7 +585,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
                 {isAuthFailed ? 'Ok' : 'Retry'}
               </CustomButton>
             ) : (
-              <Tooltip title="Kindly remove and the reconnect the device">
+              <Tooltip title="Disconnect and reconnect the device">
                 <span>
                   <CustomButton
                     variant="outlined"
