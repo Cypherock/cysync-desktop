@@ -10,6 +10,7 @@ import { PriceSyncItem } from './priceSyncItem';
 export interface ModifiedCoin extends Coin {
   parentCoin?: string;
   coinGroup?: CoinGroup;
+  id?: string;
 }
 
 export type SyncQueueItem =
