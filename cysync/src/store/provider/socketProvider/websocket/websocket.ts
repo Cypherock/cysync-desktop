@@ -132,8 +132,12 @@ export default class Socket extends EventEmitter {
     // make sure that connection is alive if there are subscriptions
     if (this.ws && this.isConnected()) {
       if (this.subscriptions.length > 0 || this.options.keepAlive) {
-        const latestPrice = await this.getCurrentFiatRates();
-        this.updateLatestPriceDatabase(latestPrice);
+        if (this.options.coinType !== 'btct') {
+          const latestPrice = await this.getCurrentFiatRates();
+          this.updateLatestPriceDatabase(latestPrice);
+        } else {
+          await this.getBlockHash(0);
+        }
       } else {
         try {
           this.ws.close();
