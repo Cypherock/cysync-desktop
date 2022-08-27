@@ -83,6 +83,7 @@ const DialogBox: React.FC<Props> = ({
   dialogHeading,
   restComponents,
   TransitionComponent,
+  BackdropComponent,
   fullScreen,
   isClosePresent,
   noBottomPadding,
@@ -117,6 +118,7 @@ const DialogBox: React.FC<Props> = ({
       scroll="body"
       onClose={onClose}
       TransitionComponent={TransitionComponent}
+      BackdropComponent={BackdropComponent}
       fullScreen={fullScreen}
       className={classes.root}
       {...rest}
