@@ -431,7 +431,7 @@ export const processResponses = async (
           coin: item.coinType,
           balance: '0',
           price: 0,
-          priceLastUpdatedAt: 0
+          priceLastUpdatedAt: undefined
         });
         options.addToQueue(
           new BalanceSyncItem({

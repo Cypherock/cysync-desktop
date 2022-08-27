@@ -36,7 +36,7 @@ export const processResponses = async (
 
   const usesNewApi = Boolean(item.id);
   let data;
-  let priceLastUpdatedAt = 0;
+  let priceLastUpdatedAt;
   if (usesNewApi) {
     data = res.data[item.id].usd;
     priceLastUpdatedAt = res.data[item.id].last_updated_at;

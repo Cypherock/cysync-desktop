@@ -289,13 +289,17 @@ export default class Socket extends EventEmitter {
     rates: { usd: number };
     ts: number;
   }) => {
-    const price = latestPrice.rates.usd;
-    const priceLastUpdatedAt = latestPrice.ts;
+    try {
+      const price = latestPrice.rates.usd;
+      const priceLastUpdatedAt = latestPrice.ts;
 
-    await coinDb.findAndUpdate(
-      { slug: this.options.coinType },
-      { price, priceLastUpdatedAt }
-    );
+      await coinDb.findAndUpdate(
+        { slug: this.options.coinType },
+        { price, priceLastUpdatedAt }
+      );
+    } catch (e) {
+      logger.error('Error occurred while updating latest price', e);
+    }
   };
 
   subscribeAddresses(addresses: string[]) {
