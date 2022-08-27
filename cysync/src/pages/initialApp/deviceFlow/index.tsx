@@ -81,7 +81,8 @@ const InitialDeviceFlow: React.FC<Props> = ({ handleDeviceConnected }) => {
 
   return (
     <>
-      <DeviceErrorPopup />
+      {/* Show device error dialog box after terms of use */}
+      {activeView > 0 && <DeviceErrorPopup />}
       <DialogBox
         fullScreen
         isClosePresent={false}
