@@ -410,6 +410,7 @@ export const SyncProvider: React.FC = ({ children }) => {
               coinType: coinData.abbr,
               coinGroup: coinData.group,
               parentCoin: coin.parentCoin,
+              id: coinData.coinGeckoId,
               isRefresh,
               module
             });
@@ -449,6 +450,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           coinType: coinData.abbr,
           parentCoin: coin.parentCoin,
           coinGroup: coinData.group,
+          id: coinData.coinGeckoId,
           isRefresh,
           module
         });

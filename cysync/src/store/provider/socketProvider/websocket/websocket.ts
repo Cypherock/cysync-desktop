@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 
 import logger from '../../../../utils/logger';
+import { coinDb } from '../../../database';
 
 import {
   AddressNotification,
@@ -46,6 +47,7 @@ interface Subscription {
 
 interface Options {
   url: string;
+  coinType: string;
   timeout?: number;
   pingTimeout?: number;
   pongTimeout?: number;
@@ -130,7 +132,8 @@ export default class Socket extends EventEmitter {
     // make sure that connection is alive if there are subscriptions
     if (this.ws && this.isConnected()) {
       if (this.subscriptions.length > 0 || this.options.keepAlive) {
-        await this.getBlockHash(0);
+        const latestPrice = await this.getCurrentFiatRates();
+        this.updateLatestPriceDatabase(latestPrice);
       } else {
         try {
           this.ws.close();
@@ -277,6 +280,27 @@ export default class Socket extends EventEmitter {
   getBlockHash(block: number) {
     return this.send('getBlockHash', { height: block });
   }
+
+  getCurrentFiatRates() {
+    return this.send('getCurrentFiatRates', { currency: 'usd' });
+  }
+
+  updateLatestPriceDatabase = async (latestPrice: {
+    rates: { usd: number };
+    ts: number;
+  }) => {
+    try {
+      const price = latestPrice.rates.usd;
+      const priceLastUpdatedAt = latestPrice.ts;
+
+      await coinDb.findAndUpdate(
+        { slug: this.options.coinType },
+        { price, priceLastUpdatedAt }
+      );
+    } catch (e) {
+      logger.error('Error occurred while updating latest price', e);
+    }
+  };
 
   subscribeAddresses(addresses: string[]) {
     const index = this.subscriptions.findIndex(s => s.type === 'notification');
