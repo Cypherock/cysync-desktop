@@ -252,7 +252,7 @@ const Summary: React.FC<StepComponentProps> = ({
         <CustomButton
           className={classes.deviceContinueButton}
           onClick={handleSend}
-          disabled={!sendTransaction.signedTxn}
+          disabled={!sendTransaction.signedTxn || !connected}
         >
           Send
         </CustomButton>
