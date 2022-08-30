@@ -1,10 +1,10 @@
-import Checkbox from '@mui/material/Checkbox';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import Button from '../../../../designSystem/designComponents/buttons/button';
+import CustomCheckbox from '../../../../designSystem/designComponents/input/checkbox';
 
 const PREFIX = 'UpdaterDeviceInfo';
 
@@ -70,7 +70,7 @@ const UpdateInfoComponent: React.FC<UpdateInfoComponentProps> = ({
           alignItems: 'center'
         }}
       >
-        <Checkbox
+        <CustomCheckbox
           checked={dontShowAgain}
           onChange={onChange}
           inputProps={{ 'aria-label': 'primary checkbox' }}
