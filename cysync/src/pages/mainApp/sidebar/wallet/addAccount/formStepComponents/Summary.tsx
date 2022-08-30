@@ -1,4 +1,5 @@
 import { COINS, NearCoinData } from '@cypherock/communication';
+import { Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useState } from 'react';
@@ -249,13 +250,17 @@ const Summary: React.FC<StepComponentProps> = ({
       </div>
       <div className={classes.divider} />
       <div className={classes.footer}>
-        <CustomButton
-          className={classes.deviceContinueButton}
-          onClick={handleSend}
-          disabled={!sendTransaction.signedTxn || !connected}
-        >
-          Send
-        </CustomButton>
+        <Tooltip title={connected ? '' : 'No internet connection available'}>
+          <div style={{ display: 'inline-block' }}>
+            <CustomButton
+              className={classes.deviceContinueButton}
+              onClick={handleSend}
+              disabled={!sendTransaction.signedTxn || !connected}
+            >
+              Send
+            </CustomButton>
+          </div>
+        </Tooltip>
       </div>
     </Root>
   );
