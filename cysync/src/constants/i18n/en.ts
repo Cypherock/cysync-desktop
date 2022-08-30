@@ -54,8 +54,8 @@ const en: I18nStrings = {
     ADD_WALLET_LIMIT_EXCEEDED: 'Cannot add more than 4 wallets.',
     ADD_WALLET_DUPLICATE:
       'This wallet already exists on the CySync Application.',
-    ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME:
-      'This wallet already exists on the CySync Application with a different name. Do you want to update the name?',
+    ADD_WALLET_DUPLICATE_WITH_DIFFERENT_DETAILS:
+      'This wallet already exists on the CySync Application with different configuration. Do you want to update the wallet details?',
     ADD_WALLET_WITH_SAME_NAME:
       'A wallet with the same name already exists on the CySync Application',
     ADD_WALLET_UNKNOWN_ERROR: `Some internal error occurred. Disconnect and reconnect the device and retry adding a wallet`,
