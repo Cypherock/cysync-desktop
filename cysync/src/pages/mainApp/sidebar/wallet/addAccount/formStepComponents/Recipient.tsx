@@ -304,7 +304,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const checkNearAccount = async (address: string) => {
     const coin = COINS[coinDetails.slug];
     if (coin instanceof NearCoinData) {
-      if (address.includes('.')) return 'This is not a valid Near address';
+      if (address.includes('.') || (address + nearSuffix).length > 64)
+        return 'This is not a valid Near address';
       const wallet = new NearWallet(coinDetails.xpub, coin);
       const check = await wallet.getTotalBalanceCustom(address + nearSuffix);
       if (!check.balance.cysyncError) {
@@ -379,7 +380,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             handleInputChange(e);
             debouncedHandleCheckAddresses();
           }}
-          value={recipientData[0].recipient}
+          value={recipientData[0].recipient.slice(0, 64 - nearSuffix.length)}
           error={recipientData[0].errorRecipient.length !== 0}
           helperText={
             recipientData[0].errorRecipient.length !== 0
