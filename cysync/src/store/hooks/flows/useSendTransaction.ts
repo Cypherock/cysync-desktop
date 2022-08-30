@@ -93,7 +93,8 @@ export const broadcastTxn = async (
     if (resp.status === 0) {
       throw new Error('brodcast-failed');
     }
-    if (typeof resp.data?.status?.SuccessValue === typeof undefined)
+
+    if (resp.data?.status?.SuccessValue === undefined)
       throw new Error('transaction-failed');
 
     return resp.data.transaction.hash;

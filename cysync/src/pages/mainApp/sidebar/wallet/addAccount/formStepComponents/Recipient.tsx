@@ -304,8 +304,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const checkNearAccount = async (address: string) => {
     const coin = COINS[coinDetails.slug];
     if (coin instanceof NearCoinData) {
-      if (address.includes('.') || (address + nearSuffix).length > 64)
-        return 'This is not a valid Near address';
+      if (address.includes('.')) return 'This is not a valid Near address';
+      if ((address + nearSuffix).length > 64)
+        return 'Near address cannot be more than 64 characters';
       const wallet = new NearWallet(coinDetails.xpub, coin);
       const check = await wallet.getTotalBalanceCustom(address + nearSuffix);
       if (!check.balance.cysyncError) {
