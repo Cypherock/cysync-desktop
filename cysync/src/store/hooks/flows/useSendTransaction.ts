@@ -89,9 +89,14 @@ export const broadcastTxn = async (
         network: coin.network
       })
       .request();
+
     if (resp.status === 0) {
       throw new Error('brodcast-failed');
     }
+
+    if (resp.data?.status?.SuccessValue === undefined)
+      throw new Error('transaction-failed');
+
     return resp.data.transaction.hash;
   } else {
     const res = await Server.bitcoin.transaction
