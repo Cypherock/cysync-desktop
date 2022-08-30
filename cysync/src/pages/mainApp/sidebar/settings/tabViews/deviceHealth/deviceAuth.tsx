@@ -326,6 +326,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
     setBlockConnectionPopup(true);
 
     return () => {
+      retryConnection();
       setBlockConnectionPopup(false);
     };
   }, []);
@@ -366,7 +367,6 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
   };
 
   const onSuccess = () => {
-    retryConnection();
     handleDeviceHealthTabClose();
   };
 
