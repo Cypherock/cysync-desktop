@@ -455,7 +455,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         } else {
           cyError.setError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
         }
-        setErrorObj(handleErrors(errorObj, cyError, flowName));
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
       });
 
       sendTransaction.on('locked', () => {
