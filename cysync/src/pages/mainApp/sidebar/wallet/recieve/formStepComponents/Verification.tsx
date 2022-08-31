@@ -175,7 +175,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
               <CustomButton
                 className={classes.footerBtn}
                 onClick={() => {
-                  receiveTransaction.userAction.resolve(true);
+                  receiveTransaction.userAction.current.resolve(true);
                   setReachedTarget(true);
                 }}
                 disabled={!linkOpened}
