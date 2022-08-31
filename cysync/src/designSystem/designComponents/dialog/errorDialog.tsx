@@ -1,6 +1,6 @@
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { Collapse } from '@mui/material';
+import { Backdrop, Collapse } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -256,6 +256,13 @@ const errorDialog: React.FC<ErrorProps> = ({
       isClosePresent={!disableAction}
       handleClose={handleClose}
       disableBackdropClick={disableAction}
+      BackdropComponent={styled(Backdrop, {
+        name: 'MuiModal',
+        slot: 'Backdrop',
+        overridesResolver: (_props, styles) => {
+          return styles.backdrop;
+        }
+      })({ zIndex: -1, backdropFilter: 'blur(10px)' })}
       restComponents={
         <Error
           advanceText={advanceText}
