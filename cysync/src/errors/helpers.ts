@@ -207,8 +207,8 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [CysyncError.ADD_WALLET_DUPLICATE]: {
       message: langStrings.ERRORS.ADD_WALLET_DUPLICATE
     },
-    [CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME]: {
-      message: langStrings.ERRORS.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME
+    [CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_DETAILS]: {
+      message: langStrings.ERRORS.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_DETAILS
     },
     [CysyncError.ADD_WALLET_WITH_SAME_NAME]: {
       message: langStrings.ERRORS.ADD_WALLET_WITH_SAME_NAME
