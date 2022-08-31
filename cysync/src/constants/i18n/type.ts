@@ -81,5 +81,8 @@ export interface I18nStrings {
     TUTORIALS_UNKNOWN_ERROR: string;
     STOP_ONGOING_FLOW: string;
     PROCESS_ABORTED_BY_USER: (flow: string) => string;
+
+    RETRY_DISABLED_DUE_TO_NO_DEVICE_CONNECTION: string;
+    RETRY_DISABLED_DUE_TO_NO_INTERNET: string;
   };
 }

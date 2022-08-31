@@ -97,7 +97,9 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
     completed,
     errorObj,
     confirmed,
-    clearErrorObj
+    clearErrorObj,
+    enableRetry,
+    enableRetryErrorMsg
   } = useDeviceAuth(true);
 
   const feedback = useFeedback();
@@ -270,11 +272,8 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
             </div>
             <div className={classes.btnContainer}>
               {verified !== -1 &&
-                (!latestDeviceConnection.current ? (
-                  <Tooltip
-                    title={'Reconnect the device to retry'}
-                    placement="top"
-                  >
+                (!enableRetry ? (
+                  <Tooltip title={enableRetryErrorMsg} placement="top">
                     <div>
                       <CustomButton
                         style={{ margin: '1rem 10px 1rem 0' }}
