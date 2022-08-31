@@ -123,7 +123,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
       setAllCoinsPresent(true);
       setContinueDisabled(true);
     }
-  }, []);
+  }, [coinsPresent]);
 
   useEffect(() => {
     if (isXpubMissing) {
