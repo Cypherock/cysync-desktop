@@ -67,8 +67,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
     setDeviceConnectionStatus,
     deviceConnection,
     internalDeviceConnection,
-    inBackgroundProcess,
-    deviceConnectionState
+    inBackgroundProcess
   } = useConnection();
   const { connected: internetConnected } = useNetwork();
 

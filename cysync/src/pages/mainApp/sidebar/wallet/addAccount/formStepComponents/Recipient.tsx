@@ -1,11 +1,13 @@
 import { COINS, Erc20CoinData, NearCoinData } from '@cypherock/communication';
 import { NearWallet } from '@cypherock/wallet';
-import { Typography } from '@mui/material';
+import { Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
+import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
+import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import {
   useCustomAccount,
   useDebouncedFunction
@@ -17,6 +19,7 @@ import {
 import {
   useConnection,
   useCurrentCoin,
+  useNetwork,
   useSelectedWallet,
   useSendTransactionContext,
   useTokenContext
@@ -218,6 +221,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     singleTransaction
   } = classes;
 
+  const { connected } = useNetwork();
   const { coinDetails } = useCurrentCoin();
 
   const { customAccountData, setCurrentWalletId, setCurrentCoin } =
@@ -235,6 +239,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
     setCurrentWalletId(_id);
     setCurrentCoin(coinDetails.slug);
   }, [_id]);
+
+  useEffect(() => {
+    if (connected) debouncedHandleCheckAddresses();
+  }, [connected]);
 
   useEffect(() => {
     if (customAccountData.length > 0) {
@@ -404,17 +412,34 @@ const Recipient: React.FC<StepComponentProps> = props => {
             <li>More than 64 characters (including {nearSuffix})</li>
           </ul>
         </Typography>
+        {connected || (
+          <div style={{ marginTop: '10px' }} className={classes.center}>
+            <Icon
+              size={50}
+              viewBox="0 0 60 60"
+              iconGroup={<ErrorExclamation />}
+            />
+            <Typography variant="body2" color="secondary">
+              Internet connection is required for this action
+            </Typography>
+          </div>
+        )}
       </div>
       <div className={divider} />
       <div className={recipientFooter}>
-        <CustomButton
-          className={recipientContinueButton}
-          onClick={() => {
-            handleRecipientSubmit();
-          }}
-        >
-          {'Add Account'}
-        </CustomButton>
+        <Tooltip title={connected ? '' : 'No internet connection available'}>
+          <div style={{ display: 'inline-block' }}>
+            <CustomButton
+              className={recipientContinueButton}
+              disabled={!connected}
+              onClick={() => {
+                handleRecipientSubmit();
+              }}
+            >
+              {'Add Account'}
+            </CustomButton>
+          </div>
+        </Tooltip>
       </div>
     </Root>
   );
