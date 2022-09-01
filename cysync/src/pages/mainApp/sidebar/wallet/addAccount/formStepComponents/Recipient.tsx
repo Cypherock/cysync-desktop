@@ -317,10 +317,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
         return 'Near address cannot be more than 64 characters';
       const wallet = new NearWallet(coinDetails.xpub, coin);
       const check = await wallet.getTotalBalanceCustom(address + nearSuffix);
-      if (!check.balance.cysyncError) {
+      if (check.balance !== undefined) {
         return 'This account already exists';
-      } else if (check.balance.cysyncError) {
-        return undefined;
       }
     }
     return undefined;

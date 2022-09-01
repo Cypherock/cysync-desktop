@@ -44,10 +44,11 @@ const getFees = async (coinType: string) => {
   } else if (coin instanceof NearCoinData) {
     const resp = await Server.near.transaction
       .getFees({
-        network: coin.network
+        network: coin.network,
+        responseType: 'v2'
       })
       .request();
-    return resp.data;
+    return resp.data.fees;
   }
 
   const res = await Server.bitcoin.transaction.getFees({ coinType }).request();
