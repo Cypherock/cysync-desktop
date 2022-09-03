@@ -175,6 +175,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
               <CustomButton
                 className={classes.footerBtn}
                 onClick={() => {
+                  logger.debug('Resolving user action');
                   receiveTransaction.userAction.resolve(true);
                   setReachedTarget(true);
                 }}

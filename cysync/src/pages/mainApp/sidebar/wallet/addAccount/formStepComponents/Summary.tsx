@@ -9,6 +9,7 @@ import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
+import { coinDb } from '../../../../../../store/database';
 import { broadcastTxn } from '../../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
@@ -16,6 +17,7 @@ import {
   useSelectedWallet,
   useSendTransactionContext,
   useSocket,
+  useSync,
   useTokenContext
 } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
@@ -112,6 +114,7 @@ const Summary: React.FC<StepComponentProps> = ({
   const { sendTransaction } = useSendTransactionContext();
 
   const [open, setOpen] = useState(false);
+  const { addCustomAccountSyncItemFromCoin } = useSync();
 
   const handleSend = () => {
     setOpen(true);
@@ -127,6 +130,16 @@ const Summary: React.FC<StepComponentProps> = ({
           txHash: res,
           token: token ? token.coin : undefined
         });
+        (async () => {
+          const coins = await coinDb.getAll({
+            walletId: coinDetails.walletId,
+            slug: coinDetails.slug
+          });
+          logger.debug(`coinDb found ${coinDetails.walletId}`);
+          if (coins.length < 1) throw new Error('No coins found');
+          logger.debug('Starting custom Account sync');
+          addCustomAccountSyncItemFromCoin(coins[0], {});
+        })();
         addTxnConfirmAddressHook(res, coinDetails.slug, selectedWallet._id);
         handleNext();
         Analytics.Instance.event(

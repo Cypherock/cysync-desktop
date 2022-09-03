@@ -1,5 +1,7 @@
 import { useRef } from 'react';
 
+import logger from './logger';
+
 export type DeferredPromise<DeferType> = {
   resolve: (value: DeferType) => void;
   reject: (value: unknown) => void;
@@ -27,6 +29,7 @@ export class DeferredReference<DeferType> {
   }
   public resolve(value: any) {
     this.deferRef.current.resolve(value);
+    logger.debug('resolved promise');
   }
   public reject(value: any) {
     this.deferRef.current.reject(value);
