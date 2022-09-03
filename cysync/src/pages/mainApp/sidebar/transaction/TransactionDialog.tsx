@@ -288,6 +288,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           <CoinIcons
             style={{ marginLeft: '0', marginRight: '10px' }}
             initial={txn.slug.toUpperCase()}
+            parentCoin={txn.coin?.toLowerCase()}
           />
           <Typography>
             {`${txn.slug.toUpperCase()} ${formatCoins(
