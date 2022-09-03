@@ -515,7 +515,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
       if (address.length === 64) return undefined;
       const wallet = new NearWallet(coinDetails.xpub, coin);
       const check = await wallet.getTotalBalanceCustom(address);
-      if (check.balance.cysyncError) {
+      if (check.balance === undefined) {
         return "This account dosen't exists";
       }
     }
