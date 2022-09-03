@@ -479,6 +479,7 @@ export const processResponses = async (
 
       const txn: Transaction = {
         hash: ele.transaction_hash,
+        customIdentifier: address,
         amount: String(ele.args.deposit),
         fees: fees.toString(),
         total: new BigNumber(ele.args.deposit).plus(fees).toString(),
