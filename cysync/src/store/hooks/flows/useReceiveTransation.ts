@@ -402,8 +402,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           contractAbbr,
           passphraseExists,
           customAccount,
-          userAction,
-          replaceAccountAction
+          userAction: userAction.current,
+          replaceAccountAction: replaceAccountAction.current
         });
 
         setIsInFlow(false);
