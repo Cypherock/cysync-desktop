@@ -1,5 +1,3 @@
-import { useRef } from 'react';
-
 export type DeferredPromise<DeferType> = {
   resolve: (value: DeferType) => void;
   reject: (value: unknown) => void;
@@ -8,9 +6,9 @@ export type DeferredPromise<DeferType> = {
 
 // Always resolve or reject the promise to prevent memory leaks.
 export class DeferredReference<DeferType> {
-  deferRef: React.MutableRefObject<DeferredPromise<DeferType>>;
+  deferRef: DeferredPromise<DeferType>;
   constructor() {
-    this.deferRef = useRef<DeferredPromise<DeferType>>(null);
+    this.deferRef = null as DeferredPromise<DeferType>;
 
     const deferred = {} as DeferredPromise<DeferType>;
 
@@ -20,15 +18,15 @@ export class DeferredReference<DeferType> {
     });
 
     deferred.promise = promise;
-    this.deferRef.current = deferred;
+    this.deferRef = deferred;
   }
   public get promise() {
-    return this.deferRef.current.promise;
+    return this.deferRef.promise;
   }
   public resolve(value: any) {
-    this.deferRef.current.resolve(value);
+    this.deferRef.resolve(value);
   }
   public reject(value: any) {
-    this.deferRef.current.reject(value);
+    this.deferRef.reject(value);
   }
 }

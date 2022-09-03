@@ -8,7 +8,7 @@ import {
 import { TransactionReceiver, WalletStates } from '@cypherock/protocols';
 import wallet from '@cypherock/wallet';
 import QRCode from 'qrcode';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   CyError,
@@ -65,8 +65,8 @@ export interface UseReceiveTransactionValues {
   coinsConfirmed: boolean;
   accountExists: boolean;
   replaceAccount: boolean;
-  userAction: DeferredReference<void>;
-  replaceAccountAction: DeferredReference<void>;
+  userAction: React.MutableRefObject<DeferredReference<void>>;
+  replaceAccountAction: React.MutableRefObject<DeferredReference<void>>;
   verifiedAccountId: boolean;
   verifiedReplaceAccount: boolean;
   replaceAccountStarted: boolean;
@@ -105,9 +105,12 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   let recAddr: string | undefined;
   const receiveTransaction = new TransactionReceiver();
 
-  const userAction = new DeferredReference<void>();
-  const replaceAccountAction = new DeferredReference<void>();
-
+  const userAction = useRef<DeferredReference<void>>(
+    new DeferredReference<void>()
+  );
+  const replaceAccountAction = useRef<DeferredReference<void>>(
+    new DeferredReference<void>()
+  );
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const resetHooks = () => {
     setCoinsConfirmed(false);
@@ -399,8 +402,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           contractAbbr,
           passphraseExists,
           customAccount,
-          userAction,
-          replaceAccountAction
+          userAction: userAction.current,
+          replaceAccountAction: replaceAccountAction.current
         });
 
         setIsInFlow(false);
