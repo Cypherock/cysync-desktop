@@ -1,7 +1,7 @@
 {
   "BUILD_TYPE": "debug",
   "LOG_LEVEL": "silly",
-  "SERVER_ENV": "development",
+  "SERVER_ENV": "local",
   "GITHUB_REPO": "Cypherock/cysync-desktop-dev",
   "ALLOW_PRERELEASE": true,
   "SIMULATE_PRODUCTION": false,

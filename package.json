@@ -8,7 +8,7 @@
     "build-pkgs": "node ./build.js all",
     "install-pkgs": "node ./run.js packages \"yarn\"",
     "start": "node ./run.js cysync \"yarn start\"",
-    "make": "node ./run.js cysync \"yarn make\"",
+    "make": "node ./run.js cysync \"yarn make --skip-package\"",
     "package": "node ./run.js cysync \"yarn package\"",
     "lint": "node ./run.js cysync \"yarn lint\"",
     "lint-pkgs": "node ./run.js packages \"yarn lint\"",
