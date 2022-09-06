@@ -89,8 +89,8 @@ export const useToken: UseToken = () => {
 
       coinWithPrice.displayBalance = balance.toString();
 
-      coinWithPrice.displayValue = value.toFixed(2);
-      coinWithPrice.displayPrice = price.toFixed(2);
+      coinWithPrice.displayValue = value.toString();
+      coinWithPrice.displayPrice = price.toString() || '0';
       coinWithPrice.isEmpty = balance.isZero();
 
       tokensWithPrice.push(coinWithPrice);

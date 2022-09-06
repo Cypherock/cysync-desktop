@@ -88,8 +88,8 @@ export const useCustomAccount: UseCustomAccount = () => {
 
       coinWithPrice.displayBalance = balance.toString();
 
-      coinWithPrice.displayValue = value.toFixed(2);
-      coinWithPrice.displayPrice = price.toFixed(2);
+      coinWithPrice.displayValue = value.toString();
+      coinWithPrice.displayPrice = price.toString();
       coinWithPrice.isEmpty = balance.isZero();
 
       customAccountWithPrice.push(coinWithPrice);

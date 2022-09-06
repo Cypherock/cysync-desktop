@@ -487,7 +487,7 @@ export const usePortfolio: UsePortfolio = () => {
 
         const value = balance.multipliedBy(latestPrice).toNumber();
 
-        currentTempCoin.value = value.toFixed(3);
+        currentTempCoin.value = value.toString();
 
         currentTempCoin.price = latestPrice.toString();
 

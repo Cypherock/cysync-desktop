@@ -137,14 +137,22 @@ const OneCoin: React.FC<OneCoinProps> = props => {
         />
       </Grid>
       <Grid item xs={2} className={classes.alignStartCenter}>
-        <Typography variant="body2" color="textPrimary">
-          <span className={classes.bold}>{`$ ${coinValue}`}</span>
-        </Typography>
+        <PopOverText
+          text={`$ ${formatDisplayAmount(coinValue, 2, true)}`}
+          color="textPrimary"
+          variant="body2"
+          className={classes.bold}
+          hoverText={`$ ${formatDisplayAmount(coinValue, undefined, true)} `}
+        />
       </Grid>
       <Grid item xs={2} className={classes.alignStartCenter}>
-        <Typography variant="body2" color="textPrimary">
-          <span className={classes.bold}>{`$ ${coinPrice}`}</span>
-        </Typography>
+        <PopOverText
+          text={`$ ${formatDisplayAmount(coinPrice, 2, true)}`}
+          color="textPrimary"
+          variant="body2"
+          className={classes.bold}
+          hoverText={`$ ${formatDisplayAmount(coinPrice, undefined, true)} `}
+        />
       </Grid>
       <Grid item xs={2} className={classes.alignStartCenter}>
         <Typography
