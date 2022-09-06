@@ -430,7 +430,8 @@ export const processResponses = async (
           slug: tokenName.toLowerCase(),
           coin: item.coinType,
           balance: '0',
-          price: 0
+          price: 0,
+          priceLastUpdatedAt: undefined
         });
         options.addToQueue(
           new BalanceSyncItem({
@@ -478,6 +479,7 @@ export const processResponses = async (
 
       const txn: Transaction = {
         hash: ele.transaction_hash,
+        customIdentifier: address,
         amount: String(ele.args.deposit),
         fees: fees.toString(),
         total: new BigNumber(ele.args.deposit).plus(fees).toString(),

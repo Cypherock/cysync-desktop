@@ -54,8 +54,8 @@ const en: I18nStrings = {
     ADD_WALLET_LIMIT_EXCEEDED: 'Cannot add more than 4 wallets.',
     ADD_WALLET_DUPLICATE:
       'This wallet already exists on the CySync Application.',
-    ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME:
-      'This wallet already exists on the CySync Application with a different name. Do you want to update the name?',
+    ADD_WALLET_DUPLICATE_WITH_DIFFERENT_DETAILS:
+      'This wallet already exists on the CySync Application with different configuration. Do you want to update the wallet details?',
     ADD_WALLET_WITH_SAME_NAME:
       'A wallet with the same name already exists on the CySync Application',
     ADD_WALLET_UNKNOWN_ERROR: `Some internal error occurred. Disconnect and reconnect the device and retry adding a wallet`,
@@ -128,7 +128,12 @@ const en: I18nStrings = {
     TUTORIALS_UNKNOWN_ERROR:
       'Some internal error occured while fetching tutorials.',
     STOP_ONGOING_FLOW: 'Stopping an ongoing flow',
-    PROCESS_ABORTED_BY_USER: (flow: string) => `${flow} was stopped by user`
+    PROCESS_ABORTED_BY_USER: (flow: string) => `${flow} was stopped by user`,
+
+    RETRY_DISABLED_DUE_TO_NO_DEVICE_CONNECTION:
+      'Reconnect the Cypherock X1 device',
+    RETRY_DISABLED_DUE_TO_NO_INTERNET:
+      'Check your internet connection and try again'
   }
 };
 

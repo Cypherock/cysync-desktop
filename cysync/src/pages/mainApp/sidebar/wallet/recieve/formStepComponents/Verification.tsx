@@ -174,8 +174,8 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
             <div className={classes.footer}>
               <CustomButton
                 className={classes.footerBtn}
-                onClick={async () => {
-                  receiveTransaction.userAction.resolve(true);
+                onClick={() => {
+                  receiveTransaction.userAction.current.resolve(true);
                   setReachedTarget(true);
                 }}
                 disabled={!linkOpened}
@@ -203,7 +203,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
           <TextView
             completed={receiveTransaction.verified}
             inProgress={!receiveTransaction.verified}
-            text="Match the Address on CypherRock X1"
+            text="Match the Address on Cypherock X1"
           />
         </>
       )}

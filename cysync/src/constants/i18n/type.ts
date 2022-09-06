@@ -28,7 +28,7 @@ export interface I18nStrings {
     ADD_WALLET_REJECTED: string;
     ADD_WALLET_LIMIT_EXCEEDED: string;
     ADD_WALLET_DUPLICATE: string;
-    ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME: string;
+    ADD_WALLET_DUPLICATE_WITH_DIFFERENT_DETAILS: string;
     ADD_WALLET_WITH_SAME_NAME: string;
     ADD_WALLET_UNKNOWN_ERROR: string;
 
@@ -81,5 +81,8 @@ export interface I18nStrings {
     TUTORIALS_UNKNOWN_ERROR: string;
     STOP_ONGOING_FLOW: string;
     PROCESS_ABORTED_BY_USER: (flow: string) => string;
+
+    RETRY_DISABLED_DUE_TO_NO_DEVICE_CONNECTION: string;
+    RETRY_DISABLED_DUE_TO_NO_INTERNET: string;
   };
 }

@@ -127,7 +127,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
 
   const handleReplaceAccount = (e: React.MouseEvent) => {
     prevent(e);
-    receiveTransaction.replaceAccountAction.resolve(true);
+    receiveTransaction.replaceAccountAction.current.resolve(true);
     receiveTransaction.setReplaceAccountStarted(true);
     handleNext();
   };

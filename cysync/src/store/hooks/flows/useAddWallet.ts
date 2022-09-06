@@ -142,7 +142,11 @@ export const useAddWallet: UseAddWallet = () => {
         if (walletWithSameId) {
           const duplicateWallet = walletWithSameId;
 
-          if (duplicateWallet.name === walletDetails.name) {
+          if (
+            duplicateWallet.name === walletDetails.name &&
+            duplicateWallet.passwordSet === walletDetails.passwordSet &&
+            duplicateWallet.passphraseSet === duplicateWallet.passphraseSet
+          ) {
             const cyError = new CyError(CysyncError.ADD_WALLET_DUPLICATE);
             setErrorObj(handleErrors(errorObj, cyError, flowName));
           } else {
@@ -153,7 +157,7 @@ export const useAddWallet: UseAddWallet = () => {
             setPassphraseSet(walletDetails.passphraseSet);
             setIsNameDiff(true);
             const cyError = new CyError(
-              CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_NAME
+              CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_DETAILS
             );
             setErrorObj(handleErrors(errorObj, cyError, flowName));
           }

@@ -46,7 +46,11 @@ export default class BlockbookProvider extends EventEmitter {
     this.websocketServerInfoList = [...serverInfo];
 
     for (const server of this.websocketServerInfoList) {
-      const socket = new BlockbookSocket({ url: server.url, keepAlive: true });
+      const socket = new BlockbookSocket({
+        url: server.url,
+        coinType: server.name,
+        keepAlive: true
+      });
 
       const socketInfo = {
         socket,

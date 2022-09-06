@@ -1,11 +1,13 @@
 import { COINS, Erc20CoinData, NearCoinData } from '@cypherock/communication';
 import { NearWallet } from '@cypherock/wallet';
-import { Typography } from '@mui/material';
+import { Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
+import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
+import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import {
   useCustomAccount,
   useDebouncedFunction
@@ -17,6 +19,7 @@ import {
 import {
   useConnection,
   useCurrentCoin,
+  useNetwork,
   useSelectedWallet,
   useSendTransactionContext,
   useTokenContext
@@ -218,6 +221,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     singleTransaction
   } = classes;
 
+  const { connected } = useNetwork();
   const { coinDetails } = useCurrentCoin();
 
   const { customAccountData, setCurrentWalletId, setCurrentCoin } =
@@ -235,6 +239,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
     setCurrentWalletId(_id);
     setCurrentCoin(coinDetails.slug);
   }, [_id]);
+
+  useEffect(() => {
+    if (connected) debouncedHandleCheckAddresses();
+  }, [connected]);
 
   useEffect(() => {
     if (customAccountData.length > 0) {
@@ -305,12 +313,12 @@ const Recipient: React.FC<StepComponentProps> = props => {
     const coin = COINS[coinDetails.slug];
     if (coin instanceof NearCoinData) {
       if (address.includes('.')) return 'This is not a valid Near address';
+      if ((address + nearSuffix).length > 64)
+        return 'Near address cannot be more than 64 characters';
       const wallet = new NearWallet(coinDetails.xpub, coin);
       const check = await wallet.getTotalBalanceCustom(address + nearSuffix);
-      if (!check.balance.cysyncError) {
+      if (check.balance !== undefined) {
         return 'This account already exists';
-      } else if (check.balance.cysyncError) {
-        return undefined;
       }
     }
     return undefined;
@@ -379,7 +387,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             handleInputChange(e);
             debouncedHandleCheckAddresses();
           }}
-          value={recipientData[0].recipient}
+          value={recipientData[0].recipient.slice(0, 64 - nearSuffix.length)}
           error={recipientData[0].errorRecipient.length !== 0}
           helperText={
             recipientData[0].errorRecipient.length !== 0
@@ -402,17 +410,34 @@ const Recipient: React.FC<StepComponentProps> = props => {
             <li>More than 64 characters (including {nearSuffix})</li>
           </ul>
         </Typography>
+        {connected || (
+          <div style={{ marginTop: '10px' }} className={classes.center}>
+            <Icon
+              size={50}
+              viewBox="0 0 60 60"
+              iconGroup={<ErrorExclamation />}
+            />
+            <Typography variant="body2" color="secondary">
+              Internet connection is required for this action
+            </Typography>
+          </div>
+        )}
       </div>
       <div className={divider} />
       <div className={recipientFooter}>
-        <CustomButton
-          className={recipientContinueButton}
-          onClick={() => {
-            handleRecipientSubmit();
-          }}
-        >
-          {'Add Account'}
-        </CustomButton>
+        <Tooltip title={connected ? '' : 'No internet connection available'}>
+          <div style={{ display: 'inline-block' }}>
+            <CustomButton
+              className={recipientContinueButton}
+              disabled={!connected}
+              onClick={() => {
+                handleRecipientSubmit();
+              }}
+            >
+              {'Add Account'}
+            </CustomButton>
+          </div>
+        </Tooltip>
       </div>
     </Root>
   );

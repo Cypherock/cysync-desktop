@@ -14,6 +14,7 @@ import {
   FeedbackState,
   useConnection,
   useFeedback,
+  useI18n,
   useNetwork
 } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
@@ -43,6 +44,7 @@ export interface UseCardAuthValues {
   cardsAuth: ICardAuthState;
   showRetry: boolean;
   enableRetry: boolean;
+  enableRetryErrorMsg: string;
   onRetry: () => void;
   setCardsStatus: React.Dispatch<React.SetStateAction<0 | 1 | -1 | 2>>;
   completed: boolean;
@@ -62,6 +64,8 @@ export type UseCardAuth = (isInitial?: boolean) => UseCardAuthValues;
 
 const flowName = Analytics.Categories.CARD_AUTH;
 export const useCardAuth: UseCardAuth = isInitial => {
+  const lang = useI18n();
+
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [verified, setVerified] = useState<-1 | 0 | 1 | 2>(0);
   const [pairingFailed, setPairingFailed] = useState(false);
@@ -72,6 +76,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
   const [completed, setCompleted] = useState(false);
   const [showRetry, setShowRetry] = useState(false);
   const [enableRetry, setEnableRetry] = useState(true);
+  const [enableRetryErrorMsg, setEnableRetryErrorMsg] = useState('');
   /**
    * -2 means authentication is remaining
    * -1 means all cards failed authentication
@@ -115,7 +120,23 @@ export const useCardAuth: UseCardAuth = isInitial => {
   const { connected: internetConnected } = useNetwork();
 
   useEffect(() => {
-    setEnableRetry(!!deviceConnection && internetConnected);
+    let allowRetry = true;
+    if (!deviceConnection) {
+      allowRetry = false;
+      setEnableRetryErrorMsg(
+        lang.langStrings.ERRORS.RETRY_DISABLED_DUE_TO_NO_DEVICE_CONNECTION
+      );
+    } else if (!internetConnected) {
+      allowRetry = false;
+      setEnableRetryErrorMsg(
+        lang.langStrings.ERRORS.RETRY_DISABLED_DUE_TO_NO_INTERNET
+      );
+    } else {
+      allowRetry = true;
+      setEnableRetryErrorMsg('');
+    }
+
+    setEnableRetry(allowRetry);
   }, [deviceConnection, internetConnected]);
 
   useEffect(() => {
@@ -469,6 +490,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
     cardsStatus,
     showRetry,
     enableRetry,
+    enableRetryErrorMsg,
     onRetry,
     setCardsStatus,
     completed,

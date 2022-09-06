@@ -19,6 +19,7 @@ import CustomIconButton from '../../../../../../designSystem/designComponents/bu
 import SwitchButton from '../../../../../../designSystem/designComponents/buttons/switchButton';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Checkbox from '../../../../../../designSystem/designComponents/input/checkbox';
+import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import { useDebouncedFunction } from '../../../../../../store/hooks';
 import {
@@ -29,6 +30,7 @@ import {
   useConnection,
   useCurrentCoin,
   useCustomAccountContext,
+  useNetwork,
   useSelectedWallet,
   useSendTransactionContext,
   useTokenContext
@@ -400,6 +402,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const [isMediumFeeLoading, setIsMediumFeeLoading] = useState(false);
   const [mediumFeeError, setMediumFeeError] = useState(false);
 
+  const { connected } = useNetwork();
+
   // Used to get previous mediumFee for the coin from localStorage
   const getPreviousMedimFee = () => {
     const prevInfoJSON = localStorage.getItem('mediumFees');
@@ -500,13 +504,18 @@ const Recipient: React.FC<StepComponentProps> = props => {
     () => handleCheckAddresses(true),
     200
   );
+
+  useEffect(() => {
+    if (connected) debouncedHandleCheckAddresses();
+  }, [connected]);
+
   const checkNearAccount = async (address: string) => {
     const coin = COINS[coinDetails.slug];
     if (coin instanceof NearCoinData) {
       if (address.length === 64) return undefined;
       const wallet = new NearWallet(coinDetails.xpub, coin);
       const check = await wallet.getTotalBalanceCustom(address);
-      if (check.balance.cysyncError) {
+      if (check.balance === undefined) {
         return "This account dosen't exists";
       }
     }
@@ -848,6 +857,18 @@ const Recipient: React.FC<StepComponentProps> = props => {
           )}
         </div>
       )}
+      {connected || (
+        <div style={{ marginTop: '10px' }} className={classes.center}>
+          <Icon
+            size={50}
+            viewBox="0 0 60 60"
+            iconGroup={<ErrorExclamation />}
+          />
+          <Typography variant="body2" color="secondary">
+            Internet connection is required for this action
+          </Typography>
+        </div>
+      )}
       <div className={divider} />
       <div className={recipientFooter}>
         {sendTransaction.estimationError?.isSet ? (
@@ -914,19 +935,24 @@ const Recipient: React.FC<StepComponentProps> = props => {
             </Typography>
           </div>
         )}
-        <CustomButton
-          disabled={
-            buttonDisabled ||
-            isButtonLoading ||
-            sendTransaction.estimationError !== undefined
-          }
-          className={recipientContinueButton}
-          onClick={() => {
-            handleRecipientSubmit();
-          }}
-        >
-          {isButtonLoading ? <CircularProgress size={25} /> : 'Continue'}
-        </CustomButton>
+        <Tooltip title={connected ? '' : 'No internet connection available'}>
+          <div style={{ display: 'inline-block' }}>
+            <CustomButton
+              disabled={
+                buttonDisabled ||
+                isButtonLoading ||
+                sendTransaction.estimationError !== undefined ||
+                !connected
+              }
+              className={recipientContinueButton}
+              onClick={() => {
+                handleRecipientSubmit();
+              }}
+            >
+              {isButtonLoading ? <CircularProgress size={25} /> : 'Continue'}
+            </CustomButton>
+          </div>
+        </Tooltip>
       </div>
     </Root>
   );

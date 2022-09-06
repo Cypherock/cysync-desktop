@@ -8,15 +8,18 @@ export interface LatestPriceSyncItemOptions {
   coinGroup: CoinGroup;
   module: string;
   isRefresh?: boolean;
+  id?: string;
 }
 
 export class LatestPriceSyncItem extends SyncItem {
+  public id: string | undefined;
   constructor({
     coinType,
     isRefresh,
     module,
     parentCoin,
-    coinGroup
+    coinGroup,
+    id
   }: LatestPriceSyncItemOptions) {
     super({
       type: 'latestPrice',
@@ -26,6 +29,7 @@ export class LatestPriceSyncItem extends SyncItem {
       coinGroup,
       parentCoin
     });
+    this.id = id;
   }
 
   equals(item: LatestPriceSyncItem | SyncItem) {
@@ -33,7 +37,8 @@ export class LatestPriceSyncItem extends SyncItem {
       return (
         this.coinType === item.coinType &&
         this.coinGroup === item.coinGroup &&
-        this.parentCoin === item.parentCoin
+        this.parentCoin === item.parentCoin &&
+        this.id === item.id
       );
     }
 
@@ -46,7 +51,8 @@ export class LatestPriceSyncItem extends SyncItem {
       parentCoin: this.parentCoin,
       coinGroup: this.coinGroup,
       isRefresh: this.isRefresh,
-      module: this.module
+      module: this.module,
+      id: this.id
     });
 
     newItem.retries = this.retries;

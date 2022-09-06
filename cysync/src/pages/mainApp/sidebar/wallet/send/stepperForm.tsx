@@ -613,6 +613,13 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     sendTransaction.resetHooks();
   };
 
+  const externalSetMaxSend = (val: boolean) => {
+    if (val) {
+      sendTransaction.setIsEstimatingFees(true);
+    }
+    setMaxSend(val);
+  };
+
   return (
     <Root className={classes.root}>
       <ErrorBox
@@ -675,7 +682,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
             setGasLimit,
             handleCopyFromClipboard,
             maxSend,
-            setMaxSend,
+            setMaxSend: externalSetMaxSend,
             handleClose,
             estimateGasLimit,
             setEstimateGasLimit,

@@ -390,118 +390,116 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   };
 
   const handleSubmit = async (_feedbackInput: FeedbackState) => {
-    setError('');
-    const checkArray: boolean[] = [];
+    try {
+      setError('');
+      const checkArray: boolean[] = [];
 
-    if (_feedbackInput.subject.trim().length === 0) {
-      checkArray.push(true);
-    } else {
-      checkArray.push(false);
-    }
-
-    if (_feedbackInput.email.trim().length === 0) {
-      checkArray.push(true);
-    } else {
-      const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-      checkArray.push(!_feedbackInput.email.trim().match(emailPattern));
-    }
-
-    if (_feedbackInput.description.trim().length === 0) {
-      checkArray.push(true);
-    } else {
-      checkArray.push(false);
-    }
-
-    if (checkArray[0] || checkArray[1] || checkArray[2]) {
-      logger.info('Feedback: Verification failed');
-      setFeedbackInput({
-        ..._feedbackInput,
-        subjectError: checkArray[0] ? 'Enter a Subject' : '',
-        emailError: checkArray[1] ? 'Enter a Valid Email Address' : '',
-        descriptionError: checkArray[2] ? 'Enter a description' : ''
-      });
-    } else {
-      setSubmitting(true);
-
-      if (_feedbackInput.email) {
-        localStorage.setItem('email', _feedbackInput.email);
+      if (_feedbackInput.subject.trim().length === 0) {
+        checkArray.push(true);
+      } else {
+        checkArray.push(false);
       }
 
-      const data: {
-        subject: string;
-        category: string;
-        email: string;
-        description: string;
-        uuid: string;
-        systemInfo?: any;
-        deviceLogs?: any;
-        deviceInfo?: any;
-        desktopLogs?: any;
-        appVersion: string;
-        attachmentUrl?: string;
-      } = {
-        subject: _feedbackInput.subject,
-        category: _feedbackInput.category,
-        email: _feedbackInput.email,
-        description: _feedbackInput.description,
-        systemInfo: await getSystemInfo(),
-        uuid: await getUUID(),
-        appVersion: packageJson.version,
-        deviceInfo:
-          firmwareVersion && deviceSerial
-            ? {
-                firmwareVersion: hexToVersion(firmwareVersion),
-                deviceSerial
-              }
-            : undefined
-      };
-
-      if (_feedbackInput.attachLogs) {
-        data.desktopLogs = await getDesktopLogs();
-      }
-      if (_feedbackInput.attachDeviceLogs) {
-        data.deviceLogs = await getDeviceLogs();
-      }
-      if (attachmentBuffer) {
-        data.attachmentUrl = await submitAttachment();
+      if (_feedbackInput.email.trim().length === 0) {
+        checkArray.push(true);
+      } else {
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        checkArray.push(!_feedbackInput.email.trim().match(emailPattern));
       }
 
-      feedbackServer
-        .send(data)
-        .request()
-        .then(() => {
-          logger.info('Feedback submitted');
-          setSubmitted(true);
-          setSubmitting(false);
-          Analytics.Instance.event(
-            Analytics.Categories.FEEDBACK,
-            Analytics.Actions.COMPLETED
-          );
+      if (_feedbackInput.description.trim().length === 0) {
+        checkArray.push(true);
+      } else {
+        checkArray.push(false);
+      }
 
-          return setFeedbackInput({
-            subject: isContact ? 'Contact Us' : '',
-            categories: ['Complaint', 'Feedback', 'Others'],
-            category: isContact ? 'Complaint' : 'Feedback',
-            description: '',
-            email: '',
-            emailError: '',
-            subjectError: '',
-            descriptionError: '',
-            attachLogs: true,
-            attachDeviceLogs: false
-          });
-        })
-        .catch(e => {
-          Analytics.Instance.event(
-            Analytics.Categories.FEEDBACK,
-            Analytics.Actions.ERROR
-          );
-          setSubmitted(false);
-          setSubmitting(false);
-          setError('Failed to submit feedback, try again later.');
-          logger.error('Feedback: Error');
-          logger.error(e);
+      if (checkArray[0] || checkArray[1] || checkArray[2]) {
+        logger.info('Feedback: Verification failed');
+        setFeedbackInput({
+          ..._feedbackInput,
+          subjectError: checkArray[0] ? 'Enter a Subject' : '',
+          emailError: checkArray[1] ? 'Enter a Valid Email Address' : '',
+          descriptionError: checkArray[2] ? 'Enter a description' : ''
         });
+      } else {
+        setSubmitting(true);
+
+        if (_feedbackInput.email) {
+          localStorage.setItem('email', _feedbackInput.email);
+        }
+
+        const data: {
+          subject: string;
+          category: string;
+          email: string;
+          description: string;
+          uuid: string;
+          systemInfo?: any;
+          deviceLogs?: any;
+          deviceInfo?: any;
+          desktopLogs?: any;
+          appVersion: string;
+          attachmentUrls?: string[];
+        } = {
+          subject: _feedbackInput.subject,
+          category: _feedbackInput.category,
+          email: _feedbackInput.email,
+          description: _feedbackInput.description,
+          systemInfo: await getSystemInfo(),
+          uuid: await getUUID(),
+          appVersion: packageJson.version,
+          deviceInfo:
+            firmwareVersion && deviceSerial
+              ? {
+                  firmwareVersion: hexToVersion(firmwareVersion),
+                  deviceSerial
+                }
+              : undefined
+        };
+
+        if (_feedbackInput.attachLogs) {
+          data.desktopLogs = await getDesktopLogs();
+        }
+        if (_feedbackInput.attachDeviceLogs) {
+          data.deviceLogs = await getDeviceLogs();
+        }
+        if (attachmentBuffer) {
+          data.attachmentUrls = [await submitAttachment()];
+        }
+
+        await feedbackServer.send(data).request();
+
+        logger.info('Feedback submitted');
+        setSubmitted(true);
+        setSubmitting(false);
+        Analytics.Instance.event(
+          Analytics.Categories.FEEDBACK,
+          Analytics.Actions.COMPLETED
+        );
+
+        return setFeedbackInput({
+          subject: isContact ? 'Contact Us' : '',
+          categories: ['Complaint', 'Feedback', 'Others'],
+          category: isContact ? 'Complaint' : 'Feedback',
+          description: '',
+          email: '',
+          emailError: '',
+          subjectError: '',
+          descriptionError: '',
+          attachLogs: true,
+          attachDeviceLogs: false
+        });
+      }
+    } catch (error) {
+      Analytics.Instance.event(
+        Analytics.Categories.FEEDBACK,
+        Analytics.Actions.ERROR
+      );
+      setSubmitted(false);
+      setSubmitting(false);
+      setError('Failed to submit feedback, try again later.');
+      logger.error('Feedback: Error');
+      logger.error(error);
     }
   };
 
@@ -552,16 +550,18 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     try {
       const response = await feedbackServer
         .uploadAttachment({
-          attachment: attachmentBuffer
+          attachment: attachmentBuffer,
+          mimeType: attachmentMimeType
         })
         .request();
-      const recordingUrl = response.data.url;
+      const recordingUrl = response.data.key;
       setUploadAttachmentStatus(2);
       return recordingUrl;
     } catch (e: any) {
       logger.error('Error uploading attachment');
       logger.error(e);
       setUploadAttachmentStatus(-1);
+      throw e;
     }
   };
 

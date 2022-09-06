@@ -22,12 +22,9 @@ const classes = {
   img2: `${PREFIX}-img2`
 };
 
-// @ts-ignore
-const requestErc20ImageFile = require.context(
-  '../../assets/erc20',
-  false,
-  /.png$/
-);
+const requestErc20ImageFile = (name: string) => {
+  return `https://static.cypherock.com/images/erc20/${name}.png`;
+};
 
 export const ModAvatar = styled(Avatar)(() => ({
   [`& .${classes.root}`]: {
@@ -120,10 +117,7 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
       }
 
       try {
-        const img = requestErc20ImageFile(
-          `./${coinInitial.toLowerCase()}.png`
-        ).default;
-        src = img;
+        src = requestErc20ImageFile(coinInitial.toLowerCase());
       } catch (error) {
         src = generic;
       }
@@ -168,7 +162,9 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
             root: classes.root2,
             img: classes.img2
           }}
-        />
+        >
+          {coinInitial.toUpperCase().slice(0, 1)}
+        </SmallModAvatar>
       );
     }
     return <StyledModAvatar style={style} alt={coinInitial} src={src} />;

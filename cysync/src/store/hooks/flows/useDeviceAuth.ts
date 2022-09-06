@@ -19,6 +19,7 @@ import {
   FeedbackState,
   useConnection,
   useFeedback,
+  useI18n,
   useNetwork
 } from '../../provider';
 
@@ -40,6 +41,7 @@ export interface UseDeviceAuthValues {
   completed: boolean;
   confirmed: 0 | -1 | 1 | 2;
   enableRetry: boolean;
+  enableRetryErrorMsg: string;
   resetHooks: () => void;
   cancelDeviceAuth: (connection: DeviceConnection) => void;
   handleFeedbackOpen: () => void;
@@ -50,24 +52,44 @@ export type UseDeviceAuth = (isInitial?: boolean) => UseDeviceAuthValues;
 const flowName = Analytics.Categories.DEVICE_AUTH;
 
 export const useDeviceAuth: UseDeviceAuth = isInitial => {
+  const lang = useI18n();
+
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [verified, setVerified] = useState<-1 | 0 | 1 | 2>(0);
   const [confirmed, setConfirmed] = useState<-1 | 0 | 1 | 2>(0);
   const [completed, setCompleted] = useState(false);
   const [enableRetry, setEnableRetry] = useState(true);
+  const [enableRetryErrorMsg, setEnableRetryErrorMsg] = useState('');
   const deviceAuth = new DeviceAuthenticator();
 
   const { showFeedback, closeFeedback, submitFeedback } = useFeedback();
   const {
     setDeviceConnectionStatus,
     deviceConnection,
-    internalDeviceConnection
+    internalDeviceConnection,
+    inBackgroundProcess
   } = useConnection();
   const { connected: internetConnected } = useNetwork();
 
   useEffect(() => {
-    setEnableRetry(!!internalDeviceConnection && internetConnected);
-  }, [internalDeviceConnection, internetConnected]);
+    let allowRetry = true;
+    if (!internalDeviceConnection || inBackgroundProcess) {
+      allowRetry = false;
+      setEnableRetryErrorMsg(
+        lang.langStrings.ERRORS.RETRY_DISABLED_DUE_TO_NO_DEVICE_CONNECTION
+      );
+    } else if (!internetConnected) {
+      allowRetry = false;
+      setEnableRetryErrorMsg(
+        lang.langStrings.ERRORS.RETRY_DISABLED_DUE_TO_NO_INTERNET
+      );
+    } else {
+      allowRetry = true;
+      setEnableRetryErrorMsg('');
+    }
+
+    setEnableRetry(allowRetry);
+  }, [internalDeviceConnection, internetConnected, inBackgroundProcess]);
 
   let deviceSerial: string | null = null;
 
@@ -303,6 +325,7 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
     verified,
     completed,
     enableRetry,
+    enableRetryErrorMsg,
     confirmed,
     handleFeedbackOpen
   } as UseDeviceAuthValues;

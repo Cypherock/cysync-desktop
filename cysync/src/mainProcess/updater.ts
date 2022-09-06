@@ -79,7 +79,9 @@ export default class Updater {
     // This check is so that 2 simultanious update flows does not take place
     if (this.checkingForUpdate) {
       logger.info('Already checking for update.');
-      this.renderer.send('duplicate-update');
+      if (this.renderer && !this.renderer.isDestroyed()) {
+        this.renderer.send('duplicate-update');
+      }
       return;
     }
 
@@ -113,12 +115,16 @@ export default class Updater {
   private updateAvailable(info: { version: string }) {
     this.checkingForUpdate = false;
     logger.info('Update available.');
-    this.renderer.send('update-available', info);
+    if (this.renderer && !this.renderer.isDestroyed()) {
+      this.renderer.send('update-available', info);
+    }
   }
 
   private updateNotAvailable() {
     this.checkingForUpdate = false;
     logger.info('Update not available.');
-    this.renderer.send('update-unavailable');
+    if (this.renderer && !this.renderer.isDestroyed()) {
+      this.renderer.send('update-unavailable');
+    }
   }
 }

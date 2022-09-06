@@ -81,7 +81,8 @@ export const getRequestsMetadata = (
       .getBalance(
         {
           address,
-          network: coin.network
+          network: coin.network,
+          responseType: 'v2'
         },
         item.isRefresh
       )
@@ -152,7 +153,7 @@ export const processResponses = async (
   } else if (coin instanceof NearCoinData) {
     const balanceRes = responses[0];
 
-    const balance = new BigNumber(balanceRes.data);
+    const balance = new BigNumber(balanceRes.data.balance);
     if (item.customAccount) {
       await customAccountDb.updateBalance({
         walletId: item.walletId,

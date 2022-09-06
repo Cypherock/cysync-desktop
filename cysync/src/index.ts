@@ -30,9 +30,10 @@ import {
   rimrafPromise
 } from './mainProcess/utils';
 
-const handleMainProcessError = async (error: any) => {
+const handleMainProcessError = async (error: any, promise?: any) => {
   logger.error('Unhandled error on main process');
   logger.error(error);
+  logger.error(promise);
 
   const title = 'Some error occurred, Contact cypherock for support.';
   let errorMsg = 'Unknown error';
@@ -46,6 +47,8 @@ const handleMainProcessError = async (error: any) => {
       errorMsg += '\n' + error.stack;
     }
   }
+
+  logger.error(errorMsg);
 
   reportCrash({ description: errorMsg, uuid: undefined });
 
@@ -135,7 +138,7 @@ const createWindow = async () => {
     }
   }
 
-  const loading = new BrowserWindow({
+  const loadingWindow = new BrowserWindow({
     show: false,
     frame: false,
     opacity: 0,
@@ -152,14 +155,14 @@ const createWindow = async () => {
     app.dock.setIcon(path.join(__dirname, '../../src/icon.png'));
   }
 
-  loading.on('focus', () => {
+  loadingWindow.on('focus', () => {
     globalShortcut.registerAll(
       ['CommandOrControl+R', 'CommandOrControl+Shift+R', 'F5'],
       () => ({})
     );
   });
 
-  loading.on('blur', () => {
+  loadingWindow.on('blur', () => {
     globalShortcut.unregister('CommandOrControl+R');
     globalShortcut.unregister('CommandOrControl+Shift+R');
     globalShortcut.unregister('F5');
@@ -169,7 +172,7 @@ const createWindow = async () => {
     `Starting up Cysync with Package Version: ${packageJson.version}, Build Version ${process.env.BUILD_VERSION}`
   );
   logger.info('Opening loading screen');
-  loading.once('show', async () => {
+  loadingWindow.once('show', async () => {
     if (
       process.env.NODE_ENV === 'development' ||
       process.env.DEBUG_PROD === 'true'
@@ -211,7 +214,7 @@ const createWindow = async () => {
     });
 
     powerMonitor.on('lock-screen', () => {
-      if (mainWindow) {
+      if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('lock-screen');
       }
     });
@@ -233,6 +236,10 @@ const createWindow = async () => {
       if (!mainWindow) {
         throw new Error('"mainWindow" is not defined');
       }
+
+      if (mainWindow.isDestroyed()) {
+        return;
+      }
       if (process.env.START_MINIMIZED) {
         mainWindow.minimize();
       } else {
@@ -242,7 +249,7 @@ const createWindow = async () => {
     });
 
     mainWindow.on('close', (e: Electron.Event) => {
-      if (mainWindow === null) {
+      if (!mainWindow || mainWindow.isDestroyed()) {
         return;
       }
 
@@ -269,7 +276,7 @@ const createWindow = async () => {
               return;
             }
 
-            if (mainWindow !== null) {
+            if (mainWindow !== null && !mainWindow.isDestroyed()) {
               app.showExitPrompt = false;
               app.preventExit = true;
               mainWindow.webContents.send('on-exit');
@@ -303,10 +310,17 @@ const createWindow = async () => {
         throw new Error('No main window present');
       }
 
+      if (mainWindow.isDestroyed()) {
+        return;
+      }
+
       mainWindow.show();
       fadeInWindow(mainWindow);
-      loading.hide();
-      loading.destroy();
+
+      if (loadingWindow && !loadingWindow.isDestroyed()) {
+        loadingWindow.hide();
+        loadingWindow.destroy();
+      }
     });
 
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY).then();
@@ -314,14 +328,16 @@ const createWindow = async () => {
     if (isDevelopment) mainWindow.webContents.openDevTools();
   });
 
-  loading.once('ready-to-show', () => {
-    loading.show();
-    fadeInWindow(loading);
+  loadingWindow.once('ready-to-show', () => {
+    if (loadingWindow && !loadingWindow.isDestroyed()) {
+      loadingWindow.show();
+      fadeInWindow(loadingWindow);
+    }
   });
 
-  loading.loadURL(LOADING_WINDOW_WEBPACK_ENTRY);
+  loadingWindow.loadURL(LOADING_WINDOW_WEBPACK_ENTRY);
 
-  if (isDevelopment) loading.webContents.openDevTools();
+  if (isDevelopment) loadingWindow.webContents.openDevTools();
 
   ipcMain.on('exit-app', () => {
     app.showExitPrompt = false;
@@ -334,6 +350,10 @@ const createWindow = async () => {
 
     if (mainWindow === null) {
       throw new Error('Main window is not defined');
+    }
+
+    if (mainWindow.isDestroyed()) {
+      return;
     }
 
     const currentWindow = mainWindow;
@@ -358,6 +378,10 @@ const createWindow = async () => {
   ipcMain.on('clear-data', async () => {
     if (mainWindow === null) {
       throw new Error('Main window is not defined');
+    }
+
+    if (mainWindow.isDestroyed()) {
+      return;
     }
 
     try {

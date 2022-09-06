@@ -8,11 +8,13 @@ export interface PriceSyncItemOptions {
   module: string;
   isRefresh?: boolean;
   parentCoin?: string;
+  id?: string;
   coinGroup: CoinGroup;
 }
 
 export class PriceSyncItem extends SyncItem {
   public days: 7 | 30 | 365;
+  public id: string | undefined;
 
   constructor({
     days,
@@ -20,7 +22,8 @@ export class PriceSyncItem extends SyncItem {
     isRefresh,
     module,
     coinGroup,
-    parentCoin
+    parentCoin,
+    id
   }: PriceSyncItemOptions) {
     super({
       type: 'price',
@@ -31,6 +34,7 @@ export class PriceSyncItem extends SyncItem {
       parentCoin
     });
     this.days = days;
+    this.id = id;
   }
 
   equals(item: PriceSyncItem | SyncItem) {
@@ -38,7 +42,8 @@ export class PriceSyncItem extends SyncItem {
       return (
         this.days === item.days &&
         this.coinType === item.coinType &&
-        this.coinGroup === item.coinGroup
+        this.coinGroup === item.coinGroup &&
+        this.id === item.id
       );
     }
 
@@ -52,7 +57,8 @@ export class PriceSyncItem extends SyncItem {
       isRefresh: this.isRefresh,
       module: this.module,
       parentCoin: this.parentCoin,
-      coinGroup: this.coinGroup
+      coinGroup: this.coinGroup,
+      id: this.id
     });
 
     newItem.retries = this.retries;
