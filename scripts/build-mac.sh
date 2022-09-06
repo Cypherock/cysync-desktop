@@ -4,6 +4,8 @@ nvm install 16
 npm install yarn -g
 rm -rf ./cysync/node_modules
 yarn install
+yarn install-pkgs
+yarn build-pkgs
 node scripts/prebuild.js
 yarn install
 yarn make
