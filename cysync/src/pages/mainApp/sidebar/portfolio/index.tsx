@@ -48,7 +48,7 @@ const Portfolio = () => {
     logger.info('In portfolio screen');
   }, []);
 
-  const handleMenuItemChange = (selectedIndex: number) => {
+  const handleWalletMenuItemChange = (selectedIndex: number) => {
     setIndex(selectedIndex);
     if (selectedIndex === 0) {
       setCoinIndex(0);
@@ -57,6 +57,10 @@ const Portfolio = () => {
       setCoinIndex(0);
       setCurrentWallet(allWallets[selectedIndex - 1]._id);
     }
+  };
+
+  const handleCoinMenuItemChange = (selectedIndex: number) => {
+    setCoinIndex(selectedIndex);
   };
 
   const [open, setOpen] = React.useState(false);
@@ -156,10 +160,17 @@ const Portfolio = () => {
         </Typography>
         <DropMenu
           options={['All Wallets', ...allWallets.map(wallet => wallet.name)]}
-          handleMenuItemSelectionChange={handleMenuItemChange}
+          handleMenuItemSelectionChange={handleWalletMenuItemChange}
           index={index}
           bg={false}
           disabled={isLoading}
+          style={{ marginRight: '10px' }}
+        />
+        <DropMenu
+          options={coinList.map((item: any) => item.toUpperCase())}
+          handleMenuItemSelectionChange={handleCoinMenuItemChange}
+          index={coinIndex}
+          bg={false}
         />
       </Grid>
       <Charts
