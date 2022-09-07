@@ -31,7 +31,8 @@ const classes = {
   transactionId: `${PREFIX}-transactionId`,
   footer: `${PREFIX}-footer`,
   footerBtn: `${PREFIX}-footerBtn`,
-  link: `${PREFIX}-link`
+  link: `${PREFIX}-link`,
+  whiteText: `${PREFIX}-whiteText`
 };
 
 const Root = styled('div')(() => ({
@@ -79,6 +80,9 @@ const Root = styled('div')(() => ({
   [`& .${classes.link}`]: {
     display: 'flex',
     cursor: 'pointer'
+  },
+  [`& .${classes.whiteText}`]: {
+    color: 'white'
   }
 }));
 
@@ -134,7 +138,13 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
             <TextView
               completed={receiveTransaction.verifiedAccountId}
               inProgress={!receiveTransaction.verifiedAccountId}
-              text="Verify 'new_account_id' on the device"
+              text={
+                <Typography>
+                  Verify "
+                  <span className={classes.whiteText}>new_account_id</span>" on
+                  the device
+                </Typography>
+              }
             />
             <TextView
               completed={receiveTransaction.verified}
@@ -142,7 +152,13 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
                 receiveTransaction.verifiedAccountId &&
                 !receiveTransaction.verified
               }
-              text="Verify 'new_public_key' on the device"
+              text={
+                <Typography>
+                  Verify "
+                  <span className={classes.whiteText}>new_public_key</span>" on
+                  the device
+                </Typography>
+              }
             />
           </>
         ) : (
@@ -155,9 +171,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
               inProgress={!linkOpened}
               text={
                 <div className={classes.transactionId}>
-                  <Typography color="textSecondary">
-                    Go to the &nbsp;
-                  </Typography>
+                  <Typography>Go to the &nbsp;</Typography>
                   <div className={classes.link} onClick={handleExternalLink}>
                     <Typography color="secondary"> Near Explorer </Typography>
                     <LaunchIcon fontSize="medium" color="secondary" />
@@ -168,7 +182,14 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
             <TextView
               completed={reachedTarget}
               inProgress={linkOpened && !reachedTarget}
-              text="Scroll to the section which cointains 'new_account_id', 'new_public_key' as shown below"
+              text={
+                <Typography>
+                  Scroll to the section which contains "
+                  <span className={classes.whiteText}>new_account_id</span>", "
+                  <span className={classes.whiteText}>new_public_key</span>" as
+                  shown below
+                </Typography>
+              }
             />
             <img src={NearExplorerImage} style={{ width: '100%' }} />
             <div className={classes.footer}>

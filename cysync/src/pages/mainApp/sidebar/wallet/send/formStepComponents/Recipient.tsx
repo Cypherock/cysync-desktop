@@ -256,7 +256,7 @@ const BatchRecipient: React.FC<BatchRecipientProps> = props => {
         <Input
           id={id}
           name="reciever_addr"
-          label={`Receiver's Address ${index}`}
+          label={`Recipient's Address ${index}`}
           value={recipient.recipient}
           error={recipient.errorRecipient.length !== 0}
           helperText={
@@ -684,7 +684,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           <Input
             name="reciever_addr"
             id="1"
-            label="Receiver's Address"
+            label="Recipient's Address"
             onChange={e => {
               handleInputChange(e);
               debouncedHandleCheckAddresses();

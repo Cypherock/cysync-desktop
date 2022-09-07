@@ -370,6 +370,13 @@ const Recipient: React.FC<StepComponentProps> = props => {
   return (
     <Root container className={root}>
       <div className={singleTransaction}>
+        <Typography
+          color="textSecondary"
+          variant="h5"
+          style={{ marginBottom: '0.5rem' }}
+        >
+          Create a new Account ID for NEAR
+        </Typography>
         <Input
           name="creatorAccount"
           label="Create From"
