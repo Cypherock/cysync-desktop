@@ -481,6 +481,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             color="secondary"
             onClick={handleDeviceHealthTabClose}
             variant="contained"
+            autoFocus
           >
             Ok
           </Button>
@@ -519,6 +520,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             <CustomButton
               onClick={handleNext}
               style={{ padding: '0.5rem 2rem' }}
+              autoFocus
             >
               Update
             </CustomButton>
@@ -581,6 +583,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
                 variant="outlined"
                 onClick={handleOnRetry}
                 style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
+                autoFocus
               >
                 {isAuthFailed ? 'Ok' : 'Retry'}
               </CustomButton>

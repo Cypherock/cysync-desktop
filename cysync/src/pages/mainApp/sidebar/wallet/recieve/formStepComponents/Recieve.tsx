@@ -224,6 +224,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
               <CustomButton
                 className={classes.footerBtn}
                 onClick={handleReplaceAccount}
+                autoFocus
               >
                 Save to Device?
               </CustomButton>

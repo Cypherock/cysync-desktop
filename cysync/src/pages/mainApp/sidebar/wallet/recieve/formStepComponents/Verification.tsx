@@ -179,6 +179,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
                   setReachedTarget(true);
                 }}
                 disabled={!linkOpened}
+                autoFocus
               >
                 Next
               </CustomButton>
