@@ -14,11 +14,9 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import success from '../../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
-import IconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import AvatarIcon from '../../../../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
-import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import { useCardAuth } from '../../../../../../store/hooks/flows';
 import { useConnection } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
@@ -307,9 +305,6 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
         <Typography color="secondary" variant="h5">
           X1 Card Authentication
         </Typography>
-        <IconButton onClick={handleDeviceHealthTabClose} title="Close">
-          <Icon size={16} viewBox="0 0 14 14" icon={ICONS.close} color="red" />
-        </IconButton>
       </Grid>
       {completed && verified === 2 ? (
         <Grid

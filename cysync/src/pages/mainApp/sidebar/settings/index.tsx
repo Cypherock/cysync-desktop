@@ -104,7 +104,16 @@ const Settings = () => {
   ];
 
   const closeTab = () => {
-    navigate(RouteLinks.settings.index);
+    // ********** Why not just go back in history? ************
+    // Because when the user lands on the Upgrade device screen
+    // from the notification or any other page, We do not want
+    // the user to land the portfolio page. Rather the user should
+    // go to the device settings page.
+    const currentPath = location.pathname;
+    const pathArr = currentPath.split('/');
+    const newPath = pathArr.slice(0, pathArr.length - 1).join('/');
+
+    navigate(newPath);
   };
 
   const handleTabOpen = (index: number) => {
