@@ -202,7 +202,8 @@ const Summary: React.FC<StepComponentProps> = ({
           variant="h5"
           style={{ marginBottom: '0.5rem' }}
         >
-          Transaction ready to be broadcast. Confirm the details
+          The new account is successfully verified. You may now complete account
+          creation
         </Typography>
         {coinAbbr.toUpperCase() === 'ETHR' && (
           <Typography color="error" style={{ marginBottom: '0.5rem' }}>
@@ -257,7 +258,7 @@ const Summary: React.FC<StepComponentProps> = ({
               onClick={handleSend}
               disabled={!sendTransaction.signedTxn || !connected}
             >
-              Send
+              Create Account
             </CustomButton>
           </div>
         </Tooltip>
