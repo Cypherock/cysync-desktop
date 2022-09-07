@@ -5,6 +5,7 @@ import React from 'react';
 
 import success from '../../../../../../assets/icons/generic/success.png';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
+import DialogBox from '../../../../../../designSystem/designComponents/dialog/dialogBox';
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import AvatarIcon from '../../../../../../designSystem/designComponents/icons/AvatarIcon';
 import TextView from '../../../../../../designSystem/designComponents/textComponents/textView';
@@ -133,28 +134,41 @@ const Replace: React.FC<StepComponentProps> = ({ handleClose }) => {
     );
   }
 
-  if (receiveTransaction.receiveAddress)
-    return receiveTransaction.verifiedReplaceAccount ? (
-      <Root className={classes.root}>
-        <AvatarIcon src={success} alt="success" />
-        <Typography
-          color="secondary"
-          align="center"
-          variant="h5"
-          style={{ margin: '1rem 0rem 6rem' }}
-        >
-          Account Saved Successfully on X1 Wallet
-        </Typography>
-        <CustomButton
-          color="secondary"
-          variant="contained"
-          onClick={() => handleClose()}
-          autoFocus
-        >
-          Ok
-        </CustomButton>
-      </Root>
-    ) : (
+  if (receiveTransaction.receiveAddress) {
+    if (receiveTransaction.verifiedReplaceAccount) {
+      return (
+        <DialogBox
+          fullWidth
+          maxWidth="md"
+          open={receiveTransaction.verifiedReplaceAccount}
+          disableBackdropClick
+          disableEscapeKeyDown
+          handleClose={handleClose}
+          restComponents={
+            <Root className={classes.root}>
+              <AvatarIcon src={success} alt="success" />
+              <Typography
+                color="secondary"
+                align="center"
+                variant="h5"
+                style={{ margin: '1rem 0rem 6rem' }}
+              >
+                Account Saved Successfully on X1 Wallet
+              </Typography>
+              <CustomButton
+                color="secondary"
+                variant="contained"
+                onClick={() => handleClose()}
+                autoFocus
+              >
+                Ok
+              </CustomButton>
+            </Root>
+          }
+        />
+      );
+    }
+    return (
       <Root className={classes.root}>
         <Typography>
           Your X1 wallet already stores 4 Near accounts. Select the account on
@@ -162,12 +176,21 @@ const Replace: React.FC<StepComponentProps> = ({ handleClose }) => {
           <span className={classes.highlightedText}>{customAccount?.name}</span>
         </Typography>
         <TextView
+          completed={receiveTransaction.replaceAccountSelected}
+          inProgress={!receiveTransaction.replaceAccountSelected}
+          text="Select an account on the device to replace"
+        />
+        <TextView
           completed={receiveTransaction.verifiedReplaceAccount}
-          inProgress={!receiveTransaction.verifiedReplaceAccount}
-          text="Select an Account to replace on the Device"
+          inProgress={
+            receiveTransaction.replaceAccountSelected &&
+            !receiveTransaction.verifiedReplaceAccount
+          }
+          text="Verify the changes on the device"
         />
       </Root>
     );
+  }
 
   return (
     <Root className={classes.root}>

@@ -69,6 +69,7 @@ export interface UseReceiveTransactionValues {
   replaceAccountAction: React.MutableRefObject<DeferredReference<void>>;
   verifiedAccountId: boolean;
   verifiedReplaceAccount: boolean;
+  replaceAccountSelected: boolean;
   replaceAccountStarted: boolean;
   setReplaceAccountStarted: React.Dispatch<React.SetStateAction<boolean>>;
   imageData: string;
@@ -93,6 +94,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [replaceAccount, setReplaceAccount] = useState(false);
   const [verifiedAccountId, setVerifiedAccountId] = useState(false);
   const [verifiedReplaceAccount, setVerifiedReplaceAccount] = useState(false);
+  const [replaceAccountSelected, setReplaceAccountSelected] = useState(false);
   const [replaceAccountStarted, setReplaceAccountStarted] = useState(false);
 
   const [imageData, setImageData] = useState('');
@@ -277,6 +279,16 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
         }
       });
 
+      receiveTransaction.on('replaceAccountSelected', value => {
+        if (value) {
+          logger.verbose('ReceiveAddress: Replace account selected on device', {
+            coinType
+          });
+          setReplaceAccountSelected(true);
+        } else {
+          setReplaceAccountSelected(false);
+        }
+      });
       receiveTransaction.on('replaceAccountVerified', value => {
         if (value) {
           logger.verbose(
@@ -551,6 +563,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     replaceAccountAction,
     verifiedReplaceAccount,
     verifiedAccountId,
+    replaceAccountSelected,
     replaceAccountStarted,
     setReplaceAccountStarted,
     imageData,

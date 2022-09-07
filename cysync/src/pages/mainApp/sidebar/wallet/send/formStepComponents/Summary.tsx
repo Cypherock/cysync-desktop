@@ -233,7 +233,7 @@ const Summary: React.FC<StepComponentProps> = ({
         )}
         {activeButton === 0 && (
           <LabelText
-            label="Receiver's Address"
+            label="Recipient's Address"
             text={batchRecipientData[0].recipient}
             verified
           />
