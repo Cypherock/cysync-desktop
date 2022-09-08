@@ -15,7 +15,7 @@ import Verify from './formStepComponents/verify';
 const addCoinWalletData = [
   ['Select Coins', SelectCoin],
   ['Verify Coins', SelectWallet],
-  ['Tap X1 Card', Verify],
+  ['Tap Card', Verify],
   ['Fetch Balance', Syncing]
 ];
 

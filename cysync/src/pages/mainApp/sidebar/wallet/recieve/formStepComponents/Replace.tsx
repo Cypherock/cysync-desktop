@@ -153,7 +153,7 @@ const Replace: React.FC<StepComponentProps> = ({ handleClose }) => {
                 variant="h5"
                 style={{ margin: '1rem 0rem 6rem' }}
               >
-                Account Saved Successfully on X1 Wallet
+                Account saved successfully on X1 wallet
               </Typography>
               <CustomButton
                 color="secondary"

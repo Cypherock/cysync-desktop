@@ -146,11 +146,11 @@ const Summary: React.FC<StepComponentProps> = ({
             }
             if (selectedWallet.passphraseSet) {
               setBroadcastError(
-                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet\nTry again in sometime.\nThis may be due to incorrect passphrase.'
+                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.\nThis may be due to incorrect passphrase.'
               );
             } else {
               setBroadcastError(
-                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet\nTry again in sometime.'
+                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.'
               );
             }
           } else {
@@ -160,7 +160,7 @@ const Summary: React.FC<StepComponentProps> = ({
           }
         } else {
           setBroadcastError(
-            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet\nTry again in sometime.'
+            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.'
           );
         }
         Analytics.Instance.event(
