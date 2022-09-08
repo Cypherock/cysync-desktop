@@ -76,12 +76,18 @@ const getUpdatedVersion = ({ previousVersion, bumpType }) => {
   switch (bumpType) {
     case "major":
       decodedVersion.major = decodedVersion.major + 1;
+      decodedVersion.minor = 0;
+      decodedVersion.feature = 0;
+      decodedVersion.bugfix = 0;
       break;
     case "minor":
       decodedVersion.minor = decodedVersion.minor + 1;
+      decodedVersion.feature = 0;
+      decodedVersion.bugfix = 0;
       break;
     case "feat":
       decodedVersion.feature = decodedVersion.feature + 1;
+      decodedVersion.bugfix = 0;
       break;
     case "bugfix":
       decodedVersion.bugfix = decodedVersion.bugfix + 1;
