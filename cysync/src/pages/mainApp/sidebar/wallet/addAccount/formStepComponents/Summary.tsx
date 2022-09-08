@@ -9,13 +9,14 @@ import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
+import { coinDb, customAccountDb } from '../../../../../../store/database';
 import { broadcastTxn } from '../../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
   useNetwork,
   useSelectedWallet,
   useSendTransactionContext,
-  useSocket,
+  useSync,
   useTokenContext
 } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
@@ -95,8 +96,6 @@ const Summary: React.FC<StepComponentProps> = ({
   const [broadcastError, setBroadcastError] = useState('');
   const [advanceError, setAdvanceError] = useState('');
 
-  const { addTxnConfirmAddressHook } = useSocket();
-
   const { selectedWallet } = useSelectedWallet();
 
   const { coinDetails } = useCurrentCoin();
@@ -112,6 +111,7 @@ const Summary: React.FC<StepComponentProps> = ({
   const { sendTransaction } = useSendTransactionContext();
 
   const [open, setOpen] = useState(false);
+  const { addBalanceSyncItemFromCoin } = useSync();
 
   const handleSend = () => {
     setOpen(true);
@@ -121,13 +121,27 @@ const Summary: React.FC<StepComponentProps> = ({
       .then(res => {
         setOpen(false);
         sendTransaction.setHash(res);
-        sendTransaction.onTxnBroadcast({
+        sendTransaction.onAddAccountTxnBroadcast({
           walletId: selectedWallet._id,
           coin: coinDetails.slug,
-          txHash: res,
-          token: token ? token.coin : undefined
+          txHash: res
         });
-        addTxnConfirmAddressHook(res, coinDetails.slug, selectedWallet._id);
+        (async () => {
+          const coins = await coinDb.getAll({
+            walletId: coinDetails.walletId,
+            slug: coinDetails.slug
+          });
+          if (coins.length < 1) throw new Error('No coins found');
+          const data = {
+            name: recipientData[0].recipient + nearSuffix,
+            walletId: coinDetails.walletId,
+            coin: coinDetails.slug,
+            price: coinDetails.price.toString(),
+            balance: '0'
+          };
+          await customAccountDb.insert(data);
+          addBalanceSyncItemFromCoin(coins[0], {});
+        })();
         handleNext();
         Analytics.Instance.event(
           Analytics.Categories.SEND_TXN,
