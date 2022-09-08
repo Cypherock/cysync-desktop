@@ -294,7 +294,7 @@ const Sidebar = () => {
 
   const onImportWallet = () => {
     setWalletIndex(-1);
-    navigate(Routes.wallet.index);
+    navigate(Routes.wallet.index + '?openImportWalletForm=true');
   };
 
   return (
