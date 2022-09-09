@@ -147,7 +147,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
         Analytics.Actions.COMPLETED
       );
       logger.info('InitialDeviceUpdate: Completed');
-      setTimeout(onClose, 1350);
+      setTimeout(onClose, 3000);
     }
   }, [isCompleted]);
 
