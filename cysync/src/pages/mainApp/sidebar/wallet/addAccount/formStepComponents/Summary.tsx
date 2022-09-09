@@ -127,12 +127,12 @@ const Summary: React.FC<StepComponentProps> = ({
           txHash: res
         });
         (async () => {
-          const coins = await coinDb.getAll({
-            walletId: coinDetails.walletId,
-            slug: coinDetails.slug
-          });
-          if (coins.length < 1) throw new Error('No coins found');
           try {
+            const coins = await coinDb.getAll({
+              walletId: coinDetails.walletId,
+              slug: coinDetails.slug
+            });
+            if (coins.length < 1) throw new Error('No coins found');
             const data = {
               name: recipientData[0].recipient + nearSuffix,
               walletId: coinDetails.walletId,
@@ -141,12 +141,12 @@ const Summary: React.FC<StepComponentProps> = ({
               balance: '0'
             };
             await customAccountDb.insert(data);
+            addBalanceSyncItemFromCoin(coins[0], {});
           } catch (error) {
             setOpen(false);
             logger.error('Custom Account database update failed', error);
             setAdvanceError(error);
           }
-          addBalanceSyncItemFromCoin(coins[0], {});
         })();
         handleNext();
         Analytics.Instance.event(
