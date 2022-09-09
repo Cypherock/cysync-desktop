@@ -132,14 +132,20 @@ const Summary: React.FC<StepComponentProps> = ({
             slug: coinDetails.slug
           });
           if (coins.length < 1) throw new Error('No coins found');
-          const data = {
-            name: recipientData[0].recipient + nearSuffix,
-            walletId: coinDetails.walletId,
-            coin: coinDetails.slug,
-            price: coinDetails.price.toString(),
-            balance: '0'
-          };
-          await customAccountDb.insert(data);
+          try {
+            const data = {
+              name: recipientData[0].recipient + nearSuffix,
+              walletId: coinDetails.walletId,
+              coin: coinDetails.slug,
+              price: coinDetails.price.toString(),
+              balance: '0'
+            };
+            await customAccountDb.insert(data);
+          } catch (error) {
+            setOpen(false);
+            logger.error('Custom Account database update failed', error);
+            setAdvanceError(error);
+          }
           addBalanceSyncItemFromCoin(coins[0], {});
         })();
         handleNext();
