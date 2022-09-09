@@ -143,9 +143,7 @@ const Summary: React.FC<StepComponentProps> = ({
             await customAccountDb.insert(data);
             addBalanceSyncItemFromCoin(coins[0], {});
           } catch (error) {
-            setOpen(false);
             logger.error('Custom Account database update failed', error);
-            setAdvanceError(error);
           }
         })();
         handleNext();
