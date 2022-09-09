@@ -33,7 +33,7 @@ import {
   DisplayTransaction,
   DisplayTransactionPropTypes
 } from '../../../../store/hooks';
-import { useSnackbar } from '../../../../store/provider';
+import { useDiscreetMode, useSnackbar } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 import logger from '../../../../utils/logger';
 
@@ -117,6 +117,7 @@ interface TransactionDialogProps {
 
 const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   const theme = useTheme();
+  const discreetMode = useDiscreetMode();
   const { txn } = props;
   const snackbar = useSnackbar();
 
@@ -144,7 +145,9 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   }, [txn]);
 
   const formatCoins = (coins: string) => {
-    return formatDisplayAmount(parseFloat(coins) || 0);
+    return discreetMode.handleSensitiveDataDisplay(
+      formatDisplayAmount(parseFloat(coins) || 0)
+    );
   };
 
   const getPriceForCoin = (coins: string) => {
@@ -161,10 +164,14 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
   const getFeePrice = () => {
     if (txn.isErc20) {
-      return ((parseFloat(txn.displayFees) || 0) * ethCoinPrice).toFixed(2);
+      return discreetMode.handleSensitiveDataDisplay(
+        ((parseFloat(txn.displayFees) || 0) * ethCoinPrice).toFixed(2)
+      );
     }
 
-    return formatDisplayAmount(getPriceForCoin(txn.displayFees));
+    return discreetMode.handleSensitiveDataDisplay(
+      formatDisplayAmount(getPriceForCoin(txn.displayFees))
+    );
   };
 
   const openTxn = () => {

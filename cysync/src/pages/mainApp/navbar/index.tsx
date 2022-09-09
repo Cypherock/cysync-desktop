@@ -8,6 +8,7 @@ import { useConnection, useFeedback } from '../../../store/provider';
 import NotificationComponent from '../notification';
 
 import DeviceConnectionStatus from './deviceConnectionStatus';
+import DiscreetMode from './discreetMode';
 import LockStatus from './lockStatus';
 import SyncStatus from './syncStatus';
 
@@ -156,6 +157,8 @@ const Navbar: React.FC = () => {
         <NotificationComponent />
 
         <LockStatus />
+
+        <DiscreetMode />
       </div>
     </Root>
   );
