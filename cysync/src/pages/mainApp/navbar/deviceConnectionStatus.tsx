@@ -223,7 +223,7 @@ const DeviceConnectionStatus: React.FC<DeviceConnectionStatusProps> = props => {
               color: theme.palette.error.dark
             }}
           >
-            Device Misconfigured
+            Device Unauthenticated
           </Typography>
         );
       case ConnectionStatus.NEW_DEVICE:
@@ -309,7 +309,7 @@ const DeviceConnectionStatus: React.FC<DeviceConnectionStatusProps> = props => {
       case ConnectionStatus.DEVICE_NOT_READY:
         return 'The device is not in the main menu.';
       case ConnectionStatus.PARTIAL_STATE:
-        return 'The device is misconfigured.';
+        return 'The device is unauthenticated.';
       case ConnectionStatus.NEW_DEVICE:
         return 'A new device has been connected to the CySync app.';
       case ConnectionStatus.LAST_AUTH_FAILED:
