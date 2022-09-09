@@ -615,7 +615,7 @@ export const useDeviceUpgrade: UseDeviceUpgrade = (isInitial?: boolean) => {
     descriptionError: '',
     email: '',
     emailError: '',
-    subject: `Reporting for Error ${errorObj.getCode()} (Upgrading Device)`,
+    subject: `Reporting for Error ${errorObj.getCode()} (Update Device)`,
     subjectError: ''
   };
 

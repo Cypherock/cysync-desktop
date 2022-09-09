@@ -128,7 +128,7 @@ const GeneralSettings = () => {
   const ListData = [
     {
       name: 'Password',
-      secondaryText: '(Change the password, Turn Off or On password)',
+      secondaryText: '(Change password, Turn Off or On password usage)',
       element: previousSetPassword ? (
         <>
           <Button
@@ -164,7 +164,8 @@ const GeneralSettings = () => {
     },
     {
       name: 'Auto Lock',
-      secondaryText: 'Lock the app automatically when desktop locks.',
+      secondaryText:
+        'Lock the app automatically when your laptop goes to sleep.',
       element: previousSetPassword ? (
         <SwitchButton
           name="toggleAutoLock"
@@ -186,8 +187,16 @@ const GeneralSettings = () => {
       disabled: !previousSetPassword
     },
     {
-      name: 'Clear Data',
-      secondaryText: '(You will loose all the data stored in the CySync app)',
+      name: 'Clear cysync app data',
+      secondaryText: (
+        <div>
+          <div>(You will lose all the data stored in the CySync app.</div>
+          <div>
+            NOTE: Your wallet accounts stored on your device will not be
+            affected)
+          </div>
+        </div>
+      ),
       element: (
         <Button
           className={classes.button}
@@ -330,9 +339,7 @@ const GeneralSettings = () => {
                   <ListItemText
                     className={classes.listItem}
                     primary={item.name}
-                    secondary={
-                      item.secondaryText.length > 0 ? item.secondaryText : null
-                    }
+                    secondary={item.secondaryText ? item.secondaryText : null}
                   />
                   <ListItemSecondaryAction>
                     {item.element}

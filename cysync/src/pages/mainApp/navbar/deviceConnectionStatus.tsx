@@ -263,7 +263,7 @@ const DeviceConnectionStatus: React.FC<DeviceConnectionStatusProps> = props => {
               color: theme.palette.error.dark
             }}
           >
-            Device not configured
+            Device not initialised
           </Typography>
         );
       case ConnectionStatus.UPDATE_REQUIRED:
@@ -316,7 +316,7 @@ const DeviceConnectionStatus: React.FC<DeviceConnectionStatusProps> = props => {
         return 'Device authentication failed the last time.';
       case ConnectionStatus.IN_TEST_APP:
       case ConnectionStatus.IN_BOOTLOADER:
-        return 'Device needs to be configured.';
+        return 'Device needs to be initialised.';
       case ConnectionStatus.UPDATE_REQUIRED:
         return 'This device is incompatible with cysync.';
       case ConnectionStatus.UNKNOWN_ERROR:

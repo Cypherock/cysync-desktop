@@ -66,7 +66,7 @@ const en: I18nStrings = {
       `Some internal error occurred while adding ${coins}`,
     ADD_COIN_FAILED: coins => `Error while adding coins: ${coins}`,
     ADD_COIN_REJECTED:
-      'Request was rejected on the X1 wallet\n, restart the operation to add coins.',
+      'Request was rejected on the X1 wallet\n, restart the operation to add coin(s).',
     ADD_COIN_UNKNOWN_ERROR: `Some internal error occurred, disconnect and reconnect the X1 wallet then try adding coins.`,
 
     CARD_AUTH_REJECTED: 'X1 Card auth was rejected from X1 wallet',

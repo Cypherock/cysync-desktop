@@ -109,7 +109,7 @@ const ConfirmPassword: React.FC<Props> = ({ onClose, open, onSuccess }) => {
           await sleep(5000);
           closeDialogBox();
           snackbar.showSnackbar(
-            'Password matched! Restarting Cysync',
+            'Password matched! Cysync will reset itself..',
             'success',
             onSuccess,
             {
