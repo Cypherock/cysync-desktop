@@ -17,11 +17,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import success from '../../../../../../assets/icons/generic/success.png';
 import Routes from '../../../../../../constants/routes';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
-import IconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import AvatarIcon from '../../../../../../designSystem/designComponents/icons/AvatarIcon';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
-import ICONS from '../../../../../../designSystem/iconGroups/iconConstants';
 import {
   DeviceUpgradeErrorResolutionState,
   useDeviceUpgrade
@@ -244,7 +242,6 @@ const Root = styled(Grid)(({ theme }) => ({
 
 const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   handleDeviceHealthTabClose,
-  allowExit,
   setAllowExit
 }) => {
   const navigate = useNavigate();
@@ -481,6 +478,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             color="secondary"
             onClick={handleDeviceHealthTabClose}
             variant="contained"
+            autoFocus
           >
             Ok
           </Button>
@@ -519,6 +517,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             <CustomButton
               onClick={handleNext}
               style={{ padding: '0.5rem 2rem' }}
+              autoFocus
             >
               Update
             </CustomButton>
@@ -581,6 +580,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
                 variant="outlined"
                 onClick={handleOnRetry}
                 style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
+                autoFocus
               >
                 {isAuthFailed ? 'Ok' : 'Retry'}
               </CustomButton>
@@ -670,16 +670,6 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
         <Typography color="secondary" variant="h5">
           Device Upgrade
         </Typography>
-        {allowExit && (
-          <IconButton onClick={handleDeviceHealthTabClose} title="Close">
-            <Icon
-              size={16}
-              viewBox="0 0 14 14"
-              icon={ICONS.close}
-              color="red"
-            />
-          </IconButton>
-        )}
       </Grid>
       {getMainContent()}
     </Root>

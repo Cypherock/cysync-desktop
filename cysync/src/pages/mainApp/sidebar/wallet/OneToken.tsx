@@ -25,7 +25,8 @@ import {
 import {
   ReceiveTransactionContext,
   SendTransactionContext,
-  useConnection
+  useConnection,
+  useDiscreetMode
 } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 import prevent from '../../../../utils/preventPropagation';
@@ -137,6 +138,7 @@ const OneToken: React.FC<OneTokenProps> = ({
   walletId,
   ethCoin
 }) => {
+  const discreetMode = useDiscreetMode();
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -237,21 +239,25 @@ const OneToken: React.FC<OneTokenProps> = ({
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`${formatDisplayAmount(holding, 4)} ${initial} `}
+            text={`${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(holding, 4)
+            )} ${initial} `}
             color="textPrimary"
-            hoverText={`${formatDisplayAmount(
-              holding,
-              decimal,
-              true
+            hoverText={`${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(holding, decimal, true)
             )} ${initial}`}
             style={{ fontSize: '0.9rem' }}
           />
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`$ ${formatDisplayAmount(value, 2, true)}`}
+            text={`$ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(value, 2, true)
+            )}`}
             color="textPrimary"
-            hoverText={`$ ${formatDisplayAmount(value, undefined)} `}
+            hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(value, undefined)
+            )} `}
           />
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>

@@ -95,7 +95,7 @@ const Device: React.FC<StepComponentProps> = ({ handleNext }) => {
     <Root className={classes.root}>
       <div className={classes.deviceDetails}>
         <Typography color="textSecondary" variant="h6" gutterBottom>
-          Follow the instruction on device
+          Follow the instructions on device
         </Typography>
         {selectedWallet.passphraseSet && (
           <>

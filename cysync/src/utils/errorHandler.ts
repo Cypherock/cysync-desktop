@@ -10,6 +10,14 @@ const setErrorHandler = () => {
       return;
     }
 
+    if (
+      (error as string)?.toLowerCase().includes('ResizeObserver'.toLowerCase())
+    ) {
+      logger.warn('Ignoring ResizeObserver error in error handler');
+      logger.warn(error);
+      return;
+    }
+
     const userId = await getUUID();
     logger.error('Error caught in error handler', {
       error,

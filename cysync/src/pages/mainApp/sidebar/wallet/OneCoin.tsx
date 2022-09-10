@@ -25,6 +25,7 @@ import {
   SendTransactionContext,
   useConnection,
   useCurrentCoin,
+  useDiscreetMode,
   useSnackbar,
   useSync
 } from '../../../../store/provider';
@@ -129,6 +130,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
   deleteHistory,
   walletId
 }) => {
+  const discreetMode = useDiscreetMode();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const sync = useSync();
@@ -262,20 +264,24 @@ const OneCoin: React.FC<OneCoinProps> = ({
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`${formatDisplayAmount(holding, 4)} ${initial}`}
+            text={`${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(holding, 4)
+            )} ${initial}`}
             color="textPrimary"
-            hoverText={`${formatDisplayAmount(
-              holding,
-              decimal,
-              true
+            hoverText={`${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(holding, decimal, true)
             )} ${initial} `}
           />
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`$ ${formatDisplayAmount(value, 2, true)}`}
+            text={`$ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(value, 2, true)
+            )}`}
             color="textPrimary"
-            hoverText={`$ ${formatDisplayAmount(value, undefined, true)} `}
+            hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(value, undefined, true)
+            )} `}
           />
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>

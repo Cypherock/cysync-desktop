@@ -10,6 +10,7 @@ import Routes from '../../../../../constants/routes';
 import PopOverText from '../../../../../designSystem/designComponents/hover/popoverText';
 import colors from '../../../../../designSystem/designConstants/colors';
 import CoinIcons from '../../../../../designSystem/genericComponents/coinIcons';
+import { useDiscreetMode } from '../../../../../store/provider';
 import formatDisplayAmount from '../../../../../utils/formatDisplayAmount';
 
 const PREFIX = 'PortfolioOneCoin';
@@ -64,6 +65,7 @@ interface OneCoinProps {
 }
 
 const OneCoin: React.FC<OneCoinProps> = props => {
+  const discreetMode = useDiscreetMode();
   const {
     coinInitial,
     coinHolding,
@@ -122,27 +124,28 @@ const OneCoin: React.FC<OneCoinProps> = props => {
       </Grid>
       <Grid item xs={3} className={classes.alignStartCenter}>
         <PopOverText
-          text={`${formatDisplayAmount(
-            coinHolding,
-            4
+          text={`${discreetMode.handleSensitiveDataDisplay(
+            formatDisplayAmount(coinHolding, 4)
           )} ${coinInitial.toUpperCase()} `}
           color="textPrimary"
           variant="body2"
           className={classes.bold}
-          hoverText={`${formatDisplayAmount(
-            coinHolding,
-            decimal,
-            true
+          hoverText={`${discreetMode.handleSensitiveDataDisplay(
+            formatDisplayAmount(coinHolding, decimal, true)
           )} ${coinInitial.toUpperCase()}`}
         />
       </Grid>
       <Grid item xs={2} className={classes.alignStartCenter}>
         <PopOverText
-          text={`$ ${formatDisplayAmount(coinValue, 2, true)}`}
+          text={`$ ${discreetMode.handleSensitiveDataDisplay(
+            formatDisplayAmount(coinValue, 2, true)
+          )}`}
           color="textPrimary"
           variant="body2"
           className={classes.bold}
-          hoverText={`$ ${formatDisplayAmount(coinValue, undefined, true)} `}
+          hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
+            formatDisplayAmount(coinValue, undefined, true)
+          )} `}
         />
       </Grid>
       <Grid item xs={2} className={classes.alignStartCenter}>
@@ -159,7 +162,7 @@ const OneCoin: React.FC<OneCoinProps> = props => {
           variant="h6"
           style={{ color: color[index % 3], fontWeight: 700 }}
         >
-          {coinPortfolio}
+          {discreetMode.handleSensitiveDataDisplay(coinPortfolio)}
         </Typography>
       </Grid>
     </Root>

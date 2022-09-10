@@ -97,6 +97,7 @@ const DialogBoxConfirmation: React.FC<Props> = ({
               variant="contained"
               disabled={confirmButtonDisabled || isLoading}
               onClick={handleConfirmation}
+              autoFocus
             >
               {isLoading ? (
                 <CircularProgress size={20} color="secondary" />

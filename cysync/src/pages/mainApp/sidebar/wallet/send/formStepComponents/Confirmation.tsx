@@ -255,7 +255,11 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
       </div>
       <div className={classes.divider} />
       <div className={classes.footer}>
-        <CustomButton className={classes.footerBtn} onClick={goToTransactions}>
+        <CustomButton
+          className={classes.footerBtn}
+          onClick={goToTransactions}
+          autoFocus
+        >
           Check Transactions
         </CustomButton>
       </div>

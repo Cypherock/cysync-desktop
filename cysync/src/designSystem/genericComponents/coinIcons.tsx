@@ -105,7 +105,7 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
     coinInitial: string,
     csize: 'sm' | 'lg' | null | undefined
   ) => {
-    if (parentCoin) {
+    if (parentCoin && parentCoin.toLowerCase() !== coinInitial.toLowerCase()) {
       const coin = COINS[parentCoin];
       if (!coin) {
         throw new Error('Invalid parentCoin: ' + parentCoin);

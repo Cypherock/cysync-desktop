@@ -3,6 +3,7 @@ import ReportIcon from '@mui/icons-material/Report';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { CircularProgress } from '@mui/material';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
@@ -17,7 +18,7 @@ import CySync from '../../designSystem/iconGroups/cySync';
 import CySyncRound from '../../designSystem/iconGroups/cySyncRound';
 import ICONS from '../../designSystem/iconGroups/iconConstants';
 import { initDatabases, passEnDb } from '../../store/database';
-import { FeedbackState, useFeedback, useSnackbar } from '../../store/provider';
+import { FeedbackState, useFeedback } from '../../store/provider';
 import { generateSinglePasswordHash, verifyPassword } from '../../utils/auth';
 import { triggerClearData } from '../../utils/clearData';
 
@@ -80,11 +81,14 @@ interface State {
   error: string;
 }
 
+const passwordTriesKey = 'passwordTries';
+
 const LockScreen = (props: any) => {
   const theme = useTheme();
-  const snackbar = useSnackbar();
 
-  const [tries, setTries] = React.useState(0);
+  const [tries, setTries] = React.useState(
+    parseInt(localStorage.getItem(passwordTriesKey), 10) || 0
+  );
   const [values, setValues] = React.useState<State>({
     password: '',
     showPassword: false,
@@ -113,9 +117,13 @@ const LockScreen = (props: any) => {
     event.preventDefault();
   };
 
+  React.useEffect(() => {
+    localStorage.setItem(passwordTriesKey, tries.toString());
+  }, [tries]);
+
   const handleSubmit = async () => {
     const password = values.password.trim();
-    setTries(t => t + 1);
+    const newTries = tries + 1;
 
     if (!password) {
       setValues({
@@ -126,34 +134,39 @@ const LockScreen = (props: any) => {
       return;
     }
 
-    if (await verifyPassword(password)) {
+    const verified = await verifyPassword(password);
+
+    if (verified) {
       setValues({
         ...values,
         error: ''
       });
       passEnDb.setPassHash(generateSinglePasswordHash(password));
       await initDatabases();
+      setTries(0);
       props.handleClose();
-    } else if (tries >= MAX_TRIES) {
+    } else if (newTries >= MAX_TRIES) {
       setValues(v => ({
         ...v,
-        error: ''
+        error:
+          'Maximum incorrect attempts reached! Cysync is resetting itself.',
+        password: ''
       }));
-      snackbar.showSnackbar(
-        'Maximum Incorrect attempts reached! Cysync self-destructing...',
-        'error',
-        resetHandler,
-        {
-          dontCloseOnClickAway: true,
-          autoHideDuration: 2000
-        }
-      );
+      setTimeout(() => {
+        resetHandler();
+      }, 2000);
     } else {
       setValues({
         ...values,
-        error: `Invalid password, Attempts remaining: ${MAX_TRIES - tries}`
+        error: `Invalid password`,
+        password: ''
       });
     }
+
+    if (!verified) {
+      setTries(newTries);
+    }
+
     setIsLoading(false);
   };
 
@@ -249,6 +262,12 @@ const LockScreen = (props: any) => {
             <Grid container>
               <Grid item xs={3} />
               <Grid item xs={6} className={classes.inputFieldsContainer}>
+                {tries > 0 && tries < MAX_TRIES && (
+                  <Alert severity="warning" sx={{ mb: 2 }}>
+                    You have {MAX_TRIES - tries} attempt(s) to enter the correct
+                    password, otherwise CySync will reset itself.
+                  </Alert>
+                )}
                 <Input
                   fullWidth
                   type={values.showPassword ? 'text' : 'password'}

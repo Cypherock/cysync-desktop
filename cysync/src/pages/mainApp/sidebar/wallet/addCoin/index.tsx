@@ -14,7 +14,7 @@ import Verify from './formStepComponents/verify';
 
 const addCoinWalletData = [
   ['Select Coins', SelectCoin],
-  ['Verify Coins', SelectWallet],
+  ['Confirm Coins', SelectWallet],
   ['Tap X1 Card', Verify],
   ['Fetch Balance', Syncing]
 ];
@@ -64,7 +64,11 @@ const AddCoin: React.FC<AddCoinProps> = ({ handleClose, coinsPresent }) => {
       open={addCoinFormOpen}
       handleClose={() => handleClose(true)}
       dialogHeading={
-        isXpubMissing ? 'Configure Wallet' : activeStep === 4 ? '' : 'Add Coin'
+        isXpubMissing
+          ? 'Configure Wallet'
+          : activeStep === 4
+          ? ''
+          : 'Add Coin(s)'
       }
       disableBackdropClick
       disableEscapeKeyDown={isAddCoinLoading}

@@ -1,0 +1,31 @@
+name: Bump CI
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - staging
+      - dev
+
+env:
+  GH_ACCESS_TOKEN: ${{secrets.GH_ACCESS_TOKEN}}
+
+jobs:
+  bump:
+    if: github.event.pull_request.merged == true
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+      - run: yarn install --ignore-scripts
+      - run: node scripts/updateVersion.js "${{ github.event.pull_request.title }}"
