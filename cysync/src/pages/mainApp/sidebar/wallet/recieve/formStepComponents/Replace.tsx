@@ -159,6 +159,7 @@ const Replace: React.FC<StepComponentProps> = ({ handleClose }) => {
                 color="secondary"
                 variant="contained"
                 onClick={() => handleClose()}
+                autoFocus
               >
                 Ok
               </CustomButton>

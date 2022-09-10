@@ -146,7 +146,12 @@ const CustomizedDialog: React.FC<CustomizedDialogsProps> = ({
         <NoButton onClick={handleClose} id="newDialogNo">
           No
         </NoButton>
-        <YesButton onClick={handleYes} variant="contained" id="newDialogYes">
+        <YesButton
+          onClick={handleYes}
+          variant="contained"
+          id="newDialogYes"
+          autoFocus
+        >
           {isLoading ? <CircularProgress size={20} color="secondary" /> : 'Yes'}
         </YesButton>
       </DialogActions>

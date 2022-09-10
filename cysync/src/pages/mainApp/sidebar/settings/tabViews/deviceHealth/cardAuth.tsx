@@ -329,6 +329,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
           <CustomButton
             onClick={handleDeviceHealthTabClose}
             style={{ padding: '0.5rem 2rem' }}
+            autoFocus
           >
             Ok
           </CustomButton>
@@ -405,6 +406,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
                   variant="outlined"
                   onClick={handleRetry}
                   style={{ textTransform: 'none', padding: '0.5rem 2rem' }}
+                  autoFocus
                 >
                   Retry
                 </CustomButton>

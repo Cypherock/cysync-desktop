@@ -386,7 +386,12 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
           >
             Device Authentication Successful
           </Typography>
-          <Button color="secondary" onClick={onSuccess} variant="contained">
+          <Button
+            color="secondary"
+            onClick={onSuccess}
+            variant="contained"
+            autoFocus
+          >
             Ok
           </Button>
         </Grid>
@@ -476,6 +481,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
                   color="primary"
                   onClick={handleRetry}
                   style={{ padding: '0.5rem 2rem' }}
+                  autoFocus
                 >
                   Retry
                 </CustomButton>

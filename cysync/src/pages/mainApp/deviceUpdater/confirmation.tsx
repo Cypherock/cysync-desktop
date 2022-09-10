@@ -196,7 +196,11 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
             {getNegativeBtnText()}
           </CustomButton>
         )}
-        <CustomButton onClick={onPositiveClick} style={{ margin: '1rem 0rem' }}>
+        <CustomButton
+          onClick={onPositiveClick}
+          style={{ margin: '1rem 0rem' }}
+          autoFocus
+        >
           {getPositiveBtnText()}
         </CustomButton>
       </div>

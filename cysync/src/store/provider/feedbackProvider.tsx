@@ -529,6 +529,17 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     }
   };
 
+  const ENTER_KEY = 13;
+  const handleKeyPress = (event: any) => {
+    if (deviceLogsLoading || submitting) {
+      return;
+    }
+
+    if (event.keyCode === ENTER_KEY) {
+      handleSubmit(feedbackInput);
+    }
+  };
+
   const startRecording = async () => {
     setRecording(true);
     const recorderObj = await initRecorder();
@@ -774,6 +785,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     placeholder={"What's about it?"}
                     value={feedbackInput.subject}
                     onChange={handleChange}
+                    onKeyDown={handleKeyPress}
                   />
                   {feedbackInput.subjectError.length > 0 && (
                     <Typography
@@ -794,6 +806,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     placeholder="Your email"
                     value={feedbackInput.email}
                     onChange={handleChange}
+                    onKeyDown={handleKeyPress}
                   />
                   {feedbackInput.emailError.length > 0 && (
                     <Typography
@@ -858,6 +871,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     value={feedbackInput.description}
                     onChange={handleChange}
                     className={classes.padBottom}
+                    onKeyDown={handleKeyPress}
                   />
                   {feedbackInput.descriptionError.length > 0 && (
                     <Typography
