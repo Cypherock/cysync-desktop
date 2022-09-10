@@ -13,10 +13,11 @@ import CheckMarkSuccessIcon from '../../../../../../assets/icons/checkmarkSucces
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import CustomIconButton from '../../../../../../designSystem/designComponents/buttons/customIconButton';
 import AvatarIcon from '../../../../../../designSystem/designComponents/icons/AvatarIcon';
-import { transactionDb } from '../../../../../../store/database';
+import { coinDb, transactionDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
   useSendTransactionContext,
+  useSync,
   useTokenContext
 } from '../../../../../../store/provider';
 import logger from '../../../../../../utils/logger';
@@ -126,6 +127,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const [imageData, setImageData] = React.useState('');
   const [isQRBuilding, setQRBuilding] = React.useState(true);
+  const { addCustomAccountSyncItemFromCoin } = useSync();
 
   React.useEffect(() => {
     QRCode.toDataURL(sendTransaction.hash)
@@ -137,6 +139,17 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
         setQRBuilding(false);
       });
   }, [sendTransaction.hash]);
+
+  React.useEffect(() => {
+    (async () => {
+      const coins = await coinDb.getAll({
+        walletId: coinDetails.walletId,
+        slug: coinDetails.slug
+      });
+      if (coins.length < 1) throw new Error('No coins found');
+      addCustomAccountSyncItemFromCoin(coins[0], {});
+    })();
+  }, []);
 
   const handleExternalLink = async () => {
     const coin = COINS[coinDetails.slug];

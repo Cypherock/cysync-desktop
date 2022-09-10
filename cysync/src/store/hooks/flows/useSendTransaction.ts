@@ -194,12 +194,6 @@ export interface UseSendTransactionValues {
     txHash: string;
     token?: string;
   }) => void;
-  onAddAccountTxnBroadcast: (params: {
-    walletId: string;
-    coin: string;
-    txHash: string;
-    token?: string;
-  }) => void;
   estimationError: CyError;
   isEstimatingFees: boolean;
   setIsEstimatingFees: (val: boolean) => void;
@@ -791,80 +785,6 @@ export const useSendTransaction: UseSendTransaction = () => {
       setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
     }
   };
-  const onAddAccountTxnBroadcast = ({
-    walletId,
-    coin,
-    txHash
-  }: {
-    walletId: string;
-    coin: string;
-    txHash: string;
-  }) => {
-    try {
-      const coinObj = COINS[coin];
-      if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${coin}`);
-      }
-
-      let amount = new BigNumber(0);
-      const fees = new BigNumber(0.0012).multipliedBy(coinObj.multiplier); // near function-call hardcoded fees
-      const formattedInputs: InputOutput[] = [];
-      const formattedOutputs: InputOutput[] = [];
-
-      if (txnInputs) {
-        for (const [i, input] of txnInputs.entries()) {
-          amount = amount.plus(new BigNumber(input.value));
-          formattedInputs.push({
-            address: input.address,
-            indexNumber: i,
-            value: String(input.value),
-            isMine: input.isMine,
-            type: IOtype.INPUT
-          });
-        }
-      }
-
-      if (txnOutputs) {
-        for (const [i, output] of txnOutputs.entries()) {
-          if (output.isMine) {
-            amount = amount.minus(new BigNumber(output.value));
-          }
-          formattedOutputs.push({
-            address: output.address,
-            indexNumber: i,
-            value: String(output.value),
-            isMine: output.isMine,
-            type: IOtype.OUTPUT
-          });
-        }
-      }
-
-      const tx: Transaction = {
-        hash: txHash.toLowerCase(),
-        amount: amount.toString(),
-        total: amount.plus(fees).toString(),
-        fees: fees.toString(),
-        walletId,
-        slug: coin.toLowerCase(),
-        confirmations: 0,
-        status: 1,
-        sentReceive: SentReceive.SENT,
-        confirmed: new Date().toISOString(),
-        blockHeight: -1,
-        inputs: formattedInputs,
-        outputs: formattedOutputs
-      };
-
-      transactionDb.insert(tx).then(() => {
-        transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
-        logger.info('UTXOS blocked');
-        logger.info(txnInputs);
-      });
-    } catch (error) {
-      const cyError = new CyError(CysyncError.SEND_TXN_BROADCAST_FAILED);
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
-    }
-  };
 
   // I think this will work, reset the error obj if its cancelled
   useEffect(() => {
@@ -902,7 +822,6 @@ export const useSendTransaction: UseSendTransaction = () => {
     handleEstimateFee,
     sendMaxAmount,
     onTxnBroadcast,
-    onAddAccountTxnBroadcast,
     estimationError,
     isEstimatingFees,
     setIsEstimatingFees

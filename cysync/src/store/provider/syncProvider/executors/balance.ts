@@ -153,7 +153,7 @@ export const processResponses = async (
   } else if (coin instanceof NearCoinData) {
     const balanceRes = responses[0];
 
-    const balance = new BigNumber(balanceRes.data.balance ?? 0);
+    const balance = new BigNumber(balanceRes.data.balance);
     if (item.customAccount) {
       await customAccountDb.updateBalance({
         walletId: item.walletId,
