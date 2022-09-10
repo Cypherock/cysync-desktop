@@ -4,7 +4,6 @@ const fs = require("fs");
 
 const GITHUB_BASE_API = "https://api.github.com";
 const GITHUB_ACCESS_TOKEN = process.env.GH_ACCESS_TOKEN;
-const BRANCH_OR_TAG = process.env.GITHUB_REF_TYPE;
 const BRANCH_OR_TAG_NAME = process.env.GITHUB_REF_NAME;
 
 const CONTENT_TYPE_MAP = {
@@ -28,22 +27,15 @@ const getArgs = () => {
     throw new Error(CMD_ERROR_MSG);
   }
 
-  const branchOrTag = BRANCH_OR_TAG;
   const name = BRANCH_OR_TAG_NAME;
 
   let buildType = "prod";
   const foldernames = args[0];
 
-  if (!["branch", "tag"].includes(branchOrTag)) {
-    throw new Error("Invalid `GITHUB_REF_TYPE`: " + branchOrTag);
-  }
-
-  if (branchOrTag === "branch") {
-    if (!["dev", "debug"].includes(name)) {
-      throw new Error("Invalid `GITHUB_REF_NAME`: " + name);
-    }
-
-    buildType = name;
+  if (name.includes("dev")) {
+    buildType = "dev";
+  } else if (name.includes("debug")) {
+    buildType = "debug";
   } else if (name.includes("rc")) {
     buildType = "rc";
   }

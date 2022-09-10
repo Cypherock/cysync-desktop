@@ -4,12 +4,10 @@ on:
   push:
     tags:
       - "*"
-    branches:
-      - dev
-      - debug
 
 env:
   GH_ACCESS_TOKEN: ${{secrets.GH_ACCESS_TOKEN}}
+  NODE_OPTIONS: "--max-old-space-size=8192"
 
 jobs:
   build-linux:
@@ -30,6 +28,8 @@ jobs:
       - run: yarn
       - run: yarn lint:check
       - run: yarn pretty:check
+      - run: yarn install-pkgs
+      - run: yarn build-pkgs
       - run: node scripts/prebuild.js
       - run: yarn make
       - uses: actions/upload-artifact@v3
@@ -53,6 +53,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
       - run: yarn
+      - run: yarn install-pkgs
+      - run: yarn build-pkgs
       - run: node scripts\prebuild.js
       - run: yarn make
       - uses: actions/upload-artifact@v3
