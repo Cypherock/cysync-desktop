@@ -3,6 +3,7 @@ import React from 'react';
 
 import {
   ConnectionProvider,
+  DiscreetModeProvider,
   FeedbackProvider,
   NetworkProvider,
   NotificationProvider,
@@ -14,22 +15,24 @@ import {
 
 const GlobalProvider = ({ children }: any) => {
   return (
-    <SnackbarProvider>
-      <NetworkProvider>
-        <ConnectionProvider>
-          <NotificationProvider>
-            <TutorialProvider>
-              {/* SocketProvider is using SyncProvider */}
-              <SyncProvider>
-                <SocketProvider>
-                  <FeedbackProvider>{children}</FeedbackProvider>
-                </SocketProvider>
-              </SyncProvider>
-            </TutorialProvider>
-          </NotificationProvider>
-        </ConnectionProvider>
-      </NetworkProvider>
-    </SnackbarProvider>
+    <DiscreetModeProvider>
+      <SnackbarProvider>
+        <NetworkProvider>
+          <ConnectionProvider>
+            <NotificationProvider>
+              <TutorialProvider>
+                {/* SocketProvider is using SyncProvider */}
+                <SyncProvider>
+                  <SocketProvider>
+                    <FeedbackProvider>{children}</FeedbackProvider>
+                  </SocketProvider>
+                </SyncProvider>
+              </TutorialProvider>
+            </NotificationProvider>
+          </ConnectionProvider>
+        </NetworkProvider>
+      </SnackbarProvider>
+    </DiscreetModeProvider>
   );
 };
 

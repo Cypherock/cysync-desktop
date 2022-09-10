@@ -5,6 +5,7 @@ import { styled, useTheme } from '@mui/material/styles';
 import React from 'react';
 
 import { UsePortfolioValues } from '../../../../../store/hooks';
+import { useDiscreetMode } from '../../../../../store/provider';
 import formatDisplayAmount from '../../../../../utils/formatDisplayAmount';
 
 import DonutChart from './DonutChart';
@@ -86,6 +87,7 @@ const PortfolioCharts = ({
   series,
   isLoading
 }: Props) => {
+  const discreetMode = useDiscreetMode();
   const theme = useTheme();
 
   return (
@@ -117,13 +119,21 @@ const PortfolioCharts = ({
                 {`$ ${
                   coinHolding.length > 0
                     ? coinIndex !== 0
-                      ? formatDisplayAmount(coinHolding[coinIndex - 1], 2, true)
-                      : formatDisplayAmount(
-                          coinHolding.reduce((a: any, b: any) => {
-                            return a + b;
-                          }, 0),
-                          2,
-                          true
+                      ? discreetMode.handleSensitiveDataDisplay(
+                          formatDisplayAmount(
+                            coinHolding[coinIndex - 1],
+                            2,
+                            true
+                          )
+                        )
+                      : discreetMode.handleSensitiveDataDisplay(
+                          formatDisplayAmount(
+                            coinHolding.reduce((a: any, b: any) => {
+                              return a + b;
+                            }, 0),
+                            2,
+                            true
+                          )
                         )
                     : 0
                 }`}
@@ -145,8 +155,12 @@ const PortfolioCharts = ({
                 }}
               >
                 {sinceLastTotalPrice >= 0
-                  ? `+ $${sinceLastTotalPrice.toFixed(2)}`
-                  : `- $${Math.abs(sinceLastTotalPrice).toFixed(2)}`}
+                  ? `+ $${discreetMode.handleSensitiveDataDisplay(
+                      sinceLastTotalPrice.toFixed(2)
+                    )}`
+                  : `- $${discreetMode.handleSensitiveDataDisplay(
+                      Math.abs(sinceLastTotalPrice).toFixed(2)
+                    )}`}
               </Typography>
               <Typography
                 color="textSecondary"

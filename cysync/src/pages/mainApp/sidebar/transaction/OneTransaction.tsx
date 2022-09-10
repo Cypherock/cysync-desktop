@@ -10,6 +10,7 @@ import PopOverText from '../../../../designSystem/designComponents/hover/popover
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
+import { useDiscreetMode } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 
 const PREFIX = 'OneTransaction';
@@ -84,6 +85,8 @@ interface OneTransactionProps {
 
 const OneTransaction: React.FC<OneTransactionProps> = props => {
   const theme = useTheme();
+  const discreetMode = useDiscreetMode();
+
   const {
     date,
     time,
@@ -157,18 +160,18 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`${initial} ${formatDisplayAmount(amount, 4)}`}
+            text={`${initial} ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(amount, 4)
+            )}`}
             color="textPrimary"
-            hoverText={`${initial} ${formatDisplayAmount(
-              amount,
-              decimal,
-              true
+            hoverText={`${initial} ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(amount, decimal, true)
             )}`}
           />
         </Grid>
         <Grid item xs={1} className={classes.alignStartCenter}>
-          <Typography color="textPrimary">{`$ ${formatDisplayAmount(
-            value
+          <Typography color="textPrimary">{`$ ${discreetMode.handleSensitiveDataDisplay(
+            formatDisplayAmount(value)
           )}`}</Typography>
         </Grid>
         <Grid

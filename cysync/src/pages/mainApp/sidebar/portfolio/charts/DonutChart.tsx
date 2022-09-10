@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Chart from 'react-apexcharts';
 
+import { useDiscreetMode } from '../../../../../store/provider';
 import formatDisplayAmount from '../../../../../utils/formatDisplayAmount';
 
 type chartProps = {
@@ -20,6 +21,17 @@ const Donut: React.FC<chartProps> = ({
   currentCoinLabel
 }) => {
   const theme = useTheme();
+  const discreetMode = useDiscreetMode();
+
+  const handleSensitiveDataDisplay = React.useRef(
+    discreetMode.handleSensitiveDataDisplay
+  );
+
+  React.useEffect(() => {
+    handleSensitiveDataDisplay.current =
+      discreetMode.handleSensitiveDataDisplay;
+  }, [discreetMode.handleSensitiveDataDisplay]);
+
   const options: ApexOptions = {
     labels:
       labels.length > 0
@@ -41,7 +53,9 @@ const Donut: React.FC<chartProps> = ({
     tooltip: {
       y: {
         formatter(val) {
-          return `$ ${formatDisplayAmount(val, 2, true)}`;
+          return `$ ${handleSensitiveDataDisplay.current(
+            formatDisplayAmount(val, 2, true)
+          )}`;
         }
       }
     },
@@ -76,7 +90,9 @@ const Donut: React.FC<chartProps> = ({
                   },
                   0
                 );
-                return `$ ${formatDisplayAmount(total, 2, true)}`;
+                return `$ ${handleSensitiveDataDisplay.current(
+                  formatDisplayAmount(total, 2, true)
+                )}`;
               }
             }
           }
