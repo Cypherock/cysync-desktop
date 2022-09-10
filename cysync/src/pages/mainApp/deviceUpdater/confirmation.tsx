@@ -34,42 +34,42 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
   const { retryConnection, deviceConnectionState } = useConnection();
 
   const getHeading = () => {
-    const defaultText = 'Looks like the device is not configured.';
+    const defaultText = 'Looks like the device is not initialised';
     switch (deviceConnectionState) {
       case DeviceConnectionState.IN_TEST_APP:
-        return 'Looks like the device is not configured.';
+        return 'Looks like the device is not initialised';
       case DeviceConnectionState.IN_BOOTLOADER:
-        return 'Looks like your device was disconnected while upgrading.';
+        return 'Looks like your device was disconnected while updating';
       case DeviceConnectionState.PARTIAL_STATE:
-        return 'Looks like your device is not authenticated.';
+        return 'Looks like your device is not authenticated';
       case DeviceConnectionState.NEW_DEVICE:
-        return 'Looks like this device is connected for the first time.';
+        return 'Looks like this device is connected for the first time';
       case DeviceConnectionState.LAST_AUTH_FAILED:
-        return 'Looks like the device authentication failed the last time.';
+        return 'Looks like the device authentication failed the last time';
       case DeviceConnectionState.DEVICE_NOT_READY:
-        return 'Looks like the device is not in the main menu.';
+        return 'Looks like the device is not in the main menu';
       case DeviceConnectionState.UNKNOWN_ERROR:
-        return 'An unknown error occurred while connecting the device.';
+        return 'An unknown error occurred while connecting the device';
       case DeviceConnectionState.UPDATE_REQUIRED:
         if (updateRequiredType === 'app') {
-          return 'The current version of CySync is not compatible with the device connected.';
+          return 'The current version of CySync is not compatible with the device connected';
         }
 
         if (updateRequiredType === 'device') {
-          return 'The current version of X1 wallet is not compatible with this CySync.';
+          return 'The current version of X1 wallet is not compatible with this CySync';
         }
 
-        return 'The current versions of CySync and X1 wallet are not compatible.';
+        return 'The current versions of CySync and X1 wallet are not compatible';
       default:
         return defaultText;
     }
   };
 
   const getQuestion = () => {
-    const defaultText = 'Do you want to configure it now?';
+    const defaultText = 'Do you want to initialise it now?';
     switch (deviceConnectionState) {
       case DeviceConnectionState.IN_TEST_APP:
-        return 'Do you want to configure it now?';
+        return 'Do you want to initialise it now?';
       case DeviceConnectionState.IN_BOOTLOADER:
         return 'Do you want to complete the upgrade now?';
       case DeviceConnectionState.PARTIAL_STATE:
@@ -120,20 +120,16 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
     }
   };
 
-  const getNegativeBtnText = () => {
+  const getNegativeBtnText = (): string | undefined => {
     switch (deviceConnectionState) {
       case DeviceConnectionState.IN_TEST_APP:
       case DeviceConnectionState.IN_BOOTLOADER:
       case DeviceConnectionState.PARTIAL_STATE:
       case DeviceConnectionState.NEW_DEVICE:
       case DeviceConnectionState.LAST_AUTH_FAILED:
-        return 'No';
       case DeviceConnectionState.DEVICE_NOT_READY:
-        return 'Cancel';
       case DeviceConnectionState.UNKNOWN_ERROR:
-        return undefined;
       case DeviceConnectionState.UPDATE_REQUIRED:
-        return 'Cancel';
       default:
         return undefined;
     }

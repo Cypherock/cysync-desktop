@@ -613,7 +613,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         return 'Connect the device to attach device logs.';
       case DeviceConnectionState.IN_BOOTLOADER:
       case DeviceConnectionState.PARTIAL_STATE:
-        return 'Looks like your device was disconnected while upgrading.';
+        return 'Looks like your device was disconnected while updating.';
       case DeviceConnectionState.NEW_DEVICE:
         return 'Looks like this device is connected for the first time.';
       case DeviceConnectionState.LAST_AUTH_FAILED:

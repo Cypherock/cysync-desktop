@@ -57,7 +57,7 @@ const SelectWallet: React.FC<StepComponentProps> = ({ handleNext }) => {
       <TextView
         completed={coinAdder.coinsConfirmed}
         inProgress={!coinAdder.coinsConfirmed}
-        text="Verify the coins on the device"
+        text="Confirm the coins on the X1 wallet"
       />
       {connected || (
         <div style={{ marginTop: '10px' }} className={classes.center}>

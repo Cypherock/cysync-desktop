@@ -888,7 +888,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           <div className={recipientTotal}>
             <div>
               <Typography variant="subtitle1" color="secondary">
-                <small>TRANSACTION FEE:</small>
+                <small>TRANSACTION FEES:</small>
                 {` ~${formatDisplayAmount(sendTransaction.approxTotalFee)} `}
                 <span className="amountCurrency">
                   {coinDetails.slug.toUpperCase()}

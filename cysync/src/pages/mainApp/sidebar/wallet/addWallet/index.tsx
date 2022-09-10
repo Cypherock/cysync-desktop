@@ -196,7 +196,7 @@ const AddWallet = () => {
       />
       <div className={classes.content}>
         <Typography variant="h6" color="textSecondary" gutterBottom>
-          You can import 4 wallets on cySync from cypherock X1 device
+          You can import 4 wallet accounts on cySync from X1 wallet
         </Typography>
         <Button
           color="secondary"
