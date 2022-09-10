@@ -147,7 +147,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
         Analytics.Actions.COMPLETED
       );
       logger.info('InitialDeviceUpdate: Completed');
-      setTimeout(onClose, 1350);
+      setTimeout(onClose, 3000);
     }
   }, [isCompleted]);
 
@@ -278,7 +278,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
               align="center"
               style={{ marginBottom: '1.5rem' }}
             >
-              {`Wait while Cypherock X1 is Upgrading to version ${latestVersion}`}
+              {`Wait while Cypherock X1 is Updating to version ${latestVersion}`}
             </Typography>
             <div className={classes.center} style={{ margin: '15px 0' }}>
               <AlertIcon

@@ -105,7 +105,7 @@ const DialogBox: React.FC<Props> = ({
     useState<React.CSSProperties>({});
 
   useEffect(() => {
-    const transactionScreens = ['Add Coin', 'Send', 'Receive'];
+    const transactionScreens = ['Add Coin(s)', 'Send', 'Receive'];
     if (transactionScreens.includes(dialogHeading))
       setBottomMarginStyle({ marginBottom: '30px' });
   }, []);

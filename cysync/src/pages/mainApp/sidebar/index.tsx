@@ -272,6 +272,17 @@ const Sidebar = () => {
     }
   };
 
+  // Handle case when the tab is already selected
+  const onTabClick = (val: number) => {
+    if (value !== val) return;
+
+    const tab = TabValues.find(elem => elem.tab === val);
+
+    if (location.pathname !== tab.route) {
+      navigate(tab.route);
+    }
+  };
+
   // This sets the active tab when the route is changed outside of the sidebar component
   useEffect(() => {
     const pathTab = TabValues.find(elem =>
@@ -294,7 +305,7 @@ const Sidebar = () => {
 
   const onImportWallet = () => {
     setWalletIndex(-1);
-    navigate(Routes.wallet.index);
+    navigate(Routes.wallet.index + '?openImportWalletForm=true');
   };
 
   return (
@@ -310,6 +321,7 @@ const Sidebar = () => {
             label="Portfolio"
             wrapped={true}
             value={0}
+            onClick={() => onTabClick(0)}
             icon={
               <Icon size={21} viewBox="0 0 24 21" iconGroup={<Portfolio />} />
             }
@@ -319,6 +331,7 @@ const Sidebar = () => {
             label="Wallets"
             wrapped={true}
             value={2}
+            onClick={() => onTabClick(2)}
             icon={<Icon size={21} viewBox="0 0 24 21" iconGroup={<Wallet />} />}
           />
           <CustomCollapse
@@ -365,6 +378,7 @@ const Sidebar = () => {
           <Tab
             label="Transactions"
             wrapped={true}
+            onClick={() => onTabClick(5)}
             value={5}
             icon={
               <Icon
@@ -378,6 +392,7 @@ const Sidebar = () => {
           <Tab
             label="Tutorial"
             value={7}
+            onClick={() => onTabClick(7)}
             wrapped={true}
             icon={
               <Icon size={21} viewBox="0 0 24 21" iconGroup={<Tutorial />} />
@@ -388,6 +403,7 @@ const Sidebar = () => {
             label="Settings"
             value={9}
             wrapped={true}
+            onClick={() => onTabClick(9)}
             icon={
               <Icon size={21} viewBox="0 0 24 21" iconGroup={<Settings />} />
             }

@@ -83,7 +83,7 @@ const Portfolio = () => {
 
   const onAddWallet = () => {
     setOpen(false);
-    navigate(Routes.wallet.index);
+    navigate(Routes.wallet.index + '?openImportWalletForm=true');
   };
 
   return (
@@ -130,7 +130,7 @@ const Portfolio = () => {
               color="textPrimary"
               style={{ marginBottom: '2rem' }}
             >
-              Import a wallet from Cypherock X1
+              Import a wallet account from X1 wallet
             </Typography>
             <CustomButton
               style={{ padding: '0.5rem 2rem ' }}

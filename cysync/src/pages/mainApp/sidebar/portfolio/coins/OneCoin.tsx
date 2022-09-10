@@ -10,6 +10,7 @@ import Routes from '../../../../../constants/routes';
 import PopOverText from '../../../../../designSystem/designComponents/hover/popoverText';
 import colors from '../../../../../designSystem/designConstants/colors';
 import CoinIcons from '../../../../../designSystem/genericComponents/coinIcons';
+import { useDiscreetMode } from '../../../../../store/provider';
 import formatDisplayAmount from '../../../../../utils/formatDisplayAmount';
 
 const PREFIX = 'PortfolioOneCoin';
@@ -64,6 +65,7 @@ interface OneCoinProps {
 }
 
 const OneCoin: React.FC<OneCoinProps> = props => {
+  const discreetMode = useDiscreetMode();
   const {
     coinInitial,
     coinHolding,
@@ -122,23 +124,22 @@ const OneCoin: React.FC<OneCoinProps> = props => {
       </Grid>
       <Grid item xs={3} className={classes.alignStartCenter}>
         <PopOverText
-          text={`${formatDisplayAmount(
-            coinHolding,
-            4
+          text={`${discreetMode.handleSensitiveDataDisplay(
+            formatDisplayAmount(coinHolding, 4)
           )} ${coinInitial.toUpperCase()} `}
           color="textPrimary"
           variant="body2"
           className={classes.bold}
-          hoverText={`${formatDisplayAmount(
-            coinHolding,
-            decimal,
-            true
+          hoverText={`${discreetMode.handleSensitiveDataDisplay(
+            formatDisplayAmount(coinHolding, decimal, true)
           )} ${coinInitial.toUpperCase()}`}
         />
       </Grid>
       <Grid item xs={2} className={classes.alignStartCenter}>
         <Typography variant="body2" color="textPrimary">
-          <span className={classes.bold}>{`$ ${coinValue}`}</span>
+          <span
+            className={classes.bold}
+          >{`$ ${discreetMode.handleSensitiveDataDisplay(coinValue)}`}</span>
         </Typography>
       </Grid>
       <Grid item xs={2} className={classes.alignStartCenter}>
@@ -151,7 +152,7 @@ const OneCoin: React.FC<OneCoinProps> = props => {
           variant="h6"
           style={{ color: color[index % 3], fontWeight: 700 }}
         >
-          {coinPortfolio}
+          {discreetMode.handleSensitiveDataDisplay(coinPortfolio)}
         </Typography>
       </Grid>
     </Root>

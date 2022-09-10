@@ -171,7 +171,7 @@ const Verify = (props: any) => {
               verified={sendTransaction.pinEntered}
             />
             <LabelText
-              label="Receiver"
+              label="Recipient"
               text={batchRecipientData[0].recipient}
               verified={sendTransaction.verified}
             />

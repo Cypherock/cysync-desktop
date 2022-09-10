@@ -110,7 +110,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
       <TextView
         completed={receiveTransaction.pathSent}
         inProgress={!receiveTransaction.pathSent}
-        text="Fetching a new address from the wallet"
+        text="Fetching a new address from the X1 wallet"
       />
       <TextView
         completed={receiveTransaction.coinsConfirmed}

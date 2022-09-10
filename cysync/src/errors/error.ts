@@ -43,7 +43,7 @@ class DisplayError {
     const sentences = this.message.split('.');
     if (sentences.length > 1) return sentences[1];
     logger.warn(`Action Message not found for error: ${this.showError()}`);
-    return 'Please restart the process altogether and try again.';
+    return 'Please restart the operation altogether and try again.';
   }
 }
 /* tslint:disable-next-line */

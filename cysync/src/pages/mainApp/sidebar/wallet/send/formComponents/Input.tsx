@@ -122,6 +122,7 @@ type InputProps = {
   customIconStyle?: object | undefined;
   showLoading?: boolean;
   items?: string[];
+  onKeyDown?: (event: any) => void;
 };
 
 const Input: React.FC<InputProps> = ({
@@ -144,7 +145,8 @@ const Input: React.FC<InputProps> = ({
   customIcon,
   customIconStyle,
   showLoading,
-  items
+  items,
+  onKeyDown
 }) => {
   const onInput = (event: any) => {
     let isChanged = true;
@@ -199,6 +201,7 @@ const Input: React.FC<InputProps> = ({
         {optionalElement}
       </div>
       <ValidationTextField
+        onKeyDown={onKeyDown}
         spellCheck={false}
         onWheel={(e: any) => e.target.blur()}
         disabled={disabled}

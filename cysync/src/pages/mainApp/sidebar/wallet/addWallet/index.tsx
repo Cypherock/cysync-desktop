@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import Routes from '../../../../../constants/routes';
 import ErrorBox from '../../../../../designSystem/designComponents/dialog/errorDialog';
@@ -55,8 +55,10 @@ const Root = styled(Grid)(() => ({
 }));
 
 const AddWallet = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { allWallets } = useWallets();
+
+  const { allWallets, isLoading: isWalletLoading } = useWallets();
 
   const [disableImportWallet, setDisableImportWallet] = useState(false);
 
@@ -164,6 +166,17 @@ const AddWallet = () => {
     await updateName();
   };
 
+  const openImportWalletForm = searchParams.get('openImportWalletForm');
+
+  useEffect(() => {
+    if (openImportWalletForm === 'true' && !isWalletLoading) {
+      if (allWallets.length < 4) {
+        handleOpen();
+      }
+      setSearchParams({});
+    }
+  }, [openImportWalletForm, isWalletLoading]);
+
   return (
     <Root container className={classes.root}>
       <ErrorBox
@@ -183,7 +196,7 @@ const AddWallet = () => {
       />
       <div className={classes.content}>
         <Typography variant="h6" color="textSecondary" gutterBottom>
-          You can import 4 wallets on cySync from cypherock X1 device
+          You can import 4 wallet accounts on cySync from X1 wallet
         </Typography>
         <Button
           color="secondary"

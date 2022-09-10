@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import React from 'react';
 import Chart from 'react-apexcharts';
 
+import { useDiscreetMode } from '../../../../../store/provider';
 import formatDisplayAmount from '../../../../../utils/formatDisplayAmount';
 
 const PREFIX = 'LineChart';
@@ -48,7 +49,17 @@ const Root = styled('div')(({ theme }) => ({
 }));
 
 const ApexChart = (props: any) => {
+  const discreetMode = useDiscreetMode();
   const theme = useTheme();
+
+  const handleSensitiveDataDisplay = React.useRef(
+    discreetMode.handleSensitiveDataDisplay
+  );
+
+  React.useEffect(() => {
+    handleSensitiveDataDisplay.current =
+      discreetMode.handleSensitiveDataDisplay;
+  }, [discreetMode.handleSensitiveDataDisplay]);
 
   const { timeActiveButton, setTimeActive, series } = props;
 
@@ -135,7 +146,12 @@ const ApexChart = (props: any) => {
         show: false
       },
       y: {
-        formatter: (data: any) => `$ ${formatDisplayAmount(data, 2, true)}`,
+        formatter: (data: any) => {
+          return `$ ${handleSensitiveDataDisplay.current(
+            formatDisplayAmount(data, 2, true)
+          )}`;
+        },
+
         title: {
           formatter: (seriesName: any) => `${seriesName.toUpperCase()} : `
         }
@@ -151,7 +167,9 @@ const ApexChart = (props: any) => {
           fontWeight: 600
         },
         formatter(value: any) {
-          return `$ ${formatDisplayAmount(value, 2, true)}`;
+          return `$ ${handleSensitiveDataDisplay.current(
+            formatDisplayAmount(value, 2, true)
+          )}`;
         }
       }
     },

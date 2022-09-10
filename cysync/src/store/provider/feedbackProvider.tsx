@@ -1,6 +1,6 @@
 import { DeviceError, DeviceErrorType } from '@cypherock/communication';
 import { feedback as feedbackServer } from '@cypherock/server-wrapper';
-import { CheckCircle, Error } from '@mui/icons-material';
+import { CheckCircle } from '@mui/icons-material';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { CircularProgress, createSvgIcon, Grid } from '@mui/material';
 import Alert from '@mui/material/Alert';
@@ -271,6 +271,11 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     handleClose: _handleClose,
     disableDeviceLogs
   } = {}) => {
+    if (recording) {
+      setIsOpen(true);
+      logger.info('showFeedback triggered while recording');
+      return;
+    }
     resetFeedbackState();
     resetRecordingState();
 
@@ -464,7 +469,20 @@ export const FeedbackProvider: React.FC = ({ children }) => {
           data.deviceLogs = await getDeviceLogs();
         }
         if (attachmentBuffer) {
-          data.attachmentUrls = [await submitAttachment()];
+          const { url, error } = await submitAttachment();
+          if (error) {
+            Analytics.Instance.event(
+              Analytics.Categories.FEEDBACK,
+              Analytics.Actions.ERROR
+            );
+            setSubmitted(false);
+            setSubmitting(false);
+            setError(error);
+            logger.error('Feedback: Error');
+            logger.error(error);
+            return;
+          }
+          data.attachmentUrls = [url];
         }
 
         await feedbackServer.send(data).request();
@@ -529,6 +547,17 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     }
   };
 
+  const ENTER_KEY = 13;
+  const handleKeyPress = (event: any) => {
+    if (deviceLogsLoading || submitting) {
+      return;
+    }
+
+    if (event.keyCode === ENTER_KEY) {
+      handleSubmit(feedbackInput);
+    }
+  };
+
   const startRecording = async () => {
     setRecording(true);
     const recorderObj = await initRecorder();
@@ -556,12 +585,21 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         .request();
       const recordingUrl = response.data.key;
       setUploadAttachmentStatus(2);
-      return recordingUrl;
+      return { url: recordingUrl as string };
     } catch (e: any) {
       logger.error('Error uploading attachment');
       logger.error(e);
       setUploadAttachmentStatus(-1);
-      throw e;
+      let error = 'Failed to upload attachment, try again later.';
+      if (e?.isAxiosError) {
+        if (e?.response.status === 406) {
+          error =
+            'Invalid attachment type, only videos and images are supported.';
+        } else if (e?.response.status === 413) {
+          error = 'Failed to upload attachment, attachment is too large.';
+        }
+      }
+      return { error };
     }
   };
 
@@ -613,7 +651,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         return 'Connect the device to attach device logs.';
       case DeviceConnectionState.IN_BOOTLOADER:
       case DeviceConnectionState.PARTIAL_STATE:
-        return 'Looks like your device was disconnected while upgrading.';
+        return 'Looks like your device was disconnected while updating.';
       case DeviceConnectionState.NEW_DEVICE:
         return 'Looks like this device is connected for the first time.';
       case DeviceConnectionState.LAST_AUTH_FAILED:
@@ -629,67 +667,77 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     }
   };
 
-  const getAttachmentComponent = () => {
+  const removeAttachment = () => {
+    setAttachmentBuffer(undefined);
+    setAttachmentMimeType(undefined);
+  };
+
+  const getAttachmentActions = () => {
     switch (uploadAttachmentStatus) {
       case 1:
         return (
-          <CustomButton disabled>
-            Uploading <CircularProgress />
-          </CustomButton>
+          <>
+            <CustomButton disabled endIcon={<CircularProgress size={20} />}>
+              Uploading
+            </CustomButton>
+          </>
         );
       case 2:
         return (
-          <CustomButton disabled>
-            Uploaded <CheckCircle />
-          </CustomButton>
-        );
-      case -1:
-        return (
-          <CustomButton disabled>
-            Upload failed <Error />
-          </CustomButton>
-        );
-    }
-    if (recording)
-      return (
-        <div>
-          <CustomButton disabled>
-            Recording <CircularProgress />{' '}
-          </CustomButton>
-        </div>
-      );
-    // Embed the recorded video from buffer
-    if (attachmentBuffer && attachmentMimeType) {
-      const sourceString = `data:${attachmentMimeType};base64,${attachmentBuffer.toString(
-        'base64'
-      )}`;
-      return (
-        <div>
-          <div>
-            <CustomButton
-              onClick={() => {
-                setAttachmentBuffer(undefined);
-              }}
-            >
-              Remove Attachment
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              width: '100%'
+            }}
+          >
+            {attachmentBuffer && attachmentMimeType && (
+              <CustomButton disabled={submitting} onClick={removeAttachment}>
+                Remove Attachment
+              </CustomButton>
+            )}
+            <CustomButton disabled endIcon={<CheckCircle />}>
+              Uploaded
             </CustomButton>
           </div>
-          {attachmentMimeType.includes('video') ? (
-            <video controls style={{ width: '100%' }}>
-              <source type={attachmentMimeType} src={sourceString} />
-            </video>
-          ) : (
-            <img
-              src={sourceString}
-              alt="attachment"
-              style={{ width: '100%' }}
-            />
-          )}
+        );
+    }
+
+    if (recording)
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            width: '100%'
+          }}
+        >
+          <CustomButton disabled endIcon={<CircularProgress size={20} />}>
+            Recording
+          </CustomButton>
+          <CustomButton onClick={stopRecording}>Stop Recording</CustomButton>
+        </div>
+      );
+
+    // Embed the recorded video from buffer
+    if (attachmentBuffer && attachmentMimeType) {
+      return (
+        <div>
+          <CustomButton onClick={removeAttachment} disabled={submitting}>
+            Remove Attachment
+          </CustomButton>
         </div>
       );
     }
+
     return (
-      <>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          width: '100%'
+        }}
+      >
         <CustomButton
           onClick={() => {
             attachmentEl.current.click();
@@ -704,8 +752,18 @@ export const FeedbackProvider: React.FC = ({ children }) => {
           placeholder="upload file"
           accept="image/png, image/jpeg, video/mp4"
           onChange={async (e: any) => {
-            const file = new Blob([e.target.files[0]], {
-              type: e.target.files[0].type
+            const rawFile = e.target.files[0];
+            if (
+              !(
+                rawFile.type.includes('image') || rawFile.type.includes('video')
+              )
+            ) {
+              setError('Select images or videos as attachment.');
+              return;
+            }
+
+            const file = new Blob([rawFile], {
+              type: rawFile.type
             });
             const fileBuffer = Buffer.from(await file.arrayBuffer());
             setAttachmentMimeType(e.target.files[0].type);
@@ -713,8 +771,32 @@ export const FeedbackProvider: React.FC = ({ children }) => {
           }}
         />
         <CustomButton onClick={startRecording}>Start Recording</CustomButton>
-      </>
+      </div>
     );
+  };
+
+  const getAttachmentComponent = () => {
+    if (attachmentBuffer && attachmentMimeType) {
+      const sourceString = `data:${attachmentMimeType};base64,${attachmentBuffer.toString(
+        'base64'
+      )}`;
+
+      if (attachmentMimeType.includes('video')) {
+        return (
+          <video controls style={{ width: '100%', marginTop: '4px' }}>
+            <source type={attachmentMimeType} src={sourceString} />
+          </video>
+        );
+      } else {
+        return (
+          <img
+            src={sourceString}
+            alt="attachment"
+            style={{ width: '100%', marginTop: '4px' }}
+          />
+        );
+      }
+    }
   };
 
   return (
@@ -774,6 +856,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     placeholder={"What's about it?"}
                     value={feedbackInput.subject}
                     onChange={handleChange}
+                    onKeyDown={handleKeyPress}
                   />
                   {feedbackInput.subjectError.length > 0 && (
                     <Typography
@@ -794,6 +877,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     placeholder="Your email"
                     value={feedbackInput.email}
                     onChange={handleChange}
+                    onKeyDown={handleKeyPress}
                   />
                   {feedbackInput.emailError.length > 0 && (
                     <Typography
@@ -858,6 +942,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     value={feedbackInput.description}
                     onChange={handleChange}
                     className={classes.padBottom}
+                    onKeyDown={handleKeyPress}
                   />
                   {feedbackInput.descriptionError.length > 0 && (
                     <Typography
@@ -868,7 +953,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     </Typography>
                   )}
                   <Grid container>
-                    <Grid item>{getAttachmentComponent()}</Grid>
+                    <Grid item xs={12}>
+                      {getAttachmentActions()}
+                      {getAttachmentComponent()}
+                    </Grid>
                   </Grid>
 
                   <Grid container className={classes.extras}>
@@ -988,7 +1076,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                   )}
                   <Grid container className={classes.buttonGroup}>
                     <CustomButton
-                      disabled={deviceLogsLoading || submitting}
+                      disabled={deviceLogsLoading || submitting || recording}
                       onClick={() => {
                         handleSubmit(feedbackInput);
                       }}

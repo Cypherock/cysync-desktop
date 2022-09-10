@@ -82,7 +82,7 @@ const AddWalletForm: React.FC<AddWalletFormProps> = ({
               <Typography color="error" style={{ display: 'flex' }}>
                 <ErrorOutlineIcon style={{ marginRight: '0.5rem' }} />
                 <span>
-                  {` No wallet found on X1 wallet, Add a wallet on device
+                  {` No wallet account found on X1 wallet, Add a wallet account on X1 wallet
                   first`}
                 </span>
               </Typography>
@@ -100,7 +100,7 @@ const AddWalletForm: React.FC<AddWalletFormProps> = ({
               <TextView
                 completed={!!walletName}
                 inProgress={!walletName}
-                text="Select the Wallet on Device which you want to import"
+                text="Select the wallet account on X1 wallet which you want to import"
               />
             </div>
           </>
@@ -118,7 +118,7 @@ const AddWalletForm: React.FC<AddWalletFormProps> = ({
                 marginTop: '1rem'
               }}
             >
-              {`Wallet ${walletName} added successfully`}
+              {`Wallet account '${walletName}' added successfully`}
             </Typography>
             <CustomButton
               disableRipple

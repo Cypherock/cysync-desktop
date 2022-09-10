@@ -229,6 +229,7 @@ type BatchRecipientProps = {
   handleCopyFromClipboard: (id: string) => void;
   index: number;
   allowDelete: boolean;
+  handleKeyPress: (e: any) => void;
 };
 
 const BatchRecipient: React.FC<BatchRecipientProps> = props => {
@@ -246,7 +247,8 @@ const BatchRecipient: React.FC<BatchRecipientProps> = props => {
     coinAbbr,
     handleCopyFromClipboard,
     index,
-    allowDelete
+    allowDelete,
+    handleKeyPress
   } = props;
   const coin = COINS[coinAbbr];
   if (!coin) throw new Error(`Cannot find coinType: ${coinAbbr}`);
@@ -254,9 +256,10 @@ const BatchRecipient: React.FC<BatchRecipientProps> = props => {
     <Grid container spacing={2}>
       <Grid item xs={6}>
         <Input
+          onKeyDown={handleKeyPress}
           id={id}
           name="reciever_addr"
-          label={`Receiver's Address ${index}`}
+          label={`Recipient's Address ${index}`}
           value={recipient.recipient}
           error={recipient.errorRecipient.length !== 0}
           helperText={
@@ -271,6 +274,7 @@ const BatchRecipient: React.FC<BatchRecipientProps> = props => {
       </Grid>
       <Grid item xs={5}>
         <Input
+          onKeyDown={handleKeyPress}
           id={id}
           name="amount"
           label="Amount"
@@ -330,7 +334,8 @@ BatchRecipient.propTypes = {
   coinAbbr: PropTypes.string.isRequired,
   handleCopyFromClipboard: PropTypes.func.isRequired,
   index: PropTypes.number.isRequired,
-  allowDelete: PropTypes.bool.isRequired
+  allowDelete: PropTypes.bool.isRequired,
+  handleKeyPress: PropTypes.func.isRequired
 };
 
 const Recipient: React.FC<StepComponentProps> = props => {
@@ -567,6 +572,21 @@ const Recipient: React.FC<StepComponentProps> = props => {
     }
   };
 
+  const ENTER_KEY = 13;
+  const handleKeyPress = (event: any) => {
+    if (
+      buttonDisabled ||
+      isButtonLoading ||
+      sendTransaction.estimationError !== undefined ||
+      !connected
+    ) {
+      return;
+    }
+    if (event.keyCode === ENTER_KEY) {
+      handleRecipientSubmit();
+    }
+  };
+
   const getFeeErrorInfo = () => {
     return (
       <div
@@ -613,6 +633,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     return (
       <>
         <Input
+          onKeyDown={handleKeyPress}
           placeHolder="Enter transaction fees"
           onChange={handleTransactionFeeChange}
           type="number"
@@ -682,9 +703,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
       {activeButton === 0 ? (
         <div className={singleTransaction}>
           <Input
+            onKeyDown={handleKeyPress}
             name="reciever_addr"
             id="1"
-            label="Receiver's Address"
+            label="Recipient's Address"
             onChange={e => {
               handleInputChange(e);
               debouncedHandleCheckAddresses();
@@ -703,6 +725,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             }}
           />
           <Input
+            onKeyDown={handleKeyPress}
             id="1"
             name="amount"
             type="number"
@@ -768,6 +791,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               />
 
               <Input
+                onKeyDown={handleKeyPress}
                 id="1"
                 name="gaslimit"
                 type="number"
@@ -790,6 +814,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               return (
                 <div key={recipient.id}>
                   <BatchRecipient
+                    handleKeyPress={handleKeyPress}
                     handleDelete={handleDelete}
                     handleChange={e => {
                       handleInputChange(e);
@@ -888,7 +913,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           <div className={recipientTotal}>
             <div>
               <Typography variant="subtitle1" color="secondary">
-                <small>TRANSACTION FEE:</small>
+                <small>TRANSACTION FEES:</small>
                 {` ~${formatDisplayAmount(sendTransaction.approxTotalFee)} `}
                 <span className="amountCurrency">
                   {coinDetails.slug.toUpperCase()}
