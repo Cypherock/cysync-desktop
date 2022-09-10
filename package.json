@@ -27,6 +27,8 @@
     "fs-extra": "^10.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.1.2",
+    "@commitlint/config-conventional": "^17.1.0",
     "husky": "^7.0.4",
     "prettier": "^2.5.1"
   }
