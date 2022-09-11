@@ -5,7 +5,6 @@ import clsx from 'clsx';
 import React from 'react';
 import Chart from 'react-apexcharts';
 
-import DropMenu from '../../../../../designSystem/designComponents/menu/DropMenu';
 import { useDiscreetMode } from '../../../../../store/provider';
 import formatDisplayAmount from '../../../../../utils/formatDisplayAmount';
 
@@ -62,21 +61,10 @@ const ApexChart = (props: any) => {
       discreetMode.handleSensitiveDataDisplay;
   }, [discreetMode.handleSensitiveDataDisplay]);
 
-  const {
-    timeActiveButton,
-    setTimeActive,
-    coinList,
-    coinIndex,
-    setCoinIndex,
-    series
-  } = props;
+  const { timeActiveButton, setTimeActive, series } = props;
 
   const handleButtonChange = (selectedIndex: number) => {
     setTimeActive(selectedIndex);
-  };
-
-  const handleMenuItemSelectionChange = (selectedIndex: number) => {
-    setCoinIndex(selectedIndex);
   };
 
   const options: ApexOptions = {
@@ -246,12 +234,6 @@ const ApexChart = (props: any) => {
   return (
     <Root className={classes.root}>
       <div className={classes.mapNavigation}>
-        <DropMenu
-          options={coinList.map((item: any) => item.toUpperCase())}
-          handleMenuItemSelectionChange={handleMenuItemSelectionChange}
-          index={coinIndex}
-          bg={false}
-        />
         <div className={classes.buttons}>
           <Button
             variant="outlined"
