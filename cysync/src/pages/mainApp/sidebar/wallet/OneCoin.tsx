@@ -274,12 +274,22 @@ const OneCoin: React.FC<OneCoinProps> = ({
           />
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
-          <Typography color="textPrimary">{`$ ${discreetMode.handleSensitiveDataDisplay(
-            value
-          )}`}</Typography>
+          <PopOverText
+            text={`$ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(value, 2, true)
+            )}`}
+            color="textPrimary"
+            hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(value, undefined, true)
+            )} `}
+          />
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
-          <Typography color="textPrimary">{`$ ${price}`}</Typography>
+          <PopOverText
+            text={`$ ${formatDisplayAmount(price, 2, true)}`}
+            color="textPrimary"
+            hoverText={`$ ${formatDisplayAmount(price, undefined, true)} `}
+          />
         </Grid>
         <Grid item xs={2} className={classes.actions}>
           <Button

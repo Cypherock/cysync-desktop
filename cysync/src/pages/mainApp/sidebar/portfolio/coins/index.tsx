@@ -96,7 +96,7 @@ const PortfolioCoins = ({
           <OneCoin
             coinInitial={data.name}
             coinValue={data.value}
-            coinPrice={new BigNumber(data.price).toFixed(2)}
+            coinPrice={data.price}
             coinPortfolio={calcCoinPortfolio(data)}
             coinHolding={data.balance}
             decimal={data.decimal}

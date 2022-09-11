@@ -71,8 +71,8 @@ export const useWalletData: UseWalletData = () => {
 
       const latestPrice = coin.price;
       const value = balance.multipliedBy(latestPrice || 0);
-      coinWithPrice.displayValue = value.toFixed(2);
-      coinWithPrice.displayPrice = latestPrice.toFixed(2) || '0';
+      coinWithPrice.displayValue = value.toString();
+      coinWithPrice.displayPrice = latestPrice.toString() || '0';
       coinWithPrice.isEmpty = balance.isZero();
 
       mappedCoins.push(coinWithPrice);
