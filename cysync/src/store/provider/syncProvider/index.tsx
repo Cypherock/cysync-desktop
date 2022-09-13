@@ -586,7 +586,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       }
       let latestPriceResult: ExecutionResult[] = [];
       if (latestPriceItems.length > 0) {
-        latestPriceResult = await executeLatestPriceBatch(items, {
+        latestPriceResult = await executeLatestPriceBatch(latestPriceItems, {
           addToQueue,
           addPriceSyncItemFromCoin,
           addLatestPriceSyncItemFromCoin
