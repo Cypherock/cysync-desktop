@@ -1,5 +1,6 @@
 import {
   batch as batchServer,
+  client as clientServer,
   IRequestMetadata
 } from '@cypherock/server-wrapper';
 import { flatMap } from 'lodash';
@@ -33,12 +34,14 @@ export interface ExecutionResult {
   canRetry?: boolean;
   error?: Error;
   processResult?: any;
+  delay?: number;
 }
 
 export interface OptionParams {
   addToQueue: SyncProviderTypes['addToQueue'];
   addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'];
   addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
+  clientItems?: boolean;
 }
 
 const getAllMetadata = (items: SyncQueueItem[]) => {
@@ -82,9 +85,21 @@ const getBatchResponses = async (
   return batchServer.create(allMetadata);
 };
 
+const getClientResponses = async (
+  allMetadataInfo: RequestMetaProcessInfo[]
+): Promise<clientServer.IClientResponse[]> => {
+  const allMetadata = flatMap(allMetadataInfo.map(elem => elem.meta));
+
+  if (allMetadata.length <= 0) {
+    return Promise.resolve([]);
+  }
+
+  return clientServer.create(allMetadata);
+};
+
 const getAllProcessResponses = async (
   allMetadataInfo: RequestMetaProcessInfo[],
-  responses: batchServer.IBatchResponse[],
+  responses: Array<batchServer.IBatchResponse | clientServer.IClientResponse>,
   options: OptionParams
 ) => {
   let responseIndex = 0;
@@ -103,6 +118,7 @@ const getAllProcessResponses = async (
     const { item } = meta;
 
     let canRetry = false;
+    let delay;
     try {
       let processResult: any;
       const resList = responses.slice(
@@ -114,6 +130,7 @@ const getAllProcessResponses = async (
       for (const res of resList) {
         if (res.isFailed) {
           // If the error is anything other than network error, no need to retry
+          delay = (res as clientServer.IClientResponse).delay;
           canRetry = true;
           throw new Error(JSON.stringify(res.data));
         }
@@ -155,7 +172,8 @@ const getAllProcessResponses = async (
         item: meta.item,
         isFailed: true,
         error,
-        canRetry
+        canRetry,
+        delay
       });
     }
   }
@@ -177,9 +195,13 @@ export const executeBatch = async (
     );
   }
 
-  let allResponses: batchServer.IBatchResponse[] = [];
+  let allResponses: Array<
+    batchServer.IBatchResponse | clientServer.IClientResponse
+  > = [];
   try {
-    allResponses = await getBatchResponses(allMetadataInfo);
+    if (options.clientItems)
+      allResponses = await getClientResponses(allMetadataInfo);
+    else allResponses = await getBatchResponses(allMetadataInfo);
   } catch (error) {
     return allMetadataInfo.map(elem => {
       const result: ExecutionResult = {
