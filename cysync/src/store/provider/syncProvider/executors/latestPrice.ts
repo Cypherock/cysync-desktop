@@ -24,6 +24,21 @@ export const getRequestsMetadata = (
   return [pricingMetadata];
 };
 
+export const getBatchRequestsMetadata = (
+  items: LatestPriceSyncItem[]
+): IRequestMetadata[] => {
+  const pricingMetadata = pricingServer
+    .getLatest(
+      {
+        coin: items.map(item => item.id).toString()
+      },
+      true
+    )
+    .getMetadata();
+
+  return [pricingMetadata];
+};
+
 export const processResponses = async (
   item: LatestPriceSyncItem,
   responses: batchServer.IBatchResponse[]

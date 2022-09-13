@@ -24,7 +24,11 @@ import {
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
-import { executeBatch, ExecutionResult } from './executors';
+import {
+  executeBatch,
+  executeLatestPriceBatch,
+  ExecutionResult
+} from './executors';
 import {
   BalanceSyncItem,
   ClientTimeoutInterface,
@@ -565,9 +569,11 @@ export const SyncProvider: React.FC = ({ children }) => {
       return [];
     }
 
-    const items = syncQueue
-      .filter(item => item.type === 'price' || item.type === 'latestPrice')
-      .splice(0, 1);
+    const latestPriceItems = syncQueue.filter(
+      item => item.type === 'latestPrice'
+    );
+
+    const items = syncQueue.filter(item => item.type === 'price').splice(0, 1);
 
     if (items.length <= 0) {
       return [];
@@ -578,6 +584,14 @@ export const SyncProvider: React.FC = ({ children }) => {
         await sleep(clientTimeout.current.tryAfter);
         clientTimeout.current.pause = false;
       }
+      let latestPriceResult: ExecutionResult[] = [];
+      if (latestPriceItems.length > 0) {
+        latestPriceResult = await executeLatestPriceBatch(items, {
+          addToQueue,
+          addPriceSyncItemFromCoin,
+          addLatestPriceSyncItemFromCoin
+        });
+      }
       const executionResult = await executeBatch(items, {
         addToQueue,
         addPriceSyncItemFromCoin,
@@ -585,7 +599,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         clientItems: true
       });
 
-      return executionResult;
+      return [...latestPriceResult, ...executionResult];
     } catch (error) {
       // Since all the tasks for an item are closely related, I understand why this is being done.
       // TODO: But we should aim to do better to handle a single failing.

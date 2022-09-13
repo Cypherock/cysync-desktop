@@ -217,3 +217,66 @@ export const executeBatch = async (
 
   return getAllProcessResponses(allMetadataInfo, allResponses, options);
 };
+
+export const executeLatestPriceBatch = async (
+  items: SyncQueueItem[],
+  options: OptionParams
+): Promise<ExecutionResult[]> => {
+  if (items.length <= 0) return [];
+
+  const metadata = getLatestPriceMetadata(items);
+  const allMetadataInfo = getAllMetadata(items);
+  if (allMetadataInfo.length !== items.length) {
+    throw new Error(
+      'allMetadataInfo length should be equal to items: ' +
+        allMetadataInfo.length
+    );
+  }
+
+  const allResponses: Array<
+    batchServer.IBatchResponse | clientServer.IClientResponse
+  > = [];
+
+  try {
+    const response = await getClientResponses([metadata]);
+    for (let i = 0; i < items.length; i++) {
+      allResponses.push(response[0]);
+    }
+  } catch (error) {
+    return allMetadataInfo.map(elem => {
+      const result: ExecutionResult = {
+        item: elem.item,
+        isFailed: true,
+        canRetry: !elem.isFailed,
+        error: elem.error || error
+      };
+      return result;
+    });
+  }
+
+  return getAllProcessResponses(allMetadataInfo, allResponses, options);
+};
+
+const getLatestPriceMetadata = (
+  items: SyncQueueItem[]
+): RequestMetaProcessInfo => {
+  const validItems: LatestPriceSyncItem[] = [];
+
+  for (const item of items) {
+    try {
+      if (item instanceof LatestPriceSyncItem) {
+        validItems.push(item);
+      } else {
+        throw new Error('Invalid sync item');
+      }
+    } catch (error) {
+      return { meta: [], isFailed: true, error, item };
+    }
+  }
+  try {
+    const meta = latestPriceExecutor.getBatchRequestsMetadata(validItems);
+    return { meta, isFailed: false, item: items[0] };
+  } catch (error) {
+    return { meta: [], isFailed: true, error, item: items[0] };
+  }
+};
