@@ -243,6 +243,9 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
   if (!txn) return <></>;
 
+  //used for displaying eth or erc20Tokens addresses in lower case
+  const isEth =
+    txn.slug.toLowerCase() === 'eth' || txn.coin.toLowerCase() === 'eth';
   return (
     <Root>
       <div className={classes.dateTimeContainer}>
@@ -344,7 +347,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {elem.address}
+                      {isEth ? elem.address.toLowerCase() : elem.address}
                     </Typography>
                     <Typography
                       style={{ userSelect: 'text' }}
@@ -383,7 +386,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {elem.address}
+                      {isEth ? elem.address.toLowerCase() : elem.address}
                     </Typography>
                     <Typography
                       style={{ userSelect: 'text' }}

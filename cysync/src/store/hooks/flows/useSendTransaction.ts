@@ -81,7 +81,7 @@ export const broadcastTxn = async (
     if (resp.status === 0) {
       throw new Error('brodcast-failed');
     }
-    return resp.data.result.toUpperCase();
+    return resp.data.result;
   } else if (coin instanceof NearCoinData) {
     const resp = await Server.near.transaction
       .broadcastTxn({
@@ -734,7 +734,7 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       if (token) {
         tx = {
-          hash: txHash.toLowerCase(),
+          hash: txHash,
           amount: amount.toString(),
           total: amount.toString(),
           fees: fees.toString(),
@@ -750,7 +750,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputs: formattedOutputs
         };
         const feeTxn: Transaction = {
-          hash: txHash.toLowerCase(),
+          hash: txHash,
           amount: fees.toString(),
           total: fees.toString(),
           fees: '0',
@@ -766,7 +766,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         transactionDb.insert(feeTxn);
       } else {
         tx = {
-          hash: coin.toLowerCase() === 'near' ? txHash : txHash.toLowerCase(),
+          hash: txHash,
           amount: amount.toString(),
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
@@ -840,7 +840,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       }
 
       const tx: Transaction = {
-        hash: txHash.toLowerCase(),
+        hash: txHash,
         amount: amount.toString(),
         total: amount.plus(fees).toString(),
         fees: fees.toString(),
