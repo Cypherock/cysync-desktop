@@ -24,9 +24,14 @@ import {
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
-import { executeBatch, ExecutionResult } from './executors';
+import {
+  executeBatch,
+  executeLatestPriceBatch,
+  ExecutionResult
+} from './executors';
 import {
   BalanceSyncItem,
+  ClientTimeoutInterface,
   CustomAccountSyncItem,
   HistorySyncItem,
   LatestPriceSyncItem,
@@ -94,6 +99,11 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const { connected } = useNetwork();
   const connectedRef = useRef<boolean | null>(connected);
+
+  const clientTimeout = useRef<ClientTimeoutInterface>({
+    pause: false,
+    tryAfter: 0
+  });
 
   useEffect(() => {
     connectedRef.current = connected;
@@ -384,6 +394,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         for (const days of [7, 30, 365] as Array<
           PriceSyncItemOptions['days']
         >) {
+          if (days === 7 && coinData.coinGeckoId) continue;
           const oldPrices = await priceHistoryDb.getOne({
             slug: coinData.abbr,
             interval: days
@@ -479,7 +490,9 @@ export const SyncProvider: React.FC = ({ children }) => {
         if (item.retries < maxRetries && result.canRetry) {
           logger.warn('Sync: Error, retrying...', { item });
           updatedItem.retries += 1;
-
+          if (result.delay) {
+            clientTimeout.current = { pause: true, tryAfter: result.delay };
+          }
           updateQueueItem = true;
           removeFromQueue = false;
         } else {
@@ -551,23 +564,68 @@ export const SyncProvider: React.FC = ({ children }) => {
     });
   };
 
-  const executeNextInQueue = async () => {
-    setIsExecutingTask(true);
+  const executeNextClientItemInQueue = async () => {
     if (!connected) {
-      await sleep(queueExecuteInterval);
-      setIsExecutingTask(false);
-      return;
+      return [];
+    }
+
+    const latestPriceItems = syncQueue.filter(
+      item => item.type === 'latestPrice'
+    );
+
+    const items = syncQueue.filter(item => item.type === 'price').splice(0, 1);
+
+    if (items.length <= 0) {
+      return [];
+    }
+
+    try {
+      if (clientTimeout.current.pause) {
+        await sleep(clientTimeout.current.tryAfter);
+        clientTimeout.current.pause = false;
+      }
+      let latestPriceResult: ExecutionResult[] = [];
+      if (latestPriceItems.length > 0) {
+        latestPriceResult = await executeLatestPriceBatch(
+          latestPriceItems as LatestPriceSyncItem[],
+          {
+            addToQueue,
+            addPriceSyncItemFromCoin,
+            addLatestPriceSyncItemFromCoin
+          }
+        );
+      }
+      const executionResult = await executeBatch(items, {
+        addToQueue,
+        addPriceSyncItemFromCoin,
+        addLatestPriceSyncItemFromCoin,
+        isClientBatch: true
+      });
+
+      return [...latestPriceResult, ...executionResult];
+    } catch (error) {
+      // Since all the tasks for an item are closely related, I understand why this is being done.
+      // TODO: But we should aim to do better to handle a single failing.
+      logger.error('Failed to execute batch, hence failing all tasks');
+    }
+
+    await sleep(queueExecuteInterval);
+  };
+
+  const executeNextBatchItemInQueue = async () => {
+    if (!connected) {
+      return [];
     }
 
     let items: SyncQueueItem[] = [];
     if (syncQueue.length > 0) {
-      items = syncQueue.slice(0, BATCH_SIZE);
+      items = syncQueue
+        .filter(item => item.type !== 'price' && item.type !== 'latestPrice')
+        .slice(0, BATCH_SIZE);
     }
 
     if (items.length <= 0) {
-      await sleep(queueExecuteInterval);
-      setIsExecutingTask(false);
-      return;
+      return [];
     }
 
     try {
@@ -576,14 +634,23 @@ export const SyncProvider: React.FC = ({ children }) => {
         addPriceSyncItemFromCoin,
         addLatestPriceSyncItemFromCoin
       });
-
-      updateAllExecutedItems(executionResult);
+      return executionResult;
     } catch (error) {
       // Since all the tasks for an item are closely related, I understand why this is being done.
       // TODO: But we should aim to do better to handle a single failing.
       logger.error('Failed to execute batch, hence failing all tasks');
     }
 
+    await sleep(queueExecuteInterval);
+  };
+
+  const executeNextInQueue = async () => {
+    setIsExecutingTask(true);
+    const array = await Promise.all([
+      executeNextClientItemInQueue(),
+      executeNextBatchItemInQueue()
+    ]);
+    updateAllExecutedItems(array.reduce((acc, item) => acc.concat(item), []));
     await sleep(queueExecuteInterval);
     setIsExecutingTask(false);
   };

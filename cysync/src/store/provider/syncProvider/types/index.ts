@@ -1,4 +1,5 @@
 export * from './syncItem';
+export * from './clientTimeout';
 export * from './historySyncItem';
 export * from './balanceSyncItem';
 export * from './customAccountSyncItem';
