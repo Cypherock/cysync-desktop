@@ -17,10 +17,11 @@ const classes = {
   content: `${PREFIX}-content`,
   textViewContainer: `${PREFIX}-textViewContainer`,
   button: `${PREFIX}-button`,
-  report: `${PREFIX}-report`
+  report: `${PREFIX}-report`,
+  listButton: `${PREFIX}-listButton`
 };
 
-const Root = styled(Grid)(() => ({
+const Root = styled(Grid)(({ theme }) => ({
   [`& .${classes.content}`]: {
     display: 'flex',
     flexDirection: 'column',
@@ -33,16 +34,28 @@ const Root = styled(Grid)(() => ({
   },
   [`& .${classes.button}`]: {
     background: '#71624C',
+    color: theme.palette.text.primary,
     padding: '0.5rem 4rem',
     fontWeight: 700,
-    fontFamily: 'Lato',
-    letterSpacing: 1,
-    color: '#FFF'
+    margin: '2rem',
+    '&:hover': {
+      background: theme.palette.secondary.dark
+    }
   },
   [`& .${classes.report}`]: {
     position: 'absolute',
     right: 20,
     bottom: 20
+  },
+  [`& .${classes.listButton}> div`]: {
+    margin: 'unset'
+  },
+  [`& .${classes.listButton}`]: {
+    textTransform: 'none',
+    marginBottom: '1.2rem',
+    padding: 'unset',
+    marginLeft: '0.3rem',
+    marginRight: '0.3rem'
   }
 }));
 
@@ -124,8 +137,8 @@ const StartOptions: React.FC<StartOptionsProps> = ({ handleNext }) => {
           {state.map(item => (
             <Button
               key={item.id}
+              className={classes.listButton}
               fullWidth
-              style={{ textTransform: 'none' }}
               onClick={() => {
                 handleClick(item.id);
               }}
@@ -136,8 +149,6 @@ const StartOptions: React.FC<StartOptionsProps> = ({ handleNext }) => {
           ))}
         </div>
         <Button
-          variant="contained"
-          color="secondary"
           disabled={!state[0].active}
           onClick={handleNext}
           className={classes.button}

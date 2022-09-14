@@ -3,4 +3,5 @@ export * as balanceExecutor from './balance';
 export * as customAccountExecutor from './customAccount';
 export * as priceExecutor from './pricing';
 export * as latestPriceExecutor from './latestPrice';
+export * from './latestPriceSync';
 export * from './sync';
