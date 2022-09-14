@@ -491,9 +491,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
 
       if (coin.group === CoinGroup.Ethereum) {
         w = wallet({ coinType, xpub, walletId, zpub, addressDB: addressDb });
-        address = (await w.newReceiveAddress()).toUpperCase();
-        // To make the first x in lowercase
-        address = `0x${address.slice(2)}`;
+        address = (await w.newReceiveAddress()).toLowerCase();
       } else if (coin.group === CoinGroup.Near && customAccountfromContext) {
         address = customAccountfromContext.name;
       } else {

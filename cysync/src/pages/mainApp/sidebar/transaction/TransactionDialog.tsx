@@ -243,6 +243,23 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
   if (!txn) return <></>;
 
+  //used for displaying eth or erc20Tokens addresses in lower case
+  let coinData;
+  const coinParent = txn.coin?.toLowerCase();
+  const coinInitial = txn.slug?.toLowerCase();
+  if (coinParent && coinParent !== coinInitial) {
+    const parent = COINS[coinParent];
+    if (!parent) {
+      logger.warn(`Cannot find coinType parent: ${coinParent}`);
+    }
+    coinData = parent.tokenList[coinInitial];
+  } else coinData = COINS[coinInitial];
+  if (!coinData) {
+    logger.warn(`Cannot find coinType: ${coinInitial}`);
+  }
+  const isEth =
+    coinData.group === CoinGroup.Ethereum ||
+    coinData.group === CoinGroup.ERC20Tokens;
   return (
     <Root>
       <div className={classes.dateTimeContainer}>
@@ -344,7 +361,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {elem.address}
+                      {isEth ? elem.address.toLowerCase() : elem.address}
                     </Typography>
                     <Typography
                       style={{ userSelect: 'text' }}
@@ -383,7 +400,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {elem.address}
+                      {isEth ? elem.address.toLowerCase() : elem.address}
                     </Typography>
                     <Typography
                       style={{ userSelect: 'text' }}
