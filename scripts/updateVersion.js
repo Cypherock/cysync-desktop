@@ -105,7 +105,9 @@ const updatePackageJson = async ({ githubRepo, version, bumpType }) => {
 
   try {
     const fileContentResp = await axios.get(
-      `${GITHUB_BASE_API}/repos/${githubRepo}/contents/cysync/package.json?ref=${BRANCH}`,
+      `${GITHUB_BASE_API}/repos/${githubRepo}/contents/cysync/package.json?ref=${encodeURIComponent(
+        BRANCH
+      )}`,
       { headers: { Authorization: `token ${GITHUB_ACCESS_TOKEN}` } }
     );
 
@@ -151,7 +153,7 @@ const updateVersionFile = async ({ githubRepo, bumpType }) => {
 
   try {
     const fileContentResp = await axios.get(
-      `${GITHUB_BASE_API}/repos/${githubRepo}/contents/${VERSION_FILE_NAME}?ref=${BRANCH}`,
+      `${GITHUB_BASE_API}/repos/${githubRepo}/contents/${VERSION_FILE_NAME}?ref=${encodeURIComponent(BRANCH)}`,
       { headers: { Authorization: `token ${GITHUB_ACCESS_TOKEN}` } }
     );
 
@@ -196,8 +198,8 @@ const updateVersionFile = async ({ githubRepo, bumpType }) => {
     { headers: { Authorization: `token ${GITHUB_ACCESS_TOKEN}` } }
   );
 
-  await updatePackageJson({ githubRepo, version: updatedVersion, bumpType });
   console.log("Updated version file");
+  await updatePackageJson({ githubRepo, version: updatedVersion, bumpType });
 };
 
 const run = async () => {
