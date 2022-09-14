@@ -263,7 +263,11 @@ const errorDialog: React.FC<ErrorProps> = ({
         overridesResolver: (_props, styles) => {
           return styles.backdrop;
         }
-      })({ zIndex: -1, backdropFilter: 'blur(10px)' })}
+      })({
+        zIndex: -1,
+        backdropFilter: 'blur(10px)',
+        transition: 'none !important'
+      })}
       restComponents={
         <Error
           advanceText={advanceText}
