@@ -7,10 +7,16 @@ const childProcess = require("child_process");
 const BRANCH_OR_TAG_NAME = process.env.GITHUB_REF_NAME;
 const GITHUB_BASE_API = "https://api.github.com";
 const GITHUB_ACCESS_TOKEN = process.env.GH_ACCESS_TOKEN;
+const DEV_ANALYTICS_KEY = process.env.DEV_ANALYTICS_KEY;
+const PROD_ANALYTICS_KEY = process.env.PROD_ANALYTICS_KEY;
 
 const RELEASE_FILE_NAME = "RELEASES.txt";
 
 console.log({ BRANCH_OR_TAG_NAME });
+
+if (!DEV_ANALYTICS_KEY || !PROD_ANALYTICS_KEY) {
+  throw new Error("Analytics keys are not defined in environment");
+}
 
 const BUILD_TYPE_CONFIG = {
   dev: {
@@ -20,6 +26,7 @@ const BUILD_TYPE_CONFIG = {
     GITHUB_REPO: "Cypherock/cysync-desktop-dev",
     ALLOW_PRERELEASE: true,
     SIMULATE_PRODUCTION: false,
+    ANALYTICS_KEY: DEV_ANALYTICS_KEY,
   },
   debug: {
     BUILD_TYPE: "production",
@@ -28,6 +35,7 @@ const BUILD_TYPE_CONFIG = {
     GITHUB_REPO: "Cypherock/cysync-desktop-debug",
     ALLOW_PRERELEASE: true,
     SIMULATE_PRODUCTION: false,
+    ANALYTICS_KEY: DEV_ANALYTICS_KEY,
   },
   rc: {
     BUILD_TYPE: "production",
@@ -36,6 +44,7 @@ const BUILD_TYPE_CONFIG = {
     GITHUB_REPO: "Cypherock/cysync-desktop-rc",
     ALLOW_PRERELEASE: false,
     SIMULATE_PRODUCTION: false,
+    ANALYTICS_KEY: DEV_ANALYTICS_KEY,
   },
   prod: {
     BUILD_TYPE: "production",
@@ -44,6 +53,7 @@ const BUILD_TYPE_CONFIG = {
     GITHUB_REPO: "Cypherock/cysync-desktop",
     ALLOW_PRERELEASE: false,
     SIMULATE_PRODUCTION: false,
+    ANALYTICS_KEY: PROD_ANALYTICS_KEY,
   },
 };
 

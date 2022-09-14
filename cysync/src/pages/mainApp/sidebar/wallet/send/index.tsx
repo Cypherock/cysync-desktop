@@ -39,11 +39,11 @@ const WalletSend = () => {
 
   useEffect(() => {
     if (sendForm) {
-      Analytics.Instance.event(
-        Analytics.Categories.SEND_TXN,
-        Analytics.Actions.OPEN,
-        coinAbbr
-      );
+      Analytics.Instance.event(Analytics.EVENTS.WALLET.SEND.OPEN, {
+        coinAbbr,
+        token: token?.slug,
+        coinDetails: coinDetails?.slug
+      });
       logger.info('Send Txn form open');
     }
   }, [sendForm]);
@@ -52,11 +52,11 @@ const WalletSend = () => {
     if (abort) {
       sendTransaction.cancelSendTxn(deviceConnection);
     }
-    Analytics.Instance.event(
-      Analytics.Categories.SEND_TXN,
-      Analytics.Actions.CLOSED,
-      coinAbbr
-    );
+    Analytics.Instance.event(Analytics.EVENTS.WALLET.SEND.CLOSED, {
+      coinAbbr,
+      token: token?.slug,
+      coinDetails: coinDetails?.slug
+    });
     logger.info('Send Txn form closed');
     sendTransaction.resetHooks();
     setSendForm(false);

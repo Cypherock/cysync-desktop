@@ -18,7 +18,6 @@ import {
   handleErrors,
   handleFirmwareUpdateErrors
 } from '../../../errors';
-import Analytics from '../../../utils/analytics';
 import {
   compareVersion,
   getFirmwareHex,
@@ -36,7 +35,8 @@ import {
 
 import { useDeviceAuth } from './useDeviceAuth';
 
-const flowName = Analytics.Categories.DEVICE_UPDATE;
+const flowName = 'DeviceUpgrade';
+
 export enum DeviceUpgradeErrorResolutionState {
   NO_ERROR,
   NO_RECONNECT_REQUIRED,

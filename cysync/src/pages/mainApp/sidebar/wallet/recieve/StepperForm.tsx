@@ -14,7 +14,6 @@ import React, { useState } from 'react';
 import CreateComponent from '../../../../../components/createComponent';
 import ErrorBox from '../../../../../designSystem/designComponents/dialog/errorDialog';
 import { useReceiveTransactionContext } from '../../../../../store/provider';
-import Analytics from '../../../../../utils/analytics';
 import logger from '../../../../../utils/logger';
 
 const QontoConnector = withStyles((theme: Theme) =>
@@ -206,10 +205,6 @@ const ReceiveForm: React.FC<StepperProps> = ({
   };
 
   const onResyncCoins = () => {
-    Analytics.Instance.event(
-      Analytics.Categories.RESYNC_COIN,
-      Analytics.Actions.CLICKED
-    );
     logger.info('Resync coin initiated');
     handleClose(true);
     receiveTransaction.clearErrorObj();

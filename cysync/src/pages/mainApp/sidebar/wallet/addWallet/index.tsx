@@ -116,17 +116,14 @@ const AddWallet = () => {
       if (isCompleted) {
         clearErrorObj();
         Analytics.Instance.event(
-          Analytics.Categories.ADD_WALLET,
-          Analytics.Actions.COMPLETED
+          Analytics.EVENTS.WALLET.IMPORT_WALLET.SUCCESS,
+          { walletId: Analytics.createHash(walletId) }
         );
       }
     }
 
     if (!stopClose) {
-      Analytics.Instance.event(
-        Analytics.Categories.ADD_WALLET,
-        Analytics.Actions.CLOSED
-      );
+      Analytics.Instance.event(Analytics.EVENTS.WALLET.IMPORT_WALLET.CLOSED);
       logger.info('Add wallet form closed');
       resetHooks();
       setOpen(false);
@@ -135,10 +132,7 @@ const AddWallet = () => {
 
   const handleOpen = async () => {
     setOpen(true);
-    Analytics.Instance.event(
-      Analytics.Categories.ADD_WALLET,
-      Analytics.Actions.OPEN
-    );
+    Analytics.Instance.event(Analytics.EVENTS.WALLET.IMPORT_WALLET.OPEN);
     logger.info('Add wallet form opened');
     try {
       if (!beforeFlowStart() || !deviceConnection) {

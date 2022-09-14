@@ -106,16 +106,14 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
 
   useEffect(() => {
     Analytics.Instance.event(
-      Analytics.Categories.INITIAL_DEVICE_AUTH,
-      Analytics.Actions.OPEN
+      Analytics.EVENTS.INITIAL.DEVICE_SETUP.DEVICE_AUTH.OPENED
     );
     logger.info('Initial device auth opened');
 
     return () => {
       feedback.closeFeedback();
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_AUTH,
-        Analytics.Actions.CLOSED
+        Analytics.EVENTS.INITIAL.DEVICE_SETUP.DEVICE_AUTH.CLOSED
       );
       logger.info('Initial device auth closed');
     };
@@ -161,16 +159,28 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
         resetHooks();
       }, 1500);
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_AUTH,
-        Analytics.Actions.COMPLETED
+        Analytics.EVENTS.INITIAL.DEVICE_SETUP.DEVICE_AUTH.SUCCESS
       );
     }
 
     if (verified === -1 || errorObj.isSet) {
-      Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_AUTH,
-        Analytics.Actions.ERROR
-      );
+      if (verified === -1) {
+        Analytics.Instance.event(
+          Analytics.EVENTS.INITIAL.DEVICE_SETUP.DEVICE_AUTH.COMPROMISED,
+          {
+            errorCode: errorObj.getCode(),
+            errorMessage: errorObj.getMessage()
+          }
+        );
+      } else {
+        Analytics.Instance.event(
+          Analytics.EVENTS.INITIAL.DEVICE_SETUP.DEVICE_AUTH.ERROR,
+          {
+            errorCode: errorObj.getCode(),
+            errorMessage: errorObj.getMessage()
+          }
+        );
+      }
     }
   }, [verified, completed]);
 

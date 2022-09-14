@@ -4,11 +4,13 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 
+import Analytics from '../../../utils/analytics';
 import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
   addressDb,
   coinDb,
+  convertTxnToAnalyticsItem,
   insertFromFullTxn,
   prepareFromBlockbookTxn,
   receiveAddressDb,
@@ -510,6 +512,13 @@ export const SocketProvider: React.FC = ({ children }) => {
                 coinType: payload.coinType,
                 addressDB: addressDb
               });
+              newTxns.map(newTxn =>
+                Analytics.Instance.event(
+                  Analytics.EVENTS.WALLET.TXN.TRACK,
+                  convertTxnToAnalyticsItem(newTxn),
+                  { isSensitive: true }
+                )
+              );
               await Promise.all(
                 newTxns.map(newTxn => transactionDb.insert(newTxn))
               );

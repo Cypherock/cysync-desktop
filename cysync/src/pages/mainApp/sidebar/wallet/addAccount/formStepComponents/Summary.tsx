@@ -147,11 +147,11 @@ const Summary: React.FC<StepComponentProps> = ({
           }
         })();
         handleNext();
-        Analytics.Instance.event(
-          Analytics.Categories.SEND_TXN,
-          Analytics.Actions.COMPLETED,
-          coinAbbr
-        );
+        Analytics.Instance.event(Analytics.EVENTS.WALLET.ADD_ACCOUNT.SUCCESS, {
+          coinAbbr,
+          coin: coinDetails?.slug,
+          token: token?.slug
+        });
         return null;
       })
       .catch(e => {
@@ -182,18 +182,24 @@ const Summary: React.FC<StepComponentProps> = ({
           );
         }
         Analytics.Instance.event(
-          Analytics.Categories.SEND_TXN,
-          Analytics.Actions.BROADCAST_ERROR,
-          coinAbbr
+          Analytics.EVENTS.WALLET.ADD_ACCOUNT.BROADCAST_ERROR,
+          {
+            coinAbbr,
+            coin: coinDetails?.slug,
+            token: token?.slug
+          }
         );
       });
   };
 
   const handleRetry = () => {
     Analytics.Instance.event(
-      Analytics.Categories.SEND_TXN,
-      Analytics.Actions.RETRY,
-      coinAbbr
+      Analytics.EVENTS.WALLET.ADD_ACCOUNT.RETRY_BROADCAST,
+      {
+        coinAbbr,
+        coin: coinDetails?.slug,
+        token: token?.slug
+      }
     );
     logger.info('Send transaction retry');
     handleSend();

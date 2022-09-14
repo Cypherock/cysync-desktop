@@ -37,10 +37,7 @@ const AddCoin: React.FC<AddCoinProps> = ({ handleClose, coinsPresent }) => {
   useEffect(() => {
     if (addCoinFormOpen) {
       setIsAddCoinLoading(false);
-      Analytics.Instance.event(
-        Analytics.Categories.ADD_COIN,
-        Analytics.Actions.OPEN
-      );
+      Analytics.Instance.event(Analytics.EVENTS.WALLET.ADD_COIN.OPEN);
       logger.info('Add coin form opened');
     }
   }, [addCoinFormOpen]);

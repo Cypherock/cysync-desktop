@@ -38,6 +38,10 @@ const validateJsonConfig = () => {
   if (typeof jsonConfig.ALLOW_PRERELEASE !== 'boolean') {
     throw new Error('Invalid ALLOW_PRERELEASE in json config');
   }
+
+  if (!jsonConfig.ANALYTICS_KEY) {
+    throw new Error('Invalid ANALYTICS_KEY in json config');
+  }
 };
 
 /**
@@ -69,6 +73,7 @@ const setConfig = () => {
   process.env.SERVER_ENV = jsonConfig.SERVER_ENV;
   process.env.GITHUB_REPO = jsonConfig.GITHUB_REPO;
   process.env.BUILD_VERSION = jsonConfig.BUILD_VERSION;
+  process.env.ANALYTICS_KEY = jsonConfig.ANALYTICS_KEY;
 
   if (jsonConfig.ALLOW_PRERELEASE) {
     process.env.ALLOW_PRERELEASE = 'true';

@@ -88,15 +88,13 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
 
   useEffect(() => {
     Analytics.Instance.event(
-      Analytics.Categories.INITIAL_CARD_AUTH,
-      Analytics.Actions.OPEN
+      Analytics.EVENTS.INITIAL.DEVICE_SETUP.CARD_AUTH.OPENED
     );
     logger.info('InitialCardAuth: Opened');
 
     return () => {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_CARD_AUTH,
-        Analytics.Actions.CLOSED
+        Analytics.EVENTS.INITIAL.DEVICE_SETUP.CARD_AUTH.CLOSED
       );
       logger.info('InitialCardAuth: Closed');
     };
@@ -135,15 +133,15 @@ const CardAuthentication: React.FC<StepComponentProps> = ({ handleNext }) => {
   useEffect(() => {
     if (cardsStatus === 0 || cardsStatus === -1) {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_CARD_AUTH,
-        Analytics.Actions.ERROR,
-        cardsStatus === 0 ? 'some-cards' : 'all-cards'
+        Analytics.EVENTS.INITIAL.DEVICE_SETUP.CARD_AUTH.ERROR,
+        {
+          allFailed: cardsStatus === 0 ? false : true
+        }
       );
       logger.info('InitialCardAuth: Error');
     } else if (cardsStatus === 1) {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_CARD_AUTH,
-        Analytics.Actions.COMPLETED
+        Analytics.EVENTS.INITIAL.DEVICE_SETUP.CARD_AUTH.SUCCESS
       );
       logger.info('InitialCardAuth: Completed');
     }

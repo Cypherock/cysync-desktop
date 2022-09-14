@@ -13,7 +13,6 @@ import {
   handleDeviceErrors,
   handleErrors
 } from '../../../errors';
-import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { walletDb } from '../../database';
 import { useConnection, useWallets } from '../../provider';
@@ -46,7 +45,7 @@ export interface UseAddWalletValues {
 
 export type UseAddWallet = () => UseAddWalletValues;
 
-const flowName = Analytics.Categories.ADD_WALLET;
+const flowName = 'AddWallet';
 
 export const useAddWallet: UseAddWallet = () => {
   const addWallet = new WalletAdder();

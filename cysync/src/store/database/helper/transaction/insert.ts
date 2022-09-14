@@ -7,10 +7,12 @@ import {
 import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 
+import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
 import { transactionDb } from '../../databaseInit';
 import {
   AddressDB,
+  convertTxnToAnalyticsItem,
   InputOutput,
   IOtype,
   SentReceive,
@@ -189,6 +191,12 @@ export const insertFromFullTxn = async (transaction: {
         status: newTxn.status
       }
     );
+
+    Analytics.Instance.event(
+      Analytics.EVENTS.WALLET.TXN.TRACK,
+      convertTxnToAnalyticsItem(newTxn),
+      { isSensitive: true }
+    );
     await transactionDb.insert(newTxn);
   } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
@@ -254,6 +262,11 @@ export const insertFromFullTxn = async (transaction: {
         outputs: []
       };
 
+      Analytics.Instance.event(
+        Analytics.EVENTS.WALLET.TXN.TRACK,
+        convertTxnToAnalyticsItem(feeTxn),
+        { isSensitive: true }
+      );
       await transactionDb.insert(feeTxn);
     }
 
@@ -278,6 +291,11 @@ export const insertFromFullTxn = async (transaction: {
       outputs
     };
 
+    Analytics.Instance.event(
+      Analytics.EVENTS.WALLET.TXN.TRACK,
+      convertTxnToAnalyticsItem(newTxn),
+      { isSensitive: true }
+    );
     await transactionDb.insert(newTxn);
   }
 };

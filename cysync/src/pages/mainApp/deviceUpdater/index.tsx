@@ -31,6 +31,10 @@ const DeviceUpdatePopup = () => {
     setOpenMisconfiguredPrompt(false);
     if (val) {
       let localUpdateType: UpdateType = 'update';
+      Analytics.Instance.event(
+        Analytics.EVENTS.DEVICE_CONNECTION.ERROR_PROMPT.ACTION_CONFIRMED,
+        { deviceConnectionState, updateRequiredType }
+      );
       if (
         [
           DeviceConnectionState.PARTIAL_STATE,
@@ -58,24 +62,12 @@ const DeviceUpdatePopup = () => {
       setUpdateType(localUpdateType);
 
       if (localUpdateType === 'update') {
-        Analytics.Instance.event(
-          Analytics.Categories.PARTIAL_DEVICE_UPDATE,
-          Analytics.Actions.OPEN
-        );
         logger.info('Redirecting user to device update settings page');
         return navigate(`${Routes.settings.device.upgrade}?isRefresh=true`);
       } else if (localUpdateType === 'auth') {
-        Analytics.Instance.event(
-          Analytics.Categories.DEVICE_AUTH_PROMPT,
-          Analytics.Actions.OPEN
-        );
         logger.info('Redirecting user to device auth settings page');
         return navigate(`${Routes.settings.device.auth}?isRefresh=true`);
       } else {
-        Analytics.Instance.event(
-          Analytics.Categories.INITIAL_FLOW_IN_MAIN,
-          Analytics.Actions.OPEN
-        );
         logger.info('Intial flow in main opened by user');
       }
     } else {
@@ -87,12 +79,8 @@ const DeviceUpdatePopup = () => {
     setIsOpen(false);
     setOpenMisconfiguredPrompt(false);
     Analytics.Instance.event(
-      updateType === 'update'
-        ? Analytics.Categories.PARTIAL_DEVICE_UPDATE
-        : updateType === 'auth'
-        ? Analytics.Categories.DEVICE_AUTH_PROMPT
-        : Analytics.Categories.INITIAL_FLOW_IN_MAIN,
-      Analytics.Actions.CLOSED
+      Analytics.EVENTS.DEVICE_CONNECTION.ERROR_PROMPT.CLOSED,
+      { deviceConnectionState, updateRequiredType }
     );
     logger.info('Device update prompt closed');
   };
@@ -100,8 +88,8 @@ const DeviceUpdatePopup = () => {
   useEffect(() => {
     if (openMisconfiguredPrompt) {
       Analytics.Instance.event(
-        Analytics.Categories.PARTIAL_DEVICE_UPDATE,
-        Analytics.Actions.PROMPT
+        Analytics.EVENTS.DEVICE_CONNECTION.ERROR_PROMPT.OPEN,
+        { deviceConnectionState, updateRequiredType }
       );
       logger.info('Device update prompt open');
     }

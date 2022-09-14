@@ -42,11 +42,11 @@ const WalletAddAccount = () => {
 
   useEffect(() => {
     if (addAccountForm) {
-      Analytics.Instance.event(
-        Analytics.Categories.SEND_TXN,
-        Analytics.Actions.OPEN,
-        coinAbbr
-      );
+      Analytics.Instance.event(Analytics.EVENTS.WALLET.ADD_ACCOUNT.OPEN, {
+        coinAbbr,
+        coin: coinDetails?.slug,
+        token: token?.slug
+      });
       logger.info('Add Account form open');
     }
   }, [addAccountForm]);
@@ -55,11 +55,11 @@ const WalletAddAccount = () => {
     if (abort) {
       sendTransaction.cancelSendTxn(deviceConnection);
     }
-    Analytics.Instance.event(
-      Analytics.Categories.SEND_TXN,
-      Analytics.Actions.CLOSED,
-      coinAbbr
-    );
+    Analytics.Instance.event(Analytics.EVENTS.WALLET.ADD_ACCOUNT.CLOSED, {
+      coinAbbr,
+      coin: coinDetails?.slug,
+      token: token?.slug
+    });
     logger.info('Add Account form closed');
     sendTransaction.resetHooks();
     setAddAccountForm(false);

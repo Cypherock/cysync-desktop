@@ -117,8 +117,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
 
   useEffect(() => {
     Analytics.Instance.event(
-      Analytics.Categories.INITIAL_DEVICE_UPDATE,
-      Analytics.Actions.OPEN
+      Analytics.EVENTS.INITIAL.DEVICE_SETUP.DEVICE_UPGRADE.OPENED
     );
     logger.info('InitialDeviceUpdate: Opened');
     startDeviceUpdate();
@@ -127,8 +126,7 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
       setBlockNewConnection(false);
       setIsDeviceUpdating(false);
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_UPDATE,
-        Analytics.Actions.CLOSED
+        Analytics.EVENTS.INITIAL.DEVICE_SETUP.DEVICE_UPGRADE.CLOSED
       );
       logger.info('InitialDeviceUpdate: Closed');
     };
@@ -137,14 +135,13 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({
   useEffect(() => {
     if (isCompleted === -1) {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_UPDATE,
-        Analytics.Actions.ERROR
+        Analytics.EVENTS.INITIAL.DEVICE_SETUP.DEVICE_UPGRADE.ERROR,
+        { errorCode: errorObj.getCode(), errorMessage: errorObj.getMessage() }
       );
       logger.info('InitialDeviceUpdate: Error');
     } else if (isCompleted === 2) {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_UPDATE,
-        Analytics.Actions.COMPLETED
+        Analytics.EVENTS.INITIAL.DEVICE_SETUP.DEVICE_UPGRADE.SUCCESS
       );
       logger.info('InitialDeviceUpdate: Completed');
       setTimeout(onClose, 3000);

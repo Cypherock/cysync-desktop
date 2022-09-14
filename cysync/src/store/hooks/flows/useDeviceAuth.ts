@@ -11,7 +11,6 @@ import {
   handleDeviceErrors,
   handleErrors
 } from '../../../errors';
-import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import sleep from '../../../utils/sleep';
 import { deviceDb } from '../../database';
@@ -49,7 +48,7 @@ export interface UseDeviceAuthValues {
 
 export type UseDeviceAuth = (isInitial?: boolean) => UseDeviceAuthValues;
 
-const flowName = Analytics.Categories.DEVICE_AUTH;
+const flowName = 'DeviceAuth';
 
 export const useDeviceAuth: UseDeviceAuth = isInitial => {
   const lang = useI18n();

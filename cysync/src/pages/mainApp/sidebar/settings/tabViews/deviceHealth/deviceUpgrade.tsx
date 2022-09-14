@@ -305,8 +305,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
   useEffect(() => {
     setBlockConnectionPopup(true);
     Analytics.Instance.event(
-      Analytics.Categories.DEVICE_UPDATE,
-      Analytics.Actions.OPEN
+      Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.DEVICE_UPGRADE.OPEN
     );
     logger.info('Setting device update open');
 
@@ -323,8 +322,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
       }
       logger.info('Setting device update closed');
       Analytics.Instance.event(
-        Analytics.Categories.DEVICE_UPDATE,
-        Analytics.Actions.CLOSED
+        Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.DEVICE_UPGRADE.CLOSED
       );
     };
   }, []);
@@ -435,13 +433,15 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
 
     if (isCompleted === -1) {
       Analytics.Instance.event(
-        Analytics.Categories.DEVICE_UPDATE,
-        Analytics.Actions.ERROR
+        Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.DEVICE_UPGRADE.ERROR,
+        {
+          errorCode: errorObj.getCode(),
+          errorMessage: errorObj.getMessage()
+        }
       );
     } else if (isCompleted === 2) {
       Analytics.Instance.event(
-        Analytics.Categories.DEVICE_UPDATE,
-        Analytics.Actions.COMPLETED
+        Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.DEVICE_UPGRADE.SUCCESS
       );
     }
   }, [isCompleted]);

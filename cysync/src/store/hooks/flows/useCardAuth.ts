@@ -17,7 +17,6 @@ import {
   useI18n,
   useNetwork
 } from '../../../store/provider';
-import Analytics from '../../../utils/analytics';
 import { hexToVersion, inTestApp } from '../../../utils/compareVersion';
 import logger from '../../../utils/logger';
 import sleep from '../../../utils/sleep';
@@ -62,7 +61,8 @@ export interface ICardAuthState {
 
 export type UseCardAuth = (isInitial?: boolean) => UseCardAuthValues;
 
-const flowName = Analytics.Categories.CARD_AUTH;
+const flowName = 'CardAuth';
+
 export const useCardAuth: UseCardAuth = isInitial => {
   const lang = useI18n();
 

@@ -46,10 +46,10 @@ class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
 
   componentDidCatch(error: any, errorInfo: any) {
     this.setState({ hasError: true });
-    Analytics.Instance.event(
-      Analytics.Categories.ERROR_BOUNDARY,
-      Analytics.Actions.PROMPT
-    );
+    Analytics.Instance.event(Analytics.EVENTS.APP.CRASHED, {
+      error,
+      errorInfo
+    });
     if (process.env.NODE_ENV === 'development') {
       /* tslint:disable-next-line */
       console.log({ error, errorInfo });

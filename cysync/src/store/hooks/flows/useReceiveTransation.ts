@@ -79,7 +79,8 @@ export interface UseReceiveTransactionValues {
 
 export type UseReceiveTransaction = () => UseReceiveTransactionValues;
 
-const flowName = Analytics.Categories.RECEIVE_ADDR;
+const flowName = 'Receive Address';
+
 export const useReceiveTransaction: UseReceiveTransaction = () => {
   const [coinsConfirmed, setCoinsConfirmed] = useState(false);
   const [xpubMissing, setXpubMissing] = useState(false);
@@ -460,12 +461,13 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   };
 
   useEffect(() => {
-    if (errorObj.isSet && xpubMissing) {
-      Analytics.Instance.event(
-        flowName,
-        Analytics.Actions.ERROR,
-        'Xpub Missing'
-      );
+    if (errorObj.isSet) {
+      Analytics.Instance.event(Analytics.EVENTS.WALLET.RECEIVE.ERROR, {
+        errorCode: errorObj.getCode(),
+        errorMessage: errorObj.getMessage(),
+        coin: coinDetails?.slug,
+        walletId: Analytics.createHash(coinDetails.walletId)
+      });
     }
   }, [errorObj.isSet]);
 
@@ -507,20 +509,17 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
       const cyError = new CyError(
         CysyncError.RECEIVE_TXN_GENERATE_UNVERIFIED_FAILED
       );
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
-      Analytics.Instance.event(
-        Analytics.Categories.RECEIVE_ADDR,
-        Analytics.Actions.ERROR
-      );
+      const finalError = handleErrors(errorObj, cyError, flowName, { err });
+      setErrorObj(finalError);
     }
   };
 
   useEffect(() => {
     if (receiveAddress) {
-      Analytics.Instance.event(
-        Analytics.Categories.RECEIVE_ADDR,
-        Analytics.Actions.COMPLETED
-      );
+      Analytics.Instance.event(Analytics.EVENTS.WALLET.RECEIVE.SUCCESS, {
+        coin: coinDetails?.slug,
+        walletId: Analytics.createHash(coinDetails.walletId)
+      });
       QRCode.toDataURL(receiveAddress, {
         errorCorrectionLevel: 'H',
         margin: 0.5,

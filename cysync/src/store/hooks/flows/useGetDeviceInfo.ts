@@ -12,7 +12,6 @@ import {
   handleDeviceErrors,
   handleErrors
 } from '../../../errors';
-import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { deviceDb } from '../../database';
 
@@ -41,7 +40,8 @@ export interface UseGetDeviceInfoValues {
 
 export type UseGetDeviceInfo = () => UseGetDeviceInfoValues;
 
-const flowName = Analytics.Categories.DEVICE_INFO;
+const flowName = 'GetDeviceInfo';
+
 export const useGetDeviceInfo: UseGetDeviceInfo = () => {
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
   const [authenticated, setAuthenticated] = useState<-1 | 0 | 1 | 2>(0);

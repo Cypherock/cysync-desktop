@@ -121,15 +121,15 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   useEffect(() => {
     Analytics.Instance.event(
-      Analytics.Categories.INITIAL_DEVICE_UPDATE_IN_MAIN,
-      Analytics.Actions.OPEN
+      Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.DEVICE_UPGRADE
+        .OPENED
     );
     logger.info('InitialDeviceUpdateInMain: Opened');
 
     return () => {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_UPDATE_IN_MAIN,
-        Analytics.Actions.CLOSED
+        Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.DEVICE_UPGRADE
+          .CLOSED
       );
       logger.info('InitialDeviceUpdateInMain: Closed');
     };
@@ -149,14 +149,18 @@ const UpgradingDevice: React.FC<StepComponentProps> = ({ handleClose }) => {
   useEffect(() => {
     if (isCompleted === -1) {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_UPDATE_IN_MAIN,
-        Analytics.Actions.ERROR
+        Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.DEVICE_UPGRADE
+          .ERROR,
+        {
+          errorCode: errorObj.getCode(),
+          errorMessage: errorObj.getMessage()
+        }
       );
       logger.info('InitialDeviceUpdateInMain: Error');
     } else if (isCompleted === 2) {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_UPDATE_IN_MAIN,
-        Analytics.Actions.COMPLETED
+        Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.DEVICE_UPGRADE
+          .SUCCESS
       );
       logger.info('InitialDeviceUpdateInMain: Completed');
       setTimeout(onClose, 3000);

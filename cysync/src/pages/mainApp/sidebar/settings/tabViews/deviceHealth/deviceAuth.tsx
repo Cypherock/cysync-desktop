@@ -283,8 +283,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 
   useEffect(() => {
     Analytics.Instance.event(
-      Analytics.Categories.DEVICE_AUTH,
-      Analytics.Actions.OPEN
+      Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.DEVICE_AUTH.OPENED
     );
     logger.info('Setting device authentication open');
     if (isRefresh) {
@@ -294,8 +293,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
 
     return () => {
       Analytics.Instance.event(
-        Analytics.Categories.DEVICE_AUTH,
-        Analytics.Actions.CLOSED
+        Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.DEVICE_AUTH.CLOSED
       );
       logger.info('Setting device authentication closed');
       if (!latestCompleted.current && latestDeviceConnection.current) {
