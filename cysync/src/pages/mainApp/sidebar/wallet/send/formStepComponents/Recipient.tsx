@@ -822,7 +822,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
                     }}
                     id={recipient.id.toString()}
                     recipient={recipient}
-                    handleCopyFromClipboard={handleCopyFromClipboard}
+                    handleCopyFromClipboard={e => {
+                      handleCopyFromClipboard(e);
+                      debouncedHandleCheckAddresses();
+                    }}
                     coinAbbr={coinAbbr}
                     index={index + 1}
                     allowDelete={batchRecipientData.length > 1}
