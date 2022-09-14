@@ -586,17 +586,20 @@ export const SyncProvider: React.FC = ({ children }) => {
       }
       let latestPriceResult: ExecutionResult[] = [];
       if (latestPriceItems.length > 0) {
-        latestPriceResult = await executeLatestPriceBatch(latestPriceItems, {
-          addToQueue,
-          addPriceSyncItemFromCoin,
-          addLatestPriceSyncItemFromCoin
-        });
+        latestPriceResult = await executeLatestPriceBatch(
+          latestPriceItems as LatestPriceSyncItem[],
+          {
+            addToQueue,
+            addPriceSyncItemFromCoin,
+            addLatestPriceSyncItemFromCoin
+          }
+        );
       }
       const executionResult = await executeBatch(items, {
         addToQueue,
         addPriceSyncItemFromCoin,
         addLatestPriceSyncItemFromCoin,
-        clientItems: true
+        isClientBatch: true
       });
 
       return [...latestPriceResult, ...executionResult];

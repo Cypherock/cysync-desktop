@@ -41,10 +41,10 @@ export interface OptionParams {
   addToQueue: SyncProviderTypes['addToQueue'];
   addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'];
   addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
-  clientItems?: boolean;
+  isClientBatch?: boolean;
 }
 
-const getAllMetadata = (items: SyncQueueItem[]) => {
+export const getAllMetadata = (items: SyncQueueItem[]) => {
   const allRequestMetadata: RequestMetaProcessInfo[] = [];
 
   for (const item of items) {
@@ -85,7 +85,7 @@ const getBatchResponses = async (
   return batchServer.create(allMetadata);
 };
 
-const getClientResponses = async (
+export const getClientResponses = async (
   allMetadataInfo: RequestMetaProcessInfo[]
 ): Promise<clientServer.IClientResponse[]> => {
   const allMetadata = flatMap(allMetadataInfo.map(elem => elem.meta));
@@ -97,7 +97,7 @@ const getClientResponses = async (
   return clientServer.create(allMetadata);
 };
 
-const getAllProcessResponses = async (
+export const getAllProcessResponses = async (
   allMetadataInfo: RequestMetaProcessInfo[],
   responses: Array<batchServer.IBatchResponse | clientServer.IClientResponse>,
   options: OptionParams
@@ -199,7 +199,7 @@ export const executeBatch = async (
     batchServer.IBatchResponse | clientServer.IClientResponse
   > = [];
   try {
-    if (options.clientItems)
+    if (options.isClientBatch)
       allResponses = await getClientResponses(allMetadataInfo);
     else allResponses = await getBatchResponses(allMetadataInfo);
   } catch (error) {
@@ -216,67 +216,4 @@ export const executeBatch = async (
   }
 
   return getAllProcessResponses(allMetadataInfo, allResponses, options);
-};
-
-export const executeLatestPriceBatch = async (
-  items: SyncQueueItem[],
-  options: OptionParams
-): Promise<ExecutionResult[]> => {
-  if (items.length <= 0) return [];
-
-  const metadata = getLatestPriceMetadata(items);
-  const allMetadataInfo = getAllMetadata(items);
-  if (allMetadataInfo.length !== items.length) {
-    throw new Error(
-      'allMetadataInfo length should be equal to items: ' +
-        allMetadataInfo.length
-    );
-  }
-
-  const allResponses: Array<
-    batchServer.IBatchResponse | clientServer.IClientResponse
-  > = [];
-
-  try {
-    const response = await getClientResponses([metadata]);
-    for (let i = 0; i < items.length; i++) {
-      allResponses.push(response[0]);
-    }
-  } catch (error) {
-    return allMetadataInfo.map(elem => {
-      const result: ExecutionResult = {
-        item: elem.item,
-        isFailed: true,
-        canRetry: !elem.isFailed,
-        error: elem.error || error
-      };
-      return result;
-    });
-  }
-
-  return getAllProcessResponses(allMetadataInfo, allResponses, options);
-};
-
-const getLatestPriceMetadata = (
-  items: SyncQueueItem[]
-): RequestMetaProcessInfo => {
-  const validItems: LatestPriceSyncItem[] = [];
-
-  for (const item of items) {
-    try {
-      if (item instanceof LatestPriceSyncItem) {
-        validItems.push(item);
-      } else {
-        throw new Error('Invalid sync item');
-      }
-    } catch (error) {
-      return { meta: [], isFailed: true, error, item };
-    }
-  }
-  try {
-    const meta = latestPriceExecutor.getBatchRequestsMetadata(validItems);
-    return { meta, isFailed: false, item: items[0] };
-  } catch (error) {
-    return { meta: [], isFailed: true, error, item: items[0] };
-  }
 };
