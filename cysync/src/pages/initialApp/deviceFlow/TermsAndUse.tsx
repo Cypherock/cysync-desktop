@@ -718,8 +718,8 @@ const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
             check that the information displayed on your mobile or desktop
             screen is correct and matches the information displayed on your
             Cypherock Device. Upon sending Crypto Assets, you are solely
-            responsible for verifying that the recipient address, amount and
-            fees are correct and that they are the same on both your computer or
+            responsible for verifying that the recipient address, amount and fee
+            are correct and that they are the same on both your computer or
             mobile and on your Cypherock Device‘s screen. You also acknowledge
             that using unverified addresses to receive Crypto Assets comes at
             your own risk.
