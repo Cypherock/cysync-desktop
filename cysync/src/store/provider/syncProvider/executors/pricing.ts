@@ -1,7 +1,7 @@
 import {
-  batch as batchServer,
   IRequestMetadata,
-  pricing as pricingServer
+  pricing as pricingServer,
+  serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 
 import { priceHistoryDb } from '../../../database';

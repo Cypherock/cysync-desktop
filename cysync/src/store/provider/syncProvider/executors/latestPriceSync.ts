@@ -1,6 +1,6 @@
 import {
-  batch as batchServer,
-  client as clientServer
+  clientBatch as clientServer,
+  serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 
 import { LatestPriceSyncItem, SyncQueueItem } from '../types';

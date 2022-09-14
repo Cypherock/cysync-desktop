@@ -6,10 +6,10 @@ import {
   NearCoinData
 } from '@cypherock/communication';
 import {
-  batch as batchServer,
   eth as ethServer,
   IRequestMetadata,
   near as nearServer,
+  serverBatch as batchServer,
   v2 as v2Server
 } from '@cypherock/server-wrapper';
 import {

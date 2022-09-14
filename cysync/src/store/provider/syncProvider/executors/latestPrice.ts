@@ -1,8 +1,8 @@
 import { CoinGroup } from '@cypherock/communication';
 import {
-  batch as batchServer,
   IRequestMetadata,
-  pricing as pricingServer
+  pricing as pricingServer,
+  serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 
 import { coinDb, tokenDb } from '../../../database';

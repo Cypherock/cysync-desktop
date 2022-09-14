@@ -1,7 +1,7 @@
 import {
-  batch as batchServer,
-  client as clientServer,
-  IRequestMetadata
+  clientBatch as clientServer,
+  IRequestMetadata,
+  serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 import { flatMap } from 'lodash';
 
