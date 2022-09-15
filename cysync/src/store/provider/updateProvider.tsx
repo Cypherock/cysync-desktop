@@ -73,9 +73,7 @@ export const UpdateProvider = ({ children }: any) => {
 
   const checkDeviceUpdate = async () => {
     try {
-      const usePrerelease =
-        process.env.ALLOW_PRERELEASE === 'true' &&
-        localStorage.getItem('usePrereleaseFirmware') === 'true';
+      const usePrerelease = process.env.ALLOW_PRERELEASE === 'true';
 
       const response = await firmwareServer
         .getLatest({ prerelease: usePrerelease })
