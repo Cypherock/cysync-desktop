@@ -317,7 +317,9 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           <Typography>
             {`${txn.slug.toUpperCase()} ${formatCoins(
               txn.displayAmount
-            )} ($${getPriceForCoin(txn.displayAmount)})`}
+            )} ($${discreetMode.handleSensitiveDataDisplay(
+              getPriceForCoin(txn.displayAmount)
+            )})`}
           </Typography>
         </div>
       </div>
