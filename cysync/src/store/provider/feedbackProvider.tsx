@@ -1,6 +1,6 @@
 import { DeviceError, DeviceErrorType } from '@cypherock/communication';
 import { feedback as feedbackServer } from '@cypherock/server-wrapper';
-import { CheckCircle } from '@mui/icons-material';
+// import { CheckCircle } from '@mui/icons-material';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { CircularProgress, createSvgIcon, Grid } from '@mui/material';
 import Alert from '@mui/material/Alert';
@@ -13,7 +13,7 @@ import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { fileTypeFromBuffer } from 'file-type';
 import PropTypes from 'prop-types';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RecordRTCPromisesHandler } from 'recordrtc';
 import * as uuid from 'uuid';
 
@@ -34,7 +34,8 @@ import Analytics from '../../utils/analytics';
 import { hexToVersion } from '../../utils/compareVersion';
 import { getDesktopLogs, getDeviceLogs } from '../../utils/getLogs';
 import logger from '../../utils/logger';
-import { initRecorder, stopRecorder } from '../../utils/recorder';
+// import { initRecorder, stopRecorder } from '../../utils/recorder';
+import { stopRecorder } from '../../utils/recorder';
 import { getSystemInfo } from '../../utils/systemInfo';
 import getUUID from '../../utils/uuid';
 import { useLogFetcher } from '../hooks/flows/useLogFetcher';
@@ -209,11 +210,11 @@ export const FeedbackProvider: React.FC = ({ children }) => {
    * 1 - uploading
    * 2 - upload finished
    */
-  const [uploadAttachmentStatus, setUploadAttachmentStatus] = useState<
+  const [_uploadAttachmentStatus, setUploadAttachmentStatus] = useState<
     -1 | 0 | 1 | 2
   >(0);
   const [recording, setRecording] = useState(false);
-  const attachmentEl = useRef(null);
+  // const attachmentEl = useRef(null);
 
   const {
     internalDeviceConnection: deviceConnection,
@@ -558,12 +559,14 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     }
   };
 
+  /*
   const startRecording = async () => {
     setRecording(true);
     const recorderObj = await initRecorder();
     setRecorder(recorderObj);
     setIsOpen(false);
   };
+   */
 
   const stopRecording = async () => {
     setRecording(false);
@@ -667,6 +670,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     }
   };
 
+  /*
   const removeAttachment = () => {
     setAttachmentBuffer(undefined);
     setAttachmentMimeType(undefined);
@@ -798,6 +802,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       }
     }
   };
+   */
 
   return (
     <>
@@ -952,12 +957,12 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                       {feedbackInput.descriptionError}
                     </Typography>
                   )}
-                  <Grid container>
-                    <Grid item xs={12}>
-                      {getAttachmentActions()}
-                      {getAttachmentComponent()}
-                    </Grid>
-                  </Grid>
+                  {/* <Grid container> */}
+                  {/*   <Grid item xs={12}> */}
+                  {/*     {getAttachmentActions()} */}
+                  {/*     {getAttachmentComponent()} */}
+                  {/*   </Grid> */}
+                  {/* </Grid> */}
 
                   <Grid container className={classes.extras}>
                     <CustomCheckbox

@@ -1,8 +1,8 @@
 import { CoinGroup } from '@cypherock/communication';
 import {
-  batch as batchServer,
   IRequestMetadata,
-  pricing as pricingServer
+  pricing as pricingServer,
+  serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 
 import { coinDb, tokenDb } from '../../../database';
@@ -18,6 +18,21 @@ export const getRequestsMetadata = (
         coin: usesNewApi ? item.id : item.coinType
       },
       usesNewApi
+    )
+    .getMetadata();
+
+  return [pricingMetadata];
+};
+
+export const getBatchRequestsMetadata = (
+  items: LatestPriceSyncItem[]
+): IRequestMetadata[] => {
+  const pricingMetadata = pricingServer
+    .getLatest(
+      {
+        coin: items.map(item => item.id).toString()
+      },
+      true
     )
     .getMetadata();
 

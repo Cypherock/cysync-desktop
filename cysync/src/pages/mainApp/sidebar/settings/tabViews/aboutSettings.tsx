@@ -6,6 +6,7 @@ import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { shell } from 'electron';
 import React, { useEffect } from 'react';
 
 import packageJson from '../../../../../../package.json';
@@ -21,10 +22,13 @@ const PREFIX = 'AboutSettings';
 const classes = {
   root: `${PREFIX}-root`,
   header: `${PREFIX}-header`,
+  footer: `${PREFIX}-footer`,
   listWrapper: `${PREFIX}-listWrapper`,
   divider: `${PREFIX}-divider`,
   listItem: `${PREFIX}-listItem`,
-  button: `${PREFIX}-button`
+  button: `${PREFIX}-button`,
+  footerText: `${PREFIX}-footerText`,
+  link: `${PREFIX}-link`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -36,6 +40,12 @@ const Root = styled('div')(({ theme }) => ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center'
+  },
+  [`& .${classes.footer}`]: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    width: '100%',
+    justifyContent: 'flex-end'
   },
   [`& .${classes.listWrapper}`]: {
     width: '100%'
@@ -56,6 +66,16 @@ const Root = styled('div')(({ theme }) => ({
     '&:hover': {
       background: theme.palette.secondary.dark
     }
+  },
+  [`& .${classes.footerText}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  [`& .${classes.link}`]: {
+    display: 'flex',
+    cursor: 'pointer'
   }
 }));
 
@@ -177,6 +197,19 @@ const AboutSettings = () => {
           })}
         </List>
       </div>
+      <Grid item xs={12} className={classes.footer}>
+        <div className={classes.footerText}>
+          <Typography color="textSecondary">Price data from &nbsp;</Typography>
+          <div
+            className={classes.link}
+            onClick={() =>
+              shell.openExternal('https://www.coingecko.com/en/api')
+            }
+          >
+            <Typography color="secondary"> CoinGecko</Typography>
+          </div>
+        </div>
+      </Grid>
     </Root>
   );
 };

@@ -243,6 +243,23 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
   if (!txn) return <></>;
 
+  //used for displaying eth or erc20Tokens addresses in lower case
+  let coinData;
+  const coinParent = txn.coin?.toLowerCase();
+  const coinInitial = txn.slug?.toLowerCase();
+  if (coinParent && coinParent !== coinInitial) {
+    const parent = COINS[coinParent];
+    if (!parent) {
+      logger.warn(`Cannot find coinType parent: ${coinParent}`);
+    }
+    coinData = parent.tokenList[coinInitial];
+  } else coinData = COINS[coinInitial];
+  if (!coinData) {
+    logger.warn(`Cannot find coinType: ${coinInitial}`);
+  }
+  const isEth =
+    coinData.group === CoinGroup.Ethereum ||
+    coinData.group === CoinGroup.ERC20Tokens;
   return (
     <Root>
       <div className={classes.dateTimeContainer}>
@@ -300,12 +317,14 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           <Typography>
             {`${txn.slug.toUpperCase()} ${formatCoins(
               txn.displayAmount
-            )} ($${getPriceForCoin(txn.displayAmount)})`}
+            )} ($${discreetMode.handleSensitiveDataDisplay(
+              getPriceForCoin(txn.displayAmount)
+            )})`}
           </Typography>
         </div>
       </div>
       <div className={classes.dataContainer}>
-        <Typography color="textSecondary">Fees</Typography>
+        <Typography color="textSecondary">Fee</Typography>
         <div className={classes.flex}>
           <CoinIcons
             style={{ marginLeft: '0', marginRight: '10px' }}
@@ -344,7 +363,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {elem.address}
+                      {isEth ? elem.address.toLowerCase() : elem.address}
                     </Typography>
                     <Typography
                       style={{ userSelect: 'text' }}
@@ -383,7 +402,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {elem.address}
+                      {isEth ? elem.address.toLowerCase() : elem.address}
                     </Typography>
                     <Typography
                       style={{ userSelect: 'text' }}

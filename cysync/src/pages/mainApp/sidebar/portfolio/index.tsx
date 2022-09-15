@@ -1,6 +1,7 @@
 import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import lodash from 'lodash';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -167,7 +168,12 @@ const Portfolio = () => {
           style={{ marginRight: '10px' }}
         />
         <DropMenu
-          options={coinList.map((item: any) => item.toUpperCase())}
+          options={coinList.map(item =>
+            item
+              .split(' ')
+              .map(e => lodash.capitalize(e))
+              .join(' ')
+          )}
           handleMenuItemSelectionChange={handleCoinMenuItemChange}
           index={coinIndex}
           bg={false}

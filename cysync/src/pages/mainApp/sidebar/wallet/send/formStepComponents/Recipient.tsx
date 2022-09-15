@@ -455,10 +455,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
         storeCurrentMedimFee(res);
       })
       .catch(e => {
-        logger.error('Error in fetching medium fees');
+        logger.error('Error in fetching medium fee');
         logger.error(e);
         setMediumFeeError(true);
-        // When error, try to use previous medium fees
+        // When error, try to use previous medium fee
         const prevFee = getPreviousMedimFee();
         if (prevFee) {
           setMediumFee(prevFee);
@@ -601,7 +601,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           style={{ marginRight: '5px' }}
         />
         <Typography variant="body2" color="textSecondary" align="center">
-          Unable to fetch the latest average fees
+          Unable to fetch the latest average fee
         </Typography>
       </div>
     );
@@ -634,7 +634,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
       <>
         <Input
           onKeyDown={handleKeyPress}
-          placeHolder="Enter transaction fees"
+          placeHolder="Enter transaction fee"
           onChange={handleTransactionFeeChange}
           type="number"
           value={transactionFee}
@@ -822,7 +822,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
                     }}
                     id={recipient.id.toString()}
                     recipient={recipient}
-                    handleCopyFromClipboard={handleCopyFromClipboard}
+                    handleCopyFromClipboard={e => {
+                      handleCopyFromClipboard(e);
+                      debouncedHandleCheckAddresses();
+                    }}
                     coinAbbr={coinAbbr}
                     index={index + 1}
                     allowDelete={batchRecipientData.length > 1}
@@ -857,7 +860,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         <div className={networkFees}>
           <div className={networkLabel}>
             <Typography className="text" color="textPrimary">
-              {`Network Fees ${isEthereum ? '( Gas Price )' : ''} :`}
+              {`Network Fee ${isEthereum ? '( Gas Price )' : ''} :`}
             </Typography>
             <SwitchButton completed={feeType} handleChange={handleFeeType} />
             <Typography color="secondary">
@@ -876,7 +879,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
                   className={classes.primaryColor}
                   style={{ marginRight: '5px', verticalAlign: 'bottom' }}
                 />
-                Transaction might be cancelled due to low fees
+                Transaction might be cancelled due to low fee
               </Typography>
             </div>
           )}
@@ -913,7 +916,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           <div className={recipientTotal}>
             <div>
               <Typography variant="subtitle1" color="secondary">
-                <small>TRANSACTION FEES:</small>
+                <small>TRANSACTION FEE:</small>
                 {` ~${formatDisplayAmount(sendTransaction.approxTotalFee)} `}
                 <span className="amountCurrency">
                   {coinDetails.slug.toUpperCase()}

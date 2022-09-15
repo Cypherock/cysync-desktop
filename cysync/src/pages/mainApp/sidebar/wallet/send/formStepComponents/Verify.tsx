@@ -194,7 +194,7 @@ const Verify = (props: any) => {
               verified={sendTransaction.verified}
             />
             <LabelText
-              label="Transaction Fees"
+              label="Transaction Fee"
               text={`~ ${
                 sendTransaction.totalFees
               } ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
@@ -241,7 +241,7 @@ const Verify = (props: any) => {
             })}
             <div className={classes.transactionFeeDetails}>
               <LabelText
-                label="Transaction Fees"
+                label="Transaction Fee"
                 text={`~ ${
                   sendTransaction.totalFees
                 } ${coinDetails.slug.toUpperCase()} ~( $${

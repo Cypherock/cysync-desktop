@@ -1,8 +1,8 @@
 import { CoinGroup, COINS, NearCoinData } from '@cypherock/communication';
 import {
-  batch as batchServer,
   IRequestMetadata,
-  near as nearServer
+  near as nearServer,
+  serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 import { NearWallet } from '@cypherock/wallet';
 
