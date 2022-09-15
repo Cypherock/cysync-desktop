@@ -324,7 +324,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         </div>
       </div>
       <div className={classes.dataContainer}>
-        <Typography color="textSecondary">Fees</Typography>
+        <Typography color="textSecondary">Fee</Typography>
         <div className={classes.flex}>
           <CoinIcons
             style={{ marginLeft: '0', marginRight: '10px' }}

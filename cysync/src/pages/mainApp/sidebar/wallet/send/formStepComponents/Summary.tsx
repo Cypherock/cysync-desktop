@@ -267,7 +267,7 @@ const Summary: React.FC<StepComponentProps> = ({
           />
         )}
         <LabelText
-          label="Transaction Fees"
+          label="Transaction Fee"
           text={`~ ${
             sendTransaction.totalFees
           } ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
