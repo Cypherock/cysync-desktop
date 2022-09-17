@@ -395,6 +395,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           PriceSyncItemOptions['days']
         >) {
           if (days === 7 && coinData.coinGeckoId) continue;
+
           const oldPrices = await priceHistoryDb.getOne({
             slug: coinData.abbr,
             interval: days
@@ -404,9 +405,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           // Check if the prices and old enough and then only add to sync
           if (oldPrices && oldPrices.data && oldPrices.data.length > 2) {
             const oldestPriceEntry = oldPrices.data[oldPrices.data.length - 1];
-            const secondOldestPriceEntry =
-              oldPrices.data[oldPrices.data.length - 2];
-            const interval = oldestPriceEntry[0] - secondOldestPriceEntry[0];
+            const interval = (days === 30 ? 1 : 24) * 60 * 60 * 1000;
             const currentTime = new Date().getTime();
             const nextLatestTime = oldestPriceEntry[0] + interval;
 
@@ -574,10 +573,6 @@ export const SyncProvider: React.FC = ({ children }) => {
     );
 
     const items = syncQueue.filter(item => item.type === 'price').splice(0, 1);
-
-    if (items.length <= 0) {
-      return [];
-    }
 
     try {
       if (clientTimeout.current.pause) {

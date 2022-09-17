@@ -23,7 +23,6 @@ import { CysyncError } from '../../../../errors';
 import logger from '../../../../utils/logger';
 import {
   addressDb,
-  Coin,
   coinDb,
   IOtype,
   prepareFromBlockbookTxn,
@@ -32,7 +31,12 @@ import {
   Transaction,
   transactionDb
 } from '../../../database';
-import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
+import {
+  BalanceSyncItem,
+  HistorySyncItem,
+  ModifiedCoin,
+  SyncProviderTypes
+} from '../types';
 
 export const getRequestsMetadata = (
   item: HistorySyncItem
@@ -444,14 +448,20 @@ export const processResponses = async (
             isRefresh: true
           })
         );
-        options.addPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
-          isRefresh: true,
-          module: item.module
-        });
-        options.addLatestPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
-          isRefresh: true,
-          module: 'default'
-        });
+        options.addPriceSyncItemFromCoin(
+          { slug: tokenName, parentCoin: item.coinType } as ModifiedCoin,
+          {
+            isRefresh: true,
+            module: item.module
+          }
+        );
+        options.addLatestPriceSyncItemFromCoin(
+          { slug: tokenName, parentCoin: item.coinType } as ModifiedCoin,
+          {
+            isRefresh: true,
+            module: 'default'
+          }
+        );
       }
     }
   }

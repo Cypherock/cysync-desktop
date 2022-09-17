@@ -69,7 +69,6 @@ const Portfolio = () => {
   useEffect(() => {
     if (allWallets[0]._id === '') setOpen(true);
     else {
-      setCurrentWallet(allWallets[0]._id);
       setOpen(false);
     }
   }, [allWallets]);

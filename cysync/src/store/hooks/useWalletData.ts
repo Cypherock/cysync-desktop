@@ -69,7 +69,7 @@ export const useWalletData: UseWalletData = () => {
 
       coinWithPrice.displayBalance = balance.toString();
 
-      const latestPrice = coin.price;
+      const latestPrice = coin.price || 0;
       const value = balance.multipliedBy(latestPrice || 0);
       coinWithPrice.displayValue = value.toString();
       coinWithPrice.displayPrice = latestPrice.toString() || '0';
