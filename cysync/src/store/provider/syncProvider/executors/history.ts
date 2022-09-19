@@ -478,7 +478,7 @@ export const processResponses = async (
       const toAddr = ele.receiver_account_id;
       const address = ele.address_parameter;
 
-      const amount = fromAddr === toAddr ? '0' : String(ele.args?.deposit);
+      const amount = fromAddr === toAddr ? '0' : String(ele.args?.deposit || 0);
 
       const txn: Transaction = {
         hash: ele.transaction_hash,
