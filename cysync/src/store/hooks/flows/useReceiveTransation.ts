@@ -128,6 +128,8 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     setVerifiedAccountId(false);
     setVerifiedReplaceAccount(false);
     setReplaceAccountStarted(false);
+    userAction.current = new DeferredReference<void>();
+    replaceAccountAction.current = new DeferredReference<void>();
     receiveTransaction.removeAllListeners();
   };
 
