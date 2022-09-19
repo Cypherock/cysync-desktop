@@ -651,14 +651,12 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const executeNextInQueue = async () => {
     setIsExecutingTask(true);
-    logger.info('SyncQueue: Executing Items');
     const array = await Promise.all([
       executeNextClientItemInQueue(),
       executeNextBatchItemInQueue()
     ]);
     updateAllExecutedItems(array.reduce((acc, item) => acc.concat(item), []));
     await sleep(queueExecuteInterval);
-    logger.info(`SyncQueue: Executed ${array.length} items`);
     setIsExecutingTask(false);
   };
 
@@ -923,8 +921,24 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   // Sets if the sync is 'on' or 'off'
   useEffect(() => {
-    if (isSyncing) {
-      if (startTime.current) {
+    if (syncQueue.length > 0) {
+      if (connected && isInitialSetupDone) {
+        if (isWaitingForConnection) {
+          setWaitingForConnection(false);
+        }
+
+        setIsSyncing(true);
+      } else if (isInitialSetupDone) {
+        setWaitingForConnection(true);
+      }
+    } else {
+      setIsSyncing(false);
+    }
+  }, [connected, isInitialSetupDone, syncQueue]);
+
+  useEffect(() => {
+    if (syncQueue.length > 0) {
+      if (startTime.current > 0) {
         const peek = performance.now();
         if (peek - startTime.current > timeThreshold + offsetTime.current) {
           offsetTime.current = peek;
@@ -945,27 +959,16 @@ export const SyncProvider: React.FC = ({ children }) => {
         startTime.current = performance.now();
       }
     } else {
-      const stop = performance.now();
-      logger.info(
-        `Sync completed total time: ${stop - startTime.current} milliseconds`
-      );
-      offsetTime.current = 0;
-      startTime.current = 0;
-    }
-    if (syncQueue.length > 0) {
-      if (connected && isInitialSetupDone) {
-        if (isWaitingForConnection) {
-          setWaitingForConnection(false);
-        }
-
-        setIsSyncing(true);
-      } else if (isInitialSetupDone) {
-        setWaitingForConnection(true);
+      if (startTime.current > 0) {
+        const stop = performance.now();
+        logger.info(
+          `Sync completed total time: ${stop - startTime.current} milliseconds`
+        );
+        offsetTime.current = 0;
+        startTime.current = 0;
       }
-    } else {
-      setIsSyncing(false);
     }
-  }, [connected, isInitialSetupDone, syncQueue]);
+  }, [syncQueue]);
 
   // Execute the syncItems if it is syncing
   useEffect(() => {
