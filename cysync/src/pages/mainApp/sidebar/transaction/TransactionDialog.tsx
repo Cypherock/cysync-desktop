@@ -21,6 +21,7 @@ import React, { useEffect, useState } from 'react';
 
 import Button from '../../../../designSystem/designComponents/buttons/button';
 import IconButton from '../../../../designSystem/designComponents/buttons/customIconButton';
+import PopOverText from '../../../../designSystem/designComponents/hover/popoverText';
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
@@ -151,7 +152,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   };
 
   const getPriceForCoin = (coins: string) => {
-    return ((parseFloat(coins) || 0) * coinPrice).toFixed(2);
+    return (parseFloat(coins) || 0) * coinPrice;
   };
 
   const getFeeCoinName = () => {
@@ -162,15 +163,23 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
     return txn.slug.toUpperCase();
   };
 
-  const getFeePrice = () => {
+  const getFeePrice = (showFull?: boolean) => {
     if (txn.isErc20) {
       return discreetMode.handleSensitiveDataDisplay(
-        ((parseFloat(txn.displayFees) || 0) * ethCoinPrice).toFixed(2)
+        formatDisplayAmount(
+          (parseFloat(txn.displayFees) || 0) * ethCoinPrice,
+          showFull ? undefined : 2,
+          true
+        )
       );
     }
 
     return discreetMode.handleSensitiveDataDisplay(
-      formatDisplayAmount(getPriceForCoin(txn.displayFees))
+      formatDisplayAmount(
+        getPriceForCoin(txn.displayFees),
+        showFull ? undefined : 2,
+        true
+      )
     );
   };
 
@@ -314,13 +323,22 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             initial={txn.slug.toUpperCase()}
             parentCoin={txn.coin?.toLowerCase()}
           />
-          <Typography>
-            {`${txn.slug.toUpperCase()} ${formatCoins(
-              txn.displayAmount
-            )} ($${discreetMode.handleSensitiveDataDisplay(
-              getPriceForCoin(txn.displayAmount)
-            )})`}
+          <Typography sx={{ mr: 1 }}>
+            {`${txn.slug.toUpperCase()} ${formatCoins(txn.displayAmount)} `}
           </Typography>
+          <PopOverText
+            text={`($ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(getPriceForCoin(txn.displayAmount), 2, true)
+            )})`}
+            color="textPrimary"
+            hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(
+                getPriceForCoin(txn.displayAmount),
+                undefined,
+                true
+              )
+            )} `}
+          />
         </div>
       </div>
       <div className={classes.dataContainer}>
@@ -330,9 +348,14 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             style={{ marginLeft: '0', marginRight: '10px' }}
             initial={getFeeCoinName()}
           />
-          <Typography>{`${getFeeCoinName()} ${formatCoins(
+          <Typography sx={{ mr: 1 }}>{`${getFeeCoinName()} ${formatCoins(
             txn.displayFees
-          )} ($${getFeePrice()})`}</Typography>
+          )}`}</Typography>
+          <PopOverText
+            text={`($ ${getFeePrice()})`}
+            color="textPrimary"
+            hoverText={`$ ${getFeePrice(true)} `}
+          />
         </div>
       </div>
       <Grid
