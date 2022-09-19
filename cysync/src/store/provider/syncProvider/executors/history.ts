@@ -479,7 +479,12 @@ export const processResponses = async (
       const address = ele.address_parameter;
 
       const amount = fromAddr === toAddr ? '0' : String(ele.args?.deposit);
-
+      const isAddAccountTransaction =
+        ele.action_kind === 'FUNCTION_CALL' &&
+        ele.args?.method_name === 'create_account';
+      let description;
+      if (isAddAccountTransaction)
+        description = `Created account ${ele.args?.args_json.new_account_id}`;
       const txn: Transaction = {
         hash: ele.transaction_hash,
         customIdentifier: address,
@@ -508,15 +513,60 @@ export const processResponses = async (
         ],
         outputs: [
           {
-            address: toAddr,
+            address: isAddAccountTransaction
+              ? ele.args?.args_json?.new_account_id
+              : toAddr,
             value: amount,
             indexNumber: 0,
             isMine: address === toAddr,
             type: IOtype.OUTPUT
           }
-        ]
+        ],
+        type: ele.action_kind,
+        description
       };
       history.push(txn);
+      if (isAddAccountTransaction) {
+        const newAccountAddress = ele.args?.args_json?.new_account_id;
+        const addAccountTxn: Transaction = {
+          hash: ele.transaction_hash,
+          customIdentifier: newAccountAddress,
+          amount,
+          fees: fees.toString(),
+          total: new BigNumber(amount).plus(fees).toString(),
+          confirmations: 0,
+          walletId: item.walletId,
+          slug: item.coinType,
+          status: ele.status ? 1 : 2,
+          sentReceive: SentReceive.RECEIVED,
+          confirmed: new Date(
+            parseInt(ele.block_timestamp, 10) / 1000000
+          ).toISOString(), //conversion from timestamp in nanoseconds
+          blockHeight: parseInt(ele.block_height, 10) || 0,
+          coin: item.coinType,
+          inputs: [
+            {
+              address: fromAddr,
+              value: amount,
+              indexNumber: 0,
+              isMine: newAccountAddress === fromAddr,
+              type: IOtype.INPUT
+            }
+          ],
+          outputs: [
+            {
+              address: newAccountAddress,
+              value: amount,
+              indexNumber: 0,
+              isMine: true,
+              type: IOtype.OUTPUT
+            }
+          ],
+          type: ele.action_kind,
+          description
+        };
+        history.push(addAccountTxn);
+      }
     }
 
     const transactionDbList = [];

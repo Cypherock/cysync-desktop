@@ -260,6 +260,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   const isEth =
     coinData.group === CoinGroup.Ethereum ||
     coinData.group === CoinGroup.ERC20Tokens;
+  const isNear = coinData.group === CoinGroup.Near;
   return (
     <Root>
       <div className={classes.dateTimeContainer}>
@@ -335,6 +336,14 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           )} ($${getFeePrice()})`}</Typography>
         </div>
       </div>
+      {isNear && (
+        <div className={classes.dataContainer}>
+          <Typography color="textSecondary">Type</Typography>
+          <div className={classes.flex}>
+            <Typography>{txn.type}</Typography>
+          </div>
+        </div>
+      )}
       <Grid
         container
         spacing={2}

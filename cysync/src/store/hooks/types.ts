@@ -52,6 +52,8 @@ export interface DisplayTransaction
   displayFees: string;
   displayTotal: string;
   displayValue: string;
+  displayType?: string;
+  displayDescription?: string;
   isErc20: boolean;
   coinName: string;
   coinDecimal: number;
