@@ -190,7 +190,7 @@ class Analytics {
         RETRY_BROADCAST: 'Add account broadcast retry'
       },
       BALANCE: {
-        UPDATED: 'Balance updated'
+        UPDATED: 'Track Balance update'
       },
       TXN: {
         TRACK: 'Track transaction'

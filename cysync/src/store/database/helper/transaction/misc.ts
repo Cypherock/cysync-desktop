@@ -12,8 +12,8 @@ export const convertToDisplayValue = (value: SentReceive) => {
 export const convertTxnToAnalyticsItem = (txn: Transaction) => {
   return {
     txnHash: txn.hash,
-    coin: txn.coin,
-    slug: txn.slug,
+    parentCoin: txn.coin,
+    coin: txn.slug,
     customIdentifier: Analytics.createHash(txn.customIdentifier),
     amount: txn.amount,
     fees: txn.fees,
