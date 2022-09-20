@@ -100,9 +100,6 @@ export const SyncProvider: React.FC = ({ children }) => {
   const { connected } = useNetwork();
   const connectedRef = useRef<boolean | null>(connected);
 
-  const timeThreshold = 60000; // log every 1 minute
-  const offsetTime = useRef(0);
-  const startTime = useRef(0);
   const clientTimeout = useRef<ClientTimeoutInterface>({
     pause: false,
     tryAfter: 0
@@ -584,10 +581,8 @@ export const SyncProvider: React.FC = ({ children }) => {
 
     try {
       if (clientTimeout.current.pause) {
-        logger.info('Waiting for coinGeckoAPI');
         await sleep(clientTimeout.current.tryAfter);
         clientTimeout.current.pause = false;
-        logger.info('Waiting complete');
       }
       let latestPriceResult: ExecutionResult[] = [];
       if (latestPriceItems.length > 0) {
@@ -651,14 +646,12 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const executeNextInQueue = async () => {
     setIsExecutingTask(true);
-    logger.info('SyncQueue: Executing Items');
     const array = await Promise.all([
       executeNextClientItemInQueue(),
       executeNextBatchItemInQueue()
     ]);
     updateAllExecutedItems(array.reduce((acc, item) => acc.concat(item), []));
     await sleep(queueExecuteInterval);
-    logger.info(`SyncQueue: Executed ${array.length} items`);
     setIsExecutingTask(false);
   };
 
@@ -923,35 +916,6 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   // Sets if the sync is 'on' or 'off'
   useEffect(() => {
-    if (isSyncing) {
-      if (startTime.current) {
-        const peek = performance.now();
-        if (peek - startTime.current > timeThreshold + offsetTime.current) {
-          offsetTime.current = peek;
-          logger.info(`Threshold exceeded at ${peek} milliseconds`);
-          logger.info({
-            queue: syncQueue.slice(0, 3).map(item => {
-              return {
-                ...item,
-                walletId: undefined,
-                xpub: undefined,
-                zpub: undefined
-              };
-            }),
-            totalLength: syncQueue.length
-          });
-        }
-      } else {
-        startTime.current = performance.now();
-      }
-    } else {
-      const stop = performance.now();
-      logger.info(
-        `Sync completed total time: ${stop - startTime.current} milliseconds`
-      );
-      offsetTime.current = 0;
-      startTime.current = 0;
-    }
     if (syncQueue.length > 0) {
       if (connected && isInitialSetupDone) {
         if (isWaitingForConnection) {
