@@ -105,8 +105,7 @@ export const SyncProvider: React.FC = ({ children }) => {
   const startTime = useRef(0);
   const clientTimeout = useRef<ClientTimeoutInterface>({
     pause: false,
-    tryAfter: 0,
-    waiting: false
+    tryAfter: 0
   });
 
   useEffect(() => {
@@ -497,8 +496,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           if (result.delay) {
             clientTimeout.current = {
               pause: true,
-              tryAfter: result.delay,
-              waiting: false
+              tryAfter: performance.now() + result.delay
             };
           }
           updateQueueItem = true;
@@ -589,17 +587,13 @@ export const SyncProvider: React.FC = ({ children }) => {
 
     try {
       if (clientTimeout.current.pause) {
-        if (!clientTimeout.current.waiting) {
-          logger.info('Waiting for coinGeckoAPI');
-          clientTimeout.current.waiting = true;
-          (async () => {
-            await sleep(clientTimeout.current.tryAfter);
-            clientTimeout.current.pause = false;
-            clientTimeout.current.waiting = false;
-            logger.info('Waiting complete');
-          })();
+        if (performance.now() >= clientTimeout.current.tryAfter) {
+          clientTimeout.current = { pause: false, tryAfter: 0 };
+          logger.info('Waiting complete');
+        } else {
+          logger.info('Skipping ClientBatch for coinGeckoAPI');
+          return [];
         }
-        return [];
       }
       let latestPriceResult: ExecutionResult[] = [];
       if (latestPriceItems.length > 0) {
