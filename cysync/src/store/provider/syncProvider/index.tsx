@@ -498,6 +498,7 @@ export const SyncProvider: React.FC = ({ children }) => {
               pause: true,
               tryAfter: performance.now() + result.delay
             };
+            logger.info('ClientBatch sync paused for CoinGeckoAPI');
           }
           updateQueueItem = true;
           removeFromQueue = false;
@@ -581,17 +582,12 @@ export const SyncProvider: React.FC = ({ children }) => {
 
     const items = syncQueue.filter(item => item.type === 'price').splice(0, 1);
 
-    if (items.length <= 0) {
-      return [];
-    }
-
     try {
       if (clientTimeout.current.pause) {
         if (performance.now() >= clientTimeout.current.tryAfter) {
           clientTimeout.current = { pause: false, tryAfter: 0 };
           logger.info('Waiting complete');
         } else {
-          logger.info('Skipping ClientBatch for coinGeckoAPI');
           return [];
         }
       }
