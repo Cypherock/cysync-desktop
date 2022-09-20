@@ -52,13 +52,13 @@ export interface DisplayTransaction
   displayFees: string;
   displayTotal: string;
   displayValue: string;
-  displayType?: string;
-  displayDescription?: string;
   isErc20: boolean;
   coinName: string;
   coinDecimal: number;
   inputs?: DisplayInputOutput[];
   outputs?: DisplayInputOutput[];
+  type?: string;
+  description?: string;
 }
 
 export const DisplayTransactionPropTypes = {
@@ -79,6 +79,8 @@ export const DisplayTransactionPropTypes = {
   displayFees: PropTypes.string.isRequired,
   displayTotal: PropTypes.string.isRequired,
   displayValue: PropTypes.string.isRequired,
+  type: PropTypes.string,
+  description: PropTypes.string,
   isErc20: PropTypes.bool.isRequired,
   coinName: PropTypes.string.isRequired,
   coinDecimal: PropTypes.number.isRequired,

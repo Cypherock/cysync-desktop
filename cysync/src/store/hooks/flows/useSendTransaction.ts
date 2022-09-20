@@ -848,6 +848,10 @@ export const useSendTransaction: UseSendTransaction = () => {
         amount: amount.toString(),
         total: amount.plus(fees).toString(),
         fees: fees.toString(),
+        customIdentifier:
+          coin.toLowerCase() === 'near'
+            ? formattedInputs[0].address
+            : undefined,
         walletId,
         slug: coin.toLowerCase(),
         confirmations: 0,

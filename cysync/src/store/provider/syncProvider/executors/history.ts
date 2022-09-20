@@ -471,21 +471,26 @@ export const processResponses = async (
     }
 
     for (const ele of rawHistory) {
-      const fees = new BigNumber(ele.tokens_burnt).plus(
-        ele.receipt_conversion_tokens_burnt
-      );
+      const fees = new BigNumber(ele.tokens_burnt)
+        .plus(ele.receipt_conversion_tokens_burnt)
+        .plus(ele.nested_receipts_tokens_burnt);
 
       const fromAddr = ele.signer_account_id;
       const toAddr = ele.receiver_account_id;
       const address = ele.address_parameter;
 
-      const amount = fromAddr === toAddr ? '0' : String(ele.args?.deposit);
+      const amount = fromAddr === toAddr ? '0' : String(ele.args?.deposit || 0);
       const isAddAccountTransaction =
         ele.action_kind === 'FUNCTION_CALL' &&
         ele.args?.method_name === 'create_account';
       let description;
-      if (isAddAccountTransaction)
-        description = `Created account ${ele.args?.args_json.new_account_id}`;
+      let argsJson;
+      if (isAddAccountTransaction) {
+        argsJson = JSON.parse(
+          Buffer.from(ele.args?.args_base64, 'base64').toString()
+        );
+        description = `Created account ${argsJson}`;
+      }
       const txn: Transaction = {
         hash: ele.transaction_hash,
         customIdentifier: address,
@@ -515,7 +520,7 @@ export const processResponses = async (
         outputs: [
           {
             address: isAddAccountTransaction
-              ? ele.args?.args_json?.new_account_id
+              ? argsJson?.new_account_id
               : toAddr,
             value: amount,
             indexNumber: 0,
@@ -528,7 +533,7 @@ export const processResponses = async (
       };
       history.push(txn);
       if (isAddAccountTransaction) {
-        const newAccountAddress = ele.args?.args_json?.new_account_id;
+        const newAccountAddress = argsJson?.new_account_id;
         const addAccountTxn: Transaction = {
           hash: ele.transaction_hash,
           customIdentifier: newAccountAddress,
@@ -543,7 +548,7 @@ export const processResponses = async (
           confirmed: new Date(
             parseInt(ele.block_timestamp, 10) / 1000000
           ).toISOString(), //conversion from timestamp in nanoseconds
-          blockHeight: parseInt(ele.block_height, 10) || 0,
+          blockHeight: 0,
           coin: item.coinType,
           inputs: [
             {
