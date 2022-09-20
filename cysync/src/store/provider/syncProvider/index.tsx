@@ -105,7 +105,8 @@ export const SyncProvider: React.FC = ({ children }) => {
   const startTime = useRef(0);
   const clientTimeout = useRef<ClientTimeoutInterface>({
     pause: false,
-    tryAfter: 0
+    tryAfter: 0,
+    waiting: false
   });
 
   useEffect(() => {
@@ -494,7 +495,11 @@ export const SyncProvider: React.FC = ({ children }) => {
           logger.warn('Sync: Error, retrying...', { item });
           updatedItem.retries += 1;
           if (result.delay) {
-            clientTimeout.current = { pause: true, tryAfter: result.delay };
+            clientTimeout.current = {
+              pause: true,
+              tryAfter: result.delay,
+              waiting: false
+            };
           }
           updateQueueItem = true;
           removeFromQueue = false;
@@ -584,10 +589,17 @@ export const SyncProvider: React.FC = ({ children }) => {
 
     try {
       if (clientTimeout.current.pause) {
-        logger.info('Waiting for coinGeckoAPI');
-        await sleep(clientTimeout.current.tryAfter);
-        clientTimeout.current.pause = false;
-        logger.info('Waiting complete');
+        if (!clientTimeout.current.waiting) {
+          logger.info('Waiting for coinGeckoAPI');
+          clientTimeout.current.waiting = true;
+          (async () => {
+            await sleep(clientTimeout.current.tryAfter);
+            clientTimeout.current.pause = false;
+            clientTimeout.current.waiting = false;
+            logger.info('Waiting complete');
+          })();
+        }
+        return [];
       }
       let latestPriceResult: ExecutionResult[] = [];
       if (latestPriceItems.length > 0) {
@@ -651,12 +663,17 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const executeNextInQueue = async () => {
     setIsExecutingTask(true);
+    const timeStart = performance.now();
     const array = await Promise.all([
       executeNextClientItemInQueue(),
       executeNextBatchItemInQueue()
     ]);
     updateAllExecutedItems(array.reduce((acc, item) => acc.concat(item), []));
     await sleep(queueExecuteInterval);
+    const timeStop = performance.now();
+    if (timeStop - timeStart > 5000) {
+      logger.info(`Batch execution took ${timeStop - timeStart} milliseconds`);
+    }
     setIsExecutingTask(false);
   };
 
