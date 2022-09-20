@@ -89,7 +89,8 @@ export const getRequestsMetadata = (
           address: item.customAccount,
           network: coin.network,
           limit: 100,
-          from: item.afterBlock
+          from: item.afterBlock,
+          responseType: 'v2'
         },
         item.isRefresh
       )
