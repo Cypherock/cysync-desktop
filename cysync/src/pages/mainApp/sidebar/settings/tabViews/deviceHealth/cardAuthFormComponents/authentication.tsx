@@ -16,13 +16,12 @@ const Authentication: React.FC<Props> = ({ verified, errorObj }) => {
   useEffect(() => {
     if (verified === -1 || errorObj.isSet) {
       Analytics.Instance.event(
-        Analytics.Categories.CARD_AUTH,
-        Analytics.Actions.ERROR
+        Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.CARD_AUTH.ERROR,
+        { errorCode: errorObj.getCode(), message: errorObj.getMessage() }
       );
     } else if (verified === 2) {
       Analytics.Instance.event(
-        Analytics.Categories.CARD_AUTH,
-        Analytics.Actions.COMPLETED
+        Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.CARD_AUTH.SUCCESS
       );
     }
   }, [verified, errorObj]);

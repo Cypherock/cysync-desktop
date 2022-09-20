@@ -106,15 +106,13 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
 
   useEffect(() => {
     Analytics.Instance.event(
-      Analytics.Categories.INITIAL_DEVICE_AUTH_IN_MAIN,
-      Analytics.Actions.OPEN
+      Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.CARD_AUTH.OPENED
     );
     logger.info('Initial device auth in main opened');
 
     return () => {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_AUTH_IN_MAIN,
-        Analytics.Actions.CLOSED
+        Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.CARD_AUTH.CLOSED
       );
       logger.info('Initial device auth in main closed');
     };
@@ -160,16 +158,31 @@ const DeviceAuthentication: React.FC<StepComponentProps> = ({
         resetHooks();
       }, 1500);
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_AUTH,
-        Analytics.Actions.COMPLETED
+        Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.DEVICE_AUTH
+          .SUCCESS
       );
     }
 
     if (verified === -1 || errorObj.isSet) {
-      Analytics.Instance.event(
-        Analytics.Categories.INITIAL_DEVICE_AUTH,
-        Analytics.Actions.ERROR
-      );
+      if (verified === -1) {
+        Analytics.Instance.event(
+          Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.DEVICE_AUTH
+            .COMPROMISED,
+          {
+            errorCode: errorObj.getCode(),
+            errorMessage: errorObj.getMessage()
+          }
+        );
+      } else {
+        Analytics.Instance.event(
+          Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.DEVICE_AUTH
+            .ERROR,
+          {
+            errorCode: errorObj.getCode(),
+            errorMessage: errorObj.getMessage()
+          }
+        );
+      }
     }
   }, [verified, completed]);
 

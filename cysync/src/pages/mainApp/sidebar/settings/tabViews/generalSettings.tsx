@@ -83,6 +83,9 @@ const GeneralSettings = () => {
   const [disableProvision, setDisableProvision] = React.useState(
     localStorage.getItem('disableProvision') === 'true'
   );
+  const [disableAnalytics, setDisableAnalytics] = React.useState(
+    localStorage.getItem('disableAnalytics') === 'true'
+  );
   const [usePrereleaseFirmware, setUsePrereleaseFirmware] = React.useState(
     localStorage.getItem('usePrereleaseFirmware') === 'true'
   );
@@ -107,6 +110,25 @@ const GeneralSettings = () => {
     const newAutoLock = !autoLock;
     setAutoLock(newAutoLock);
     storeAutoLock(newAutoLock);
+  };
+
+  const handleAnalyticsToggle = () => {
+    const newVal = !disableAnalytics;
+    setDisableAnalytics(newVal);
+    if (newVal) {
+      Analytics.Instance.event(
+        Analytics.EVENTS.SETTINGS.GENERAL_SETTINGS.ANALYTICS.DISABLED
+      );
+    }
+
+    Analytics.Instance.toggleDisable(newVal);
+
+    if (!newVal) {
+      Analytics.Instance.event(
+        Analytics.EVENTS.SETTINGS.GENERAL_SETTINGS.ANALYTICS.ENABLED
+      );
+    }
+    localStorage.setItem('disableAnalytics', newVal.toString());
   };
 
   const handleDisableProvisionClick = () => {
@@ -209,6 +231,26 @@ const GeneralSettings = () => {
         >
           Clear Data
         </Button>
+      )
+    },
+    {
+      name: 'Analytics',
+      secondaryText: (
+        <div style={{ width: '50%' }}>
+          Enable analytics to help Cypherock improve user experience and resolve
+          your issues faster. This includes clicks, page visits, redirections,
+          actions (send, receive, lock, etc), end of page scrolls,
+          (un)installing and app version, number of accounts, crypto assets and
+          operations, session durations, the Cypherock device type and firmware.
+          This does not track your device and card operations.
+        </div>
+      ),
+      element: (
+        <SwitchButton
+          name="analytics"
+          completed={!disableAnalytics}
+          handleChange={handleAnalyticsToggle}
+        />
       )
     }
   ];

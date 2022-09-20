@@ -20,11 +20,13 @@ import {
 import BigNumber from 'bignumber.js';
 
 import { CysyncError } from '../../../../errors';
+import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
 import {
   addressDb,
   Coin,
   coinDb,
+  convertTxnToAnalyticsItem,
   IOtype,
   prepareFromBlockbookTxn,
   SentReceive,
@@ -158,6 +160,17 @@ export const processResponses = async (
         if (coin.xpubUnconfirmedBalance) {
           balance = balance.plus(coin.xpubUnconfirmedBalance);
         }
+        Analytics.Instance.event(
+          Analytics.EVENTS.WALLET.BALANCE.UPDATED,
+          {
+            totalBalance: balance.toString(),
+            walletId: Analytics.createHash(item.walletId),
+            identifier: Analytics.createHash(item.zpub),
+            coin: item.coinType,
+            parentCoin: item.parentCoin
+          },
+          { isSensitive: true }
+        );
       } else {
         await coinDb.updateXpubBalance({
           xpub: item.xpub,
@@ -172,6 +185,18 @@ export const processResponses = async (
         if (coin.zpubUnconfirmedBalance) {
           balance = balance.plus(coin.zpubUnconfirmedBalance);
         }
+
+        Analytics.Instance.event(
+          Analytics.EVENTS.WALLET.BALANCE.UPDATED,
+          {
+            totalBalance: balance.toString(),
+            walletId: Analytics.createHash(item.walletId),
+            identifier: Analytics.createHash(item.xpub),
+            coin: item.coinType,
+            parentCoin: item.parentCoin
+          },
+          { isSensitive: true }
+        );
       }
 
       await coinDb.updateTotalBalance({
@@ -201,6 +226,7 @@ export const processResponses = async (
       }
 
       try {
+        analyzeTxn(item, transactionDbList);
         await transactionDb.insertMany(transactionDbList);
       } catch (error) {
         // No need to retry if the inserting fails because it'll produce the same error.
@@ -409,6 +435,7 @@ export const processResponses = async (
       transactionDbList.push(txn);
     }
     try {
+      analyzeTxn(item, transactionDbList);
       await transactionDb.insertMany(transactionDbList);
       // No need to retry if the inserting fails because it'll produce the same error.
     } catch (error) {
@@ -521,6 +548,7 @@ export const processResponses = async (
       transactionDbList.push(txn);
     }
     try {
+      analyzeTxn(item, transactionDbList);
       await transactionDb.insertMany(transactionDbList);
       // No need to retry if the inserting fails because it'll produce the same error.
     } catch (error) {
@@ -535,4 +563,56 @@ export const processResponses = async (
       };
     }
   }
+};
+
+const lastBlockStorageForAnalytics = {
+  getKey: (item: HistorySyncItem) => {
+    const key = Analytics.createHash(
+      `${item.coinType}-${item.parentCoin}-${item.customAccount}-${item.xpub}-${item.walletId}`
+    );
+    return key;
+  },
+
+  getItem: (item: HistorySyncItem) => {
+    const val = parseInt(
+      localStorage.getItem(lastBlockStorageForAnalytics.getKey(item)),
+      10
+    );
+    return val || 0;
+  },
+
+  setItem: (item: HistorySyncItem, val: number) => {
+    localStorage.setItem(
+      lastBlockStorageForAnalytics.getKey(item),
+      val.toString()
+    );
+  }
+};
+
+const analyzeTxn = (item: HistorySyncItem, txns: Transaction[]) => {
+  let highestBlock = 0;
+  const lastBlockHeight = lastBlockStorageForAnalytics.getItem(item);
+  const cysyncInitializedTime = Analytics.Instance.cysyncInitializedTime;
+
+  for (const txn of txns) {
+    if (txn.blockHeight > highestBlock) {
+      highestBlock = txn.blockHeight;
+    }
+
+    const time = new Date(txn.confirmed);
+    if (
+      txn.blockHeight >= lastBlockHeight - 1 &&
+      txn.confirmations &&
+      txn.confirmations > 0 &&
+      time.getTime() >= cysyncInitializedTime
+    ) {
+      Analytics.Instance.event(
+        Analytics.EVENTS.WALLET.TXN.TRACK,
+        convertTxnToAnalyticsItem(txn),
+        { isSensitive: true }
+      );
+    }
+  }
+
+  lastBlockStorageForAnalytics.setItem(item, highestBlock);
 };

@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { CysyncError } from '../../errors';
+import Analytics from '../../utils/analytics';
 import { inTestApp } from '../../utils/compareVersion';
 import logger from '../../utils/logger';
 import {
@@ -374,6 +375,24 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   }, [completed]);
 
   useEffect(() => {
+    if (deviceConnectionState === DeviceConnectionState.VERIFIED) {
+      Analytics.Instance.event(Analytics.EVENTS.DEVICE_CONNECTION.CONNECTED, {
+        deviceConnectionState,
+        deviceState: internalDeviceConnection?.deviceState,
+        deviceSerial: Analytics.createHash(deviceSerial),
+        firmwareVersion
+      });
+    } else if (deviceConnectionState !== DeviceConnectionState.NOT_CONNECTED) {
+      Analytics.Instance.event(Analytics.EVENTS.DEVICE_CONNECTION.ERROR, {
+        deviceConnectionState,
+        deviceState: internalDeviceConnection?.deviceState,
+        deviceSerial: Analytics.createHash(deviceSerial),
+        firmwareVersion,
+        errorCode: errorObj.getCode(),
+        errorMessage: errorObj.getMessage()
+      });
+    }
+
     logger.info(`Device Connection Status Code: ${getLogMessage()}`);
     if (deviceConnectionState === DeviceConnectionState.VERIFIED) {
       setIsReady(true);

@@ -87,10 +87,9 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
     switch (deviceConnectionState) {
       case DeviceConnectionState.DEVICE_NOT_READY:
         logger.info('Retry device connection by user');
-        Analytics.Instance.event(
-          Analytics.Categories.RETRY_DEVICE_CONNECTION,
-          Analytics.Actions.CLICKED
-        );
+        Analytics.Instance.event(Analytics.EVENTS.DEVICE_CONNECTION.RETRY, {
+          fromInitial: true
+        });
         retryConnection();
         handleClose();
         break;

@@ -75,8 +75,7 @@ const DBCleaupPopup = () => {
       if (isCleanupRequired) {
         setIsOpen(true);
         Analytics.Instance.event(
-          Analytics.Categories.DATABASE_CLEANUP,
-          Analytics.Actions.OPEN
+          Analytics.EVENTS.DATABASE_CLEANUP.PROMPT_DISPLAYED
         );
         logger.info('Database cleanup prompt opened');
       }
@@ -92,10 +91,7 @@ const DBCleaupPopup = () => {
 
   const handleClose = () => {
     setIsOpen(false);
-    Analytics.Instance.event(
-      Analytics.Categories.DATABASE_CLEANUP,
-      Analytics.Actions.CLOSED
-    );
+    Analytics.Instance.event(Analytics.EVENTS.DATABASE_CLEANUP.PROMPT_CLOSED);
     logger.info('Database cleanup prompt closed');
   };
 

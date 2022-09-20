@@ -353,7 +353,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         });
         setDeviceLogsLoading(true);
       } catch (error) {
-        const flowName = Analytics.Categories.FETCH_LOG;
+        const flowName = 'Fetch Logs';
         const cyError = new CyError();
         if (error instanceof CyError) {
           setErrorObj(handleErrors(errorObj, error, flowName, { error }));
@@ -471,10 +471,10 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         if (attachmentBuffer) {
           const { url, error } = await submitAttachment();
           if (error) {
-            Analytics.Instance.event(
-              Analytics.Categories.FEEDBACK,
-              Analytics.Actions.ERROR
-            );
+            Analytics.Instance.event(Analytics.EVENTS.FEEDBACK.ERROR, {
+              errorMessage: error,
+              attachmentFailed: true
+            });
             setSubmitted(false);
             setSubmitting(false);
             setError(error);
@@ -490,10 +490,11 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         logger.info('Feedback submitted');
         setSubmitted(true);
         setSubmitting(false);
-        Analytics.Instance.event(
-          Analytics.Categories.FEEDBACK,
-          Analytics.Actions.COMPLETED
-        );
+        Analytics.Instance.event(Analytics.EVENTS.FEEDBACK.SUBMITTED, {
+          hasDeviceLogs: !!data.deviceLogs,
+          hasDesktopLogs: !!data.desktopLogs,
+          hasAttachment: data.attachmentUrls && data.attachmentUrls.length > 0
+        });
 
         return setFeedbackInput({
           subject: isContact ? 'Contact Us' : '',
@@ -509,10 +510,9 @@ export const FeedbackProvider: React.FC = ({ children }) => {
         });
       }
     } catch (error) {
-      Analytics.Instance.event(
-        Analytics.Categories.FEEDBACK,
-        Analytics.Actions.ERROR
-      );
+      Analytics.Instance.event(Analytics.EVENTS.FEEDBACK.ERROR, {
+        error
+      });
       setSubmitted(false);
       setSubmitting(false);
       setError('Failed to submit feedback, try again later.');
@@ -606,10 +606,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   useEffect(() => {
     if (isOpen) {
       resetFeedbackState();
-      Analytics.Instance.event(
-        Analytics.Categories.FEEDBACK,
-        Analytics.Actions.OPEN
-      );
+      Analytics.Instance.event(Analytics.EVENTS.FEEDBACK.OPENED);
       logger.info('Feedback: Initiated');
     }
   }, [isOpen]);
@@ -627,13 +624,12 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       }
     }
 
-    setIsOpen(false);
+    if (isOpen) {
+      setIsOpen(false);
 
-    Analytics.Instance.event(
-      Analytics.Categories.FEEDBACK,
-      Analytics.Actions.CLOSED
-    );
-    logger.info('Feedback: Closed');
+      Analytics.Instance.event(Analytics.EVENTS.FEEDBACK.CLOSED);
+      logger.info('Feedback: Closed');
+    }
 
     resetLogFetcherHooks();
     clearErrorObj();

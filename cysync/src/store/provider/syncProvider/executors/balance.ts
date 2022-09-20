@@ -16,6 +16,7 @@ import {
 } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
+import Analytics from '../../../../utils/analytics';
 import { coinDb, customAccountDb, tokenDb } from '../../../database';
 import { BalanceSyncItem } from '../types';
 
@@ -130,6 +131,18 @@ export const processResponses = async (
       slug: item.coinType,
       balance: balance.toString()
     });
+
+    Analytics.Instance.event(
+      Analytics.EVENTS.WALLET.BALANCE.UPDATED,
+      {
+        totalBalance: balance.toString(),
+        walletId: Analytics.createHash(item.walletId),
+        identifier: Analytics.createHash(item.xpub),
+        coin: item.coinType,
+        parentCoin: item.parentCoin
+      },
+      { isSensitive: true }
+    );
     return;
   }
 
@@ -150,6 +163,17 @@ export const processResponses = async (
       totalBalance: balance.toString(),
       totalUnconfirmedBalance: '0'
     });
+    Analytics.Instance.event(
+      Analytics.EVENTS.WALLET.BALANCE.UPDATED,
+      {
+        totalBalance: balance.toString(),
+        walletId: Analytics.createHash(item.walletId),
+        identifier: Analytics.createHash(item.xpub),
+        coin: item.coinType,
+        parentCoin: item.parentCoin
+      },
+      { isSensitive: true }
+    );
   } else if (coin instanceof NearCoinData) {
     const balanceRes = responses[0];
 
@@ -175,6 +199,17 @@ export const processResponses = async (
       totalBalance: totalBalance.toString(),
       totalUnconfirmedBalance: '0'
     });
+    Analytics.Instance.event(
+      Analytics.EVENTS.WALLET.BALANCE.UPDATED,
+      {
+        totalBalance: totalBalance.toString(),
+        walletId: Analytics.createHash(item.walletId),
+        identifier: Analytics.createHash(item.xpub),
+        coin: item.coinType,
+        parentCoin: item.parentCoin
+      },
+      { isSensitive: true }
+    );
   } else {
     throw new Error('Invalid coin in balance sync item: ' + item.coinType);
   }

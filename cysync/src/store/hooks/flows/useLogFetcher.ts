@@ -8,7 +8,6 @@ import {
   handleDeviceErrors,
   handleErrors
 } from '../../../errors';
-import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
 export interface HandleLogFetcherOptions {
@@ -32,7 +31,7 @@ export interface UseLogFetcherValues {
 
 export type UseLogFetcher = () => UseLogFetcherValues;
 
-const flowName = Analytics.Categories.FETCH_LOG;
+const flowName = 'FetchLogs';
 
 export const useLogFetcher: UseLogFetcher = () => {
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());

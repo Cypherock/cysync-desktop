@@ -339,8 +339,8 @@ const DeviceConnectionStatus: React.FC<DeviceConnectionStatusProps> = props => {
           onClick={() => {
             logger.info('Device update prompt opened from navbar.');
             Analytics.Instance.event(
-              Analytics.Categories.NAVBAR_DEVICE_CONNECTED,
-              Analytics.Actions.CLICKED
+              Analytics.EVENTS.NAVBAR.DEVICE_CONNECTION.CLICKED,
+              { deviceConnectionState }
             );
             setOpenMisconfiguredPrompt(true);
           }}

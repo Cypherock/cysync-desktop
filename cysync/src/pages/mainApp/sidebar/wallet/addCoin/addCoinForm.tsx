@@ -246,10 +246,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
   };
 
   const onRetry = () => {
-    Analytics.Instance.event(
-      Analytics.Categories.ADD_COIN,
-      Analytics.Actions.RETRY
-    );
+    Analytics.Instance.event(Analytics.EVENTS.WALLET.ADD_COIN.RETRY);
     logger.info('Add coin form retry');
     setIsAddCoinLoading(false);
     coinAdder.clearErrorObj();

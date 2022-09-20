@@ -59,7 +59,11 @@ const handleErrors = (
     err.setError(DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW);
 
   // report to analytics
-  Analytics.Instance.event(flow, Analytics.Actions.ERROR);
+  Analytics.Instance.event(Analytics.EVENTS.APP.ERROR, {
+    errorCode: err.getCode(),
+    errorMessage: err.getMessage(),
+    flow
+  });
 
   return err;
 };

@@ -48,10 +48,12 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
 
   useEffect(() => {
     if (coinAdder.addCoinCompleted) {
-      Analytics.Instance.event(
-        Analytics.Categories.ADD_COIN,
-        Analytics.Actions.COMPLETED
-      );
+      Analytics.Instance.event(Analytics.EVENTS.WALLET.ADD_COIN.SUCCESS, {
+        coins: coinAdder.addCoinStatus?.map(elem => ({
+          coin: elem.coin?.slug,
+          status: elem.status
+        }))
+      });
       // Solely for UI purpose, to wait and give a UX feeback
       sleep(1000).then(() => {
         coinAdder.resetHooks();

@@ -257,15 +257,13 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
 
   useEffect(() => {
     Analytics.Instance.event(
-      Analytics.Categories.CARD_AUTH,
-      Analytics.Actions.OPEN
+      Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.CARD_AUTH.OPENED
     );
     logger.info('Settings Card auth form open');
 
     return () => {
       Analytics.Instance.event(
-        Analytics.Categories.CARD_AUTH,
-        Analytics.Actions.CLOSED
+        Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.CARD_AUTH.CLOSED
       );
       logger.info('Settings Card auth form closed');
       if (!latestCompleted.current && latestDeviceConnection.current) {

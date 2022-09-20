@@ -80,13 +80,11 @@ const Authentication: React.FC<Props> = ({
   useEffect(() => {
     if (isCompleted === -1 || errorObj.isSet) {
       Analytics.Instance.event(
-        Analytics.Categories.DEVICE_UPDATE,
-        Analytics.Actions.ERROR
+        Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.DEVICE_UPGRADE.ERROR
       );
     } else if (isCompleted === 2) {
       Analytics.Instance.event(
-        Analytics.Categories.DEVICE_UPDATE,
-        Analytics.Actions.COMPLETED
+        Analytics.EVENTS.SETTINGS.DEVICE_SETTINGS.DEVICE_UPGRADE.SUCCESS
       );
     }
   }, [isCompleted, errorObj.isSet]);

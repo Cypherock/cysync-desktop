@@ -35,8 +35,7 @@ const Confirmation: React.FC<Props> = ({ handleClose }) => {
   const onPositiveClick = () => {
     logger.info('Database cleanup confirmed by user');
     Analytics.Instance.event(
-      Analytics.Categories.DATABASE_CLEANUP,
-      Analytics.Actions.CLICKED
+      Analytics.EVENTS.DATABASE_CLEANUP.CLEAR_DATA_CLICKED
     );
 
     navigate(`${Routes.settings.general.index}?resetApp=true`);

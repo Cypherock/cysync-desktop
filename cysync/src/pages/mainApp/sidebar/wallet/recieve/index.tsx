@@ -35,10 +35,7 @@ const WalletReceive = () => {
   useEffect(() => {
     if (receiveForm) {
       setDeviceFlow(!!deviceConnection);
-      Analytics.Instance.event(
-        Analytics.Categories.RECEIVE_ADDR,
-        Analytics.Actions.OPEN
-      );
+      Analytics.Instance.event(Analytics.EVENTS.WALLET.RECEIVE.OPEN);
       logger.info('Receive address form opened');
     }
   }, [receiveForm]);
@@ -46,10 +43,7 @@ const WalletReceive = () => {
   const handleClose = (abort?: boolean) => {
     if (abort && deviceConnection)
       receiveTransaction.cancelReceiveTxn(deviceConnection);
-    Analytics.Instance.event(
-      Analytics.Categories.RECEIVE_ADDR,
-      Analytics.Actions.CLOSED
-    );
+    Analytics.Instance.event(Analytics.EVENTS.WALLET.RECEIVE.CLOSED);
     logger.info('Receive address form closed');
     receiveTransaction.resetHooks();
     receiveTransaction.userAction.current.resolve(false);

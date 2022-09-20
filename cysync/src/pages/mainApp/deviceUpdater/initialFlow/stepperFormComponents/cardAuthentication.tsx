@@ -107,15 +107,13 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
 
   useEffect(() => {
     Analytics.Instance.event(
-      Analytics.Categories.INITIAL_CARD_AUTH_IN_MAIN,
-      Analytics.Actions.OPEN
+      Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.CARD_AUTH.OPENED
     );
     logger.info('InitialCardAuthInMain: Opened');
 
     return () => {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_CARD_AUTH_IN_MAIN,
-        Analytics.Actions.CLOSED
+        Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.CARD_AUTH.CLOSED
       );
       logger.info('InitialCardAuthInMain: Closed');
     };
@@ -131,15 +129,16 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
   useEffect(() => {
     if (cardsStatus === 0 || cardsStatus === -1) {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_CARD_AUTH_IN_MAIN,
-        Analytics.Actions.ERROR,
-        cardsStatus === 0 ? 'some-cards' : 'all-cards'
+        Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.CARD_AUTH.ERROR,
+        {
+          allFailed: cardsStatus === 0 ? false : true
+        }
       );
       logger.info('InitialCardAuthInMain: Error');
     } else if (cardsStatus === 1) {
       Analytics.Instance.event(
-        Analytics.Categories.INITIAL_CARD_AUTH_IN_MAIN,
-        Analytics.Actions.COMPLETED
+        Analytics.EVENTS.DEVICE_CONNECTION.INITIAL_FLOW_IN_MAIN.CARD_AUTH
+          .SUCCESS
       );
       logger.info('InitialCardAuthInMain: Completed');
     }

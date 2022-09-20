@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { passEnDb } from '../store/database';
 import { useConnection } from '../store/provider';
+import Analytics from '../utils/analytics';
 import logger from '../utils/logger';
 
 const PREFIX = 'ExitCleanup';
@@ -59,6 +60,7 @@ const ExitCleanup: React.FC<ExitCleanupProps> = ({ setDoCleanupFunction }) => {
     await exitCleanup();
 
     logger.info('ExitCleanup Completed');
+    Analytics.Instance.event(Analytics.EVENTS.APP.CLOSED);
     ipcRenderer.send('exit-app');
   };
 

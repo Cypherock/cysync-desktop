@@ -146,11 +146,12 @@ const Summary: React.FC<StepComponentProps> = ({
               addCustomAccountSyncItemFromCoin(coins[0], {});
           })();
         handleNext();
-        Analytics.Instance.event(
-          Analytics.Categories.SEND_TXN,
-          Analytics.Actions.COMPLETED,
-          coinAbbr
-        );
+        Analytics.Instance.event(Analytics.EVENTS.WALLET.SEND.SUCCESS, {
+          coinAbbr,
+          token: token?.slug,
+          coin: coinDetails?.slug,
+          txnHash: sendTransaction.hash
+        });
         return null;
       })
       .catch(e => {
@@ -183,20 +184,20 @@ const Summary: React.FC<StepComponentProps> = ({
             'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.'
           );
         }
-        Analytics.Instance.event(
-          Analytics.Categories.SEND_TXN,
-          Analytics.Actions.BROADCAST_ERROR,
-          coinAbbr
-        );
+        Analytics.Instance.event(Analytics.EVENTS.WALLET.SEND.BROADCAST_ERROR, {
+          coinAbbr,
+          token: token?.slug,
+          coin: coinDetails?.slug
+        });
       });
   };
 
   const handleRetry = () => {
-    Analytics.Instance.event(
-      Analytics.Categories.SEND_TXN,
-      Analytics.Actions.RETRY,
-      coinAbbr
-    );
+    Analytics.Instance.event(Analytics.EVENTS.WALLET.SEND.RETRY_BROADCAST, {
+      coinAbbr,
+      token: token?.slug,
+      coin: coinDetails?.slug
+    });
     logger.info('Send transaction retry');
     handleSend();
   };

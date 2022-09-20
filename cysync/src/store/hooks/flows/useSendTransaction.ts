@@ -28,13 +28,12 @@ import {
   handleErrors,
   handleWalletErrors
 } from '../../../errors';
-import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { addressDb, coinDb, transactionDb } from '../../database';
 
 import * as flowHandlers from './handlers';
 
-const flowName = Analytics.Categories.SEND_TXN;
+const flowName = 'SendTxn';
 
 export const changeFormatOfOutputList = (
   targetList: any,
@@ -293,7 +292,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       }
       setIsEstimatingFees(true);
 
-      const subFlowName = Analytics.Categories.ESTIMATE_FEE;
+      const subFlowName = 'Estimate Fees';
       logger.info(
         `${subFlowName}: Initiated , ${[coinType, fees, isSendAll].join(',')}`
       );
@@ -361,7 +360,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     amount: string
   ) => {
     return new Promise(resolve => {
-      const subFlowName = Analytics.Categories.ESTIMATE_GAS_LIMIT;
+      const subFlowName = 'Estimate Gas Limit';
       logger.info(`${subFlowName}: Initiated', ${contractAddress}`);
       Server.eth.transaction
         .getContractFees({
