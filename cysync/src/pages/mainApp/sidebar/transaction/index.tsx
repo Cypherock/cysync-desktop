@@ -8,7 +8,6 @@ import Grid from '@mui/material/Grid';
 import InputAdornment from '@mui/material/InputAdornment';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import BigNumber from 'bignumber.js';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AutoSizer, List } from 'react-virtualized';
@@ -213,7 +212,7 @@ const Transaction = () => {
           initial={data.slug?.toUpperCase()}
           coinParent={data.coin === data.slug ? undefined : data.coin}
           amount={data.displayAmount}
-          value={new BigNumber(data.displayValue).toFixed(2)}
+          value={data.displayValue}
           result={convertToDisplayValue(data.sentReceive).toUpperCase()}
           decimal={data.coinDecimal}
           address={data.hash}
