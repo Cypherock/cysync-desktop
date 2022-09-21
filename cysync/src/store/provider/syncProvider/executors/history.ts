@@ -89,7 +89,8 @@ export const getRequestsMetadata = (
           address: item.customAccount,
           network: coin.network,
           limit: 100,
-          from: item.afterBlock
+          from: item.afterBlock,
+          responseType: 'v2'
         },
         item.isRefresh
       )
@@ -470,16 +471,26 @@ export const processResponses = async (
     }
 
     for (const ele of rawHistory) {
-      const fees = new BigNumber(ele.tokens_burnt).plus(
-        ele.receipt_conversion_tokens_burnt
-      );
+      const fees = new BigNumber(ele.tokens_burnt || 0)
+        .plus(ele.receipt_conversion_tokens_burnt || 0)
+        .plus(ele.nested_receipts_tokens_burnt || 0);
 
       const fromAddr = ele.signer_account_id;
       const toAddr = ele.receiver_account_id;
       const address = ele.address_parameter;
 
       const amount = fromAddr === toAddr ? '0' : String(ele.args?.deposit || 0);
-
+      const isAddAccountTransaction =
+        ele.action_kind === 'FUNCTION_CALL' &&
+        ele.args?.method_name === 'create_account';
+      let description;
+      let argsJson;
+      if (isAddAccountTransaction) {
+        argsJson = JSON.parse(
+          Buffer.from(ele.args?.args_base64 || '', 'base64').toString()
+        );
+        description = `Created account ${argsJson.new_account_id}`;
+      }
       const txn: Transaction = {
         hash: ele.transaction_hash,
         customIdentifier: address,
@@ -508,15 +519,60 @@ export const processResponses = async (
         ],
         outputs: [
           {
-            address: toAddr,
+            address: isAddAccountTransaction
+              ? argsJson?.new_account_id
+              : toAddr,
             value: amount,
             indexNumber: 0,
             isMine: address === toAddr,
             type: IOtype.OUTPUT
           }
-        ]
+        ],
+        type: ele.action_kind,
+        description
       };
       history.push(txn);
+      if (isAddAccountTransaction) {
+        const newAccountAddress = argsJson?.new_account_id;
+        const addAccountTxn: Transaction = {
+          hash: ele.transaction_hash,
+          customIdentifier: newAccountAddress,
+          amount,
+          fees: fees.toString(),
+          total: new BigNumber(amount).plus(fees).toString(),
+          confirmations: 0,
+          walletId: item.walletId,
+          slug: item.coinType,
+          status: ele.status ? 1 : 2,
+          sentReceive: SentReceive.RECEIVED,
+          confirmed: new Date(
+            parseInt(ele.block_timestamp, 10) / 1000000
+          ).toISOString(), //conversion from timestamp in nanoseconds
+          blockHeight: 0,
+          coin: item.coinType,
+          inputs: [
+            {
+              address: fromAddr,
+              value: amount,
+              indexNumber: 0,
+              isMine: newAccountAddress === fromAddr,
+              type: IOtype.INPUT
+            }
+          ],
+          outputs: [
+            {
+              address: newAccountAddress,
+              value: amount,
+              indexNumber: 0,
+              isMine: true,
+              type: IOtype.OUTPUT
+            }
+          ],
+          type: ele.action_kind,
+          description
+        };
+        history.push(addAccountTxn);
+      }
     }
 
     const transactionDbList = [];

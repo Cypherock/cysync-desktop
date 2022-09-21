@@ -407,7 +407,9 @@ const Transaction = () => {
                     coinName: showTxn.coinName,
                     coinDecimal: showTxn.coinDecimal,
                     inputs: showTxn.inputs,
-                    outputs: showTxn.outputs
+                    outputs: showTxn.outputs,
+                    type: showTxn.type,
+                    description: showTxn.description
                   }
                 : null
             }
