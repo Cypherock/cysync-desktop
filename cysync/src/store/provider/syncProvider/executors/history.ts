@@ -249,12 +249,13 @@ export const processResponses = async (
 
       const fromAddr = formatEthAddress(ele.from);
       const toAddr = formatEthAddress(ele.to);
+      const amount = fromAddr === toAddr ? '0' : String(ele.value);
 
       const txn: Transaction = {
         hash: ele.hash,
-        amount: String(ele.value),
+        amount,
         fees: fees.toString(),
-        total: new BigNumber(ele.value).plus(fees).toString(),
+        total: new BigNumber(amount).plus(fees).toString(),
         confirmations: ele.confirmations || 0,
         walletId: item.walletId,
         slug: item.coinType,
@@ -268,7 +269,7 @@ export const processResponses = async (
         inputs: [
           {
             address: fromAddr,
-            value: String(ele.value),
+            value: amount,
             indexNumber: 0,
             isMine: address === fromAddr,
             type: IOtype.INPUT
@@ -277,7 +278,7 @@ export const processResponses = async (
         outputs: [
           {
             address: toAddr,
-            value: String(ele.value),
+            value: amount,
             indexNumber: 0,
             isMine: address === toAddr,
             type: IOtype.OUTPUT
@@ -287,18 +288,18 @@ export const processResponses = async (
 
       // If it is a failed transaction, then check if it is a token transaction.
       if (txn.status === 2) {
-        let amount = '0';
+        let txnAmount = '0';
         const token = Object.values(coinData.tokenList).find(
           t => t.address === ele.to.toLowerCase()
         );
 
         if (token) {
           if (ele.input) {
-            amount = String(getEthAmountFromInput(ele.input));
+            txnAmount = String(getEthAmountFromInput(ele.input));
           }
 
           txn.slug = token.abbr;
-          txn.amount = amount;
+          txn.amount = txnAmount;
 
           // Even if the token transaction failed, the transaction fee is still deducted.
           if (txn.sentReceive === SentReceive.SENT) {
@@ -477,12 +478,14 @@ export const processResponses = async (
       const toAddr = ele.receiver_account_id;
       const address = ele.address_parameter;
 
+      const amount = fromAddr === toAddr ? '0' : String(ele.args?.deposit || 0);
+
       const txn: Transaction = {
         hash: ele.transaction_hash,
         customIdentifier: address,
-        amount: String(ele.args.deposit),
+        amount,
         fees: fees.toString(),
-        total: new BigNumber(ele.args.deposit).plus(fees).toString(),
+        total: new BigNumber(amount).plus(fees).toString(),
         confirmations: 0,
         walletId: item.walletId,
         slug: item.coinType,
@@ -497,7 +500,7 @@ export const processResponses = async (
         inputs: [
           {
             address: fromAddr,
-            value: String(ele.args.deposit),
+            value: amount,
             indexNumber: 0,
             isMine: address === fromAddr,
             type: IOtype.INPUT
@@ -506,7 +509,7 @@ export const processResponses = async (
         outputs: [
           {
             address: toAddr,
-            value: String(ele.args.deposit),
+            value: amount,
             indexNumber: 0,
             isMine: address === toAddr,
             type: IOtype.OUTPUT
