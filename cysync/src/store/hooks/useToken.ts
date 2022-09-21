@@ -84,7 +84,7 @@ export const useToken: UseToken = () => {
         coinObj.multiplier
       );
 
-      const price = token.price;
+      const price = token.price || 0;
       const value = balance.multipliedBy(price);
 
       coinWithPrice.displayBalance = balance.toString();
