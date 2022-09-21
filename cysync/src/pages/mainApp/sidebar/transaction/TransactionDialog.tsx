@@ -67,7 +67,8 @@ const Root = styled('div')(({ theme }) => ({
     fontWeight: 'lighter'
   },
   [`& .${classes.dataContainer}`]: {
-    margin: '10px 0'
+    margin: '10px 0',
+    marginRight: '3rem'
   },
   [`& .${classes.flex}`]: {
     display: 'flex',
@@ -337,11 +338,21 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         </div>
       </div>
       {isNear && (
-        <div className={classes.dataContainer}>
-          <Typography color="textSecondary">Type</Typography>
-          <div className={classes.flex}>
-            <Typography>{txn.type}</Typography>
+        <div style={{ display: 'flex' }}>
+          <div className={classes.dataContainer}>
+            <Typography color="textSecondary">Type</Typography>
+            <div className={classes.flex}>
+              <Typography>{txn.type}</Typography>
+            </div>
           </div>
+          {txn.description && (
+            <div className={classes.dataContainer}>
+              <Typography color="textSecondary">Description</Typography>
+              <div className={classes.flex}>
+                <Typography>{txn.description}</Typography>
+              </div>
+            </div>
+          )}
         </div>
       )}
       <Grid

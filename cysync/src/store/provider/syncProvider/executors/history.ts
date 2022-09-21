@@ -471,9 +471,9 @@ export const processResponses = async (
     }
 
     for (const ele of rawHistory) {
-      const fees = new BigNumber(ele.tokens_burnt)
-        .plus(ele.receipt_conversion_tokens_burnt)
-        .plus(ele.nested_receipts_tokens_burnt);
+      const fees = new BigNumber(ele.tokens_burnt || 0)
+        .plus(ele.receipt_conversion_tokens_burnt || 0)
+        .plus(ele.nested_receipts_tokens_burnt || 0);
 
       const fromAddr = ele.signer_account_id;
       const toAddr = ele.receiver_account_id;
@@ -487,9 +487,9 @@ export const processResponses = async (
       let argsJson;
       if (isAddAccountTransaction) {
         argsJson = JSON.parse(
-          Buffer.from(ele.args?.args_base64, 'base64').toString()
+          Buffer.from(ele.args?.args_base64 || '', 'base64').toString()
         );
-        description = `Created account ${argsJson}`;
+        description = `Created account ${argsJson.new_account_id}`;
       }
       const txn: Transaction = {
         hash: ele.transaction_hash,

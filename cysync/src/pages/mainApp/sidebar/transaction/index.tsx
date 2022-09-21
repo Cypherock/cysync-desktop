@@ -408,7 +408,8 @@ const Transaction = () => {
                     coinDecimal: showTxn.coinDecimal,
                     inputs: showTxn.inputs,
                     outputs: showTxn.outputs,
-                    type: showTxn.type
+                    type: showTxn.type,
+                    description: showTxn.description
                   }
                 : null
             }
