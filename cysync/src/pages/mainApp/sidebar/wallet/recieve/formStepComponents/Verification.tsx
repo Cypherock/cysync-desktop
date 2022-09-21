@@ -164,7 +164,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
         ) : (
           <>
             <Typography color="textSecondary">
-              Visit the Near Explorer to veify the account belongs to you
+              Visit the Near Explorer to verify the account belongs to you
             </Typography>
             <TextView
               completed={linkOpened}
