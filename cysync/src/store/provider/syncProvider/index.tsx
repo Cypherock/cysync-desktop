@@ -663,6 +663,21 @@ export const SyncProvider: React.FC = ({ children }) => {
     const timeStop = performance.now();
     if (timeStop - timeStart > 5000) {
       logger.info(`Batch execution took ${timeStop - timeStart} milliseconds`);
+      logger.info({
+        queue: array
+          .reduce((acc, item) => acc.concat(item), [])
+          .map(item => {
+            return {
+              ...item,
+              item: {
+                ...item.item,
+                walletId: undefined,
+                xpub: undefined,
+                zpub: undefined
+              }
+            };
+          })
+      });
     }
     setIsExecutingTask(false);
   };
