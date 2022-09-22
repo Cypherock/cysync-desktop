@@ -124,28 +124,22 @@ export const getCoinPriceHistory = async (
     pIndex > 0;
     pIndex--
   ) {
+    const isFirst = pIndex === latestUnitPrices.length - 1;
     const transaction = transactionHistory[tIndex];
+    let isTxnAdded = false;
     if (transaction?.confirmed) {
       const transactionTime = new Date(transaction.confirmed).getTime();
       const prevPricePoint = computedPrices[pIndex - 1][0];
       const thisPricePoint = computedPrices[pIndex][0];
 
       if (
-        prevPricePoint < transactionTime &&
-        transactionTime <= thisPricePoint
+        (prevPricePoint < transactionTime &&
+          transactionTime <= thisPricePoint) ||
+        (isFirst && transactionTime >= thisPricePoint)
       ) {
         if (transaction.sentReceive === SentReceive.SENT) {
           curBalance = curBalance.plus(new BigNumber(transaction.amount));
-          if (coinData.group === CoinGroup.ERC20Tokens) {
-            curBalance = curBalance.plus(
-              // TODO: for now using eth as default as there is no parent
-              // token mapping available. Please remodify this to fetch
-              // the parent coin and then its multiplier
-              new BigNumber(transaction.fees || 0)
-                .dividedBy(COINS.eth.multiplier)
-                .multipliedBy(coinData.multiplier)
-            );
-          } else {
+          if (coinData.group !== CoinGroup.ERC20Tokens) {
             curBalance = curBalance.plus(new BigNumber(transaction.fees));
           }
         } else if (transaction.sentReceive === SentReceive.FEES) {
@@ -154,17 +148,40 @@ export const getCoinPriceHistory = async (
           curBalance = curBalance.minus(new BigNumber(transaction.amount));
         }
         tIndex--;
+        isTxnAdded = true;
       }
     }
     computedPrices[pIndex][1] = curBalance
-      .multipliedBy(computedPrices[pIndex][1])
+      .multipliedBy(latestUnitPrices[pIndex][1])
       .dividedBy(coinData.multiplier)
       .toNumber();
+
+    if (isTxnAdded) {
+      pIndex++;
+    }
   }
+
   computedPrices[0][1] = curBalance
     .multipliedBy(computedPrices[0][1])
     .dividedBy(coinData.multiplier)
     .toNumber();
+
+  let hasNegative = false;
+  for (const price of computedPrices) {
+    if (price && price[1] && price[1] < 0) {
+      price[1] = 0;
+      hasNegative = true;
+    }
+  }
+
+  if (hasNegative) {
+    logger.warn('Portfolio: Negative value found in ' + coinType, {
+      coinType,
+      parent,
+      hasWallet: !!walletId,
+      days
+    });
+  }
 
   return {
     totalBalance,

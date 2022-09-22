@@ -339,6 +339,7 @@ export const processResponses = async (
       const tokenObj = coinData.tokenList[ele.tokenSymbol.toLowerCase()];
       const fromAddr = formatEthAddress(ele.from);
       const toAddr = formatEthAddress(ele.to);
+      const amount = fromAddr === toAddr ? '0' : String(ele.value);
 
       // Only add if it exists in our coin list
       if (
@@ -353,9 +354,9 @@ export const processResponses = async (
         erc20Tokens.add(ele.tokenSymbol.toLowerCase());
         const txn: Transaction = {
           hash: ele.hash as string,
-          amount: String(ele.value),
+          amount,
           fees: fees.toString(),
-          total: String(ele.value),
+          total: amount,
           confirmations: (ele.confirmations as number) || 0,
           walletId: item.walletId,
           slug: (ele.tokenSymbol as string).toLowerCase(),
@@ -390,14 +391,14 @@ export const processResponses = async (
 
       // When a token is sent, the transaction fee is deducted from ETH
       if (address === fromAddr) {
-        const amount = new BigNumber(ele.gasPrice || 0).multipliedBy(
+        const amt = new BigNumber(ele.gasPrice || 0).multipliedBy(
           new BigNumber(ele.gasUsed || 0)
         );
         history.push({
           hash: ele.hash as string,
-          amount: amount.toString(),
+          amount: amt.toString(),
           fees: '0',
-          total: amount.toString(),
+          total: amt.toString(),
           confirmations: (ele.confirmations as number) || 0,
           walletId: item.walletId,
           slug: item.coinType,
