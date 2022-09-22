@@ -100,6 +100,9 @@ export const SyncProvider: React.FC = ({ children }) => {
   const { connected } = useNetwork();
   const connectedRef = useRef<boolean | null>(connected);
 
+  const timeThreshold = 60000; // log every 1 minute
+  const offsetTime = useRef(0);
+  const startTime = useRef(0);
   const clientTimeout = useRef<ClientTimeoutInterface>({
     pause: false,
     tryAfter: 0
@@ -490,7 +493,11 @@ export const SyncProvider: React.FC = ({ children }) => {
           logger.warn('Sync: Error, retrying...', { item });
           updatedItem.retries += 1;
           if (result.delay) {
-            clientTimeout.current = { pause: true, tryAfter: result.delay };
+            clientTimeout.current = {
+              pause: true,
+              tryAfter: performance.now() + result.delay
+            };
+            logger.info('ClientBatch sync paused for CoinGeckoAPI');
           }
           updateQueueItem = true;
           removeFromQueue = false;
@@ -576,8 +583,12 @@ export const SyncProvider: React.FC = ({ children }) => {
 
     try {
       if (clientTimeout.current.pause) {
-        await sleep(clientTimeout.current.tryAfter);
-        clientTimeout.current.pause = false;
+        if (performance.now() >= clientTimeout.current.tryAfter) {
+          clientTimeout.current = { pause: false, tryAfter: 0 };
+          logger.info('Waiting complete');
+        } else {
+          return [];
+        }
       }
       let latestPriceResult: ExecutionResult[] = [];
       if (latestPriceItems.length > 0) {
@@ -641,12 +652,32 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const executeNextInQueue = async () => {
     setIsExecutingTask(true);
+    const timeStart = performance.now();
     const array = await Promise.all([
       executeNextClientItemInQueue(),
       executeNextBatchItemInQueue()
     ]);
     updateAllExecutedItems(array.reduce((acc, item) => acc.concat(item), []));
     await sleep(queueExecuteInterval);
+    const timeStop = performance.now();
+    if (timeStop - timeStart > 5000) {
+      logger.info(`Batch execution took ${timeStop - timeStart} milliseconds`);
+      logger.info({
+        queue: array
+          .reduce((acc, item) => acc.concat(item), [])
+          .map(item => {
+            return {
+              ...item,
+              item: {
+                ...item.item,
+                walletId: undefined,
+                xpub: undefined,
+                zpub: undefined
+              }
+            };
+          })
+      });
+    }
     setIsExecutingTask(false);
   };
 
@@ -925,6 +956,40 @@ export const SyncProvider: React.FC = ({ children }) => {
       setIsSyncing(false);
     }
   }, [connected, isInitialSetupDone, syncQueue]);
+
+  useEffect(() => {
+    if (syncQueue.length > 0) {
+      if (startTime.current > 0) {
+        const peek = performance.now();
+        if (peek - startTime.current > timeThreshold + offsetTime.current) {
+          offsetTime.current = peek;
+          logger.info(`Threshold exceeded at ${peek} milliseconds`);
+          logger.info({
+            queue: syncQueue.slice(0, 3).map(item => {
+              return {
+                ...item,
+                walletId: undefined,
+                xpub: undefined,
+                zpub: undefined
+              };
+            }),
+            totalLength: syncQueue.length
+          });
+        }
+      } else {
+        startTime.current = performance.now();
+      }
+    } else {
+      if (startTime.current > 0) {
+        const stop = performance.now();
+        logger.info(
+          `Sync completed total time: ${stop - startTime.current} milliseconds`
+        );
+        offsetTime.current = 0;
+        startTime.current = 0;
+      }
+    }
+  }, [syncQueue]);
 
   // Execute the syncItems if it is syncing
   useEffect(() => {
