@@ -199,9 +199,11 @@ export const executeBatch = async (
     batchServer.IBatchResponse | clientServer.IClientResponse
   > = [];
   try {
-    if (options.isClientBatch)
+    if (options.isClientBatch) {
       allResponses = await getClientResponses(allMetadataInfo);
-    else allResponses = await getBatchResponses(allMetadataInfo);
+    } else {
+      allResponses = await getBatchResponses(allMetadataInfo);
+    }
   } catch (error) {
     return allMetadataInfo.map(elem => {
       const result: ExecutionResult = {

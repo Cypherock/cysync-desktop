@@ -1,32 +1,16 @@
-import { CoinGroup, COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
-import { getPortfolioCache } from '../../utils/cache';
 import logger from '../../utils/logger';
-import {
-  coinDb,
-  getAllTxns,
-  getLatestPriceForCoin,
-  priceHistoryDb,
-  SentReceive,
-  tokenDb,
-  Transaction,
-  transactionDb
-} from '../database';
+import { coinDb, priceHistoryDb, tokenDb, transactionDb } from '../database';
 
-import { CoinDetails, CoinHistory, CoinPriceHistory } from './types';
+import { getCoinData } from './helper/portfolio';
+import { CoinDetails, CoinHistory } from './types';
 import { useDebouncedFunction } from './useDebounce';
 
 export interface UsePortfolioValues {
   coinList: string[];
   coinHistory: CoinHistory[];
-  getAllCoinPriceHistory: (
-    days: number,
-    wallet?: string,
-    isRefresh?: boolean
-  ) => Promise<void>;
-  coinsUserHas: (walletId?: string) => Promise<CoinDetails[]>;
   coinHolding: number[];
   oldTotalPrice: number;
   hasCoins: boolean;
@@ -117,391 +101,6 @@ export const usePortfolio: UsePortfolio = () => {
       transactionDb.emitter.removeListener('delete', debouncedRefreshFromDB);
     };
   }, []);
-
-  const getCoinPriceHistory = async (
-    coinType: string,
-    days: number,
-    wallet = '',
-    parent?: string
-  ) => {
-    let coinData;
-    if (parent) {
-      const parentData = COINS[parent];
-      if (!parentData) throw new Error(`Parent coin ${parent} not found`);
-      coinData = parentData.tokenList[coinType];
-    } else coinData = COINS[coinType];
-    if (!coinData) {
-      throw new Error(`Cannot find coinType: ${coinType}`);
-    }
-
-    let totalBalance = new BigNumber(0);
-    const allPrices = await priceHistoryDb.getOne({
-      slug: coinType,
-      interval: days
-    });
-    if (!allPrices) {
-      return null;
-    }
-
-    const latestUnitPrices = allPrices.data;
-    const computedPrices = JSON.parse(
-      JSON.stringify(latestUnitPrices)
-    ) as number[][];
-    let transactionHistory: Transaction[] = [];
-    const lastSinceDate = new Date();
-    lastSinceDate.setDate(lastSinceDate.getDate() - days);
-
-    if (wallet && wallet !== 'null') {
-      if (coinData.group === CoinGroup.ERC20Tokens) {
-        const token = await tokenDb.getOne({
-          walletId: wallet,
-          slug: coinType
-        });
-        if (token) totalBalance = new BigNumber(token.balance);
-        else return null;
-      } else {
-        const coin = await coinDb.getOne({ walletId: wallet, slug: coinType });
-        if (coin)
-          totalBalance = new BigNumber(
-            coin.totalBalance ? coin.totalBalance : 0
-          );
-        else return null;
-      }
-
-      transactionHistory = await getAllTxns(
-        {
-          walletId: wallet,
-          slug: coinType
-        },
-        {
-          excludeFailed: true,
-          excludePending: true,
-          sinceDate: lastSinceDate
-        },
-        {
-          field: 'confirmed',
-          order: 'asc'
-        }
-      );
-    } else {
-      if (coinData.group === CoinGroup.ERC20Tokens) {
-        const tokens = await tokenDb.getAll({ slug: coinType });
-        if (tokens.length === 0) return null;
-        for (const token of tokens) {
-          totalBalance = totalBalance.plus(token.balance);
-        }
-      } else {
-        const allCoins = await coinDb.getAll({ slug: coinType });
-        if (allCoins.length === 0) return null;
-        for (const coin of allCoins) {
-          totalBalance = totalBalance.plus(
-            coin.totalBalance ? coin.totalBalance : 0
-          );
-        }
-      }
-
-      transactionHistory = await getAllTxns(
-        {
-          slug: coinType
-        },
-        {
-          excludeFailed: true,
-          excludePending: true,
-          sinceDate: lastSinceDate
-        },
-        {
-          field: 'confirmed',
-          order: 'asc'
-        }
-      );
-    }
-
-    let curBalance = totalBalance;
-
-    for (
-      let tIndex = transactionHistory.length - 1,
-        pIndex = latestUnitPrices.length - 1;
-      pIndex > 0;
-      pIndex--
-    ) {
-      const transaction = transactionHistory[tIndex];
-      if (transaction?.confirmed) {
-        const transactionTime = new Date(transaction.confirmed).getTime();
-        const prevPricePoint = computedPrices[pIndex - 1][0];
-        const thisPricePoint = computedPrices[pIndex][0];
-
-        if (
-          prevPricePoint < transactionTime &&
-          transactionTime <= thisPricePoint
-        ) {
-          if (transaction.sentReceive === SentReceive.SENT) {
-            curBalance = curBalance.plus(new BigNumber(transaction.amount));
-            if (coinData.group === CoinGroup.ERC20Tokens) {
-              curBalance = curBalance.plus(
-                // TODO: for now using eth as default as there is no parent
-                // token mapping available. Please remodify this to fetch
-                // the parent coin and then its multiplier
-                new BigNumber(transaction.fees || 0)
-                  .dividedBy(COINS.eth.multiplier)
-                  .multipliedBy(coinData.multiplier)
-              );
-            } else {
-              curBalance = curBalance.plus(new BigNumber(transaction.fees));
-            }
-          } else if (transaction.sentReceive === SentReceive.FEES) {
-            curBalance = curBalance.plus(new BigNumber(transaction.amount));
-          } else {
-            curBalance = curBalance.minus(new BigNumber(transaction.amount));
-          }
-          tIndex--;
-        }
-      }
-      computedPrices[pIndex][1] = curBalance
-        .multipliedBy(computedPrices[pIndex][1])
-        .dividedBy(coinData.multiplier)
-        .toNumber();
-    }
-    computedPrices[0][1] = curBalance
-      .multipliedBy(computedPrices[0][1])
-      .dividedBy(coinData.multiplier)
-      .toNumber();
-
-    return {
-      totalBalance,
-      unitPrices: latestUnitPrices,
-      pricesToDisplay: computedPrices
-    } as CoinPriceHistory;
-  };
-
-  const getAllCoinPriceHistory = async (
-    days: number,
-    wallet = '',
-    isRefresh = false,
-    loader = true
-  ) => {
-    if (loader) setIsLoading(true);
-    const key = `${wallet}-${days}`;
-    if (!isRefresh) {
-      const cacheData:
-        | undefined
-        | {
-            prevTotal: number;
-            allCoinList: string[];
-            allCoinPriceHistory: CoinHistory[];
-          } = getPortfolioCache(key) as any;
-
-      if (
-        cacheData &&
-        cacheData.prevTotal !== undefined &&
-        cacheData.allCoinList !== undefined &&
-        cacheData.allCoinPriceHistory !== undefined
-      ) {
-        logger.info('Getting graph from cache');
-        setOldTotalPrice(cacheData.prevTotal);
-        setCoinList(cacheData.allCoinList);
-        setCoinHistory(cacheData.allCoinPriceHistory);
-        return;
-      }
-    }
-
-    logger.info('Computing graph data');
-
-    const allCoinPriceHistory: CoinHistory[] = [];
-    const allCoinList: string[] = ['All Coins'];
-    let prevTotal = new BigNumber(0);
-    const allCoins = await coinDb.getAll();
-    const allTokens = await tokenDb.getAll();
-    const allItems = [
-      ...new Map(
-        allCoins
-          .map(coin => {
-            return { parent: undefined, slug: coin.slug };
-          })
-          .map(item => [JSON.stringify(item), item])
-      ).values(),
-      ...new Map(
-        allTokens
-          .map(token => {
-            return { parent: token.coin, slug: token.slug };
-          })
-          .map(item => [JSON.stringify(item), item])
-      ).values()
-    ];
-
-    for (const item of allItems) {
-      let coin;
-      if (item.parent) {
-        const parent = COINS[item.parent];
-        coin = parent.tokenList[item.slug];
-      } else {
-        coin = COINS[item.slug];
-      }
-
-      if (!coin) {
-        continue;
-      }
-      if (coin.isTest) continue;
-      const coinPrices = await getCoinPriceHistory(
-        item.slug,
-        days,
-        wallet,
-        item.parent
-      );
-      if (!coinPrices || !coinPrices.pricesToDisplay) continue;
-
-      allCoinList.push(item.slug);
-      const tempCoin: CoinHistory = {
-        name: item.slug,
-        data: coinPrices.pricesToDisplay
-      };
-
-      allCoinPriceHistory.push(tempCoin);
-
-      if (!coinPrices.unitPrices[0]) {
-        logger.warn('Unexpected unitPrices variable', {
-          unitPrices: coinPrices.unitPrices,
-          item,
-          days,
-          wallet
-        });
-        continue;
-      }
-
-      prevTotal = prevTotal.plus(coinPrices.pricesToDisplay[0][1]);
-    }
-
-    setOldTotalPrice(prevTotal.toNumber());
-    setCoinList(allCoinList);
-    setCoinHistory(allCoinPriceHistory);
-    if (loader) setIsLoading(false);
-  };
-
-  // returns a list of all coins with their balances and value (eg, if there are 2 bitcoins in 2 different wallet, it will return a value of total if wallet is null
-  const coinsUserHas: UsePortfolioValues['coinsUserHas'] = async (
-    walletId = ''
-  ) => {
-    return new Promise(async resolve => {
-      const allCoinholding: number[] = [];
-      const setOfCoins: CoinDetails[] = [];
-
-      const allCoins = await coinDb.getAll();
-      const allTokens = await tokenDb.getAll();
-      const allItems = [
-        ...new Map(
-          allCoins
-            .map(coin => {
-              return { parent: undefined, slug: coin.slug };
-            })
-            .map(item => [JSON.stringify(item), item])
-        ).values(),
-        ...new Map(
-          allTokens
-            .map(token => {
-              return { parent: token.coin, slug: token.slug };
-            })
-            .map(item => [JSON.stringify(item), item])
-        ).values()
-      ];
-      for (const item of allItems) {
-        let coinData;
-        if (item.parent) {
-          const parent = COINS[item.parent];
-          if (!parent) {
-            throw new Error(`Cannot find parent coinType: ${item.parent}`);
-          }
-          coinData = parent.tokenList[item.slug];
-        } else {
-          coinData = COINS[item.slug];
-        }
-        if (!coinData) {
-          throw new Error(`Cannot find coinType: ${item.slug}`);
-        }
-        let totalBalance = new BigNumber(0);
-        const currentTempCoin: CoinDetails = {
-          name: item.slug,
-          parent: item.parent,
-          decimal: coinData.decimal,
-          balance: '0',
-          value: '0',
-          price: '0'
-        };
-
-        if (walletId && walletId !== 'null') {
-          if (coinData.group === CoinGroup.ERC20Tokens) {
-            const token = await tokenDb.getOne({
-              walletId,
-              slug: item.slug
-            });
-            if (token) totalBalance = new BigNumber(token.balance);
-            else continue;
-          } else {
-            const xpub = await coinDb.getOne({ walletId, slug: item.slug });
-            if (xpub)
-              totalBalance = new BigNumber(
-                xpub.totalBalance ? xpub.totalBalance : 0
-              );
-            else continue;
-          }
-        } else {
-          if (coinData.group === CoinGroup.ERC20Tokens) {
-            const tokens = await tokenDb.getAll({ slug: item.slug });
-            if (tokens.length === 0) continue;
-            for (const token of tokens) {
-              totalBalance = totalBalance.plus(token.balance);
-            }
-          } else {
-            const coinsData = await coinDb.getAll({ slug: item.slug });
-            if (coinsData.length === 0) continue;
-            for (const coin of coinsData) {
-              totalBalance = totalBalance.plus(
-                coin.totalBalance ? coin.totalBalance : 0
-              );
-            }
-          }
-        }
-
-        if (!hasCoins) {
-          setHasCoins(true);
-        }
-
-        const res = await priceHistoryDb.getOne({
-          slug: item.slug,
-          interval: 7
-        });
-
-        if (res && res.data) {
-          const latestUnitPrices = res.data;
-          if (!latestUnitPrices[latestUnitPrices.length - 1]) {
-            logger.warn('Unexpected latestUnitPrice from DB', {
-              latestUnitPrices,
-              slug: item.slug
-            });
-          }
-        }
-
-        const latestPrice = await getLatestPriceForCoin(item.slug, item.parent);
-
-        const balance = totalBalance.dividedBy(coinData.multiplier);
-
-        currentTempCoin.balance = balance.toString();
-
-        const value = balance.multipliedBy(latestPrice).toNumber();
-
-        currentTempCoin.value = value.toString();
-
-        currentTempCoin.price = latestPrice.toString();
-
-        // Don't add coins to holdings (This will not display the coin in chart)
-        if (!coinData.isTest) {
-          allCoinholding.push(parseFloat(value.toFixed(3)));
-        }
-
-        setOfCoins.push(currentTempCoin);
-      }
-      setCoinHolding(allCoinholding);
-      resolve(setOfCoins);
-    });
-  };
 
   const sortCoins = (coinsToSort: CoinDetails[], index: number) => {
     let compareFunc: (a: CoinDetails, b: CoinDetails) => number;
@@ -625,51 +224,57 @@ export const usePortfolio: UsePortfolio = () => {
     }
   };
 
-  useEffect(() => {
-    coinsUserHas(currentWallet)
-      .then(res => {
-        setTotal(
-          parseFloat(
-            res.reduce(
-              (a, b) => new BigNumber(a).plus(b.value || 0).toString(),
-              '0'
-            )
-          )
-        );
-        const sortedCoins = res.sort((a, b) =>
-          new BigNumber(b.value).minus(a.value).toNumber()
-        );
-        setCoins([...sortedCoins]);
+  const computeGraphData = (params?: {
+    isRefresh?: boolean;
+    onlyGraphChange?: boolean;
+    noLoader?: boolean;
+  }) => {
+    if (!params?.noLoader) {
+      setIsLoading(true);
+    }
+
+    getCoinData({
+      days: timeActiveButton,
+      walletId: currentWallet,
+      isRefresh: params?.isRefresh,
+      onlyGraphChange: params?.onlyGraphChange
+    })
+      .then(result => {
+        if (result.totalAmount !== undefined) {
+          setTotal(result.totalAmount);
+        }
+        if (result.setOfCoins !== undefined) {
+          setCoins(result.setOfCoins);
+        }
+        if (result.allCoinholding !== undefined) {
+          setCoinHolding(result.allCoinholding);
+        }
+
+        setOldTotalPrice(result.oldTotalPrice);
+        setCoinList(result.coinList);
+        setCoinHistory(result.coinHistory);
+
+        setHasCoins(result.hasCoins);
       })
       .catch(error => {
+        logger.error('Error in calculating portfolio data');
         logger.error(error);
+      })
+      .finally(() => {
+        if (!params?.noLoader) {
+          setIsLoading(false);
+        }
       });
-    getAllCoinPriceHistory(timeActiveButton, currentWallet);
+  };
+
+  useEffect(() => {
+    computeGraphData();
   }, [currentWallet]);
 
   useEffect(() => {
     if (doRefresh) {
       setDoRefresh(false);
-      coinsUserHas(currentWallet)
-        .then(res => {
-          setTotal(
-            parseFloat(
-              res.reduce(
-                (a, b) => new BigNumber(a).plus(b.value || 0).toString(),
-                '0'
-              )
-            )
-          );
-          const sortedCoins = res.sort((a, b) =>
-            new BigNumber(b.value).minus(a.value).toNumber()
-          );
-          setCoins([...sortedCoins]);
-        })
-        .catch(error => {
-          logger.error(error);
-        });
-
-      getAllCoinPriceHistory(timeActiveButton, currentWallet, true, false);
+      computeGraphData({ isRefresh: true, noLoader: true });
     }
   }, [doRefresh]);
 
@@ -714,7 +319,7 @@ export const usePortfolio: UsePortfolio = () => {
     }
 
     setSinceText(text);
-    getAllCoinPriceHistory(timeActiveButton, currentWallet);
+    computeGraphData({ onlyGraphChange: true });
   }, [timeActiveButton]);
 
   useEffect(() => {
@@ -725,8 +330,6 @@ export const usePortfolio: UsePortfolio = () => {
   return {
     coinList,
     coinHistory,
-    getAllCoinPriceHistory,
-    coinsUserHas,
     coinHolding,
     oldTotalPrice,
     hasCoins,
