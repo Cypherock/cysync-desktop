@@ -23,7 +23,6 @@ import { CysyncError } from '../../../../errors';
 import logger from '../../../../utils/logger';
 import {
   addressDb,
-  Coin,
   coinDb,
   IOtype,
   prepareFromBlockbookTxn,
@@ -32,7 +31,12 @@ import {
   Transaction,
   transactionDb
 } from '../../../database';
-import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
+import {
+  BalanceSyncItem,
+  HistorySyncItem,
+  ModifiedCoin,
+  SyncProviderTypes
+} from '../types';
 
 export const getRequestsMetadata = (
   item: HistorySyncItem
@@ -89,7 +93,8 @@ export const getRequestsMetadata = (
           address: item.customAccount,
           network: coin.network,
           limit: 100,
-          from: item.afterBlock
+          from: item.afterBlock,
+          responseType: 'v2'
         },
         item.isRefresh
       )
@@ -249,12 +254,13 @@ export const processResponses = async (
 
       const fromAddr = formatEthAddress(ele.from);
       const toAddr = formatEthAddress(ele.to);
+      const amount = fromAddr === toAddr ? '0' : String(ele.value);
 
       const txn: Transaction = {
         hash: ele.hash,
-        amount: String(ele.value),
+        amount,
         fees: fees.toString(),
-        total: new BigNumber(ele.value).plus(fees).toString(),
+        total: new BigNumber(amount).plus(fees).toString(),
         confirmations: ele.confirmations || 0,
         walletId: item.walletId,
         slug: item.coinType,
@@ -268,7 +274,7 @@ export const processResponses = async (
         inputs: [
           {
             address: fromAddr,
-            value: String(ele.value),
+            value: amount,
             indexNumber: 0,
             isMine: address === fromAddr,
             type: IOtype.INPUT
@@ -277,7 +283,7 @@ export const processResponses = async (
         outputs: [
           {
             address: toAddr,
-            value: String(ele.value),
+            value: amount,
             indexNumber: 0,
             isMine: address === toAddr,
             type: IOtype.OUTPUT
@@ -287,18 +293,18 @@ export const processResponses = async (
 
       // If it is a failed transaction, then check if it is a token transaction.
       if (txn.status === 2) {
-        let amount = '0';
+        let txnAmount = '0';
         const token = Object.values(coinData.tokenList).find(
           t => t.address === ele.to.toLowerCase()
         );
 
         if (token) {
           if (ele.input) {
-            amount = String(getEthAmountFromInput(ele.input));
+            txnAmount = String(getEthAmountFromInput(ele.input));
           }
 
           txn.slug = token.abbr;
-          txn.amount = amount;
+          txn.amount = txnAmount;
 
           // Even if the token transaction failed, the transaction fee is still deducted.
           if (txn.sentReceive === SentReceive.SENT) {
@@ -444,14 +450,20 @@ export const processResponses = async (
             isRefresh: true
           })
         );
-        options.addPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
-          isRefresh: true,
-          module: item.module
-        });
-        options.addLatestPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
-          isRefresh: true,
-          module: 'default'
-        });
+        options.addPriceSyncItemFromCoin(
+          { slug: tokenName, parentCoin: item.coinType } as ModifiedCoin,
+          {
+            isRefresh: true,
+            module: item.module
+          }
+        );
+        options.addLatestPriceSyncItemFromCoin(
+          { slug: tokenName, parentCoin: item.coinType } as ModifiedCoin,
+          {
+            isRefresh: true,
+            module: 'default'
+          }
+        );
       }
     }
   }
@@ -469,20 +481,32 @@ export const processResponses = async (
     }
 
     for (const ele of rawHistory) {
-      const fees = new BigNumber(ele.tokens_burnt).plus(
-        ele.receipt_conversion_tokens_burnt
-      );
+      const fees = new BigNumber(ele.tokens_burnt || 0)
+        .plus(ele.receipt_conversion_tokens_burnt || 0)
+        .plus(ele.nested_receipts_tokens_burnt || 0);
 
       const fromAddr = ele.signer_account_id;
       const toAddr = ele.receiver_account_id;
       const address = ele.address_parameter;
 
+      const amount = fromAddr === toAddr ? '0' : String(ele.args?.deposit || 0);
+      const isAddAccountTransaction =
+        ele.action_kind === 'FUNCTION_CALL' &&
+        ele.args?.method_name === 'create_account';
+      let description;
+      let argsJson;
+      if (isAddAccountTransaction) {
+        argsJson = JSON.parse(
+          Buffer.from(ele.args?.args_base64 || '', 'base64').toString()
+        );
+        description = `Created account ${argsJson.new_account_id}`;
+      }
       const txn: Transaction = {
         hash: ele.transaction_hash,
         customIdentifier: address,
-        amount: String(ele.args.deposit),
+        amount,
         fees: fees.toString(),
-        total: new BigNumber(ele.args.deposit).plus(fees).toString(),
+        total: new BigNumber(amount).plus(fees).toString(),
         confirmations: 0,
         walletId: item.walletId,
         slug: item.coinType,
@@ -497,7 +521,7 @@ export const processResponses = async (
         inputs: [
           {
             address: fromAddr,
-            value: String(ele.args.deposit),
+            value: amount,
             indexNumber: 0,
             isMine: address === fromAddr,
             type: IOtype.INPUT
@@ -505,15 +529,60 @@ export const processResponses = async (
         ],
         outputs: [
           {
-            address: toAddr,
-            value: String(ele.args.deposit),
+            address: isAddAccountTransaction
+              ? argsJson?.new_account_id
+              : toAddr,
+            value: amount,
             indexNumber: 0,
             isMine: address === toAddr,
             type: IOtype.OUTPUT
           }
-        ]
+        ],
+        type: ele.action_kind,
+        description
       };
       history.push(txn);
+      if (isAddAccountTransaction) {
+        const newAccountAddress = argsJson?.new_account_id;
+        const addAccountTxn: Transaction = {
+          hash: ele.transaction_hash,
+          customIdentifier: newAccountAddress,
+          amount,
+          fees: fees.toString(),
+          total: new BigNumber(amount).plus(fees).toString(),
+          confirmations: 0,
+          walletId: item.walletId,
+          slug: item.coinType,
+          status: ele.status ? 1 : 2,
+          sentReceive: SentReceive.RECEIVED,
+          confirmed: new Date(
+            parseInt(ele.block_timestamp, 10) / 1000000
+          ).toISOString(), //conversion from timestamp in nanoseconds
+          blockHeight: 0,
+          coin: item.coinType,
+          inputs: [
+            {
+              address: fromAddr,
+              value: amount,
+              indexNumber: 0,
+              isMine: newAccountAddress === fromAddr,
+              type: IOtype.INPUT
+            }
+          ],
+          outputs: [
+            {
+              address: newAccountAddress,
+              value: amount,
+              indexNumber: 0,
+              isMine: true,
+              type: IOtype.OUTPUT
+            }
+          ],
+          type: ele.action_kind,
+          description
+        };
+        history.push(addAccountTxn);
+      }
     }
 
     const transactionDbList = [];

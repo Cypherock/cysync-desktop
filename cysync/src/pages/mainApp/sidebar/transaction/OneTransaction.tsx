@@ -170,9 +170,15 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
           />
         </Grid>
         <Grid item xs={1} className={classes.alignStartCenter}>
-          <Typography color="textPrimary">{`$ ${discreetMode.handleSensitiveDataDisplay(
-            formatDisplayAmount(value)
-          )}`}</Typography>
+          <PopOverText
+            text={`$ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(value, 2, true)
+            )}`}
+            color="textPrimary"
+            hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(value, undefined, true)
+            )} `}
+          />
         </Grid>
         <Grid
           item

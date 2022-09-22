@@ -1,11 +1,12 @@
 import {
   clientBatch as clientServer,
+  IRequestMetadata,
+  pricing as pricingServer,
   serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 
 import { LatestPriceSyncItem, SyncQueueItem } from '../types';
 
-import { latestPriceExecutor } from '.';
 import {
   ExecutionResult,
   getAllMetadata,
@@ -14,6 +15,21 @@ import {
   OptionParams,
   RequestMetaProcessInfo
 } from './sync';
+
+export const getBatchRequestsMetadata = (
+  items: LatestPriceSyncItem[]
+): IRequestMetadata[] => {
+  const pricingMetadata = pricingServer
+    .getLatest(
+      {
+        coin: items.map(item => item.id).toString()
+      },
+      true
+    )
+    .getMetadata();
+
+  return [pricingMetadata];
+};
 
 const getLatestPriceMetadata = (
   items: SyncQueueItem[]
@@ -32,7 +48,7 @@ const getLatestPriceMetadata = (
     }
   }
   try {
-    const meta = latestPriceExecutor.getBatchRequestsMetadata(validItems);
+    const meta = getBatchRequestsMetadata(validItems);
     return { meta, isFailed: false, item: items[0] };
   } catch (error) {
     return { meta: [], isFailed: true, error, item: items[0] };
