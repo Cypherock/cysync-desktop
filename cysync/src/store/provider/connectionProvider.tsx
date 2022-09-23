@@ -134,6 +134,8 @@ export const ConnectionProvider: React.FC = ({ children }) => {
     isNotReady
   } = useGetDeviceInfo();
   const { connected, beforeNetworkAction } = useNetwork();
+  const getDeviceInfoRetries = useRef(0);
+  const GET_DEVICE_INFO_RETRIES = 3;
 
   const latestDeviceConnection = React.useRef<any>();
 
@@ -205,36 +207,49 @@ export const ConnectionProvider: React.FC = ({ children }) => {
     2500
   );
 
+  const createNewConnection = (params?: {
+    dontShowReconnection?: boolean;
+    isGetDeviceInfoRetry?: boolean;
+  }) => {
+    if (!params?.isGetDeviceInfoRetry) {
+      getDeviceInfoRetries.current = 0;
+    }
+
+    setIsDeviceNotReady(false);
+    createPort()
+      .then(
+        ({ connection, inBootloader: inB, deviceState: rawDeviceState }) => {
+          if (!params?.dontShowReconnection) {
+            setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
+          }
+          setUpdateRequiredType(undefined);
+          setInBootloader(inB);
+          setDeviceState(rawDeviceState);
+          setInternalDeviceConnection(connection);
+          logger.info('Connected device info', {
+            inB,
+            deviceState: rawDeviceState
+          });
+          return null;
+        }
+      )
+      .catch(e => {
+        logger.error('Error in connecting to device', e);
+        setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
+        setUpdateRequiredType(undefined);
+        if (internalDeviceConnection) {
+          internalDeviceConnection.destroy();
+        }
+        setInternalDeviceConnection(null);
+        setDeviceConnection(null);
+        setDeviceConnectionStatus(false);
+      });
+  };
+
   useEffect(() => {
     deviceConnectionStatusRef.current = deviceConnectionStatus;
     if (deviceConnectionStatus && !internalDeviceConnection) {
-      setIsDeviceNotReady(false);
-      createPort()
-        .then(
-          ({ connection, inBootloader: inB, deviceState: rawDeviceState }) => {
-            setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
-            setUpdateRequiredType(undefined);
-            setInBootloader(inB);
-            setDeviceState(rawDeviceState);
-            setInternalDeviceConnection(connection);
-            logger.info('Connected device info', {
-              inB,
-              deviceState: rawDeviceState
-            });
-            return null;
-          }
-        )
-        .catch(e => {
-          logger.error('Error in connecting to device', e);
-          setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
-          setUpdateRequiredType(undefined);
-          if (internalDeviceConnection) {
-            internalDeviceConnection.destroy();
-          }
-          setInternalDeviceConnection(null);
-          setDeviceConnection(null);
-          setDeviceConnectionStatus(false);
-        });
+      createNewConnection();
     } else if (!deviceConnectionStatus) {
       setIsInFlow(false);
       setIsDeviceNotReady(false);
@@ -248,10 +263,12 @@ export const ConnectionProvider: React.FC = ({ children }) => {
     }
   }, [deviceConnectionStatus]);
 
-  const retryConnection = () => {
+  const retryConnection = (dontShowReconnection?: boolean) => {
     setIsDeviceNotReady(false);
     setUpdateRequiredType(undefined);
-    setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
+    if (!dontShowReconnection) {
+      setDeviceConnectionState(DeviceConnectionState.NOT_CONNECTED);
+    }
     if (internalDeviceConnection && !blockNewConnection) {
       setFirmwareVersion(undefined);
       setDeviceSerial(null);
@@ -317,6 +334,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         isUpdateRequired
       });
       let allowConnection = false;
+      let doRetry = false;
       setUpdateRequiredType(undefined);
       // Allow connection in `isNewDevice` & `lastAuthFailed` states if app is in debug mode.
       if (!deviceConnectionStatus) {
@@ -336,15 +354,57 @@ export const ConnectionProvider: React.FC = ({ children }) => {
           allowConnection = true;
         }
       } else if (isNotReady) {
-        setDeviceConnectionState(DeviceConnectionState.DEVICE_NOT_READY);
-        setIsDeviceNotReady(true);
+        if (isDeviceNotReadyCheck) {
+          setDeviceConnectionState(DeviceConnectionState.DEVICE_NOT_READY);
+          setIsDeviceNotReady(true);
+        } else if (getDeviceInfoRetries.current > GET_DEVICE_INFO_RETRIES - 1) {
+          logger.error(
+            'Error in connecting device (not ready), max retries exceeded'
+          );
+          logger.error(errorObj);
+          setDeviceConnectionState(DeviceConnectionState.DEVICE_NOT_READY);
+          setIsDeviceNotReady(true);
+        } else {
+          doRetry = true;
+          getDeviceInfoRetries.current = getDeviceInfoRetries.current + 1;
+          logger.warn(
+            'Error in connecting device (not ready), retrying... ' +
+              getDeviceInfoRetries.current
+          );
+          logger.warn(errorObj);
+        }
       } else if (isUpdateRequired) {
         setUpdateRequiredType(isUpdateRequired);
         setDeviceConnectionState(DeviceConnectionState.UPDATE_REQUIRED);
       } else if (errorObj.isSet) {
-        setDeviceConnectionState(DeviceConnectionState.UNKNOWN_ERROR);
+        if (getDeviceInfoRetries.current > GET_DEVICE_INFO_RETRIES - 1) {
+          logger.error('Error in connecting device, max retries exceeded');
+          logger.error(errorObj);
+          setDeviceConnectionState(DeviceConnectionState.UNKNOWN_ERROR);
+        } else {
+          doRetry = true;
+          getDeviceInfoRetries.current = getDeviceInfoRetries.current + 1;
+          logger.warn(
+            'Error in connecting device, retrying... ' +
+              getDeviceInfoRetries.current
+          );
+          logger.warn(errorObj);
+        }
       } else {
         setDeviceConnectionState(DeviceConnectionState.PARTIAL_STATE);
+      }
+
+      if (doRetry) {
+        createNewConnection({
+          dontShowReconnection: true,
+          isGetDeviceInfoRetry: true
+        });
+        setIsDeviceNotReadyCheck(false);
+        clearErrorObj();
+        resetHooks();
+        return;
+      } else {
+        getDeviceInfoRetries.current = 0;
       }
 
       if (!allowConnection) {
