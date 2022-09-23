@@ -37,14 +37,14 @@ const Authentication: React.FC<Props> = ({
           </>
         ) : null}
         <Typography variant="body2" color="textSecondary" align="center">
-          Follow the steps on the Device
+          Follow the instructions on X1 Wallet
         </Typography>
         <br />
         <DynamicTextView state={updateDownloaded} text="Downloading Firmware" />
         <br />
         <DynamicTextView
           state={isApproved}
-          text={`Confirm update on device to version ${latestVersion}`}
+          text={`Confirm update on X1 wallet to version ${latestVersion}`}
         />
         <br />
         <DynamicTextView

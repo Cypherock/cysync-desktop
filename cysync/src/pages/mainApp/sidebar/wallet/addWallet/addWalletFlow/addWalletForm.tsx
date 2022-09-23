@@ -95,7 +95,7 @@ const AddWalletForm: React.FC<AddWalletFormProps> = ({
             <Icon size={157} viewBox="0 0 157 70" iconGroup={<Device />} />
             <div className={classes.content}>
               <Typography color="textSecondary">
-                Follow the Steps on the Device
+                Follow the instructions on X1 Wallet
               </Typography>
               <TextView
                 completed={!!walletName}

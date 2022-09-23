@@ -180,7 +180,7 @@ const Authenticator: React.FC<Props> = ({ handleClose }) => {
               Completing device authentication...
             </Typography>
             <Typography variant="body2" color="textSecondary" align="center">
-              Follow the steps on the Device
+              Follow the instructions on X1 Wallet
             </Typography>
             <div className={classes.container}>
               <br />

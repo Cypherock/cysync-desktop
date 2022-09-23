@@ -154,7 +154,7 @@ const CardAuthentication: React.FC<StepComponentProps> = ({
           gutterBottom
           style={{ marginBottom: '1rem' }}
         >
-          Follow the Steps on Device
+          Follow the instructions on X1 Wallet
         </Typography>
         <DynamicTextView text="Connect X1 wallet" state={connStatus} />
         <br />

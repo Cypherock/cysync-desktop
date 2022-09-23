@@ -142,7 +142,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
               align="center"
               style={{ margin: '1rem 0rem 2rem' }}
             >
-              Device Upgrade successful!
+              Device Update successful!
             </Typography>
             <div style={{ display: 'flex' }}>
               <CustomButton
@@ -178,7 +178,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
               </>
             ) : null}
             <Typography variant="body2" color="textSecondary" align="center">
-              Follow the steps on the Device
+              Follow the instructions on X1 Wallet
             </Typography>
             <div className={classes.container}>
               <br />
@@ -230,7 +230,7 @@ const Updater: React.FC<Props> = ({ handleClose }) => {
                   </ListItemAvatar>
                   <ListItemText
                     className={classes.error}
-                    primary={errorObj.showError() || 'Device Upgrade Failed'}
+                    primary={errorObj.showError() || 'Device Update Failed'}
                   />
                 </ListItem>
                 <div className={classes.errorButtons}>
