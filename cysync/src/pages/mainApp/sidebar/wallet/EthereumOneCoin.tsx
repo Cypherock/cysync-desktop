@@ -10,7 +10,7 @@ import { styled, Theme, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../../constants/routes';
@@ -28,7 +28,7 @@ import {
   tokenDb,
   transactionDb
 } from '../../../../store/database';
-import { useToken } from '../../../../store/hooks';
+import { DisplayToken, useToken } from '../../../../store/hooks';
 import {
   useReceiveTransaction,
   useSendTransaction
@@ -48,6 +48,7 @@ import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 import prevent from '../../../../utils/preventPropagation';
 
 import AddToken from './addToken';
+import getTokens, { IInitialToken } from './addToken/tokens';
 import { EthereumOneCoinProps, EthereumOneCoinPropTypes } from './OneCoinProps';
 import OneToken from './OneToken';
 import Recieve from './recieve';
@@ -183,6 +184,13 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   const sync = useSync();
   const snackbar = useSnackbar();
 
+  // Using JSON.parse to create a deep copy instead of passing by referrence
+  // Using useRef because this variable will not change throught the lifecycle
+  // of this component.
+  const tokens = useRef<IInitialToken[]>(
+    JSON.parse(JSON.stringify(getTokens(initial.toLowerCase())))
+  );
+
   const { selectedWallet } = useSelectedWallet();
 
   const { coinDetails } = useCurrentCoin();
@@ -258,12 +266,19 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   };
 
   const [receiveForm, setReceiveForm] = useState(false);
-
   const receiveTransaction = useReceiveTransaction();
-
   const handleReceiveFormOpen = (e: React.MouseEvent) => {
     prevent(e);
     if (beforeAction() && beforeNetworkAction()) setReceiveForm(true);
+  };
+
+  const [selectedAddToken, setSelectedAddToken] = useState<
+    DisplayToken | undefined
+  >(undefined);
+  const [addTokenReceiveForm, setAddTokenReceiveForm] = useState(false);
+  const addTokenReceiveTransaction = useReceiveTransaction();
+  const handleAddTokenReceiveFormOpen = () => {
+    if (beforeAction() && beforeNetworkAction()) setAddTokenReceiveForm(true);
   };
 
   const [collapseTab, setCollapseTab] = React.useState(false);
@@ -289,9 +304,39 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
 
   const [openAddToken, setOpenAddToken] = useState(false);
 
-  const handleAddTokenFormClose = () => {
+  const handleAddTokenFormClose = (selectedToken?: string) => {
+    const elem = tokens.current.find(e => e.abbr === selectedToken);
+
+    if (elem) {
+      const token: DisplayToken = {
+        walletId: selectedWallet._id,
+        coin: initial,
+        slug: selectedToken,
+        balance: '0',
+        price: 0,
+        displayValue: '0',
+        displayPrice: '0',
+        displayBalance: '0',
+        isEmpty: true,
+        parentCoin: initial,
+        priceLastUpdatedAt: undefined
+      };
+
+      if (!(beforeAction() && beforeNetworkAction())) {
+        return;
+      }
+
+      setSelectedAddToken(token);
+    }
+
     setOpenAddToken(false);
   };
+
+  useEffect(() => {
+    if (selectedAddToken) {
+      handleAddTokenReceiveFormOpen();
+    }
+  }, [selectedAddToken]);
 
   return (
     <Root>
@@ -317,6 +362,27 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
         handleClose={handleAddTokenFormClose}
         ethCoin={initial}
       />
+
+      {selectedAddToken && (
+        <TokenContext.Provider
+          value={{ token: selectedAddToken, ethCoin: initial }}
+        >
+          <ReceiveTransactionContext.Provider
+            value={{
+              receiveTransaction: addTokenReceiveTransaction,
+              receiveForm: addTokenReceiveForm,
+              setReceiveForm: val => {
+                if (!val) {
+                  setSelectedAddToken(undefined);
+                }
+                setAddTokenReceiveForm(val);
+              }
+            }}
+          >
+            <Recieve />
+          </ReceiveTransactionContext.Provider>
+        </TokenContext.Provider>
+      )}
 
       <SendTransactionContext.Provider
         value={{
