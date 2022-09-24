@@ -771,6 +771,7 @@ export const useSendTransaction: UseSendTransaction = () => {
             coin.toLowerCase() === 'near'
               ? formattedInputs[0].address
               : undefined,
+          type: coin.toLowerCase() === 'near' ? 'TRANSFER' : undefined,
           amount: amount.toString(),
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
@@ -851,6 +852,11 @@ export const useSendTransaction: UseSendTransaction = () => {
         customIdentifier:
           coin.toLowerCase() === 'near'
             ? formattedInputs[0].address
+            : undefined,
+        type: coin.toLowerCase() === 'near' ? 'FUNCTION_CALL' : undefined,
+        description:
+          coin.toLowerCase() === 'near'
+            ? `Created account ${formattedOutputs[0]?.address}`
             : undefined,
         walletId,
         slug: coin.toLowerCase(),
