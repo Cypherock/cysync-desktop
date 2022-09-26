@@ -463,7 +463,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
             <div className={classes.errorButtons}>
               {!latestDeviceConnection.current ? (
                 <Tooltip
-                  title={'Reconnect the device to retry'}
+                  title={'Reconnect the X1 wallet to retry'}
                   placement="top"
                 >
                   <div>
@@ -527,7 +527,7 @@ const DeviceAuth: React.FC<DeviceSettingItemProps> = ({
               style={{ marginRight: '5px' }}
             />
             <Typography variant="body2" color="textSecondary" align="center">
-              Do not disconnect the device while it is being authenticated.
+              Do not disconnect the X1 wallet while it is being authenticated.
             </Typography>
           </div>
 

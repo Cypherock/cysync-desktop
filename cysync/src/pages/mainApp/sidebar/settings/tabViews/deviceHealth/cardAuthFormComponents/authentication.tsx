@@ -31,12 +31,12 @@ const Authentication: React.FC<Props> = ({ verified, errorObj }) => {
     <Grid container>
       <Grid item xs={12}>
         <Typography variant="body2" color="textSecondary" align="center">
-          Follow the steps on the Device
+          Follow the instructions on X1 Wallet
         </Typography>
         <br />
         <DynamicTextView
           state={verified}
-          text="Tap the X1 Card on top of the device"
+          text="Tap the X1 Card on top of the X1 wallet"
         />
       </Grid>
     </Grid>

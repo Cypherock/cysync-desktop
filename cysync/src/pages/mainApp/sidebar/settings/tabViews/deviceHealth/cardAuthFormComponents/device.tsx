@@ -51,14 +51,14 @@ const Device: React.FC<Props> = ({
     <Grid container>
       <Grid item xs={12}>
         <Typography variant="body2" color="textSecondary" align="center">
-          Follow the steps on the Device
+          Follow the instructions on X1 Wallet
         </Typography>
         <br />
         <DynamicTextView state={connStatus} text="Connect X1 Wallet" />
         <br />
         <DynamicTextView
           state={requestStatus}
-          text="Accept the request on the device"
+          text="Accept the request on the X1 wallet"
         />
       </Grid>
     </Grid>

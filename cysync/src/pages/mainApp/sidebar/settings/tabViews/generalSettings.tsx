@@ -154,7 +154,7 @@ const GeneralSettings = () => {
     {
       name: 'Auto Lock',
       secondaryText:
-        'Lock the app automatically when your laptop goes to sleep.',
+        'Lock the app automatically when your laptop goes to sleep',
       element: previousSetPassword ? (
         <SwitchButton
           name="toggleAutoLock"
@@ -179,7 +179,7 @@ const GeneralSettings = () => {
       name: 'Clear cysync app data',
       secondaryText: (
         <div>
-          <div>(You will lose all the data stored in the CySync app.</div>
+          <div>(You will lose all the data stored in the CySync app</div>
           <div>
             NOTE: Your wallet accounts stored on your device will not be
             affected)
@@ -229,11 +229,11 @@ const GeneralSettings = () => {
         Do you really want to clear all the application data?
       </Typography>
       <Typography align="center" color="textSecondary">
-        You will loose all the data stored in your CySync app.
+        You will lose all the data stored in your CySync app
       </Typography>
       {!passwordExists() && (
         <Typography align="center" color="textSecondary">
-          Restart the application if it does not starts automatically.
+          Restart the application if it does not starts automatically
         </Typography>
       )}
     </div>

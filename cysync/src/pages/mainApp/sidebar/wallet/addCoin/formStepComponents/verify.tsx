@@ -59,7 +59,7 @@ const Verify: React.FC<StepComponentProps> = ({ handleNext }) => {
   return (
     <Root className={classes.root}>
       <Typography color="textSecondary" gutterBottom>
-        Follow the Steps on Device
+        Follow the instructions on X1 Wallet
       </Typography>
       {selectedWallet.passphraseSet && (
         <>
