@@ -227,15 +227,18 @@ export const SyncProvider: React.FC = ({ children }) => {
           coin: coin.slug,
           walletId: coin.walletId
         });
-        const topBlock = await getTopBlock(
-          {
-            walletId: coin.walletId,
-            slug: coinData.abbr
-          },
-          {}
-        );
         for (const account of customAccounts) {
           const customAccount = account.name;
+
+          const topBlock = await getTopBlock(
+            {
+              walletId: coin.walletId,
+              slug: coinData.abbr,
+              customIdentifier: customAccount
+            },
+            {}
+          );
+
           const newItem = new HistorySyncItem({
             xpub: coin.xpub,
             walletName: '',
