@@ -223,13 +223,6 @@ const Summary: React.FC<StepComponentProps> = ({
           The new account is successfully verified. You may now complete account
           creation
         </Typography>
-        {coinAbbr.toUpperCase() === 'ETHR' && (
-          <Typography color="error" style={{ marginBottom: '0.5rem' }}>
-            [ This is a Ropsten
-            <strong>&nbsp;Testnet&nbsp;</strong>
-            transaction only ]
-          </Typography>
-        )}
         <LabelText label="Create From" text={creatorAccount} verified />
         <LabelText
           label="New Account Id"

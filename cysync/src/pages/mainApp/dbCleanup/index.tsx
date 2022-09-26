@@ -4,6 +4,7 @@ import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import {
   addressDb,
   coinDb,
+  customAccountDb,
   deviceDb,
   notificationDb,
   priceHistoryDb,
@@ -61,6 +62,10 @@ const DBCleaupPopup = () => {
         {
           name: 'Device',
           promise: deviceDb.hasIncompatableData.bind(deviceDb)
+        },
+        {
+          name: 'Custom Account',
+          promise: customAccountDb.hasIncompatableData.bind(customAccountDb)
         }
       ];
 

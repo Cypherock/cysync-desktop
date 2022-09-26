@@ -156,13 +156,6 @@ const Verify = (props: any) => {
             </div>
           </CustomAlert>
         </div>
-        {coinAbbr.toUpperCase() === 'ETHR' && (
-          <Typography color="error">
-            [ This is a Ropsten
-            <strong>&nbsp;Testnet&nbsp;</strong>
-            transaction only ]
-          </Typography>
-        )}
         {activeButton === 0 ? (
           <>
             <LabelText
