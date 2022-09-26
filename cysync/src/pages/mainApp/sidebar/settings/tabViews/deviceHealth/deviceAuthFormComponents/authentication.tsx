@@ -95,10 +95,10 @@ const Authentication: React.FC<Props> = ({
     <Grid container>
       <Grid item xs={12}>
         <Typography variant="body2" color="textSecondary" align="center">
-          Follow the steps on the Device
+          Follow the instructions on X1 Wallet
         </Typography>
         <br />
-        <DynamicTextView state={confirmed} text="Confirm on Device" />
+        <DynamicTextView state={confirmed} text="Confirm on X1 wallet" />
         <br />
         <DynamicTextView state={verified} text="Device Authentication" />
       </Grid>

@@ -87,7 +87,7 @@ const DeviceSettings = ({ allowExit, setAllowExit }: DeviceSettingsProps) => {
 
   const DeviceHealthItems = [
     {
-      name: 'Device Upgrade',
+      name: 'Device Update',
       element: (
         <DeviceUpgrade
           allowExit={allowExit}

@@ -34,25 +34,25 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
   const { retryConnection, deviceConnectionState } = useConnection();
 
   const getHeading = () => {
-    const defaultText = 'Looks like the device is not initialised';
+    const defaultText = 'Looks like the X1 wallet is misconfigured';
     switch (deviceConnectionState) {
       case DeviceConnectionState.IN_TEST_APP:
-        return 'Looks like the device is not initialised';
+        return 'Looks like the X1 wallet is misconfigured';
       case DeviceConnectionState.IN_BOOTLOADER:
-        return 'Looks like your device was disconnected while updating';
+        return 'Looks like your X1 wallet was disconnected while updating';
       case DeviceConnectionState.PARTIAL_STATE:
-        return 'Looks like your device is not authenticated';
+        return 'Looks like your X1 wallet is not authenticated';
       case DeviceConnectionState.NEW_DEVICE:
-        return 'Looks like this device is connected for the first time';
+        return 'Looks like this X1 wallet is connected for the first time';
       case DeviceConnectionState.LAST_AUTH_FAILED:
-        return 'Looks like the device authentication failed the last time';
+        return 'Looks like the X1 wallet authentication failed the last time';
       case DeviceConnectionState.DEVICE_NOT_READY:
-        return 'Looks like the device is not in the main menu';
+        return 'Looks like the X1 wallet is not in the main menu';
       case DeviceConnectionState.UNKNOWN_ERROR:
-        return 'An unknown error occurred while connecting the device';
+        return 'An unknown error occurred while connecting the X1 wallet';
       case DeviceConnectionState.UPDATE_REQUIRED:
         if (updateRequiredType === 'app') {
-          return 'The current version of CySync is not compatible with the device connected';
+          return 'The current version of CySync is not compatible with the X1 wallet connected';
         }
 
         if (updateRequiredType === 'device') {
@@ -66,22 +66,22 @@ const Confirmation: React.FC<Props> = ({ handleClose, updateRequiredType }) => {
   };
 
   const getQuestion = () => {
-    const defaultText = 'Do you want to initialise it now?';
+    const defaultText = 'Do you want to configure it now?';
     switch (deviceConnectionState) {
       case DeviceConnectionState.IN_TEST_APP:
-        return 'Do you want to initialise it now?';
+        return 'Do you want to configure it now?';
       case DeviceConnectionState.IN_BOOTLOADER:
         return 'Do you want to complete the upgrade now?';
       case DeviceConnectionState.PARTIAL_STATE:
         return 'Do you want to complete the authentication now?';
       case DeviceConnectionState.NEW_DEVICE:
-        return 'Do you want to setup the device now?';
+        return 'Do you want to setup the X1 wallet now?';
       case DeviceConnectionState.LAST_AUTH_FAILED:
         return 'Do you want to retry the authentication now?';
       case DeviceConnectionState.DEVICE_NOT_READY:
-        return 'Bring the device to the main menu and try again.';
+        return 'Bring the X1 wallet to the main menu and try again.';
       case DeviceConnectionState.UNKNOWN_ERROR:
-        return 'Reconnect the device and try again';
+        return 'Reconnect the X1 wallet and try again';
       case DeviceConnectionState.UPDATE_REQUIRED:
         if (updateRequiredType === 'app') {
           return 'Update CySync from https://cypherock.com/gs';

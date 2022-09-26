@@ -11,7 +11,7 @@ import DeviceSetupFormFlow from './stepperFormFlow';
 const deviceSetupData = [
   ['Device  Authentication', DeviceAuthentication],
   ['X1 Card  Authentication', CardAuthentication],
-  ['Update Device', UpgradingDevice]
+  ['Device Update', UpgradingDevice]
 ];
 
 interface Props {

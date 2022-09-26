@@ -154,7 +154,7 @@ const LockScreen = (props: any) => {
       }));
       setTimeout(() => {
         resetHandler();
-      }, 2000);
+      }, 3000);
     } else {
       setValues({
         ...values,

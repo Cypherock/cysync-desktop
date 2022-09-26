@@ -490,7 +490,8 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       if (result.isFailed) {
         if (item.retries < maxRetries && result.canRetry) {
-          logger.warn('Sync: Error, retrying...', { item });
+          const errorMsg = result?.error?.toString() || result?.error;
+          logger.warn('Sync: Error, retrying...', { item, error: errorMsg });
           updatedItem.retries += 1;
           if (result.delay) {
             clientTimeout.current = {
@@ -502,10 +503,11 @@ export const SyncProvider: React.FC = ({ children }) => {
           updateQueueItem = true;
           removeFromQueue = false;
         } else {
+          const errorMsg = result?.error?.toString() || result?.error;
           logger.error(
             `${CysyncError.SYNC_MAX_TRIES_EXCEEDED} Sync: Error, max retries exceeded`
           );
-          logger.error({ error: result.error, item });
+          logger.error({ error: errorMsg, item });
         }
       } else if (
         item instanceof HistorySyncItem &&
@@ -614,8 +616,6 @@ export const SyncProvider: React.FC = ({ children }) => {
       // TODO: But we should aim to do better to handle a single failing.
       logger.error('Failed to execute batch, hence failing all tasks');
     }
-
-    await sleep(queueExecuteInterval);
   };
 
   const executeNextBatchItemInQueue = async () => {
@@ -624,6 +624,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
 
     let items: SyncQueueItem[] = [];
+
     if (syncQueue.length > 0) {
       items = syncQueue
         .filter(item => item.type !== 'price' && item.type !== 'latestPrice')
@@ -646,8 +647,6 @@ export const SyncProvider: React.FC = ({ children }) => {
       // TODO: But we should aim to do better to handle a single failing.
       logger.error('Failed to execute batch, hence failing all tasks');
     }
-
-    await sleep(queueExecuteInterval);
   };
 
   const executeNextInQueue = async () => {
@@ -658,7 +657,6 @@ export const SyncProvider: React.FC = ({ children }) => {
       executeNextBatchItemInQueue()
     ]);
     updateAllExecutedItems(array.reduce((acc, item) => acc.concat(item), []));
-    await sleep(queueExecuteInterval);
     const timeStop = performance.now();
     if (timeStop - timeStart > 5000) {
       logger.info(`Batch execution took ${timeStop - timeStart} milliseconds`);
@@ -678,6 +676,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           })
       });
     }
+    await sleep(queueExecuteInterval);
     setIsExecutingTask(false);
   };
 
@@ -978,6 +977,9 @@ export const SyncProvider: React.FC = ({ children }) => {
         }
       } else {
         startTime.current = performance.now();
+        logger.info(
+          `Sync queue started executing with ${syncQueue.length} items`
+        );
       }
     } else {
       if (startTime.current > 0) {

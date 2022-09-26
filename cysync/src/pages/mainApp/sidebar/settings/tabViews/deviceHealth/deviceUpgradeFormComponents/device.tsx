@@ -15,7 +15,7 @@ const Device: React.FC<Props> = ({ connStatus, authState }) => {
     <Grid container>
       <Grid item xs={12}>
         <Typography variant="body2" color="textSecondary" align="center">
-          Follow the steps on the Device
+          Follow the instructions on X1 Wallet
         </Typography>
         <br />
         <DynamicTextView state={connStatus} text="Connect X1 Wallet" />

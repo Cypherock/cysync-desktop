@@ -105,7 +105,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
     <Root>
       <Backdrop open={open} />
       <Typography color="textSecondary">
-        Follow the instructions on Device
+        Follow the instructions on X1 Wallet
       </Typography>
       <TextView
         completed={receiveTransaction.pathSent}
@@ -117,7 +117,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         inProgress={
           receiveTransaction.pathSent && !receiveTransaction.coinsConfirmed
         }
-        text="Verify the Coin on Device"
+        text="Verify the Coin on X1 wallet"
         stylex={{ marginTop: '0rem' }}
       />
       {selectedWallet.passphraseSet && (

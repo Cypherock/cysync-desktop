@@ -394,7 +394,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
       element: <Device connStatus={connStatus} authState={authState} />
     },
     {
-      name: 'Upgrade',
+      name: 'Update',
       element: (
         <Authentication
           progress={updateProgress}
@@ -472,7 +472,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             variant="h5"
             style={{ margin: '1rem 0rem 6rem' }}
           >
-            Device Upgrade Successful
+            Device Update Successful
           </Typography>
           <Button
             color="secondary"
@@ -566,7 +566,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
           >
             {isAuthFailed
               ? 'Firmware Verification Failed'
-              : 'Device Upgrade Failed'}
+              : 'Device Update Failed'}
           </Typography>
           <Typography
             color="textSecondary"
@@ -585,7 +585,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
                 {isAuthFailed ? 'Ok' : 'Retry'}
               </CustomButton>
             ) : (
-              <Tooltip title="Disconnect and reconnect the device">
+              <Tooltip title="Disconnect and reconnect the X1 wallet">
                 <span>
                   <CustomButton
                     variant="outlined"
@@ -643,8 +643,8 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
             style={{ marginRight: '5px' }}
           />
           <Typography variant="body2" color="textSecondary" align="center">
-            Do not disconnect device while it is being updated. This may take a
-            few minutes.
+            Do not disconnect X1 wallet while it is being updated. This may take
+            a few minutes.
           </Typography>
         </div>
 
@@ -668,7 +668,7 @@ const DeviceUpgrade: React.FC<DeviceSettingItemProps> = ({
     <Root container style={{ padding: '0.5rem 0rem' }}>
       <Grid item xs={12} className={classes.header}>
         <Typography color="secondary" variant="h5">
-          Device Upgrade
+          Device Update
         </Typography>
       </Grid>
       {getMainContent()}

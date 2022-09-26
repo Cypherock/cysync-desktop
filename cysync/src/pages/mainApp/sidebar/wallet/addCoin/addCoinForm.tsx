@@ -282,7 +282,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
             >
               {isXpubMissing
                 ? 'Wallet configured successfully'
-                : 'Coin added successfully'}
+                : 'Coin(s) added successfully'}
             </Typography>
             <Button
               variant="contained"
