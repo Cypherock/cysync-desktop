@@ -1,5 +1,5 @@
 import SearchIcon from '@mui/icons-material/Search';
-import { styled, useTheme } from '@mui/material';
+import { Alert, styled, useTheme } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -13,9 +13,7 @@ import CustomButton from '../../../../../designSystem/designComponents/buttons/b
 import CustomCheckBox from '../../../../../designSystem/designComponents/input/checkbox';
 import Input from '../../../../../designSystem/designComponents/input/input';
 import CoinIcons from '../../../../../designSystem/genericComponents/coinIcons';
-import { tokenDb } from '../../../../../store/database';
 import { useDebouncedFunction } from '../../../../../store/hooks';
-import { useSelectedWallet, useSync } from '../../../../../store/provider';
 
 import getTokens, { IInitialToken } from './tokens';
 
@@ -54,7 +52,7 @@ const Root = styled('div')(({ theme }) => ({
     display: 'flex',
     width: '100%',
     flexDirection: 'column',
-    height: '500px'
+    height: '300px'
   },
   [`& .${classes.coinItem}`]: {
     display: 'flex',
@@ -89,15 +87,14 @@ const Root = styled('div')(({ theme }) => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: '4rem',
-    margin: '1rem 0rem 30rem 0rem'
+    marginTop: '5rem'
   }
 }));
 
 export interface AddTokenFormProps {
   tokenList: string[];
   ethCoin: string;
-  handleClose: () => void;
+  handleClose: (token?: string) => void;
 }
 
 const AddTokenForm: React.FC<AddTokenFormProps> = ({
@@ -114,46 +111,26 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
     JSON.parse(JSON.stringify(getTokens(ethCoin.toLowerCase())))
   );
 
-  const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
-
-  const { selectedWallet } = useSelectedWallet();
+  const [selectedToken, setSelectedToken] = useState<string | undefined>(
+    undefined
+  );
 
   const [continueDisabled, setContinueDisabled] = useState(true);
 
   useEffect(() => {
-    if (selectedTokens.length === 0) {
+    if (!selectedToken) {
       setContinueDisabled(true);
     } else {
       setContinueDisabled(false);
     }
-  }, [selectedTokens]);
+  }, [selectedToken]);
 
   const handleCoinSelect = (abbr: string) => {
-    setSelectedTokens(t => {
-      if (t.includes(abbr)) {
-        return t.filter(token => token !== abbr);
-      } else {
-        return [...t, abbr];
-      }
-    });
+    setSelectedToken(abbr);
   };
 
-  const sync = useSync();
-
   const onContinue = () => {
-    const tokensToAdd = [...selectedTokens];
-    tokensToAdd.forEach(tokenName => {
-      tokenDb.insert({
-        walletId: selectedWallet._id,
-        slug: tokenName,
-        coin: ethCoin.toLowerCase(),
-        balance: '0',
-        price: 0,
-        priceLastUpdatedAt: undefined
-      });
-      sync.addTokenTask(selectedWallet._id, tokenName, ethCoin.toLowerCase());
-    });
-    handleClose();
+    handleClose(selectedToken);
   };
 
   const [search, setSearch] = useState('');
@@ -185,7 +162,7 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
     const item = search ? searchResults[index] : tokens.current[index];
     const { abbr, name } = item;
     const wasAlreadyAdded = tokenList.includes(abbr);
-    const isSelected = wasAlreadyAdded || selectedTokens.includes(abbr);
+    const isSelected = wasAlreadyAdded || selectedToken === abbr;
 
     return (
       <div key={key} style={style}>
@@ -238,7 +215,7 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
         />
       </Grid>
       <div className={classes.head}>
-        <Typography className={classes.heading}>Select tokens</Typography>
+        <Typography className={classes.heading}>Select token</Typography>
       </div>
       {searchResults.length > 0 ? (
         <div className={classes.coinContainer}>
@@ -256,13 +233,11 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
           </AutoSizer>
         </div>
       ) : isLoading ? (
-        <Grid container>
-          <Grid item xs={12}>
-            <div className={classes.loaderContainer}>
-              <CircularProgress color="secondary" />
-            </div>
-          </Grid>
-        </Grid>
+        <div className={classes.coinContainer}>
+          <div className={classes.loaderContainer}>
+            <CircularProgress color="secondary" />
+          </div>
+        </div>
       ) : (
         <Typography
           variant="subtitle1"
@@ -272,6 +247,10 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
           No Tokens found.
         </Typography>
       )}
+
+      <Alert sx={{ mt: 2 }} severity="info" variant="outlined">
+        In order to add an ERC20 token you have to receive it in your wallet
+      </Alert>
       <CustomButton
         disabled={continueDisabled}
         onClick={onContinue}
@@ -283,7 +262,7 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
           right: '4.3rem'
         }}
       >
-        Continue
+        Receive
       </CustomButton>
     </Root>
   );
