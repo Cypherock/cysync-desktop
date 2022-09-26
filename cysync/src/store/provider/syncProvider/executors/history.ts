@@ -254,11 +254,12 @@ export const processResponses = async (
 
       const fromAddr = formatEthAddress(ele.from);
       const toAddr = formatEthAddress(ele.to);
-      const amount = fromAddr === toAddr ? '0' : String(ele.value);
+      const selfTransfer = fromAddr === toAddr;
+      const amount = String(ele.value || 0);
 
       const txn: Transaction = {
         hash: ele.hash,
-        amount,
+        amount: selfTransfer ? '0' : amount,
         fees: fees.toString(),
         total: new BigNumber(amount).plus(fees).toString(),
         confirmations: ele.confirmations || 0,
@@ -339,7 +340,8 @@ export const processResponses = async (
       const tokenObj = coinData.tokenList[ele.tokenSymbol.toLowerCase()];
       const fromAddr = formatEthAddress(ele.from);
       const toAddr = formatEthAddress(ele.to);
-      const amount = fromAddr === toAddr ? '0' : String(ele.value);
+      const selfTransfer = fromAddr === toAddr;
+      const amount = String(ele.value || 0);
 
       // Only add if it exists in our coin list
       if (
@@ -354,7 +356,7 @@ export const processResponses = async (
         erc20Tokens.add(ele.tokenSymbol.toLowerCase());
         const txn: Transaction = {
           hash: ele.hash as string,
-          amount,
+          amount: selfTransfer ? '0' : amount,
           fees: fees.toString(),
           total: amount,
           confirmations: (ele.confirmations as number) || 0,
@@ -490,7 +492,8 @@ export const processResponses = async (
       const toAddr = ele.receiver_account_id;
       const address = ele.address_parameter;
 
-      const amount = fromAddr === toAddr ? '0' : String(ele.args?.deposit || 0);
+      const selfTransfer = fromAddr === toAddr;
+      const amount = String(ele.args?.deposit || 0);
       const isAddAccountTransaction =
         ele.action_kind === 'FUNCTION_CALL' &&
         ele.args?.method_name === 'create_account';
@@ -505,7 +508,7 @@ export const processResponses = async (
       const txn: Transaction = {
         hash: ele.transaction_hash,
         customIdentifier: address,
-        amount,
+        amount: selfTransfer ? '0' : amount,
         fees: fees.toString(),
         total: new BigNumber(amount).plus(fees).toString(),
         confirmations: 0,
