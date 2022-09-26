@@ -7,6 +7,7 @@ export interface TxQuery {
   walletName?: string;
   slug?: string;
   coin?: string;
+  customIdentifier?: string;
   sentReceive?: SentReceive;
   status?: Status;
 }
