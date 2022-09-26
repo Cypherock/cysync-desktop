@@ -3,11 +3,10 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
-import Routes from '../../../constants/routes';
 import CustomButton from '../../../designSystem/designComponents/buttons/button';
 import Analytics from '../../../utils/analytics';
+import { triggerClearData } from '../../../utils/clearData';
 import logger from '../../../utils/logger';
 
 const PREFIX = 'DbCleanup-Confirmation';
@@ -30,8 +29,6 @@ type Props = {
 };
 
 const Confirmation: React.FC<Props> = ({ handleClose }) => {
-  const navigate = useNavigate();
-
   const onPositiveClick = () => {
     logger.info('Database cleanup confirmed by user');
     Analytics.Instance.event(
@@ -39,7 +36,7 @@ const Confirmation: React.FC<Props> = ({ handleClose }) => {
       Analytics.Actions.CLICKED
     );
 
-    navigate(`${Routes.settings.general.index}?resetApp=true`);
+    triggerClearData();
     handleClose();
   };
 
@@ -65,7 +62,7 @@ const Confirmation: React.FC<Props> = ({ handleClose }) => {
       </Grid>
       <div className={classes.errorButtons}>
         <CustomButton onClick={onPositiveClick} style={{ margin: '1rem 0rem' }}>
-          Go to Settings
+          Clear Data
         </CustomButton>
       </div>
     </Root>

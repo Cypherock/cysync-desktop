@@ -149,9 +149,9 @@ const MainApp: React.FC = () => {
                 </Routes>
               </Grid>
             </Grid>
+            <DbCleanup />
             <Updater />
             <DeviceUpdater />
-            <DbCleanup />
           </StyledGrid>
         </UpdateProvider>
       </WalletsProvider>
