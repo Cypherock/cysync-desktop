@@ -18,8 +18,7 @@ import AvatarIcon from '../../../../../../designSystem/designComponents/icons/Av
 import { transactionDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
-  useSendTransactionContext,
-  useTokenContext
+  useSendTransactionContext
 } from '../../../../../../store/provider';
 import logger from '../../../../../../utils/logger';
 
@@ -124,10 +123,6 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
 
   const { coinDetails } = useCurrentCoin();
 
-  const { token } = useTokenContext();
-
-  const coinAbbr = token ? token.slug : coinDetails.slug;
-
   const [imageData, setImageData] = React.useState('');
   const [isQRBuilding, setQRBuilding] = React.useState(true);
 
@@ -201,13 +196,6 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
     <Root className={classes.root}>
       <div className={classes.confirmationDetails}>
         <Grid container>
-          {coinAbbr.toUpperCase() === 'ETHR' && (
-            <Typography color="error">
-              [ This is a Ropsten
-              <strong>&nbsp;Testnet&nbsp;</strong>
-              transaction only ]
-            </Typography>
-          )}
           <Grid item sm={12} className={classes.alignColCenterCenter}>
             {isQRBuilding ? (
               <CircularProgress size={40} />

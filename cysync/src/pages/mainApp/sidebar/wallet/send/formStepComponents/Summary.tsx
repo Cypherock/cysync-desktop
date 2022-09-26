@@ -224,13 +224,6 @@ const Summary: React.FC<StepComponentProps> = ({
         >
           Transaction ready to be broadcast. Confirm the details
         </Typography>
-        {coinAbbr.toUpperCase() === 'ETHR' && (
-          <Typography color="error" style={{ marginBottom: '0.5rem' }}>
-            [ This is a Ropsten
-            <strong>&nbsp;Testnet&nbsp;</strong>
-            transaction only ]
-          </Typography>
-        )}
         {activeButton === 0 && (
           <LabelText
             label="Recipient's Address"

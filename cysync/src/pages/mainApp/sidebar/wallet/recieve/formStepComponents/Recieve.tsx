@@ -10,11 +10,9 @@ import React, { useEffect } from 'react';
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import {
-  useCurrentCoin,
   useCustomAccountContext,
   useReceiveTransactionContext,
-  useSnackbar,
-  useTokenContext
+  useSnackbar
 } from '../../../../../../store/provider';
 import prevent from '../../../../../../utils/preventPropagation';
 
@@ -118,12 +116,7 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
 
   const { receiveTransaction } = useReceiveTransactionContext();
 
-  const { coinDetails } = useCurrentCoin();
-
-  const { token } = useTokenContext();
   const { customAccount } = useCustomAccountContext();
-
-  const coinAbbr = token ? token.slug : coinDetails.slug;
 
   const handleReplaceAccount = (e: React.MouseEvent) => {
     prevent(e);
@@ -151,13 +144,6 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
   if (receiveTransaction.receiveAddress)
     return (
       <Root className={classes.root}>
-        {coinAbbr.toUpperCase() === 'ETHR' && (
-          <Typography color="error" style={{ marginBottom: '0.5rem' }}>
-            [ This is a Ropsten
-            <strong>&nbsp;Testnet&nbsp;</strong>
-            transaction only ]
-          </Typography>
-        )}
         <div className={classes.addressContainer}>
           <Typography
             color="secondary"
