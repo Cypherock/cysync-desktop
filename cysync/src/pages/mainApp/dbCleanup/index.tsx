@@ -1,4 +1,3 @@
-import CircularProgress from '@mui/material/CircularProgress';
 import React, { useEffect, useState } from 'react';
 
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
@@ -18,9 +17,8 @@ import logger from '../../../utils/logger';
 
 import ConfirmationComponent from './confirmation';
 
-const DBCleanupPopup = () => {
+const DBCleaupPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [inProgress, setInProgress] = useState(false);
 
   const checkForDBCleanup = async () => {
     try {
@@ -74,7 +72,6 @@ const DBCleanupPopup = () => {
         }
       }
 
-      setIsOpen(true);
       if (isCleanupRequired) {
         setIsOpen(true);
         Analytics.Instance.event(
@@ -93,24 +90,24 @@ const DBCleanupPopup = () => {
     checkForDBCleanup();
   }, []);
 
+  const handleClose = () => {
+    setIsOpen(false);
+    Analytics.Instance.event(
+      Analytics.Categories.DATABASE_CLEANUP,
+      Analytics.Actions.CLOSED
+    );
+    logger.info('Database cleanup prompt closed');
+  };
+
   if (isOpen) {
     return (
       <DialogBox
         fullWidth
         maxWidth="md"
         open={isOpen}
-        handleClose={() => {}}
-        restComponents={
-          inProgress ? (
-            <CircularProgress size={22} color="secondary" />
-          ) : (
-            <ConfirmationComponent
-              handleClose={() => {
-                setInProgress(true);
-              }}
-            />
-          )
-        }
+        handleClose={handleClose}
+        isClosePresent
+        restComponents={<ConfirmationComponent handleClose={handleClose} />}
       />
     );
   }
@@ -118,4 +115,4 @@ const DBCleanupPopup = () => {
   return <></>;
 };
 
-export default DBCleanupPopup;
+export default DBCleaupPopup;

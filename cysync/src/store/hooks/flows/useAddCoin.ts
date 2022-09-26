@@ -139,8 +139,7 @@ export const useAddCoin: UseAddCoin = () => {
 
     for (const [i, coin] of coinList.entries()) {
       const coinData = COINS[coin.slug];
-      if (!coinData.deprecated)
-        coinStatus.push({ coin, name: coinData.name, status: i === 0 ? 1 : 0 });
+      coinStatus.push({ coin, name: coinData.name, status: i === 0 ? 1 : 0 });
     }
 
     setAddCoinIndex(0);
