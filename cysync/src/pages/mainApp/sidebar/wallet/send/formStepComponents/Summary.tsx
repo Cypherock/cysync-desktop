@@ -133,7 +133,7 @@ const Summary: React.FC<StepComponentProps> = ({
           walletId: selectedWallet._id,
           coin: coinDetails.slug,
           txHash: res,
-          token: token ? token.coin : undefined
+          token: token ? token.slug : undefined
         });
         addTxnConfirmAddressHook(res, coinDetails.slug, selectedWallet._id);
         if (isNear)
