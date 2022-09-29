@@ -11,6 +11,7 @@ import generic from '../../../node_modules/cryptocurrency-icons/svg/color/generi
 import ltc from '../../../node_modules/cryptocurrency-icons/svg/color/ltc.svg';
 import btct from '../../assets/icons/btct.svg';
 import ethr from '../../assets/icons/ethr.svg';
+import matic from '../../assets/icons/matic.svg';
 import near from '../../assets/icons/near.svg';
 
 const PREFIX = 'CoinIcons';
@@ -151,6 +152,9 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
           break;
         case 'NEAR':
           src = near;
+          break;
+        case 'MATIC':
+          src = matic;
           break;
         default:
           src = generic;
