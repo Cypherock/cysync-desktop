@@ -353,7 +353,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         outputList: changeFormatOfOutputList(
           recipientData,
           coinDetails.slug,
-          token
+          token?.slug
         ),
         fees: intTransactionFee,
         isSendAll: false,
