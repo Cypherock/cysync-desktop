@@ -1,4 +1,3 @@
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -34,7 +33,11 @@ const Root = styled('div')(({ theme }) => ({
     borderRadius: 5,
     minHeight: 50,
     maxHeight: 60,
-    margin: `${theme.spacing(1)} 0px`
+    margin: `${theme.spacing(1)} 0px`,
+    cursor: 'pointer',
+    '&:hover': {
+      background: '#343a42'
+    }
   },
   [`& .${classes.alignStartCenter}`]: {
     display: 'flex',
@@ -126,7 +129,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
 
   return (
     <Root style={{ marginRight: '10px' }}>
-      <Grid container className={classes.root}>
+      <Grid container className={classes.root} onClick={onShowMore}>
         <Grid
           item
           xs={3}
@@ -136,7 +139,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
         >
           <CoinIcons
             initial={initial}
-            style={{ marginRight: '10px' }}
+            style={{ paddingLeft: '8px', marginRight: '10px' }}
             parentCoin={coinParent?.toLowerCase()}
           />
           <div
@@ -151,9 +154,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
         </Grid>
         <Grid item xs={1} className={classes.alignStartCenter}>
           <PopOverText
-            text={`${walletName.substring(0, 5)}${
-              walletName.length > 5 ? '...' : ''
-            } `}
+            text={walletName}
             color="textPrimary"
             hoverText={walletName}
           />
@@ -161,15 +162,16 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
             text={`${initial} ${discreetMode.handleSensitiveDataDisplay(
-              formatDisplayAmount(amount, 4)
+              formatDisplayAmount(amount, 5, true)
             )}`}
             color="textPrimary"
             hoverText={`${initial} ${discreetMode.handleSensitiveDataDisplay(
               formatDisplayAmount(amount, decimal, true)
             )}`}
+            style={{ paddingRight: '8px' }}
           />
         </Grid>
-        <Grid item xs={1} className={classes.alignStartCenter}>
+        <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
             text={`$ ${discreetMode.handleSensitiveDataDisplay(
               formatDisplayAmount(value, 2, true)
@@ -178,6 +180,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
             hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
               formatDisplayAmount(value, undefined, true)
             )} `}
+            style={{ paddingRight: '8px' }}
           />
         </Grid>
         <Grid
@@ -188,6 +191,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
           <Typography
             className={!(result === 'SENT') ? classes.blue : classes.orange}
             variant="body2"
+            style={{ paddingRight: '8px' }}
           >
             {getResultIcon()}
             {result}
@@ -195,7 +199,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
         </Grid>
         <Grid
           item
-          xs={1}
+          xs={2}
           className={clsx(classes.alignStartCenter, classes.capitalize)}
         >
           <Typography
@@ -206,19 +210,10 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
                 ? classes.orange
                 : classes.blue
             }
+            style={{ paddingRight: '8px' }}
           >
             {status}
           </Typography>
-        </Grid>
-        <Grid item xs={2} className={classes.alignCenterCenter}>
-          <Button
-            size="small"
-            variant="outlined"
-            color="secondary"
-            onClick={onShowMore}
-          >
-            Show More
-          </Button>
         </Grid>
       </Grid>
     </Root>

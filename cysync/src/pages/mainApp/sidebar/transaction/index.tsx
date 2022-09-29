@@ -308,7 +308,7 @@ const Transaction = () => {
                 <Typography color="textSecondary">Amount</Typography>
               </Button>
             </Grid>
-            <Grid item xs={1}>
+            <Grid item xs={2}>
               <Button
                 className={classes.headerButtons}
                 onClick={() => {
@@ -336,7 +336,7 @@ const Transaction = () => {
                 Result
               </Typography>
             </Grid>
-            <Grid item xs={1}>
+            <Grid item xs={2}>
               <Typography color="textSecondary" style={{ marginLeft: '5px' }}>
                 Status
               </Typography>
