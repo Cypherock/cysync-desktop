@@ -777,6 +777,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           fees: fees.toString(),
           walletId,
           slug: coin.toLowerCase(),
+          coin,
           confirmations: 0,
           status: coin.toLowerCase() === 'near' ? 1 : 0,
           sentReceive: SentReceive.SENT,
