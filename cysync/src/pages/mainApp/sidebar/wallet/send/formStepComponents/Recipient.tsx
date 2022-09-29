@@ -556,7 +556,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         outputList: changeFormatOfOutputList(
           batchRecipientData,
           coinDetails.slug,
-          token
+          token?.slug
         ),
         // rounding the data to handle decimals for now
         // TODO: Need to figure out support everywhere properly
