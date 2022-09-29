@@ -4,7 +4,6 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Collapse } from '@mui/material';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import { styled, Theme, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -71,7 +70,9 @@ const classes = {
   grey: `${PREFIX}-grey`,
   dialogRoot: `${PREFIX}-dialogRoot`,
   ethererum: `${PREFIX}-ethererum`,
-  rootButtonWrapper: `${PREFIX}-rootButtonWrapper`
+  rootButtonWrapper: `${PREFIX}-rootButtonWrapper`,
+  actionButton: `${PREFIX}-actionButton`,
+  actionButtonIcon: `${PREFIX}-actionButtonIcon`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -99,9 +100,9 @@ const Root = styled('div')(({ theme }) => ({
     margin: '0px !important'
   },
   [`& .${classes.divider}`]: {
-    background: theme.palette.primary.dark,
-    height: '50%',
-    margin: '0px 10px'
+    height: '100%',
+    width: '0',
+    margin: '0 2.5px'
   },
   [`& .${classes.actions}`]: {
     display: 'flex',
@@ -147,6 +148,17 @@ const Root = styled('div')(({ theme }) => ({
     alignItems: 'center',
     justifyContent: 'center',
     borderTop: `1px solid rgba(33, 40, 35, 1)`
+  },
+  [`& .${classes.actionButton}`]: {
+    [theme.breakpoints.down('lg')]: {
+      fontSize: '12px'
+    }
+  },
+  [`& .${classes.actionButtonIcon}`]: {
+    [theme.breakpoints.down('lg')]: {
+      width: '14px',
+      height: '14px'
+    }
   }
 }));
 
@@ -419,45 +431,63 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
               initial={initial.toUpperCase()}
               style={{ marginRight: '10px' }}
             />
-            <Typography color="textPrimary">{name}</Typography>
+            <PopOverText
+              color="textPrimary"
+              hoverText={name}
+              style={{ paddingRight: '8px' }}
+            >
+              {name}
+            </PopOverText>
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
             <PopOverText
-              text={`${discreetMode.handleSensitiveDataDisplay(
-                formatDisplayAmount(holding, 4)
-              )} ${initial}`}
               color="textPrimary"
               hoverText={`${discreetMode.handleSensitiveDataDisplay(
                 formatDisplayAmount(holding, decimal, true)
               )} ${initial}`}
-            />
+              style={{ paddingRight: '8px' }}
+            >
+              {discreetMode.handleSensitiveDataDisplay(
+                formatDisplayAmount(holding, 5, true)
+              )}{' '}
+              {initial}
+            </PopOverText>
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
             <PopOverText
-              text={`$ ${discreetMode.handleSensitiveDataDisplay(
-                formatDisplayAmount(value, 2, true)
-              )}`}
               color="textPrimary"
               hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
                 formatDisplayAmount(value, undefined, true)
               )} `}
-            />
+              style={{ paddingRight: '8px' }}
+            >
+              $
+              {discreetMode.handleSensitiveDataDisplay(
+                formatDisplayAmount(value, 2, true)
+              )}
+            </PopOverText>
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
             <PopOverText
-              text={`$ ${formatDisplayAmount(price, 2, true)}`}
               color="textPrimary"
               hoverText={`$ ${formatDisplayAmount(price, undefined, true)} `}
-            />
+              style={{ paddingRight: '8px' }}
+            >
+              $ {formatDisplayAmount(price, 2, true)}
+            </PopOverText>
           </Grid>
           <Grid item xs={2} className={classes.actions}>
             <Button
               variant="text"
-              className={!isEmpty ? clsx(classes.orange) : clsx(classes.grey)}
+              className={clsx({
+                [classes.orange]: !isEmpty,
+                [classes.grey]: isEmpty,
+                [classes.actionButton]: true
+              })}
               onClick={handleSendFormOpen}
               startIcon={
                 <Icon
-                  className={classes.icon}
+                  className={clsx(classes.icon, classes.actionButtonIcon)}
                   viewBox="0 0 14 15"
                   icon={ICONS.walletSend}
                   color={
@@ -470,13 +500,13 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
             >
               Send
             </Button>
-            <Divider orientation="vertical" className={classes.divider} />
+            <div className={classes.divider} />
             <Button
               variant="text"
-              className={clsx(classes.recieveButton)}
+              className={clsx(classes.recieveButton, classes.actionButton)}
               startIcon={
                 <Icon
-                  className={classes.icon}
+                  className={clsx(classes.icon, classes.actionButtonIcon)}
                   viewBox="0 0 14 15"
                   icon={ICONS.walletRecieve}
                   color={theme.palette.info.main}
@@ -488,13 +518,17 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
             </Button>
           </Grid>
           <Grid item xs={1} className={classes.alignCenterCenter}>
-            <CustomIconButton title="Delete Coin" onClick={handleDeleteOpen}>
+            <CustomIconButton
+              title="Delete Coin"
+              onClick={handleDeleteOpen}
+              iconButtonClassName={clsx(classes.actionButton)}
+            >
               <Icon
                 style={{
                   display: 'inline-block',
                   verticalAlign: 'middle'
                 }}
-                size={20}
+                size={16}
                 viewBox="0 0 18 18"
                 iconGroup={<Dustbin />}
               />

@@ -146,9 +146,15 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
     }
   }, [txn]);
 
-  const formatCoins = (coins: string) => {
+  const formatCoins = (coins: string, showFull?: false) => {
+    if (showFull) {
+      return discreetMode.handleSensitiveDataDisplay(
+        formatDisplayAmount(parseFloat(coins) || 0)
+      );
+    }
+
     return discreetMode.handleSensitiveDataDisplay(
-      formatDisplayAmount(parseFloat(coins) || 0)
+      formatDisplayAmount(parseFloat(coins) || 0, 5, true)
     );
   };
 
@@ -329,9 +335,6 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             {`${txn.slug.toUpperCase()} ${formatCoins(txn.displayAmount)} `}
           </Typography>
           <PopOverText
-            text={`($ ${discreetMode.handleSensitiveDataDisplay(
-              formatDisplayAmount(getPriceForCoin(txn.displayAmount), 2, true)
-            )})`}
             color="textPrimary"
             hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
               formatDisplayAmount(
@@ -340,7 +343,11 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                 true
               )
             )} `}
-          />
+          >
+            {`($ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(getPriceForCoin(txn.displayAmount), 2, true)
+            )})`}
+          </PopOverText>
         </div>
       </div>
       <div className={classes.dataContainer}>
