@@ -157,6 +157,7 @@ const OneTransaction: React.FC<OneTransactionProps> = props => {
             text={walletName}
             color="textPrimary"
             hoverText={walletName}
+            style={{ paddingRight: '8px' }}
           />
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
