@@ -4,8 +4,8 @@ import {
   COINS,
   EthCoinData
 } from '@cypherock/communication';
+import { generateEthAddressFromXpub } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
-import { utils } from 'ethers';
 
 import logger from '../../../../utils/logger';
 import { transactionDb } from '../../databaseInit';
@@ -192,8 +192,7 @@ export const insertFromFullTxn = async (transaction: {
     await transactionDb.insert(newTxn);
   } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
-    const myAddress =
-      utils.HDNode.fromExtendedKey(xpub).derivePath(`0/0`).address;
+    const myAddress = generateEthAddressFromXpub(xpub);
 
     const amount = new BigNumber(txn.value);
     const fromAddr = txn.from;
@@ -466,8 +465,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
     return [newTxn];
   } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
-    const myAddress =
-      utils.HDNode.fromExtendedKey(xpub).derivePath(`0/0`).address;
+    const myAddress = generateEthAddressFromXpub(xpub);
     let feeTxn: Transaction;
 
     const amount = new BigNumber(txn.value);
