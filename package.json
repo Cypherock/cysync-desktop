@@ -23,6 +23,7 @@
     "pretty:check": "yarn pretty:local:check && yarn pretty:cysync:check"
   },
   "dependencies": {
+    "@solana/web3.js": "^1.63.1",
     "axios": "^0.26.1",
     "fs-extra": "^10.0.0"
   },

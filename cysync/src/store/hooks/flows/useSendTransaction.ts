@@ -5,7 +5,8 @@ import {
   DeviceError,
   DeviceErrorType,
   EthCoinData,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import {
   InputOutput,
@@ -98,6 +99,22 @@ export const broadcastTxn = async (
       throw new Error('transaction-failed');
 
     return resp.data.transaction.hash;
+  } else if (coin instanceof SolanaCoinData) {
+    const resp = await Server.solana.transaction
+      .broadcastTxn({
+        transaction: signedTxn,
+        network: coin.network
+      })
+      .request();
+
+    if (resp.status === 0) {
+      throw new Error('brodcast-failed');
+    }
+
+    if (resp.data?.signature === undefined)
+      throw new Error('transaction-failed');
+
+    return resp.data.signature;
   } else {
     const res = await Server.bitcoin.transaction
       .broadcastTxn({
@@ -122,6 +139,7 @@ export const verifyAddress = (address: string, coin: string) => {
       /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/; // any number of top level accounts are valid here
     return regexImplicit.test(address) || regexRegistered.test(address);
   }
+
   return WAValidator.validate(
     address,
     coinDetails.validatorCoinName,

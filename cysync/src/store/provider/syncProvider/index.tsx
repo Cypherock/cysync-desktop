@@ -332,6 +332,17 @@ export const SyncProvider: React.FC = ({ children }) => {
           });
           addToQueue(newItem);
         }
+      } else if (coinData.group === CoinGroup.Solana) {
+        const newItem = new BalanceSyncItem({
+          xpub: coin.xpub,
+          zpub: coin.zpub,
+          walletId: coin.walletId,
+          coinType: coin.slug,
+          isRefresh,
+          coinGroup: CoinGroup.Solana,
+          module
+        });
+        addToQueue(newItem);
       } else {
         // If BTC fork, we get the balance from the txn api
         addHistorySyncItemFromCoin(coin, { module, isRefresh });

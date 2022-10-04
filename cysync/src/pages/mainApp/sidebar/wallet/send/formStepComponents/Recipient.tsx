@@ -474,6 +474,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
   const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
+  const isSolana = COINS[coinDetails.slug].group === CoinGroup.Solana;
+  const isBtc = COINS[coinDetails.slug].group === CoinGroup.BitcoinForks;
 
   const handleCheckAddresses = async (skipEmpty = false) => {
     let isValid = true;
@@ -673,7 +675,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   return (
     <Root container className={root}>
-      {!isEthereum && !isNear && (
+      {isBtc && (
         <ButtonGroup
           disableElevation
           aria-label="outlined secondary button group"
@@ -772,7 +774,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               />
             </div>
           )}
-          {isNear && <div style={{ marginBottom: '10px' }} />}
+          {isNear || (isSolana && <div style={{ marginBottom: '10px' }} />)}
           {isEthereum && (
             <div style={{ marginTop: '10px' }}>
               <FormControlLabel
@@ -856,7 +858,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           </Grid>
         </Grid>
       )}
-      {!isNear && (
+      {!isNear && !isSolana && (
         <div className={networkFees}>
           <div className={networkLabel}>
             <Typography className="text" color="textPrimary">
