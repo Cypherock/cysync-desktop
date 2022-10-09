@@ -15,6 +15,8 @@ export interface HistorySyncItemOptions {
   coinGroup: CoinGroup;
   isRefresh?: boolean;
   customAccount?: string;
+  afterHash?: string;
+  beforeHash?: string;
 }
 
 export class HistorySyncItem extends SyncItem {
@@ -32,6 +34,10 @@ export class HistorySyncItem extends SyncItem {
 
   public customAccount?: string;
 
+  public afterHash?: string;
+
+  public beforeHash?: string;
+
   constructor({
     xpub,
     zpub,
@@ -44,7 +50,9 @@ export class HistorySyncItem extends SyncItem {
     isRefresh,
     parentCoin,
     coinGroup,
-    customAccount
+    customAccount,
+    afterHash,
+    beforeHash
   }: HistorySyncItemOptions) {
     super({
       type: 'history',
@@ -61,6 +69,8 @@ export class HistorySyncItem extends SyncItem {
     this.page = page;
     this.afterBlock = afterBlock;
     this.customAccount = customAccount;
+    this.afterHash = afterHash;
+    this.beforeHash = beforeHash;
   }
 
   equals(item: HistorySyncItem | SyncItem) {
@@ -72,7 +82,9 @@ export class HistorySyncItem extends SyncItem {
       return (
         this.walletName === item.walletName &&
         this.coinType === item.coinType &&
-        this.customAccount === item.customAccount
+        this.customAccount === item.customAccount &&
+        this.afterHash === item.afterHash &&
+        this.beforeHash === item.beforeHash
       );
     }
 
@@ -92,7 +104,9 @@ export class HistorySyncItem extends SyncItem {
       isRefresh: this.isRefresh,
       coinGroup: this.coinGroup,
       parentCoin: this.parentCoin,
-      customAccount: this.customAccount
+      customAccount: this.customAccount,
+      afterHash: this.afterHash,
+      beforeHash: this.beforeHash
     });
 
     newItem.retries = this.retries;

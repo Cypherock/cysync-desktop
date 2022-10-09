@@ -94,3 +94,14 @@ export const getTopBlock = async (query: TxQuery, options: TxQueryOptions) => {
   // return max block height
   return res[0].blockHeight;
 };
+
+export const getTopHash = async (query: TxQuery, options: TxQueryOptions) => {
+  const res = await getAllTxns(query, options, {
+    field: 'confirmed',
+    order: 'desc',
+    limit: 1
+  });
+  if (res.length === 0) return undefined;
+  // return max block height
+  return res[0].hash;
+};

@@ -4,7 +4,8 @@ import {
   CoinGroup,
   COINS,
   EthCoinData,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
@@ -17,6 +18,7 @@ import {
   coinDb,
   customAccountDb,
   getTopBlock,
+  getTopHash,
   priceHistoryDb,
   tokenDb,
   transactionDb
@@ -252,6 +254,27 @@ export const SyncProvider: React.FC = ({ children }) => {
           });
           addToQueue(newItem);
         }
+      } else if (coinData instanceof SolanaCoinData) {
+        const topHash = await getTopHash(
+          {
+            walletId: coin.walletId,
+            slug: coinData.abbr,
+            status: 1
+          },
+          {}
+        );
+
+        const newItem = new HistorySyncItem({
+          xpub: coin.xpub,
+          walletName: '',
+          walletId: coin.walletId,
+          coinType: coinData.abbr,
+          afterHash: topHash,
+          coinGroup: CoinGroup.Solana,
+          isRefresh,
+          module
+        });
+        addToQueue(newItem);
       } else {
         logger.warn('Xpub with invalid coin found', {
           coinData,
@@ -532,6 +555,9 @@ export const SyncProvider: React.FC = ({ children }) => {
         (updatedItem as HistorySyncItem).page = result.processResult.page;
         (updatedItem as HistorySyncItem).afterBlock =
           result.processResult.after;
+        (updatedItem as HistorySyncItem).afterHash = result.processResult.until;
+        (updatedItem as HistorySyncItem).beforeHash =
+          result.processResult.before;
       }
 
       if (removeFromQueue) {
