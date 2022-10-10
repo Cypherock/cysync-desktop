@@ -1,4 +1,9 @@
-import { CoinGroup, COINS } from '@cypherock/communication';
+import {
+  CoinGroup,
+  COINS,
+  EthCoinData,
+  SolanaCoinData
+} from '@cypherock/communication';
 import { getServerUrl } from '@cypherock/server-wrapper';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
@@ -53,7 +58,8 @@ export const SocketProvider: React.FC = ({ children }) => {
     address: string,
     walletId: string,
     coinType: string,
-    currentSocket?: Socket
+    currentSocket?: Socket,
+    network?: string
   ) => {
     try {
       let usableSocket: Socket;
@@ -72,7 +78,7 @@ export const SocketProvider: React.FC = ({ children }) => {
         walletId,
         coinType
       });
-      usableSocket.emit('receiveAddr', address, walletId, coinType);
+      usableSocket.emit('receiveAddr', address, walletId, coinType, network);
     } catch (error) {
       logger.error(error);
     }
@@ -82,7 +88,8 @@ export const SocketProvider: React.FC = ({ children }) => {
     hash: string,
     coinType: string,
     walletId: string,
-    currentSocket?: Socket
+    currentSocket?: Socket,
+    network?: string
   ) => {
     try {
       let usableSocket: Socket;
@@ -97,7 +104,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       }
 
       logger.info('Setting Txn Confirm hook', { hash, coinType, walletId });
-      usableSocket.emit('txnConfirm', hash, coinType, walletId);
+      usableSocket.emit('txnConfirm', hash, coinType, walletId, network);
     } catch (error) {
       logger.error(error);
     }
@@ -149,7 +156,8 @@ export const SocketProvider: React.FC = ({ children }) => {
         address,
         walletId,
         coinType,
-        currentSocket
+        currentSocket,
+        (coin as SolanaCoinData | EthCoinData).network
       );
     } else {
       return addReceiveAddressHookFromBlockbookSocket(
@@ -179,7 +187,8 @@ export const SocketProvider: React.FC = ({ children }) => {
         hash,
         coinType,
         walletId,
-        currentSocket
+        currentSocket,
+        (coin as SolanaCoinData | EthCoinData).network
       );
     } else {
       return;

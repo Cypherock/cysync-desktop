@@ -123,6 +123,8 @@ export const broadcastTxn = async (
       throw new Error('brodcast-failed');
     }
 
+    if (resp.data.cysyncError) throw resp.data.cysyncError;
+
     if (resp.data?.signature === undefined)
       throw new Error('transaction-failed');
 
@@ -801,7 +803,10 @@ export const useSendTransaction: UseSendTransaction = () => {
             coin.toLowerCase() === 'near'
               ? formattedInputs[0].address
               : undefined,
-          type: coin.toLowerCase() === 'near' ? 'TRANSFER' : undefined,
+          type:
+            coin.toLowerCase() === 'near' || coin.toLowerCase() === 'sol'
+              ? 'TRANSFER'
+              : undefined,
           amount: amount.toString(),
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
