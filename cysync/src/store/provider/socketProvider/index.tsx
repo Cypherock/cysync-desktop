@@ -144,7 +144,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       logger.warn('Invalid coinType in addReceiveAddressHook: ' + coinType);
       return;
     }
-    if (coin.group === CoinGroup.Ethereum) {
+    if (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana) {
       return addReceiveAddressHookFromSocket(
         address,
         walletId,
@@ -174,7 +174,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       return;
     }
 
-    if (coin.group === CoinGroup.Ethereum) {
+    if (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana) {
       return addTxnConfirmAddressHookFromSocket(
         hash,
         coinType,
@@ -198,7 +198,10 @@ export const SocketProvider: React.FC = ({ children }) => {
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
-      if (coin && coin.group === CoinGroup.Ethereum) {
+      if (
+        coin &&
+        (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana)
+      ) {
         addTxnConfirmAddressHook(
           pendingTxn.hash,
           pendingTxn.walletId,
@@ -213,7 +216,10 @@ export const SocketProvider: React.FC = ({ children }) => {
 
     for (const receiveAddr of allReceiveAddr) {
       const coin = COINS[receiveAddr.coinType];
-      if (coin && coin.group === CoinGroup.Ethereum) {
+      if (
+        coin &&
+        (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana)
+      ) {
         addReceiveAddressHook(
           receiveAddr.address,
           receiveAddr.walletId,
