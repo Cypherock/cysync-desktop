@@ -11,6 +11,7 @@ export interface HistorySyncItemOptions {
   zpub?: string;
   page?: number;
   afterBlock?: number;
+  afterTokenBlock?: number;
   parentCoin?: string;
   coinGroup: CoinGroup;
   isRefresh?: boolean;
@@ -30,6 +31,8 @@ export class HistorySyncItem extends SyncItem {
 
   public afterBlock?: number;
 
+  public afterTokenBlock?: number;
+
   public customAccount?: string;
 
   constructor({
@@ -41,6 +44,7 @@ export class HistorySyncItem extends SyncItem {
     module,
     page,
     afterBlock,
+    afterTokenBlock,
     isRefresh,
     parentCoin,
     coinGroup,
@@ -60,6 +64,7 @@ export class HistorySyncItem extends SyncItem {
     this.walletId = walletId;
     this.page = page;
     this.afterBlock = afterBlock;
+    this.afterTokenBlock = afterTokenBlock;
     this.customAccount = customAccount;
   }
 
@@ -72,7 +77,8 @@ export class HistorySyncItem extends SyncItem {
       return (
         this.walletName === item.walletName &&
         this.coinType === item.coinType &&
-        this.customAccount === item.customAccount
+        this.customAccount === item.customAccount &&
+        this.afterTokenBlock === item.afterTokenBlock
       );
     }
 
@@ -89,6 +95,7 @@ export class HistorySyncItem extends SyncItem {
       module: this.module,
       page: this.page,
       afterBlock: this.afterBlock,
+      afterTokenBlock: this.afterTokenBlock,
       isRefresh: this.isRefresh,
       coinGroup: this.coinGroup,
       parentCoin: this.parentCoin,
