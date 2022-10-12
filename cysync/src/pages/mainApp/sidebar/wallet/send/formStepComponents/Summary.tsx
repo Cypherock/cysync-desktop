@@ -178,6 +178,14 @@ const Summary: React.FC<StepComponentProps> = ({
               'Failed to broadcast the transaction. Check your internet connection and try again.'
             );
           }
+        } else if (e.message) {
+          setAdvanceError(e.message);
+          setBroadcastError(
+            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.' +
+              selectedWallet.passphraseSet
+              ? '\nThis may be due to incorrect passphrase.'
+              : ''
+          );
         } else {
           setBroadcastError(
             'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.'

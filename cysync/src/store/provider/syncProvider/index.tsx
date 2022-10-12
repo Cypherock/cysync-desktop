@@ -4,7 +4,8 @@ import {
   CoinGroup,
   COINS,
   EthCoinData,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
@@ -17,6 +18,7 @@ import {
   coinDb,
   customAccountDb,
   getTopBlock,
+  getTopHash,
   priceHistoryDb,
   tokenDb,
   transactionDb
@@ -276,6 +278,27 @@ export const SyncProvider: React.FC = ({ children }) => {
           });
           addToQueue(newItem);
         }
+      } else if (coinData instanceof SolanaCoinData) {
+        const topHash = await getTopHash(
+          {
+            walletId: coin.walletId,
+            slug: coinData.abbr,
+            status: 1
+          },
+          {}
+        );
+
+        const newItem = new HistorySyncItem({
+          xpub: coin.xpub,
+          walletName: '',
+          walletId: coin.walletId,
+          coinType: coinData.abbr,
+          afterHash: topHash,
+          coinGroup: CoinGroup.Solana,
+          isRefresh,
+          module
+        });
+        addToQueue(newItem);
       } else {
         logger.warn('Xpub with invalid coin found', {
           coinData,
@@ -356,6 +379,17 @@ export const SyncProvider: React.FC = ({ children }) => {
           });
           addToQueue(newItem);
         }
+      } else if (coinData.group === CoinGroup.Solana) {
+        const newItem = new BalanceSyncItem({
+          xpub: coin.xpub,
+          zpub: coin.zpub,
+          walletId: coin.walletId,
+          coinType: coin.slug,
+          isRefresh,
+          coinGroup: CoinGroup.Solana,
+          module
+        });
+        addToQueue(newItem);
       } else {
         // If BTC fork, we get the balance from the txn api
         addHistorySyncItemFromCoin(coin, { module, isRefresh });
@@ -547,6 +581,9 @@ export const SyncProvider: React.FC = ({ children }) => {
           result.processResult.after;
         (updatedItem as HistorySyncItem).afterTokenBlock =
           result.processResult.afterToken;
+        (updatedItem as HistorySyncItem).afterHash = result.processResult.until;
+        (updatedItem as HistorySyncItem).beforeHash =
+          result.processResult.before;
       }
 
       if (removeFromQueue) {

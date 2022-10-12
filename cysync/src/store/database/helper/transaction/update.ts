@@ -15,6 +15,16 @@ export const updateConfirmations = async (txn: any) => {
     );
 
     return txn.confirmations || 0;
+  } else if (txn.coinType === 'sol') {
+    const confirmations = txn.err ? 0 : 1;
+    transactionDb.findAndUpdate(
+      { hash: txn.hash },
+      {
+        status: txn.err ? 2 : 1,
+        confirmations
+      }
+    );
+    return confirmations;
   } else {
     let status = 0;
     let hasConfirmation = false;
