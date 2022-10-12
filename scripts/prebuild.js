@@ -22,7 +22,7 @@ const BUILD_TYPE_CONFIG = {
     SIMULATE_PRODUCTION: false,
   },
   feat: {
-    BUILD_TYPE: "feature",
+    BUILD_TYPE: "debug",
     LOG_LEVEL: "silly",
     SERVER_ENV: "development",
     GITHUB_REPO: "Cypherock/cysync-desktop-feat",
