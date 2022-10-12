@@ -34,6 +34,8 @@ const getArgs = () => {
 
   if (name.includes("dev")) {
     buildType = "dev";
+  } else if (name.includes("feat")) {
+    buildType = "feat";
   } else if (name.includes("debug")) {
     buildType = "debug";
   } else if (name.includes("rc")) {
