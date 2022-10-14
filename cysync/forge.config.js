@@ -11,6 +11,15 @@ const config = {
       entitlements: 'entitlements.plist',
       'entitlements-inherit': 'entitlements.plist',
       'signature-flags': 'library'
+    },
+    packagerConfig: {
+      protocols: [
+        {
+          protocol: 'cypherock',
+          name: 'cypherock',
+          schemes: 'cypherock'
+        }
+      ]
     }
   },
   makers: [
