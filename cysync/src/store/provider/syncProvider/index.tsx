@@ -214,11 +214,35 @@ export const SyncProvider: React.FC = ({ children }) => {
           addToQueue(newZItem);
         }
       } else if (coinData instanceof EthCoinData) {
+        const topBlock = await getTopBlock(
+          {
+            walletId: coin.walletId,
+            slug: coinData.abbr,
+            coin: coinData.abbr
+          },
+          {
+            excludeFailed: true,
+            excludePending: true
+          }
+        );
+        const topTokenBlock = await getTopBlock(
+          {
+            walletId: coin.walletId,
+            slug: coinData.abbr,
+            coin: 'eth'
+          },
+          {
+            excludeFailed: true,
+            excludePending: true
+          }
+        );
         const newItem = new HistorySyncItem({
           xpub: coin.xpub,
           walletName: '',
           walletId: coin.walletId,
           coinType: coinData.abbr,
+          afterBlock: topBlock,
+          afterTokenBlock: topTokenBlock,
           isRefresh,
           module,
           coinGroup: CoinGroup.Ethereum
@@ -558,6 +582,8 @@ export const SyncProvider: React.FC = ({ children }) => {
         (updatedItem as HistorySyncItem).afterHash = result.processResult.until;
         (updatedItem as HistorySyncItem).beforeHash =
           result.processResult.before;
+        (updatedItem as HistorySyncItem).afterTokenBlock =
+          result.processResult.afterToken;
       }
 
       if (removeFromQueue) {

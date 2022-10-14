@@ -74,14 +74,26 @@ export const getRequestsMetadata = (
     const address = generateEthAddressFromXpub(item.xpub);
 
     const ethTxnMetadata = ethServer.transaction
-      .getHistory({ address, network: coin.network }, item.isRefresh)
+      .getHistory(
+        {
+          address,
+          network: coin.network,
+          limit: 100,
+          from: item.afterBlock,
+          responseType: 'v2'
+        },
+        item.isRefresh
+      )
       .getMetadata();
 
     const erc20Metadata = ethServer.transaction
       .getContractHistory(
         {
           address,
-          network: coin.network
+          network: coin.network,
+          limit: 100,
+          from: item.afterTokenBlock,
+          responseType: 'v2'
         },
         item.isRefresh
       )
@@ -262,8 +274,10 @@ export const processResponses = async (
 
     const address = generateEthAddressFromXpub(item.xpub);
     const rawHistory = responses[0].data?.result;
+    const moreParent = responses[0].data?.more;
 
     const erc20history = responses[1].data?.result;
+    const moreToken = responses[1].data?.more;
 
     if (!rawHistory) {
       throw new Error('Invalid eth history from server');
@@ -491,6 +505,15 @@ export const processResponses = async (
         );
       }
     }
+    const returnObj: { after?: number; afterToken?: number } = {};
+    if (moreParent || moreToken) {
+      if (rawHistory.length > 0)
+        returnObj.after = rawHistory[rawHistory.length - 1].blockNumber;
+      if (erc20history.length > 0)
+        returnObj.afterToken =
+          erc20history[erc20history.length - 1].blockNumber;
+    }
+    return returnObj.after || returnObj.afterToken ? returnObj : undefined;
   }
 
   if (coinData instanceof NearCoinData) {
