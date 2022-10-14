@@ -113,49 +113,57 @@ const OneCoin: React.FC<OneCoinProps> = props => {
           >
             {coinInitial.toUpperCase()}
           </Typography>
-          <Typography
+          <PopOverText
+            hoverText={coin.name.toUpperCase()}
             color="textPrimary"
-            style={{ fontSize: '0.6rem' }}
+            style={{ fontSize: '0.6rem', paddingRight: '8px' }}
             className={classes.bold}
           >
             {coin.name.toUpperCase()}
-          </Typography>
+          </PopOverText>
         </div>
       </Grid>
       <Grid item xs={3} className={classes.alignStartCenter}>
         <PopOverText
-          text={`${discreetMode.handleSensitiveDataDisplay(
-            formatDisplayAmount(coinHolding, 4)
-          )} ${coinInitial.toUpperCase()} `}
           color="textPrimary"
           variant="body2"
           className={classes.bold}
           hoverText={`${discreetMode.handleSensitiveDataDisplay(
             formatDisplayAmount(coinHolding, decimal, true)
           )} ${coinInitial.toUpperCase()}`}
-        />
+          style={{ paddingRight: '8px' }}
+        >
+          {discreetMode.handleSensitiveDataDisplay(
+            formatDisplayAmount(coinHolding, 5, true)
+          )}{' '}
+          {coinInitial.toUpperCase()}
+        </PopOverText>
       </Grid>
       <Grid item xs={2} className={classes.alignStartCenter}>
         <PopOverText
-          text={`$ ${discreetMode.handleSensitiveDataDisplay(
-            formatDisplayAmount(coinValue, 2, true)
-          )}`}
           color="textPrimary"
           variant="body2"
           className={classes.bold}
           hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
             formatDisplayAmount(coinValue, undefined, true)
           )} `}
-        />
+          style={{ paddingRight: '8px' }}
+        >
+          {`$ ${discreetMode.handleSensitiveDataDisplay(
+            formatDisplayAmount(coinValue, 2, true)
+          )}`}
+        </PopOverText>
       </Grid>
       <Grid item xs={2} className={classes.alignStartCenter}>
         <PopOverText
-          text={`$ ${formatDisplayAmount(coinPrice, 2, true)}`}
           color="textPrimary"
           variant="body2"
           className={classes.bold}
           hoverText={`$ ${formatDisplayAmount(coinPrice, undefined, true)} `}
-        />
+          style={{ paddingRight: '8px' }}
+        >
+          {`$ ${formatDisplayAmount(coinPrice, 2, true)}`}
+        </PopOverText>
       </Grid>
       <Grid item xs={2} className={classes.alignStartCenter}>
         <Typography

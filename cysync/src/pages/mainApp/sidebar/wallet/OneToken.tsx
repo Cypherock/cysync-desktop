@@ -1,5 +1,4 @@
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -48,12 +47,15 @@ const classes = {
   orange: `${PREFIX}-orange`,
   grey: `${PREFIX}-grey`,
   dialogRoot: `${PREFIX}-dialogRoot`,
-  nameWrapper: `${PREFIX}-nameWrapper`
+  nameWrapper: `${PREFIX}-nameWrapper`,
+  borderLeft: `${PREFIX}-borderLeft`,
+  actionButton: `${PREFIX}-actionButton`,
+  actionButtonIcon: `${PREFIX}-actionButtonIcon`
 };
 
 const Root = styled('div')(({ theme }) => ({
+  background: theme.palette.primary.light,
   [`& .${classes.root}`]: {
-    background: theme.palette.primary.light,
     minHeight: 50,
     padding: '0px 0px 5px',
     cursor: 'pointer',
@@ -65,9 +67,9 @@ const Root = styled('div')(({ theme }) => ({
     margin: '0px !important'
   },
   [`& .${classes.divider}`]: {
-    background: theme.palette.primary.dark,
-    height: '50%',
-    margin: '0px 10px'
+    height: '100%',
+    width: '0',
+    margin: '0 2.5px'
   },
   [`& .${classes.actions}`]: {
     display: 'flex',
@@ -106,12 +108,22 @@ const Root = styled('div')(({ theme }) => ({
     paddingBottom: '4rem'
   },
   [`& .${classes.nameWrapper}`]: {
-    marginLeft: '3.5rem',
+    paddingLeft: '3.5rem'
+  },
+  [`& .${classes.borderLeft}`]: {
     borderLeft: '1px solid rgba(33,40,35,1)',
-    display: 'flex',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingRight: '10px'
+    height: '100%'
+  },
+  [`& .${classes.actionButton}`]: {
+    [theme.breakpoints.down('lg')]: {
+      fontSize: '12px'
+    }
+  },
+  [`& .${classes.actionButtonIcon}`]: {
+    [theme.breakpoints.down('lg')]: {
+      width: '14px',
+      height: '14px'
+    }
   }
 }));
 
@@ -225,56 +237,74 @@ const OneToken: React.FC<OneTokenProps> = ({
       </ReceiveTransactionContext.Provider>
 
       <Grid container onClick={onClick} className={classes.root}>
-        <Grid item xs={3} className={classes.alignStartCenter}>
-          <Grid wrap="nowrap" container className={classes.nameWrapper}>
-            <CoinIcons
-              initial={initial.toUpperCase()}
-              parentCoin={ethCoin.toLowerCase()}
-              size="sm"
-            />
-            <Typography color="textPrimary" style={{ fontSize: '0.9rem' }}>
-              {name}
-            </Typography>
-          </Grid>
+        <Grid
+          item
+          xs={3}
+          className={clsx(classes.alignStartCenter, classes.nameWrapper)}
+        >
+          <div className={classes.borderLeft} />
+          <CoinIcons
+            initial={initial.toUpperCase()}
+            parentCoin={ethCoin.toLowerCase()}
+            size="sm"
+          />
+          <PopOverText
+            color="textPrimary"
+            hoverText={name}
+            style={{ paddingRight: '8px', fontSize: '0.9rem' }}
+          >
+            {name}
+          </PopOverText>
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`${discreetMode.handleSensitiveDataDisplay(
-              formatDisplayAmount(holding, 4)
-            )} ${initial} `}
             color="textPrimary"
             hoverText={`${discreetMode.handleSensitiveDataDisplay(
               formatDisplayAmount(holding, decimal, true)
             )} ${initial}`}
-            style={{ fontSize: '0.9rem' }}
-          />
+            style={{ fontSize: '0.9rem', paddingRight: '8px' }}
+          >
+            {discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(holding, 5, true)
+            )}{' '}
+            {initial}
+          </PopOverText>
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`$ ${discreetMode.handleSensitiveDataDisplay(
-              formatDisplayAmount(value, 2, true)
-            )}`}
             color="textPrimary"
             hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
               formatDisplayAmount(value, undefined)
             )} `}
-          />
+            style={{ fontSize: '0.9rem', paddingRight: '8px' }}
+          >
+            $
+            {discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(value, 2, true)
+            )}
+          </PopOverText>
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`$ ${formatDisplayAmount(price, 2, true)}`}
             color="textPrimary"
             hoverText={`$ ${formatDisplayAmount(price)} `}
-          />
+            style={{ fontSize: '0.9rem', paddingRight: '8px' }}
+          >
+            $ {formatDisplayAmount(price, 2, true)}
+          </PopOverText>
         </Grid>
         <Grid item xs={2} className={classes.actions}>
           <Button
             variant="text"
-            className={!isEmpty ? clsx(classes.orange) : clsx(classes.grey)}
+            className={clsx({
+              [classes.orange]: !isEmpty,
+              [classes.grey]: isEmpty,
+              [classes.actionButton]: true
+            })}
             onClick={handleSendFormOpen}
             startIcon={
               <Icon
-                className={classes.icon}
+                className={clsx(classes.icon, classes.actionButtonIcon)}
                 viewBox="0 0 14 15"
                 icon={ICONS.walletSend}
                 color={
@@ -284,37 +314,39 @@ const OneToken: React.FC<OneTokenProps> = ({
                 }
               />
             }
-            style={{ fontSize: '0.9rem' }}
           >
             Send
           </Button>
 
-          <Divider orientation="vertical" className={classes.divider} />
+          <div className={classes.divider} />
           <Button
             variant="text"
-            className={clsx(classes.recieveButton)}
+            className={clsx(classes.recieveButton, classes.actionButton)}
             startIcon={
               <Icon
-                className={classes.icon}
+                className={clsx(classes.icon, classes.actionButtonIcon)}
                 viewBox="0 0 14 15"
                 icon={ICONS.walletRecieve}
                 color={theme.palette.info.main}
               />
             }
             onClick={handleReceiveFormOpen}
-            style={{ fontSize: '0.9rem' }}
           >
             Receive
           </Button>
         </Grid>
         <Grid item xs={1} className={classes.alignCenterCenter}>
-          <CustomIconButton title="Delete Coin" onClick={handleDeleteOpen}>
+          <CustomIconButton
+            title="Delete Coin"
+            onClick={handleDeleteOpen}
+            iconButtonClassName={clsx(classes.actionButton)}
+          >
             <Icon
               style={{
                 display: 'inline-block',
                 verticalAlign: 'middle'
               }}
-              size={20}
+              size={16}
               viewBox="0 0 18 18"
               iconGroup={<Dustbin />}
             />

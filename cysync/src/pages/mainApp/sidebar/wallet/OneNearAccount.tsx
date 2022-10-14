@@ -1,5 +1,4 @@
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -44,7 +43,9 @@ const classes = {
   orange: `${PREFIX}-orange`,
   grey: `${PREFIX}-grey`,
   dialogRoot: `${PREFIX}-dialogRoot`,
-  nameWrapper: `${PREFIX}-nameWrapper`
+  nameWrapper: `${PREFIX}-nameWrapper`,
+  actionButton: `${PREFIX}-actionButton`,
+  actionButtonIcon: `${PREFIX}-actionButtonIcon`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -61,9 +62,9 @@ const Root = styled('div')(({ theme }) => ({
     margin: '0px !important'
   },
   [`& .${classes.divider}`]: {
-    background: theme.palette.primary.dark,
-    height: '50%',
-    margin: '0px 10px'
+    height: '100%',
+    width: '0',
+    margin: '0 2.5px'
   },
   [`& .${classes.actions}`]: {
     display: 'flex',
@@ -107,6 +108,18 @@ const Root = styled('div')(({ theme }) => ({
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingRight: '10px'
+  },
+  [`& .${classes.actionButton}`]: {
+    fontSize: '0.9rem',
+    [theme.breakpoints.down('lg')]: {
+      fontSize: '12px'
+    }
+  },
+  [`& .${classes.actionButtonIcon}`]: {
+    [theme.breakpoints.down('lg')]: {
+      width: '14px',
+      height: '14px'
+    }
   }
 }));
 
@@ -211,26 +224,27 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
       <Grid container onClick={onClick} className={classes.root}>
         <Grid item xs={3} className={classes.alignStartCenter}>
           <Grid wrap="nowrap" container className={classes.nameWrapper}>
-            <Typography
+            <PopOverText
+              hoverText={name}
               color="textPrimary"
               style={{ paddingRight: '4rem', fontSize: '0.9rem' }}
-              noWrap={true}
             >
               {name}
-            </Typography>
+            </PopOverText>
           </Grid>
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
-            text={`${discreetMode.handleSensitiveDataDisplay(
-              formatDisplayAmount(holding, 4)
-            )} ${initial} `}
             color="textPrimary"
             hoverText={`${discreetMode.handleSensitiveDataDisplay(
               formatDisplayAmount(holding, decimal, true)
             )} ${initial}`}
-            style={{ fontSize: '0.9rem' }}
-          />
+            style={{ fontSize: '0.9rem', paddingRight: '8px' }}
+          >
+            {`${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(holding, 5, true)
+            )} ${initial} `}
+          </PopOverText>
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
@@ -241,6 +255,7 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
             hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
               formatDisplayAmount(value, undefined, true)
             )} `}
+            style={{ fontSize: '0.9rem', paddingRight: '8px' }}
           />
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
@@ -248,16 +263,21 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
             text={`$ ${formatDisplayAmount(price, 2, true)}`}
             color="textPrimary"
             hoverText={`$ ${formatDisplayAmount(price, undefined, true)} `}
+            style={{ fontSize: '0.9rem', paddingRight: '8px' }}
           />
         </Grid>
         <Grid item xs={2} className={classes.actions}>
           <Button
             variant="text"
-            className={!isEmpty ? clsx(classes.orange) : clsx(classes.grey)}
+            className={clsx({
+              [classes.orange]: !isEmpty,
+              [classes.grey]: isEmpty,
+              [classes.actionButton]: true
+            })}
             onClick={handleSendFormOpen}
             startIcon={
               <Icon
-                className={classes.icon}
+                className={clsx(classes.icon, classes.actionButtonIcon)}
                 viewBox="0 0 14 15"
                 icon={ICONS.walletSend}
                 color={
@@ -267,25 +287,23 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
                 }
               />
             }
-            style={{ fontSize: '0.9rem' }}
           >
             Send
           </Button>
 
-          <Divider orientation="vertical" className={classes.divider} />
+          <div className={classes.divider} />
           <Button
             variant="text"
-            className={clsx(classes.recieveButton)}
+            className={clsx(classes.recieveButton, classes.actionButton)}
             startIcon={
               <Icon
-                className={classes.icon}
+                className={clsx(classes.icon, classes.actionButtonIcon)}
                 viewBox="0 0 14 15"
                 icon={ICONS.walletRecieve}
                 color={theme.palette.info.main}
               />
             }
             onClick={handleReceiveFormOpen}
-            style={{ fontSize: '0.9rem' }}
           >
             Receive
           </Button>

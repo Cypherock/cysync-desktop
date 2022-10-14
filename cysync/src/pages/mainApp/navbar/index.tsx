@@ -5,7 +5,6 @@ import React from 'react';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import CySync from '../../../designSystem/iconGroups/cySync';
 import { useConnection, useFeedback } from '../../../store/provider';
-import NotificationComponent from '../notification';
 
 import DeviceConnectionStatus from './deviceConnectionStatus';
 import DiscreetMode from './discreetMode';
@@ -153,8 +152,6 @@ const Navbar: React.FC = () => {
         <SyncStatus loaderIconClassName={classes.loaderIcon} />
 
         <DeviceConnectionStatus loaderIconClassName={classes.loaderIcon} />
-
-        <NotificationComponent />
 
         <LockStatus />
 

@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 type MouseOverProps = {
-  text: string;
+  text?: any;
+  children?: any;
   hoverText: string;
   color?: TypographyProps['color'];
   variant?: TypographyProps['variant'];
@@ -14,7 +15,7 @@ type MouseOverProps = {
 };
 
 const PopOverText: React.FC<MouseOverProps> = props => {
-  const { text, hoverText, variant } = props;
+  const { children, text, hoverText, variant } = props;
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
   const handlePopoverOpen = (
@@ -30,7 +31,7 @@ const PopOverText: React.FC<MouseOverProps> = props => {
   const open = Boolean(anchorEl);
 
   return (
-    <div>
+    <>
       <Typography
         variant={variant}
         aria-owns={open ? 'mouse-over-popover' : undefined}
@@ -40,8 +41,9 @@ const PopOverText: React.FC<MouseOverProps> = props => {
         color={props.color}
         style={props.style}
         className={props.className}
+        noWrap={true}
       >
-        {text}
+        {children || text}
       </Typography>
       <Popover
         id="mouse-over-popover"
@@ -65,12 +67,13 @@ const PopOverText: React.FC<MouseOverProps> = props => {
           {hoverText}
         </Typography>
       </Popover>
-    </div>
+    </>
   );
 };
 
 PopOverText.propTypes = {
-  text: PropTypes.string.isRequired,
+  text: PropTypes.any,
+  children: PropTypes.any,
   hoverText: PropTypes.string.isRequired,
   color: PropTypes.oneOf([
     'initial',
