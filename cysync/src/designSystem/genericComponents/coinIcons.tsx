@@ -9,6 +9,7 @@ import doge from '../../../node_modules/cryptocurrency-icons/svg/color/doge.svg'
 import eth from '../../../node_modules/cryptocurrency-icons/svg/color/eth.svg';
 import generic from '../../../node_modules/cryptocurrency-icons/svg/color/generic.svg';
 import ltc from '../../../node_modules/cryptocurrency-icons/svg/color/ltc.svg';
+import solana from '../../../node_modules/cryptocurrency-icons/svg/color/sol.svg';
 import btct from '../../assets/icons/btct.svg';
 import ethr from '../../assets/icons/ethr.svg';
 import matic from '../../assets/icons/matic.svg';
@@ -152,6 +153,9 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
           break;
         case 'NEAR':
           src = near;
+          break;
+        case 'SOL':
+          src = solana;
           break;
         case 'MATIC':
           src = matic;

@@ -1,4 +1,10 @@
 export { convertToDisplayValue } from './misc';
 export { insertFromFullTxn, prepareFromBlockbookTxn } from './insert';
-export { TxQuery, TxQueryOptions, getAllTxns, getTopBlock } from './get';
+export {
+  TxQuery,
+  TxQueryOptions,
+  getAllTxns,
+  getTopBlock,
+  getTopHash
+} from './get';
 export { updateConfirmations } from './update';
