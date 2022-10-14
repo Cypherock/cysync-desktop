@@ -1,4 +1,9 @@
-import { COINS, EthCoinData, NearCoinData } from '@cypherock/communication';
+import {
+  COINS,
+  EthCoinData,
+  NearCoinData,
+  SolanaCoinData
+} from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
 import LaunchIcon from '@mui/icons-material/Launch';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -21,6 +26,7 @@ import {
   useSendTransactionContext
 } from '../../../../../../store/provider';
 import logger from '../../../../../../utils/logger';
+import { ellipsisMiddle } from '../../../../../../utils/stringManipulation';
 
 import {
   StepComponentProps,
@@ -88,6 +94,7 @@ const Root = styled('div')(({ theme }) => ({
   },
   [`& .${classes.transactionId}`]: {
     display: 'flex',
+    flexWrap: 'wrap',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center'
@@ -176,6 +183,13 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
           txHash: sendTransaction.hash
         })
       );
+    } else if (coin instanceof SolanaCoinData) {
+      shell.openExternal(
+        Server.solana.transaction.getOpenTxnLink({
+          network: coin.network,
+          txHash: sendTransaction.hash
+        })
+      );
     } else {
       shell.openExternal(
         Server.bitcoin.transaction.getOpenTxnLink({
@@ -230,7 +244,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
             color="textPrimary"
             variant="body1"
           >
-            {` ${sendTransaction.hash}`}
+            {ellipsisMiddle(sendTransaction.hash, 70)}
           </Typography>
           <CustomIconButton
             title="Open Link"
