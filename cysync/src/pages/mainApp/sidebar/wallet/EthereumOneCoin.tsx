@@ -604,25 +604,27 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
               </Grid>
             </Grid>
           ) : (
-            <Grid item xs={12} className={classes.rootButtonWrapper}>
-              <CoinCardBtn
-                onClick={(e: React.MouseEvent) => {
-                  prevent(e);
-                  if (setOpenAddToken) setOpenAddToken(true);
-                }}
-                fullWidth
-                startIcon={<AddCircleIcon />}
-                style={{
-                  borderRadius: '0',
-                  borderTop: '1px solid #222',
-                  padding: '6px'
-                }}
-                disabled={isLoading}
-                disableRipple
-              >
-                ADD TOKEN
-              </CoinCardBtn>
-            </Grid>
+            tokenList.length <= 0 || (
+              <Grid item xs={12} className={classes.rootButtonWrapper}>
+                <CoinCardBtn
+                  onClick={(e: React.MouseEvent) => {
+                    prevent(e);
+                    if (setOpenAddToken) setOpenAddToken(true);
+                  }}
+                  fullWidth
+                  startIcon={<AddCircleIcon />}
+                  style={{
+                    borderRadius: '0',
+                    borderTop: '1px solid #222',
+                    padding: '6px'
+                  }}
+                  disabled={isLoading}
+                  disableRipple
+                >
+                  ADD TOKEN
+                </CoinCardBtn>
+              </Grid>
+            )
           )}
         </>
       }
