@@ -41,24 +41,36 @@ export const changeFormatOfOutputList = (
   coinType: string,
   token: any
 ): Array<{ address: string; value?: BigNumber }> => {
-  const coin = COINS[token ? token.coin : coinType];
+  const coin = COINS[coinType];
 
   if (!coin) {
     throw new Error(`Invalid coinType ${coinType}`);
   }
 
-  return targetList.map((rec: any) => {
+  let multiplier = coin.multiplier;
+
+  if (token && coin instanceof EthCoinData) {
+    const tokenObj = coin.tokenList[token.toLowerCase()];
+
+    if (!coin) {
+      throw new Error(`Invalid token ${token}, in ${coinType}`);
+    }
+
+    multiplier = tokenObj.multiplier;
+  }
+
+  const list = targetList.map((rec: any) => {
     return {
       address: rec.recipient.trim(),
 
       value:
         rec.amount === undefined
           ? undefined
-          : new BigNumber(rec.amount).multipliedBy(
-              new BigNumber(coin.multiplier)
-            )
+          : new BigNumber(rec.amount).multipliedBy(new BigNumber(multiplier))
     };
   });
+
+  return list;
 };
 
 export const broadcastTxn = async (
