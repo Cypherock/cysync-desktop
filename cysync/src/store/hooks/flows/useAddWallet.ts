@@ -65,7 +65,7 @@ export const useAddWallet: UseAddWallet = () => {
   const [walletSuccess, setWalletSuccess] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
-  const [isNameDiff, setIsNameDiff] = useState(false);
+  const [isConfigDiff, setIsConfigDiff] = useState(false);
   const [walletId, setWalletId] = useState('');
   const [isCancelled, setIsCancelled] = useState(false);
 
@@ -83,7 +83,7 @@ export const useAddWallet: UseAddWallet = () => {
   const clearAll = () => {
     setIsCancelled(false);
     setWalletSuccess(false);
-    setIsNameDiff(false);
+    setIsConfigDiff(false);
     setPasswordSet(false);
     setPassphraseSet(false);
     clearErrorObj();
@@ -153,7 +153,7 @@ export const useAddWallet: UseAddWallet = () => {
           if (
             duplicateWallet.name === walletDetails.name &&
             duplicateWallet.passwordSet === walletDetails.passwordSet &&
-            duplicateWallet.passphraseSet === duplicateWallet.passphraseSet
+            duplicateWallet.passphraseSet === walletDetails.passphraseSet
           ) {
             const cyError = new CyError(CysyncError.ADD_WALLET_DUPLICATE);
             setErrorObj(handleErrors(errorObj, cyError, flowName));
@@ -163,7 +163,7 @@ export const useAddWallet: UseAddWallet = () => {
             setWalletId(walletDetails._id);
             setPasswordSet(walletDetails.passwordSet);
             setPassphraseSet(walletDetails.passphraseSet);
-            setIsNameDiff(true);
+            setIsConfigDiff(true);
             const cyError = new CyError(
               CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_DETAILS
             );
@@ -274,11 +274,11 @@ export const useAddWallet: UseAddWallet = () => {
       duplicateWallet.passwordSet = passwordSet;
       await walletDelete();
       await walletDb.update(duplicateWallet);
-      setIsNameDiff(false);
+      setIsConfigDiff(false);
       clearErrorObj();
       setWalletSuccess(true);
     } catch (error) {
-      setIsNameDiff(false);
+      setIsConfigDiff(false);
       const cyError = new CyError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
       setErrorObj(
         handleErrors(errorObj, cyError, flowName, {
@@ -314,7 +314,7 @@ export const useAddWallet: UseAddWallet = () => {
     cancelAddWallet,
     walletId,
     updateName,
-    isNameDiff,
+    isConfigDiff,
     walletSuccess
   } as UseAddWalletValues;
 };
