@@ -48,7 +48,7 @@ export interface UseAddWalletValues {
   cancelAddWallet: (connection: DeviceConnection) => Promise<void>;
   walletId: string;
   updateName: () => Promise<void>;
-  isNameDiff: boolean;
+  isConfigDiff: boolean;
   walletSuccess: boolean;
 }
 
