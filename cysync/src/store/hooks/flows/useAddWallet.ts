@@ -3,7 +3,6 @@ import {
   DeviceError,
   DeviceErrorType
 } from '@cypherock/communication';
-import { Wallet } from '@cypherock/database';
 import { WalletAdder, WalletStates } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
 
@@ -15,7 +14,16 @@ import {
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
-import { walletDb } from '../../database';
+import {
+  addressDb,
+  coinDb,
+  customAccountDb,
+  receiveAddressDb,
+  tokenDb,
+  transactionDb,
+  Wallet,
+  walletDb
+} from '../../database';
 import { useConnection, useWallets } from '../../provider';
 
 import * as flowHandlers from './handlers';
@@ -231,6 +239,22 @@ export const useAddWallet: UseAddWallet = () => {
       });
   };
 
+  const walletDelete = async () => {
+    try {
+      await addressDb.delete({ walletId });
+      await receiveAddressDb.delete({
+        walletId
+      });
+      await coinDb.delete({ walletId });
+      await tokenDb.delete({ walletId });
+      await transactionDb.delete({ walletId });
+      await customAccountDb.delete({ walletId });
+      await walletDb.deleteById(walletId);
+    } catch (error) {
+      logger.error(error);
+    }
+  };
+
   const updateName = async () => {
     try {
       logger.info('AddWallet: Updating name for same wallet');
@@ -248,6 +272,7 @@ export const useAddWallet: UseAddWallet = () => {
       duplicateWallet.name = walletName;
       duplicateWallet.passphraseSet = passphraseSet;
       duplicateWallet.passwordSet = passwordSet;
+      await walletDelete();
       await walletDb.update(duplicateWallet);
       setIsNameDiff(false);
       clearErrorObj();
