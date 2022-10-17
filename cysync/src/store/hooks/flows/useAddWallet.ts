@@ -169,7 +169,7 @@ export const useAddWallet: UseAddWallet = () => {
             setPassphraseSet(walletDetails.passphraseSet);
             setIsConfigDiff(true);
             const cyError = new CyError(
-              CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_DETAILS
+              CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_PASSPHRASE_CONFIG
             );
             setErrorObj(handleErrors(errorObj, cyError, flowName));
           } else {
