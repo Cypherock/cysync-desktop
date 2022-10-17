@@ -146,7 +146,6 @@ export const useAddWallet: UseAddWallet = () => {
         }
 
         const walletWithSameId = await walletDb.getById(walletDetails._id);
-
         if (walletWithSameId) {
           const duplicateWallet = walletWithSameId;
 
@@ -155,10 +154,26 @@ export const useAddWallet: UseAddWallet = () => {
             duplicateWallet.passwordSet === walletDetails.passwordSet &&
             duplicateWallet.passphraseSet === walletDetails.passphraseSet
           ) {
+            logger.info('AddWallet: Same wallet found');
             const cyError = new CyError(CysyncError.ADD_WALLET_DUPLICATE);
             setErrorObj(handleErrors(errorObj, cyError, flowName));
+          } else if (
+            duplicateWallet.passphraseSet !== walletDetails.passphraseSet
+          ) {
+            logger.info(
+              'AddWallet: Same wallet found with different passphrase config'
+            );
+            setWalletName(walletDetails.name);
+            setWalletId(walletDetails._id);
+            setPasswordSet(walletDetails.passwordSet);
+            setPassphraseSet(walletDetails.passphraseSet);
+            setIsConfigDiff(true);
+            const cyError = new CyError(
+              CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_DETAILS
+            );
+            setErrorObj(handleErrors(errorObj, cyError, flowName));
           } else {
-            logger.info('AddWallet: Same wallet found with different name');
+            logger.info('AddWallet: Same wallet found with different config');
             setWalletName(walletDetails.name);
             setWalletId(walletDetails._id);
             setPasswordSet(walletDetails.passwordSet);
@@ -239,7 +254,7 @@ export const useAddWallet: UseAddWallet = () => {
       });
   };
 
-  const walletDelete = async () => {
+  const coinsDelete = async () => {
     try {
       await addressDb.delete({ walletId });
       await receiveAddressDb.delete({
@@ -249,7 +264,6 @@ export const useAddWallet: UseAddWallet = () => {
       await tokenDb.delete({ walletId });
       await transactionDb.delete({ walletId });
       await customAccountDb.delete({ walletId });
-      await walletDb.deleteById(walletId);
     } catch (error) {
       logger.error(error);
     }
@@ -272,7 +286,7 @@ export const useAddWallet: UseAddWallet = () => {
       duplicateWallet.name = walletName;
       duplicateWallet.passphraseSet = passphraseSet;
       duplicateWallet.passwordSet = passwordSet;
-      await walletDelete();
+      await coinsDelete();
       await walletDb.update(duplicateWallet);
       setIsConfigDiff(false);
       clearErrorObj();
