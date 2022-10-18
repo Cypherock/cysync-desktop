@@ -5,7 +5,8 @@ import {
   DeviceError,
   DeviceErrorType,
   EthCoinData,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import {
   InputOutput,
@@ -110,6 +111,24 @@ export const broadcastTxn = async (
       throw new Error('transaction-failed');
 
     return resp.data.transaction.hash;
+  } else if (coin instanceof SolanaCoinData) {
+    const resp = await Server.solana.transaction
+      .broadcastTxn({
+        transaction: signedTxn,
+        network: coin.network
+      })
+      .request();
+
+    if (resp.status === 0) {
+      throw new Error('brodcast-failed');
+    }
+
+    if (resp.data.cysyncError) throw resp.data.cysyncError;
+
+    if (resp.data?.signature === undefined)
+      throw new Error('transaction-failed');
+
+    return resp.data.signature;
   } else {
     const res = await Server.bitcoin.transaction
       .broadcastTxn({
@@ -134,6 +153,7 @@ export const verifyAddress = (address: string, coin: string) => {
       /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/; // any number of top level accounts are valid here
     return regexImplicit.test(address) || regexRegistered.test(address);
   }
+
   return WAValidator.validate(
     address,
     coinDetails.validatorCoinName,
@@ -783,12 +803,16 @@ export const useSendTransaction: UseSendTransaction = () => {
             coin.toLowerCase() === 'near'
               ? formattedInputs[0].address
               : undefined,
-          type: coin.toLowerCase() === 'near' ? 'TRANSFER' : undefined,
+          type:
+            coin.toLowerCase() === 'near' || coin.toLowerCase() === 'sol'
+              ? 'TRANSFER'
+              : undefined,
           amount: amount.toString(),
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
           walletId,
           slug: coin.toLowerCase(),
+          coin,
           confirmations: 0,
           status: coin.toLowerCase() === 'near' ? 1 : 0,
           sentReceive: SentReceive.SENT,

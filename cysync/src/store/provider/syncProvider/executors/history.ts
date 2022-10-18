@@ -3,18 +3,21 @@ import {
   CoinGroup,
   COINS,
   EthCoinData,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import {
   eth as ethServer,
   IRequestMetadata,
   near as nearServer,
   serverBatch as batchServer,
+  solana as solanaServer,
   v2 as v2Server
 } from '@cypherock/server-wrapper';
 import {
   formatEthAddress,
   generateEthAddressFromXpub,
+  generateSolanaAddressFromXpub,
   getEthAmountFromInput
 } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
@@ -113,6 +116,25 @@ export const getRequestsMetadata = (
       .getMetadata();
 
     return [nearTxnMetadata];
+  }
+
+  if (coin instanceof SolanaCoinData) {
+    const address = generateSolanaAddressFromXpub(item.xpub);
+
+    const solanaTxnMetadata = solanaServer.transaction
+      .getHistory(
+        {
+          address,
+          network: coin.network,
+          limit: 100,
+          from: item.afterHash,
+          before: item.beforeHash
+        },
+        item.isRefresh
+      )
+      .getMetadata();
+
+    return [solanaTxnMetadata];
   }
 
   logger.warn('Invalid coin in sync queue', {
@@ -628,6 +650,91 @@ export const processResponses = async (
     if (more && rawHistory) {
       return {
         after: rawHistory[rawHistory.length - 1].block_height
+      };
+    }
+  }
+
+  if (coinData instanceof SolanaCoinData) {
+    if (responses[0].isFailed) {
+      throw new Error('Did not find responses while processing');
+    }
+    const history: Transaction[] = [];
+    const rawHistory = responses[0].data.data;
+    const more = responses[0].data.more;
+
+    if (!rawHistory) {
+      throw new Error('Invalid near history from server');
+    }
+
+    for (const ele of rawHistory) {
+      if (ele.transaction?.message?.instructions?.length > 0) {
+        for (const instruction of ele.transaction.message.instructions) {
+          const fees = new BigNumber(ele.meta?.fee || 0);
+
+          const fromAddr = instruction.parsed?.info?.source;
+          const toAddr = instruction.parsed?.info?.destination;
+          const address = generateSolanaAddressFromXpub(item.xpub);
+
+          const selfTransfer = fromAddr === toAddr;
+          const amount = String(instruction.parsed?.info?.lamports || 0);
+          const txn: Transaction = {
+            hash: ele.signature,
+            amount: selfTransfer ? '0' : amount,
+            fees: fees.toString(),
+            total: new BigNumber(amount).plus(fees).toString(),
+            confirmations: 1,
+            walletId: item.walletId,
+            slug: item.coinType,
+            status: ele.meta?.err || ele.err ? 2 : 1,
+            sentReceive:
+              address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
+            confirmed: new Date(
+              parseInt(ele.blockTime, 10) * 1000
+            ).toISOString(), // conversion from timestamp in seconds
+            blockHeight: ele.slot,
+            coin: item.coinType,
+            inputs: [
+              {
+                address: fromAddr,
+                value: amount,
+                indexNumber: 0,
+                isMine: address === fromAddr,
+                type: IOtype.INPUT
+              }
+            ],
+            outputs: [
+              {
+                address: toAddr,
+                value: amount,
+                indexNumber: 0,
+                isMine: address === toAddr,
+                type: IOtype.OUTPUT
+              }
+            ],
+            type: instruction.parsed?.type
+          };
+          history.push(txn);
+        }
+      }
+    }
+
+    const transactionDbList = [];
+    for (const txn of history) {
+      transactionDbList.push(txn);
+    }
+    try {
+      await transactionDb.insertMany(transactionDbList);
+      // No need to retry if the inserting fails because it'll produce the same error.
+    } catch (error) {
+      logger.error(
+        ` ${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insert`
+      );
+      logger.error(error);
+    }
+    if (more && rawHistory) {
+      return {
+        before: rawHistory[rawHistory.length - 1].signature,
+        until: item.afterHash
       };
     }
   }
