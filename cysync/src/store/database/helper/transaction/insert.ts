@@ -2,7 +2,8 @@ import {
   BtcCoinData,
   CoinGroup,
   COINS,
-  EthCoinData
+  EthCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import { generateEthAddressFromXpub } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
@@ -278,6 +279,59 @@ export const insertFromFullTxn = async (transaction: {
     };
 
     await transactionDb.insert(newTxn);
+  } else if (coin instanceof SolanaCoinData) {
+    const history: Transaction[] = [];
+    const ele = transaction.txn;
+
+    if (ele.transaction?.message?.instructions?.length > 0) {
+      for (const instruction of ele.transaction.message.instructions) {
+        const fees = new BigNumber(ele.meta?.fee || 0);
+
+        const fromAddr = instruction.parsed?.info?.source;
+        const toAddr = instruction.parsed?.info?.destination;
+        const address = ele.address;
+
+        const selfTransfer = fromAddr === toAddr;
+        const amount = String(instruction.parsed?.info?.lamports || 0);
+        const newTxn: Transaction = {
+          hash: ele.signature,
+          amount: selfTransfer ? '0' : amount,
+          fees: fees.toString(),
+          total: new BigNumber(amount).plus(fees).toString(),
+          confirmations: 1,
+          walletId: transaction.walletId,
+          slug: transaction.coinType,
+          status: ele.meta?.err || ele.err ? 2 : 1,
+          sentReceive:
+            address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
+          confirmed: new Date(parseInt(ele.blockTime, 10) * 1000).toISOString(), // conversion from timestamp in seconds
+          blockHeight: ele.slot,
+          coin: transaction.coinType,
+          inputs: [
+            {
+              address: fromAddr,
+              value: amount,
+              indexNumber: 0,
+              isMine: address === fromAddr,
+              type: IOtype.INPUT
+            }
+          ],
+          outputs: [
+            {
+              address: toAddr,
+              value: amount,
+              indexNumber: 0,
+              isMine: address === toAddr,
+              type: IOtype.OUTPUT
+            }
+          ],
+          type: instruction.parsed?.type
+        };
+        history.push(newTxn);
+      }
+    }
+
+    await transactionDb.insertMany(history);
   }
 };
 

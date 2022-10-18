@@ -413,7 +413,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           coinType,
           xpub,
           zpub,
-          contractAbbr,
+          contractAbbr: contractAbbr || coinType,
           passphraseExists,
           customAccount,
           userAction: userAction.current,

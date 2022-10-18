@@ -2,12 +2,14 @@ import {
   CoinGroup,
   COINS,
   ETHCOINS,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import {
   bitcoin as bitcoinServer,
   eth as ethServer,
-  near as nearServer
+  near as nearServer,
+  solana as solanaServer
 } from '@cypherock/server-wrapper';
 import CopyIcon from '@mui/icons-material/FileCopyOutlined';
 import Chip from '@mui/material/Chip';
@@ -223,6 +225,13 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           txHash: txn.hash
         })
       );
+    } else if (coin.group === CoinGroup.Solana) {
+      shell.openExternal(
+        solanaServer.transaction.getOpenTxnLink({
+          txHash: txn.hash,
+          network: (coin as SolanaCoinData).network
+        })
+      );
     } else {
       shell.openExternal(
         bitcoinServer.transaction.getOpenTxnLink({
@@ -276,7 +285,6 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   const isEth =
     coinData.group === CoinGroup.Ethereum ||
     coinData.group === CoinGroup.ERC20Tokens;
-  const isNear = coinData.group === CoinGroup.Near;
   return (
     <Root>
       <div className={classes.dateTimeContainer}>
@@ -367,14 +375,16 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           />
         </div>
       </div>
-      {isNear && (
+      {
         <div style={{ display: 'flex' }}>
-          <div className={classes.dataContainer}>
-            <Typography color="textSecondary">Type</Typography>
-            <div className={classes.flex}>
-              <Typography>{txn.type}</Typography>
+          {txn.type && (
+            <div className={classes.dataContainer}>
+              <Typography color="textSecondary">Type</Typography>
+              <div className={classes.flex}>
+                <Typography>{txn.type.toUpperCase()}</Typography>
+              </div>
             </div>
-          </div>
+          )}
           {txn.description && (
             <div className={classes.dataContainer}>
               <Typography color="textSecondary">Description</Typography>
@@ -384,7 +394,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             </div>
           )}
         </div>
-      )}
+      }
       <Grid
         container
         spacing={2}
