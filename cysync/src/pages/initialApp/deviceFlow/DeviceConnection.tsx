@@ -98,6 +98,7 @@ const DeviceConnection = ({ handleNext, handleDeviceConnected }: any) => {
   const handleFeedbackOpen = () => {
     showFeedback({
       isContact: true,
+      disableDeviceLogs: true,
       heading: 'Report',
       initFeedbackState: newFeedbackState
     });
