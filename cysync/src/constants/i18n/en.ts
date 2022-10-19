@@ -58,6 +58,8 @@ const en: I18nStrings = {
       'This wallet account already exists on the CySync App with different configuration, do you want to update the wallet account details?',
     ADD_WALLET_WITH_SAME_NAME:
       'A wallet account with the same name already exists on the CySync App',
+    ADD_WALLET_DUPLICATE_WITH_DIFFERENT_PASSPHRASE_CONFIG:
+      'This wallet account already exists on the CySync App with different passphrase config, do you want to update the wallet account details?',
     ADD_WALLET_UNKNOWN_ERROR: `Some internal error occurred, disconnect and reconnect the X1 wallet then retry`,
 
     ADD_COIN_FAILED_DUE_TO_SERVER_ERROR: coins =>

@@ -213,6 +213,10 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [CysyncError.ADD_WALLET_WITH_SAME_NAME]: {
       message: langStrings.ERRORS.ADD_WALLET_WITH_SAME_NAME
     },
+    [CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_PASSPHRASE_CONFIG]: {
+      message:
+        langStrings.ERRORS.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_PASSPHRASE_CONFIG
+    },
     [CysyncError.ADD_WALLET_UNKNOWN_ERROR]: {
       message: langStrings.ERRORS.ADD_WALLET_UNKNOWN_ERROR
     },

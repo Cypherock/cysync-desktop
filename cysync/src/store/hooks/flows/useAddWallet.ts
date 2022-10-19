@@ -3,7 +3,6 @@ import {
   DeviceError,
   DeviceErrorType
 } from '@cypherock/communication';
-import { Wallet } from '@cypherock/database';
 import { WalletAdder, WalletStates } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
 
@@ -15,7 +14,16 @@ import {
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
-import { walletDb } from '../../database';
+import {
+  addressDb,
+  coinDb,
+  customAccountDb,
+  receiveAddressDb,
+  tokenDb,
+  transactionDb,
+  Wallet,
+  walletDb
+} from '../../database';
 import { useConnection, useWallets } from '../../provider';
 
 import * as flowHandlers from './handlers';
@@ -40,7 +48,7 @@ export interface UseAddWalletValues {
   cancelAddWallet: (connection: DeviceConnection) => Promise<void>;
   walletId: string;
   updateName: () => Promise<void>;
-  isNameDiff: boolean;
+  isConfigDiff: boolean;
   walletSuccess: boolean;
 }
 
@@ -57,7 +65,7 @@ export const useAddWallet: UseAddWallet = () => {
   const [walletSuccess, setWalletSuccess] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [errorObj, setErrorObj] = useState<CyError>(new CyError());
-  const [isNameDiff, setIsNameDiff] = useState(false);
+  const [isConfigDiff, setIsConfigDiff] = useState(false);
   const [walletId, setWalletId] = useState('');
   const [isCancelled, setIsCancelled] = useState(false);
 
@@ -75,7 +83,7 @@ export const useAddWallet: UseAddWallet = () => {
   const clearAll = () => {
     setIsCancelled(false);
     setWalletSuccess(false);
-    setIsNameDiff(false);
+    setIsConfigDiff(false);
     setPasswordSet(false);
     setPassphraseSet(false);
     clearErrorObj();
@@ -138,24 +146,39 @@ export const useAddWallet: UseAddWallet = () => {
         }
 
         const walletWithSameId = await walletDb.getById(walletDetails._id);
-
         if (walletWithSameId) {
           const duplicateWallet = walletWithSameId;
 
           if (
             duplicateWallet.name === walletDetails.name &&
             duplicateWallet.passwordSet === walletDetails.passwordSet &&
-            duplicateWallet.passphraseSet === duplicateWallet.passphraseSet
+            duplicateWallet.passphraseSet === walletDetails.passphraseSet
           ) {
+            logger.info('AddWallet: Same wallet found');
             const cyError = new CyError(CysyncError.ADD_WALLET_DUPLICATE);
             setErrorObj(handleErrors(errorObj, cyError, flowName));
-          } else {
-            logger.info('AddWallet: Same wallet found with different name');
+          } else if (
+            duplicateWallet.passphraseSet !== walletDetails.passphraseSet
+          ) {
+            logger.info(
+              'AddWallet: Same wallet found with different passphrase config'
+            );
             setWalletName(walletDetails.name);
             setWalletId(walletDetails._id);
             setPasswordSet(walletDetails.passwordSet);
             setPassphraseSet(walletDetails.passphraseSet);
-            setIsNameDiff(true);
+            setIsConfigDiff(true);
+            const cyError = new CyError(
+              CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_PASSPHRASE_CONFIG
+            );
+            setErrorObj(handleErrors(errorObj, cyError, flowName));
+          } else {
+            logger.info('AddWallet: Same wallet found with different config');
+            setWalletName(walletDetails.name);
+            setWalletId(walletDetails._id);
+            setPasswordSet(walletDetails.passwordSet);
+            setPassphraseSet(walletDetails.passphraseSet);
+            setIsConfigDiff(true);
             const cyError = new CyError(
               CysyncError.ADD_WALLET_DUPLICATE_WITH_DIFFERENT_DETAILS
             );
@@ -231,6 +254,21 @@ export const useAddWallet: UseAddWallet = () => {
       });
   };
 
+  const coinsDelete = async () => {
+    try {
+      await addressDb.delete({ walletId });
+      await receiveAddressDb.delete({
+        walletId
+      });
+      await coinDb.delete({ walletId });
+      await tokenDb.delete({ walletId });
+      await transactionDb.delete({ walletId });
+      await customAccountDb.delete({ walletId });
+    } catch (error) {
+      logger.error(error);
+    }
+  };
+
   const updateName = async () => {
     try {
       logger.info('AddWallet: Updating name for same wallet');
@@ -248,12 +286,13 @@ export const useAddWallet: UseAddWallet = () => {
       duplicateWallet.name = walletName;
       duplicateWallet.passphraseSet = passphraseSet;
       duplicateWallet.passwordSet = passwordSet;
+      await coinsDelete();
       await walletDb.update(duplicateWallet);
-      setIsNameDiff(false);
+      setIsConfigDiff(false);
       clearErrorObj();
       setWalletSuccess(true);
     } catch (error) {
-      setIsNameDiff(false);
+      setIsConfigDiff(false);
       const cyError = new CyError(CysyncError.ADD_WALLET_UNKNOWN_ERROR);
       setErrorObj(
         handleErrors(errorObj, cyError, flowName, {
@@ -289,7 +328,7 @@ export const useAddWallet: UseAddWallet = () => {
     cancelAddWallet,
     walletId,
     updateName,
-    isNameDiff,
+    isConfigDiff,
     walletSuccess
   } as UseAddWalletValues;
 };
