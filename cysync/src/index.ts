@@ -138,6 +138,32 @@ const createWindow = async () => {
     }
   }
 
+  if (process.platform === 'win32') {
+    // Set the path of electron.exe and your app.
+    // These two additional parameters are only available on windows.
+    // Setting this is required to get this working in dev mode.
+    logger.info('_win32_');
+    app.setAsDefaultProtocolClient('cypherock', process.execPath, [
+      path.resolve(process.argv[1])
+    ]);
+  } else {
+    logger.info('_macos_');
+    app.setAsDefaultProtocolClient('cypherock');
+  }
+  app.on('open-url', (event, url) => {
+    event.preventDefault();
+    logger.info('deep link uri', url);
+  });
+
+  if (applicationLock) {
+    app.on('second-instance', () => {
+      if (mainWindow) {
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+      }
+    });
+  }
+
   const loadingWindow = new BrowserWindow({
     show: false,
     frame: false,
