@@ -430,10 +430,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       } else {
         setSubmitting(true);
 
-        if (_feedbackInput.email) {
-          localStorage.setItem('email', _feedbackInput.email);
-        }
-
         const data: {
           subject: string;
           category: string;

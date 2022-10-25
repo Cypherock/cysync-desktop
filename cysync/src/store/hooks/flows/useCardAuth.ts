@@ -2,6 +2,7 @@ import { DeviceConnection, DeviceError } from '@cypherock/communication';
 import { CardAuthenticator } from '@cypherock/protocols';
 import { useEffect, useRef, useState } from 'react';
 
+import packageJson from '../../../../package.json';
 import {
   CyError,
   CysyncError,
@@ -411,12 +412,16 @@ export const useCardAuth: UseCardAuth = isInitial => {
         sdkVersion,
         firmwareVersion: hexToVersion(firmwareVersion),
         cardNumber,
-
-        isTestApp
+        isTestApp,
+        email: (JSON.parse(localStorage.getItem('allowAuthEmail')) as boolean)
+          ? localStorage.getItem('email') || undefined
+          : undefined,
+        cysyncVersion: packageJson.version,
+        grouped: isInitial
       });
       setIsInFlow(false);
       logger.info('CardAuth: completed.');
-      // Solely for UI purpose, to wait and give a UX feeback
+      // Solely for UI purpose, to wait and give a UX feedback
       await sleep(1000);
       setCompleted(true);
     } catch (e) {
