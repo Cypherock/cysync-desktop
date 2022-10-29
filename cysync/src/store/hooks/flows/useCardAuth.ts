@@ -78,6 +78,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
   const [showRetry, setShowRetry] = useState(false);
   const [enableRetry, setEnableRetry] = useState(true);
   const [enableRetryErrorMsg, setEnableRetryErrorMsg] = useState('');
+  const sessionId = useRef<string | undefined>(undefined);
   /**
    * -2 means authentication is remaining
    * -1 means all cards failed authentication
@@ -372,6 +373,10 @@ export const useCardAuth: UseCardAuth = isInitial => {
       setProcessStatus(2);
     });
 
+    cardAuth.on('sessionId', (id: string) => {
+      sessionId.current = id;
+    });
+
     cardAuth.on('verified', (v: boolean) => {
       if (v) {
         logger.info('CardAuth: Card verified');
@@ -417,7 +422,8 @@ export const useCardAuth: UseCardAuth = isInitial => {
           ? localStorage.getItem('email') || undefined
           : undefined,
         cysyncVersion: packageJson.version,
-        grouped: isInitial
+        grouped: isInitial,
+        sessionId: sessionId.current
       });
       setIsInFlow(false);
       logger.info('CardAuth: completed.');
