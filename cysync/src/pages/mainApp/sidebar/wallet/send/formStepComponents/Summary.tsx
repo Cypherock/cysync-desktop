@@ -1,4 +1,5 @@
 import { CoinGroup, COINS } from '@cypherock/communication';
+import { CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
@@ -39,7 +40,8 @@ const classes = {
   divider: `${PREFIX}-divider`,
   footer: `${PREFIX}-footer`,
   status: `${PREFIX}-status`,
-  center: `${PREFIX}-center`
+  center: `${PREFIX}-center`,
+  loading: `${PREFIX}-loading`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -82,6 +84,11 @@ const Root = styled('div')(({ theme }) => ({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%'
+  },
+  [`& .${classes.loading}`]: {
+    margin: '0 10px',
+    position: 'absolute',
+    right: '1rem'
   }
 }));
 
@@ -308,6 +315,13 @@ const Summary: React.FC<StepComponentProps> = ({
       <div className={classes.divider} />
       <div className={classes.footer}>
         <Typography className={classes.status}>{statusText}</Typography>
+        {sendTransaction.signedTxn?.length > 0 || !connected || (
+          <CircularProgress
+            size={22}
+            className={classes.loading}
+            color="secondary"
+          />
+        )}
       </div>
     </Root>
   );
