@@ -349,7 +349,6 @@ export const useCardAuth: UseCardAuth = isInitial => {
         cyError.setError(CysyncError.CARD_AUTH_UNKNOWN_ERROR);
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
-      setEnableRetry(false);
     });
 
     cardAuth.on('acceptedRequest', acceptedRequest => {
