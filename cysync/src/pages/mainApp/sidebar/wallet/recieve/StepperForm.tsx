@@ -179,12 +179,16 @@ type StepperProps = {
   stepsData: any[][];
   handleClose: (abort?: boolean) => void;
   handleXpubMissing: () => void;
+  exitFlowOnErrorClose: boolean;
+  setExitFlowOnErrorClose: (value: boolean) => void;
 };
 
 const ReceiveForm: React.FC<StepperProps> = ({
   stepsData,
   handleClose,
-  handleXpubMissing
+  handleXpubMissing,
+  exitFlowOnErrorClose,
+  setExitFlowOnErrorClose
 }) => {
   const { receiveTransaction } = useReceiveTransactionContext();
   const [activeStep, setActiveStep] = useState(0);
@@ -201,6 +205,7 @@ const ReceiveForm: React.FC<StepperProps> = ({
     receiveTransaction.clearErrorObj();
     receiveTransaction.setXpubMissing(false);
     receiveTransaction.resetHooks();
+    if (exitFlowOnErrorClose) handleClose();
     // Go to the Receive address component to display the unverified address
     setActiveStep(stepsData.length - 2);
   };
@@ -266,7 +271,8 @@ const ReceiveForm: React.FC<StepperProps> = ({
           component={stepsData[activeStep][1]}
           props={{
             handleNext,
-            handleClose
+            handleClose,
+            setExitFlowOnErrorClose
           }}
         />
       </div>
@@ -277,7 +283,9 @@ const ReceiveForm: React.FC<StepperProps> = ({
 ReceiveForm.propTypes = {
   stepsData: PropTypes.array.isRequired,
   handleClose: PropTypes.func.isRequired,
-  handleXpubMissing: PropTypes.func.isRequired
+  handleXpubMissing: PropTypes.func.isRequired,
+  exitFlowOnErrorClose: PropTypes.bool.isRequired,
+  setExitFlowOnErrorClose: PropTypes.func.isRequired
 };
 
 export default ReceiveForm;
