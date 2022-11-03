@@ -20,7 +20,8 @@ import {
   CurrentCoinContext,
   useAddCoinContext,
   useConnection,
-  useSelectedWallet
+  useSelectedWallet,
+  useWalletConnect
 } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 
@@ -29,6 +30,7 @@ import allCoins from './addCoin/coins';
 import EthereumOneCoin from './EthereumOneCoin';
 import NearOneCoin from './NearOneCoin';
 import OneCoin from './OneCoin';
+import WalletConnect from './walletconnect';
 
 const PREFIX = 'Wallet';
 
@@ -184,6 +186,8 @@ const WalletView: React.FC<WalletViewProps> = ({
   }, [coinData.length, sortIndex, selectedWallet]);
 
   const [search, setSearch] = useState('');
+  const [wcuri, setwcuri] = useState('');
+  const { openDialogBox } = useWalletConnect();
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
@@ -291,6 +295,14 @@ const WalletView: React.FC<WalletViewProps> = ({
               justifyContent: 'flex-end'
             }}
           >
+            <Input
+              placeholder="WalletConnect uri"
+              value={wcuri}
+              onChange={openDialogBox}
+              className={classes.search}
+              size="small"
+              styleType="light"
+            />
             <Input
               placeholder="Search Your Coin"
               value={search}
@@ -522,6 +534,7 @@ const WalletView: React.FC<WalletViewProps> = ({
         handleClose={handleAddCoinFormClose}
         coinsPresent={coinsPresent}
       />
+      <WalletConnect />
       {getMainContent()}
     </Root>
   );

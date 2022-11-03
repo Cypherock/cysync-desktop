@@ -18,3 +18,4 @@ export * from './tokenContextProvider';
 export * from './customAccountContextProvider';
 export * from './i18nProvider';
 export * from './discreetModeProvider';
+export * from './walletConnectProvider';

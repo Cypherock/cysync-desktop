@@ -88,6 +88,7 @@
     "@mui/lab": "^5.0.0-alpha.77",
     "@mui/material": "^5.6.1",
     "@mui/styles": "^5.6.1",
+    "@walletconnect/client": "1.7.8",
     "apexcharts": "^3.32.1",
     "axios": "^0.26.0",
     "bcrypt": "^5.0.1",
