@@ -1,7 +1,7 @@
 {
   "name": "cypherock-cysync",
   "productName": "cypherock-cysync",
-  "version": "1.0.771",
+  "version": "1.0.772",
   "description": "Desktop wallet for Cypherock X1 hardware wallet.",
   "main": ".webpack/main",
   "scripts": {
