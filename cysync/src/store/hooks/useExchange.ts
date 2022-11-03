@@ -28,9 +28,13 @@ export const useExchange = () => {
     }
   }, [fromToken, toToken, amountToSend]);
 
-  const createSwapTransaction = async (receiveAddress: string) => {
+  const createSwapTransaction = async (
+    receiveAddress: string,
+    walletId: string
+  ) => {
     const { data } = await axios.get(`${baseUrl}/swap/transaction`, {
       params: {
+        walletId,
         from: fromToken.slug,
         to: toToken.slug,
         amount: amountToSend,
@@ -43,6 +47,13 @@ export const useExchange = () => {
     };
   };
 
+  const getSwapTransactions = async (walletId: string) => {
+    const { data } = await axios.get(`${baseUrl}/swap/transactions`, {
+      params: { walletId }
+    });
+    return data.message.result;
+  };
+
   return {
     fromToken,
     setFromToken,
@@ -53,6 +64,7 @@ export const useExchange = () => {
     exchangeRate,
     fees,
     amountToReceive,
-    createSwapTransaction
+    createSwapTransaction,
+    getSwapTransactions
   };
 };

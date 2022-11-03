@@ -1,24 +1,23 @@
 import { COINS } from '@cypherock/communication';
-import { Wallet } from '@cypherock/database';
 import { Grid, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 
 import Button from '../../../../../../designSystem/designComponents/buttons/button';
 import logger from '../../../../../../mainProcess/logger';
-import { customAccountDb } from '../../../../../../store/database';
+import { customAccountDb, Wallet } from '../../../../../../store/database';
 import {
   changeFormatOfOutputList,
+  DisplayCoin,
   useExchange,
   useReceiveTransaction,
-  useSendTransaction,
-  useWalletData
+  useSendTransaction
 } from '../../../../../../store/hooks';
-import { useConnection, useWallets } from '../../../../../../store/provider';
+import { useConnection } from '../../../../../../store/provider';
 import { RecipientData } from '../../../wallet/addAccount/formStepComponents/StepComponentProps';
-import SwapCompletedDialog from '../dialogs/SwapCompletedDialog';
-import VerifySwapDetailsDialog from '../dialogs/VerifySwapDetailsDialog';
 
+import SwapCompletedDialog from './dialogs/SwapCompletedDialog';
+import VerifySwapDetailsDialog from './dialogs/VerifySwapDetailsDialog';
 import NetworkFeeDetails from './NetworkFeeDetails';
 import SwapDetailsForm from './SwapDetailsForm';
 
@@ -52,7 +51,15 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-const ExchangePanel = () => {
+type exchangePanelProps = {
+  coinData: DisplayCoin[];
+  currentWalletDetails: Wallet;
+};
+
+const ExchangePanel: React.FC<exchangePanelProps> = ({
+  coinData,
+  currentWalletDetails
+}) => {
   const {
     fromToken,
     setFromToken,
@@ -65,36 +72,12 @@ const ExchangePanel = () => {
     amountToReceive,
     createSwapTransaction
   } = useExchange();
-  const { allWallets, isLoading: isWalletLoading } = useWallets();
-
-  // By default selecting the first wallet
-  useEffect(() => {
-    if (!currentWalletId && !isWalletLoading) {
-      setCurrentWalletId(allWallets[0]._id);
-    }
-  }, [isWalletLoading, allWallets]);
 
   const handleChangeAmountToSend = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setAmountToSend(event.target.value);
   };
-
-  const { coinData, setCurrentWalletId, currentWalletId } = useWalletData();
-
-  // TODO: Remove hardcoded wallet id with the selected wallet id
-
-  const [currentWalletDetails, setCurrentWalletDetails] =
-    useState<Wallet | null>(null);
-
-  useEffect(() => {
-    if (isWalletLoading) return;
-
-    const wallet = allWallets.find(elem => elem._id === currentWalletId);
-    if (wallet) {
-      setCurrentWalletDetails(wallet);
-    }
-  }, [currentWalletId, isWalletLoading]);
 
   const { deviceConnection, deviceSdkVersion, setIsInFlow } = useConnection();
 
@@ -112,7 +95,7 @@ const ExchangePanel = () => {
         connection: deviceConnection,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
-        walletId: currentWalletId,
+        walletId: currentWalletDetails._id,
         coinType: toToken.slug,
         coinName: COINS[toToken.slug]?.name,
         xpub: toToken.xpub,
@@ -128,7 +111,8 @@ const ExchangePanel = () => {
 
   const startSendFlow = async () => {
     const sendDetails = await createSwapTransaction(
-      receiveTransaction.receiveAddress
+      receiveTransaction.receiveAddress,
+      currentWalletDetails._id
     );
 
     setSwapTransactionId(sendDetails.id);
@@ -158,7 +142,7 @@ const ExchangePanel = () => {
         connection: deviceConnection,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
-        walletId: currentWalletId,
+        walletId: currentWalletDetails._id,
         xpub: fromToken.xpub,
         zpub: fromToken.zpub,
         coinType: fromToken.slug,

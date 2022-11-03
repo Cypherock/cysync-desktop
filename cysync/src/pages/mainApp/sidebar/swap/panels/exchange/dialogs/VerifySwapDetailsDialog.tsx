@@ -5,10 +5,10 @@ import { Grid, Link, Typography } from '@mui/material';
 import { Box, keyframes } from '@mui/system';
 import React, { useEffect, useState } from 'react';
 
-import CustomDialog from '../../../../../../designSystem/designComponents/dialog/dialogBox';
-import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
-import CoinIcons from '../../../../../../designSystem/genericComponents/coinIcons';
-import Changelly from '../../../../../../designSystem/iconGroups/changelly';
+import CustomDialog from '../../../../../../../designSystem/designComponents/dialog/dialogBox';
+import Icon from '../../../../../../../designSystem/designComponents/icons/Icon';
+import CoinIcons from '../../../../../../../designSystem/genericComponents/coinIcons';
+import Changelly from '../../../../../../../designSystem/iconGroups/changelly';
 
 const rotateKeyframe = keyframes`
   0% {

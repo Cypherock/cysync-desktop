@@ -50,8 +50,6 @@ const SwapDetailsForm: React.FC<swapDetailsFormProps> = ({
   const [fromTokenIndex, setFromTokenIndex] = useState('');
   const [toTokenIndex, setToTokenIndex] = useState('');
 
-  //   const [fromTokenName, setFromTokenName] = useState('');
-
   const handleChangeFromToken = (event: SelectChangeEvent) => {
     setFromTokenIndex(event.target.value);
     setFromToken(coinData[+event.target.value]);
@@ -96,7 +94,6 @@ const SwapDetailsForm: React.FC<swapDetailsFormProps> = ({
               })}
             </Select>
           </FormControl>
-
           {/* <Autocomplete
             autoHighlight
             value={fromToken}
@@ -135,7 +132,7 @@ const SwapDetailsForm: React.FC<swapDetailsFormProps> = ({
           /> */}
         </Grid>
         <Grid item xs={6}>
-          <Grid container xs={12}>
+          <Grid container>
             <Grid
               container
               display={'flex'}
@@ -218,7 +215,7 @@ const SwapDetailsForm: React.FC<swapDetailsFormProps> = ({
           </FormControl>
         </Grid>
         <Grid item xs={6}>
-          <Grid container xs={12}>
+          <Grid container>
             <Grid
               container
               display={'flex'}

@@ -4,9 +4,9 @@ import { Box } from '@mui/system';
 import { shell } from 'electron';
 import React from 'react';
 
-import CustomDialog from '../../../../../../designSystem/designComponents/dialog/dialogBox';
-import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
-import CheckmarkSuccess from '../../../../../../designSystem/iconGroups/checkmarkSuccess';
+import CustomDialog from '../../../../../../../designSystem/designComponents/dialog/dialogBox';
+import Icon from '../../../../../../../designSystem/designComponents/icons/Icon';
+import CheckmarkSuccess from '../../../../../../../designSystem/iconGroups/checkmarkSuccess';
 
 const CHANGELLY_TRACKING_URL = 'https://changelly.com/track/';
 
