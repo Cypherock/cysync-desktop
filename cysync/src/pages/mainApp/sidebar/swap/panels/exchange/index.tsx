@@ -54,11 +54,15 @@ const Root = styled('div')(({ theme }) => ({
 type ExchangePanelProps = {
   coinData: DisplayCoin[];
   currentWalletDetails: Wallet;
+  allWallets: Wallet[];
+  setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const ExchangePanel: React.FC<ExchangePanelProps> = ({
   coinData,
-  currentWalletDetails
+  currentWalletDetails,
+  allWallets,
+  setCurrentWalletId
 }) => {
   const {
     fromToken,
@@ -193,6 +197,9 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
           setAmountToSend={setAmountToSend}
           handleChangeAmountToSend={handleChangeAmountToSend}
           classesForm={classes.form}
+          allWallets={allWallets}
+          setCurrentWalletId={setCurrentWalletId}
+          currentWalletId={currentWalletDetails?._id}
         />
       }
       {amountToReceive && (

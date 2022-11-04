@@ -31,9 +31,10 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function HorizontalTabs() {
-  const [value, setValue] = useState(1);
+  const [value, setValue] = useState(0);
 
   const { allWallets, isLoading: isWalletLoading } = useWallets();
+  const { coinData, setCurrentWalletId, currentWalletId } = useWalletData();
 
   // By default selecting the first wallet
   useEffect(() => {
@@ -41,8 +42,6 @@ export default function HorizontalTabs() {
       setCurrentWalletId(allWallets[0]._id);
     }
   }, [isWalletLoading, allWallets]);
-
-  const { coinData, setCurrentWalletId, currentWalletId } = useWalletData();
 
   // TODO: Remove hardcoded wallet id with the selected wallet id
 
@@ -79,6 +78,8 @@ export default function HorizontalTabs() {
         <ExchangePanel
           coinData={coinData}
           currentWalletDetails={currentWalletDetails}
+          allWallets={allWallets}
+          setCurrentWalletId={setCurrentWalletId}
         />
       </TabPanel>
       <TabPanel value={value} index={1}>

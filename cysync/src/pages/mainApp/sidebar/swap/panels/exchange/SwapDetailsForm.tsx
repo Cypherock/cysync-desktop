@@ -1,6 +1,8 @@
 import { COINS } from '@cypherock/communication';
 import { SwapVerticalCircle } from '@mui/icons-material';
 import {
+  Box,
+  Chip,
   //   Autocomplete,
   FormControl,
   Grid,
@@ -9,6 +11,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Tooltip,
   Typography
   //   Box,
   //   TextField
@@ -19,7 +22,15 @@ import SwitchButton from '../../../../../../designSystem/designComponents/button
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Input from '../../../../../../designSystem/designComponents/input/input';
 import CoinIcons from '../../../../../../designSystem/genericComponents/coinIcons';
+import { Wallet } from '../../../../../../store/database';
 import { DisplayCoin } from '../../../../../../store/hooks';
+
+const trimString = (str: string, length: number) => {
+  if (str.length > length) {
+    return str.substring(0, length - 3) + '...';
+  }
+  return str;
+};
 
 type SwapDetailsFormProps = {
   fromToken: DisplayCoin;
@@ -33,6 +44,9 @@ type SwapDetailsFormProps = {
   ) => void;
   setAmountToSend: React.Dispatch<React.SetStateAction<string>>;
   classesForm: string;
+  allWallets: Wallet[];
+  setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
+  currentWalletId: string;
 };
 
 const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
@@ -44,7 +58,10 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
   amountToSend,
   setAmountToSend,
   handleChangeAmountToSend,
-  classesForm
+  classesForm,
+  allWallets,
+  setCurrentWalletId,
+  currentWalletId
 }) => {
   const [isAmountToSendMax, setIsAmountToSendMax] = useState(false);
   const [fromTokenIndex, setFromTokenIndex] = useState('');
@@ -63,9 +80,27 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
     <>
       <Grid container spacing={2}>
         <Grid item xs={6}>
-          <Typography variant="h6" color="textSecondary">
-            From
-          </Typography>
+          <Box display="flex" gap={1}>
+            <Typography variant="h6" color="textSecondary">
+              From
+            </Typography>
+            {allWallets.map(wallet => (
+              <Tooltip title={wallet.name} key={wallet._id}>
+                <Chip
+                  sx={{ fontSize: '10px', width: '50px' }}
+                  size="small"
+                  color="secondary"
+                  variant={
+                    currentWalletId === wallet._id ? 'filled' : 'outlined'
+                  }
+                  label={trimString(wallet.name, 6)}
+                  onClick={() => {
+                    setCurrentWalletId(wallet._id);
+                  }}
+                />
+              </Tooltip>
+            ))}
+          </Box>
           <FormControl fullWidth className={classesForm}>
             <InputLabel id="select-source-helper-label" shrink={false}>
               {fromToken ? '' : 'Select Source'}
