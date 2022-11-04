@@ -51,12 +51,12 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-type exchangePanelProps = {
+type ExchangePanelProps = {
   coinData: DisplayCoin[];
   currentWalletDetails: Wallet;
 };
 
-const ExchangePanel: React.FC<exchangePanelProps> = ({
+const ExchangePanel: React.FC<ExchangePanelProps> = ({
   coinData,
   currentWalletDetails
 }) => {

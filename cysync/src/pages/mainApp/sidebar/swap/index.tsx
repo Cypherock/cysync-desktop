@@ -3,11 +3,6 @@ import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React from 'react';
 
-// import VerifyDialog from './dialogs/verifyDialog';
-// import PendingOperation from './dialogs/pendingOperation';
-// import Received from './dialogs/received';
-// import ExchangeProgress from './dialogs/exchangeProgress';
-// import TransactionDetails from './dialogs/transactionDetails';
 import HorizontalTabs from './HorizontalTabs';
 
 const PREFIX = 'Swap';
@@ -50,11 +45,6 @@ const Swap = () => {
         </Typography>
       </Grid>
       <HorizontalTabs />
-      {/* <VerifyDialog /> */}
-      {/* <PendingOperation /> */}
-      {/* <Received /> */}
-      {/* <ExchangeProgress /> */}
-      {/* <TransactionDetails /> */}
     </Root>
   );
 };

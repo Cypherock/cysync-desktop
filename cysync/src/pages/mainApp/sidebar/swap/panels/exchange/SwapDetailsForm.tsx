@@ -21,7 +21,7 @@ import Input from '../../../../../../designSystem/designComponents/input/input';
 import CoinIcons from '../../../../../../designSystem/genericComponents/coinIcons';
 import { DisplayCoin } from '../../../../../../store/hooks';
 
-type swapDetailsFormProps = {
+type SwapDetailsFormProps = {
   fromToken: DisplayCoin;
   setFromToken: React.Dispatch<React.SetStateAction<DisplayCoin>>;
   toToken: DisplayCoin;
@@ -35,7 +35,7 @@ type swapDetailsFormProps = {
   classesForm: string;
 };
 
-const SwapDetailsForm: React.FC<swapDetailsFormProps> = ({
+const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
   fromToken,
   setFromToken,
   toToken,

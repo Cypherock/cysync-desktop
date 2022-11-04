@@ -3,7 +3,7 @@ import { Divider, Grid, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import React from 'react';
 
-import CustomDialog from '../../../../../../designSystem/designComponents/dialog/dialogBox';
+import CustomDialog from '../../../../../../../designSystem/designComponents/dialog/dialogBox';
 
 const transactionDetailsContent = () => {
   return (

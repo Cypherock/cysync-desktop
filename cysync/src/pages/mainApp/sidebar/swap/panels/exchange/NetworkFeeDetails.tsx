@@ -6,7 +6,7 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Changelly from '../../../../../../designSystem/iconGroups/changelly';
 import formatDisplayAmount from '../../../../../../utils/formatDisplayAmount';
 
-type feeDetailsProps = {
+type FeeDetailsProps = {
   fromToken: string;
   toToken: string;
   fees: string;
@@ -15,7 +15,7 @@ type feeDetailsProps = {
   price: number;
 };
 
-const NetworkFeeDetails: React.FC<feeDetailsProps> = ({
+const NetworkFeeDetails: React.FC<FeeDetailsProps> = ({
   fromToken,
   toToken,
   fees,

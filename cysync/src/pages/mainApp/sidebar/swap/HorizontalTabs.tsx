@@ -31,7 +31,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function HorizontalTabs() {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(1);
 
   const { allWallets, isLoading: isWalletLoading } = useWallets();
 

@@ -2,7 +2,7 @@ import { COINS } from '@cypherock/communication';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Grid, Typography } from '@mui/material';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import colors from '../../../../../../designSystem/designConstants/colors';
@@ -10,6 +10,8 @@ import CoinIcons from '../../../../../../designSystem/genericComponents/coinIcon
 import Download from '../../../../../../designSystem/iconGroups/download';
 import Swap from '../../../../../../designSystem/iconGroups/swap';
 import { useExchange } from '../../../../../../store/hooks';
+
+import ExchangeProgress from './dialogs/ExchangeProgress';
 
 type HistoryItem = {
   date: string;
@@ -31,12 +33,15 @@ type historyPanelProps = {
 const HistoryPanel: React.FC<historyPanelProps> = ({ walletId }) => {
   const { getSwapTransactions } = useExchange();
 
-  const [historyItems, setHistoryItems] = React.useState<HistoryItem[]>([]);
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [transactionProgress, setTransactionProgress] = useState(0);
+  const [isExchangeProgressOpen, setIsExchangeProgressOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const getTransactions = async () => {
       const transactions = await getSwapTransactions(walletId);
-      /* tslint:disable-next-line */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       transactions.forEach((transaction: any) => {
         const createdAt = new Date(transaction.createdAt * 1000);
         const date = createdAt.toLocaleDateString();
@@ -74,157 +79,199 @@ const HistoryPanel: React.FC<historyPanelProps> = ({ walletId }) => {
         });
       });
     };
-    getTransactions();
-  }, []);
+    if (walletId) getTransactions();
+  }, [walletId]);
 
   return (
-    <Grid container>
-      <Grid item xs={12}>
-        <Typography
-          variant="body1"
-          sx={{ color: 'secondary.dark' }}
-          textAlign={'right'}
+    <>
+      <Grid container>
+        <Grid item xs={12}>
+          <Typography
+            variant="body1"
+            sx={{ color: 'secondary.dark' }}
+            textAlign={'right'}
+          >
+            <Download />
+            &nbsp; Export operations
+          </Typography>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          sx={{
+            marginTop: '13px',
+            padding: '12px 0px 12px 12px',
+            alignItems: 'center',
+            background: '#1C1F22',
+            display: 'flex'
+          }}
         >
-          <Download />
-          &nbsp; Export operations
-        </Typography>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        sx={{
-          marginTop: '13px',
-          padding: '12px 0px 12px 12px',
-          alignItems: 'center',
-          background: '#1C1F22',
-          display: 'flex'
-        }}
-      >
-        <Icon
-          size={20}
-          viewBox="0 0 30 30"
-          iconGroup={<InfoOutlinedIcon color="secondary" />}
-        />
-        <Typography variant="body1" sx={{ color: 'secondary.dark' }}>
-          Your swap desktop transactions are not synchronized with the Ledger
-          Live mobile application
-        </Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Grid container marginTop={'40px'}>
-          {historyItems.map((item, index) => (
-            <Grid item xs={12} key={index} marginTop={'20px'}>
-              <Typography variant="body1" color="textSecondary">
-                {item.date}
-              </Typography>
-              {item.txns.map(txn => (
-                <Grid key={txn.id} item xs={12} marginTop={'20px'}>
+          <Icon
+            size={20}
+            viewBox="0 0 30 30"
+            iconGroup={<InfoOutlinedIcon color="secondary" />}
+          />
+          <Typography variant="body1" sx={{ color: 'secondary.dark' }}>
+            Your swap desktop transactions are not synchronized with the Ledger
+            Live mobile application
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Grid
+            container
+            marginTop={'40px'}
+            sx={{ maxHeight: '45vh', overflow: 'auto' }}
+          >
+            {historyItems.map((item, index) => (
+              <Grid
+                item
+                xs={12}
+                key={index}
+                marginTop={'20px'}
+                sx={{ cursor: 'pointer' }}
+              >
+                <Typography variant="body1" color="textSecondary">
+                  {item.date}
+                </Typography>
+                {item.txns.map(txn => (
                   <Grid
-                    container
-                    display={'flex'}
-                    justifyContent="space-around"
-                    sx={{
-                      border: '0.5px solid #433F3B',
-                      borderRadius: '10px',
-                      padding: '9px 17px 8px'
+                    key={txn.id}
+                    item
+                    xs={12}
+                    marginTop={'20px'}
+                    onClick={() => {
+                      // Possible Changelly status from:
+                      // https://github.com/changelly/api-changelly#getting-exchange-status
+                      switch (txn.status) {
+                        case 'finished':
+                          setTransactionProgress(2);
+                          break;
+                        case 'sending' || 'exchanging':
+                          setTransactionProgress(3);
+                          break;
+                        default:
+                          setTransactionProgress(0);
+                      }
+                      setIsExchangeProgressOpen(true);
                     }}
                   >
                     <Grid
-                      item
-                      xs={3}
-                      display="flex"
-                      alignContent={'center'}
-                      alignItems={'center'}
-                    >
-                      <Icon
-                        size={20}
-                        viewBox="0 0 16 15"
-                        iconGroup={<Swap color={colors.text.secondary} />}
-                      />
-                      <Grid item>
-                        <Typography variant="body1" color="textPrimary">
-                          Changelly
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {txn.time}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                    <Grid
-                      item
-                      xs={6}
-                      display="flex"
-                      alignContent={'center'}
-                      alignItems={'center'}
+                      container
+                      display={'flex'}
+                      justifyContent="space-around"
+                      sx={{
+                        border: '0.5px solid #433F3B',
+                        borderRadius: '10px',
+                        padding: '9px 17px 8px'
+                      }}
                     >
                       <Grid
-                        container
-                        display={'flex'}
-                        justifyContent={'space-around'}
+                        item
+                        xs={3}
+                        display="flex"
+                        alignContent={'center'}
+                        alignItems={'center'}
                       >
-                        <Grid
-                          item
-                          display={'flex'}
-                          alignContent={'center'}
-                          alignItems={'center'}
-                        >
-                          <CoinIcons
-                            initial={txn.fromToken.toUpperCase()}
-                            style={{ marginRight: '10px' }}
-                          />
+                        <Icon
+                          size={20}
+                          viewBox="0 0 16 15"
+                          iconGroup={<Swap color={colors.text.secondary} />}
+                        />
+                        <Grid item>
                           <Typography variant="body1" color="textPrimary">
-                            {COINS[txn.fromToken]?.name}
-                          </Typography>
-                        </Grid>
-                        <Grid
-                          item
-                          display={'flex'}
-                          alignContent={'center'}
-                          alignItems={'center'}
-                          marginLeft={'5px'}
-                        >
-                          <ArrowForwardIcon sx={{ color: 'text.secondary' }} />
-                        </Grid>
-                        <Grid
-                          item
-                          display={'flex'}
-                          alignContent={'center'}
-                          alignItems={'center'}
-                        >
-                          <CoinIcons
-                            initial={txn.toToken.toUpperCase()}
-                            style={{ marginRight: '10px' }}
-                          />
-                          <Typography variant="body1" color="textPrimary">
-                            {COINS[txn.toToken]?.name}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <Grid
-                        container
-                        display={'flex'}
-                        justifyContent={'flex-end'}
-                      >
-                        <Grid item textAlign={'right'}>
-                          <Typography variant="body1" sx={{ color: '#16953A' }}>
-                            +{txn.amount}
+                            Changelly
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
-                            -{txn.fees} {txn.fromToken.toUpperCase()}
+                            {txn.time}
                           </Typography>
+                        </Grid>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={6}
+                        display="flex"
+                        alignContent={'center'}
+                        alignItems={'center'}
+                      >
+                        <Grid
+                          container
+                          display={'flex'}
+                          justifyContent={'space-around'}
+                        >
+                          <Grid
+                            item
+                            display={'flex'}
+                            alignContent={'center'}
+                            alignItems={'center'}
+                          >
+                            <CoinIcons
+                              initial={txn.fromToken.toUpperCase()}
+                              style={{ marginRight: '10px' }}
+                            />
+                            <Typography variant="body1" color="textPrimary">
+                              {COINS[txn.fromToken]?.name}
+                            </Typography>
+                          </Grid>
+                          <Grid
+                            item
+                            display={'flex'}
+                            alignContent={'center'}
+                            alignItems={'center'}
+                            marginLeft={'5px'}
+                          >
+                            <ArrowForwardIcon
+                              sx={{ color: 'text.secondary' }}
+                            />
+                          </Grid>
+                          <Grid
+                            item
+                            display={'flex'}
+                            alignContent={'center'}
+                            alignItems={'center'}
+                          >
+                            <CoinIcons
+                              initial={txn.toToken.toUpperCase()}
+                              style={{ marginRight: '10px' }}
+                            />
+                            <Typography variant="body1" color="textPrimary">
+                              {COINS[txn.toToken]?.name}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                      <Grid item xs={3}>
+                        <Grid
+                          container
+                          display={'flex'}
+                          justifyContent={'flex-end'}
+                        >
+                          <Grid item textAlign={'right'}>
+                            <Typography
+                              variant="body1"
+                              sx={{ color: '#16953A' }}
+                            >
+                              +{txn.amount}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              -{txn.fees} {txn.fromToken.toUpperCase()}
+                            </Typography>
+                          </Grid>
                         </Grid>
                       </Grid>
                     </Grid>
                   </Grid>
-                </Grid>
-              ))}
-            </Grid>
-          ))}
+                ))}
+              </Grid>
+            ))}
+          </Grid>
         </Grid>
       </Grid>
-    </Grid>
+      <ExchangeProgress
+        open={isExchangeProgressOpen}
+        onClose={() => setIsExchangeProgressOpen(false)}
+        progress={transactionProgress}
+      />
+    </>
   );
 };
 
