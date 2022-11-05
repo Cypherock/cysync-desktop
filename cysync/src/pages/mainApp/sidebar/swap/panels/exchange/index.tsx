@@ -17,6 +17,7 @@ import { useConnection } from '../../../../../../store/provider';
 import { RecipientData } from '../../../wallet/addAccount/formStepComponents/StepComponentProps';
 
 import SwapCompletedDialog from './dialogs/SwapCompletedDialog';
+import VerifySendAddressDialog from './dialogs/VerifySendAddressDialog';
 import VerifySwapDetailsDialog from './dialogs/VerifySwapDetailsDialog';
 import NetworkFeeDetails from './NetworkFeeDetails';
 import SwapDetailsForm from './SwapDetailsForm';
@@ -86,8 +87,16 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
   const { deviceConnection, deviceSdkVersion, setIsInFlow } = useConnection();
 
   const [isVerifySwapDetailsOpen, setIsVerifySwapDetailsOpen] = useState(false);
+  const [isVerifySendAddressDialogOpen, setIsVerifySendAddressDialogOpen] =
+    useState(false);
   const [isSwapCompleted, setIsSwapCompleted] = useState(false);
-  const [swapTransactionId, setSwapTransactionId] = useState('');
+  const [swapTransaction, setSwapTransaction] = useState<{
+    id: string;
+    payinAddress: string;
+  }>({
+    id: '',
+    payinAddress: ''
+  });
 
   const receiveTransaction = useReceiveTransaction();
   const sendTransaction = useSendTransaction();
@@ -113,15 +122,20 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
       });
   };
 
-  const startSendFlow = async () => {
+  const createChangellyTransaction = async () => {
     const sendDetails = await createSwapTransaction(
       receiveTransaction.receiveAddress,
       currentWalletDetails._id
     );
 
-    setSwapTransactionId(sendDetails.id);
+    setSwapTransaction(sendDetails);
+  };
 
-    logger.info('Swap Transaction: Changelly Transaction Created', sendDetails);
+  const startSendFlow = async () => {
+    logger.info(
+      'Swap Transaction: Changelly Transaction Created',
+      swapTransaction
+    );
 
     let customAccount: string | undefined;
 
@@ -135,7 +149,7 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
 
     const recipientData: RecipientData = {
       id: 0,
-      recipient: sendDetails.payinAddress,
+      recipient: swapTransaction.payinAddress,
       amount: amountToSend,
       errorRecipient: '',
       errorAmount: ''
@@ -173,7 +187,8 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
 
   useEffect(() => {
     if (receiveTransaction.verified) {
-      startSendFlow();
+      createChangellyTransaction();
+      setIsVerifySendAddressDialogOpen(true);
     }
   }, [receiveTransaction.verified]);
 
@@ -254,8 +269,12 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
           sourceCoinName={COINS[fromToken.slug]?.name}
           targetCoinSlug={toToken.slug.toUpperCase()}
           targetCoinName={COINS[toToken.slug]?.name}
-          cardTapped={receiveTransaction.cardTapped}
+          receiveFlowCardTapped={receiveTransaction.cardTapped}
           receiveAddressVerified={receiveTransaction.verified}
+          receiveAddress={receiveTransaction?.receiveAddress}
+          sendAddressVerified={sendTransaction.verified}
+          sendFlowPinEntered={sendTransaction.pinEntered}
+          sendFlowCardTapped={sendTransaction.cardsTapped}
         />
       )}
       {isSwapCompleted && (
@@ -265,9 +284,17 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
             setIsSwapCompleted(false);
           }}
           toTokenName={COINS[toToken.slug]?.name}
-          transactionId={swapTransactionId}
+          transactionId={swapTransaction.id}
         />
       )}
+      <VerifySendAddressDialog
+        open={isVerifySendAddressDialogOpen}
+        onClose={() => {
+          setIsVerifySendAddressDialogOpen(false);
+          startSendFlow();
+        }}
+        url={`https://changelly.com/track/${swapTransaction.id}`}
+      />
     </Root>
   );
 };

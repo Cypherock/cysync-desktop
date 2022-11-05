@@ -20,12 +20,73 @@ const rotateKeyframe = keyframes`
   }
 `;
 
-enum VerificationStatus {
-  Pending,
-  PinEntered,
-  ReceivingAddressVerified,
-  SendingAddressVerified
+enum ReceiveFlowSteps {
+  EnterPinAndTapCard,
+  VerifyReceiveAddress,
+  Completed
 }
+
+const receiveFlowStepsMessages: {
+  [key in ReceiveFlowSteps]: string;
+} = {
+  [ReceiveFlowSteps.EnterPinAndTapCard]: 'Pin entered and card tapped',
+  [ReceiveFlowSteps.VerifyReceiveAddress]: 'Receive address verified',
+  [ReceiveFlowSteps.Completed]: 'Receive flow completed'
+};
+
+enum SendFlowSteps {
+  Waiting,
+  VerifySendAddress,
+  EnterPin,
+  TapCard,
+  SignTransaction,
+  Completed
+}
+
+const sendFlowStepsMessages: {
+  [key in SendFlowSteps]: string;
+} = {
+  [SendFlowSteps.Waiting]: 'Waiting for receive flow',
+  [SendFlowSteps.VerifySendAddress]: 'Verify sending address',
+  [SendFlowSteps.EnterPin]: 'Pin entered',
+  [SendFlowSteps.TapCard]: 'Card tapped',
+  [SendFlowSteps.SignTransaction]: 'Signing transaction',
+  [SendFlowSteps.Completed]: 'Send flow completed'
+};
+
+function getFlowSteps<Type extends number>(
+  currentStep: Type,
+  lastStep: Type,
+  messages: {
+    [key in Type]: string;
+  }
+): JSX.Element {
+  return (
+    <Box>
+      <Typography
+        variant="body1"
+        color="textPrimary"
+        marginTop="20px"
+        display={'flex'}
+        alignItems={'center'}
+        gap={1}
+      >
+        {currentStep === lastStep ? (
+          <CheckCircleOutlineIcon color="success" />
+        ) : (
+          <LoadingIcon
+            sx={{
+              animation: `${rotateKeyframe} 1500ms linear infinite`
+            }}
+          />
+        )}
+        {messages[currentStep]}
+      </Typography>
+    </Box>
+  );
+}
+
+// enum SendFlowSteps {}
 
 type VerifySwapDetailsDialogProps = {
   open: boolean;
@@ -37,8 +98,12 @@ type VerifySwapDetailsDialogProps = {
   sourceCoinName: string;
   targetCoinSlug: string;
   targetCoinName: string;
-  cardTapped: boolean;
+  receiveFlowCardTapped: boolean;
   receiveAddressVerified: boolean;
+  receiveAddress: string;
+  sendAddressVerified: boolean;
+  sendFlowPinEntered: boolean;
+  sendFlowCardTapped: boolean;
 };
 
 const VerifySwapDetailsDialog: React.FC<VerifySwapDetailsDialogProps> = ({
@@ -51,36 +116,51 @@ const VerifySwapDetailsDialog: React.FC<VerifySwapDetailsDialogProps> = ({
   sourceCoinName,
   targetCoinSlug,
   targetCoinName,
-  cardTapped,
-  receiveAddressVerified
+  receiveFlowCardTapped,
+  receiveAddressVerified,
+  receiveAddress,
+  sendAddressVerified,
+  sendFlowPinEntered,
+  sendFlowCardTapped
 }) => {
-  const [status, setStatus] = useState<VerificationStatus>(
-    VerificationStatus.Pending
+  const [receiveFlowStep, setReceiveFlowStep] = useState<ReceiveFlowSteps>(
+    ReceiveFlowSteps.EnterPinAndTapCard
+  );
+
+  const [sendFlowStep, setSendFlowStep] = useState<SendFlowSteps>(
+    SendFlowSteps.Waiting
   );
 
   useEffect(() => {
-    if (cardTapped) {
-      setStatus(VerificationStatus.PinEntered);
+    if (receiveFlowCardTapped) {
+      setReceiveFlowStep(ReceiveFlowSteps.VerifyReceiveAddress);
     }
-  }, [cardTapped]);
+  }, [receiveFlowCardTapped]);
 
   useEffect(() => {
     if (receiveAddressVerified) {
-      setStatus(VerificationStatus.ReceivingAddressVerified);
+      setReceiveFlowStep(ReceiveFlowSteps.Completed);
+      setSendFlowStep(SendFlowSteps.VerifySendAddress);
     }
   }, [receiveAddressVerified]);
 
-  const getStatusIcon = (currentStage: VerificationStatus) => {
-    return currentStage <= status ? (
-      <CheckCircleOutlineIcon color="success" />
-    ) : (
-      <LoadingIcon
-        sx={{
-          animation: `${rotateKeyframe} 1500ms linear infinite`
-        }}
-      />
-    );
-  };
+  useEffect(() => {
+    if (sendAddressVerified) {
+      setSendFlowStep(SendFlowSteps.EnterPin);
+    }
+  }, [sendAddressVerified]);
+
+  useEffect(() => {
+    if (sendFlowPinEntered) {
+      setSendFlowStep(SendFlowSteps.TapCard);
+    }
+  }, [sendFlowPinEntered]);
+
+  useEffect(() => {
+    if (sendFlowCardTapped) {
+      setSendFlowStep(SendFlowSteps.SignTransaction);
+    }
+  }, [sendFlowCardTapped]);
 
   const getVerifySwapDetailsDialogContent = () => {
     return (
@@ -211,53 +291,54 @@ const VerifySwapDetailsDialog: React.FC<VerifySwapDetailsDialogProps> = ({
                 {targetCoinName}
               </Typography>
             </Grid>
+            {receiveAddress && (
+              <Grid
+                item
+                xs={12}
+                display="flex"
+                justifyContent={'space-between'}
+                marginTop="20px"
+              >
+                <Typography variant="body1" color="textSecondary">
+                  Receiving address
+                </Typography>
+                <Typography
+                  variant="body1"
+                  color="textPrimary"
+                  display={'flex'}
+                  alignItems={'center'}
+                  gap={1}
+                >
+                  {receiveAddress}
+                </Typography>
+              </Grid>
+            )}
           </Grid>
-          <Typography
-            variant="body1"
-            color="textPrimary"
-            marginTop="20px"
-            display={'flex'}
-            alignItems={'center'}
-            gap={1}
-          >
-            {getStatusIcon(VerificationStatus.PinEntered)}
-            Pin entered and tapped a card
-          </Typography>
-          <Typography
-            variant="body1"
-            color="textPrimary"
-            marginTop="20px"
-            display={'flex'}
-            alignItems={'center'}
-            gap={1}
-          >
-            {getStatusIcon(VerificationStatus.ReceivingAddressVerified)}
-            Receiving address checked
-          </Typography>
-          <Typography
-            variant="body1"
-            color="textPrimary"
-            marginTop="20px"
-            display={'flex'}
-            alignItems={'center'}
-            gap={1}
-          >
-            {getStatusIcon(VerificationStatus.SendingAddressVerified)}
-            Checking sending address
-          </Typography>
+          {getFlowSteps<ReceiveFlowSteps>(
+            receiveFlowStep,
+            ReceiveFlowSteps.Completed,
+            receiveFlowStepsMessages
+          )}
+          {getFlowSteps<SendFlowSteps>(
+            sendFlowStep,
+            SendFlowSteps.Completed,
+            sendFlowStepsMessages
+          )}
         </Box>
       </Box>
     );
   };
 
   return (
-    <CustomDialog
-      open={open}
-      handleClose={onClose}
-      isClosePresent={true}
-      disableEscapeKeyDown
-      restComponents={getVerifySwapDetailsDialogContent()}
-    />
+    <>
+      <CustomDialog
+        open={open}
+        handleClose={onClose}
+        isClosePresent={true}
+        disableEscapeKeyDown
+        restComponents={getVerifySwapDetailsDialogContent()}
+      />
+    </>
   );
 };
 
