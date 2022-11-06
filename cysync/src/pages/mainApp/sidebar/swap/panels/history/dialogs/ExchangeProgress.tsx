@@ -1,4 +1,3 @@
-// import { CallReceived, ContentCopy } from '@mui/icons-material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DownloadIcon from '@mui/icons-material/Download';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
@@ -8,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import LinearProgress from '@mui/material/LinearProgress';
 import withStyles from '@mui/styles/withStyles';
 import { Box } from '@mui/system';
+import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import CustomDialog from '../../../../../../../designSystem/designComponents/dialog/dialogBox';
@@ -166,6 +166,12 @@ const ExchangeProgress: React.FC<ExchangeProgressProps> = ({
       restComponents={getExchangeProgressContent(progress)}
     />
   );
+};
+
+ExchangeProgress.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  progress: PropTypes.number.isRequired
 };
 
 export default ExchangeProgress;

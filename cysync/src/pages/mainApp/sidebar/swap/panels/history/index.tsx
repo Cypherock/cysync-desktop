@@ -1,4 +1,5 @@
 import { COINS } from '@cypherock/communication';
+import { Wallet } from '@cypherock/database';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Grid, Typography } from '@mui/material';
@@ -27,11 +28,13 @@ type HistoryItem = {
 };
 
 type historyPanelProps = {
-  walletId: string;
+  currentWalletDetails: Wallet;
 };
 
-const HistoryPanel: React.FC<historyPanelProps> = ({ walletId }) => {
-  const { getSwapTransactions } = useExchange();
+const HistoryPanel: React.FC<historyPanelProps> = ({
+  currentWalletDetails
+}) => {
+  const { getSwapTransactions } = useExchange(currentWalletDetails);
 
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [transactionProgress, setTransactionProgress] = useState(0);
@@ -40,8 +43,8 @@ const HistoryPanel: React.FC<historyPanelProps> = ({ walletId }) => {
 
   useEffect(() => {
     const getTransactions = async () => {
-      const transactions = await getSwapTransactions(walletId);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const transactions = await getSwapTransactions();
+      /* tslint:disable-next-line */
       transactions.forEach((transaction: any) => {
         const createdAt = new Date(transaction.createdAt * 1000);
         const date = createdAt.toLocaleDateString();
@@ -79,8 +82,8 @@ const HistoryPanel: React.FC<historyPanelProps> = ({ walletId }) => {
         });
       });
     };
-    if (walletId) getTransactions();
-  }, [walletId]);
+    if (currentWalletDetails) getTransactions();
+  }, [currentWalletDetails]);
 
   return (
     <>

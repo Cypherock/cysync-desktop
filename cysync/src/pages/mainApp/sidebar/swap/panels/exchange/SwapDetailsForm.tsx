@@ -3,7 +3,6 @@ import { SwapVerticalCircle } from '@mui/icons-material';
 import {
   Box,
   Chip,
-  //   Autocomplete,
   FormControl,
   Grid,
   InputLabel,
@@ -13,9 +12,8 @@ import {
   SelectChangeEvent,
   Tooltip,
   Typography
-  //   Box,
-  //   TextField
 } from '@mui/material';
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import SwitchButton from '../../../../../../designSystem/designComponents/buttons/switchButton';
@@ -47,6 +45,8 @@ type SwapDetailsFormProps = {
   allWallets: Wallet[];
   setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
   currentWalletId: string;
+  amountToReceive: string;
+  price: number;
 };
 
 const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
@@ -61,7 +61,9 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
   classesForm,
   allWallets,
   setCurrentWalletId,
-  currentWalletId
+  currentWalletId,
+  amountToReceive,
+  price
 }) => {
   const [isAmountToSendMax, setIsAmountToSendMax] = useState(false);
   const [fromTokenIndex, setFromTokenIndex] = useState('');
@@ -111,60 +113,26 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
               variant="outlined"
               labelId="select-source-helper-label"
             >
-              {coinData.map((coin, index) => {
-                const coinSlugName = coin.slug.toUpperCase();
-                const coinName = COINS[coin.slug]?.name;
-                return (
-                  <MenuItem value={index} key={`from-${coin.slug}`}>
-                    <CoinIcons
-                      initial={coinSlugName}
-                      style={{ marginRight: '10px' }}
-                    />
-                    <ListItemText
-                      primary={coinName}
-                      secondary={`${coin.displayBalance} ${coinSlugName}`}
-                    />
-                  </MenuItem>
-                );
-              })}
+              {coinData
+                .filter(coin => coin.totalBalance !== '0')
+                .map((coin, index) => {
+                  const coinSlugName = coin.slug.toUpperCase();
+                  const coinName = COINS[coin.slug]?.name;
+                  return (
+                    <MenuItem value={index} key={`from-${coin.slug}`}>
+                      <CoinIcons
+                        initial={coinSlugName}
+                        style={{ marginRight: '10px' }}
+                      />
+                      <ListItemText
+                        primary={coinName}
+                        secondary={`${coin.displayBalance} ${coinSlugName}`}
+                      />
+                    </MenuItem>
+                  );
+                })}
             </Select>
           </FormControl>
-          {/* <Autocomplete
-            autoHighlight
-            value={fromToken}
-            onChange={(_event, newValue) => {
-              setFromToken(newValue as DisplayCoin);
-            }}
-            options={coinData}
-            getOptionLabel={(option: DisplayCoin) =>
-              COINS[option.slug]?.name || ''
-            }
-            renderOption={(props, option) => {
-              return (
-                <Box component={'li'} {...props}>
-                  <CoinIcons
-                    initial={option.slug.toUpperCase()}
-                    style={{ marginRight: '10px' }}
-                  />
-                  <ListItemText
-                    primary={COINS[option.slug]?.name}
-                    secondary={`${
-                      option.displayBalance
-                    } ${option.slug.toUpperCase()}`}
-                  />
-                </Box>
-              );
-            }}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label=""
-                inputProps={{
-                  ...params.inputProps
-                }}
-              />
-            )}
-          /> */}
         </Grid>
         <Grid item xs={6}>
           <Grid container>
@@ -196,8 +164,7 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
           <Input
             fullWidth
             type="number"
-            placeholder="0.00000000"
-            inputProps={{ 'aria-label': 'description' }}
+            placeholder="0"
             value={amountToSend}
             onChange={handleChangeAmountToSend}
             className={classesForm}
@@ -274,11 +241,41 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
               </Grid>
             </Grid>
           </Grid>
-          <Input fullWidth placeholder="0.00000000" className={classesForm} />
+          <Box
+            border={'0.5px solid #CDCDCD'}
+            borderRadius="5px"
+            marginTop="10px"
+            padding="5px 10px"
+            textAlign="right"
+          >
+            <Typography variant="body1" color="textSecondary">
+              {amountToReceive}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              $ {(+amountToReceive * price).toFixed(2)}
+            </Typography>
+          </Box>
         </Grid>
       </Grid>
     </>
   );
+};
+
+SwapDetailsForm.propTypes = {
+  fromToken: PropTypes.any,
+  setFromToken: PropTypes.func.isRequired,
+  toToken: PropTypes.any,
+  setToToken: PropTypes.func.isRequired,
+  coinData: PropTypes.array.isRequired,
+  amountToSend: PropTypes.string.isRequired,
+  handleChangeAmountToSend: PropTypes.func.isRequired,
+  setAmountToSend: PropTypes.func.isRequired,
+  classesForm: PropTypes.string.isRequired,
+  allWallets: PropTypes.array.isRequired,
+  setCurrentWalletId: PropTypes.func.isRequired,
+  currentWalletId: PropTypes.string,
+  amountToReceive: PropTypes.string.isRequired,
+  price: PropTypes.number.isRequired
 };
 
 export default SwapDetailsForm;

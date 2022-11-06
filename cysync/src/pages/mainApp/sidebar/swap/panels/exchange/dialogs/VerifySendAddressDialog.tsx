@@ -2,6 +2,7 @@ import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Box, Typography } from '@mui/material';
 import { shell } from 'electron';
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import Button from '../../../../../../../designSystem/designComponents/buttons/button';
@@ -9,7 +10,7 @@ import CustomDialog from '../../../../../../../designSystem/designComponents/dia
 
 const getVerifySendAddressDialogContent = (
   url: string,
-  onClose: () => void
+  onVerify: () => void
 ): JSX.Element => {
   return (
     <Box
@@ -33,7 +34,7 @@ const getVerifySendAddressDialogContent = (
         <Button
           onClick={() => {
             shell.openExternal(url);
-            onClose();
+            onVerify();
           }}
           sx={{ marginTop: '20px' }}
         >
@@ -52,23 +53,29 @@ const getVerifySendAddressDialogContent = (
 
 type VerifySendAddressDialogProps = {
   open: boolean;
-  onClose: () => void;
+  onVerify: () => void;
   url: string;
 };
 
 const VerifySendAddressDialog: React.FC<VerifySendAddressDialogProps> = ({
   open,
-  onClose,
+  onVerify,
   url
 }): JSX.Element => {
   return (
     <CustomDialog
       open={open}
-      handleClose={onClose}
+      handleClose={onVerify}
       isClosePresent={true}
-      restComponents={getVerifySendAddressDialogContent(url, onClose)}
+      restComponents={getVerifySendAddressDialogContent(url, onVerify)}
     />
   );
+};
+
+VerifySendAddressDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onVerify: PropTypes.func.isRequired,
+  url: PropTypes.string.isRequired
 };
 
 export default VerifySendAddressDialog;

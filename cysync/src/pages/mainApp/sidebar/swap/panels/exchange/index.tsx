@@ -1,20 +1,13 @@
 import { COINS } from '@cypherock/communication';
+import { Wallet } from '@cypherock/database';
 import { Grid, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import Button from '../../../../../../designSystem/designComponents/buttons/button';
-import logger from '../../../../../../mainProcess/logger';
-import { customAccountDb, Wallet } from '../../../../../../store/database';
-import {
-  changeFormatOfOutputList,
-  DisplayCoin,
-  useExchange,
-  useReceiveTransaction,
-  useSendTransaction
-} from '../../../../../../store/hooks';
-import { useConnection } from '../../../../../../store/provider';
-import { RecipientData } from '../../../wallet/addAccount/formStepComponents/StepComponentProps';
+import { DisplayCoin, useExchange } from '../../../../../../store/hooks';
+import { ReceiveFlowSteps } from '../../../../../../store/hooks/helper/FlowSteps';
 
 import SwapCompletedDialog from './dialogs/SwapCompletedDialog';
 import VerifySendAddressDialog from './dialogs/VerifySendAddressDialog';
@@ -25,19 +18,10 @@ import SwapDetailsForm from './SwapDetailsForm';
 const PREFIX = 'ExchangePanel';
 
 const classes = {
-  root: `${PREFIX}-root`,
-  input: `${PREFIX}-input`,
-  debug: `${PREFIX}-debug`,
   form: `${PREFIX}-form`
 };
 
-const Root = styled('div')(({ theme }) => ({
-  [`& .${classes.root}`]: {
-    height: 'min-content'
-  },
-  [`& .${classes.debug}`]: {
-    border: `2px solid ${theme.palette.error.main}`
-  },
+const Root = styled('div')(() => ({
   [`& .${classes.form}`]: {
     marginTop: '10px',
     border: '0.5px solid #CDCDCD',
@@ -48,6 +32,9 @@ const Root = styled('div')(({ theme }) => ({
       alignContents: 'center',
       width: '250px',
       height: '20px'
+    },
+    '& .MuiOutlinedInput-input': {
+      textAlign: 'right'
     }
   }
 }));
@@ -75,129 +62,43 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
     exchangeRate,
     fees,
     amountToReceive,
-    createSwapTransaction
-  } = useExchange();
+    startReceiveFlow,
+    cancelSwapTransaction,
+    receiveFlowStep,
+    sendFlowStep,
+    receiveAddress,
+    isSwapCompleted,
+    swapTransaction,
+    handleUserVerifiedSendAddress
+  } = useExchange(currentWalletDetails);
+
+  const [showSwapCompletedDialog, setSwapCompletedDialog] = useState(false);
+  const [showSendAddressVerifyDialog, setShowSendAddressVerifyDialog] =
+    useState(false);
+  const [showSwapDetailsVerifyDialog, setShowSwapDetailsVerifyDialog] =
+    useState(false);
+
+  useEffect(() => {
+    if (isSwapCompleted) {
+      setShowSwapDetailsVerifyDialog(false);
+      setSwapCompletedDialog(true);
+    }
+  }, [isSwapCompleted]);
+
+  useEffect(() => {
+    if (
+      swapTransaction.payinAddress &&
+      receiveFlowStep === ReceiveFlowSteps.Completed
+    ) {
+      setShowSendAddressVerifyDialog(true);
+    }
+  }, [swapTransaction, receiveFlowStep]);
 
   const handleChangeAmountToSend = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setAmountToSend(event.target.value);
   };
-
-  const { deviceConnection, deviceSdkVersion, setIsInFlow } = useConnection();
-
-  const [isVerifySwapDetailsOpen, setIsVerifySwapDetailsOpen] = useState(false);
-  const [isVerifySendAddressDialogOpen, setIsVerifySendAddressDialogOpen] =
-    useState(false);
-  const [isSwapCompleted, setIsSwapCompleted] = useState(false);
-  const [swapTransaction, setSwapTransaction] = useState<{
-    id: string;
-    payinAddress: string;
-  }>({
-    id: '',
-    payinAddress: ''
-  });
-
-  const receiveTransaction = useReceiveTransaction();
-  const sendTransaction = useSendTransaction();
-
-  const startReceiveFlow = () => {
-    setIsVerifySwapDetailsOpen(true);
-    receiveTransaction
-      .handleReceiveTransaction({
-        connection: deviceConnection,
-        sdkVersion: deviceSdkVersion,
-        setIsInFlow,
-        walletId: currentWalletDetails._id,
-        coinType: toToken.slug,
-        coinName: COINS[toToken.slug]?.name,
-        xpub: toToken.xpub,
-        zpub: toToken.zpub
-      })
-      .then(() => {
-        logger.info('Swap Transaction: Receive Flow Started');
-      })
-      .catch(err => {
-        logger.error('Swap Transaction: Receive Flow Failed', err);
-      });
-  };
-
-  const createChangellyTransaction = async () => {
-    const sendDetails = await createSwapTransaction(
-      receiveTransaction.receiveAddress,
-      currentWalletDetails._id
-    );
-
-    setSwapTransaction(sendDetails);
-  };
-
-  const startSendFlow = async () => {
-    logger.info(
-      'Swap Transaction: Changelly Transaction Created',
-      swapTransaction
-    );
-
-    let customAccount: string | undefined;
-
-    if (fromToken.slug === 'near') {
-      const customAccounts = await customAccountDb.getAll({
-        coin: fromToken.slug,
-        walletId: fromToken.walletId
-      });
-      customAccount = customAccounts[0].name;
-    }
-
-    const recipientData: RecipientData = {
-      id: 0,
-      recipient: swapTransaction.payinAddress,
-      amount: amountToSend,
-      errorRecipient: '',
-      errorAmount: ''
-    };
-
-    sendTransaction
-      .handleSendTransaction({
-        connection: deviceConnection,
-        sdkVersion: deviceSdkVersion,
-        setIsInFlow,
-        walletId: currentWalletDetails._id,
-        xpub: fromToken.xpub,
-        zpub: fromToken.zpub,
-        coinType: fromToken.slug,
-        fees: +fees,
-        pinExists: currentWalletDetails?.passwordSet,
-        passphraseExists: currentWalletDetails?.passphraseSet,
-        customAccount,
-        newAccountId: null,
-        outputList: changeFormatOfOutputList(
-          [recipientData],
-          fromToken.slug,
-          undefined
-        ),
-        data: {},
-        isSendAll: false
-      })
-      .then(() => {
-        logger.info('Swap Transaction: Send Flow Completed');
-      })
-      .catch(err => {
-        logger.error('Swap Transaction: Send Flow Failed', err);
-      });
-  };
-
-  useEffect(() => {
-    if (receiveTransaction.verified) {
-      createChangellyTransaction();
-      setIsVerifySendAddressDialogOpen(true);
-    }
-  }, [receiveTransaction.verified]);
-
-  useEffect(() => {
-    if (sendTransaction.signedTxn) {
-      setIsVerifySwapDetailsOpen(false);
-      setIsSwapCompleted(true);
-    }
-  }, [sendTransaction.signedTxn]);
 
   return (
     <Root>
@@ -215,6 +116,8 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
           allWallets={allWallets}
           setCurrentWalletId={setCurrentWalletId}
           currentWalletId={currentWalletDetails?._id}
+          amountToReceive={amountToReceive || '0'}
+          price={toToken?.price || 0}
         />
       }
       {amountToReceive && (
@@ -231,14 +134,18 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
           }
           <Grid
             container
-            xs={12}
             justifyContent={'center'}
             alignContent={'center'}
             alignItems={'center'}
             paddingTop={3}
           >
             <Grid item>
-              <Button onClick={startReceiveFlow}>
+              <Button
+                onClick={() => {
+                  setShowSwapDetailsVerifyDialog(true);
+                  startReceiveFlow();
+                }}
+              >
                 <Typography
                   variant="h5"
                   color="textPrimary"
@@ -251,16 +158,12 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
           </Grid>
         </>
       )}
-      {isVerifySwapDetailsOpen && (
+      {showSwapDetailsVerifyDialog && (
         <VerifySwapDetailsDialog
-          open={isVerifySwapDetailsOpen}
+          open={showSwapDetailsVerifyDialog}
           onClose={() => {
-            receiveTransaction.cancelReceiveTxn(deviceConnection);
-            logger.info('Swap Transaction: Receive Flow Cancelled');
-
-            sendTransaction.cancelSendTxn(deviceConnection);
-            logger.info('Swap Transaction: Receive Flow Cancelled');
-            setIsVerifySwapDetailsOpen(false);
+            cancelSwapTransaction();
+            setShowSwapDetailsVerifyDialog(false);
           }}
           amountToSend={amountToSend}
           amountToReceive={amountToReceive}
@@ -269,34 +172,38 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
           sourceCoinName={COINS[fromToken.slug]?.name}
           targetCoinSlug={toToken.slug.toUpperCase()}
           targetCoinName={COINS[toToken.slug]?.name}
-          receiveFlowCardTapped={receiveTransaction.cardTapped}
-          receiveAddressVerified={receiveTransaction.verified}
-          receiveAddress={receiveTransaction?.receiveAddress}
-          sendAddressVerified={sendTransaction.verified}
-          sendFlowPinEntered={sendTransaction.pinEntered}
-          sendFlowCardTapped={sendTransaction.cardsTapped}
+          receiveAddress={receiveAddress}
+          receiveFlowStep={receiveFlowStep}
+          sendFlowStep={sendFlowStep}
         />
       )}
-      {isSwapCompleted && (
+      {showSwapCompletedDialog && (
         <SwapCompletedDialog
-          open={isSwapCompleted}
+          open={showSwapCompletedDialog}
           onClose={() => {
-            setIsSwapCompleted(false);
+            setSwapCompletedDialog(false);
           }}
           toTokenName={COINS[toToken.slug]?.name}
           transactionId={swapTransaction.id}
         />
       )}
       <VerifySendAddressDialog
-        open={isVerifySendAddressDialogOpen}
-        onClose={() => {
-          setIsVerifySendAddressDialogOpen(false);
-          startSendFlow();
+        open={showSendAddressVerifyDialog}
+        onVerify={() => {
+          handleUserVerifiedSendAddress();
+          setShowSendAddressVerifyDialog(false);
         }}
         url={`https://changelly.com/track/${swapTransaction.id}`}
       />
     </Root>
   );
+};
+
+ExchangePanel.propTypes = {
+  coinData: PropTypes.array.isRequired,
+  currentWalletDetails: PropTypes.any, //! FIXME
+  allWallets: PropTypes.array.isRequired,
+  setCurrentWalletId: PropTypes.func.isRequired
 };
 
 export default ExchangePanel;

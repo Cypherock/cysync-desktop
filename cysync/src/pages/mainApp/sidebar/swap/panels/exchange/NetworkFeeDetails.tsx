@@ -1,5 +1,6 @@
 import { InfoOutlined } from '@mui/icons-material';
 import { Divider, Grid, Link, Typography } from '@mui/material';
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
@@ -113,23 +114,24 @@ const NetworkFeeDetails: React.FC<FeeDetailsProps> = ({
               borderRadius: '10px'
             }}
           >
-            <Grid
-              container
-              xs={5}
-              display={'flex'}
-              alignItems={'center'}
-              spacing={2}
-            >
-              <Grid item>
-                <Changelly />
-              </Grid>
-              <Grid item>
-                <Typography variant="body1" color="textPrimary">
-                  Changelly
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  No registration required
-                </Typography>
+            <Grid item xs={5}>
+              <Grid
+                container
+                display={'flex'}
+                alignItems={'center'}
+                spacing={2}
+              >
+                <Grid item>
+                  <Changelly />
+                </Grid>
+                <Grid item>
+                  <Typography variant="body1" color="textPrimary">
+                    Changelly
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    No registration required
+                  </Typography>
+                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={4}>
@@ -167,6 +169,15 @@ const NetworkFeeDetails: React.FC<FeeDetailsProps> = ({
       </Grid>
     </>
   );
+};
+
+NetworkFeeDetails.propTypes = {
+  fromToken: PropTypes.string.isRequired,
+  toToken: PropTypes.string.isRequired,
+  fees: PropTypes.string.isRequired,
+  exchangeRate: PropTypes.string.isRequired,
+  result: PropTypes.number.isRequired,
+  price: PropTypes.number.isRequired
 };
 
 export default NetworkFeeDetails;

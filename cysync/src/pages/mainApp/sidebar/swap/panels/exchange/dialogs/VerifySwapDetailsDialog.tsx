@@ -3,12 +3,17 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import LoadingIcon from '@mui/icons-material/Loop';
 import { Grid, Link, Typography } from '@mui/material';
 import { Box, keyframes } from '@mui/system';
-import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 import CustomDialog from '../../../../../../../designSystem/designComponents/dialog/dialogBox';
 import Icon from '../../../../../../../designSystem/designComponents/icons/Icon';
 import CoinIcons from '../../../../../../../designSystem/genericComponents/coinIcons';
 import Changelly from '../../../../../../../designSystem/iconGroups/changelly';
+import {
+  ReceiveFlowSteps,
+  SendFlowSteps
+} from '../../../../../../../store/hooks/helper/FlowSteps';
 
 const rotateKeyframe = keyframes`
   0% {
@@ -20,12 +25,6 @@ const rotateKeyframe = keyframes`
   }
 `;
 
-enum ReceiveFlowSteps {
-  EnterPinAndTapCard,
-  VerifyReceiveAddress,
-  Completed
-}
-
 const receiveFlowStepsMessages: {
   [key in ReceiveFlowSteps]: string;
 } = {
@@ -33,15 +32,6 @@ const receiveFlowStepsMessages: {
   [ReceiveFlowSteps.VerifyReceiveAddress]: 'Receive address verified',
   [ReceiveFlowSteps.Completed]: 'Receive flow completed'
 };
-
-enum SendFlowSteps {
-  Waiting,
-  VerifySendAddress,
-  EnterPin,
-  TapCard,
-  SignTransaction,
-  Completed
-}
 
 const sendFlowStepsMessages: {
   [key in SendFlowSteps]: string;
@@ -86,8 +76,6 @@ function getFlowSteps<Type extends number>(
   );
 }
 
-// enum SendFlowSteps {}
-
 type VerifySwapDetailsDialogProps = {
   open: boolean;
   onClose: () => void;
@@ -98,12 +86,9 @@ type VerifySwapDetailsDialogProps = {
   sourceCoinName: string;
   targetCoinSlug: string;
   targetCoinName: string;
-  receiveFlowCardTapped: boolean;
-  receiveAddressVerified: boolean;
   receiveAddress: string;
-  sendAddressVerified: boolean;
-  sendFlowPinEntered: boolean;
-  sendFlowCardTapped: boolean;
+  receiveFlowStep: ReceiveFlowSteps;
+  sendFlowStep: SendFlowSteps;
 };
 
 const VerifySwapDetailsDialog: React.FC<VerifySwapDetailsDialogProps> = ({
@@ -116,52 +101,10 @@ const VerifySwapDetailsDialog: React.FC<VerifySwapDetailsDialogProps> = ({
   sourceCoinName,
   targetCoinSlug,
   targetCoinName,
-  receiveFlowCardTapped,
-  receiveAddressVerified,
   receiveAddress,
-  sendAddressVerified,
-  sendFlowPinEntered,
-  sendFlowCardTapped
+  receiveFlowStep,
+  sendFlowStep
 }) => {
-  const [receiveFlowStep, setReceiveFlowStep] = useState<ReceiveFlowSteps>(
-    ReceiveFlowSteps.EnterPinAndTapCard
-  );
-
-  const [sendFlowStep, setSendFlowStep] = useState<SendFlowSteps>(
-    SendFlowSteps.Waiting
-  );
-
-  useEffect(() => {
-    if (receiveFlowCardTapped) {
-      setReceiveFlowStep(ReceiveFlowSteps.VerifyReceiveAddress);
-    }
-  }, [receiveFlowCardTapped]);
-
-  useEffect(() => {
-    if (receiveAddressVerified) {
-      setReceiveFlowStep(ReceiveFlowSteps.Completed);
-      setSendFlowStep(SendFlowSteps.VerifySendAddress);
-    }
-  }, [receiveAddressVerified]);
-
-  useEffect(() => {
-    if (sendAddressVerified) {
-      setSendFlowStep(SendFlowSteps.EnterPin);
-    }
-  }, [sendAddressVerified]);
-
-  useEffect(() => {
-    if (sendFlowPinEntered) {
-      setSendFlowStep(SendFlowSteps.TapCard);
-    }
-  }, [sendFlowPinEntered]);
-
-  useEffect(() => {
-    if (sendFlowCardTapped) {
-      setSendFlowStep(SendFlowSteps.SignTransaction);
-    }
-  }, [sendFlowCardTapped]);
-
   const getVerifySwapDetailsDialogContent = () => {
     return (
       <Box
@@ -185,7 +128,7 @@ const VerifySwapDetailsDialog: React.FC<VerifySwapDetailsDialogProps> = ({
               </Link>
             </Typography>
           </Box>
-          <Grid container xs={12}>
+          <Grid container>
             <Grid
               item
               xs={12}
@@ -340,6 +283,21 @@ const VerifySwapDetailsDialog: React.FC<VerifySwapDetailsDialogProps> = ({
       />
     </>
   );
+};
+
+VerifySwapDetailsDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  amountToSend: PropTypes.string.isRequired,
+  amountToReceive: PropTypes.string.isRequired,
+  networkFees: PropTypes.string.isRequired,
+  sourceCoinSlug: PropTypes.string.isRequired,
+  sourceCoinName: PropTypes.string.isRequired,
+  targetCoinSlug: PropTypes.string.isRequired,
+  targetCoinName: PropTypes.string.isRequired,
+  receiveAddress: PropTypes.string,
+  receiveFlowStep: PropTypes.number.isRequired,
+  sendFlowStep: PropTypes.number.isRequired
 };
 
 export default VerifySwapDetailsDialog;

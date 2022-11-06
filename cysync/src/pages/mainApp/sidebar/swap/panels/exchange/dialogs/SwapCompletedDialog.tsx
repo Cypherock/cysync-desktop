@@ -2,13 +2,14 @@ import SecurityTwoToneIcon from '@mui/icons-material/SecurityTwoTone';
 import { Grid, Link, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { shell } from 'electron';
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import CustomDialog from '../../../../../../../designSystem/designComponents/dialog/dialogBox';
 import Icon from '../../../../../../../designSystem/designComponents/icons/Icon';
 import CheckmarkSuccess from '../../../../../../../designSystem/iconGroups/checkmarkSuccess';
 
-const CHANGELLY_TRACKING_URL = 'https://changelly.com/track/';
+const CHANGELLY_TRACKING_URL = 'https://changelly.com/track';
 
 type SwapCompletedDialogProps = {
   open: boolean;
@@ -117,6 +118,13 @@ const SwapCompletedDialog: React.FC<SwapCompletedDialogProps> = ({
       restComponents={getSwapCompletedDialogContent(toTokenName, transactionId)}
     />
   );
+};
+
+SwapCompletedDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  toTokenName: PropTypes.string.isRequired,
+  transactionId: PropTypes.string.isRequired
 };
 
 export default SwapCompletedDialog;

@@ -83,7 +83,7 @@ export default function HorizontalTabs() {
         />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        <HistoryPanel walletId={currentWalletId} />
+        <HistoryPanel currentWalletDetails={currentWalletDetails} />
       </TabPanel>
     </Box>
   );
