@@ -39,6 +39,7 @@ export interface ConnectionContextInterface {
   beforeNetworkAction: () => boolean;
   inBackgroundProcess: boolean;
   deviceSerial: string | null;
+  supportedCoinList: Array<{ id: number; version: number }>;
   setDeviceSerial: React.Dispatch<React.SetStateAction<string | null>>;
   deviceSdkVersion: string | null;
   setDeviceSdkVersion: React.Dispatch<React.SetStateAction<string | null>>;
@@ -92,6 +93,9 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   const [openCancelFlowPrompt, setOpenCancelFlowPrompt] = useState(false);
   const [openMisconfiguredPrompt, setOpenMisconfiguredPrompt] = useState(false);
   const [deviceSerial, setDeviceSerial] = useState<string | null>(null);
+  const [supportedCoinList, setSupportedCoinList] = useState<
+    Array<{ id: number; version: number }>
+  >([]);
   const [deviceSdkVersion, setDeviceSdkVersion] = useState<string | null>(null);
   const [isInFlow, setIsInFlow] = useState(false);
 
@@ -183,7 +187,8 @@ export const ConnectionProvider: React.FC = ({ children }) => {
           setIsInFlow,
           setFirmwareVersion,
           setDeviceSerial,
-          setSdkVersion: setDeviceSdkVersion
+          setSdkVersion: setDeviceSdkVersion,
+          setSupportedCoinList
         });
       } else {
         logger.info('Trigger partial check for device');
@@ -193,7 +198,8 @@ export const ConnectionProvider: React.FC = ({ children }) => {
           setIsInFlow,
           setFirmwareVersion,
           setDeviceSerial,
-          setSdkVersion: setDeviceSdkVersion
+          setSdkVersion: setDeviceSdkVersion,
+          setSupportedCoinList
         });
       }
     } else {
@@ -313,6 +319,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         logger.info('Device connection established in initial application', {
           firmwareVersion,
           deviceSerial,
+          supportedCoinList,
           inBootloader,
           deviceState
         });
@@ -420,6 +427,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       logger.info('Authenticated Device connection established', {
         firmwareVersion,
         deviceSerial,
+        supportedCoinList,
         inBootloader,
         deviceState
       });
@@ -567,6 +575,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         beforeNetworkAction,
         inBackgroundProcess,
         deviceSerial,
+        supportedCoinList,
         setDeviceSerial,
         deviceSdkVersion,
         setDeviceSdkVersion,

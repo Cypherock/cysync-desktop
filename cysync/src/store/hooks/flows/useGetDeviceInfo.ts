@@ -23,6 +23,7 @@ export interface HandleGetDeviceInfoOptions {
   setIsInFlow: (val: boolean) => void;
   setFirmwareVersion: (val: string) => void;
   setDeviceSerial: (val: string) => void;
+  setSupportedCoinList: (val: Array<{ id: number; version: number }>) => void;
   setSdkVersion: (val: string) => void;
 }
 
@@ -69,7 +70,8 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
     setIsInFlow,
     setFirmwareVersion,
     setDeviceSerial,
-    setSdkVersion
+    setSdkVersion,
+    setSupportedCoinList
   }: HandleGetDeviceInfoOptions) => {
     resetHooks();
 
@@ -158,6 +160,14 @@ export const useGetDeviceInfo: UseGetDeviceInfo = () => {
       const cyError = new CyError(CysyncError.DEVICE_NOT_READY);
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
+
+    getDeviceInfo.on(
+      'coinList',
+      (coinList: Array<{ id: number; version: number }>) => {
+        logger.info('GetDeviceInfo: Got ', { coinList });
+        setSupportedCoinList(coinList);
+      }
+    );
 
     try {
       setIsInFlow(true);

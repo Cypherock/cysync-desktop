@@ -48,6 +48,7 @@ import prevent from '../../../../utils/preventPropagation';
 
 import AddToken from './addToken';
 import getTokens, { IInitialToken } from './addToken/tokens';
+import SendButton from './generalComponents/SendButton';
 import { EthereumOneCoinProps, EthereumOneCoinPropTypes } from './OneCoinProps';
 import OneToken from './OneToken';
 import Recieve from './recieve';
@@ -477,29 +478,11 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
             </PopOverText>
           </Grid>
           <Grid item xs={2} className={classes.actions}>
-            <Button
-              variant="text"
-              className={clsx({
-                [classes.orange]: !isEmpty,
-                [classes.grey]: isEmpty,
-                [classes.actionButton]: true
-              })}
-              onClick={handleSendFormOpen}
-              startIcon={
-                <Icon
-                  className={clsx(classes.icon, classes.actionButtonIcon)}
-                  viewBox="0 0 14 15"
-                  icon={ICONS.walletSend}
-                  color={
-                    !isEmpty
-                      ? theme.palette.secondary.main
-                      : theme.palette.grey[500]
-                  }
-                />
-              }
-            >
-              Send
-            </Button>
+            <SendButton
+              handleSendFormOpen={handleSendFormOpen}
+              isEmpty={isEmpty}
+              prefix={PREFIX}
+            />
             <div className={classes.divider} />
             <Button
               variant="text"
