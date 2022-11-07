@@ -2,7 +2,7 @@ import { COINS } from '@cypherock/communication';
 import { Wallet } from '@cypherock/database';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { Grid, Typography } from '@mui/material';
+import { Button, Grid, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
@@ -11,6 +11,7 @@ import CoinIcons from '../../../../../../designSystem/genericComponents/coinIcon
 import Download from '../../../../../../designSystem/iconGroups/download';
 import Swap from '../../../../../../designSystem/iconGroups/swap';
 import { useExchange } from '../../../../../../store/hooks';
+import csvDownloader from '../../../../../../utils/csvDownloader';
 
 import ExchangeProgress from './dialogs/ExchangeProgress';
 
@@ -31,11 +32,31 @@ type historyPanelProps = {
   currentWalletDetails: Wallet;
 };
 
+// tslint:disable-next-line: no-any
+const formatRawTransactions = (rawTransactions: any[], columns: string[]) => {
+  const formattedRawTransactions = rawTransactions.map(
+    // tslint:disable-next-line: no-any
+    (rawTransaction: any) => {
+      const txn: {
+        [key in string]: string | number | null;
+      } = {};
+      columns.forEach(key => (txn[key] = rawTransaction[key]));
+      return txn;
+    }
+  );
+
+  const headers: { [key in string]: string } = {};
+  columns.forEach(key => (headers[key] = key));
+
+  formattedRawTransactions.unshift(headers);
+  return formattedRawTransactions;
+};
+
 const HistoryPanel: React.FC<historyPanelProps> = ({
   currentWalletDetails
 }) => {
   const { getSwapTransactions } = useExchange(currentWalletDetails);
-
+  const [rawTransactions, setRawTransactions] = useState([]);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [transactionProgress, setTransactionProgress] = useState(0);
   const [isExchangeProgressOpen, setIsExchangeProgressOpen] =
@@ -44,6 +65,7 @@ const HistoryPanel: React.FC<historyPanelProps> = ({
   useEffect(() => {
     const getTransactions = async () => {
       const transactions = await getSwapTransactions();
+      setRawTransactions(transactions);
       /* tslint:disable-next-line */
       transactions.forEach((transaction: any) => {
         const createdAt = new Date(transaction.createdAt * 1000);
@@ -91,11 +113,43 @@ const HistoryPanel: React.FC<historyPanelProps> = ({
         <Grid item xs={12}>
           <Typography
             variant="body1"
-            sx={{ color: 'secondary.dark' }}
+            sx={{
+              color: 'secondary.dark'
+            }}
             textAlign={'right'}
           >
-            <Download />
-            &nbsp; Export operations
+            <Button
+              startIcon={<Download />}
+              color="secondary"
+              onClick={() => {
+                csvDownloader(
+                  formatRawTransactions(rawTransactions, [
+                    'id',
+                    'createdAt',
+                    'moneyReceived',
+                    'moneySent',
+                    'rate',
+                    'status',
+                    'currencyFrom',
+                    'currencyTo',
+                    'payinAddress',
+                    'payoutAddress',
+                    'amountExpectedFrom',
+                    'amountExpectedTo',
+                    'networkFee',
+                    'changellyFee'
+                  ]),
+                  `CySync-Swap-History-${currentWalletDetails.name}`
+                );
+              }}
+              sx={{
+                borderRadius: '40px',
+                padding: '10px 20px'
+              }}
+            >
+              {/* <Download /> */}
+              &nbsp; Export operations
+            </Button>
           </Typography>
         </Grid>
         <Grid
