@@ -8,7 +8,7 @@ import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
-import { CysyncError } from '../../../../../../errors';
+import { CyError, CysyncError } from '../../../../../../errors';
 import { coinDb } from '../../../../../../store/database';
 import { broadcastTxn } from '../../../../../../store/hooks/flows';
 import {
@@ -229,6 +229,7 @@ const Summary: React.FC<StepComponentProps> = ({
     }
   }, [connected, sendTransaction.signedTxn]);
 
+  const cyError = new CyError(CysyncError.SEND_TXN_BROADCAST_FAILED);
   return (
     <Root className={classes.root}>
       {broadcastError && (
@@ -237,6 +238,8 @@ const Summary: React.FC<StepComponentProps> = ({
           handleClose={() => handleClose(true)}
           actionText="Retry"
           handleAction={handleRetry}
+          errorObj={cyError}
+          overrideErrorObj={true}
           text={broadcastError}
           advanceText={advanceError}
           flow="Broadcasting Transaction"

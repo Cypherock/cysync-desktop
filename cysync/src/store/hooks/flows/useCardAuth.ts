@@ -256,16 +256,14 @@ export const useCardAuth: UseCardAuth = isInitial => {
       const temp = { ...cardsAuth };
       temp[currentCard] = 1;
       setCardsAuth(temp);
-      setTimeout(() => {
-        if (deviceConnection && firmwareVersion) {
-          handleCardAuth({
-            connection: deviceConnection,
-            sdkVersion: deviceSdkVersion,
-            cardNumber: currentCard,
-            isTestApp: inTestApp(deviceState)
-          });
-        }
-      }, 3000);
+      if (deviceConnection && firmwareVersion) {
+        handleCardAuth({
+          connection: deviceConnection,
+          sdkVersion: deviceSdkVersion,
+          cardNumber: currentCard,
+          isTestApp: inTestApp(deviceState)
+        });
+      }
     }
   }, [currentCard]);
 
@@ -310,7 +308,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
           isTestApp: inTestApp(deviceState)
         });
       }
-    }, 1000);
+    }, 500);
   };
 
   const handleCardAuth = async ({
@@ -349,7 +347,6 @@ export const useCardAuth: UseCardAuth = isInitial => {
         cyError.setError(CysyncError.CARD_AUTH_UNKNOWN_ERROR);
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
-      setEnableRetry(false);
     });
 
     cardAuth.on('acceptedRequest', acceptedRequest => {
