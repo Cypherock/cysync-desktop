@@ -1,5 +1,4 @@
-import { DialogProps } from '@mui/material';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, DialogProps } from '@mui/material';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import PropTypes from 'prop-types';
@@ -24,7 +23,7 @@ const Root = styled(DialogBox)(({ theme }) => ({
     width: '30%',
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-around'
   },
   [`& .${classes.close}`]: {
     textTransform: 'none',
@@ -54,6 +53,7 @@ type Props = {
   rejectButtonText?: string;
   rejectButtonDisabled?: boolean;
   isLoading?: boolean;
+  hideRejectButton?: boolean;
 };
 
 const DialogBoxConfirmation: React.FC<Props> = ({
@@ -70,7 +70,8 @@ const DialogBoxConfirmation: React.FC<Props> = ({
   confirmButtonText,
   rejectButtonDisabled,
   rejectButtonText,
-  isLoading
+  isLoading,
+  hideRejectButton
 }) => {
   return (
     <Root
@@ -85,14 +86,16 @@ const DialogBoxConfirmation: React.FC<Props> = ({
         <>
           {restComponents}
           <div className={classes.buttons}>
-            <Button
-              variant="contained"
-              className={classes.close}
-              onClick={handleClose}
-              disabled={rejectButtonDisabled}
-            >
-              {rejectButtonText || 'No'}
-            </Button>
+            {hideRejectButton || (
+              <Button
+                variant="contained"
+                className={classes.close}
+                onClick={handleClose}
+                disabled={rejectButtonDisabled}
+              >
+                {rejectButtonText || 'No'}
+              </Button>
+            )}
             <CustomButton
               variant="contained"
               disabled={confirmButtonDisabled || isLoading}
