@@ -193,7 +193,7 @@ const SetEmail: React.FC<Props> = ({ onClose, open, remove, emailText }) => {
             gutterBottom
             style={{ marginBottom: '3rem' }}
           >
-            {remove ? 'Do you want to remove your email?' : 'Enter your email'}
+            {remove ? 'Remove your email?' : 'Enter your email'}
           </Typography>
           {remove || (
             <Input

@@ -193,7 +193,11 @@ const GeneralSettings = () => {
           }}
         />
       ),
-      secondaryText: 'Disable Auth Email',
+      secondaryText: !emailText
+        ? 'Add your email to receive authentication report'
+        : allowAuthEmail
+        ? 'Email auth is enabled'
+        : 'Email auth is disabled',
       element: emailText ? (
         <SwitchButton
           name="toggleAuthEmail"
@@ -209,7 +213,7 @@ const GeneralSettings = () => {
             setSetEmailDialog(true);
           }}
         >
-          Add Auth Email
+          Add Email Auth
         </Button>
       )
     },
