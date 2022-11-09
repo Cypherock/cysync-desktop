@@ -9,8 +9,10 @@ import doge from '../../../node_modules/cryptocurrency-icons/svg/color/doge.svg'
 import eth from '../../../node_modules/cryptocurrency-icons/svg/color/eth.svg';
 import generic from '../../../node_modules/cryptocurrency-icons/svg/color/generic.svg';
 import ltc from '../../../node_modules/cryptocurrency-icons/svg/color/ltc.svg';
+import solana from '../../../node_modules/cryptocurrency-icons/svg/color/sol.svg';
 import btct from '../../assets/icons/btct.svg';
 import ethr from '../../assets/icons/ethr.svg';
+import matic from '../../assets/icons/matic.svg';
 import near from '../../assets/icons/near.svg';
 
 const PREFIX = 'CoinIcons';
@@ -51,6 +53,11 @@ export const ModAvatar = styled(Avatar)(() => ({
 }));
 
 export const SmallModAvatar = styled(Avatar)(() => ({
+  height: '20px',
+  width: '20px',
+  margin: '10px',
+  fontSize: '1rem',
+
   [`& .${classes.root2}`]: {
     height: 'auto',
     width: 'auto',
@@ -58,8 +65,8 @@ export const SmallModAvatar = styled(Avatar)(() => ({
   },
 
   [`& .${classes.img2}`]: {
-    width: '20px',
-    height: '20px'
+    width: '100%',
+    height: '100%'
   }
 }));
 
@@ -147,6 +154,12 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
         case 'NEAR':
           src = near;
           break;
+        case 'SOL':
+          src = solana;
+          break;
+        case 'MATIC':
+          src = matic;
+          break;
         default:
           src = generic;
       }
@@ -159,14 +172,14 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
           alt={coinInitial}
           src={src}
           classes={{
-            root: classes.root2,
-            img: classes.img2
+            root: classes.root2
           }}
         >
           {coinInitial.toUpperCase().slice(0, 1)}
         </SmallModAvatar>
       );
     }
+
     return <StyledModAvatar style={style} alt={coinInitial} src={src} />;
   };
 

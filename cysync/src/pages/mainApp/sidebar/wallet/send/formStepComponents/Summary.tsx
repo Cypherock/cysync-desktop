@@ -133,7 +133,7 @@ const Summary: React.FC<StepComponentProps> = ({
           walletId: selectedWallet._id,
           coin: coinDetails.slug,
           txHash: res,
-          token: token ? token.coin : undefined
+          token: token ? token.slug : undefined
         });
         addTxnConfirmAddressHook(res, coinDetails.slug, selectedWallet._id);
         if (isNear)
@@ -179,6 +179,14 @@ const Summary: React.FC<StepComponentProps> = ({
               'Failed to broadcast the transaction. Check your internet connection and try again.'
             );
           }
+        } else if (e.message) {
+          setAdvanceError(e.message);
+          setBroadcastError(
+            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.' +
+              selectedWallet.passphraseSet
+              ? '\nThis may be due to incorrect passphrase.'
+              : ''
+          );
         } else {
           setBroadcastError(
             'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.'
@@ -225,13 +233,6 @@ const Summary: React.FC<StepComponentProps> = ({
         >
           Transaction ready to be broadcast. Confirm the details
         </Typography>
-        {coinAbbr.toUpperCase() === 'ETHR' && (
-          <Typography color="error" style={{ marginBottom: '0.5rem' }}>
-            [ This is a Ropsten
-            <strong>&nbsp;Testnet&nbsp;</strong>
-            transaction only ]
-          </Typography>
-        )}
         {activeButton === 0 && (
           <LabelText
             label="Recipient's Address"
@@ -268,7 +269,7 @@ const Summary: React.FC<StepComponentProps> = ({
           />
         )}
         <LabelText
-          label="Transaction Fees"
+          label="Transaction Fee"
           text={`~ ${
             sendTransaction.totalFees
           } ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(

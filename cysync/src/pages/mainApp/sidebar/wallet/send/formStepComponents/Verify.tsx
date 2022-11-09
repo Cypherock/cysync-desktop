@@ -156,13 +156,6 @@ const Verify = (props: any) => {
             </div>
           </CustomAlert>
         </div>
-        {coinAbbr.toUpperCase() === 'ETHR' && (
-          <Typography color="error">
-            [ This is a Ropsten
-            <strong>&nbsp;Testnet&nbsp;</strong>
-            transaction only ]
-          </Typography>
-        )}
         {activeButton === 0 ? (
           <>
             <LabelText
@@ -194,7 +187,7 @@ const Verify = (props: any) => {
               verified={sendTransaction.verified}
             />
             <LabelText
-              label="Transaction Fees"
+              label="Transaction Fee"
               text={`~ ${
                 sendTransaction.totalFees
               } ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
@@ -241,7 +234,7 @@ const Verify = (props: any) => {
             })}
             <div className={classes.transactionFeeDetails}>
               <LabelText
-                label="Transaction Fees"
+                label="Transaction Fee"
                 text={`~ ${
                   sendTransaction.totalFees
                 } ${coinDetails.slug.toUpperCase()} ~( $${

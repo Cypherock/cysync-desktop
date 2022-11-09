@@ -18,6 +18,7 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import Routes from '../../../constants/routes';
+import CustomButton from '../../../designSystem/designComponents/buttons/button';
 import WalletItem from '../../../designSystem/designComponents/customComponents/walletItem';
 import Icon from '../../../designSystem/designComponents/icons/Icon';
 import colors from '../../../designSystem/designConstants/colors';
@@ -97,7 +98,7 @@ const StyledButton = withStyles(() =>
       fontWeight: 500
     }
   })
-)(Button);
+)(CustomButton);
 
 const StyledAddWalletButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',

@@ -2,17 +2,20 @@ import {
   CoinGroup,
   COINS,
   EthCoinData,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import {
-  batch as batchServer,
   eth as ethServer,
   IRequestMetadata,
-  near as nearServer
+  near as nearServer,
+  serverBatch as batchServer,
+  solana as solanaServer
 } from '@cypherock/server-wrapper';
 import {
   generateEthAddressFromXpub,
-  generateNearAddressFromXpub
+  generateNearAddressFromXpub,
+  generateSolanaAddressFromXpub
 } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
@@ -84,6 +87,18 @@ export const getRequestsMetadata = (
           address,
           network: coin.network,
           responseType: 'v2'
+        },
+        item.isRefresh
+      )
+      .getMetadata();
+    return [balanceMetadata];
+  } else if (coin instanceof SolanaCoinData) {
+    const address = generateSolanaAddressFromXpub(item.xpub);
+    const balanceMetadata = solanaServer.wallet
+      .getBalance(
+        {
+          address,
+          network: coin.network
         },
         item.isRefresh
       )
@@ -193,6 +208,27 @@ export const processResponses = async (
     for (const customAccount of customAccounts) {
       totalBalance = totalBalance.plus(new BigNumber(customAccount.balance));
     }
+    await coinDb.updateTotalBalance({
+      xpub: item.xpub,
+      slug: item.coinType,
+      totalBalance: totalBalance.toString(),
+      totalUnconfirmedBalance: '0'
+    });
+    Analytics.Instance.event(
+      Analytics.EVENTS.WALLET.BALANCE.UPDATED,
+      {
+        totalBalance: totalBalance.toString(),
+        walletId: Analytics.createHash(item.walletId),
+        identifier: Analytics.createHash(item.xpub),
+        coin: item.coinType,
+        parentCoin: item.parentCoin
+      },
+      { isSensitive: true }
+    );
+  } else if (coin instanceof SolanaCoinData) {
+    const balanceRes = responses[0];
+
+    const totalBalance = new BigNumber(balanceRes.data.balance ?? 0);
     await coinDb.updateTotalBalance({
       xpub: item.xpub,
       slug: item.coinType,

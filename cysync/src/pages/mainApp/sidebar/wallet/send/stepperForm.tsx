@@ -284,7 +284,11 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       coinDetails.xpub,
       coinDetails.zpub,
       coinDetails.slug,
-      changeFormatOfOutputList(batchRecipientData, coinDetails.slug, token),
+      changeFormatOfOutputList(
+        batchRecipientData,
+        coinDetails.slug,
+        token?.slug
+      ),
       parseFloat(transactionFee) || 0,
       maxSend,
       {

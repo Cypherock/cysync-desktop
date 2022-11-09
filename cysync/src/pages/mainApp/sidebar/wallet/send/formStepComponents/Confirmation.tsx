@@ -1,4 +1,9 @@
-import { COINS, EthCoinData, NearCoinData } from '@cypherock/communication';
+import {
+  COINS,
+  EthCoinData,
+  NearCoinData,
+  SolanaCoinData
+} from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
 import LaunchIcon from '@mui/icons-material/Launch';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -18,10 +23,10 @@ import AvatarIcon from '../../../../../../designSystem/designComponents/icons/Av
 import { transactionDb } from '../../../../../../store/database';
 import {
   useCurrentCoin,
-  useSendTransactionContext,
-  useTokenContext
+  useSendTransactionContext
 } from '../../../../../../store/provider';
 import logger from '../../../../../../utils/logger';
+import { ellipsisMiddle } from '../../../../../../utils/stringManipulation';
 
 import {
   StepComponentProps,
@@ -89,6 +94,7 @@ const Root = styled('div')(({ theme }) => ({
   },
   [`& .${classes.transactionId}`]: {
     display: 'flex',
+    flexWrap: 'wrap',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center'
@@ -123,10 +129,6 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
   const { sendTransaction } = useSendTransactionContext();
 
   const { coinDetails } = useCurrentCoin();
-
-  const { token } = useTokenContext();
-
-  const coinAbbr = token ? token.slug : coinDetails.slug;
 
   const [imageData, setImageData] = React.useState('');
   const [isQRBuilding, setQRBuilding] = React.useState(true);
@@ -181,6 +183,13 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
           txHash: sendTransaction.hash
         })
       );
+    } else if (coin instanceof SolanaCoinData) {
+      shell.openExternal(
+        Server.solana.transaction.getOpenTxnLink({
+          network: coin.network,
+          txHash: sendTransaction.hash
+        })
+      );
     } else {
       shell.openExternal(
         Server.bitcoin.transaction.getOpenTxnLink({
@@ -201,13 +210,6 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
     <Root className={classes.root}>
       <div className={classes.confirmationDetails}>
         <Grid container>
-          {coinAbbr.toUpperCase() === 'ETHR' && (
-            <Typography color="error">
-              [ This is a Ropsten
-              <strong>&nbsp;Testnet&nbsp;</strong>
-              transaction only ]
-            </Typography>
-          )}
           <Grid item sm={12} className={classes.alignColCenterCenter}>
             {isQRBuilding ? (
               <CircularProgress size={40} />
@@ -242,7 +244,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
             color="textPrimary"
             variant="body1"
           >
-            {` ${sendTransaction.hash}`}
+            {ellipsisMiddle(sendTransaction.hash, 70)}
           </Typography>
           <CustomIconButton
             title="Open Link"

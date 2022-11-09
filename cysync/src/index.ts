@@ -212,6 +212,31 @@ const createWindow = async () => {
       },
       icon: iconPath
     });
+    mainWindow.webContents.session.webRequest.onHeadersReceived(
+      (details, callback) => {
+        if (details.url.startsWith('https://api.coingecko.com/')) {
+          const keys = Object.keys(details.responseHeaders);
+
+          const index = keys
+            .map(e => e.toLowerCase())
+            .findIndex(e => e === 'Access-Control-Allow-Origin'.toLowerCase());
+
+          if (index !== -1) {
+            delete details.responseHeaders[keys[index]];
+          }
+
+          const headers = {
+            responseHeaders: {
+              'Access-Control-Allow-Origin': ['*'],
+              ...details.responseHeaders
+            }
+          };
+          callback(headers);
+        } else {
+          callback({ responseHeaders: details.responseHeaders });
+        }
+      }
+    );
 
     powerMonitor.on('lock-screen', () => {
       if (mainWindow && !mainWindow.isDestroyed()) {

@@ -52,14 +52,14 @@ When adding coins to the wallet, the following flow takes place -
 ## Sending coins
 The general flow -
 1. Get receiver's address and amount as input
-2. Set transaction fees to adjust transaction priority
+2. Set transaction fee to adjust transaction priority
 3. Create transaction and await confirmation from device
 4. Once confirmed, broadcast the signed transaction onto the network.
 
 The following things execute the flow -
 - The `useSendTransaction` contains utilities related to sending a transaction.
 - `handleSendTransaction()` inside the hook sets up listeners to respond to device response. An instance of `TransactionSender` (defined in the protocols package) listens to events such as "cardError", "locked", "coinsConfirmed", and "txnTooLarge".
-- The protocols package then fetches the fees from the network, performs all the checks on the transaction .
+- The protocols package then fetches the fee from the network, performs all the checks on the transaction .
 - Once created, the transaction is verified in the package and the `signatureVerify` event is emitted from the protocols package.
 - The `onTxnBroadcast()` method then appends all inputs and outputs to the transaction (type `InputOutput`), and broadcasts the transaction using the `server-wrapper` package..
 - If successful, the transaction details are stored in the database represented by the `TransactionDB` class.

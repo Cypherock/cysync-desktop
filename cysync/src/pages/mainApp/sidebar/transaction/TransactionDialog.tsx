@@ -2,12 +2,14 @@ import {
   CoinGroup,
   COINS,
   ETHCOINS,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import {
   bitcoin as bitcoinServer,
   eth as ethServer,
-  near as nearServer
+  near as nearServer,
+  solana as solanaServer
 } from '@cypherock/server-wrapper';
 import CopyIcon from '@mui/icons-material/FileCopyOutlined';
 import Chip from '@mui/material/Chip';
@@ -21,6 +23,7 @@ import React, { useEffect, useState } from 'react';
 
 import Button from '../../../../designSystem/designComponents/buttons/button';
 import IconButton from '../../../../designSystem/designComponents/buttons/customIconButton';
+import PopOverText from '../../../../designSystem/designComponents/hover/popoverText';
 import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
@@ -67,7 +70,8 @@ const Root = styled('div')(({ theme }) => ({
     fontWeight: 'lighter'
   },
   [`& .${classes.dataContainer}`]: {
-    margin: '10px 0'
+    margin: '10px 0',
+    marginRight: '3rem'
   },
   [`& .${classes.flex}`]: {
     display: 'flex',
@@ -133,7 +137,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         .catch(logger.error);
 
       if (txn.coin && txn.coin !== txn.slug) {
-        getLatestPriceForCoin(txn.slug.toLowerCase(), txn.coin.toLowerCase())
+        getLatestPriceForCoin(txn.coin.toLowerCase())
           .then(price => {
             setEthCoinPrice(price);
           })
@@ -144,14 +148,20 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
     }
   }, [txn]);
 
-  const formatCoins = (coins: string) => {
+  const formatCoins = (coins: string, showFull?: false) => {
+    if (showFull) {
+      return discreetMode.handleSensitiveDataDisplay(
+        formatDisplayAmount(parseFloat(coins) || 0)
+      );
+    }
+
     return discreetMode.handleSensitiveDataDisplay(
-      formatDisplayAmount(parseFloat(coins) || 0)
+      formatDisplayAmount(parseFloat(coins) || 0, 5, true)
     );
   };
 
   const getPriceForCoin = (coins: string) => {
-    return ((parseFloat(coins) || 0) * coinPrice).toFixed(2);
+    return (parseFloat(coins) || 0) * coinPrice;
   };
 
   const getFeeCoinName = () => {
@@ -162,15 +172,23 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
     return txn.slug.toUpperCase();
   };
 
-  const getFeePrice = () => {
+  const getFeePrice = (showFull?: boolean) => {
     if (txn.isErc20) {
       return discreetMode.handleSensitiveDataDisplay(
-        ((parseFloat(txn.displayFees) || 0) * ethCoinPrice).toFixed(2)
+        formatDisplayAmount(
+          (parseFloat(txn.displayFees) || 0) * ethCoinPrice,
+          showFull ? undefined : 2,
+          true
+        )
       );
     }
 
     return discreetMode.handleSensitiveDataDisplay(
-      formatDisplayAmount(getPriceForCoin(txn.displayFees))
+      formatDisplayAmount(
+        getPriceForCoin(txn.displayFees),
+        showFull ? undefined : 2,
+        true
+      )
     );
   };
 
@@ -205,6 +223,13 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         nearServer.transaction.getOpenTxnLink({
           network: (coin as NearCoinData).network,
           txHash: txn.hash
+        })
+      );
+    } else if (coin.group === CoinGroup.Solana) {
+      shell.openExternal(
+        solanaServer.transaction.getOpenTxnLink({
+          txHash: txn.hash,
+          network: (coin as SolanaCoinData).network
         })
       );
     } else {
@@ -243,6 +268,23 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
   if (!txn) return <></>;
 
+  //used for displaying eth or erc20Tokens addresses in lower case
+  let coinData;
+  const coinParent = txn.coin?.toLowerCase();
+  const coinInitial = txn.slug?.toLowerCase();
+  if (coinParent && coinParent !== coinInitial) {
+    const parent = COINS[coinParent];
+    if (!parent) {
+      logger.warn(`Cannot find coinType parent: ${coinParent}`);
+    }
+    coinData = parent.tokenList[coinInitial];
+  } else coinData = COINS[coinInitial];
+  if (!coinData) {
+    logger.warn(`Cannot find coinType: ${coinInitial}`);
+  }
+  const isEth =
+    coinData.group === CoinGroup.Ethereum ||
+    coinData.group === CoinGroup.ERC20Tokens;
   return (
     <Root>
       <div className={classes.dateTimeContainer}>
@@ -297,25 +339,62 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             initial={txn.slug.toUpperCase()}
             parentCoin={txn.coin?.toLowerCase()}
           />
-          <Typography>
-            {`${txn.slug.toUpperCase()} ${formatCoins(
-              txn.displayAmount
-            )} ($${getPriceForCoin(txn.displayAmount)})`}
+          <Typography sx={{ mr: 1 }}>
+            {`${txn.slug.toUpperCase()} ${formatCoins(txn.displayAmount)} `}
           </Typography>
+          <PopOverText
+            color="textPrimary"
+            hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(
+                getPriceForCoin(txn.displayAmount),
+                undefined,
+                true
+              )
+            )} `}
+          >
+            {`($ ${discreetMode.handleSensitiveDataDisplay(
+              formatDisplayAmount(getPriceForCoin(txn.displayAmount), 2, true)
+            )})`}
+          </PopOverText>
         </div>
       </div>
       <div className={classes.dataContainer}>
-        <Typography color="textSecondary">Fees</Typography>
+        <Typography color="textSecondary">Fee</Typography>
         <div className={classes.flex}>
           <CoinIcons
             style={{ marginLeft: '0', marginRight: '10px' }}
             initial={getFeeCoinName()}
           />
-          <Typography>{`${getFeeCoinName()} ${formatCoins(
+          <Typography sx={{ mr: 1 }}>{`${getFeeCoinName()} ${formatCoins(
             txn.displayFees
-          )} ($${getFeePrice()})`}</Typography>
+          )}`}</Typography>
+          <PopOverText
+            text={`($ ${getFeePrice()})`}
+            color="textPrimary"
+            hoverText={`$ ${getFeePrice(true)} `}
+          />
         </div>
       </div>
+      {
+        <div style={{ display: 'flex' }}>
+          {txn.type && (
+            <div className={classes.dataContainer}>
+              <Typography color="textSecondary">Type</Typography>
+              <div className={classes.flex}>
+                <Typography>{txn.type.toUpperCase()}</Typography>
+              </div>
+            </div>
+          )}
+          {txn.description && (
+            <div className={classes.dataContainer}>
+              <Typography color="textSecondary">Description</Typography>
+              <div className={classes.flex}>
+                <Typography>{txn.description}</Typography>
+              </div>
+            </div>
+          )}
+        </div>
+      }
       <Grid
         container
         spacing={2}
@@ -344,7 +423,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {elem.address}
+                      {isEth ? elem.address.toLowerCase() : elem.address}
                     </Typography>
                     <Typography
                       style={{ userSelect: 'text' }}
@@ -383,7 +462,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {elem.address}
+                      {isEth ? elem.address.toLowerCase() : elem.address}
                     </Typography>
                     <Typography
                       style={{ userSelect: 'text' }}

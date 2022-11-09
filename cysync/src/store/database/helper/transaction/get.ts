@@ -7,6 +7,7 @@ export interface TxQuery {
   walletName?: string;
   slug?: string;
   coin?: string;
+  customIdentifier?: string;
   sentReceive?: SentReceive;
   status?: Status;
 }
@@ -92,4 +93,15 @@ export const getTopBlock = async (query: TxQuery, options: TxQueryOptions) => {
   if (res.length === 0) return undefined;
   // return max block height
   return res[0].blockHeight;
+};
+
+export const getTopHash = async (query: TxQuery, options: TxQueryOptions) => {
+  const res = await getAllTxns(query, options, {
+    field: 'confirmed',
+    order: 'desc',
+    limit: 1
+  });
+  if (res.length === 0) return undefined;
+  // return max block height
+  return res[0].hash;
 };

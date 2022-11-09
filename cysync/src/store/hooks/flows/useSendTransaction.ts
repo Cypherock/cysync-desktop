@@ -5,7 +5,8 @@ import {
   DeviceError,
   DeviceErrorType,
   EthCoinData,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import {
   InputOutput,
@@ -40,24 +41,36 @@ export const changeFormatOfOutputList = (
   coinType: string,
   token: any
 ): Array<{ address: string; value?: BigNumber }> => {
-  const coin = COINS[token ? token.coin : coinType];
+  const coin = COINS[coinType];
 
   if (!coin) {
     throw new Error(`Invalid coinType ${coinType}`);
   }
 
-  return targetList.map((rec: any) => {
+  let multiplier = coin.multiplier;
+
+  if (token && coin instanceof EthCoinData) {
+    const tokenObj = coin.tokenList[token.toLowerCase()];
+
+    if (!coin) {
+      throw new Error(`Invalid token ${token}, in ${coinType}`);
+    }
+
+    multiplier = tokenObj.multiplier;
+  }
+
+  const list = targetList.map((rec: any) => {
     return {
       address: rec.recipient.trim(),
 
       value:
         rec.amount === undefined
           ? undefined
-          : new BigNumber(rec.amount).multipliedBy(
-              new BigNumber(coin.multiplier)
-            )
+          : new BigNumber(rec.amount).multipliedBy(new BigNumber(multiplier))
     };
   });
+
+  return list;
 };
 
 export const broadcastTxn = async (
@@ -80,7 +93,7 @@ export const broadcastTxn = async (
     if (resp.status === 0) {
       throw new Error('brodcast-failed');
     }
-    return resp.data.result.toUpperCase();
+    return resp.data.result;
   } else if (coin instanceof NearCoinData) {
     const resp = await Server.near.transaction
       .broadcastTxn({
@@ -97,6 +110,24 @@ export const broadcastTxn = async (
       throw new Error('transaction-failed');
 
     return resp.data.transaction.hash;
+  } else if (coin instanceof SolanaCoinData) {
+    const resp = await Server.solana.transaction
+      .broadcastTxn({
+        transaction: signedTxn,
+        network: coin.network
+      })
+      .request();
+
+    if (resp.status === 0) {
+      throw new Error('brodcast-failed');
+    }
+
+    if (resp.data.cysyncError) throw resp.data.cysyncError;
+
+    if (resp.data?.signature === undefined)
+      throw new Error('transaction-failed');
+
+    return resp.data.signature;
   } else {
     const res = await Server.bitcoin.transaction
       .broadcastTxn({
@@ -121,6 +152,7 @@ export const verifyAddress = (address: string, coin: string) => {
       /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/; // any number of top level accounts are valid here
     return regexImplicit.test(address) || regexRegistered.test(address);
   }
+
   return WAValidator.validate(
     address,
     coinDetails.validatorCoinName,
@@ -733,7 +765,7 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       if (token) {
         tx = {
-          hash: txHash.toLowerCase(),
+          hash: txHash,
           amount: amount.toString(),
           total: amount.toString(),
           fees: fees.toString(),
@@ -749,7 +781,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputs: formattedOutputs
         };
         const feeTxn: Transaction = {
-          hash: txHash.toLowerCase(),
+          hash: txHash,
           amount: fees.toString(),
           total: fees.toString(),
           fees: '0',
@@ -765,12 +797,21 @@ export const useSendTransaction: UseSendTransaction = () => {
         transactionDb.insert(feeTxn);
       } else {
         tx = {
-          hash: coin.toLowerCase() === 'near' ? txHash : txHash.toLowerCase(),
+          hash: txHash,
+          customIdentifier:
+            coin.toLowerCase() === 'near'
+              ? formattedInputs[0].address
+              : undefined,
+          type:
+            coin.toLowerCase() === 'near' || coin.toLowerCase() === 'sol'
+              ? 'TRANSFER'
+              : undefined,
           amount: amount.toString(),
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
           walletId,
           slug: coin.toLowerCase(),
+          coin,
           confirmations: 0,
           status: coin.toLowerCase() === 'near' ? 1 : 0,
           sentReceive: SentReceive.SENT,
@@ -839,10 +880,19 @@ export const useSendTransaction: UseSendTransaction = () => {
       }
 
       const tx: Transaction = {
-        hash: txHash.toLowerCase(),
+        hash: txHash,
         amount: amount.toString(),
         total: amount.plus(fees).toString(),
         fees: fees.toString(),
+        customIdentifier:
+          coin.toLowerCase() === 'near'
+            ? formattedInputs[0].address
+            : undefined,
+        type: coin.toLowerCase() === 'near' ? 'FUNCTION_CALL' : undefined,
+        description:
+          coin.toLowerCase() === 'near'
+            ? `Created account ${formattedOutputs[0]?.address}`
+            : undefined,
         walletId,
         slug: coin.toLowerCase(),
         confirmations: 0,

@@ -4,7 +4,8 @@ import {
   CoinGroup,
   COINS,
   EthCoinData,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import crypto from 'crypto';
 import PropTypes from 'prop-types';
@@ -17,6 +18,7 @@ import {
   coinDb,
   customAccountDb,
   getTopBlock,
+  getTopHash,
   priceHistoryDb,
   tokenDb,
   transactionDb
@@ -24,9 +26,14 @@ import {
 import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
-import { executeBatch, ExecutionResult } from './executors';
+import {
+  executeBatch,
+  executeLatestPriceBatch,
+  ExecutionResult
+} from './executors';
 import {
   BalanceSyncItem,
+  ClientTimeoutInterface,
   CustomAccountSyncItem,
   HistorySyncItem,
   LatestPriceSyncItem,
@@ -94,6 +101,14 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const { connected } = useNetwork();
   const connectedRef = useRef<boolean | null>(connected);
+
+  const timeThreshold = 60000; // log every 1 minute
+  const offsetTime = useRef(0);
+  const startTime = useRef(0);
+  const clientTimeout = useRef<ClientTimeoutInterface>({
+    pause: false,
+    tryAfter: 0
+  });
 
   useEffect(() => {
     connectedRef.current = connected;
@@ -199,11 +214,35 @@ export const SyncProvider: React.FC = ({ children }) => {
           addToQueue(newZItem);
         }
       } else if (coinData instanceof EthCoinData) {
+        const topBlock = await getTopBlock(
+          {
+            walletId: coin.walletId,
+            slug: coinData.abbr,
+            coin: coinData.abbr
+          },
+          {
+            excludeFailed: true,
+            excludePending: true
+          }
+        );
+        const topTokenBlock = await getTopBlock(
+          {
+            walletId: coin.walletId,
+            slug: coinData.abbr,
+            coin: 'eth'
+          },
+          {
+            excludeFailed: true,
+            excludePending: true
+          }
+        );
         const newItem = new HistorySyncItem({
           xpub: coin.xpub,
           walletName: '',
           walletId: coin.walletId,
           coinType: coinData.abbr,
+          afterBlock: topBlock,
+          afterTokenBlock: topTokenBlock,
           isRefresh,
           module,
           coinGroup: CoinGroup.Ethereum
@@ -214,15 +253,18 @@ export const SyncProvider: React.FC = ({ children }) => {
           coin: coin.slug,
           walletId: coin.walletId
         });
-        const topBlock = await getTopBlock(
-          {
-            walletId: coin.walletId,
-            slug: coinData.abbr
-          },
-          {}
-        );
         for (const account of customAccounts) {
           const customAccount = account.name;
+
+          const topBlock = await getTopBlock(
+            {
+              walletId: coin.walletId,
+              slug: coinData.abbr,
+              customIdentifier: customAccount
+            },
+            {}
+          );
+
           const newItem = new HistorySyncItem({
             xpub: coin.xpub,
             walletName: '',
@@ -236,6 +278,27 @@ export const SyncProvider: React.FC = ({ children }) => {
           });
           addToQueue(newItem);
         }
+      } else if (coinData instanceof SolanaCoinData) {
+        const topHash = await getTopHash(
+          {
+            walletId: coin.walletId,
+            slug: coinData.abbr,
+            status: 1
+          },
+          {}
+        );
+
+        const newItem = new HistorySyncItem({
+          xpub: coin.xpub,
+          walletName: '',
+          walletId: coin.walletId,
+          coinType: coinData.abbr,
+          afterHash: topHash,
+          coinGroup: CoinGroup.Solana,
+          isRefresh,
+          module
+        });
+        addToQueue(newItem);
       } else {
         logger.warn('Xpub with invalid coin found', {
           coinData,
@@ -316,6 +379,17 @@ export const SyncProvider: React.FC = ({ children }) => {
           });
           addToQueue(newItem);
         }
+      } else if (coinData.group === CoinGroup.Solana) {
+        const newItem = new BalanceSyncItem({
+          xpub: coin.xpub,
+          zpub: coin.zpub,
+          walletId: coin.walletId,
+          coinType: coin.slug,
+          isRefresh,
+          coinGroup: CoinGroup.Solana,
+          module
+        });
+        addToQueue(newItem);
       } else {
         // If BTC fork, we get the balance from the txn api
         addHistorySyncItemFromCoin(coin, { module, isRefresh });
@@ -384,6 +458,8 @@ export const SyncProvider: React.FC = ({ children }) => {
         for (const days of [7, 30, 365] as Array<
           PriceSyncItemOptions['days']
         >) {
+          if (days === 7 && coinData.coinGeckoId) continue;
+
           const oldPrices = await priceHistoryDb.getOne({
             slug: coinData.abbr,
             interval: days
@@ -393,9 +469,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           // Check if the prices and old enough and then only add to sync
           if (oldPrices && oldPrices.data && oldPrices.data.length > 2) {
             const oldestPriceEntry = oldPrices.data[oldPrices.data.length - 1];
-            const secondOldestPriceEntry =
-              oldPrices.data[oldPrices.data.length - 2];
-            const interval = oldestPriceEntry[0] - secondOldestPriceEntry[0];
+            const interval = (days === 30 ? 1 : 24) * 60 * 60 * 1000;
             const currentTime = new Date().getTime();
             const nextLatestTime = oldestPriceEntry[0] + interval;
 
@@ -477,16 +551,24 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       if (result.isFailed) {
         if (item.retries < maxRetries && result.canRetry) {
-          logger.warn('Sync: Error, retrying...', { item });
+          const errorMsg = result?.error?.toString() || result?.error;
+          logger.warn('Sync: Error, retrying...', { item, error: errorMsg });
           updatedItem.retries += 1;
-
+          if (result.delay) {
+            clientTimeout.current = {
+              pause: true,
+              tryAfter: performance.now() + result.delay
+            };
+            logger.info('ClientBatch sync paused for CoinGeckoAPI');
+          }
           updateQueueItem = true;
           removeFromQueue = false;
         } else {
+          const errorMsg = result?.error?.toString() || result?.error;
           logger.error(
             `${CysyncError.SYNC_MAX_TRIES_EXCEEDED} Sync: Error, max retries exceeded`
           );
-          logger.error({ error: result.error, item });
+          logger.error({ error: errorMsg, item });
         }
       } else if (
         item instanceof HistorySyncItem &&
@@ -497,6 +579,11 @@ export const SyncProvider: React.FC = ({ children }) => {
         (updatedItem as HistorySyncItem).page = result.processResult.page;
         (updatedItem as HistorySyncItem).afterBlock =
           result.processResult.after;
+        (updatedItem as HistorySyncItem).afterHash = result.processResult.until;
+        (updatedItem as HistorySyncItem).beforeHash =
+          result.processResult.before;
+        (updatedItem as HistorySyncItem).afterTokenBlock =
+          result.processResult.afterToken;
       }
 
       if (removeFromQueue) {
@@ -551,23 +638,67 @@ export const SyncProvider: React.FC = ({ children }) => {
     });
   };
 
-  const executeNextInQueue = async () => {
-    setIsExecutingTask(true);
+  const executeNextClientItemInQueue = async () => {
     if (!connected) {
-      await sleep(queueExecuteInterval);
-      setIsExecutingTask(false);
-      return;
+      return [];
+    }
+
+    const latestPriceItems = syncQueue.filter(
+      item => item.type === 'latestPrice'
+    );
+
+    const items = syncQueue.filter(item => item.type === 'price').splice(0, 1);
+
+    try {
+      if (clientTimeout.current.pause) {
+        if (performance.now() >= clientTimeout.current.tryAfter) {
+          clientTimeout.current = { pause: false, tryAfter: 0 };
+          logger.info('Waiting complete');
+        } else {
+          return [];
+        }
+      }
+      let latestPriceResult: ExecutionResult[] = [];
+      if (latestPriceItems.length > 0) {
+        latestPriceResult = await executeLatestPriceBatch(
+          latestPriceItems as LatestPriceSyncItem[],
+          {
+            addToQueue,
+            addPriceSyncItemFromCoin,
+            addLatestPriceSyncItemFromCoin
+          }
+        );
+      }
+      const executionResult = await executeBatch(items, {
+        addToQueue,
+        addPriceSyncItemFromCoin,
+        addLatestPriceSyncItemFromCoin,
+        isClientBatch: true
+      });
+
+      return [...latestPriceResult, ...executionResult];
+    } catch (error) {
+      // Since all the tasks for an item are closely related, I understand why this is being done.
+      // TODO: But we should aim to do better to handle a single failing.
+      logger.error('Failed to execute batch, hence failing all tasks');
+    }
+  };
+
+  const executeNextBatchItemInQueue = async () => {
+    if (!connected) {
+      return [];
     }
 
     let items: SyncQueueItem[] = [];
+
     if (syncQueue.length > 0) {
-      items = syncQueue.slice(0, BATCH_SIZE);
+      items = syncQueue
+        .filter(item => item.type !== 'price' && item.type !== 'latestPrice')
+        .slice(0, BATCH_SIZE);
     }
 
     if (items.length <= 0) {
-      await sleep(queueExecuteInterval);
-      setIsExecutingTask(false);
-      return;
+      return [];
     }
 
     try {
@@ -576,14 +707,41 @@ export const SyncProvider: React.FC = ({ children }) => {
         addPriceSyncItemFromCoin,
         addLatestPriceSyncItemFromCoin
       });
-
-      updateAllExecutedItems(executionResult);
+      return executionResult;
     } catch (error) {
       // Since all the tasks for an item are closely related, I understand why this is being done.
       // TODO: But we should aim to do better to handle a single failing.
       logger.error('Failed to execute batch, hence failing all tasks');
     }
+  };
 
+  const executeNextInQueue = async () => {
+    setIsExecutingTask(true);
+    const timeStart = performance.now();
+    const array = await Promise.all([
+      executeNextClientItemInQueue(),
+      executeNextBatchItemInQueue()
+    ]);
+    updateAllExecutedItems(array.reduce((acc, item) => acc.concat(item), []));
+    const timeStop = performance.now();
+    if (timeStop - timeStart > 5000) {
+      logger.info(`Batch execution took ${timeStop - timeStart} milliseconds`);
+      logger.info({
+        queue: array
+          .reduce((acc, item) => acc.concat(item), [])
+          .map(item => {
+            return {
+              ...item,
+              item: {
+                ...item.item,
+                walletId: undefined,
+                xpub: undefined,
+                zpub: undefined
+              }
+            };
+          })
+      });
+    }
     await sleep(queueExecuteInterval);
     setIsExecutingTask(false);
   };
@@ -863,6 +1021,43 @@ export const SyncProvider: React.FC = ({ children }) => {
       setIsSyncing(false);
     }
   }, [connected, isInitialSetupDone, syncQueue]);
+
+  useEffect(() => {
+    if (syncQueue.length > 0) {
+      if (startTime.current > 0) {
+        const peek = performance.now();
+        if (peek - startTime.current > timeThreshold + offsetTime.current) {
+          offsetTime.current = peek;
+          logger.info(`Threshold exceeded at ${peek} milliseconds`);
+          logger.info({
+            queue: syncQueue.slice(0, 3).map(item => {
+              return {
+                ...item,
+                walletId: undefined,
+                xpub: undefined,
+                zpub: undefined
+              };
+            }),
+            totalLength: syncQueue.length
+          });
+        }
+      } else {
+        startTime.current = performance.now();
+        logger.info(
+          `Sync queue started executing with ${syncQueue.length} items`
+        );
+      }
+    } else {
+      if (startTime.current > 0) {
+        const stop = performance.now();
+        logger.info(
+          `Sync completed total time: ${stop - startTime.current} milliseconds`
+        );
+        offsetTime.current = 0;
+        startTime.current = 0;
+      }
+    }
+  }, [syncQueue]);
 
   // Execute the syncItems if it is syncing
   useEffect(() => {

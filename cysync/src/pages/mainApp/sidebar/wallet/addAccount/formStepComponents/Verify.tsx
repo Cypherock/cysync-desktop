@@ -151,13 +151,6 @@ const Verify = (props: any) => {
             </div>
           </CustomAlert>
         </div>
-        {coinAbbr.toUpperCase() === 'ETHR' && (
-          <Typography color="error">
-            [ This is a Ropsten
-            <strong>&nbsp;Testnet&nbsp;</strong>
-            transaction only ]
-          </Typography>
-        )}
         <>
           <LabelText
             label="Coin"
@@ -184,7 +177,7 @@ const Verify = (props: any) => {
             verified={sendTransaction.verified}
           />
           <LabelText
-            label="Transaction Fees"
+            label="Transaction Fee"
             text={`~ ${0.0012} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
               0.0012 * parseFloat(coinDetails.displayPrice),
               2,

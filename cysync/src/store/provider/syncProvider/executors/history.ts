@@ -3,18 +3,21 @@ import {
   CoinGroup,
   COINS,
   EthCoinData,
-  NearCoinData
+  NearCoinData,
+  SolanaCoinData
 } from '@cypherock/communication';
 import {
-  batch as batchServer,
   eth as ethServer,
   IRequestMetadata,
   near as nearServer,
+  serverBatch as batchServer,
+  solana as solanaServer,
   v2 as v2Server
 } from '@cypherock/server-wrapper';
 import {
   formatEthAddress,
   generateEthAddressFromXpub,
+  generateSolanaAddressFromXpub,
   getEthAmountFromInput
 } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
@@ -24,7 +27,6 @@ import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
 import {
   addressDb,
-  Coin,
   coinDb,
   convertTxnToAnalyticsItem,
   IOtype,
@@ -34,7 +36,12 @@ import {
   Transaction,
   transactionDb
 } from '../../../database';
-import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
+import {
+  BalanceSyncItem,
+  HistorySyncItem,
+  ModifiedCoin,
+  SyncProviderTypes
+} from '../types';
 
 export const getRequestsMetadata = (
   item: HistorySyncItem
@@ -69,14 +76,26 @@ export const getRequestsMetadata = (
     const address = generateEthAddressFromXpub(item.xpub);
 
     const ethTxnMetadata = ethServer.transaction
-      .getHistory({ address, network: coin.network }, item.isRefresh)
+      .getHistory(
+        {
+          address,
+          network: coin.network,
+          limit: 100,
+          from: item.afterBlock,
+          responseType: 'v2'
+        },
+        item.isRefresh
+      )
       .getMetadata();
 
     const erc20Metadata = ethServer.transaction
       .getContractHistory(
         {
           address,
-          network: coin.network
+          network: coin.network,
+          limit: 100,
+          from: item.afterTokenBlock,
+          responseType: 'v2'
         },
         item.isRefresh
       )
@@ -91,13 +110,33 @@ export const getRequestsMetadata = (
           address: item.customAccount,
           network: coin.network,
           limit: 100,
-          from: item.afterBlock
+          from: item.afterBlock,
+          responseType: 'v2'
         },
         item.isRefresh
       )
       .getMetadata();
 
     return [nearTxnMetadata];
+  }
+
+  if (coin instanceof SolanaCoinData) {
+    const address = generateSolanaAddressFromXpub(item.xpub);
+
+    const solanaTxnMetadata = solanaServer.transaction
+      .getHistory(
+        {
+          address,
+          network: coin.network,
+          limit: 100,
+          from: item.afterHash,
+          before: item.beforeHash
+        },
+        item.isRefresh
+      )
+      .getMetadata();
+
+    return [solanaTxnMetadata];
   }
 
   logger.warn('Invalid coin in sync queue', {
@@ -261,8 +300,10 @@ export const processResponses = async (
 
     const address = generateEthAddressFromXpub(item.xpub);
     const rawHistory = responses[0].data?.result;
+    const moreParent = responses[0].data?.more;
 
     const erc20history = responses[1].data?.result;
+    const moreToken = responses[1].data?.more;
 
     if (!rawHistory) {
       throw new Error('Invalid eth history from server');
@@ -275,12 +316,14 @@ export const processResponses = async (
 
       const fromAddr = formatEthAddress(ele.from);
       const toAddr = formatEthAddress(ele.to);
+      const selfTransfer = fromAddr === toAddr;
+      const amount = String(ele.value || 0);
 
       const txn: Transaction = {
         hash: ele.hash,
-        amount: String(ele.value),
+        amount: selfTransfer ? '0' : amount,
         fees: fees.toString(),
-        total: new BigNumber(ele.value).plus(fees).toString(),
+        total: new BigNumber(amount).plus(fees).toString(),
         confirmations: ele.confirmations || 0,
         walletId: item.walletId,
         slug: item.coinType,
@@ -294,7 +337,7 @@ export const processResponses = async (
         inputs: [
           {
             address: fromAddr,
-            value: String(ele.value),
+            value: amount,
             indexNumber: 0,
             isMine: address === fromAddr,
             type: IOtype.INPUT
@@ -303,7 +346,7 @@ export const processResponses = async (
         outputs: [
           {
             address: toAddr,
-            value: String(ele.value),
+            value: amount,
             indexNumber: 0,
             isMine: address === toAddr,
             type: IOtype.OUTPUT
@@ -313,18 +356,18 @@ export const processResponses = async (
 
       // If it is a failed transaction, then check if it is a token transaction.
       if (txn.status === 2) {
-        let amount = '0';
+        let txnAmount = '0';
         const token = Object.values(coinData.tokenList).find(
           t => t.address === ele.to.toLowerCase()
         );
 
         if (token) {
           if (ele.input) {
-            amount = String(getEthAmountFromInput(ele.input));
+            txnAmount = String(getEthAmountFromInput(ele.input));
           }
 
           txn.slug = token.abbr;
-          txn.amount = amount;
+          txn.amount = txnAmount;
 
           // Even if the token transaction failed, the transaction fee is still deducted.
           if (txn.sentReceive === SentReceive.SENT) {
@@ -359,6 +402,8 @@ export const processResponses = async (
       const tokenObj = coinData.tokenList[ele.tokenSymbol.toLowerCase()];
       const fromAddr = formatEthAddress(ele.from);
       const toAddr = formatEthAddress(ele.to);
+      const selfTransfer = fromAddr === toAddr;
+      const amount = String(ele.value || 0);
 
       // Only add if it exists in our coin list
       if (
@@ -373,9 +418,9 @@ export const processResponses = async (
         erc20Tokens.add(ele.tokenSymbol.toLowerCase());
         const txn: Transaction = {
           hash: ele.hash as string,
-          amount: String(ele.value),
+          amount: selfTransfer ? '0' : amount,
           fees: fees.toString(),
-          total: String(ele.value),
+          total: amount,
           confirmations: (ele.confirmations as number) || 0,
           walletId: item.walletId,
           slug: (ele.tokenSymbol as string).toLowerCase(),
@@ -410,14 +455,14 @@ export const processResponses = async (
 
       // When a token is sent, the transaction fee is deducted from ETH
       if (address === fromAddr) {
-        const amount = new BigNumber(ele.gasPrice || 0).multipliedBy(
+        const amt = new BigNumber(ele.gasPrice || 0).multipliedBy(
           new BigNumber(ele.gasUsed || 0)
         );
         history.push({
           hash: ele.hash as string,
-          amount: amount.toString(),
+          amount: amt.toString(),
           fees: '0',
-          total: amount.toString(),
+          total: amt.toString(),
           confirmations: (ele.confirmations as number) || 0,
           walletId: item.walletId,
           slug: item.coinType,
@@ -471,16 +516,31 @@ export const processResponses = async (
             isRefresh: true
           })
         );
-        options.addPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
-          isRefresh: true,
-          module: item.module
-        });
-        options.addLatestPriceSyncItemFromCoin({ slug: tokenName } as Coin, {
-          isRefresh: true,
-          module: 'default'
-        });
+        options.addPriceSyncItemFromCoin(
+          { slug: tokenName, parentCoin: item.coinType } as ModifiedCoin,
+          {
+            isRefresh: true,
+            module: item.module
+          }
+        );
+        options.addLatestPriceSyncItemFromCoin(
+          { slug: tokenName, parentCoin: item.coinType } as ModifiedCoin,
+          {
+            isRefresh: true,
+            module: 'default'
+          }
+        );
       }
     }
+    const returnObj: { after?: number; afterToken?: number } = {};
+    if (moreParent || moreToken) {
+      if (rawHistory.length > 0)
+        returnObj.after = rawHistory[rawHistory.length - 1].blockNumber;
+      if (erc20history.length > 0)
+        returnObj.afterToken =
+          erc20history[erc20history.length - 1].blockNumber;
+    }
+    return returnObj.after || returnObj.afterToken ? returnObj : undefined;
   }
 
   if (coinData instanceof NearCoinData) {
@@ -496,18 +556,31 @@ export const processResponses = async (
     }
 
     for (const ele of rawHistory) {
-      const fees = new BigNumber(ele.tokens_burnt).plus(
-        ele.receipt_conversion_tokens_burnt
-      );
+      const fees = new BigNumber(ele.tokens_burnt || 0)
+        .plus(ele.receipt_conversion_tokens_burnt || 0)
+        .plus(ele.nested_receipts_tokens_burnt || 0);
 
       const fromAddr = ele.signer_account_id;
       const toAddr = ele.receiver_account_id;
       const address = ele.address_parameter;
 
+      const selfTransfer = fromAddr === toAddr;
+      const amount = String(ele.args?.deposit || 0);
+      const isAddAccountTransaction =
+        ele.action_kind === 'FUNCTION_CALL' &&
+        ele.args?.method_name === 'create_account';
+      let description;
+      let argsJson;
+      if (isAddAccountTransaction) {
+        argsJson = JSON.parse(
+          Buffer.from(ele.args?.args_base64 || '', 'base64').toString()
+        );
+        description = `Created account ${argsJson.new_account_id}`;
+      }
       const txn: Transaction = {
         hash: ele.transaction_hash,
         customIdentifier: address,
-        amount: String(ele.args.deposit),
+        amount: selfTransfer ? '0' : amount,
         fees: fees.toString(),
         total: new BigNumber(ele.args.deposit).plus(fees).toString(),
         confirmations: 1,
@@ -524,7 +597,7 @@ export const processResponses = async (
         inputs: [
           {
             address: fromAddr,
-            value: String(ele.args.deposit),
+            value: amount,
             indexNumber: 0,
             isMine: address === fromAddr,
             type: IOtype.INPUT
@@ -532,15 +605,60 @@ export const processResponses = async (
         ],
         outputs: [
           {
-            address: toAddr,
-            value: String(ele.args.deposit),
+            address: isAddAccountTransaction
+              ? argsJson?.new_account_id
+              : toAddr,
+            value: amount,
             indexNumber: 0,
             isMine: address === toAddr,
             type: IOtype.OUTPUT
           }
-        ]
+        ],
+        type: ele.action_kind,
+        description
       };
       history.push(txn);
+      if (isAddAccountTransaction) {
+        const newAccountAddress = argsJson?.new_account_id;
+        const addAccountTxn: Transaction = {
+          hash: ele.transaction_hash,
+          customIdentifier: newAccountAddress,
+          amount,
+          fees: fees.toString(),
+          total: new BigNumber(amount).plus(fees).toString(),
+          confirmations: 0,
+          walletId: item.walletId,
+          slug: item.coinType,
+          status: ele.status ? 1 : 2,
+          sentReceive: SentReceive.RECEIVED,
+          confirmed: new Date(
+            parseInt(ele.block_timestamp, 10) / 1000000
+          ).toISOString(), //conversion from timestamp in nanoseconds
+          blockHeight: 0,
+          coin: item.coinType,
+          inputs: [
+            {
+              address: fromAddr,
+              value: amount,
+              indexNumber: 0,
+              isMine: newAccountAddress === fromAddr,
+              type: IOtype.INPUT
+            }
+          ],
+          outputs: [
+            {
+              address: newAccountAddress,
+              value: amount,
+              indexNumber: 0,
+              isMine: true,
+              type: IOtype.OUTPUT
+            }
+          ],
+          type: ele.action_kind,
+          description
+        };
+        history.push(addAccountTxn);
+      }
     }
 
     const transactionDbList = [];
@@ -560,6 +678,91 @@ export const processResponses = async (
     if (more && rawHistory) {
       return {
         after: rawHistory[rawHistory.length - 1].block_height
+      };
+    }
+  }
+
+  if (coinData instanceof SolanaCoinData) {
+    if (responses[0].isFailed) {
+      throw new Error('Did not find responses while processing');
+    }
+    const history: Transaction[] = [];
+    const rawHistory = responses[0].data.data;
+    const more = responses[0].data.more;
+
+    if (!rawHistory) {
+      throw new Error('Invalid near history from server');
+    }
+
+    for (const ele of rawHistory) {
+      if (ele.transaction?.message?.instructions?.length > 0) {
+        for (const instruction of ele.transaction.message.instructions) {
+          const fees = new BigNumber(ele.meta?.fee || 0);
+
+          const fromAddr = instruction.parsed?.info?.source;
+          const toAddr = instruction.parsed?.info?.destination;
+          const address = generateSolanaAddressFromXpub(item.xpub);
+
+          const selfTransfer = fromAddr === toAddr;
+          const amount = String(instruction.parsed?.info?.lamports || 0);
+          const txn: Transaction = {
+            hash: ele.signature,
+            amount: selfTransfer ? '0' : amount,
+            fees: fees.toString(),
+            total: new BigNumber(amount).plus(fees).toString(),
+            confirmations: 1,
+            walletId: item.walletId,
+            slug: item.coinType,
+            status: ele.meta?.err || ele.err ? 2 : 1,
+            sentReceive:
+              address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
+            confirmed: new Date(
+              parseInt(ele.blockTime, 10) * 1000
+            ).toISOString(), // conversion from timestamp in seconds
+            blockHeight: ele.slot,
+            coin: item.coinType,
+            inputs: [
+              {
+                address: fromAddr,
+                value: amount,
+                indexNumber: 0,
+                isMine: address === fromAddr,
+                type: IOtype.INPUT
+              }
+            ],
+            outputs: [
+              {
+                address: toAddr,
+                value: amount,
+                indexNumber: 0,
+                isMine: address === toAddr,
+                type: IOtype.OUTPUT
+              }
+            ],
+            type: instruction.parsed?.type
+          };
+          history.push(txn);
+        }
+      }
+    }
+
+    const transactionDbList = [];
+    for (const txn of history) {
+      transactionDbList.push(txn);
+    }
+    try {
+      await transactionDb.insertMany(transactionDbList);
+      // No need to retry if the inserting fails because it'll produce the same error.
+    } catch (error) {
+      logger.error(
+        ` ${CysyncError.TXN_INSERT_FAILED} Error while inserting transaction in DB : insert`
+      );
+      logger.error(error);
+    }
+    if (more && rawHistory) {
+      return {
+        before: rawHistory[rawHistory.length - 1].signature,
+        until: item.afterHash
       };
     }
   }

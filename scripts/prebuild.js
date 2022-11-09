@@ -24,6 +24,14 @@ const BUILD_TYPE_CONFIG = {
     LOG_LEVEL: "silly",
     SERVER_ENV: "development",
     GITHUB_REPO: "Cypherock/cysync-desktop-dev",
+    ALLOW_PRERELEASE: false,
+    SIMULATE_PRODUCTION: false,
+  },
+  feat: {
+    BUILD_TYPE: "debug",
+    LOG_LEVEL: "silly",
+    SERVER_ENV: "development",
+    GITHUB_REPO: "Cypherock/cysync-desktop-feat",
     ALLOW_PRERELEASE: true,
     SIMULATE_PRODUCTION: false,
     ANALYTICS_KEY: DEV_ANALYTICS_KEY,
@@ -64,6 +72,8 @@ const getArgs = () => {
 
   if (name.includes("dev")) {
     buildType = "dev";
+  } else if (name.includes("feat")) {
+    buildType = "feat";
   } else if (name.includes("debug")) {
     buildType = "debug";
   } else if (name.includes("rc")) {
@@ -187,7 +197,7 @@ const setVersion = async (buildType, tagName) => {
 
   const usableVersion = usableVersionArr.join(".");
 
-  const index = ["dev", "debug"].includes(buildType)
+  const index = ["dev","feat","debug"].includes(buildType)
     ? await getReleaseIndex({
         githubRepo: BUILD_TYPE_CONFIG[buildType].GITHUB_REPO,
       })
@@ -196,6 +206,9 @@ const setVersion = async (buildType, tagName) => {
   switch (buildType) {
     case "dev":
       packageJson.version = `${usableVersion}-dev.${index}`;
+      break;
+    case "feat":
+      packageJson.version = `${usableVersion}-feat.${index}`;
       break;
     case "debug":
       packageJson.version = `${usableVersion}-debug.${index}`;

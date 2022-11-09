@@ -229,13 +229,6 @@ const Summary: React.FC<StepComponentProps> = ({
           The new account is successfully verified. You may now complete account
           creation
         </Typography>
-        {coinAbbr.toUpperCase() === 'ETHR' && (
-          <Typography color="error" style={{ marginBottom: '0.5rem' }}>
-            [ This is a Ropsten
-            <strong>&nbsp;Testnet&nbsp;</strong>
-            transaction only ]
-          </Typography>
-        )}
         <LabelText label="Create From" text={creatorAccount} verified />
         <LabelText
           label="New Account Id"
@@ -252,7 +245,7 @@ const Summary: React.FC<StepComponentProps> = ({
           verified={sendTransaction.verified}
         />
         <LabelText
-          label="Transaction Fees"
+          label="Transaction Fee"
           text={`~ ${0.0012} ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
             0.0012 * parseFloat(coinDetails.displayPrice),
             2,

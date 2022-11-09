@@ -8,7 +8,6 @@ import Grid from '@mui/material/Grid';
 import InputAdornment from '@mui/material/InputAdornment';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import BigNumber from 'bignumber.js';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AutoSizer, List } from 'react-virtualized';
@@ -213,7 +212,7 @@ const Transaction = () => {
           initial={data.slug?.toUpperCase()}
           coinParent={data.coin === data.slug ? undefined : data.coin}
           amount={data.displayAmount}
-          value={new BigNumber(data.displayValue).toFixed(2)}
+          value={data.displayValue}
           result={convertToDisplayValue(data.sentReceive).toUpperCase()}
           decimal={data.coinDecimal}
           address={data.hash}
@@ -309,7 +308,7 @@ const Transaction = () => {
                 <Typography color="textSecondary">Amount</Typography>
               </Button>
             </Grid>
-            <Grid item xs={1}>
+            <Grid item xs={2}>
               <Button
                 className={classes.headerButtons}
                 onClick={() => {
@@ -337,7 +336,7 @@ const Transaction = () => {
                 Result
               </Typography>
             </Grid>
-            <Grid item xs={1}>
+            <Grid item xs={2}>
               <Typography color="textSecondary" style={{ marginLeft: '5px' }}>
                 Status
               </Typography>
@@ -407,7 +406,9 @@ const Transaction = () => {
                     coinName: showTxn.coinName,
                     coinDecimal: showTxn.coinDecimal,
                     inputs: showTxn.inputs,
-                    outputs: showTxn.outputs
+                    outputs: showTxn.outputs,
+                    type: showTxn.type,
+                    description: showTxn.description
                   }
                 : null
             }

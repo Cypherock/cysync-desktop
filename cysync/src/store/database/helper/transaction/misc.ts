@@ -4,7 +4,7 @@ import Analytics from '../../../../utils/analytics';
 import { SentReceive } from '../../index';
 
 export const convertToDisplayValue = (value: SentReceive) => {
-  if (value === SentReceive.FEES) return 'Fees';
+  if (value === SentReceive.FEES) return 'Fee';
   if (value === SentReceive.SENT) return 'Sent';
   return 'Received';
 };

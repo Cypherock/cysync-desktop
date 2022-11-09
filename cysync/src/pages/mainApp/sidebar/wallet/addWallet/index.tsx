@@ -160,6 +160,14 @@ const AddWallet = () => {
     await updateName();
   };
 
+  const handleRetry = async () => {
+    handleClose();
+    clearErrorObj();
+    resetHooks();
+
+    navigate(Routes.wallet.index + '?openImportWalletForm=true');
+  };
+
   const openImportWalletForm = searchParams.get('openImportWalletForm');
 
   useEffect(() => {
@@ -175,8 +183,8 @@ const AddWallet = () => {
     <Root container className={classes.root}>
       <ErrorBox
         open={errorObj.isSet}
-        actionText={isNameDiff ? 'Yes' : undefined}
-        handleAction={isNameDiff ? onUpdateName : undefined}
+        actionText={isNameDiff ? 'Yes' : 'Retry'}
+        handleAction={isNameDiff ? onUpdateName : handleRetry}
         handleClose={handleErrorBoxClose}
         text={errorObj.showError()}
         errorObj={errorObj}

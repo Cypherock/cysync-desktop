@@ -386,7 +386,7 @@ const CardAuth: React.FC<DeviceSettingItemProps> = ({
             <div className={classes.errorButtons}>
               {!latestDeviceConnection.current ? (
                 <Tooltip
-                  title={'Reconnect the device to retry'}
+                  title={'Reconnect the X1 wallet to retry'}
                   placement="top"
                 >
                   <div>

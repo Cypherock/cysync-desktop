@@ -1,7 +1,7 @@
 import {
-  batch as batchServer,
   IRequestMetadata,
-  pricing as pricingServer
+  pricing as pricingServer,
+  serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 
 import { priceHistoryDb } from '../../../database';
@@ -40,4 +40,12 @@ export const processResponses = async (
     interval: item.days,
     data: usesNewApi ? res.data.prices : res.data.data.entries
   });
+
+  if (item.days === 30 && usesNewApi) {
+    await priceHistoryDb.insert({
+      slug: item.coinType,
+      interval: 7,
+      data: res.data.prices.slice(-168) // 7 * 24 for hourly interval
+    });
+  }
 };

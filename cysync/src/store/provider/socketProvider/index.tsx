@@ -1,4 +1,9 @@
-import { CoinGroup, COINS } from '@cypherock/communication';
+import {
+  CoinGroup,
+  COINS,
+  EthCoinData,
+  SolanaCoinData
+} from '@cypherock/communication';
 import { getServerUrl } from '@cypherock/server-wrapper';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
@@ -55,7 +60,8 @@ export const SocketProvider: React.FC = ({ children }) => {
     address: string,
     walletId: string,
     coinType: string,
-    currentSocket?: Socket
+    currentSocket?: Socket,
+    network?: string
   ) => {
     try {
       let usableSocket: Socket;
@@ -74,7 +80,7 @@ export const SocketProvider: React.FC = ({ children }) => {
         walletId,
         coinType
       });
-      usableSocket.emit('receiveAddr', address, walletId, coinType);
+      usableSocket.emit('receiveAddr', address, walletId, coinType, network);
     } catch (error) {
       logger.error(error);
     }
@@ -84,7 +90,8 @@ export const SocketProvider: React.FC = ({ children }) => {
     hash: string,
     coinType: string,
     walletId: string,
-    currentSocket?: Socket
+    currentSocket?: Socket,
+    network?: string
   ) => {
     try {
       let usableSocket: Socket;
@@ -99,7 +106,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       }
 
       logger.info('Setting Txn Confirm hook', { hash, coinType, walletId });
-      usableSocket.emit('txnConfirm', hash, coinType, walletId);
+      usableSocket.emit('txnConfirm', hash, coinType, walletId, network);
     } catch (error) {
       logger.error(error);
     }
@@ -146,12 +153,13 @@ export const SocketProvider: React.FC = ({ children }) => {
       logger.warn('Invalid coinType in addReceiveAddressHook: ' + coinType);
       return;
     }
-    if (coin.group === CoinGroup.Ethereum) {
+    if (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana) {
       return addReceiveAddressHookFromSocket(
         address,
         walletId,
         coinType,
-        currentSocket
+        currentSocket,
+        (coin as SolanaCoinData | EthCoinData).network
       );
     } else {
       return addReceiveAddressHookFromBlockbookSocket(
@@ -176,12 +184,13 @@ export const SocketProvider: React.FC = ({ children }) => {
       return;
     }
 
-    if (coin.group === CoinGroup.Ethereum) {
+    if (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana) {
       return addTxnConfirmAddressHookFromSocket(
         hash,
         coinType,
         walletId,
-        currentSocket
+        currentSocket,
+        (coin as SolanaCoinData | EthCoinData).network
       );
     } else {
       return;
@@ -200,7 +209,10 @@ export const SocketProvider: React.FC = ({ children }) => {
 
     for (const pendingTxn of allPendingTxns) {
       const coin = COINS[pendingTxn.coin];
-      if (coin && coin.group === CoinGroup.Ethereum) {
+      if (
+        coin &&
+        (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana)
+      ) {
         addTxnConfirmAddressHook(
           pendingTxn.hash,
           pendingTxn.walletId,
@@ -215,7 +227,10 @@ export const SocketProvider: React.FC = ({ children }) => {
 
     for (const receiveAddr of allReceiveAddr) {
       const coin = COINS[receiveAddr.coinType];
-      if (coin && coin.group === CoinGroup.Ethereum) {
+      if (
+        coin &&
+        (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana)
+      ) {
         addReceiveAddressHook(
           receiveAddr.address,
           receiveAddr.walletId,

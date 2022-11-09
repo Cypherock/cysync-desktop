@@ -53,7 +53,9 @@ const SelectWallet: React.FC<StepComponentProps> = ({ handleNext }) => {
 
   return (
     <Root className={classes.root}>
-      <Typography color="textSecondary">Follow the Steps on Device</Typography>
+      <Typography color="textSecondary">
+        Follow the instructions on X1 Wallet
+      </Typography>
       <TextView
         completed={coinAdder.coinsConfirmed}
         inProgress={!coinAdder.coinsConfirmed}

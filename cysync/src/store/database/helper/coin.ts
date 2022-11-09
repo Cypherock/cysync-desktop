@@ -35,7 +35,7 @@ export const getLatestPriceForCoin = async (
     logger.warn(`Cannot find price for coin ${coin}`);
     return 0;
   }
-  return res.price;
+  return res.price || 0;
 };
 
 export const getLatestPriceForCoins = async (

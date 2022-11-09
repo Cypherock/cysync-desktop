@@ -4,13 +4,12 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Collapse } from '@mui/material';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import { styled, Theme, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Routes from '../../../../constants/routes';
@@ -28,7 +27,7 @@ import {
   tokenDb,
   transactionDb
 } from '../../../../store/database';
-import { useToken } from '../../../../store/hooks';
+import { DisplayToken, useToken } from '../../../../store/hooks';
 import {
   useReceiveTransaction,
   useSendTransaction
@@ -48,6 +47,7 @@ import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 import prevent from '../../../../utils/preventPropagation';
 
 import AddToken from './addToken';
+import getTokens, { IInitialToken } from './addToken/tokens';
 import { EthereumOneCoinProps, EthereumOneCoinPropTypes } from './OneCoinProps';
 import OneToken from './OneToken';
 import Recieve from './recieve';
@@ -70,7 +70,9 @@ const classes = {
   grey: `${PREFIX}-grey`,
   dialogRoot: `${PREFIX}-dialogRoot`,
   ethererum: `${PREFIX}-ethererum`,
-  rootButtonWrapper: `${PREFIX}-rootButtonWrapper`
+  rootButtonWrapper: `${PREFIX}-rootButtonWrapper`,
+  actionButton: `${PREFIX}-actionButton`,
+  actionButtonIcon: `${PREFIX}-actionButtonIcon`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -98,9 +100,9 @@ const Root = styled('div')(({ theme }) => ({
     margin: '0px !important'
   },
   [`& .${classes.divider}`]: {
-    background: theme.palette.primary.dark,
-    height: '50%',
-    margin: '0px 10px'
+    height: '100%',
+    width: '0',
+    margin: '0 2.5px'
   },
   [`& .${classes.actions}`]: {
     display: 'flex',
@@ -146,6 +148,17 @@ const Root = styled('div')(({ theme }) => ({
     alignItems: 'center',
     justifyContent: 'center',
     borderTop: `1px solid rgba(33, 40, 35, 1)`
+  },
+  [`& .${classes.actionButton}`]: {
+    [theme.breakpoints.down('lg')]: {
+      fontSize: '12px'
+    }
+  },
+  [`& .${classes.actionButtonIcon}`]: {
+    [theme.breakpoints.down('lg')]: {
+      width: '14px',
+      height: '14px'
+    }
   }
 }));
 
@@ -182,6 +195,13 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const sync = useSync();
   const snackbar = useSnackbar();
+
+  // Using JSON.parse to create a deep copy instead of passing by referrence
+  // Using useRef because this variable will not change throught the lifecycle
+  // of this component.
+  const tokens = useRef<IInitialToken[]>(
+    JSON.parse(JSON.stringify(getTokens(initial.toLowerCase())))
+  );
 
   const { selectedWallet } = useSelectedWallet();
 
@@ -258,12 +278,19 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   };
 
   const [receiveForm, setReceiveForm] = useState(false);
-
   const receiveTransaction = useReceiveTransaction();
-
   const handleReceiveFormOpen = (e: React.MouseEvent) => {
     prevent(e);
     if (beforeAction() && beforeNetworkAction()) setReceiveForm(true);
+  };
+
+  const [selectedAddToken, setSelectedAddToken] = useState<
+    DisplayToken | undefined
+  >(undefined);
+  const [addTokenReceiveForm, setAddTokenReceiveForm] = useState(false);
+  const addTokenReceiveTransaction = useReceiveTransaction();
+  const handleAddTokenReceiveFormOpen = () => {
+    if (beforeAction() && beforeNetworkAction()) setAddTokenReceiveForm(true);
   };
 
   const [collapseTab, setCollapseTab] = React.useState(false);
@@ -289,9 +316,39 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
 
   const [openAddToken, setOpenAddToken] = useState(false);
 
-  const handleAddTokenFormClose = () => {
+  const handleAddTokenFormClose = (selectedToken?: string) => {
+    const elem = tokens.current.find(e => e.abbr === selectedToken);
+
+    if (elem) {
+      const token: DisplayToken = {
+        walletId: selectedWallet._id,
+        coin: initial,
+        slug: selectedToken,
+        balance: '0',
+        price: 0,
+        displayValue: '0',
+        displayPrice: '0',
+        displayBalance: '0',
+        isEmpty: true,
+        parentCoin: initial,
+        priceLastUpdatedAt: undefined
+      };
+
+      if (!(beforeAction() && beforeNetworkAction())) {
+        return;
+      }
+
+      setSelectedAddToken(token);
+    }
+
     setOpenAddToken(false);
   };
+
+  useEffect(() => {
+    if (selectedAddToken) {
+      handleAddTokenReceiveFormOpen();
+    }
+  }, [selectedAddToken]);
 
   return (
     <Root>
@@ -317,6 +374,27 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
         handleClose={handleAddTokenFormClose}
         ethCoin={initial}
       />
+
+      {selectedAddToken && (
+        <TokenContext.Provider
+          value={{ token: selectedAddToken, ethCoin: initial }}
+        >
+          <ReceiveTransactionContext.Provider
+            value={{
+              receiveTransaction: addTokenReceiveTransaction,
+              receiveForm: addTokenReceiveForm,
+              setReceiveForm: val => {
+                if (!val) {
+                  setSelectedAddToken(undefined);
+                }
+                setAddTokenReceiveForm(val);
+              }
+            }}
+          >
+            <Recieve />
+          </ReceiveTransactionContext.Provider>
+        </TokenContext.Provider>
+      )}
 
       <SendTransactionContext.Provider
         value={{
@@ -353,45 +431,63 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
               initial={initial.toUpperCase()}
               style={{ marginRight: '10px' }}
             />
-            <Typography color="textPrimary">{name}</Typography>
+            <PopOverText
+              color="textPrimary"
+              hoverText={name}
+              style={{ paddingRight: '8px' }}
+            >
+              {name}
+            </PopOverText>
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
             <PopOverText
-              text={`${discreetMode.handleSensitiveDataDisplay(
-                formatDisplayAmount(holding, 4)
-              )} ${initial}`}
               color="textPrimary"
               hoverText={`${discreetMode.handleSensitiveDataDisplay(
                 formatDisplayAmount(holding, decimal, true)
               )} ${initial}`}
-            />
+              style={{ paddingRight: '8px' }}
+            >
+              {discreetMode.handleSensitiveDataDisplay(
+                formatDisplayAmount(holding, 5, true)
+              )}{' '}
+              {initial}
+            </PopOverText>
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
             <PopOverText
-              text={`$ ${discreetMode.handleSensitiveDataDisplay(
-                formatDisplayAmount(value, 2, true)
-              )}`}
               color="textPrimary"
               hoverText={`$ ${discreetMode.handleSensitiveDataDisplay(
                 formatDisplayAmount(value, undefined, true)
               )} `}
-            />
+              style={{ paddingRight: '8px' }}
+            >
+              $
+              {discreetMode.handleSensitiveDataDisplay(
+                formatDisplayAmount(value, 2, true)
+              )}
+            </PopOverText>
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
             <PopOverText
-              text={`$ ${formatDisplayAmount(price, 2, true)}`}
               color="textPrimary"
               hoverText={`$ ${formatDisplayAmount(price, undefined, true)} `}
-            />
+              style={{ paddingRight: '8px' }}
+            >
+              $ {formatDisplayAmount(price, 2, true)}
+            </PopOverText>
           </Grid>
           <Grid item xs={2} className={classes.actions}>
             <Button
               variant="text"
-              className={!isEmpty ? clsx(classes.orange) : clsx(classes.grey)}
+              className={clsx({
+                [classes.orange]: !isEmpty,
+                [classes.grey]: isEmpty,
+                [classes.actionButton]: true
+              })}
               onClick={handleSendFormOpen}
               startIcon={
                 <Icon
-                  className={classes.icon}
+                  className={clsx(classes.icon, classes.actionButtonIcon)}
                   viewBox="0 0 14 15"
                   icon={ICONS.walletSend}
                   color={
@@ -404,13 +500,13 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
             >
               Send
             </Button>
-            <Divider orientation="vertical" className={classes.divider} />
+            <div className={classes.divider} />
             <Button
               variant="text"
-              className={clsx(classes.recieveButton)}
+              className={clsx(classes.recieveButton, classes.actionButton)}
               startIcon={
                 <Icon
-                  className={classes.icon}
+                  className={clsx(classes.icon, classes.actionButtonIcon)}
                   viewBox="0 0 14 15"
                   icon={ICONS.walletRecieve}
                   color={theme.palette.info.main}
@@ -422,13 +518,17 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
             </Button>
           </Grid>
           <Grid item xs={1} className={classes.alignCenterCenter}>
-            <CustomIconButton title="Delete Coin" onClick={handleDeleteOpen}>
+            <CustomIconButton
+              title="Delete Coin"
+              onClick={handleDeleteOpen}
+              iconButtonClassName={clsx(classes.actionButton)}
+            >
               <Icon
                 style={{
                   display: 'inline-block',
                   verticalAlign: 'middle'
                 }}
-                size={20}
+                size={16}
                 viewBox="0 0 18 18"
                 iconGroup={<Dustbin />}
               />
@@ -504,25 +604,27 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
               </Grid>
             </Grid>
           ) : (
-            <Grid item xs={12} className={classes.rootButtonWrapper}>
-              <CoinCardBtn
-                onClick={(e: React.MouseEvent) => {
-                  prevent(e);
-                  if (setOpenAddToken) setOpenAddToken(true);
-                }}
-                fullWidth
-                startIcon={<AddCircleIcon />}
-                style={{
-                  borderRadius: '0',
-                  borderTop: '1px solid #222',
-                  padding: '6px'
-                }}
-                disabled={isLoading}
-                disableRipple
-              >
-                ADD TOKEN
-              </CoinCardBtn>
-            </Grid>
+            tokenList.length <= 0 || (
+              <Grid item xs={12} className={classes.rootButtonWrapper}>
+                <CoinCardBtn
+                  onClick={(e: React.MouseEvent) => {
+                    prevent(e);
+                    if (setOpenAddToken) setOpenAddToken(true);
+                  }}
+                  fullWidth
+                  startIcon={<AddCircleIcon />}
+                  style={{
+                    borderRadius: '0',
+                    borderTop: '1px solid #222',
+                    padding: '6px'
+                  }}
+                  disabled={isLoading}
+                  disableRipple
+                >
+                  ADD TOKEN
+                </CoinCardBtn>
+              </Grid>
+            )
           )}
         </>
       }

@@ -86,9 +86,6 @@ const GeneralSettings = () => {
   const [disableAnalytics, setDisableAnalytics] = React.useState(
     localStorage.getItem('disableAnalytics') === 'true'
   );
-  const [usePrereleaseFirmware, setUsePrereleaseFirmware] = React.useState(
-    localStorage.getItem('usePrereleaseFirmware') === 'true'
-  );
 
   const [removePasswordDialog, setRemovePasswordDialog] = React.useState(false);
   const [confirmPasswordDialog, setConfirmPasswordDialog] =
@@ -139,14 +136,6 @@ const GeneralSettings = () => {
     setDisableProvision(!disableProvision);
   };
 
-  const handleUsePrereleaseFirmwareClick = () => {
-    localStorage.setItem(
-      'usePrereleaseFirmware',
-      usePrereleaseFirmware ? 'false' : 'true'
-    );
-    setUsePrereleaseFirmware(!usePrereleaseFirmware);
-  };
-
   const ListData = [
     {
       name: 'Password',
@@ -187,7 +176,7 @@ const GeneralSettings = () => {
     {
       name: 'Auto Lock',
       secondaryText:
-        'Lock the app automatically when your laptop goes to sleep.',
+        'Lock the app automatically when your laptop goes to sleep',
       element: previousSetPassword ? (
         <SwitchButton
           name="toggleAutoLock"
@@ -212,7 +201,7 @@ const GeneralSettings = () => {
       name: 'Clear cysync app data',
       secondaryText: (
         <div>
-          <div>(You will lose all the data stored in the CySync app.</div>
+          <div>(You will lose all the data stored in the CySync app</div>
           <div>
             NOTE: Your wallet accounts stored on your device will not be
             affected)
@@ -269,21 +258,6 @@ const GeneralSettings = () => {
     });
   }
 
-  if (process.env.ALLOW_PRERELEASE === 'true') {
-    ListData.push({
-      name: 'Enable Pre-release Firmware update',
-      secondaryText:
-        '(This will allow for the installation of pre released firmware on your device)',
-      element: (
-        <SwitchButton
-          name="usePrereleaseFirmware"
-          completed={usePrereleaseFirmware}
-          handleChange={handleUsePrereleaseFirmwareClick}
-        />
-      )
-    });
-  }
-
   const resetAppConfirmationComponent = (
     <div
       style={{
@@ -297,11 +271,11 @@ const GeneralSettings = () => {
         Do you really want to clear all the application data?
       </Typography>
       <Typography align="center" color="textSecondary">
-        You will loose all the data stored in your CySync app.
+        You will lose all the data stored in your CySync app
       </Typography>
       {!passwordExists() && (
         <Typography align="center" color="textSecondary">
-          Restart the application if it does not starts automatically.
+          Restart the application if it does not starts automatically
         </Typography>
       )}
     </div>
