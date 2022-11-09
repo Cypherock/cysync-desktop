@@ -194,7 +194,7 @@ export const insertFromFullTxn = async (transaction: {
 
     Analytics.Instance.event(
       Analytics.EVENTS.WALLET.TXN.TRACK,
-      convertTxnToAnalyticsItem(newTxn),
+      convertTxnToAnalyticsItem(newTxn, xpub),
       { isSensitive: true }
     );
     await transactionDb.insert(newTxn);
@@ -264,7 +264,7 @@ export const insertFromFullTxn = async (transaction: {
 
       Analytics.Instance.event(
         Analytics.EVENTS.WALLET.TXN.TRACK,
-        convertTxnToAnalyticsItem(feeTxn),
+        convertTxnToAnalyticsItem(feeTxn, xpub),
         { isSensitive: true }
       );
       await transactionDb.insert(feeTxn);
@@ -293,7 +293,7 @@ export const insertFromFullTxn = async (transaction: {
 
     Analytics.Instance.event(
       Analytics.EVENTS.WALLET.TXN.TRACK,
-      convertTxnToAnalyticsItem(newTxn),
+      convertTxnToAnalyticsItem(newTxn, xpub),
       { isSensitive: true }
     );
     await transactionDb.insert(newTxn);

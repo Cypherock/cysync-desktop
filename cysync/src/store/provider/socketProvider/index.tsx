@@ -515,7 +515,7 @@ export const SocketProvider: React.FC = ({ children }) => {
               newTxns.map(newTxn =>
                 Analytics.Instance.event(
                   Analytics.EVENTS.WALLET.TXN.TRACK,
-                  convertTxnToAnalyticsItem(newTxn),
+                  convertTxnToAnalyticsItem(newTxn, coin.xpub),
                   { isSensitive: true }
                 )
               );

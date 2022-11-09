@@ -510,7 +510,7 @@ export const processResponses = async (
         amount: String(ele.args.deposit),
         fees: fees.toString(),
         total: new BigNumber(ele.args.deposit).plus(fees).toString(),
-        confirmations: 0,
+        confirmations: 1,
         walletId: item.walletId,
         slug: item.coinType,
         status: ele.status ? 1 : 2,
@@ -608,7 +608,7 @@ const analyzeTxn = (item: HistorySyncItem, txns: Transaction[]) => {
     ) {
       Analytics.Instance.event(
         Analytics.EVENTS.WALLET.TXN.TRACK,
-        convertTxnToAnalyticsItem(txn),
+        convertTxnToAnalyticsItem(txn, item.xpub),
         { isSensitive: true }
       );
     }

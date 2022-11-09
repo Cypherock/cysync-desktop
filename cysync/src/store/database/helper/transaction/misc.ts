@@ -9,11 +9,12 @@ export const convertToDisplayValue = (value: SentReceive) => {
   return 'Received';
 };
 
-export const convertTxnToAnalyticsItem = (txn: Transaction) => {
+export const convertTxnToAnalyticsItem = (txn: Transaction, xpub: string) => {
   return {
     txnHash: txn.hash,
     parentCoin: txn.coin,
     coin: txn.slug,
+    identifier: Analytics.createHash(xpub),
     customIdentifier: Analytics.createHash(txn.customIdentifier),
     amount: txn.amount,
     fees: txn.fees,
@@ -25,6 +26,7 @@ export const convertTxnToAnalyticsItem = (txn: Transaction) => {
         ? 'Pending'
         : 'Success',
     walletId: Analytics.createHash(txn.walletId),
-    confirmations: txn.confirmations
+    confirmations: txn.confirmations,
+    time: txn.confirmed
   };
 };
