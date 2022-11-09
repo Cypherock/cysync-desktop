@@ -14,7 +14,7 @@ import {
   Typography
 } from '@mui/material';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import SwitchButton from '../../../../../../designSystem/designComponents/buttons/switchButton';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';

@@ -108,8 +108,6 @@ const ExchangePanel = () => {
           allWallets={allWallets}
           amountToReceive={amountToReceive || '0'}
           price={toToken?.price || 0}
-          // toWalletId={toWalletId}
-          // setToWalletId={setToWalletId}
           toWallet={toWallet}
           setToWallet={setToWallet}
           fromWallet={fromWallet}
