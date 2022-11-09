@@ -3,27 +3,71 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 import logger from '../../mainProcess/logger';
-import { customAccountDb, Wallet } from '../database';
+import { coinDb, customAccountDb, Wallet } from '../database';
 import {
   changeFormatOfOutputList,
   DisplayCoin,
   useReceiveTransaction,
-  useSendTransaction
+  useSendTransaction,
+  useWalletData
 } from '../hooks';
-import { useConnection } from '../provider';
+import { useConnection, useWallets } from '../provider';
 
 import { ReceiveFlowSteps, SendFlowSteps } from './helper/FlowSteps';
 
 // TODO: get the base URL from the config
 const baseUrl = 'http://localhost:5000/swap';
 
-export const useExchange = (currentWalletDetails: Wallet) => {
+export interface UseExchangeValues {
+  fromToken: DisplayCoin;
+  setFromToken: React.Dispatch<React.SetStateAction<DisplayCoin>>;
+  toToken: DisplayCoin;
+  setToToken: React.Dispatch<React.SetStateAction<DisplayCoin>>;
+  amountToSend: string;
+  setAmountToSend: React.Dispatch<React.SetStateAction<string>>;
+  exchangeRate: string;
+  fees: string;
+  amountToReceive: string;
+  receiveAddress: string;
+  // tslint:disable-next-line: no-any
+  getSwapTransactions: (walletId: string) => Promise<any>;
+  startReceiveFlow: () => void;
+  generateSwapTransaction: () => Promise<void>;
+  startSendFlow: () => void;
+  cancelSwapTransaction: () => void;
+  isSwapCompleted: boolean;
+  // tslint:disable-next-line: no-any
+  swapTransaction: any;
+  handleUserVerifiedSendAddress: () => void;
+  toWallet: Wallet;
+  setToWallet: React.Dispatch<React.SetStateAction<Wallet>>;
+  fromWallet: Wallet;
+  setFromWallet: React.Dispatch<React.SetStateAction<Wallet>>;
+  fromWalletCoinData: DisplayCoin[];
+  toWalletCoinData: DisplayCoin[];
+  allWallets: Wallet[];
+  receiveFlowStep: ReceiveFlowSteps;
+  sendFlowStep: SendFlowSteps;
+}
+
+export type UseExchange = () => UseExchangeValues;
+
+export const useExchange: UseExchange = () => {
+  const { allWallets, isLoading: isWalletLoading } = useWallets();
+  const { getCoinsWithPrices } = useWalletData();
+
   const { deviceConnection, deviceSdkVersion, setIsInFlow } = useConnection();
   const receiveTransaction = useReceiveTransaction();
   const sendTransaction = useSendTransaction();
 
   const [fromToken, setFromToken] = useState<DisplayCoin>();
   const [toToken, setToToken] = useState<DisplayCoin>();
+  const [toWallet, setToWallet] = useState<Wallet>();
+  const [fromWallet, setFromWallet] = useState<Wallet>();
+  const [fromWalletCoinData, setFromWalletCoinData] = useState<DisplayCoin[]>(
+    []
+  );
+  const [toWalletCoinData, setToWalletCoinData] = useState<DisplayCoin[]>([]);
   const [amountToSend, setAmountToSend] = useState('');
   const [fees, setFees] = useState('');
   const [amountToReceive, setAmountToReceive] = useState('');
@@ -40,6 +84,32 @@ export const useExchange = (currentWalletDetails: Wallet) => {
   const [sendFlowStep, setSendFlowStep] = useState<SendFlowSteps>(
     SendFlowSteps.Waiting
   );
+
+  // Fetch the coins from the database when the source wallet changes
+  useEffect(() => {
+    const setCoinListFromWallet = async () => {
+      const coins = await getAllCoinsFromWallet(fromWallet?._id);
+      setFromWalletCoinData(coins);
+    };
+    setCoinListFromWallet();
+  }, [fromWallet]);
+
+  // Fetch the coins from the database when the destination wallet changes
+  useEffect(() => {
+    const setCoinListToWallet = async () => {
+      const coins = await getAllCoinsFromWallet(toWallet?._id);
+      setToWalletCoinData(coins);
+    };
+    setCoinListToWallet();
+  }, [toWallet]);
+
+  // Set the first wallet as the default from and to wallet
+  useEffect(() => {
+    if (!isWalletLoading) {
+      setFromWallet(allWallets[0]);
+      setToWallet(allWallets[0]);
+    }
+  }, [isWalletLoading, allWallets]);
 
   // Set the receive address once the card is tapped
   useEffect(() => {
@@ -134,9 +204,9 @@ export const useExchange = (currentWalletDetails: Wallet) => {
    * @param walletId The wallet to fetch the transactions for.
    * @returns An array of transactions.
    */
-  const getSwapTransactions = async () => {
+  const getSwapTransactions = async (walletId: string) => {
     const { data } = await axios.get(`${baseUrl}/transactions`, {
-      params: { walletId: currentWalletDetails?._id }
+      params: { walletId }
     });
     return data.message.result;
   };
@@ -150,11 +220,12 @@ export const useExchange = (currentWalletDetails: Wallet) => {
         connection: deviceConnection,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
-        walletId: currentWalletDetails._id,
+        walletId: toWallet._id,
         coinType: toToken.slug,
         coinName: COINS[toToken.slug]?.name,
         xpub: toToken.xpub,
-        zpub: toToken.zpub
+        zpub: toToken.zpub,
+        passphraseExists: toWallet.passphraseSet
       })
       .then(() => {
         logger.info('Swap Transaction: Receive Flow Started');
@@ -165,11 +236,10 @@ export const useExchange = (currentWalletDetails: Wallet) => {
   };
 
   /**
-   * Creates a swap transaction.
+   * Creates a swap transaction with the toWallet id as the receiving wallet.
    */
   const generateSwapTransaction = async () => {
-    const sendDetails = await createSwapTransaction(currentWalletDetails._id);
-
+    const sendDetails = await createSwapTransaction(toWallet?._id);
     setSwapTransaction(sendDetails);
   };
 
@@ -202,13 +272,13 @@ export const useExchange = (currentWalletDetails: Wallet) => {
         connection: deviceConnection,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
-        walletId: currentWalletDetails._id,
+        walletId: fromWallet?._id,
         xpub: fromToken.xpub,
         zpub: fromToken.zpub,
         coinType: fromToken.slug,
         fees: +fees,
-        pinExists: currentWalletDetails?.passwordSet,
-        passphraseExists: currentWalletDetails?.passphraseSet,
+        pinExists: fromWallet?.passwordSet,
+        passphraseExists: fromWallet?.passphraseSet,
         customAccount,
         newAccountId: null,
         outputList: changeFormatOfOutputList(
@@ -245,6 +315,20 @@ export const useExchange = (currentWalletDetails: Wallet) => {
     startSendFlow();
   };
 
+  /**
+   * Get all the coins that are added to a wallet.
+   *
+   * @param walletId The wallet to fetch the coins for.
+   * @returns A promise that resolves to an array of DisplayCoins.
+   */
+  const getAllCoinsFromWallet = async (
+    walletId: string
+  ): Promise<DisplayCoin[]> => {
+    const res = await coinDb.getAll({ walletId });
+    const unsortedCoins = await getCoinsWithPrices(res);
+    return unsortedCoins;
+  };
+
   return {
     fromToken,
     setFromToken,
@@ -261,10 +345,17 @@ export const useExchange = (currentWalletDetails: Wallet) => {
     generateSwapTransaction,
     startSendFlow,
     cancelSwapTransaction,
-    receiveFlowStep,
-    sendFlowStep,
     isSwapCompleted,
     swapTransaction,
-    handleUserVerifiedSendAddress
+    handleUserVerifiedSendAddress,
+    toWallet,
+    setToWallet,
+    fromWallet,
+    setFromWallet,
+    fromWalletCoinData,
+    toWalletCoinData,
+    allWallets,
+    receiveFlowStep,
+    sendFlowStep
   };
 };

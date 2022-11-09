@@ -1,12 +1,10 @@
 import { COINS } from '@cypherock/communication';
-import { Wallet } from '@cypherock/database';
 import { Grid, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import Button from '../../../../../../designSystem/designComponents/buttons/button';
-import { DisplayCoin, useExchange } from '../../../../../../store/hooks';
+import { useExchange } from '../../../../../../store/hooks';
 import { ReceiveFlowSteps } from '../../../../../../store/hooks/helper/FlowSteps';
 
 import SwapCompletedDialog from './dialogs/SwapCompletedDialog';
@@ -39,19 +37,7 @@ const Root = styled('div')(() => ({
   }
 }));
 
-type ExchangePanelProps = {
-  coinData: DisplayCoin[];
-  currentWalletDetails: Wallet;
-  allWallets: Wallet[];
-  setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
-};
-
-const ExchangePanel: React.FC<ExchangePanelProps> = ({
-  coinData,
-  currentWalletDetails,
-  allWallets,
-  setCurrentWalletId
-}) => {
+const ExchangePanel = () => {
   const {
     fromToken,
     setFromToken,
@@ -69,8 +55,15 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
     receiveAddress,
     isSwapCompleted,
     swapTransaction,
-    handleUserVerifiedSendAddress
-  } = useExchange(currentWalletDetails);
+    handleUserVerifiedSendAddress,
+    toWallet,
+    setToWallet,
+    fromWallet,
+    setFromWallet,
+    fromWalletCoinData,
+    toWalletCoinData,
+    allWallets
+  } = useExchange();
 
   const [showSwapCompletedDialog, setSwapCompletedDialog] = useState(false);
   const [showSendAddressVerifyDialog, setShowSendAddressVerifyDialog] =
@@ -108,16 +101,21 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
           setFromToken={setFromToken}
           toToken={toToken}
           setToToken={setToToken}
-          coinData={coinData}
           amountToSend={amountToSend}
           setAmountToSend={setAmountToSend}
           handleChangeAmountToSend={handleChangeAmountToSend}
           classesForm={classes.form}
           allWallets={allWallets}
-          setCurrentWalletId={setCurrentWalletId}
-          currentWalletId={currentWalletDetails?._id}
           amountToReceive={amountToReceive || '0'}
           price={toToken?.price || 0}
+          // toWalletId={toWalletId}
+          // setToWalletId={setToWalletId}
+          toWallet={toWallet}
+          setToWallet={setToWallet}
+          fromWallet={fromWallet}
+          fromWalletCoinData={fromWalletCoinData}
+          toWalletCoinData={toWalletCoinData}
+          setFromWallet={setFromWallet}
         />
       }
       {amountToReceive && (
@@ -197,13 +195,6 @@ const ExchangePanel: React.FC<ExchangePanelProps> = ({
       />
     </Root>
   );
-};
-
-ExchangePanel.propTypes = {
-  coinData: PropTypes.array.isRequired,
-  currentWalletDetails: PropTypes.any, //! FIXME
-  allWallets: PropTypes.array.isRequired,
-  setCurrentWalletId: PropTypes.func.isRequired
 };
 
 export default ExchangePanel;

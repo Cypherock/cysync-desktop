@@ -31,6 +31,7 @@ export interface UseWalletDataValues {
   setSortIndex: React.Dispatch<React.SetStateAction<number>>;
   sortCoinData: (coins: DisplayCoin[], index: number) => void;
   sortCoinsByIndex: (index: number) => void;
+  getCoinsWithPrices: (coins: Coin[]) => Promise<DisplayCoin[]>;
 }
 
 export type UseWalletData = () => UseWalletDataValues;
@@ -253,6 +254,7 @@ export const useWalletData: UseWalletData = () => {
     sortIndex,
     setSortIndex,
     sortCoinData,
-    sortCoinsByIndex
+    sortCoinsByIndex,
+    getCoinsWithPrices
   };
 };

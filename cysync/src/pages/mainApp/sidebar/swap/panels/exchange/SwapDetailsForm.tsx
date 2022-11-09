@@ -14,7 +14,7 @@ import {
   Typography
 } from '@mui/material';
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import SwitchButton from '../../../../../../designSystem/designComponents/buttons/switchButton';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
@@ -35,7 +35,6 @@ type SwapDetailsFormProps = {
   setFromToken: React.Dispatch<React.SetStateAction<DisplayCoin>>;
   toToken: DisplayCoin;
   setToToken: React.Dispatch<React.SetStateAction<DisplayCoin>>;
-  coinData: DisplayCoin[];
   amountToSend: string;
   handleChangeAmountToSend: (
     event: React.ChangeEvent<HTMLInputElement>
@@ -43,10 +42,14 @@ type SwapDetailsFormProps = {
   setAmountToSend: React.Dispatch<React.SetStateAction<string>>;
   classesForm: string;
   allWallets: Wallet[];
-  setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
-  currentWalletId: string;
   amountToReceive: string;
   price: number;
+  toWallet: Wallet;
+  setToWallet: React.Dispatch<React.SetStateAction<Wallet>>;
+  fromWallet: Wallet;
+  setFromWallet: React.Dispatch<React.SetStateAction<Wallet>>;
+  fromWalletCoinData: DisplayCoin[];
+  toWalletCoinData: DisplayCoin[];
 };
 
 const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
@@ -54,28 +57,33 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
   setFromToken,
   toToken,
   setToToken,
-  coinData,
   amountToSend,
   setAmountToSend,
   handleChangeAmountToSend,
   classesForm,
   allWallets,
-  setCurrentWalletId,
-  currentWalletId,
   amountToReceive,
-  price
+  price,
+  toWallet,
+  setToWallet,
+  fromWallet,
+  setFromWallet,
+  fromWalletCoinData,
+  toWalletCoinData
 }) => {
   const [isAmountToSendMax, setIsAmountToSendMax] = useState(false);
-  const [fromTokenIndex, setFromTokenIndex] = useState('');
-  const [toTokenIndex, setToTokenIndex] = useState('');
+  const [fromTokenSlug, setFromTokenSlug] = useState('');
+  const [toTokenSlug, setToTokenSlug] = useState('');
 
   const handleChangeFromToken = (event: SelectChangeEvent) => {
-    setFromTokenIndex(event.target.value);
-    setFromToken(coinData[+event.target.value]);
+    setFromTokenSlug(event.target.value);
+    setFromToken(
+      fromWalletCoinData.find(coin => coin.slug === event.target.value)
+    );
   };
   const handleChangeToToken = (event: SelectChangeEvent) => {
-    setToTokenIndex(event.target.value);
-    setToToken(coinData[+event.target.value]);
+    setToTokenSlug(event.target.value);
+    setToToken(toWalletCoinData.find(coin => coin.slug === event.target.value));
   };
 
   return (
@@ -93,11 +101,11 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
                   size="small"
                   color="secondary"
                   variant={
-                    currentWalletId === wallet._id ? 'filled' : 'outlined'
+                    fromWallet?._id === wallet._id ? 'filled' : 'outlined'
                   }
                   label={trimString(wallet.name, 6)}
                   onClick={() => {
-                    setCurrentWalletId(wallet._id);
+                    setFromWallet(wallet);
                   }}
                 />
               </Tooltip>
@@ -108,18 +116,18 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
               {fromToken ? '' : 'Select Source'}
             </InputLabel>
             <Select
-              value={fromTokenIndex}
+              value={fromTokenSlug}
               onChange={handleChangeFromToken}
               variant="outlined"
               labelId="select-source-helper-label"
             >
-              {coinData
+              {fromWalletCoinData
                 .filter(coin => coin.totalBalance !== '0')
-                .map((coin, index) => {
+                .map(coin => {
                   const coinSlugName = coin.slug.toUpperCase();
                   const coinName = COINS[coin.slug]?.name;
                   return (
-                    <MenuItem value={index} key={`from-${coin.slug}`}>
+                    <MenuItem value={coin.slug} key={`from-${coin.slug}`}>
                       <CoinIcons
                         initial={coinSlugName}
                         style={{ marginRight: '10px' }}
@@ -152,10 +160,10 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
               <Grid item>
                 <SwitchButton
                   completed={isAmountToSendMax}
-                  disabled={fromTokenIndex === ''}
+                  disabled={fromTokenSlug === ''}
                   handleChange={() => {
                     setIsAmountToSendMax(currVal => !currVal);
-                    setAmountToSend(fromToken?.displayBalance || '0');
+                    setAmountToSend(fromToken?.totalBalance || '0');
                   }}
                 />
               </Grid>
@@ -187,24 +195,40 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
       </Typography>
       <Grid container spacing={2} sx={{ marginTop: '-45px' }}>
         <Grid item xs={6}>
-          <Typography variant="h6" color="textSecondary">
-            To
-          </Typography>
+          <Box display="flex" gap={1}>
+            <Typography variant="h6" color="textSecondary">
+              To
+            </Typography>
+            {allWallets.map(wallet => (
+              <Tooltip title={wallet.name} key={wallet._id}>
+                <Chip
+                  sx={{ fontSize: '10px', width: '50px' }}
+                  size="small"
+                  color="secondary"
+                  variant={toWallet?._id === wallet._id ? 'filled' : 'outlined'}
+                  label={trimString(wallet.name, 6)}
+                  onClick={() => {
+                    setToWallet(wallet);
+                  }}
+                />
+              </Tooltip>
+            ))}
+          </Box>
           <FormControl fullWidth className={classesForm}>
             <InputLabel id="select-target-helper-label" shrink={false}>
               {toToken ? '' : 'Select Target'}
             </InputLabel>
             <Select
-              value={toTokenIndex}
+              value={toTokenSlug}
               onChange={handleChangeToToken}
               labelId="select-target-helper-label"
               variant="outlined"
             >
-              {coinData.map((coin, index) => {
+              {toWalletCoinData.map(coin => {
                 const coinSlugName = coin.slug.toUpperCase();
                 const coinName = COINS[coin.slug]?.name;
                 return (
-                  <MenuItem value={index} key={`to-${coin.slug}`}>
+                  <MenuItem value={coin.slug} key={`to-${coin.slug}`}>
                     <CoinIcons
                       initial={coinSlugName}
                       style={{ marginRight: '10px' }}
@@ -266,16 +290,19 @@ SwapDetailsForm.propTypes = {
   setFromToken: PropTypes.func.isRequired,
   toToken: PropTypes.any,
   setToToken: PropTypes.func.isRequired,
-  coinData: PropTypes.array.isRequired,
   amountToSend: PropTypes.string.isRequired,
   handleChangeAmountToSend: PropTypes.func.isRequired,
   setAmountToSend: PropTypes.func.isRequired,
   classesForm: PropTypes.string.isRequired,
   allWallets: PropTypes.array.isRequired,
-  setCurrentWalletId: PropTypes.func.isRequired,
-  currentWalletId: PropTypes.string,
   amountToReceive: PropTypes.string.isRequired,
-  price: PropTypes.number.isRequired
+  price: PropTypes.number.isRequired,
+  toWallet: PropTypes.any,
+  setToWallet: PropTypes.func.isRequired,
+  fromWallet: PropTypes.any,
+  setFromWallet: PropTypes.func.isRequired,
+  fromWalletCoinData: PropTypes.array.isRequired,
+  toWalletCoinData: PropTypes.array.isRequired
 };
 
 export default SwapDetailsForm;

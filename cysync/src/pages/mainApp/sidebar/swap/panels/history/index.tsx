@@ -1,16 +1,17 @@
 import { COINS } from '@cypherock/communication';
-import { Wallet } from '@cypherock/database';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Button, Grid, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
+import DropMenu from '../../../../../../designSystem/designComponents/menu/DropMenu';
 import colors from '../../../../../../designSystem/designConstants/colors';
 import CoinIcons from '../../../../../../designSystem/genericComponents/coinIcons';
 import Download from '../../../../../../designSystem/iconGroups/download';
 import Swap from '../../../../../../designSystem/iconGroups/swap';
 import { useExchange } from '../../../../../../store/hooks';
+import { useWallets } from '../../../../../../store/provider';
 import csvDownloader from '../../../../../../utils/csvDownloader';
 
 import ExchangeProgress from './dialogs/ExchangeProgress';
@@ -20,16 +21,12 @@ type HistoryItem = {
   txns: Array<{
     id: string;
     time: string;
-    fromToken: string;
-    toToken: string;
+    currencyFrom: string;
+    currencyTo: string;
     amount: string;
     fees: string;
     status: string;
   }>;
-};
-
-type historyPanelProps = {
-  currentWalletDetails: Wallet;
 };
 
 // tslint:disable-next-line: no-any
@@ -52,105 +49,160 @@ const formatRawTransactions = (rawTransactions: any[], columns: string[]) => {
   return formattedRawTransactions;
 };
 
-const HistoryPanel: React.FC<historyPanelProps> = ({
-  currentWalletDetails
-}) => {
-  const { getSwapTransactions } = useExchange(currentWalletDetails);
+const groupTransactionsByDate = (
+  transactions: Array<{
+    date: string;
+    walletId: string;
+    id: string;
+    time: string;
+    currencyFrom: string;
+    currencyTo: string;
+    amountExpectedFrom: string;
+    changellyFee: string;
+    status: string;
+  }>
+) => {
+  const groupedTransactions: HistoryItem[] = [];
+  transactions.forEach(transaction => {
+    const date = transaction.date;
+    const newTxn = {
+      id: transaction.id,
+      time: transaction.time,
+      currencyFrom: transaction.currencyFrom,
+      currencyTo: transaction.currencyTo,
+      amount: transaction.amountExpectedFrom,
+      fees: transaction.changellyFee,
+      status: transaction.status
+    };
+    const index = groupedTransactions.findIndex(
+      groupedTransaction => groupedTransaction.date === date
+    );
+
+    if (index === -1) {
+      groupedTransactions.push({
+        date,
+        txns: [newTxn]
+      });
+    } else {
+      groupedTransactions[index].txns.push(newTxn);
+    }
+  });
+  return groupedTransactions;
+};
+
+const HistoryPanel = () => {
+  const { allWallets, isLoading } = useWallets();
+  const { getSwapTransactions } = useExchange();
   const [rawTransactions, setRawTransactions] = useState([]);
+  const [selectedWalletIndex, setSelectedWalletIndex] = useState(0);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [transactionProgress, setTransactionProgress] = useState(0);
   const [isExchangeProgressOpen, setIsExchangeProgressOpen] =
     useState<boolean>(false);
 
   useEffect(() => {
-    const getTransactions = async () => {
-      const transactions = await getSwapTransactions();
-      setRawTransactions(transactions);
-      /* tslint:disable-next-line */
-      transactions.forEach((transaction: any) => {
-        const createdAt = new Date(transaction.createdAt * 1000);
-        const date = createdAt.toLocaleDateString();
-        const time = createdAt.toLocaleTimeString();
-        const newTxn = {
-          id: transaction.id,
-          time,
-          fromToken: transaction.currencyFrom,
-          toToken: transaction.currencyTo,
-          amount: transaction.amountExpectedFrom,
-          fees: transaction.changellyFee,
-          status: transaction.status
-        };
-        setHistoryItems(prev => {
-          const index = prev.findIndex(item => item.date === date);
-          if (index === -1) {
-            return [
-              ...prev,
-              {
-                date,
-                txns: [newTxn]
-              }
-            ];
-          } else {
-            const newTxns = [...prev[index].txns, newTxn];
-            return [
-              ...prev.slice(0, index),
-              {
-                date,
-                txns: newTxns
-              },
-              ...prev.slice(index + 1)
-            ];
+    const getTransactions = async (walletIds: string[]) => {
+      // tslint:disable-next-line: no-any
+      const txns: any[] = [];
+      for (const walletId of walletIds) {
+        const transactions = await getSwapTransactions(walletId);
+        /* tslint:disable-next-line */
+        const newTxns = transactions.map(
+          ({ createdAt, ...transaction }: any) => {
+            const txnCreatedAt = new Date(createdAt * 1000);
+            const date = txnCreatedAt.toLocaleDateString();
+            const time = txnCreatedAt.toLocaleTimeString();
+            return {
+              date,
+              time,
+              ...transaction
+            };
           }
-        });
-      });
+        );
+        txns.push(...newTxns);
+      }
+      setRawTransactions(txns);
+      setHistoryItems(groupTransactionsByDate(txns));
     };
-    if (currentWalletDetails) getTransactions();
-  }, [currentWalletDetails]);
+
+    if (isLoading) return;
+
+    if (selectedWalletIndex === 0)
+      getTransactions(allWallets.map(wallet => wallet._id));
+    else getTransactions([allWallets[selectedWalletIndex - 1]._id]);
+  }, [isLoading, allWallets, selectedWalletIndex]);
+
+  const handleWalletChange = (selectedIndex: number) => {
+    setSelectedWalletIndex(selectedIndex);
+  };
 
   return (
     <>
       <Grid container>
         <Grid item xs={12}>
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'secondary.dark'
-            }}
-            textAlign={'right'}
+          <Grid
+            container
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
           >
-            <Button
-              startIcon={<Download />}
-              color="secondary"
-              onClick={() => {
-                csvDownloader(
-                  formatRawTransactions(rawTransactions, [
-                    'id',
-                    'createdAt',
-                    'moneyReceived',
-                    'moneySent',
-                    'rate',
-                    'status',
-                    'currencyFrom',
-                    'currencyTo',
-                    'payinAddress',
-                    'payoutAddress',
-                    'amountExpectedFrom',
-                    'amountExpectedTo',
-                    'networkFee',
-                    'changellyFee'
-                  ]),
-                  `CySync-Swap-History-${currentWalletDetails.name}`
-                );
-              }}
-              sx={{
-                borderRadius: '40px',
-                padding: '10px 20px'
-              }}
-            >
-              {/* <Download /> */}
-              &nbsp; Export operations
-            </Button>
-          </Typography>
+            <Grid item>
+              {allWallets[0].name !== '' && (
+                <DropMenu
+                  options={[
+                    'All Wallets',
+                    ...allWallets.map(wallet => wallet.name)
+                  ]}
+                  handleMenuItemSelectionChange={handleWalletChange}
+                  index={selectedWalletIndex}
+                  bg={false}
+                  style={{ marginRight: '10px' }}
+                />
+              )}
+            </Grid>
+            <Grid item>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: 'secondary.dark'
+                }}
+                textAlign={'right'}
+              >
+                <Button
+                  startIcon={<Download />}
+                  color="secondary"
+                  onClick={() => {
+                    csvDownloader(
+                      formatRawTransactions(rawTransactions, [
+                        'id',
+                        'createdAt',
+                        'moneyReceived',
+                        'moneySent',
+                        'rate',
+                        'status',
+                        'currencyFrom',
+                        'currencyTo',
+                        'payinAddress',
+                        'payoutAddress',
+                        'amountExpectedFrom',
+                        'amountExpectedTo',
+                        'networkFee',
+                        'changellyFee'
+                      ]),
+                      `CySync-Swap-History-${new Date().toLocaleDateString()}.csv`
+                    );
+                  }}
+                  sx={{
+                    borderRadius: '40px',
+                    padding: '10px 20px'
+                  }}
+                >
+                  {/* <Download /> */}
+                  &nbsp; Export operations
+                </Button>
+              </Typography>
+            </Grid>
+          </Grid>
         </Grid>
         <Grid
           item
@@ -262,11 +314,11 @@ const HistoryPanel: React.FC<historyPanelProps> = ({
                             alignItems={'center'}
                           >
                             <CoinIcons
-                              initial={txn.fromToken.toUpperCase()}
+                              initial={txn.currencyFrom.toUpperCase()}
                               style={{ marginRight: '10px' }}
                             />
                             <Typography variant="body1" color="textPrimary">
-                              {COINS[txn.fromToken]?.name}
+                              {COINS[txn.currencyFrom]?.name}
                             </Typography>
                           </Grid>
                           <Grid
@@ -287,11 +339,11 @@ const HistoryPanel: React.FC<historyPanelProps> = ({
                             alignItems={'center'}
                           >
                             <CoinIcons
-                              initial={txn.toToken.toUpperCase()}
+                              initial={txn.currencyTo.toUpperCase()}
                               style={{ marginRight: '10px' }}
                             />
                             <Typography variant="body1" color="textPrimary">
-                              {COINS[txn.toToken]?.name}
+                              {COINS[txn.currencyTo]?.name}
                             </Typography>
                           </Grid>
                         </Grid>
@@ -310,7 +362,7 @@ const HistoryPanel: React.FC<historyPanelProps> = ({
                               +{txn.amount}
                             </Typography>
                             <Typography variant="body2" color="textSecondary">
-                              -{txn.fees} {txn.fromToken.toUpperCase()}
+                              -{txn.fees} {txn.currencyFrom.toUpperCase()}
                             </Typography>
                           </Grid>
                         </Grid>
