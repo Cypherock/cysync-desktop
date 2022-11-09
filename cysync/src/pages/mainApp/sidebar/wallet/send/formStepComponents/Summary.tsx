@@ -1,10 +1,9 @@
 import { CoinGroup, COINS } from '@cypherock/communication';
-import { Tooltip } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
@@ -24,6 +23,7 @@ import {
 import Analytics from '../../../../../../utils/analytics';
 import formatDisplayAmount from '../../../../../../utils/formatDisplayAmount';
 import logger from '../../../../../../utils/logger';
+import sleep from '../../../../../../utils/sleep';
 import LabelText from '../generalComponents/LabelText';
 
 import {
@@ -39,8 +39,9 @@ const classes = {
   mainText: `${PREFIX}-mainText`,
   divider: `${PREFIX}-divider`,
   footer: `${PREFIX}-footer`,
-  deviceContinueButton: `${PREFIX}-deviceContinueButton`,
-  center: `${PREFIX}-center`
+  status: `${PREFIX}-status`,
+  center: `${PREFIX}-center`,
+  loading: `${PREFIX}-loading`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -74,18 +75,20 @@ const Root = styled('div')(({ theme }) => ({
     width: '85%',
     justifyContent: 'flex-end'
   },
-  [`& .${classes.deviceContinueButton}`]: {
-    width: '10rem',
-    height: '3rem',
+  [`& .${classes.status}`]: {
     marginTop: 15,
-    textTransform: 'none',
-    color: '#fff'
+    color: theme.palette.text.secondary
   },
   [`& .${classes.center}`]: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%'
+  },
+  [`& .${classes.loading}`]: {
+    margin: '0 10px',
+    position: 'absolute',
+    right: '1rem'
   }
 }));
 
@@ -99,6 +102,9 @@ const Summary: React.FC<StepComponentProps> = ({
 }) => {
   const [broadcastError, setBroadcastError] = useState('');
   const [advanceError, setAdvanceError] = useState('');
+  const [statusText, setStatusText] = useState(
+    'Waiting for signature from X1 wallet'
+  );
 
   const { addTxnConfirmAddressHook } = useSocket();
 
@@ -106,6 +112,7 @@ const Summary: React.FC<StepComponentProps> = ({
 
   const { coinDetails } = useCurrentCoin();
   const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
+  const isSolana = COINS[coinDetails.slug].group === CoinGroup.Solana;
 
   const { token } = useTokenContext();
 
@@ -121,10 +128,11 @@ const Summary: React.FC<StepComponentProps> = ({
 
   const { addCustomAccountSyncItemFromCoin } = useSync();
 
-  const handleSend = () => {
+  const handleSend = async () => {
     setOpen(true);
     setBroadcastError('');
     setAdvanceError('');
+    if (isSolana) await sleep(10000); // since the blockhash is new the nodes need time to get this blockhash
     broadcastTxn(sendTransaction.signedTxn, coinDetails.slug)
       .then(res => {
         setOpen(false);
@@ -208,6 +216,18 @@ const Summary: React.FC<StepComponentProps> = ({
     logger.info('Send transaction retry');
     handleSend();
   };
+
+  useEffect(() => {
+    if (!connected) setStatusText('');
+    else {
+      if (sendTransaction.signedTxn) {
+        setStatusText('Broadcasting transaction');
+        handleSend();
+      } else {
+        setStatusText('Waiting for signature from X1 wallet');
+      }
+    }
+  }, [connected, sendTransaction.signedTxn]);
 
   const cyError = new CyError(CysyncError.SEND_TXN_BROADCAST_FAILED);
   return (
@@ -297,18 +317,14 @@ const Summary: React.FC<StepComponentProps> = ({
       </div>
       <div className={classes.divider} />
       <div className={classes.footer}>
-        <Tooltip title={connected ? '' : 'No internet connection available'}>
-          <div style={{ display: 'inline-block' }}>
-            <CustomButton
-              className={classes.deviceContinueButton}
-              onClick={handleSend}
-              disabled={!sendTransaction.signedTxn || !connected}
-              autoFocus
-            >
-              Send
-            </CustomButton>
-          </div>
-        </Tooltip>
+        <Typography className={classes.status}>{statusText}</Typography>
+        {sendTransaction.signedTxn?.length > 0 || !connected || (
+          <CircularProgress
+            size={22}
+            className={classes.loading}
+            color="secondary"
+          />
+        )}
       </div>
     </Root>
   );
