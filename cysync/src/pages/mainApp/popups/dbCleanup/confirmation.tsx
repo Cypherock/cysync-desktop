@@ -5,10 +5,10 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Routes from '../../../constants/routes';
-import CustomButton from '../../../designSystem/designComponents/buttons/button';
-import Analytics from '../../../utils/analytics';
-import logger from '../../../utils/logger';
+import Routes from '../../../../constants/routes';
+import CustomButton from '../../../../designSystem/designComponents/buttons/button';
+import Analytics from '../../../../utils/analytics';
+import logger from '../../../../utils/logger';
 
 const PREFIX = 'DbCleanup-Confirmation';
 

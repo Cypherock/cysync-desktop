@@ -3,9 +3,9 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import success from '../../../../assets/icons/generic/success.png';
-import Button from '../../../../designSystem/designComponents/buttons/button';
-import ModAvatar from '../../../../designSystem/designComponents/icons/AvatarIcon';
+import success from '../../../../../assets/icons/generic/success.png';
+import Button from '../../../../../designSystem/designComponents/buttons/button';
+import ModAvatar from '../../../../../designSystem/designComponents/icons/AvatarIcon';
 
 const PREFIX = 'UpdaterAppInstall';
 

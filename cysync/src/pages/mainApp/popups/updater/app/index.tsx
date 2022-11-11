@@ -1,8 +1,8 @@
 import { shell } from 'electron';
 import React from 'react';
 
-import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
-import { useUpdater } from '../../../../store/provider';
+import DialogBox from '../../../../../designSystem/designComponents/dialog/dialogBox';
+import { useUpdater } from '../../../../../store/provider';
 
 import UpdateInfoComponent from './info';
 import PersistentInfo from './persistent';

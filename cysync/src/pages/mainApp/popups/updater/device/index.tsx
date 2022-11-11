@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Routes from '../../../../constants/routes';
-import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
+import Routes from '../../../../../constants/routes';
+import DialogBox from '../../../../../designSystem/designComponents/dialog/dialogBox';
 import {
   DeviceConnectionState,
   useConnection,
   useUpdater
-} from '../../../../store/provider';
-import { compareVersion, hexToVersion } from '../../../../utils/compareVersion';
-import logger from '../../../../utils/logger';
+} from '../../../../../store/provider';
+import { compareVersion, hexToVersion } from '../../../../../utils/compareVersion';
+import logger from '../../../../../utils/logger';
 
 import UpdateInfoComponent from './info';
 

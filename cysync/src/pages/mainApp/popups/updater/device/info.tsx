@@ -3,8 +3,8 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import Button from '../../../../designSystem/designComponents/buttons/button';
-import CustomCheckbox from '../../../../designSystem/designComponents/input/checkbox';
+import Button from '../../../../../designSystem/designComponents/buttons/button';
+import CustomCheckbox from '../../../../../designSystem/designComponents/input/checkbox';
 
 const PREFIX = 'UpdaterDeviceInfo';
 

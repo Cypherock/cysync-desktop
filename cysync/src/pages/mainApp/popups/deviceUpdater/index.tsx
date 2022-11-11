@@ -2,11 +2,14 @@ import { shell } from 'electron';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Routes from '../../../constants/routes';
-import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
-import { DeviceConnectionState, useConnection } from '../../../store/provider';
-import Analytics from '../../../utils/analytics';
-import logger from '../../../utils/logger';
+import Routes from '../../../../constants/routes';
+import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
+import {
+  DeviceConnectionState,
+  useConnection
+} from '../../../../store/provider';
+import Analytics from '../../../../utils/analytics';
+import logger from '../../../../utils/logger';
 
 import ConfirmationComponent from './confirmation';
 import InitialFlowComponent from './initialFlow';

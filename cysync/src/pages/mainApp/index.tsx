@@ -7,8 +7,9 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import RouteLinks from '../../constants/routes';
 import { UpdateProvider, WalletsProvider } from '../../store/provider';
 
-import DbCleanup from './dbCleanup';
-import DeviceUpdater from './deviceUpdater';
+import DbCleanup from './popups/dbCleanup';
+import DeviceUpdater from './popups/deviceUpdater';
+import WalletConnectPopup from './popups/walletConnect';
 import Navbar from './navbar';
 import Sidebar from './sidebar';
 import Portfolio from './sidebar/portfolio';
@@ -16,7 +17,7 @@ import Settings from './sidebar/settings';
 import Transaction from './sidebar/transaction';
 import Tutorial from './sidebar/tutorial';
 import Wallet from './sidebar/wallet';
-import Updater from './updater';
+import Updater from './popups/updater';
 
 const PREFIX = 'MainApp';
 
@@ -152,6 +153,7 @@ const MainApp: React.FC = () => {
             <Updater />
             <DeviceUpdater />
             <DbCleanup />
+            <WalletConnectPopup />
           </StyledGrid>
         </UpdateProvider>
       </WalletsProvider>

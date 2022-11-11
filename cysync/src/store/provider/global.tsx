@@ -10,7 +10,8 @@ import {
   SnackbarProvider,
   SocketProvider,
   SyncProvider,
-  TutorialProvider
+  TutorialProvider,
+  WalletConnectProvider
 } from '.';
 
 const GlobalProvider = ({ children }: any) => {
@@ -24,7 +25,9 @@ const GlobalProvider = ({ children }: any) => {
                 {/* SocketProvider is using SyncProvider */}
                 <SyncProvider>
                   <SocketProvider>
-                    <FeedbackProvider>{children}</FeedbackProvider>
+                    <FeedbackProvider>
+                      <WalletConnectProvider>{children}</WalletConnectProvider>
+                    </FeedbackProvider>
                   </SocketProvider>
                 </SyncProvider>
               </TutorialProvider>
