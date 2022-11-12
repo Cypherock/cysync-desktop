@@ -3,18 +3,21 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import WalletConnect from '@walletconnect/client';
 import Wallet from '@cypherock/wallet';
+
 import { Coin, addressDb } from '../../database';
+import {
+  WalletConnectCallRequestMethod,
+  WalletConnectCallRequestMethodMap,
+  WalletConnectConnectionState,
+  IAccount
+} from './type';
 
 import logger from '../../../utils/logger';
 
-const CONNECTION_TIMEOUT = 5000;
+export * from './type';
 
-export enum WalletConnectConnectionState {
-  NOT_CONNECTED,
-  CONNECTING,
-  SELECT_ACCOUNT,
-  CONNECTED
-}
+const ACCEPTED_CALL_METHODS = [WalletConnectCallRequestMethodMap.ETH_SIGN];
+const CONNECTION_TIMEOUT = 5000;
 
 export interface WalletConnectContextInterface {
   isOpen: boolean;
@@ -33,6 +36,8 @@ export const WalletConnectContext: React.Context<WalletConnectContextInterface> 
 
 export const WalletConnectProvider: React.FC = ({ children }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [selectedAccount, setSelectedAccount] =
+    React.useState<IAccount>(undefined);
   const [connectionError, setConnectionError] = React.useState('');
   const [connectionState, _setConnectionState] =
     React.useState<WalletConnectConnectionState>(
@@ -47,6 +52,14 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       }
     | undefined
   >(undefined);
+  const [callRequestId, setCallRequestId] = React.useState<string | undefined>(
+    undefined
+  );
+  const [callRequestMethod, setCallRequestMethod] = React.useState<
+    WalletConnectCallRequestMethod | undefined
+  >(undefined);
+  const [callRequestParams, setCallRequestParams] =
+    React.useState<any>(undefined);
 
   const currentConnector = React.useRef<WalletConnect | undefined>(undefined);
   const currentConnectionState = React.useRef<
@@ -54,10 +67,18 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   >(WalletConnectConnectionState.NOT_CONNECTED);
   const connectionTimeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
+  const resetStates = () => {
+    setConnectionClientMeta(undefined);
+    setCallRequestMethod(undefined);
+    setCallRequestParams(undefined);
+    setSelectedAccount(undefined);
+    currentConnector.current = undefined;
+  };
+
   const setConnectionState = (val: WalletConnectConnectionState) => {
     currentConnectionState.current = val;
     if (val === WalletConnectConnectionState.NOT_CONNECTED) {
-      setConnectionClientMeta(undefined);
+      resetStates();
     }
     _setConnectionState(val);
   };
@@ -96,10 +117,15 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       const address = (await wallet.newReceiveAddress()).toLowerCase();
 
       currentConnector.current?.approveSession({
-        accounts: [address], //
+        accounts: [address],
         chainId: coinMeta.chain
       });
-      setConnectionState(WalletConnectConnectionState.CONNECTED);
+      setSelectedAccount({
+        ...coin,
+        chain: coinMeta.chain,
+        name: coinMeta.name,
+        address: address
+      });
     } catch (error) {
       logger.error('WalletConnect: Error in selecting account');
       logger.error(error);
@@ -109,6 +135,12 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
 
   const handleSessionRequest = (error: Error, payload: any) => {
     console.log({ error, payload });
+    if (error) {
+      logger.error('WalletConnect: Session request error', error);
+      return;
+    }
+
+    logger.info('WalletConnect: Session request received', payload);
     if (connectionTimeout.current) {
       clearTimeout(connectionTimeout.current);
     }
@@ -119,6 +151,28 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
 
   const handleCallRequest = (error: Error, payload: any) => {
     console.log({ error, payload });
+    if (error) {
+      logger.error('WalletConnect: Session request error', error);
+      return;
+    }
+
+    if (
+      payload?.id &&
+      payload?.params &&
+      ACCEPTED_CALL_METHODS.includes(payload?.method)
+    ) {
+      const params = payload.params;
+      setCallRequestParams(params);
+      setCallRequestId(params);
+      setCallRequestMethod(payload.method);
+    } else if (payload?.id) {
+      currentConnector.current?.rejectRequest({
+        id: payload.id,
+        error: {
+          message: 'Unsupported method'
+        }
+      });
+    }
   };
 
   const handleDisconnect = (error: Error, payload: any) => {
