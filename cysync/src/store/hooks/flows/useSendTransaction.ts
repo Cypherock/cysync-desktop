@@ -32,6 +32,7 @@ import {
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { addressDb, coinDb, transactionDb } from '../../database';
+import { useStatusCheck } from '../../provider/transactionStatusProvider';
 
 import * as flowHandlers from './handlers';
 
@@ -271,6 +272,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     new CyError()
   );
   const [isEstimatingFees, setIsEstimatingFees] = useState(false);
+  const { addTransactionStatusCheckItem } = useStatusCheck();
 
   const resetHooks = () => {
     setDeviceConnected(false);
@@ -823,6 +825,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         };
       }
       transactionDb.insert(tx).then(() => {
+        addTransactionStatusCheckItem(tx, {});
         transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
         logger.info('UTXOS blocked');
         logger.info(txnInputs);
@@ -906,6 +909,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       };
 
       transactionDb.insert(tx).then(() => {
+        addTransactionStatusCheckItem(tx, {});
         transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
         logger.info('UTXOS blocked');
         logger.info(txnInputs);

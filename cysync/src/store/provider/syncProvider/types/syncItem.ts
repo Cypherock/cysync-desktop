@@ -7,7 +7,8 @@ export interface SyncItemOptions {
     | 'balance'
     | 'wallet-setup'
     | 'latestPrice'
-    | 'customAccount';
+    | 'customAccount'
+    | 'txnStatus';
   coinType: string;
   module: string;
   isRefresh?: boolean;

@@ -955,7 +955,6 @@ export const SyncProvider: React.FC = ({ children }) => {
   }, [modulesInExecutionQueue]);
 
   useEffect(() => {
-    transactionDb.failExpiredTxn();
     setupInitial();
 
     // Refresh after 60 mins
@@ -1049,6 +1048,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
   }, [connected, isInitialSetupDone, syncQueue]);
 
+  // queue execution performance logging
   useEffect(() => {
     if (syncQueue.length > 0) {
       if (startTime.current > 0) {
