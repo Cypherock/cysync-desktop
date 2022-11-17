@@ -948,7 +948,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         logger.info('Sync: Refresh triggered for latest balance and history');
         addBalanceRefresh({ isRefresh: true });
         addHistoryRefresh({ isRefresh: true });
-      }, 1000 * 3 * 5);
+      }, 1000 * 60 * 5);
     }
 
     isResyncExecuting.current = isExecuting;
