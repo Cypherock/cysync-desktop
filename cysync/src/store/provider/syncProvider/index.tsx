@@ -748,7 +748,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const addHistoryRefresh = async ({
     isRefresh = false,
-    module = 'default'
+    module = 'refresh-history'
   }) => {
     const allXpubs = await coinDb.getAll();
     for (const xpub of allXpubs) {
@@ -758,7 +758,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const addBalanceRefresh = async ({
     isRefresh = false,
-    module = 'default'
+    module = 'refresh-balance'
   }) => {
     const coins = await coinDb.getAll();
     const tokens = await tokenDb.getAll();
@@ -792,7 +792,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const addCustomAccountRefresh = async ({
     isRefresh = false,
-    module = 'default'
+    module = 'refresh-custom-acc'
   }) => {
     const coins = await coinDb.getAll({ slug: 'near' });
     for (const coin of coins) {
@@ -825,7 +825,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const addLatestPriceRefresh = async ({
     isRefresh = false,
-    module = 'default'
+    module = 'refresh-latest-price'
   }) => {
     const allXpubs = await coinDb.getAll();
     const tokens = await tokenDb.getAll();
@@ -850,6 +850,7 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const addCoinTask = (coin: Coin, { module = 'default' }) => {
+    // allow overlap of resync with flow specific resync
     addCustomAccountSyncItemFromCoin(coin, { module, isRefresh: true });
     addBalanceSyncItemFromCoin(coin, { module, isRefresh: true });
     addHistorySyncItemFromCoin(coin, { module, isRefresh: true });
@@ -927,6 +928,32 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const intervals = useRef<NodeJS.Timeout[]>([]);
+  const syncTimeout = useRef<NodeJS.Timeout>();
+  const isResyncExecuting = useRef(false);
+
+  useEffect(() => {
+    // resync: balances & transaction history
+    const resyncKeys = ['refresh-balance', 'refresh-history'];
+    const isExecuting = resyncKeys.some(r =>
+      modulesInExecutionQueue.includes(r)
+    );
+
+    if (isExecuting === true && isResyncExecuting.current === false) {
+      // reset the timer for execution
+      clearTimeout(syncTimeout.current);
+    } else if (isExecuting === false && isResyncExecuting.current === true) {
+      // add the timed execution
+      syncTimeout.current = setTimeout(async () => {
+        if (isResyncExecuting.current === true) return;
+        logger.info('Sync: Refresh triggered for latest balance and history');
+        addBalanceRefresh({ isRefresh: true });
+        addHistoryRefresh({ isRefresh: true });
+      }, 1000 * 60 * 5);
+    }
+
+    isResyncExecuting.current = isExecuting;
+  }, [modulesInExecutionQueue]);
+
   useEffect(() => {
     transactionDb.failExpiredTxn();
     setupInitial();
@@ -982,14 +1009,14 @@ export const SyncProvider: React.FC = ({ children }) => {
         setInterval(async () => {
           logger.info('Sync: Refresh triggered for latest price');
           try {
-            addLatestPriceRefresh({ isRefresh: true, module: 'refresh' });
+            addLatestPriceRefresh({ isRefresh: true });
           } catch (error) {
             logger.error(
               `${CysyncError.LATEST_PRICE_REFRESH_FAILED} Sync: Error in refreshing latest price`
             );
             logger.error(error);
           }
-          addCustomAccountRefresh({ isRefresh: true, module: 'refresh' })
+          addCustomAccountRefresh({ isRefresh: true })
             .then(() => {
               logger.info('Sync: Custom Accounts Refresh completed');
             })
