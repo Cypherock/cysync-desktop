@@ -929,7 +929,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const intervals = useRef<NodeJS.Timeout[]>([]);
   const syncTimeout = useRef<NodeJS.Timeout>();
-  const isResyncExecuting = useRef(false);
+  const isResyncExecuting = useRef(true);
 
   useEffect(() => {
     // resync: balances & transaction history
