@@ -23,7 +23,6 @@ import {
 import Analytics from '../../../../../../utils/analytics';
 import formatDisplayAmount from '../../../../../../utils/formatDisplayAmount';
 import logger from '../../../../../../utils/logger';
-import sleep from '../../../../../../utils/sleep';
 import LabelText from '../generalComponents/LabelText';
 
 import {
@@ -112,7 +111,6 @@ const Summary: React.FC<StepComponentProps> = ({
 
   const { coinDetails } = useCurrentCoin();
   const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
-  const isSolana = COINS[coinDetails.slug].group === CoinGroup.Solana;
 
   const { token } = useTokenContext();
 
@@ -132,7 +130,6 @@ const Summary: React.FC<StepComponentProps> = ({
     setOpen(true);
     setBroadcastError('');
     setAdvanceError('');
-    if (isSolana) await sleep(10000); // since the blockhash is new the nodes need time to get this blockhash
     broadcastTxn(sendTransaction.signedTxn, coinDetails.slug)
       .then(res => {
         setOpen(false);
@@ -174,29 +171,29 @@ const Summary: React.FC<StepComponentProps> = ({
             }
             if (selectedWallet.passphraseSet) {
               setBroadcastError(
-                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.\nThis may be due to incorrect passphrase.'
+                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime\nThis may be due to incorrect passphrase'
               );
             } else {
               setBroadcastError(
-                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.'
+                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime'
               );
             }
           } else {
             setBroadcastError(
-              'Failed to broadcast the transaction. Check your internet connection and try again.'
+              'Failed to broadcast the transaction. Check your internet connection and try again'
             );
           }
         } else if (e.message) {
           setAdvanceError(e.message);
           setBroadcastError(
-            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.' +
-              selectedWallet.passphraseSet
-              ? '\nThis may be due to incorrect passphrase.'
-              : ''
+            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime' +
+              (selectedWallet.passphraseSet
+                ? '\nThis may be due to incorrect passphrase'
+                : '')
           );
         } else {
           setBroadcastError(
-            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.'
+            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime'
           );
         }
         Analytics.Instance.event(
