@@ -79,6 +79,20 @@ const app: CustomApp = internalApp as CustomApp;
 app.showExitPrompt = true;
 app.preventExit = false;
 
+logger.info('Starting Application', {
+  defaultApp: process.defaultApp,
+  args: process.argv
+});
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('cypherock', process.execPath, [
+      path.resolve(process.argv[1])
+    ]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('cypherock');
+}
+
 // Locks the current application instance.
 const applicationLock = app.requestSingleInstanceLock();
 
@@ -138,25 +152,10 @@ const createWindow = async () => {
     }
   }
 
-  if (process.platform === 'win32') {
-    // Set the path of electron.exe and your app.
-    // These two additional parameters are only available on windows.
-    // Setting this is required to get this working in dev mode.
-    logger.info('_win32_');
-    app.setAsDefaultProtocolClient('cypherock', process.execPath, [
-      path.resolve(process.argv[1])
-    ]);
-  } else {
-    logger.info('_macos_');
-    app.setAsDefaultProtocolClient('cypherock');
-  }
-  app.on('open-url', (event, url) => {
-    event.preventDefault();
-    logger.info('deep link uri', url);
-  });
-
   if (applicationLock) {
-    app.on('second-instance', () => {
+    app.on('second-instance', (_event, commandLine, workingDirectory) => {
+      // Handle Deeplink for windows
+      logger.info('Second instance opened', { commandLine, workingDirectory });
       if (mainWindow) {
         if (mainWindow.isMinimized()) mainWindow.restore();
         mainWindow.focus();
@@ -466,4 +465,10 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow().then();
   }
+});
+
+app.on('open-url', (event, url) => {
+  // Handle deeplink for macos and linux
+  event.preventDefault();
+  logger.info('deep link uri', url);
 });
