@@ -51,6 +51,14 @@ export function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+export const SyncModules = {
+  INITIAL_RESYNC: 'initial-resync',
+  AUTO_RESYNC: 'auto-resync',
+  MANUAL_RESYNC: 'manual-resync',
+  PRICE_RESYNC: 'price-resync',
+  LATEST_PRICE_RESYNC: 'latest-price-resync'
+};
+
 export interface SyncContextInterface {
   isSyncing: boolean;
   isWaitingForConnection: boolean;
@@ -906,11 +914,26 @@ export const SyncProvider: React.FC = ({ children }) => {
   const setupInitial = async () => {
     logger.info('Sync: Adding Initial items');
     if (process.env.IS_PRODUCTION === 'true') {
-      await addCustomAccountRefresh({ isRefresh: true });
-      await addBalanceRefresh({ isRefresh: true });
-      await addHistoryRefresh({ isRefresh: true });
-      await addPriceRefresh({ isRefresh: true });
-      await addLatestPriceRefresh({ isRefresh: true });
+      await addCustomAccountRefresh({
+        isRefresh: true,
+        module: SyncModules.INITIAL_RESYNC
+      });
+      await addBalanceRefresh({
+        isRefresh: true,
+        module: SyncModules.INITIAL_RESYNC
+      });
+      await addHistoryRefresh({
+        isRefresh: true,
+        module: SyncModules.INITIAL_RESYNC
+      });
+      await addPriceRefresh({
+        isRefresh: true,
+        module: SyncModules.INITIAL_RESYNC
+      });
+      await addLatestPriceRefresh({
+        isRefresh: true,
+        module: SyncModules.INITIAL_RESYNC
+      });
     }
 
     setInitialSetupDone(true);
@@ -918,12 +941,13 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const reSync = async () => {
     logger.info('Sync: ReSyncing items');
+    const module = SyncModules.MANUAL_RESYNC;
 
-    await addCustomAccountRefresh({});
-    await addBalanceRefresh({});
-    await addHistoryRefresh({});
-    await addPriceRefresh({});
-    await addLatestPriceRefresh({});
+    await addCustomAccountRefresh({ module });
+    await addBalanceRefresh({ module });
+    await addHistoryRefresh({ module });
+    await addPriceRefresh({ module });
+    await addLatestPriceRefresh({ module });
     await notifications.updateLatest();
   };
 
@@ -932,8 +956,16 @@ export const SyncProvider: React.FC = ({ children }) => {
   const isResyncExecuting = useRef(true);
 
   useEffect(() => {
+    if (process.env.IS_PRODUCTION !== 'true') {
+      return;
+    }
+
     // resync: balances & transaction history
-    const resyncKeys = ['refresh-balance', 'refresh-history'];
+    const resyncKeys = [
+      SyncModules.AUTO_RESYNC,
+      SyncModules.MANUAL_RESYNC,
+      SyncModules.INITIAL_RESYNC
+    ];
     const isExecuting = resyncKeys.some(r =>
       modulesInExecutionQueue.includes(r)
     );
@@ -946,8 +978,8 @@ export const SyncProvider: React.FC = ({ children }) => {
       syncTimeout.current = setTimeout(async () => {
         if (isResyncExecuting.current === true) return;
         logger.info('Sync: Refresh triggered for latest balance and history');
-        addBalanceRefresh({ isRefresh: true });
-        addHistoryRefresh({ isRefresh: true });
+        addBalanceRefresh({ isRefresh: true, module: SyncModules.AUTO_RESYNC });
+        addHistoryRefresh({ isRefresh: true, module: SyncModules.AUTO_RESYNC });
       }, 1000 * 60 * 5);
     }
 
@@ -967,7 +999,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         setInterval(async () => {
           logger.info('Sync: Refresh triggered');
           // Needs refactor
-          addPriceRefresh({ isRefresh: true, module: 'refresh' })
+          addPriceRefresh({ isRefresh: true, module: SyncModules.PRICE_RESYNC })
             .then(() => {
               logger.info('Sync: Price Refresh completed');
             })
@@ -1009,14 +1041,20 @@ export const SyncProvider: React.FC = ({ children }) => {
         setInterval(async () => {
           logger.info('Sync: Refresh triggered for latest price');
           try {
-            addLatestPriceRefresh({ isRefresh: true });
+            addLatestPriceRefresh({
+              isRefresh: true,
+              module: SyncModules.LATEST_PRICE_RESYNC
+            });
           } catch (error) {
             logger.error(
               `${CysyncError.LATEST_PRICE_REFRESH_FAILED} Sync: Error in refreshing latest price`
             );
             logger.error(error);
           }
-          addCustomAccountRefresh({ isRefresh: true })
+          addCustomAccountRefresh({
+            isRefresh: true,
+            module: SyncModules.LATEST_PRICE_RESYNC
+          })
             .then(() => {
               logger.info('Sync: Custom Accounts Refresh completed');
             })
@@ -1070,8 +1108,11 @@ export const SyncProvider: React.FC = ({ children }) => {
         }
       } else {
         startTime.current = performance.now();
+        const modules = Array.from(
+          new Set(syncQueue.map(elem => elem.module))
+        ).join(',');
         logger.info(
-          `Sync queue started executing with ${syncQueue.length} items`
+          `Sync queue started executing with ${syncQueue.length} items, module ${modules}`
         );
       }
     } else {
