@@ -1,5 +1,6 @@
-import { Coin } from '../../database';
 import { EthCoinData } from '@cypherock/communication';
+
+import { Coin } from '../../database';
 
 export interface IAccount extends Coin {
   chain: EthCoinData['chain'];
@@ -23,4 +24,11 @@ export enum WalletConnectConnectionState {
   CONNECTING,
   SELECT_ACCOUNT,
   CONNECTED
+}
+
+export interface WalletConnectionConnectionClientMeta {
+  description?: string;
+  url?: string;
+  icons?: string[];
+  name?: string;
 }

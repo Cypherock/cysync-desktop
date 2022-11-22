@@ -1,22 +1,20 @@
-import { COINS, CoinGroup } from '@cypherock/communication';
+import { CoinGroup, COINS } from '@cypherock/communication';
+import { Autocomplete, Box, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import { Autocomplete, TextField, Box } from '@mui/material';
-import PropTypes from 'prop-types';
-import React, { useState, useEffect } from 'react';
 import BigNumber from 'bignumber.js';
+import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
 
-import CoinIcon from '../../../../designSystem/genericComponents/coinIcons';
 import CustomButton from '../../../../designSystem/designComponents/buttons/button';
-import { coinDb, Coin, Wallet } from '../../../../store/database';
-import {
-  useWalletConnect,
-  WalletConnectConnectionState,
-  useWallets
-} from '../../../../store/provider';
-import logger from '../../../../utils/logger';
+import CoinIcon from '../../../../designSystem/genericComponents/coinIcons';
+import { Coin, coinDb, Wallet } from '../../../../store/database';
+import { useWalletConnect, useWallets } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
+import logger from '../../../../utils/logger';
+
+import ClientMeta from './clientMeta';
 
 const DefaultTextField = styled(TextField)(({ theme }) => ({
   '& label.Mui-focused': {
@@ -42,13 +40,20 @@ const DefaultTextField = styled(TextField)(({ theme }) => ({
 const PREFIX = 'WalletConnect-AccountSelection';
 
 const classes = {
+  container: `${PREFIX}-container`,
   errorButtons: `${PREFIX}-errorButtons`,
   padBottom: `${PREFIX}-padBottom`
 };
 
 const Root = styled(Grid)(() => ({
   padding: '20px',
+  [`& .${classes.container}`]: {
+    width: '100%',
+    maxWidth: '515px',
+    margin: 'auto'
+  },
   [`& .${classes.errorButtons}`]: {
+    marginTop: '24px',
     display: 'flex',
     justifyContent: 'space-around',
     width: '100%'
@@ -129,78 +134,96 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
 
   return (
     <Root container>
-      <Typography color="textPrimary" variant="body2" gutterBottom>
-        Chose your wallet
-      </Typography>
-      <Autocomplete
-        id="wallet-connect-wallet"
-        fullWidth
-        options={walletData}
-        autoHighlight
-        getOptionLabel={option => option.name}
-        sx={{ mb: 4 }}
-        renderInput={params => (
-          <DefaultTextField
-            {...params}
-            label="Select a Wallet"
-            inputProps={{
-              ...params.inputProps,
-              autoComplete: 'wallet-connect-wallet' // disable autocomplete and autofill
-            }}
-          />
-        )}
-        onChange={(e, val) => handleChange('wallet', val)}
-        value={selectedWallet}
-      />
+      <div className={classes.container}>
+        <ClientMeta />
+        <Typography color="textPrimary" variant="body2" gutterBottom>
+          Chose your wallet
+        </Typography>
+        <Autocomplete
+          id="wallet-connect-wallet"
+          fullWidth
+          options={walletData}
+          autoHighlight
+          getOptionLabel={option => option.name}
+          sx={{ mb: 4 }}
+          renderInput={params => (
+            <DefaultTextField
+              {...params}
+              label="Select a Wallet"
+              inputProps={{
+                ...params.inputProps,
+                autoComplete: 'wallet-connect-wallet' // disable autocomplete and autofill
+              }}
+            />
+          )}
+          onChange={(e, val) => handleChange('wallet', val)}
+          value={selectedWallet}
+        />
 
-      <Typography color="textPrimary" variant="body2" gutterBottom>
-        Chose account
-      </Typography>
-      <Autocomplete
-        id="wallet-connect-account"
-        disabled={!selectedWallet}
-        fullWidth
-        options={coinData}
-        autoHighlight
-        getOptionLabel={option => option.name}
-        renderOption={(props, option) => {
-          return (
-            <Box component="span" {...props}>
-              <CoinIcon initial={option.slug} style={{ marginRight: '10px' }} />
-              {option.name} ({option.value} {option.slug.toUpperCase()})
-            </Box>
-          );
-        }}
-        renderInput={params => (
-          <DefaultTextField
-            {...params}
-            label="Choose an account"
-            inputProps={{
-              ...params.inputProps,
-              autoComplete: 'wallet-connect-account' // disable autocomplete and autofill
+        <Typography color="textPrimary" variant="body2" gutterBottom>
+          Chose account
+        </Typography>
+        <Autocomplete
+          id="wallet-connect-account"
+          disabled={!selectedWallet}
+          fullWidth
+          options={coinData}
+          autoHighlight
+          getOptionLabel={option => option.name}
+          renderOption={(props, option) => {
+            return (
+              <Box component="span" {...props}>
+                <CoinIcon
+                  initial={option.slug}
+                  style={{ marginRight: '10px' }}
+                />
+                {option.name} ({option.value} {option.slug.toUpperCase()})
+              </Box>
+            );
+          }}
+          renderInput={params => (
+            <DefaultTextField
+              {...params}
+              label="Choose an account"
+              inputProps={{
+                ...params.inputProps,
+                autoComplete: 'wallet-connect-account' // disable autocomplete and autofill
+              }}
+            />
+          )}
+          onChange={(e, val) => handleChange('account', val)}
+          value={selectedAccount}
+        />
+        {error ||
+          (walletConnect.connectionError && (
+            <Typography
+              variant="caption"
+              style={{ color: theme.palette.error.main }}
+            >
+              {error || walletConnect.connectionError}
+            </Typography>
+          ))}
+        <div className={classes.errorButtons}>
+          <CustomButton
+            onClick={walletConnect.handleClose}
+            style={{
+              padding: '0.5rem 3rem',
+              margin: '1rem 0rem'
             }}
-          />
-        )}
-        onChange={(e, val) => handleChange('account', val)}
-        value={selectedAccount}
-      />
-      {error ||
-        (walletConnect.connectionError && (
-          <Typography
-            variant="caption"
-            style={{ color: theme.palette.error.main }}
           >
-            {error || walletConnect.connectionError}
-          </Typography>
-        ))}
-      <div className={classes.errorButtons}>
-        <CustomButton
-          onClick={onPositiveClick}
-          style={{ margin: '1rem 0rem' }}
-          disabled={!selectedAccount}
-        >
-          Submit
-        </CustomButton>
+            Reject
+          </CustomButton>
+          <CustomButton
+            onClick={onPositiveClick}
+            style={{
+              padding: '0.5rem 3rem',
+              margin: '1rem 0rem'
+            }}
+            disabled={!selectedAccount}
+          >
+            Continue
+          </CustomButton>
+        </div>
       </div>
     </Root>
   );

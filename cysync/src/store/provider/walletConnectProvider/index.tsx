@@ -1,18 +1,19 @@
 import { COINS, EthCoinData } from '@cypherock/communication';
+import Wallet from '@cypherock/wallet';
+import WalletConnect from '@walletconnect/client';
 import PropTypes from 'prop-types';
 import React from 'react';
-import WalletConnect from '@walletconnect/client';
-import Wallet from '@cypherock/wallet';
 
-import { Coin, addressDb } from '../../database';
+import logger from '../../../utils/logger';
+import { addressDb, Coin } from '../../database';
+
 import {
+  IAccount,
   WalletConnectCallRequestMethod,
   WalletConnectCallRequestMethodMap,
   WalletConnectConnectionState,
-  IAccount
+  WalletConnectionConnectionClientMeta
 } from './type';
-
-import logger from '../../../utils/logger';
 
 export * from './type';
 
@@ -27,6 +28,13 @@ export interface WalletConnectContextInterface {
   createConnection: (url: string) => Promise<void>;
   connectionError: string;
   selectAccount: (coin: Coin) => void;
+  connectionClientMeta: WalletConnectionConnectionClientMeta | undefined;
+  approveCallRequest: (result: string) => void;
+  rejectCallRequest: (reason?: string) => void;
+  callRequestId: number | undefined;
+  callRequestMethod: WalletConnectCallRequestMethod | undefined;
+  callRequestParams: any;
+  selectedAccount: IAccount | undefined;
 }
 
 export const WalletConnectContext: React.Context<WalletConnectContextInterface> =
@@ -36,23 +44,18 @@ export const WalletConnectContext: React.Context<WalletConnectContextInterface> 
 
 export const WalletConnectProvider: React.FC = ({ children }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [selectedAccount, setSelectedAccount] =
-    React.useState<IAccount>(undefined);
+  const [selectedAccount, setSelectedAccount] = React.useState<
+    IAccount | undefined
+  >(undefined);
   const [connectionError, setConnectionError] = React.useState('');
   const [connectionState, _setConnectionState] =
     React.useState<WalletConnectConnectionState>(
       WalletConnectConnectionState.NOT_CONNECTED
     );
   const [connectionClientMeta, setConnectionClientMeta] = React.useState<
-    | {
-        description?: string;
-        url?: string;
-        icons?: string[];
-        name?: string;
-      }
-    | undefined
+    WalletConnectionConnectionClientMeta | undefined
   >(undefined);
-  const [callRequestId, setCallRequestId] = React.useState<string | undefined>(
+  const [callRequestId, setCallRequestId] = React.useState<number | undefined>(
     undefined
   );
   const [callRequestMethod, setCallRequestMethod] = React.useState<
@@ -124,7 +127,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         ...coin,
         chain: coinMeta.chain,
         name: coinMeta.name,
-        address: address
+        address
       });
     } catch (error) {
       logger.error('WalletConnect: Error in selecting account');
@@ -133,8 +136,27 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     }
   };
 
+  const approveCallRequest = (result: string) => {
+    if (callRequestId) {
+      currentConnector.current?.approveRequest({
+        id: callRequestId,
+        result
+      });
+    }
+  };
+
+  const rejectCallRequest = (message?: string) => {
+    if (callRequestId) {
+      currentConnector.current?.rejectRequest({
+        id: callRequestId,
+        error: {
+          message
+        }
+      });
+    }
+  };
+
   const handleSessionRequest = (error: Error, payload: any) => {
-    console.log({ error, payload });
     if (error) {
       logger.error('WalletConnect: Session request error', error);
       return;
@@ -150,7 +172,6 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   };
 
   const handleCallRequest = (error: Error, payload: any) => {
-    console.log({ error, payload });
     if (error) {
       logger.error('WalletConnect: Session request error', error);
       return;
@@ -163,7 +184,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     ) {
       const params = payload.params;
       setCallRequestParams(params);
-      setCallRequestId(params);
+      setCallRequestId(payload.id);
       setCallRequestMethod(payload.method);
     } else if (payload?.id) {
       currentConnector.current?.rejectRequest({
@@ -176,12 +197,18 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   };
 
   const handleDisconnect = (error: Error, payload: any) => {
-    console.log({ error, payload });
+    logger.info('WalletConnect: Disconnect');
+    if (error) {
+      logger.error(error);
+    }
     setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
   };
 
   const handleConnect = (error: Error, payload: any) => {
-    console.log({ error, payload });
+    logger.info('WalletConnect: Connected');
+    if (error) {
+      logger.error(error);
+    }
     setConnectionState(WalletConnectConnectionState.CONNECTED);
   };
 
@@ -221,9 +248,12 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         disconnect();
       }, CONNECTION_TIMEOUT);
     } catch (error) {
+      if (error) {
+        logger.error('WalletConnect: Connection error');
+        logger.error(error);
+      }
       setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
       setConnectionError(error.message);
-      console.log(error);
     }
   };
 
@@ -237,7 +267,13 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         openDialog,
         connectionError,
         selectAccount,
-        connectionClientMeta
+        connectionClientMeta,
+        approveCallRequest,
+        rejectCallRequest,
+        callRequestId,
+        callRequestMethod,
+        callRequestParams,
+        selectedAccount
       }}
     >
       {children}
