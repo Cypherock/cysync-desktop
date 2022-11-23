@@ -304,6 +304,12 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   const triggerCalcGasLimit = async () => {
     const coin = COINS[coinDetails.slug];
+
+    if (!token) {
+      setGasLimit(21000);
+      return;
+    }
+
     if (
       !(
         estimateGasLimit &&
@@ -312,11 +318,6 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         batchRecipientData[0].recipient.length === 42
       )
     ) {
-      return;
-    }
-
-    if (!token) {
-      setGasLimit(21000);
       return;
     }
 

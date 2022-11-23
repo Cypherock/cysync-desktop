@@ -11,6 +11,15 @@ const config = {
       entitlements: 'entitlements.plist',
       'entitlements-inherit': 'entitlements.plist',
       'signature-flags': 'library'
+    },
+    packagerConfig: {
+      protocols: [
+        {
+          protocol: 'cypherock',
+          name: 'cypherock',
+          schemes: 'cypherock'
+        }
+      ]
     }
   },
   makers: [
@@ -51,7 +60,8 @@ const config = {
         maintainer: 'Cypherock',
         homepage: 'https://cypherock.com',
         productName: 'Cypherock CySync',
-        name: 'cypherock-cysync'
+        name: 'cypherock-cysync',
+        mimeType: ['x-scheme-handler/cypherock']
       }
     },
     {

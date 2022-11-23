@@ -213,8 +213,8 @@ export const SocketProvider: React.FC = ({ children }) => {
       ) {
         addTxnConfirmAddressHook(
           pendingTxn.hash,
-          pendingTxn.walletId,
           pendingTxn.coin,
+          pendingTxn.walletId,
           currentSocket,
           currentBlockbookSocket
         );

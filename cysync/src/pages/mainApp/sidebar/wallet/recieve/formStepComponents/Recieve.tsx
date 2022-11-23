@@ -8,7 +8,6 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
-import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import {
   useCustomAccountContext,
   useReceiveTransactionContext,
@@ -110,7 +109,10 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-const Receive: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
+const Receive: React.FC<StepComponentProps> = ({
+  handleNext,
+  setExitFlowOnErrorClose
+}) => {
   const theme = useTheme();
   const snackbar = useSnackbar();
 
@@ -126,20 +128,10 @@ const Receive: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
   };
 
   useEffect(() => {
+    setExitFlowOnErrorClose(true);
     if (!receiveTransaction.verified)
       receiveTransaction.getUnverifiedReceiveAddress();
   }, []);
-
-  if (receiveTransaction.errorObj.isSet) {
-    return (
-      <ErrorDialog
-        open={receiveTransaction.errorObj.isSet}
-        handleClose={() => handleClose()}
-        errorObj={receiveTransaction.errorObj}
-        flow="Generating Receive Address"
-      />
-    );
-  }
 
   if (receiveTransaction.receiveAddress)
     return (
