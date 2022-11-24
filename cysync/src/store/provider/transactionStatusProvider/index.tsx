@@ -5,16 +5,12 @@ import React, { useEffect, useRef } from 'react';
 import logger from '../../../utils/logger';
 import { coinDb, Status, Transaction, transactionDb } from '../../database';
 import { useNetwork } from '../networkProvider';
-import { useSync } from '../syncProvider';
+import { sleep, useSync } from '../syncProvider';
 
 import { executeBatchCheck, ExecutionResult } from './txnStatusExecutor';
 import { TxnStatusItem } from './txnStatusItem';
 
 const BATCH_SIZE = 5;
-
-export function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 export interface TransactionStatusProviderInterface {
   addTransactionStatusCheckItem: (

@@ -24,8 +24,7 @@ import { addressDb, receiveAddressDb } from '../../database';
 import {
   useCurrentCoin,
   useCustomAccountContext,
-  useSelectedWallet,
-  useSocket
+  useSelectedWallet
 } from '../../provider';
 
 import * as flowHandlers from './handlers';
@@ -103,7 +102,6 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
   const { coinDetails } = useCurrentCoin();
   const { customAccount: customAccountfromContext } = useCustomAccountContext();
   const [QRError, setQRError] = useState(false);
-  const { addReceiveAddressHook } = useSocket();
   let recAddr: string | undefined;
   const receiveTransaction = new TransactionReceiver();
 
@@ -145,7 +143,6 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
     coinType: string
   ) => {
     logger.info('New receive address', { coinType, walletId, addr });
-    addReceiveAddressHook(addr, walletId, coinType);
     receiveAddressDb.insert({ address: addr, walletId, coinType });
   };
 
