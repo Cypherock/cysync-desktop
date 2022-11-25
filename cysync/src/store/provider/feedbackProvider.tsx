@@ -42,6 +42,7 @@ import { useLogFetcher } from '../hooks/flows/useLogFetcher';
 
 import { DeviceConnectionState, useConnection } from './connectionProvider';
 import { useSnackbar } from './snackbarProvider';
+import { sleep } from './syncProvider';
 
 const PREFIX = 'FeedbackContext';
 
@@ -306,9 +307,19 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
     const randomId = uuid.v4();
     setOpenId(randomId);
-    setIsOpen(true);
+    triggerOpen();
 
     return randomId;
+  };
+
+  const triggerOpen = async () => {
+    // If already open, then close the previously opened feedback form
+    if (isOpen) {
+      setIsOpen(false);
+      // Wait for the form to be closed before opening the new one
+      await sleep(300);
+    }
+    setIsOpen(true);
   };
 
   const fetchLogs = async () => {
