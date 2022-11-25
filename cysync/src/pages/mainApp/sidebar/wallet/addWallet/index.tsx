@@ -82,7 +82,7 @@ const AddWallet = () => {
     resetHooks,
     walletId,
     updateName,
-    isNameDiff
+    isConfigDiff
   } = useAddWallet();
 
   const [open, setOpen] = useState(false);
@@ -189,8 +189,8 @@ const AddWallet = () => {
     <Root container className={classes.root}>
       <ErrorBox
         open={errorObj.isSet}
-        actionText={isNameDiff ? 'Yes' : 'Retry'}
-        handleAction={isNameDiff ? onUpdateName : handleRetry}
+        actionText={isConfigDiff ? 'Yes' : 'Retry'}
+        handleAction={isConfigDiff ? onUpdateName : handleRetry}
         handleClose={handleErrorBoxClose}
         text={errorObj.showError()}
         errorObj={errorObj}

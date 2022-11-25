@@ -8,6 +8,7 @@ import {
   handleDeviceErrors,
   handleErrors
 } from '../../../errors';
+import { useConnection } from '../../../store/provider';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 
@@ -40,6 +41,7 @@ export const useLogFetcher: UseLogFetcher = () => {
   const [requestStatus, setRequestStatus] = useState<-1 | 0 | 1 | 2>(0);
   const [logFetched, setLogFetched] = useState<-1 | 0 | 1 | 2>(0);
   const logFetcher = new LogsFetcher();
+  const { inInitial } = useConnection();
 
   // To call resetHooks outside of this function
   const resetHooks = () => {
@@ -114,7 +116,12 @@ export const useLogFetcher: UseLogFetcher = () => {
     logFetcher.on('notReady', () => {
       setRequestStatus(-1);
       setLogFetched(-1);
-      const cyError = new CyError(CysyncError.DEVICE_NOT_READY_IN_INITIAL);
+      const cyError = new CyError();
+      if (inInitial) {
+        cyError.setError(CysyncError.DEVICE_NOT_READY_IN_INITIAL);
+      } else {
+        cyError.setError(CysyncError.DEVICE_NOT_READY);
+      }
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
 

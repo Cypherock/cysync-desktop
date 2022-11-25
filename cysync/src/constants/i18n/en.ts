@@ -58,6 +58,8 @@ const en: I18nStrings = {
       'This wallet account already exists on the CySync App with different configuration, do you want to update the wallet account details?',
     ADD_WALLET_WITH_SAME_NAME:
       'A wallet account with the same name already exists on the CySync App',
+    ADD_WALLET_DUPLICATE_WITH_DIFFERENT_PASSPHRASE_CONFIG:
+      'This wallet account already exists on the CySync App with different passphrase config, do you want to update the wallet account details?',
     ADD_WALLET_UNKNOWN_ERROR: `Some internal error occurred, disconnect and reconnect the X1 wallet then retry`,
 
     ADD_COIN_FAILED_DUE_TO_SERVER_ERROR: coins =>
@@ -106,7 +108,7 @@ const en: I18nStrings = {
     RECEIVE_TXN_GENERATE_UNVERIFIED_FAILED:
       'Error in generating unverified receiveAddress',
     RECEIVE_TXN_DIFFERENT_ADDRESS_FROM_DEVICE:
-      'Some error occurred while fetching the address',
+      'Some internal error occurred while fetching the address\n This may be due to incorrect passphrase',
     RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER: `Contact cypherock if the addresses on the Cysync app did not match the addresses on the X1 wallet`,
 
     SEND_TXN_REJECTED: (coin: string) =>

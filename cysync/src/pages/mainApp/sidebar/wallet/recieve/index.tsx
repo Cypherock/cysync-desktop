@@ -40,6 +40,7 @@ const WalletReceive = () => {
   });
 
   const [isDeviceFlow, setDeviceFlow] = useState(!!deviceConnection);
+  const [exitFlowOnErrorClose, setExitFlowOnErrorClose] = useState(false);
 
   useEffect(() => {
     if (receiveForm) {
@@ -51,6 +52,10 @@ const WalletReceive = () => {
       logger.info('Receive address form opened');
     }
   }, [receiveForm]);
+
+  const handleSetExitFlowOnErrorClose = (value: boolean) => {
+    setExitFlowOnErrorClose(value);
+  };
 
   const handleClose = (abort?: boolean) => {
     if (abort && deviceConnection)
@@ -92,6 +97,8 @@ const WalletReceive = () => {
             stepsData={ReceiveFormComponents}
             handleClose={handleClose}
             handleXpubMissing={handleXpubMissing}
+            exitFlowOnErrorClose={exitFlowOnErrorClose}
+            setExitFlowOnErrorClose={handleSetExitFlowOnErrorClose}
           />
         }
       />
@@ -107,7 +114,11 @@ const WalletReceive = () => {
       handleClose={handleClose}
       dialogHeading="Receive"
       restComponents={
-        <Recieve handleClose={handleClose} handleNext={handleClose} />
+        <Recieve
+          handleClose={handleClose}
+          handleNext={handleClose}
+          setExitFlowOnErrorClose={handleSetExitFlowOnErrorClose}
+        />
       }
     />
   );

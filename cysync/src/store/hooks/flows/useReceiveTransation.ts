@@ -357,7 +357,7 @@ export const useReceiveTransaction: UseReceiveTransaction = () => {
           }
           if (customAccount) {
             logger.verbose(
-              'ReceiveAddress: Address comparision skipped, found customAccount',
+              'ReceiveAddress: Address comparison skipped, found customAccount',
               coinType
             );
           }

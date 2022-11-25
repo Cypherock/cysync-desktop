@@ -55,6 +55,7 @@ export interface ConnectionContextInterface {
   isDeviceAvailable: boolean;
   blockConnectionPopup: boolean;
   setBlockConnectionPopup: React.Dispatch<React.SetStateAction<boolean>>;
+  inInitial: boolean;
 }
 
 export const ConnectionContext: React.Context<ConnectionContextInterface> =
@@ -122,6 +123,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   );
   const [deviceState, setDeviceState] = useState<string | undefined>(undefined);
   const [inBootloader, setInBootloader] = useState(false);
+  const [inInitial, setInInitial] = useState(false);
   const [isDeviceNotReady, setIsDeviceNotReady] = useState(false);
   const [isDeviceNotReadyCheck, setIsDeviceNotReadyCheck] = useState(false);
 
@@ -146,6 +148,11 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   useEffect(() => {
     latestDeviceConnection.current = internalDeviceConnection;
   }, [internalDeviceConnection]);
+
+  useEffect(() => {
+    if (deviceState === '01') setInInitial(true);
+    else setInInitial(false);
+  }, [deviceState]);
 
   useEffect(() => {
     checkForConnection(newStatus => {
@@ -592,7 +599,8 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         setBlockNewConnection: externalSetBlockNewConnection,
         isDeviceAvailable: deviceConnectionStatus,
         setBlockConnectionPopup,
-        blockConnectionPopup
+        blockConnectionPopup,
+        inInitial
       }}
     >
       {children}

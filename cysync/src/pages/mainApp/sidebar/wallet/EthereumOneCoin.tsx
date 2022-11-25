@@ -587,7 +587,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
               </Grid>
             </Grid>
           ) : (
-            tokenList.length <= 0 || (
+            tokens.current?.length <= 0 || (
               <Grid item xs={12} className={classes.rootButtonWrapper}>
                 <CoinCardBtn
                   onClick={(e: React.MouseEvent) => {
