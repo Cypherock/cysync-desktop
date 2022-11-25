@@ -93,6 +93,7 @@ const Root = styled('div')(({ theme }) => ({
 
 const Summary: React.FC<StepComponentProps> = ({
   handleNext,
+  resetFlow,
   total,
   batchRecipientData,
   maxSend,
@@ -211,7 +212,7 @@ const Summary: React.FC<StepComponentProps> = ({
       coinAbbr
     );
     logger.info('Send transaction retry');
-    handleSend();
+    resetFlow();
   };
 
   useEffect(() => {
