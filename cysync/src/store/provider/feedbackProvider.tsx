@@ -188,8 +188,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     disableDeviceLogs: false
   };
 
-  const [externalHandleClose, setExternalHandleClose] =
-    useState<HandleCloseType>(undefined);
   const [heading, setHeading] = useState<string | undefined>(undefined);
   const [isContact, setIsContact] = useState(false);
 
@@ -280,7 +278,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     resetFeedbackState();
     resetRecordingState();
 
-    setExternalHandleClose(_handleClose);
     setIsContact(_isContact || false);
     setHeading(_heading);
 
@@ -538,10 +535,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const handleOk = () => {
     setIsOpen(false);
-
-    if (externalHandleClose) {
-      externalHandleClose();
-    }
   };
 
   const ENTER_KEY = 13;
@@ -636,10 +629,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
     resetLogFetcherHooks();
     clearErrorObj();
-
-    if (externalHandleClose) {
-      externalHandleClose();
-    }
     setOpenId('');
   };
 
