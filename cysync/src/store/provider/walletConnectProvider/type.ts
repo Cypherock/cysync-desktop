@@ -6,6 +6,8 @@ export interface IAccount extends Coin {
   chain: EthCoinData['chain'];
   name: EthCoinData['name'];
   address: string;
+  passphraseExists: boolean;
+  pinExists: boolean;
 }
 
 export const WalletConnectCallRequestMethodMap = {

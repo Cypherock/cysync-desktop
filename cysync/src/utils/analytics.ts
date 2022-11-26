@@ -29,6 +29,7 @@ class Analytics {
     ESTIMATE_FEE: 'Estimate Fee',
     ESTIMATE_GAS_LIMIT: 'Estimate Gas Limit',
     SEND_TXN: 'Send Transaction',
+    SIGN_MESSAGE: 'Sign Transaction',
     FEEDBACK: 'Feedback',
     CARD_AUTH: 'Card Authentication',
     DEVICE_INFO: 'Device Info',

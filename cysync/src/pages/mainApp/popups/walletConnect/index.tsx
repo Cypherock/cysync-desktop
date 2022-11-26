@@ -8,6 +8,7 @@ import {
 
 import AccountSelection from './accountSelection';
 import ConnectedPopup from './connected';
+import Sign from './sign';
 import UrlFormComponent from './urlForm';
 
 const WalletConnectPopup = () => {
@@ -43,15 +44,18 @@ const WalletConnectPopup = () => {
 
   if (connectionState === WalletConnectConnectionState.CONNECTED) {
     return (
-      <DialogBox
-        fullWidth
-        maxWidth="sm"
-        open={isOpen}
-        handleClose={handleClose}
-        isClosePresent
-        dialogHeading="Wallet Connect"
-        restComponents={<ConnectedPopup handleClose={handleClose} />}
-      />
+      <>
+        <Sign />
+        <DialogBox
+          fullWidth
+          maxWidth="sm"
+          open={isOpen}
+          handleClose={handleClose}
+          isClosePresent
+          dialogHeading="Wallet Connect"
+          restComponents={<ConnectedPopup handleClose={handleClose} />}
+        />
+      </>
     );
   }
 

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import logger from '../../../utils/logger';
-import { addressDb, Coin } from '../../database';
+import { addressDb, Coin, Wallet as IWallet } from '../../database';
 
 import {
   IAccount,
@@ -17,7 +17,14 @@ import {
 
 export * from './type';
 
-const ACCEPTED_CALL_METHODS = [WalletConnectCallRequestMethodMap.ETH_SIGN];
+const ACCEPTED_CALL_METHODS = [
+  WalletConnectCallRequestMethodMap.ETH_SIGN_TXN,
+  WalletConnectCallRequestMethodMap.ETH_SEND_TXN,
+  WalletConnectCallRequestMethodMap.SIGN_TYPED,
+  WalletConnectCallRequestMethodMap.ETH_SIGN,
+  WalletConnectCallRequestMethodMap.SIGN_PERSONAL
+];
+
 const CONNECTION_TIMEOUT = 5000;
 
 export interface WalletConnectContextInterface {
@@ -27,7 +34,7 @@ export interface WalletConnectContextInterface {
   connectionState: WalletConnectConnectionState;
   createConnection: (url: string) => Promise<void>;
   connectionError: string;
-  selectAccount: (coin: Coin) => void;
+  selectAccount: (walletData: IWallet, coin: Coin) => Promise<void>;
   connectionClientMeta: WalletConnectionConnectionClientMeta | undefined;
   approveCallRequest: (result: string) => void;
   rejectCallRequest: (reason?: string) => void;
@@ -101,7 +108,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     setIsOpen(false);
   };
 
-  const selectAccount = async (coin: Coin) => {
+  const selectAccount = async (walletData: IWallet, coin: Coin) => {
     try {
       const coinMeta = COINS[coin.slug];
 
@@ -127,7 +134,9 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         ...coin,
         chain: coinMeta.chain,
         name: coinMeta.name,
-        address
+        address,
+        passphraseExists: walletData.passphraseSet,
+        pinExists: walletData.passwordSet
       });
     } catch (error) {
       logger.error('WalletConnect: Error in selecting account');
@@ -137,15 +146,20 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   };
 
   const approveCallRequest = (result: string) => {
+    logger.info('WalletConnect: Approving call request', { result });
     if (callRequestId) {
       currentConnector.current?.approveRequest({
         id: callRequestId,
         result
       });
     }
+    setCallRequestId(undefined);
+    setCallRequestMethod(undefined);
+    setCallRequestParams(undefined);
   };
 
   const rejectCallRequest = (message?: string) => {
+    logger.info('WalletConnect: Rejecting call request', { message });
     if (callRequestId) {
       currentConnector.current?.rejectRequest({
         id: callRequestId,
@@ -154,6 +168,9 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         }
       });
     }
+    setCallRequestId(undefined);
+    setCallRequestMethod(undefined);
+    setCallRequestParams(undefined);
   };
 
   const handleSessionRequest = (error: Error, payload: any) => {
@@ -182,11 +199,15 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       payload?.params &&
       ACCEPTED_CALL_METHODS.includes(payload?.method)
     ) {
+      logger.info('WalletConnect: Call Request received', { payload });
       const params = payload.params;
       setCallRequestParams(params);
       setCallRequestId(payload.id);
       setCallRequestMethod(payload.method);
     } else if (payload?.id) {
+      logger.error('WalletConnect: Unsupported Call Request received', {
+        payload
+      });
       currentConnector.current?.rejectRequest({
         id: payload.id,
         error: {

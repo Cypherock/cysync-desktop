@@ -75,7 +75,7 @@ interface ICoin extends Coin {
 const WalletConnectAccountSelection: React.FC<Props> = () => {
   const theme = useTheme();
   const walletConnect = useWalletConnect();
-  const { allWallets: walletData, isLoading: isWalletLoading } = useWallets();
+  const { allWallets: walletData } = useWallets();
 
   const [selectedWallet, setSelectedWallet] = useState<Wallet>(null);
   const [selectedAccount, setSelectedAccount] = useState<Coin>(null);
@@ -84,7 +84,7 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
 
   const onPositiveClick = () => {
     setError('');
-    walletConnect.selectAccount(selectedAccount);
+    walletConnect.selectAccount(selectedWallet, selectedAccount);
   };
 
   const handleChange = (type: 'wallet' | 'account', value: any) => {
