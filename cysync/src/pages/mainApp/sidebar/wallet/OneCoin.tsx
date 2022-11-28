@@ -31,6 +31,7 @@ import {
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 import prevent from '../../../../utils/preventPropagation';
 
+import SendButton from './generalComponents/SendButton';
 import { OneCoinProps, OneCoinPropTypes } from './OneCoinProps';
 import Recieve from './recieve';
 import Send from './send';
@@ -318,29 +319,11 @@ const OneCoin: React.FC<OneCoinProps> = ({
           </PopOverText>
         </Grid>
         <Grid item xs={2} className={classes.actions}>
-          <Button
-            variant="text"
-            className={clsx({
-              [classes.orange]: !isEmpty,
-              [classes.grey]: isEmpty,
-              [classes.actionButton]: true
-            })}
-            onClick={handleSendFormOpen}
-            startIcon={
-              <Icon
-                className={clsx(classes.icon, classes.actionButtonIcon)}
-                viewBox="0 0 14 15"
-                icon={ICONS.walletSend}
-                color={
-                  !isEmpty
-                    ? theme.palette.secondary.main
-                    : theme.palette.grey[500]
-                }
-              />
-            }
-          >
-            Send
-          </Button>
+          <SendButton
+            handleSendFormOpen={handleSendFormOpen}
+            isEmpty={isEmpty}
+            prefix={PREFIX}
+          />
           <div className={classes.divider} />
           <Button
             variant="text"
