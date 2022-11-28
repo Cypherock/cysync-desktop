@@ -366,7 +366,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
     isButtonLoading,
     estimateGasLimit,
     setEstimateGasLimit,
-    duplicateBatchAddresses
+    duplicateBatchAddresses,
+    addbatchRecipientData,
+    txnParams,
+    resultType
   } = props;
   const {
     active,
@@ -384,6 +387,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     amountUSD
   } = classes;
 
+  const initialTransactionFeesSet = React.useRef(false);
   const { coinDetails } = useCurrentCoin();
   const isBtcFork = COINS[coinDetails.slug]?.group === CoinGroup.BitcoinForks;
   const { customAccount } = useCustomAccountContext();
@@ -451,7 +455,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
       .then(res => {
         logger.info(`Medium Fee is ${res}`);
         setMediumFee(res);
-        setTransactionFee(res);
+        if (!initialTransactionFeesSet.current) {
+          initialTransactionFeesSet.current = true;
+          setTransactionFee(res);
+        }
         storeCurrentMedimFee(res);
       })
       .catch(e => {
@@ -462,7 +469,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
         const prevFee = getPreviousMedimFee();
         if (prevFee) {
           setMediumFee(prevFee);
-          setTransactionFee(prevFee);
+          if (!initialTransactionFeesSet.current) {
+            initialTransactionFeesSet.current = true;
+            setTransactionFee(prevFee);
+          }
         }
       })
       .finally(() => {
@@ -567,8 +577,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
         data: {
           gasLimit,
           contractAddress,
-          contractAbbr: token ? coinAbbr.toUpperCase() : undefined
-        }
+          contractAbbr: token ? coinAbbr.toUpperCase() : undefined,
+          nonce: txnParams?.nonce,
+          contractData: txnParams?.data
+        },
+        onlySignature: resultType && resultType === 'signature'
       });
       handleNext();
     }
@@ -673,6 +686,46 @@ const Recipient: React.FC<StepComponentProps> = props => {
     return <></>;
   };
 
+  useEffect(() => {
+    if (txnParams) {
+      const dataCopy = batchRecipientData.map((elem, index) => {
+        if (index === 0) {
+          if (txnParams.to) {
+            elem.recipient = txnParams.to;
+          }
+
+          if (txnParams.value) {
+            const value = new BigNumber(txnParams.value, 16);
+            elem.amount = value
+              .dividedBy(COINS[coinDetails.slug].multiplier)
+              .toString();
+          }
+        }
+
+        return elem;
+      });
+
+      if (txnParams.gas) {
+        const value = parseInt(txnParams.gas, 16);
+        if (value) {
+          setGasLimit(value);
+        }
+      }
+
+      if (txnParams.gasPrice) {
+        const value = new BigNumber(txnParams.gasPrice, 16)
+          .dividedBy(1_000_000_000)
+          .toNumber();
+        if (value) {
+          initialTransactionFeesSet.current = true;
+          setTransactionFee(value);
+        }
+      }
+
+      addbatchRecipientData([...dataCopy]);
+    }
+  }, [txnParams]);
+
   return (
     <Root container className={root}>
       {isBtc && (
@@ -713,6 +766,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               handleInputChange(e);
               debouncedHandleCheckAddresses();
             }}
+            disabled={!!txnParams?.to}
             value={batchRecipientData[0].recipient}
             error={batchRecipientData[0].errorRecipient.length !== 0}
             helperText={
@@ -743,13 +797,14 @@ const Recipient: React.FC<StepComponentProps> = props => {
             helperText={batchRecipientData[0].errorAmount}
             placeHolder="0"
             decimal={(COINS[coinAbbr] || { decimal: 18 }).decimal}
-            disabled={maxSend}
+            disabled={!!txnParams?.value || maxSend}
             customIcon={
               <Button
                 className={`${classes.sendMaxBtn} ${
                   maxSend ? classes.sendMaxBtnActive : ''
                 }`}
                 onClick={() => setMaxSend(!maxSend)}
+                disabled={!!txnParams?.value}
               >
                 Send Max
               </Button>

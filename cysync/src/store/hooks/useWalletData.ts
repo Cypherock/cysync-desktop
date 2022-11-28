@@ -1,4 +1,3 @@
-import { COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
@@ -7,11 +6,12 @@ import {
   Coin,
   coinDb,
   customAccountDb,
+  DisplayCoin,
+  getCoinWithPrices,
   priceHistoryDb,
   receiveAddressDb
 } from '../database';
 
-import { DisplayCoin } from './types';
 import { useDebouncedFunction } from './useDebounce';
 
 export interface UseWalletDataValues {
@@ -51,30 +51,7 @@ export const useWalletData: UseWalletData = () => {
     const mappedCoins: DisplayCoin[] = [];
 
     for (const coin of coins) {
-      const coinObj = COINS[coin.slug];
-      if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${coin.slug}`);
-      }
-
-      const coinWithPrice: DisplayCoin = {
-        ...coin,
-        isEmpty: true,
-        displayValue: '0',
-        displayPrice: '0',
-        displayBalance: '0'
-      };
-      const balance = new BigNumber(
-        coin.totalBalance ? coin.totalBalance : 0
-      ).dividedBy(coinObj.multiplier);
-
-      coinWithPrice.displayBalance = balance.toString();
-
-      const latestPrice = coin.price || 0;
-      const value = balance.multipliedBy(latestPrice || 0);
-      coinWithPrice.displayValue = value.toString();
-      coinWithPrice.displayPrice = latestPrice.toString() || '0';
-      coinWithPrice.isEmpty = balance.isZero();
-
+      const coinWithPrice = await getCoinWithPrices(coin);
       mappedCoins.push(coinWithPrice);
     }
 

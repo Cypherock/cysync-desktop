@@ -97,7 +97,9 @@ const Summary: React.FC<StepComponentProps> = ({
   batchRecipientData,
   maxSend,
   handleClose,
-  activeButton
+  activeButton,
+  onSuccess,
+  resultType
 }) => {
   const [broadcastError, setBroadcastError] = useState('');
   const [advanceError, setAdvanceError] = useState('');
@@ -127,6 +129,17 @@ const Summary: React.FC<StepComponentProps> = ({
   const { addCustomAccountSyncItemFromCoin } = useSync();
 
   const handleSend = async () => {
+    if (onSuccess && resultType === 'signature') {
+      onSuccess('0x' + sendTransaction.signature);
+      handleNext();
+      Analytics.Instance.event(
+        Analytics.Categories.SEND_TXN,
+        Analytics.Actions.COMPLETED,
+        coinAbbr
+      );
+      return;
+    }
+
     setOpen(true);
     setBroadcastError('');
     setAdvanceError('');
@@ -150,6 +163,9 @@ const Summary: React.FC<StepComponentProps> = ({
             if (coins.length >= 1)
               addCustomAccountSyncItemFromCoin(coins[0], {});
           })();
+        if (onSuccess && resultType === 'hash') {
+          onSuccess(res);
+        }
         handleNext();
         Analytics.Instance.event(
           Analytics.Categories.SEND_TXN,
@@ -215,16 +231,19 @@ const Summary: React.FC<StepComponentProps> = ({
   };
 
   useEffect(() => {
-    if (!connected) setStatusText('');
-    else {
-      if (sendTransaction.signedTxn) {
-        setStatusText('Broadcasting transaction');
-        handleSend();
-      } else {
-        setStatusText('Waiting for signature from X1 wallet');
-      }
+    if (!connected) {
+      setStatusText('');
     }
-  }, [connected, sendTransaction.signedTxn]);
+
+    if (sendTransaction.signature && resultType === 'signature') {
+      handleSend();
+    } else if (sendTransaction.signedTxn) {
+      setStatusText('Broadcasting transaction');
+      handleSend();
+    } else {
+      setStatusText('Waiting for signature from X1 wallet');
+    }
+  }, [connected, sendTransaction.signedTxn, sendTransaction.signature]);
 
   const cyError = new CyError(CysyncError.SEND_TXN_BROADCAST_FAILED);
   return (

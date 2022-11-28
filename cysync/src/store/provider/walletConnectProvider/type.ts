@@ -1,8 +1,8 @@
 import { EthCoinData } from '@cypherock/communication';
 
-import { Coin } from '../../database';
+import { DisplayCoin } from '../../database';
 
-export interface IAccount extends Coin {
+export interface IAccount extends DisplayCoin {
   chain: EthCoinData['chain'];
   name: EthCoinData['name'];
   address: string;

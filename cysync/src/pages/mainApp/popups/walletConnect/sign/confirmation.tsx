@@ -5,7 +5,11 @@ import React from 'react';
 
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
 import CoinIcon from '../../../../../designSystem/genericComponents/coinIcons';
-import { useConnection, useWalletConnect } from '../../../../../store/provider';
+import {
+  useConnection,
+  useWalletConnect,
+  WalletConnectCallRequestMethodMap
+} from '../../../../../store/provider';
 
 const PREFIX = 'WalletConnect-Connected';
 
@@ -18,6 +22,7 @@ const classes = {
 const Root = styled('div')(() => ({
   padding: '20px',
   [`& .${classes.accountDisplayConatiner}`]: {
+    boxSizing: 'border-box',
     marginTop: '24px',
     padding: '10px',
     background: '#1F262E',
@@ -25,7 +30,8 @@ const Root = styled('div')(() => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    marginBottom: '2rem'
   },
   [`& .${classes.errorButtons}`]: {
     marginTop: '24px',
@@ -45,12 +51,31 @@ type Props = {
 const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
   const walletConnect = useWalletConnect();
   const { beforeFlowStart } = useConnection();
+  const [messageToSign, setMessageToSign] = React.useState('');
 
   const onContinue = () => {
     if (beforeFlowStart()) {
       handleNext();
     }
   };
+
+  const decodeMessage = () => {
+    let message = '';
+    if (
+      walletConnect.callRequestMethod ===
+      WalletConnectCallRequestMethodMap.SIGN_PERSONAL
+    ) {
+      message = walletConnect.callRequestParams[0];
+      setMessageToSign(Buffer.from(message.slice(2), 'hex').toString());
+    } else {
+      message = walletConnect.callRequestParams[1];
+      setMessageToSign(message);
+    }
+  };
+
+  React.useEffect(() => {
+    decodeMessage();
+  }, [walletConnect.callRequestParams, walletConnect.callRequestMethod]);
 
   return (
     <Root>
@@ -92,21 +117,17 @@ const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
         </>
       )}
 
-      <Typography color="textPrimary" variant="body2" gutterBottom>
-        {walletConnect.callRequestId}
-      </Typography>
-
-      <Typography color="textPrimary" variant="body2" gutterBottom>
-        {walletConnect.callRequestMethod}
+      <Typography color="textSecondary" variant="h6" gutterBottom>
+        Sign Message:
       </Typography>
 
       <Typography
         color="textPrimary"
-        variant="body2"
+        variant="body1"
         gutterBottom
         sx={{ overflowWrap: 'anywhere' }}
       >
-        {JSON.stringify(walletConnect.callRequestParams)}
+        {messageToSign}
       </Typography>
 
       <div className={classes.errorButtons}>

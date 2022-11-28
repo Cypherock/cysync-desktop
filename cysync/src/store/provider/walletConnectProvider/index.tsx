@@ -5,7 +5,12 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import logger from '../../../utils/logger';
-import { addressDb, Coin, Wallet as IWallet } from '../../database';
+import {
+  addressDb,
+  Coin,
+  getCoinWithPrices,
+  Wallet as IWallet
+} from '../../database';
 
 import {
   IAccount,
@@ -20,7 +25,6 @@ export * from './type';
 const ACCEPTED_CALL_METHODS = [
   WalletConnectCallRequestMethodMap.ETH_SIGN_TXN,
   WalletConnectCallRequestMethodMap.ETH_SEND_TXN,
-  WalletConnectCallRequestMethodMap.SIGN_TYPED,
   WalletConnectCallRequestMethodMap.ETH_SIGN,
   WalletConnectCallRequestMethodMap.SIGN_PERSONAL
 ];
@@ -42,6 +46,7 @@ export interface WalletConnectContextInterface {
   callRequestMethod: WalletConnectCallRequestMethod | undefined;
   callRequestParams: any;
   selectedAccount: IAccount | undefined;
+  selectedWallet: IWallet | undefined;
 }
 
 export const WalletConnectContext: React.Context<WalletConnectContextInterface> =
@@ -51,6 +56,9 @@ export const WalletConnectContext: React.Context<WalletConnectContextInterface> 
 
 export const WalletConnectProvider: React.FC = ({ children }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [selectedWallet, setSelectedWallet] = React.useState<
+    IWallet | undefined
+  >(undefined);
   const [selectedAccount, setSelectedAccount] = React.useState<
     IAccount | undefined
   >(undefined);
@@ -82,6 +90,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     setCallRequestMethod(undefined);
     setCallRequestParams(undefined);
     setSelectedAccount(undefined);
+    setSelectedWallet(undefined);
     currentConnector.current = undefined;
   };
 
@@ -130,8 +139,9 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         accounts: [address],
         chainId: coinMeta.chain
       });
+      setSelectedWallet(walletData);
       setSelectedAccount({
-        ...coin,
+        ...(await getCoinWithPrices(coin)),
         chain: coinMeta.chain,
         name: coinMeta.name,
         address,
@@ -217,7 +227,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     }
   };
 
-  const handleDisconnect = (error: Error, payload: any) => {
+  const handleDisconnect = (error: Error, _payload: any) => {
     logger.info('WalletConnect: Disconnect');
     if (error) {
       logger.error(error);
@@ -225,7 +235,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
   };
 
-  const handleConnect = (error: Error, payload: any) => {
+  const handleConnect = (error: Error, _payload: any) => {
     logger.info('WalletConnect: Connected');
     if (error) {
       logger.error(error);
@@ -294,7 +304,8 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         callRequestId,
         callRequestMethod,
         callRequestParams,
-        selectedAccount
+        selectedAccount,
+        selectedWallet
       }}
     >
       {children}

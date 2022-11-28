@@ -8,6 +8,7 @@ import {
 
 import AccountSelection from './accountSelection';
 import ConnectedPopup from './connected';
+import Send from './send';
 import Sign from './sign';
 import UrlFormComponent from './urlForm';
 
@@ -46,6 +47,7 @@ const WalletConnectPopup = () => {
     return (
       <>
         <Sign />
+        <Send />
         <DialogBox
           fullWidth
           maxWidth="sm"

@@ -26,7 +26,27 @@ const SenderData = [
   ['Confirmation', Confirmation]
 ];
 
-const WalletSend = () => {
+interface WalletSendProps {
+  onSuccess?: (result: string) => void;
+  onReject?: (reason?: string) => void;
+  txnParams?: {
+    from: string;
+    to: string;
+    data?: string;
+    gas?: string; // hex
+    gasPrice?: string; // hex
+    value?: string; // hex
+    nonce?: string; // hex
+  };
+  resultType?: 'signature' | 'hash';
+}
+
+const WalletSend: React.FC<WalletSendProps> = ({
+  onSuccess,
+  onReject,
+  txnParams,
+  resultType
+}) => {
   const { sendForm, setSendForm, sendTransaction } =
     useSendTransactionContext();
 
@@ -51,6 +71,7 @@ const WalletSend = () => {
   const handleSendFormClose = (abort?: boolean) => {
     if (abort) {
       sendTransaction.cancelSendTxn(deviceConnection);
+      onReject('Rejected');
     }
     Analytics.Instance.event(
       Analytics.Categories.SEND_TXN,
@@ -84,6 +105,10 @@ const WalletSend = () => {
           <StepperForm
             stepsData={SenderData}
             handleClose={handleSendFormClose}
+            onSuccess={onSuccess}
+            onReject={onReject}
+            txnParams={txnParams}
+            resultType={resultType}
           />
         }
       />

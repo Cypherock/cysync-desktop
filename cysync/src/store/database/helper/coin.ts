@@ -1,7 +1,15 @@
 import { CoinGroup, COINS } from '@cypherock/communication';
+import BigNumber from 'bignumber.js';
 
 import logger from '../../../utils/logger';
-import { coinDb, tokenDb } from '../databaseInit';
+import { Coin, coinDb, tokenDb } from '../databaseInit';
+
+export interface DisplayCoin extends Coin {
+  displayValue: string;
+  displayPrice: string;
+  displayBalance: string;
+  isEmpty: boolean;
+}
 
 export const getLatestPriceForCoin = async (
   coin: string,
@@ -49,4 +57,32 @@ export const getLatestPriceForCoins = async (
     );
   }
   return latestPrices;
+};
+
+export const getCoinWithPrices = async (coin: Coin) => {
+  const coinObj = COINS[coin.slug];
+  if (!coinObj) {
+    throw new Error(`Cannot find coinType: ${coin.slug}`);
+  }
+
+  const coinWithPrice: DisplayCoin = {
+    ...coin,
+    isEmpty: true,
+    displayValue: '0',
+    displayPrice: '0',
+    displayBalance: '0'
+  };
+  const balance = new BigNumber(
+    coin.totalBalance ? coin.totalBalance : 0
+  ).dividedBy(coinObj.multiplier);
+
+  coinWithPrice.displayBalance = balance.toString();
+
+  const latestPrice = coin.price || 0;
+  const value = balance.multipliedBy(latestPrice || 0);
+  coinWithPrice.displayValue = value.toString();
+  coinWithPrice.displayPrice = latestPrice.toString() || '0';
+  coinWithPrice.isEmpty = balance.isZero();
+
+  return coinWithPrice;
 };

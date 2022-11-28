@@ -202,9 +202,28 @@ const Root = styled('div')(({ theme }) => ({
 type StepperProps = {
   stepsData: any[][];
   handleClose: (abort?: boolean) => void;
+  onSuccess?: (result: string) => void;
+  onReject?: (reason?: string) => void;
+  txnParams?: {
+    from: string;
+    to: string;
+    data?: string;
+    gas?: string; // hex
+    gasPrice?: string; // hex
+    value?: string; // hex
+    nonce?: string; // hex
+  };
+  resultType?: 'signature' | 'hash';
 };
 
-const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
+const SendForm: React.FC<StepperProps> = ({
+  stepsData,
+  handleClose,
+  onSuccess,
+  onReject,
+  txnParams,
+  resultType
+}) => {
   const { sendForm, sendTransaction } = useSendTransactionContext();
   const [activeStep, setActiveStep] = useState(0);
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -214,7 +233,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [gasLimitError, setGasLimitError] = React.useState<string | undefined>(
     undefined
   );
-  const [estimateGasLimit, setEstimateGasLimit] = React.useState(true);
+  const [estimateGasLimit, setEstimateGasLimit] = React.useState(
+    !txnParams.gas
+  );
 
   // State Management Semaphore for Button of Transaction Type
   // 0 => Single Transaction
@@ -305,11 +326,6 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const triggerCalcGasLimit = async () => {
     const coin = COINS[coinDetails.slug];
 
-    if (!token) {
-      setGasLimit(21000);
-      return;
-    }
-
     if (
       !(
         estimateGasLimit &&
@@ -318,6 +334,11 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         batchRecipientData[0].recipient.length === 42
       )
     ) {
+      return;
+    }
+
+    if (!token) {
+      setGasLimit(21000);
       return;
     }
 
@@ -692,7 +713,11 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
             estimateGasLimit,
             setEstimateGasLimit,
             duplicateBatchAddresses,
-            isButtonLoading
+            isButtonLoading,
+            onSuccess,
+            onReject,
+            txnParams,
+            resultType
           }}
         />
       </div>
@@ -702,7 +727,19 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
 SendForm.propTypes = {
   stepsData: PropTypes.array.isRequired,
-  handleClose: PropTypes.func.isRequired
+  handleClose: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func,
+  onReject: PropTypes.func,
+  txnParams: PropTypes.exact({
+    from: PropTypes.string.isRequired,
+    to: PropTypes.string.isRequired,
+    data: PropTypes.string,
+    gas: PropTypes.string,
+    gasPrice: PropTypes.string,
+    value: PropTypes.string,
+    nonce: PropTypes.string
+  }),
+  resultType: PropTypes.oneOf(['signature', 'hash'])
 };
 
 export default SendForm;

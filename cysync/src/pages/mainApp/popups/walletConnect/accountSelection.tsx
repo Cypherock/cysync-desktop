@@ -156,7 +156,7 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
               }}
             />
           )}
-          onChange={(e, val) => handleChange('wallet', val)}
+          onChange={(_e: any, val) => handleChange('wallet', val)}
           value={selectedWallet}
         />
 
@@ -169,7 +169,7 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
           fullWidth
           options={coinData}
           autoHighlight
-          getOptionLabel={option => option.name}
+          getOptionLabel={option => (option as any).name}
           renderOption={(props, option) => {
             return (
               <Box component="span" {...props}>
@@ -177,7 +177,8 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
                   initial={option.slug}
                   style={{ marginRight: '10px' }}
                 />
-                {option.name} ({option.value} {option.slug.toUpperCase()})
+                {(option as any).name} ({(option as any).value}{' '}
+                {option.slug.toUpperCase()})
               </Box>
             );
           }}
@@ -191,7 +192,7 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
               }}
             />
           )}
-          onChange={(e, val) => handleChange('account', val)}
+          onChange={(_e: any, val) => handleChange('account', val)}
           value={selectedAccount}
         />
         {error ||

@@ -34,6 +34,7 @@ const Root = styled(Grid)(({ theme }) => ({
   alignItems: 'center',
   width: '100%',
   [`& .${classes.accountDisplayConatiner}`]: {
+    boxSizing: 'border-box',
     marginTop: '24px',
     padding: '10px',
     background: '#1F262E',
@@ -52,14 +53,12 @@ const Root = styled(Grid)(({ theme }) => ({
   [`& .${classes.padBottom}`]: {
     marginBottom: 5
   },
-
   [`& .${classes.deviceDetails}`]: {
     width: '70%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    minHeight: '15rem',
-    paddingBottom: '5rem'
+    minHeight: '15rem'
   },
   [`& .${classes.mainText}`]: {
     fontSize: '1rem',
@@ -112,10 +111,11 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
       WalletConnectCallRequestMethodMap.SIGN_PERSONAL
     ) {
       message = walletConnect.callRequestParams[0];
+      setMessageToSign(Buffer.from(message.slice(2), 'hex').toString());
     } else {
       message = walletConnect.callRequestParams[1];
+      setMessageToSign(message);
     }
-    setMessageToSign(Buffer.from(message, 'hex').toString());
 
     const account = walletConnect.selectedAccount;
 
@@ -152,7 +152,12 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
         <Typography color="textSecondary" variant="h6" gutterBottom>
           Message
         </Typography>
-        <Typography color="textPrimary" variant="body1" gutterBottom>
+        <Typography
+          color="textPrimary"
+          variant="body1"
+          gutterBottom
+          sx={{ overflowWrap: 'anywhere' }}
+        >
           {messageToSign}
         </Typography>
         <Typography color="textSecondary" variant="h6" gutterBottom>
@@ -167,7 +172,9 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
           <>
             <TextView
               completed={signMessage.passphraseEntered}
-              inProgress={!signMessage.passphraseEntered}
+              inProgress={
+                signMessage.coinsConfirmed && !signMessage.passphraseEntered
+              }
               text="Enter Passphrase"
             />
           </>
@@ -195,7 +202,7 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
               walletConnect.selectedAccount.passphraseExists &&
               !signMessage.cardsTapped
                 ? false
-                : !signMessage.cardsTapped
+                : signMessage.coinsConfirmed && !signMessage.cardsTapped
             }
             text="Tap any X1 Card"
             stylex={{ marginTop: '0px' }}

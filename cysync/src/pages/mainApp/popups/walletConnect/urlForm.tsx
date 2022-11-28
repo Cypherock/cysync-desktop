@@ -52,7 +52,7 @@ const WalletConnectUrlForm: React.FC<Props> = () => {
   const isDisabled =
     walletConnect.connectionState === WalletConnectConnectionState.CONNECTING;
 
-  const onPositiveClick = e => {
+  const onPositiveClick = (e: any) => {
     e.preventDefault();
 
     if (isDisabled) return;
