@@ -8,7 +8,10 @@ import {
   useConnection,
   useUpdater
 } from '../../../../../store/provider';
-import { compareVersion, hexToVersion } from '../../../../../utils/compareVersion';
+import {
+  compareVersion,
+  hexToVersion
+} from '../../../../../utils/compareVersion';
 import logger from '../../../../../utils/logger';
 
 import UpdateInfoComponent from './info';
