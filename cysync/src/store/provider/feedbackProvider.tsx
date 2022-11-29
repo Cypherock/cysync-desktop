@@ -42,6 +42,7 @@ import { useLogFetcher } from '../hooks/flows/useLogFetcher';
 
 import { DeviceConnectionState, useConnection } from './connectionProvider';
 import { useSnackbar } from './snackbarProvider';
+import { sleep } from './syncProvider';
 
 const PREFIX = 'FeedbackContext';
 
@@ -188,8 +189,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     disableDeviceLogs: false
   };
 
-  const [externalHandleClose, setExternalHandleClose] =
-    useState<HandleCloseType>(undefined);
   const [heading, setHeading] = useState<string | undefined>(undefined);
   const [isContact, setIsContact] = useState(false);
 
@@ -280,7 +279,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     resetFeedbackState();
     resetRecordingState();
 
-    setExternalHandleClose(_handleClose);
     setIsContact(_isContact || false);
     setHeading(_heading);
 
@@ -309,9 +307,19 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
     const randomId = uuid.v4();
     setOpenId(randomId);
-    setIsOpen(true);
+    triggerOpen();
 
     return randomId;
+  };
+
+  const triggerOpen = async () => {
+    // If already open, then close the previously opened feedback form
+    if (isOpen) {
+      setIsOpen(false);
+      // Wait for the form to be closed before opening the new one
+      await sleep(300);
+    }
+    setIsOpen(true);
   };
 
   const fetchLogs = async () => {
@@ -538,10 +546,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const handleOk = () => {
     setIsOpen(false);
-
-    if (externalHandleClose) {
-      externalHandleClose();
-    }
   };
 
   const ENTER_KEY = 13;
@@ -636,10 +640,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
     resetLogFetcherHooks();
     clearErrorObj();
-
-    if (externalHandleClose) {
-      externalHandleClose();
-    }
     setOpenId('');
   };
 
