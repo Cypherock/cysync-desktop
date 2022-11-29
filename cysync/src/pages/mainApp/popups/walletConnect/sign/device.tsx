@@ -4,8 +4,9 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import ErrorDialog from '../../../../../designSystem/designComponents/dialog/errorDialog';
 import TextView from '../../../../../designSystem/designComponents/textComponents/textView';
-import { useSignMessage } from '../../../../../store/hooks';
+import { UseSignMessageValues } from '../../../../../store/hooks';
 import {
   useConnection,
   useWalletConnect,
@@ -95,14 +96,18 @@ const Root = styled(Grid)(({ theme }) => ({
 }));
 
 type Props = {
+  handleNext: () => void;
   handleClose: () => void;
+  signMessage: UseSignMessageValues;
 };
 
-const WalletConnectAccountSelection: React.FC<Props> = () => {
+const WalletConnectSignMessageDevice: React.FC<Props> = ({
+  handleClose,
+  signMessage
+}) => {
   const walletConnect = useWalletConnect();
   const [messageToSign, setMessageToSign] = React.useState('');
   const { deviceConnection, deviceSdkVersion, setIsInFlow } = useConnection();
-  const signMessage = useSignMessage();
 
   const signRequest = async () => {
     let message = '';
@@ -132,12 +137,12 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
     });
   };
 
+  const handleRetry = () => {
+    signRequest();
+  };
+
   React.useEffect(() => {
     signRequest();
-
-    return () => {
-      signMessage.cancelSignMessage(deviceConnection);
-    };
   }, []);
 
   React.useEffect(() => {
@@ -147,74 +152,88 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
   }, [signMessage.signature]);
 
   return (
-    <Root container>
-      <div className={classes.deviceDetails}>
-        <Typography color="textSecondary" variant="h6" gutterBottom>
-          Message
-        </Typography>
-        <Typography
-          color="textPrimary"
-          variant="body1"
-          gutterBottom
-          sx={{ overflowWrap: 'anywhere' }}
-        >
-          {messageToSign}
-        </Typography>
-        <Typography color="textSecondary" variant="h6" gutterBottom>
-          Follow the instructions on X1 Wallet
-        </Typography>
-        <TextView
-          completed={signMessage.coinsConfirmed}
-          inProgress={!signMessage.coinsConfirmed}
-          text="Confirm On Device"
+    <>
+      {signMessage.errorObj.isSet && (
+        <ErrorDialog
+          open={signMessage.errorObj.isSet}
+          handleClose={() => handleClose()}
+          errorObj={signMessage.errorObj}
+          actionText="Retry"
+          handleAction={handleRetry}
+          flow="Sign Message"
         />
-        {walletConnect.selectedAccount.passphraseExists && (
-          <>
-            <TextView
-              completed={signMessage.passphraseEntered}
-              inProgress={
-                signMessage.coinsConfirmed && !signMessage.passphraseEntered
-              }
-              text="Enter Passphrase"
-            />
-          </>
-        )}
+      )}
+      <Root container>
+        <div className={classes.deviceDetails}>
+          <Typography color="textSecondary" variant="h6" gutterBottom>
+            Message
+          </Typography>
+          <Typography
+            color="textPrimary"
+            variant="body1"
+            gutterBottom
+            sx={{ overflowWrap: 'anywhere' }}
+          >
+            {messageToSign}
+          </Typography>
+          <Typography color="textSecondary" variant="h6" gutterBottom>
+            Follow the instructions on X1 Wallet
+          </Typography>
+          <TextView
+            completed={signMessage.coinsConfirmed}
+            inProgress={!signMessage.coinsConfirmed}
+            text="Confirm On Device"
+          />
+          {walletConnect.selectedAccount.passphraseExists && (
+            <>
+              <TextView
+                completed={signMessage.passphraseEntered}
+                inProgress={
+                  signMessage.coinsConfirmed && !signMessage.passphraseEntered
+                }
+                text="Enter Passphrase"
+              />
+            </>
+          )}
 
-        {walletConnect.selectedAccount.pinExists && (
-          <>
+          {walletConnect.selectedAccount.pinExists && (
+            <>
+              <TextView
+                completed={signMessage.pinEntered && signMessage.cardsTapped}
+                inProgress={
+                  walletConnect.selectedAccount.passphraseExists &&
+                  !signMessage.passphraseEntered
+                    ? false
+                    : !signMessage.pinEntered || !signMessage.cardsTapped
+                }
+                text="Enter PIN and Tap any X1 Card"
+              />
+            </>
+          )}
+
+          {walletConnect.selectedAccount.pinExists || (
             <TextView
-              completed={signMessage.pinEntered && signMessage.cardsTapped}
+              completed={signMessage.cardsTapped}
               inProgress={
                 walletConnect.selectedAccount.passphraseExists &&
-                !signMessage.passphraseEntered
+                !signMessage.cardsTapped
                   ? false
-                  : !signMessage.pinEntered || !signMessage.cardsTapped
+                  : signMessage.coinsConfirmed && !signMessage.cardsTapped
               }
-              text="Enter PIN and Tap any X1 Card"
+              text="Tap any X1 Card"
+              stylex={{ marginTop: '0px' }}
             />
-          </>
-        )}
-
-        {walletConnect.selectedAccount.pinExists || (
-          <TextView
-            completed={signMessage.cardsTapped}
-            inProgress={
-              walletConnect.selectedAccount.passphraseExists &&
-              !signMessage.cardsTapped
-                ? false
-                : signMessage.coinsConfirmed && !signMessage.cardsTapped
-            }
-            text="Tap any X1 Card"
-            stylex={{ marginTop: '0px' }}
-          />
-        )}
-      </div>
-    </Root>
+          )}
+        </div>
+      </Root>
+    </>
   );
 };
 
-WalletConnectAccountSelection.propTypes = {
-  handleClose: PropTypes.func.isRequired
+WalletConnectSignMessageDevice.propTypes = {
+  handleNext: PropTypes.func.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  signMessage: PropTypes.any.isRequired
 };
 
-export default WalletConnectAccountSelection;
+export default WalletConnectSignMessageDevice;

@@ -35,7 +35,7 @@ export interface HandleSignMessageOptions {
   message: string;
 }
 
-export interface UseSignValues {
+export interface UseSignMessageValues {
   handleSignMessage: (options: HandleSignMessageOptions) => Promise<void>;
   deviceConnected: boolean;
   setDeviceConnected: React.Dispatch<React.SetStateAction<boolean>>;
@@ -54,7 +54,7 @@ export interface UseSignValues {
   cancelSignMessage: (connection: DeviceConnection) => void;
 }
 
-export type UseSignMessage = () => UseSignValues;
+export type UseSignMessage = () => UseSignMessageValues;
 
 export const useSignMessage: UseSignMessage = () => {
   const [deviceConnected, setDeviceConnected] = useState(false);
@@ -90,7 +90,7 @@ export const useSignMessage: UseSignMessage = () => {
     resetHooks();
   };
 
-  const handleSignMessage: UseSignValues['handleSignMessage'] = async ({
+  const handleSignMessage: UseSignMessageValues['handleSignMessage'] = async ({
     connection,
     sdkVersion,
     setIsInFlow,

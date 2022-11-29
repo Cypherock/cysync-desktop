@@ -1,6 +1,7 @@
 import { COINS, EthCoinData } from '@cypherock/communication';
 import Wallet from '@cypherock/wallet';
 import WalletConnect from '@walletconnect/client';
+import { ipcRenderer } from 'electron';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -11,6 +12,7 @@ import {
   getCoinWithPrices,
   Wallet as IWallet
 } from '../../database';
+import { useConnection } from '../connectionProvider';
 
 import {
   IAccount,
@@ -55,6 +57,8 @@ export const WalletConnectContext: React.Context<WalletConnectContextInterface> 
   );
 
 export const WalletConnectProvider: React.FC = ({ children }) => {
+  const deviceConnection = useConnection();
+
   const [isOpen, setIsOpen] = React.useState(false);
   const [selectedWallet, setSelectedWallet] = React.useState<
     IWallet | undefined
@@ -86,6 +90,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   const connectionTimeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   const resetStates = () => {
+    deviceConnection.setBlockConnectionPopup(false);
     setConnectionClientMeta(undefined);
     setCallRequestMethod(undefined);
     setCallRequestParams(undefined);
@@ -103,6 +108,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   };
 
   const openDialog = () => {
+    deviceConnection.setBlockConnectionPopup(true);
     setIsOpen(true);
   };
 
@@ -196,6 +202,9 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
 
     setConnectionClientMeta(currentConnector.current.peerMeta);
     setConnectionState(WalletConnectConnectionState.SELECT_ACCOUNT);
+    if (!isOpen) {
+      openDialog();
+    }
   };
 
   const handleCallRequest = (error: Error, payload: any) => {
@@ -233,6 +242,8 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       logger.error(error);
     }
     setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
+    setConnectionError('');
+    setIsOpen(false);
   };
 
   const handleConnect = (error: Error, _payload: any) => {
@@ -287,6 +298,21 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       setConnectionError(error.message);
     }
   };
+
+  const onExternalLink = (_event: any, uri: string) => {
+    logger.info('WalletConnect: Open', { uri });
+    if (connectionState === WalletConnectConnectionState.NOT_CONNECTED) {
+      createConnection(uri);
+    }
+  };
+
+  React.useEffect(() => {
+    ipcRenderer.on('wallet-connect', onExternalLink);
+
+    return () => {
+      ipcRenderer.removeListener('wallet-connect', onExternalLink);
+    };
+  }, []);
 
   return (
     <WalletConnectContext.Provider

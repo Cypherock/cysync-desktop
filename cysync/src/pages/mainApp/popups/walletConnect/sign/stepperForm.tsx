@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import CreateComponent from '../../../../../components/createComponent';
+import { UseSignMessageValues } from '../../../../../store/hooks';
 
 const QontoConnector = withStyles((theme: Theme) =>
   createStyles({
@@ -178,10 +179,13 @@ const Root = styled('div')(({ theme }) => ({
 type StepperProps = {
   stepsData: any[][];
   handleClose: () => void;
+  signMessage: UseSignMessageValues;
 };
 
 const WalletConnectSignStepperForm: React.FC<StepperProps> = ({
-  stepsData
+  stepsData,
+  handleClose,
+  signMessage
 }) => {
   const [activeStep, setActiveStep] = useState(0);
 
@@ -215,7 +219,7 @@ const WalletConnectSignStepperForm: React.FC<StepperProps> = ({
       <div style={{ marginTop: '10px' }}>
         <CreateComponent
           component={stepsData[activeStep][1]}
-          props={{ handleNext }}
+          props={{ handleNext, handleClose, signMessage }}
         />
       </div>
     </Root>
@@ -224,7 +228,8 @@ const WalletConnectSignStepperForm: React.FC<StepperProps> = ({
 
 WalletConnectSignStepperForm.propTypes = {
   stepsData: PropTypes.array.isRequired,
-  handleClose: PropTypes.func.isRequired
+  handleClose: PropTypes.func.isRequired,
+  signMessage: PropTypes.any.isRequired
 };
 
 export default WalletConnectSignStepperForm;

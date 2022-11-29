@@ -1,10 +1,12 @@
 import { styled } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
 import CoinIcon from '../../../../../designSystem/genericComponents/coinIcons';
+import { UseSignMessageValues } from '../../../../../store/hooks';
 import {
   useConnection,
   useWalletConnect,
@@ -46,11 +48,13 @@ const Root = styled('div')(() => ({
 
 type Props = {
   handleNext: () => void;
+  handleClose: () => void;
+  signMessage: UseSignMessageValues;
 };
 
 const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
   const walletConnect = useWalletConnect();
-  const { beforeFlowStart } = useConnection();
+  const { beforeFlowStart, deviceConnection } = useConnection();
   const [messageToSign, setMessageToSign] = React.useState('');
 
   const onContinue = () => {
@@ -74,7 +78,9 @@ const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
   };
 
   React.useEffect(() => {
-    decodeMessage();
+    if (walletConnect.callRequestMethod && walletConnect.callRequestParams) {
+      decodeMessage();
+    }
   }, [walletConnect.callRequestParams, walletConnect.callRequestMethod]);
 
   return (
@@ -131,22 +137,43 @@ const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
       </Typography>
 
       <div className={classes.errorButtons}>
-        <CustomButton
-          onClick={onContinue}
-          style={{
-            padding: '0.5rem 3rem',
-            margin: '1rem 0rem'
-          }}
-        >
-          Continue
-        </CustomButton>
+        {!deviceConnection && (
+          <Tooltip title="Connect X1 Wallet">
+            <span>
+              <CustomButton
+                onClick={onContinue}
+                style={{
+                  padding: '0.5rem 3rem',
+                  margin: '1rem 0rem'
+                }}
+                disabled={!deviceConnection}
+              >
+                Continue
+              </CustomButton>
+            </span>
+          </Tooltip>
+        )}
+        {deviceConnection && (
+          <CustomButton
+            onClick={onContinue}
+            style={{
+              padding: '0.5rem 3rem',
+              margin: '1rem 0rem'
+            }}
+            disabled={!deviceConnection}
+          >
+            Continue
+          </CustomButton>
+        )}
       </div>
     </Root>
   );
 };
 
 WalletConnectSignConfirm.propTypes = {
-  handleNext: PropTypes.func.isRequired
+  handleNext: PropTypes.func.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  signMessage: PropTypes.any.isRequired
 };
 
 export default WalletConnectSignConfirm;

@@ -340,7 +340,10 @@ const WalletView: React.FC<WalletViewProps> = ({
                 </Button>
               )}
             </div>
-            <IconButton onClick={walletConnect.openDialog}>
+            <IconButton
+              onClick={walletConnect.openDialog}
+              sx={{ marginLeft: '12px' }}
+            >
               <SensorsIcon />
             </IconButton>
           </Grid>

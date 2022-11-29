@@ -1,7 +1,9 @@
 import React from 'react';
 
 import DialogBox from '../../../../../designSystem/designComponents/dialog/dialogBox';
+import { useSignMessage } from '../../../../../store/hooks';
 import {
+  useConnection,
   useWalletConnect,
   WalletConnectCallRequestMethod,
   WalletConnectCallRequestMethodMap,
@@ -19,6 +21,8 @@ const SignComponents = [
 
 const WalletConnectSign = () => {
   const walletConnect = useWalletConnect();
+  const { deviceConnection } = useConnection();
+  const signMessage = useSignMessage();
 
   const isOpen = !!(
     walletConnect.connectionState === WalletConnectConnectionState.CONNECTED &&
@@ -31,19 +35,25 @@ const WalletConnectSign = () => {
     ).includes(walletConnect.callRequestMethod)
   );
 
+  const handleClose = () => {
+    walletConnect.rejectCallRequest();
+    signMessage.cancelSignMessage(deviceConnection);
+  };
+
   return (
     <DialogBox
       fullWidth
       maxWidth="sm"
       open={isOpen}
-      handleClose={walletConnect.rejectCallRequest}
+      handleClose={handleClose}
       disableBackdropClick
       isClosePresent
       dialogHeading="Sign Message"
       restComponents={
         <StepperForm
           stepsData={SignComponents}
-          handleClose={walletConnect.rejectCallRequest}
+          handleClose={handleClose}
+          signMessage={signMessage}
         />
       }
     />
