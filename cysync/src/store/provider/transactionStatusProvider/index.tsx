@@ -5,9 +5,9 @@ import React, { useEffect, useRef } from 'react';
 import logger from '../../../utils/logger';
 import { coinDb, Status, Transaction, transactionDb } from '../../database';
 import { useNetwork } from '../networkProvider';
-import { sleep, useSync } from '../syncProvider';
+import { RESYNC_INTERVAL, sleep, useSync } from '../syncProvider';
 
-import { executeBatchCheck, ExecutionResult } from './txnStatusExecutor';
+import { executeBatchCheck, ExecutionResult } from './sync';
 import { TxnStatusItem } from './txnStatusItem';
 
 const BATCH_SIZE = 5;
@@ -15,7 +15,7 @@ const BATCH_SIZE = 5;
 export interface TransactionStatusProviderInterface {
   addTransactionStatusCheckItem: (
     txn: Transaction,
-    options: { isRefresh?: boolean }
+    options?: { isRefresh?: boolean }
   ) => void;
 }
 
@@ -96,11 +96,23 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
         updatedItem.backoffFactor *= backoffExpMultiplier;
         updatedItem.backoffTime =
           updatedItem.backoffFactor * backoffBaseInterval;
-        // TODO: define condition for stopping status query
+
+        // not very precise; next history sync might be very near in time
+        // ineffective in reducing API calls, helpful to shorten the txnStatusQueue
+        if (updatedItem.backoffTime > RESYNC_INTERVAL) removeFromQueue = true;
       }
 
-      if (result.isComplete === true) {
-        // status is final, update balances and history
+      syncQueueUpdateOperations.push({
+        operation: removeFromQueue ? 'remove' : 'update',
+        item,
+        updatedItem
+      });
+
+      // no need for resync as transaction is incomplete; skipping it
+      if (result.isComplete !== true) continue;
+
+      try {
+        // status is final, resync balances and history
         const coinEntry = await coinDb.getOne({
           walletId: item.walletId,
           slug: item.coinType
@@ -121,13 +133,9 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
           },
           {}
         );
+      } catch (e) {
+        logger.error('Failed to sync after transaction status update', e, item);
       }
-
-      syncQueueUpdateOperations.push({
-        operation: removeFromQueue ? 'remove' : 'update',
-        item,
-        updatedItem
-      });
     }
 
     setTxnStatusQueue(currentSyncQueue => {
@@ -158,26 +166,25 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
     let items: TxnStatusItem[] = [];
 
     if (txnStatusQueue.length > 0) {
-      // deduct the backoff time; actual backoff is (backoff + queue processing)
+      // deduct the backoff time
+      // this is not accurate; actual backoff is (backoff + queue processing)
       txnStatusQueue.forEach(ele => {
         ele.backoffTime = Math.max(0, ele.backoffTime - queueExecuteInterval);
       });
+
+      // filter items ready for execution i.e. backoffTime is 0
       items = txnStatusQueue.filter(
         ele => ele.backoffTime <= queueExecuteInterval
       );
     }
 
     if (connected && txnStatusQueue.length > 0 && items.length > 0) {
-      try {
-        const array = await executeBatchCheck(items.slice(0, BATCH_SIZE));
-        await updateAllExecutedItems(
-          array.reduce((acc, item) => acc.concat(item), [])
-        );
-      } catch (error) {
-        // TODO: define handling of error
-        logger.error('Failed to execute batch');
-      }
+      const array = await executeBatchCheck(items.slice(0, BATCH_SIZE));
+      await updateAllExecutedItems(
+        array.reduce((acc, item) => acc.concat(item), [])
+      );
     }
+
     await sleep(queueExecuteInterval);
     setIsExecutingTask(false);
   };

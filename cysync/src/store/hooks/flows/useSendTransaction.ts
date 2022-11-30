@@ -825,7 +825,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         };
       }
       transactionDb.insert(tx).then(() => {
-        addTransactionStatusCheckItem(tx, {});
+        addTransactionStatusCheckItem(tx);
         transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
         logger.info('UTXOS blocked');
         logger.info(txnInputs);
@@ -909,7 +909,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       };
 
       transactionDb.insert(tx).then(() => {
-        addTransactionStatusCheckItem(tx, {});
+        addTransactionStatusCheckItem(tx);
         transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
         logger.info('UTXOS blocked');
         logger.info(txnInputs);

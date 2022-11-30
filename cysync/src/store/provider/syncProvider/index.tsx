@@ -46,6 +46,7 @@ import {
 } from './types';
 
 const BATCH_SIZE = 5;
+export const RESYNC_INTERVAL = 5 * 60 * 1000; // 5 minutes or 300000 ms
 
 export function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -948,7 +949,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         logger.info('Sync: Refresh triggered for latest balance and history');
         addBalanceRefresh({ isRefresh: true });
         addHistoryRefresh({ isRefresh: true });
-      }, 1000 * 60 * 5);
+      }, RESYNC_INTERVAL);
     }
 
     isResyncExecuting.current = isExecuting;
