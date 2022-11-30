@@ -19,6 +19,7 @@ import {
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
+import { useStatusCheck } from '../transactionStatusProvider';
 
 import BlockbookSocket from './blockbookProvider';
 
@@ -42,6 +43,7 @@ export const SocketProvider: React.FC = ({ children }) => {
     BlockbookSocket | undefined
   >(undefined);
   const { addBalanceSyncItemFromCoin, addHistorySyncItemFromCoin } = useSync();
+  const { addTransactionStatusCheckItem } = useStatusCheck();
 
   const addReceiveAddressHookFromBlockbookSocket = async (
     address: string,
@@ -365,7 +367,10 @@ export const SocketProvider: React.FC = ({ children }) => {
                 addressDB: addressDb
               });
               await Promise.all(
-                newTxns.map(newTxn => transactionDb.insert(newTxn))
+                newTxns.map(newTxn => {
+                  transactionDb.insert(newTxn);
+                  addTransactionStatusCheckItem(newTxn);
+                })
               );
 
               if (isConfirmed) {
