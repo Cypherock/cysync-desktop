@@ -1,9 +1,4 @@
-import {
-  CoinGroup,
-  COINS,
-  EthCoinData,
-  SolanaCoinData
-} from '@cypherock/communication';
+import { CoinGroup, COINS } from '@cypherock/communication';
 import { getServerUrl } from '@cypherock/server-wrapper';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
@@ -33,13 +28,7 @@ export interface SocketContextInterface {
     address: string,
     walletId: string,
     coinType: string,
-    currentSocket?: Socket
-  ) => void;
-  addTxnConfirmAddressHook: (
-    hash: string,
-    coinType: string,
-    walletId: string,
-    currentSocket?: Socket
+    blockbookSocket?: BlockbookSocket
   ) => void;
 }
 
@@ -53,62 +42,6 @@ export const SocketProvider: React.FC = ({ children }) => {
     BlockbookSocket | undefined
   >(undefined);
   const { addBalanceSyncItemFromCoin, addHistorySyncItemFromCoin } = useSync();
-
-  const addReceiveAddressHookFromSocket = (
-    address: string,
-    walletId: string,
-    coinType: string,
-    currentSocket?: Socket,
-    network?: string
-  ) => {
-    try {
-      let usableSocket: Socket;
-
-      if (currentSocket) {
-        usableSocket = currentSocket;
-      } else if (socket) {
-        usableSocket = socket;
-      } else {
-        logger.error('Socket is not defined');
-        return;
-      }
-
-      logger.info('Setting Receive address hook', {
-        address,
-        walletId,
-        coinType
-      });
-      usableSocket.emit('receiveAddr', address, walletId, coinType, network);
-    } catch (error) {
-      logger.error(error);
-    }
-  };
-
-  const addTxnConfirmAddressHookFromSocket = (
-    hash: string,
-    coinType: string,
-    walletId: string,
-    currentSocket?: Socket,
-    network?: string
-  ) => {
-    try {
-      let usableSocket: Socket;
-
-      if (currentSocket) {
-        usableSocket = currentSocket;
-      } else if (socket) {
-        usableSocket = socket;
-      } else {
-        logger.error('Socket is not defined');
-        return;
-      }
-
-      logger.info('Setting Txn Confirm hook', { hash, coinType, walletId });
-      usableSocket.emit('txnConfirm', hash, coinType, walletId, network);
-    } catch (error) {
-      logger.error(error);
-    }
-  };
 
   const addReceiveAddressHookFromBlockbookSocket = async (
     address: string,
@@ -143,7 +76,6 @@ export const SocketProvider: React.FC = ({ children }) => {
     address: string,
     walletId: string,
     coinType: string,
-    currentSocket?: Socket,
     currentBlockbookSocket?: BlockbookSocket
   ) => {
     const coin = COINS[coinType];
@@ -152,13 +84,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       return;
     }
     if (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana) {
-      return addReceiveAddressHookFromSocket(
-        address,
-        walletId,
-        coinType,
-        currentSocket,
-        (coin as SolanaCoinData | EthCoinData).network
-      );
+      return;
     } else {
       return addReceiveAddressHookFromBlockbookSocket(
         address,
@@ -169,98 +95,12 @@ export const SocketProvider: React.FC = ({ children }) => {
     }
   };
 
-  const addTxnConfirmAddressHook = (
-    hash: string,
-    coinType: string,
-    walletId: string,
-    currentSocket?: Socket,
-    _currentBlockbookSocket?: BlockbookSocket
-  ) => {
-    const coin = COINS[coinType];
-    if (!coin) {
-      logger.warn('Invalid coinType in addTxnConfirmAddressHook: ' + coinType);
-      return;
-    }
-
-    if (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana) {
-      return addTxnConfirmAddressHookFromSocket(
-        hash,
-        coinType,
-        walletId,
-        currentSocket,
-        (coin as SolanaCoinData | EthCoinData).network
-      );
-    } else {
-      return;
-    }
-  };
-
-  const addInitialHooks = async (
-    currentSocket: Socket,
-    currentBlockbookSocket?: BlockbookSocket
-  ) => {
-    logger.info('Adding initial socket hooks');
-
-    const allPendingTxns = await transactionDb.getAll({
-      status: Status.PENDING
-    });
-
-    for (const pendingTxn of allPendingTxns) {
-      const coin = COINS[pendingTxn.coin];
-      if (
-        coin &&
-        (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana)
-      ) {
-        addTxnConfirmAddressHook(
-          pendingTxn.hash,
-          pendingTxn.coin,
-          pendingTxn.walletId,
-          currentSocket,
-          currentBlockbookSocket
-        );
-      }
-    }
-
-    const allReceiveAddr = await receiveAddressDb.getAll();
-
-    for (const receiveAddr of allReceiveAddr) {
-      const coin = COINS[receiveAddr.coinType];
-      if (
-        coin &&
-        (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana)
-      ) {
-        addReceiveAddressHook(
-          receiveAddr.address,
-          receiveAddr.walletId,
-          receiveAddr.coinType,
-          currentSocket,
-          currentBlockbookSocket
-        );
-      }
-    }
-  };
-
   const addInitialSubscriptions = async (
-    currentSocket?: Socket,
     currentBlockbookSocket?: BlockbookSocket
   ) => {
     logger.info('Adding initial blockbook web subscriptions');
-    const allPendingTxns = await transactionDb.getAll({
-      status: Status.PENDING
-    });
 
-    for (const pendingTxn of allPendingTxns) {
-      const coin = COINS[pendingTxn.coin];
-      if (coin && coin.group === CoinGroup.BitcoinForks) {
-        addTxnConfirmAddressHook(
-          pendingTxn.hash,
-          pendingTxn.walletId,
-          pendingTxn.coin,
-          currentSocket,
-          currentBlockbookSocket
-        );
-      }
-    }
+    // no direct support for pendingTxn status in Bitcoin
 
     const allReceiveAddr = await receiveAddressDb.getAll();
 
@@ -271,7 +111,6 @@ export const SocketProvider: React.FC = ({ children }) => {
           receiveAddr.address,
           receiveAddr.walletId,
           receiveAddr.coinType,
-          currentSocket,
           currentBlockbookSocket
         );
       }
@@ -595,14 +434,8 @@ export const SocketProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    if (socket) {
-      addInitialHooks(socket, blockbookSocket);
-    }
-  }, [socket]);
-
-  useEffect(() => {
     if (blockbookSocket) {
-      addInitialSubscriptions(socket, blockbookSocket);
+      addInitialSubscriptions(blockbookSocket);
     }
   }, [blockbookSocket]);
 
@@ -681,7 +514,6 @@ export const SocketProvider: React.FC = ({ children }) => {
   return (
     <SocketContext.Provider
       value={{
-        addTxnConfirmAddressHook,
         addReceiveAddressHook,
         socket
       }}
