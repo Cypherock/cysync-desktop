@@ -238,6 +238,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     addToQueue,
     updateQueueItems
   } = useSyncQueue<SyncQueueItem>({
+    queueName: 'Sync queue',
     connection: useNetwork().connected,
     executeInterval: 1000,
     nextBatchItemExecutor: executeNextBatchItemInQueue,

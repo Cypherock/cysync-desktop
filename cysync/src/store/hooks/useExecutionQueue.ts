@@ -49,6 +49,7 @@ export interface UseExecutionQueueInterface<T> {
 }
 
 export interface UseExecutionQueueOptions<T> {
+  queueName: string;
   connection: boolean;
   executeInterval: number;
   nextBatchItemExecutor?: () => void;
@@ -57,6 +58,7 @@ export interface UseExecutionQueueOptions<T> {
 }
 
 export type UseExecutionQueue = <T extends ExecutionQueueItem>({
+  queueName,
   connection,
   executeInterval,
   nextBatchItemExecutor,
@@ -65,12 +67,14 @@ export type UseExecutionQueue = <T extends ExecutionQueueItem>({
 }: UseExecutionQueueOptions<T>) => UseExecutionQueueInterface<T>;
 
 export const useSyncQueue: UseExecutionQueue = <T extends ExecutionQueueItem>({
+  queueName,
   connection,
   executeInterval,
   nextBatchItemExecutor,
   nextClientItemExecutor,
   updateItemsInQueue
 }: UseExecutionQueueOptions<T>) => {
+  const name = queueName;
   const [syncQueue, setSyncQueue] = React.useState<T[]>([]);
   const [modulesInExecutionQueue, setModuleInExecutionQueue] = React.useState<
     string[]
@@ -225,8 +229,8 @@ export const useSyncQueue: UseExecutionQueue = <T extends ExecutionQueueItem>({
         const peek = performance.now();
         if (peek - startTime.current > timeThreshold + offsetTime.current) {
           offsetTime.current = peek;
-          logger.info(`Threshold exceeded at ${peek} milliseconds`);
-          logger.info({
+          logger.info(`${name}: Threshold exceeded at ${peek} milliseconds`);
+          logger.info(`${name}: `, {
             queue: syncQueue.slice(0, 3).map(item => {
               return {
                 ...item,
@@ -241,14 +245,16 @@ export const useSyncQueue: UseExecutionQueue = <T extends ExecutionQueueItem>({
       } else {
         startTime.current = performance.now();
         logger.info(
-          `Sync queue started executing with ${syncQueue.length} items`
+          `${name}: Sync queue started executing with ${syncQueue.length} items`
         );
       }
     } else {
       if (startTime.current > 0) {
         const stop = performance.now();
         logger.info(
-          `Sync completed total time: ${stop - startTime.current} milliseconds`
+          `${name}: Sync completed total time: ${
+            stop - startTime.current
+          } milliseconds`
         );
         offsetTime.current = 0;
         startTime.current = 0;

@@ -133,6 +133,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
     addToQueue,
     updateQueueItems
   } = useSyncQueue<TxnStatusItem>({
+    queueName: 'Transaction status queue',
     connection: useNetwork().connected,
     executeInterval: 2000,
     nextBatchItemExecutor: executeNextBatchItemInQueue,
