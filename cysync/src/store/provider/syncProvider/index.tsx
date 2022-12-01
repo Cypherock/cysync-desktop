@@ -23,7 +23,7 @@ import {
   tokenDb,
   transactionDb
 } from '../../database';
-import { useSyncQueue } from '../../hooks/useSyncQueue';
+import { sleep, useSyncQueue } from '../../hooks/useSyncQueue';
 import { useNotifications } from '../notificationProvider';
 
 import {
@@ -44,12 +44,7 @@ import {
   SyncQueueItem
 } from './types';
 
-const BATCH_SIZE = 5;
 export const RESYNC_INTERVAL = 5 * 60 * 1000; // 5 minutes or 300000 ms
-
-export function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 export interface SyncContextInterface {
   isSyncing: boolean;
@@ -86,19 +81,19 @@ export const SyncContext: React.Context<SyncContextInterface> =
 
 export const SyncProvider: React.FC = ({ children }) => {
   const {
+    BATCH_SIZE,
     connected,
     connectedRef,
     syncQueue,
-    setSyncQueue,
     queueExecuteInterval,
     modulesInExecutionQueue,
-    setModuleInExecutionQueue,
-    addToQueue,
     isSyncing,
     setInitialSetupDone,
     isWaitingForConnection,
     isExecutingTask,
-    setIsExecutingTask
+    setIsExecutingTask,
+    addToQueue,
+    updateQueueItems
   } = useSyncQueue(1000);
   const notifications = useNotifications();
 
@@ -579,41 +574,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         });
       }
     }
-
-    setSyncQueue(currentSyncQueue => {
-      const duplicate = [...currentSyncQueue];
-
-      for (const operation of syncQueueUpdateOperations) {
-        const index = duplicate.findIndex(elem => elem.equals(operation.item));
-        if (index === -1) {
-          logger.warn('Cannot find item index while updating sync queue');
-          continue;
-        }
-
-        if (operation.operation === 'remove') {
-          duplicate.splice(index, 1);
-        } else if (operation.operation === 'update' && operation.updatedItem) {
-          duplicate[index] = operation.updatedItem;
-        }
-      }
-
-      const allCompletedModules: string[] = [];
-      for (const [module] of allCompletedModulesSet.entries()) {
-        if (duplicate.findIndex(elem => elem.module === module) === -1) {
-          allCompletedModules.push(module);
-        }
-      }
-
-      setModuleInExecutionQueue(currentModules => {
-        const duplicateModules = [...currentModules];
-
-        return duplicateModules.filter(
-          elem => !allCompletedModules.includes(elem)
-        );
-      });
-
-      return duplicate;
-    });
+    updateQueueItems(syncQueueUpdateOperations, allCompletedModulesSet);
   };
 
   const executeNextClientItemInQueue = async () => {

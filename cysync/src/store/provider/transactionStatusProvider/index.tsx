@@ -4,14 +4,12 @@ import React, { useEffect } from 'react';
 
 import logger from '../../../utils/logger';
 import { coinDb, Status, Transaction, transactionDb } from '../../database';
-import { useSyncQueue } from '../../hooks/useSyncQueue';
-import { RESYNC_INTERVAL, sleep, useSync } from '../syncProvider';
+import { sleep, useSyncQueue } from '../../hooks/useSyncQueue';
+import { RESYNC_INTERVAL, useSync } from '../syncProvider';
 import { SyncQueueItem } from '../syncProvider/types';
 
 import { executeBatchCheck, ExecutionResult } from './sync';
 import { TxnStatusItem } from './txnStatusItem';
-
-const BATCH_SIZE = 5;
 
 export interface TransactionStatusProviderInterface {
   addTransactionStatusCheckItem: (
@@ -28,13 +26,14 @@ export const StatusCheckContext: React.Context<TransactionStatusProviderInterfac
 export const TransactionStatusProvider: React.FC = ({ children }) => {
   const { addBalanceSyncItemFromCoin, addHistorySyncItemFromCoin } = useSync();
   const {
+    BATCH_SIZE,
     isExecutingTask,
     setIsExecutingTask,
     connected,
     syncQueue,
-    setSyncQueue,
     queueExecuteInterval,
-    addToQueue
+    addToQueue,
+    updateQueueItems
   } = useSyncQueue(2000);
 
   const backoffExpMultiplier = 2;
@@ -70,6 +69,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
   const updateAllExecutedItems = async (
     executionResults: ExecutionResult[]
   ) => {
+    const allCompletedModulesSet: Set<string> = new Set<string>();
     const syncQueueUpdateOperations: Array<{
       item: SyncQueueItem;
       operation: 'remove' | 'update';
@@ -101,6 +101,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
         item,
         updatedItem
       });
+      if (removeFromQueue) allCompletedModulesSet.add(item.module);
 
       // no need for resync as transaction is incomplete; skipping it
       if (result.isComplete !== true || !(item instanceof TxnStatusItem))
@@ -132,26 +133,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
         logger.error('Failed to sync after transaction status update', e, item);
       }
     }
-
-    setSyncQueue(currentSyncQueue => {
-      const duplicate = [...currentSyncQueue];
-
-      for (const operation of syncQueueUpdateOperations) {
-        const index = duplicate.findIndex(elem => elem.equals(operation.item));
-        if (index === -1) {
-          logger.warn('Cannot find item index while updating sync queue');
-          continue;
-        }
-
-        if (operation.operation === 'remove') {
-          duplicate.splice(index, 1);
-        } else if (operation.operation === 'update' && operation.updatedItem) {
-          duplicate[index] = operation.updatedItem;
-        }
-      }
-
-      return duplicate;
-    });
+    updateQueueItems(syncQueueUpdateOperations, allCompletedModulesSet);
   };
 
   // pick, batch and execute the queued request items and finally update the queue

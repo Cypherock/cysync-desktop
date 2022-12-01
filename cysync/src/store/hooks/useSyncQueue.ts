@@ -4,6 +4,10 @@ import logger from '../../utils/logger';
 import { useNetwork } from '../provider';
 import { SyncQueueItem } from '../provider/syncProvider/types';
 
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export interface UseSyncQueueInterface {
   BATCH_SIZE: number;
   syncQueue: SyncQueueItem[];
@@ -21,6 +25,14 @@ export interface UseSyncQueueInterface {
   isWaitingForConnection: boolean;
   isExecutingTask: boolean;
   setIsExecutingTask: React.Dispatch<React.SetStateAction<boolean>>;
+  updateQueueItems: (
+    updateOperations: Array<{
+      item: SyncQueueItem;
+      operation: 'remove' | 'update';
+      updatedItem?: SyncQueueItem;
+    }>,
+    allCompletedModulesSet: Set<string>
+  ) => void;
 }
 
 export type UseSyncQueue = (executeInterval: number) => UseSyncQueueInterface;
@@ -61,6 +73,50 @@ export const useSyncQueue: UseSyncQueue = (executeInterval: number) => {
         return [...currentSyncQueue, item];
       }
       return currentSyncQueue;
+    });
+  };
+
+  const updateQueueItems = (
+    updateOperations: Array<{
+      item: SyncQueueItem;
+      operation: 'remove' | 'update';
+      updatedItem?: SyncQueueItem;
+    }>,
+    allCompletedModulesSet: Set<string>
+  ) => {
+    setSyncQueue(currentSyncQueue => {
+      const duplicate = [...currentSyncQueue];
+
+      for (const operation of updateOperations) {
+        const index = duplicate.findIndex(elem => elem.equals(operation.item));
+        if (index === -1) {
+          logger.warn('Cannot find item index while updating sync queue');
+          continue;
+        }
+
+        if (operation.operation === 'remove') {
+          duplicate.splice(index, 1);
+        } else if (operation.operation === 'update' && operation.updatedItem) {
+          duplicate[index] = operation.updatedItem;
+        }
+      }
+
+      const allCompletedModules: string[] = [];
+      for (const [module] of allCompletedModulesSet.entries()) {
+        if (duplicate.findIndex(elem => elem.module === module) === -1) {
+          allCompletedModules.push(module);
+        }
+      }
+
+      setModuleInExecutionQueue(currentModules => {
+        const duplicateModules = [...currentModules];
+
+        return duplicateModules.filter(
+          elem => !allCompletedModules.includes(elem)
+        );
+      });
+
+      return duplicate;
     });
   };
 
@@ -125,6 +181,7 @@ export const useSyncQueue: UseSyncQueue = (executeInterval: number) => {
 
   return {
     BATCH_SIZE,
+    sleep,
     queueExecuteInterval,
     connected,
     connectedRef,
@@ -139,6 +196,7 @@ export const useSyncQueue: UseSyncQueue = (executeInterval: number) => {
     setSyncQueue,
     modulesInExecutionQueue,
     setModuleInExecutionQueue,
-    addToQueue
+    addToQueue,
+    updateQueueItems
   } as UseSyncQueueInterface;
 };
