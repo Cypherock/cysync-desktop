@@ -3,19 +3,20 @@ import { serverBatch as batchServer } from '@cypherock/server-wrapper/dist/resou
 import { flatMap } from 'lodash';
 
 import logger from '../../../utils/logger';
+import { SyncQueueItem } from '../syncProvider/types';
 
 import { getRequestsMetadata, processResponses } from './txnStatus';
 import { TxnStatusItem } from './txnStatusItem';
 
 export interface RequestMetaProcessInfo {
   meta: IRequestMetadata[];
-  item: TxnStatusItem;
+  item: SyncQueueItem;
   error?: Error;
   isFailed: boolean;
 }
 
 export interface ExecutionResult {
-  item: TxnStatusItem;
+  item: SyncQueueItem;
   isFailed: boolean;
   isComplete?: boolean;
   canRetry?: boolean;
@@ -25,7 +26,7 @@ export interface ExecutionResult {
 }
 
 // Populates the metadata for each entry of batch query
-export const getAllMetadata = (items: TxnStatusItem[]) => {
+export const getAllMetadata = (items: SyncQueueItem[]) => {
   const allRequestMetadata: RequestMetaProcessInfo[] = [];
 
   items.forEach(item => {
@@ -115,7 +116,7 @@ export const getAllProcessResponses = async (
 };
 
 export const executeBatchCheck = async (
-  items: TxnStatusItem[]
+  items: SyncQueueItem[]
 ): Promise<ExecutionResult[]> => {
   if (items.length <= 0) return [];
 

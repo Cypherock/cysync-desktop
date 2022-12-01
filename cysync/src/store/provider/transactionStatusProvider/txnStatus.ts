@@ -17,6 +17,7 @@ import {
 
 import logger from '../../../utils/logger';
 import { transactionDb } from '../../database';
+import { SyncQueueItem } from '../syncProvider/types';
 
 import { TxnStatusItem } from './txnStatusItem';
 
@@ -41,15 +42,13 @@ export const getCurrentTxnStatus = async (
 };
 
 export const getRequestsMetadata = (
-  item: TxnStatusItem
+  item: SyncQueueItem
 ): IRequestMetadata[] => {
   const coin = COINS[item.coinType];
 
-  if (!coin) {
-    logger.warn('Invalid coin in sync queue', {
-      coinType: item.coinType
-    });
-    return undefined;
+  if (!coin || !(item instanceof TxnStatusItem)) {
+    logger.warn('Invalid item in transaction status sync queue', item);
+    throw new Error('Invalid item in transaction sync queue');
   }
 
   if (coin instanceof BtcCoinData) {

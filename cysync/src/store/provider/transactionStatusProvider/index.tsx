@@ -1,11 +1,12 @@
 import { COINS } from '@cypherock/communication';
 import PropTypes from 'prop-types';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
 import logger from '../../../utils/logger';
 import { coinDb, Status, Transaction, transactionDb } from '../../database';
-import { useNetwork } from '../networkProvider';
+import { useSyncQueue } from '../../hooks/useSyncQueue';
 import { RESYNC_INTERVAL, sleep, useSync } from '../syncProvider';
+import { SyncQueueItem } from '../syncProvider/types';
 
 import { executeBatchCheck, ExecutionResult } from './sync';
 import { TxnStatusItem } from './txnStatusItem';
@@ -25,31 +26,19 @@ export const StatusCheckContext: React.Context<TransactionStatusProviderInterfac
   );
 
 export const TransactionStatusProvider: React.FC = ({ children }) => {
-  const [txnStatusQueue, setTxnStatusQueue] = React.useState<TxnStatusItem[]>(
-    []
-  );
-  const [isExecutingTask, setIsExecutingTask] = React.useState(false);
   const { addBalanceSyncItemFromCoin, addHistorySyncItemFromCoin } = useSync();
+  const {
+    isExecutingTask,
+    setIsExecutingTask,
+    connected,
+    syncQueue,
+    setSyncQueue,
+    queueExecuteInterval,
+    addToQueue
+  } = useSyncQueue(2000);
 
-  const queueExecuteInterval = 2000;
   const backoffExpMultiplier = 2;
   const backoffBaseInterval = 10000;
-
-  const { connected } = useNetwork();
-  const connectedRef = useRef<boolean | null>(connected);
-
-  useEffect(() => {
-    connectedRef.current = connected;
-  }, [connected]);
-
-  const addToQueue = (item: TxnStatusItem) => {
-    setTxnStatusQueue(currentTxnQueue => {
-      if (currentTxnQueue.findIndex(elem => elem.equals(item)) === -1) {
-        return [...currentTxnQueue, item];
-      }
-      return currentTxnQueue;
-    });
-  };
 
   const addTransactionStatusCheckItem = (
     txn: Transaction,
@@ -71,6 +60,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
       sender: txn.outputs[0]?.address,
       coinType: coinData.abbr,
       coinGroup: coinData.group,
+      module: 'refresh',
       isRefresh,
       backoffTime: backoffBaseInterval
     });
@@ -81,24 +71,28 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
     executionResults: ExecutionResult[]
   ) => {
     const syncQueueUpdateOperations: Array<{
-      item: TxnStatusItem;
+      item: SyncQueueItem;
       operation: 'remove' | 'update';
-      updatedItem?: TxnStatusItem;
+      updatedItem?: SyncQueueItem;
     }> = [];
 
     for (const result of executionResults) {
       const { item } = result;
-      const updatedItem = item.clone();
+      let updatedItem;
       let removeFromQueue = true;
 
-      if (result.isFailed || !result.isComplete) {
+      if (
+        item instanceof TxnStatusItem &&
+        (result.isFailed || !result.isComplete)
+      ) {
+        updatedItem = item.clone();
         removeFromQueue = false;
         updatedItem.backoffFactor *= backoffExpMultiplier;
         updatedItem.backoffTime =
           updatedItem.backoffFactor * backoffBaseInterval;
 
         // not very precise; next history sync might be very near in time
-        // ineffective in reducing API calls, helpful to shorten the txnStatusQueue
+        // ineffective in reducing API calls, helpful to shorten the syncQueue
         if (updatedItem.backoffTime > RESYNC_INTERVAL) removeFromQueue = true;
       }
 
@@ -109,7 +103,8 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
       });
 
       // no need for resync as transaction is incomplete; skipping it
-      if (result.isComplete !== true) continue;
+      if (result.isComplete !== true || !(item instanceof TxnStatusItem))
+        continue;
 
       try {
         // status is final, resync balances and history
@@ -138,7 +133,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
       }
     }
 
-    setTxnStatusQueue(currentSyncQueue => {
+    setSyncQueue(currentSyncQueue => {
       const duplicate = [...currentSyncQueue];
 
       for (const operation of syncQueueUpdateOperations) {
@@ -163,22 +158,25 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
   const executeNextInQueue = async () => {
     setIsExecutingTask(true);
 
-    let items: TxnStatusItem[] = [];
+    let items: SyncQueueItem[] = [];
 
-    if (txnStatusQueue.length > 0) {
+    if (syncQueue.length > 0) {
       // deduct the backoff time
-      // this is not accurate; actual backoff is (backoff + queue processing)
-      txnStatusQueue.forEach(ele => {
+      // this is inaccurate; actual backoff is (backoff + queue processing)
+      syncQueue.forEach(ele => {
+        if (!(ele instanceof TxnStatusItem)) return;
         ele.backoffTime = Math.max(0, ele.backoffTime - queueExecuteInterval);
       });
 
       // filter items ready for execution i.e. backoffTime is 0
-      items = txnStatusQueue.filter(
-        ele => ele.backoffTime <= queueExecuteInterval
+      items = syncQueue.filter(
+        ele =>
+          ele instanceof TxnStatusItem &&
+          ele.backoffTime <= queueExecuteInterval
       );
     }
 
-    if (connected && txnStatusQueue.length > 0 && items.length > 0) {
+    if (connected && syncQueue.length > 0 && items.length > 0) {
       const array = await executeBatchCheck(items.slice(0, BATCH_SIZE));
       await updateAllExecutedItems(
         array.reduce((acc, item) => acc.concat(item), [])

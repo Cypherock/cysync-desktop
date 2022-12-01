@@ -1,5 +1,8 @@
 import { CoinGroup } from '@cypherock/communication';
 
+import { SyncItem } from '../../hooks';
+import { SyncQueueItem } from '../syncProvider/types';
+
 export interface TxnStatusSyncItemOptions {
   walletId: string;
   coinType: string;
@@ -8,9 +11,14 @@ export interface TxnStatusSyncItemOptions {
   txnHash: string;
   sender: string;
   backoffTime: number;
+  module: string;
+  parentCoin?: string;
 }
 
-export class TxnStatusItem implements TxnStatusSyncItemOptions {
+export class TxnStatusItem
+  extends SyncItem
+  implements TxnStatusSyncItemOptions
+{
   public walletId: string;
   public txnHash: string;
   public sender: string; // needed in near RPC call param
@@ -30,8 +38,18 @@ export class TxnStatusItem implements TxnStatusSyncItemOptions {
     coinType,
     coinGroup,
     isRefresh,
+    module,
+    parentCoin,
     backoffTime
   }: TxnStatusSyncItemOptions) {
+    super({
+      type: 'txnStatus',
+      coinType,
+      isRefresh,
+      module,
+      parentCoin,
+      coinGroup
+    });
     this.walletId = walletId;
     this.txnHash = txnHash;
     this.sender = sender;
@@ -48,7 +66,7 @@ export class TxnStatusItem implements TxnStatusSyncItemOptions {
   parentCoin: string;
   retries = 2;
 
-  equals(item: TxnStatusItem) {
+  equals(item: SyncQueueItem) {
     if (item instanceof TxnStatusItem) {
       return (
         this.walletId === item.walletId &&
@@ -69,6 +87,8 @@ export class TxnStatusItem implements TxnStatusSyncItemOptions {
       coinType: this.coinType,
       coinGroup: this.coinGroup,
       isRefresh: this.isRefresh,
+      module: this.module,
+      parentCoin: this.parentCoin,
       backoffTime: this.backoffTime
     });
     newItem.backoffFactor = this.backoffFactor;

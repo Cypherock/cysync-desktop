@@ -1,6 +1,6 @@
 import { CoinGroup, COINS } from '@cypherock/communication';
 
-import { SyncItem } from './syncItem';
+import { SyncItem } from '../../../hooks';
 
 export interface HistorySyncItemOptions {
   coinType: string;

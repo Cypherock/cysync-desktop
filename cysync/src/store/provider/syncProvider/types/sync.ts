@@ -1,6 +1,7 @@
 import { CoinGroup } from '@cypherock/communication';
 
 import { Coin } from '../../../../store/database/databaseInit';
+import { TxnStatusItem } from '../../transactionStatusProvider/txnStatusItem';
 
 import { BalanceSyncItem } from './balanceSyncItem';
 import { HistorySyncItem } from './historySyncItem';
@@ -17,7 +18,8 @@ export type SyncQueueItem =
   | HistorySyncItem
   | PriceSyncItem
   | BalanceSyncItem
-  | LatestPriceSyncItem;
+  | LatestPriceSyncItem
+  | TxnStatusItem;
 
 export interface SyncProviderTypes {
   addToQueue: (item: SyncQueueItem) => void;

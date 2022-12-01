@@ -1,6 +1,6 @@
 import { CoinGroup } from '@cypherock/communication';
 
-import { SyncItem } from './syncItem';
+import { SyncItem } from '../../../hooks';
 
 export interface LatestPriceSyncItemOptions {
   coinType: string;

@@ -23,7 +23,7 @@ import {
   tokenDb,
   transactionDb
 } from '../../database';
-import { useNetwork } from '../networkProvider';
+import { useSyncQueue } from '../../hooks/useSyncQueue';
 import { useNotifications } from '../notificationProvider';
 
 import {
@@ -40,7 +40,6 @@ import {
   ModifiedCoin,
   PriceSyncItem,
   PriceSyncItemOptions,
-  SyncItem,
   SyncProviderTypes,
   SyncQueueItem
 } from './types';
@@ -86,51 +85,29 @@ export const SyncContext: React.Context<SyncContextInterface> =
   React.createContext<SyncContextInterface>({} as SyncContextInterface);
 
 export const SyncProvider: React.FC = ({ children }) => {
-  const [isSyncing, setIsSyncing] = React.useState(false);
-  const [isWaitingForConnection, setWaitingForConnection] =
-    React.useState(false);
-  const [isInitialSetupDone, setInitialSetupDone] = React.useState(false);
-  const [isExecutingTask, setIsExecutingTask] = React.useState(false);
-  const [modulesInExecutionQueue, setModuleInExecutionQueue] = React.useState<
-    string[]
-  >([]);
-  const [syncQueue, setSyncQueue] = React.useState<SyncQueueItem[]>([]);
+  const {
+    connected,
+    connectedRef,
+    syncQueue,
+    setSyncQueue,
+    queueExecuteInterval,
+    modulesInExecutionQueue,
+    setModuleInExecutionQueue,
+    addToQueue,
+    isSyncing,
+    setInitialSetupDone,
+    isWaitingForConnection,
+    isExecutingTask,
+    setIsExecutingTask
+  } = useSyncQueue(1000);
   const notifications = useNotifications();
 
-  const queueExecuteInterval = 1000;
   const maxRetries = 2;
 
-  const { connected } = useNetwork();
-  const connectedRef = useRef<boolean | null>(connected);
-
-  const timeThreshold = 60000; // log every 1 minute
-  const offsetTime = useRef(0);
-  const startTime = useRef(0);
   const clientTimeout = useRef<ClientTimeoutInterface>({
     pause: false,
     tryAfter: 0
   });
-
-  useEffect(() => {
-    connectedRef.current = connected;
-  }, [connected]);
-
-  const addToQueue: SyncProviderTypes['addToQueue'] = item => {
-    setSyncQueue(currentSyncQueue => {
-      if (currentSyncQueue.findIndex(elem => elem.equals(item)) === -1) {
-        // Adds the current item to ModuleExecutionQueue
-        setModuleInExecutionQueue(currentModuleQueue => {
-          if (!currentModuleQueue.includes(item.module)) {
-            return [...currentModuleQueue, item.module];
-          }
-          return currentModuleQueue;
-        });
-
-        return [...currentSyncQueue, item];
-      }
-      return currentSyncQueue;
-    });
-  };
 
   const addHistorySyncItemFromCoin: SyncProviderTypes['addHistorySyncItemFromCoin'] =
     async (coin: Coin, { module = 'default', isRefresh = false }) => {
@@ -590,7 +567,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       if (removeFromQueue) {
         syncQueueUpdateOperations.push({ operation: 'remove', item });
         // Remove module from ModuleInExecutionQueue
-        const { module } = item as SyncItem;
+        const { module } = item as SyncQueueItem;
         allCompletedModulesSet.add(module);
       }
 
@@ -1031,61 +1008,6 @@ export const SyncProvider: React.FC = ({ children }) => {
       intervals.current = [] as NodeJS.Timeout[];
     };
   }, []);
-
-  // Sets if the sync is 'on' or 'off'
-  useEffect(() => {
-    if (syncQueue.length > 0) {
-      if (connected && isInitialSetupDone) {
-        if (isWaitingForConnection) {
-          setWaitingForConnection(false);
-        }
-
-        setIsSyncing(true);
-      } else if (isInitialSetupDone) {
-        setWaitingForConnection(true);
-      }
-    } else {
-      setIsSyncing(false);
-    }
-  }, [connected, isInitialSetupDone, syncQueue]);
-
-  // queue execution performance logging
-  useEffect(() => {
-    if (syncQueue.length > 0) {
-      if (startTime.current > 0) {
-        const peek = performance.now();
-        if (peek - startTime.current > timeThreshold + offsetTime.current) {
-          offsetTime.current = peek;
-          logger.info(`Threshold exceeded at ${peek} milliseconds`);
-          logger.info({
-            queue: syncQueue.slice(0, 3).map(item => {
-              return {
-                ...item,
-                walletId: undefined,
-                xpub: undefined,
-                zpub: undefined
-              };
-            }),
-            totalLength: syncQueue.length
-          });
-        }
-      } else {
-        startTime.current = performance.now();
-        logger.info(
-          `Sync queue started executing with ${syncQueue.length} items`
-        );
-      }
-    } else {
-      if (startTime.current > 0) {
-        const stop = performance.now();
-        logger.info(
-          `Sync completed total time: ${stop - startTime.current} milliseconds`
-        );
-        offsetTime.current = 0;
-        startTime.current = 0;
-      }
-    }
-  }, [syncQueue]);
 
   // Execute the syncItems if it is syncing
   useEffect(() => {
