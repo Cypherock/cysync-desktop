@@ -4,11 +4,12 @@ import React, { useEffect } from 'react';
 
 import logger from '../../../utils/logger';
 import { coinDb, Status, Transaction, transactionDb } from '../../database';
-import { sleep, useSyncQueue } from '../../hooks/useSyncQueue';
+import { ExecutionResult } from '../../hooks';
+import { useSyncQueue } from '../../hooks/useExecutionQueue';
+import { useNetwork } from '../networkProvider';
 import { RESYNC_INTERVAL, useSync } from '../syncProvider';
-import { SyncQueueItem } from '../syncProvider/types';
 
-import { executeBatchCheck, ExecutionResult } from './sync';
+import { executeBatchCheck } from './sync';
 import { TxnStatusItem } from './txnStatusItem';
 
 export interface TransactionStatusProviderInterface {
@@ -24,17 +25,113 @@ export const StatusCheckContext: React.Context<TransactionStatusProviderInterfac
   );
 
 export const TransactionStatusProvider: React.FC = ({ children }) => {
+  // pick, batch and execute the queued request items
+  const executeNextBatchItemInQueue = async () => {
+    let items: TxnStatusItem[] = [];
+
+    if (queue.length > 0) {
+      // deduct the backoff time
+      // this is inaccurate; actual backoff is (backoff + queue processing)
+      queue.forEach(ele => {
+        if (!(ele instanceof TxnStatusItem)) return;
+        ele.backoffTime = Math.max(0, ele.backoffTime - queueExecuteInterval);
+      });
+
+      // filter items ready for execution i.e. backoffTime is 0
+      items = queue.filter(
+        ele =>
+          ele instanceof TxnStatusItem &&
+          ele.backoffTime <= queueExecuteInterval
+      );
+    }
+
+    if (connected && queue.length > 0 && items.length > 0) {
+      return await executeBatchCheck(items.slice(0, BATCH_SIZE));
+    }
+    return [];
+  };
+
+  // finally update the queue after one execution cycle
+  const updateAllExecutedItems = async (
+    executionResults: Array<ExecutionResult<TxnStatusItem>>
+  ) => {
+    const allCompletedModulesSet: Set<string> = new Set<string>();
+    const syncQueueUpdateOperations: Array<{
+      item: TxnStatusItem;
+      operation: 'remove' | 'update';
+      updatedItem?: TxnStatusItem;
+    }> = [];
+
+    for (const result of executionResults) {
+      const { item } = result;
+      let updatedItem;
+      let removeFromQueue = true;
+
+      if (result.isFailed || !result.isComplete) {
+        updatedItem = item.clone();
+        removeFromQueue = false;
+        updatedItem.backoffFactor *= backoffExpMultiplier;
+        updatedItem.backoffTime =
+          updatedItem.backoffFactor * backoffBaseInterval;
+
+        // not very precise; next history sync might be very near in time
+        // ineffective in reducing API calls, helpful to shorten the syncQueue
+        if (updatedItem.backoffTime > RESYNC_INTERVAL) removeFromQueue = true;
+      }
+
+      syncQueueUpdateOperations.push({
+        operation: removeFromQueue ? 'remove' : 'update',
+        item,
+        updatedItem
+      });
+      if (removeFromQueue) allCompletedModulesSet.add(item.module);
+
+      // no need for resync as transaction is incomplete; skipping it
+      if (result.isComplete !== true) continue;
+
+      try {
+        // status is final, resync balances and history
+        const coinEntry = await coinDb.getOne({
+          walletId: item.walletId,
+          slug: item.coinType
+        });
+        addBalanceSyncItemFromCoin(
+          {
+            ...coinEntry,
+            coinGroup: item.coinGroup,
+            parentCoin: item.parentCoin
+          },
+          {}
+        );
+        addHistorySyncItemFromCoin(
+          {
+            ...coinEntry,
+            coinGroup: item.coinGroup,
+            parentCoin: item.parentCoin
+          },
+          {}
+        );
+      } catch (e) {
+        logger.error('Failed to sync after transaction status update', e, item);
+      }
+    }
+    updateQueueItems(syncQueueUpdateOperations, allCompletedModulesSet);
+  };
+
   const { addBalanceSyncItemFromCoin, addHistorySyncItemFromCoin } = useSync();
   const {
     BATCH_SIZE,
-    isExecutingTask,
-    setIsExecutingTask,
     connected,
-    syncQueue,
+    queue,
     queueExecuteInterval,
     addToQueue,
     updateQueueItems
-  } = useSyncQueue(2000);
+  } = useSyncQueue<TxnStatusItem>({
+    connection: useNetwork().connected,
+    executeInterval: 2000,
+    nextBatchItemExecutor: executeNextBatchItemInQueue,
+    updateItemsInQueue: updateAllExecutedItems
+  });
 
   const backoffExpMultiplier = 2;
   const backoffBaseInterval = 10000;
@@ -66,109 +163,6 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
     addToQueue(newItem);
   };
 
-  const updateAllExecutedItems = async (
-    executionResults: ExecutionResult[]
-  ) => {
-    const allCompletedModulesSet: Set<string> = new Set<string>();
-    const syncQueueUpdateOperations: Array<{
-      item: SyncQueueItem;
-      operation: 'remove' | 'update';
-      updatedItem?: SyncQueueItem;
-    }> = [];
-
-    for (const result of executionResults) {
-      const { item } = result;
-      let updatedItem;
-      let removeFromQueue = true;
-
-      if (
-        item instanceof TxnStatusItem &&
-        (result.isFailed || !result.isComplete)
-      ) {
-        updatedItem = item.clone();
-        removeFromQueue = false;
-        updatedItem.backoffFactor *= backoffExpMultiplier;
-        updatedItem.backoffTime =
-          updatedItem.backoffFactor * backoffBaseInterval;
-
-        // not very precise; next history sync might be very near in time
-        // ineffective in reducing API calls, helpful to shorten the syncQueue
-        if (updatedItem.backoffTime > RESYNC_INTERVAL) removeFromQueue = true;
-      }
-
-      syncQueueUpdateOperations.push({
-        operation: removeFromQueue ? 'remove' : 'update',
-        item,
-        updatedItem
-      });
-      if (removeFromQueue) allCompletedModulesSet.add(item.module);
-
-      // no need for resync as transaction is incomplete; skipping it
-      if (result.isComplete !== true || !(item instanceof TxnStatusItem))
-        continue;
-
-      try {
-        // status is final, resync balances and history
-        const coinEntry = await coinDb.getOne({
-          walletId: item.walletId,
-          slug: item.coinType
-        });
-        addBalanceSyncItemFromCoin(
-          {
-            ...coinEntry,
-            coinGroup: item.coinGroup,
-            parentCoin: item.parentCoin
-          },
-          {}
-        );
-        addHistorySyncItemFromCoin(
-          {
-            ...coinEntry,
-            coinGroup: item.coinGroup,
-            parentCoin: item.parentCoin
-          },
-          {}
-        );
-      } catch (e) {
-        logger.error('Failed to sync after transaction status update', e, item);
-      }
-    }
-    updateQueueItems(syncQueueUpdateOperations, allCompletedModulesSet);
-  };
-
-  // pick, batch and execute the queued request items and finally update the queue
-  const executeNextInQueue = async () => {
-    setIsExecutingTask(true);
-
-    let items: SyncQueueItem[] = [];
-
-    if (syncQueue.length > 0) {
-      // deduct the backoff time
-      // this is inaccurate; actual backoff is (backoff + queue processing)
-      syncQueue.forEach(ele => {
-        if (!(ele instanceof TxnStatusItem)) return;
-        ele.backoffTime = Math.max(0, ele.backoffTime - queueExecuteInterval);
-      });
-
-      // filter items ready for execution i.e. backoffTime is 0
-      items = syncQueue.filter(
-        ele =>
-          ele instanceof TxnStatusItem &&
-          ele.backoffTime <= queueExecuteInterval
-      );
-    }
-
-    if (connected && syncQueue.length > 0 && items.length > 0) {
-      const array = await executeBatchCheck(items.slice(0, BATCH_SIZE));
-      await updateAllExecutedItems(
-        array.reduce((acc, item) => acc.concat(item), [])
-      );
-    }
-
-    await sleep(queueExecuteInterval);
-    setIsExecutingTask(false);
-  };
-
   // fetch all pending transactions and push them into status check queue
   const setupInitial = async () => {
     logger.info('Sync: Adding Initial items');
@@ -190,11 +184,6 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
     setupInitial();
     transactionDb.failExpiredTxn();
   }, []);
-
-  // execute transaction status checks
-  useEffect(() => {
-    if (!isExecutingTask) executeNextInQueue();
-  }, [isExecutingTask]);
 
   return (
     <StatusCheckContext.Provider

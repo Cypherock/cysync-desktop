@@ -23,14 +23,12 @@ import {
   tokenDb,
   transactionDb
 } from '../../database';
-import { sleep, useSyncQueue } from '../../hooks/useSyncQueue';
+import { ExecutionResult } from '../../hooks';
+import { useSyncQueue } from '../../hooks/useExecutionQueue';
+import { useNetwork } from '../networkProvider';
 import { useNotifications } from '../notificationProvider';
 
-import {
-  executeBatch,
-  executeLatestPriceBatch,
-  ExecutionResult
-} from './executors';
+import { executeBatch, executeLatestPriceBatch } from './executors';
 import {
   BalanceSyncItem,
   ClientTimeoutInterface,
@@ -80,21 +78,171 @@ export const SyncContext: React.Context<SyncContextInterface> =
   React.createContext<SyncContextInterface>({} as SyncContextInterface);
 
 export const SyncProvider: React.FC = ({ children }) => {
+  const updateAllExecutedItems = async (
+    executionResults: Array<ExecutionResult<SyncQueueItem>>
+  ) => {
+    const allCompletedModulesSet: Set<string> = new Set<string>();
+    const syncQueueUpdateOperations: Array<{
+      item: SyncQueueItem;
+      operation: 'remove' | 'update';
+      updatedItem?: SyncQueueItem;
+    }> = [];
+
+    for (const result of executionResults) {
+      const { item } = result;
+
+      let removeFromQueue = true;
+      let updateQueueItem = false;
+      const updatedItem = item.clone();
+
+      if (result.isFailed) {
+        if (item.retries < maxRetries && result.canRetry) {
+          const errorMsg = result?.error?.toString() || result?.error;
+          logger.warn('Sync: Error, retrying...', { item, error: errorMsg });
+          updatedItem.retries += 1;
+          if (result.delay) {
+            clientTimeout.current = {
+              pause: true,
+              tryAfter: performance.now() + result.delay
+            };
+            logger.info('ClientBatch sync paused for CoinGeckoAPI');
+          }
+          updateQueueItem = true;
+          removeFromQueue = false;
+        } else {
+          const errorMsg = result?.error?.toString() || result?.error;
+          logger.error(
+            `${CysyncError.SYNC_MAX_TRIES_EXCEEDED} Sync: Error, max retries exceeded`
+          );
+          logger.error({ error: errorMsg, item });
+        }
+      } else if (
+        item instanceof HistorySyncItem &&
+        result.processResult !== undefined
+      ) {
+        removeFromQueue = false;
+        updateQueueItem = true;
+        (updatedItem as HistorySyncItem).page = result.processResult.page;
+        (updatedItem as HistorySyncItem).afterBlock =
+          result.processResult.after;
+        (updatedItem as HistorySyncItem).afterHash = result.processResult.until;
+        (updatedItem as HistorySyncItem).beforeHash =
+          result.processResult.before;
+        (updatedItem as HistorySyncItem).afterTokenBlock =
+          result.processResult.afterToken;
+      }
+
+      if (removeFromQueue) {
+        syncQueueUpdateOperations.push({ operation: 'remove', item });
+        // Remove module from ModuleInExecutionQueue
+        const { module } = item as SyncQueueItem;
+        allCompletedModulesSet.add(module);
+      }
+
+      if (updateQueueItem) {
+        syncQueueUpdateOperations.push({
+          operation: 'update',
+          item,
+          updatedItem
+        });
+      }
+    }
+    updateQueueItems(syncQueueUpdateOperations, allCompletedModulesSet);
+  };
+
+  const executeNextClientItemInQueue = async () => {
+    if (!connected) {
+      return [];
+    }
+
+    const latestPriceItems = queue.filter(item => item.type === 'latestPrice');
+
+    const items = queue.filter(item => item.type === 'price').splice(0, 1);
+
+    try {
+      if (clientTimeout.current.pause) {
+        if (performance.now() >= clientTimeout.current.tryAfter) {
+          clientTimeout.current = { pause: false, tryAfter: 0 };
+          logger.info('Waiting complete');
+        } else {
+          return [];
+        }
+      }
+      let latestPriceResult: Array<ExecutionResult<SyncQueueItem>> = [];
+      if (latestPriceItems.length > 0) {
+        latestPriceResult = await executeLatestPriceBatch(
+          latestPriceItems as LatestPriceSyncItem[],
+          {
+            addToQueue,
+            addPriceSyncItemFromCoin,
+            addLatestPriceSyncItemFromCoin
+          }
+        );
+      }
+      const executionResult = await executeBatch(items, {
+        addToQueue,
+        addPriceSyncItemFromCoin,
+        addLatestPriceSyncItemFromCoin,
+        isClientBatch: true
+      });
+
+      return [...latestPriceResult, ...executionResult];
+    } catch (error) {
+      // Since all the tasks for an item are closely related, I understand why this is being done.
+      // TODO: But we should aim to do better to handle a single failing.
+      logger.error('Failed to execute batch, hence failing all tasks');
+    }
+  };
+
+  const executeNextBatchItemInQueue = async () => {
+    if (!connected) {
+      return [];
+    }
+
+    let items: SyncQueueItem[] = [];
+
+    if (queue.length > 0) {
+      items = queue
+        .filter(item => item.type !== 'price' && item.type !== 'latestPrice')
+        .slice(0, BATCH_SIZE);
+    }
+
+    if (items.length <= 0) {
+      return [];
+    }
+
+    try {
+      const executionResult = await executeBatch(items, {
+        addToQueue,
+        addPriceSyncItemFromCoin,
+        addLatestPriceSyncItemFromCoin
+      });
+      return executionResult;
+    } catch (error) {
+      // Since all the tasks for an item are closely related, I understand why this is being done.
+      // TODO: But we should aim to do better to handle a single failing.
+      logger.error('Failed to execute batch, hence failing all tasks');
+    }
+  };
+
   const {
     BATCH_SIZE,
     connected,
     connectedRef,
-    syncQueue,
-    queueExecuteInterval,
+    queue,
     modulesInExecutionQueue,
     isSyncing,
     setInitialSetupDone,
     isWaitingForConnection,
-    isExecutingTask,
-    setIsExecutingTask,
     addToQueue,
     updateQueueItems
-  } = useSyncQueue(1000);
+  } = useSyncQueue<SyncQueueItem>({
+    connection: useNetwork().connected,
+    executeInterval: 1000,
+    nextBatchItemExecutor: executeNextBatchItemInQueue,
+    nextClientItemExecutor: executeNextClientItemInQueue,
+    updateItemsInQueue: updateAllExecutedItems
+  });
   const notifications = useNotifications();
 
   const maxRetries = 2;
@@ -505,186 +653,6 @@ export const SyncProvider: React.FC = ({ children }) => {
       }
     };
 
-  const updateAllExecutedItems = async (
-    executionResults: ExecutionResult[]
-  ) => {
-    const allCompletedModulesSet: Set<string> = new Set<string>();
-    const syncQueueUpdateOperations: Array<{
-      item: SyncQueueItem;
-      operation: 'remove' | 'update';
-      updatedItem?: SyncQueueItem;
-    }> = [];
-
-    for (const result of executionResults) {
-      const { item } = result;
-
-      let removeFromQueue = true;
-      let updateQueueItem = false;
-      const updatedItem = item.clone();
-
-      if (result.isFailed) {
-        if (item.retries < maxRetries && result.canRetry) {
-          const errorMsg = result?.error?.toString() || result?.error;
-          logger.warn('Sync: Error, retrying...', { item, error: errorMsg });
-          updatedItem.retries += 1;
-          if (result.delay) {
-            clientTimeout.current = {
-              pause: true,
-              tryAfter: performance.now() + result.delay
-            };
-            logger.info('ClientBatch sync paused for CoinGeckoAPI');
-          }
-          updateQueueItem = true;
-          removeFromQueue = false;
-        } else {
-          const errorMsg = result?.error?.toString() || result?.error;
-          logger.error(
-            `${CysyncError.SYNC_MAX_TRIES_EXCEEDED} Sync: Error, max retries exceeded`
-          );
-          logger.error({ error: errorMsg, item });
-        }
-      } else if (
-        item instanceof HistorySyncItem &&
-        result.processResult !== undefined
-      ) {
-        removeFromQueue = false;
-        updateQueueItem = true;
-        (updatedItem as HistorySyncItem).page = result.processResult.page;
-        (updatedItem as HistorySyncItem).afterBlock =
-          result.processResult.after;
-        (updatedItem as HistorySyncItem).afterHash = result.processResult.until;
-        (updatedItem as HistorySyncItem).beforeHash =
-          result.processResult.before;
-        (updatedItem as HistorySyncItem).afterTokenBlock =
-          result.processResult.afterToken;
-      }
-
-      if (removeFromQueue) {
-        syncQueueUpdateOperations.push({ operation: 'remove', item });
-        // Remove module from ModuleInExecutionQueue
-        const { module } = item as SyncQueueItem;
-        allCompletedModulesSet.add(module);
-      }
-
-      if (updateQueueItem) {
-        syncQueueUpdateOperations.push({
-          operation: 'update',
-          item,
-          updatedItem
-        });
-      }
-    }
-    updateQueueItems(syncQueueUpdateOperations, allCompletedModulesSet);
-  };
-
-  const executeNextClientItemInQueue = async () => {
-    if (!connected) {
-      return [];
-    }
-
-    const latestPriceItems = syncQueue.filter(
-      item => item.type === 'latestPrice'
-    );
-
-    const items = syncQueue.filter(item => item.type === 'price').splice(0, 1);
-
-    try {
-      if (clientTimeout.current.pause) {
-        if (performance.now() >= clientTimeout.current.tryAfter) {
-          clientTimeout.current = { pause: false, tryAfter: 0 };
-          logger.info('Waiting complete');
-        } else {
-          return [];
-        }
-      }
-      let latestPriceResult: ExecutionResult[] = [];
-      if (latestPriceItems.length > 0) {
-        latestPriceResult = await executeLatestPriceBatch(
-          latestPriceItems as LatestPriceSyncItem[],
-          {
-            addToQueue,
-            addPriceSyncItemFromCoin,
-            addLatestPriceSyncItemFromCoin
-          }
-        );
-      }
-      const executionResult = await executeBatch(items, {
-        addToQueue,
-        addPriceSyncItemFromCoin,
-        addLatestPriceSyncItemFromCoin,
-        isClientBatch: true
-      });
-
-      return [...latestPriceResult, ...executionResult];
-    } catch (error) {
-      // Since all the tasks for an item are closely related, I understand why this is being done.
-      // TODO: But we should aim to do better to handle a single failing.
-      logger.error('Failed to execute batch, hence failing all tasks');
-    }
-  };
-
-  const executeNextBatchItemInQueue = async () => {
-    if (!connected) {
-      return [];
-    }
-
-    let items: SyncQueueItem[] = [];
-
-    if (syncQueue.length > 0) {
-      items = syncQueue
-        .filter(item => item.type !== 'price' && item.type !== 'latestPrice')
-        .slice(0, BATCH_SIZE);
-    }
-
-    if (items.length <= 0) {
-      return [];
-    }
-
-    try {
-      const executionResult = await executeBatch(items, {
-        addToQueue,
-        addPriceSyncItemFromCoin,
-        addLatestPriceSyncItemFromCoin
-      });
-      return executionResult;
-    } catch (error) {
-      // Since all the tasks for an item are closely related, I understand why this is being done.
-      // TODO: But we should aim to do better to handle a single failing.
-      logger.error('Failed to execute batch, hence failing all tasks');
-    }
-  };
-
-  const executeNextInQueue = async () => {
-    setIsExecutingTask(true);
-    const timeStart = performance.now();
-    const array = await Promise.all([
-      executeNextClientItemInQueue(),
-      executeNextBatchItemInQueue()
-    ]);
-    updateAllExecutedItems(array.reduce((acc, item) => acc.concat(item), []));
-    const timeStop = performance.now();
-    if (timeStop - timeStart > 5000) {
-      logger.info(`Batch execution took ${timeStop - timeStart} milliseconds`);
-      logger.info({
-        queue: array
-          .reduce((acc, item) => acc.concat(item), [])
-          .map(item => {
-            return {
-              ...item,
-              item: {
-                ...item.item,
-                walletId: undefined,
-                xpub: undefined,
-                zpub: undefined
-              }
-            };
-          })
-      });
-    }
-    await sleep(queueExecuteInterval);
-    setIsExecutingTask(false);
-  };
-
   const addHistoryRefresh = async ({
     isRefresh = false,
     module = 'refresh-history'
@@ -969,13 +937,6 @@ export const SyncProvider: React.FC = ({ children }) => {
       intervals.current = [] as NodeJS.Timeout[];
     };
   }, []);
-
-  // Execute the syncItems if it is syncing
-  useEffect(() => {
-    if (isSyncing && !isWaitingForConnection && !isExecutingTask) {
-      executeNextInQueue();
-    }
-  }, [isSyncing, isExecutingTask, isWaitingForConnection]);
 
   return (
     <SyncContext.Provider

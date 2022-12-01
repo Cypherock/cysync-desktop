@@ -3,30 +3,20 @@ import { serverBatch as batchServer } from '@cypherock/server-wrapper/dist/resou
 import { flatMap } from 'lodash';
 
 import logger from '../../../utils/logger';
-import { SyncQueueItem } from '../syncProvider/types';
+import { ExecutionResult } from '../../hooks';
 
 import { getRequestsMetadata, processResponses } from './txnStatus';
 import { TxnStatusItem } from './txnStatusItem';
 
 export interface RequestMetaProcessInfo {
   meta: IRequestMetadata[];
-  item: SyncQueueItem;
+  item: TxnStatusItem;
   error?: Error;
   isFailed: boolean;
-}
-
-export interface ExecutionResult {
-  item: SyncQueueItem;
-  isFailed: boolean;
-  isComplete?: boolean;
-  canRetry?: boolean;
-  error?: Error;
-  processResult?: any;
-  delay?: number;
 }
 
 // Populates the metadata for each entry of batch query
-export const getAllMetadata = (items: SyncQueueItem[]) => {
+export const getAllMetadata = (items: TxnStatusItem[]) => {
   const allRequestMetadata: RequestMetaProcessInfo[] = [];
 
   items.forEach(item => {
@@ -59,7 +49,7 @@ export const getAllProcessResponses = async (
   responses: batchServer.IBatchResponse[]
 ) => {
   let responseIndex = 0;
-  const allExeutionResults: ExecutionResult[] = [];
+  const allExeutionResults: Array<ExecutionResult<TxnStatusItem>> = [];
 
   for (const meta of allMetadataInfo) {
     if (meta.isFailed) {
@@ -116,8 +106,8 @@ export const getAllProcessResponses = async (
 };
 
 export const executeBatchCheck = async (
-  items: SyncQueueItem[]
-): Promise<ExecutionResult[]> => {
+  items: TxnStatusItem[]
+): Promise<Array<ExecutionResult<TxnStatusItem>>> => {
   if (items.length <= 0) return [];
 
   const allMetadataInfo = getAllMetadata(items);

@@ -1,21 +1,29 @@
 import React, { useEffect, useRef } from 'react';
 
 import logger from '../../utils/logger';
-import { useNetwork } from '../provider';
-import { SyncQueueItem } from '../provider/syncProvider/types';
+
+import { ExecutionResult } from './types';
+
+export abstract class ExecutionQueueItem {
+  public module: string;
+
+  equals(_item: ExecutionQueueItem) {
+    throw new Error('equals not implemented for this class');
+  }
+}
 
 export function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export interface UseSyncQueueInterface {
+export interface UseExecutionQueueInterface<T> {
   BATCH_SIZE: number;
-  syncQueue: SyncQueueItem[];
-  setSyncQueue: React.Dispatch<React.SetStateAction<SyncQueueItem[]>>;
+  queue: T[];
+  setQueue: React.Dispatch<React.SetStateAction<T[]>>;
   queueExecuteInterval: number;
   modulesInExecutionQueue: string[];
   setModuleInExecutionQueue: React.Dispatch<React.SetStateAction<string[]>>;
-  addToQueue: (item: SyncQueueItem) => void;
+  addToQueue: (item: T) => void;
   connected: boolean;
   connectedRef: React.MutableRefObject<boolean>;
   isSyncing: boolean;
@@ -27,19 +35,45 @@ export interface UseSyncQueueInterface {
   setIsExecutingTask: React.Dispatch<React.SetStateAction<boolean>>;
   updateQueueItems: (
     updateOperations: Array<{
-      item: SyncQueueItem;
+      item: T;
       operation: 'remove' | 'update';
-      updatedItem?: SyncQueueItem;
+      updatedItem?: T;
     }>,
     allCompletedModulesSet: Set<string>
   ) => void;
+  executeNextInQueue?: () => void;
+  executeNextClientItemInQueue?: () => void;
+  executeNextBatchItemInQueue?: () => void;
+  updateAllExecutedItems?: (
+    executionResults: Array<ExecutionResult<T>>
+  ) => void;
 }
 
-export type UseSyncQueue = (executeInterval: number) => UseSyncQueueInterface;
+export interface UseExecutionQueueOptions<T> {
+  connection: boolean;
+  executeInterval: number;
+  nextBatchItemExecutor?: () => void;
+  nextClientItemExecutor?: () => void;
+  updateItemsInQueue?: (executionResults: Array<ExecutionResult<T>>) => void;
+}
 
-export const useSyncQueue: UseSyncQueue = (executeInterval: number) => {
+export type UseExecutionQueue = <T extends ExecutionQueueItem>({
+  connection,
+  executeInterval,
+  nextBatchItemExecutor,
+  nextClientItemExecutor,
+  updateItemsInQueue
+}: UseExecutionQueueOptions<T>) => UseExecutionQueueInterface<T>;
+
+export const useSyncQueue: UseExecutionQueue = <T extends ExecutionQueueItem>({
+  connection,
+  executeInterval,
+  nextBatchItemExecutor,
+  nextClientItemExecutor,
+  updateItemsInQueue
+}: UseExecutionQueueOptions<T>) => {
   const BATCH_SIZE = 5;
-  const [syncQueue, setSyncQueue] = React.useState<SyncQueueItem[]>([]);
+  const [syncQueue, setSyncQueue] = React.useState<T[]>([]);
   const [modulesInExecutionQueue, setModuleInExecutionQueue] = React.useState<
     string[]
   >([]);
@@ -52,14 +86,14 @@ export const useSyncQueue: UseSyncQueue = (executeInterval: number) => {
 
   const queueExecuteInterval = executeInterval;
 
-  const { connected } = useNetwork();
+  const connected = connection;
   const connectedRef = useRef<boolean | null>(connected);
 
   const timeThreshold = 60000; // log every 1 minute
   const offsetTime = useRef(0);
   const startTime = useRef(0);
 
-  const addToQueue = (item: SyncQueueItem) => {
+  const addToQueue = (item: T) => {
     setSyncQueue(currentSyncQueue => {
       if (currentSyncQueue.findIndex(elem => elem.equals(item)) === -1) {
         // Adds the current item to ModuleExecutionQueue
@@ -76,11 +110,49 @@ export const useSyncQueue: UseSyncQueue = (executeInterval: number) => {
     });
   };
 
+  const executeNextInQueue = async () => {
+    setIsExecutingTask(true);
+    const timeStart = performance.now();
+    const array = await Promise.all([
+      executeNextClientItemInQueue(),
+      executeNextBatchItemInQueue()
+    ]);
+    if (array.length > 0)
+      updateAllExecutedItems(array.reduce((acc, item) => acc.concat(item), []));
+    const timeStop = performance.now();
+    if (timeStop - timeStart > 5000) {
+      logger.info(`Batch execution took ${timeStop - timeStart} milliseconds`);
+      logger.info({
+        queue: array
+          .reduce((acc, item) => acc.concat(item), [])
+          .map(item => {
+            return {
+              ...item,
+              item: {
+                ...item.item,
+                walletId: undefined,
+                xpub: undefined,
+                zpub: undefined
+              }
+            };
+          })
+      });
+    }
+    await sleep(queueExecuteInterval);
+    setIsExecutingTask(false);
+  };
+
+  const executeNextBatchItemInQueue = nextBatchItemExecutor;
+
+  const executeNextClientItemInQueue = nextClientItemExecutor;
+
+  const updateAllExecutedItems = updateItemsInQueue;
+
   const updateQueueItems = (
     updateOperations: Array<{
-      item: SyncQueueItem;
+      item: T;
       operation: 'remove' | 'update';
-      updatedItem?: SyncQueueItem;
+      updatedItem?: T;
     }>,
     allCompletedModulesSet: Set<string>
   ) => {
@@ -141,6 +213,13 @@ export const useSyncQueue: UseSyncQueue = (executeInterval: number) => {
     }
   }, [connected, isInitialSetupDone, syncQueue]);
 
+  // Execute the syncItems if it is syncing
+  useEffect(() => {
+    if (isSyncing && !isWaitingForConnection && !isExecutingTask) {
+      executeNextInQueue();
+    }
+  }, [isSyncing, isExecutingTask, isWaitingForConnection]);
+
   // queue execution performance logging
   useEffect(() => {
     if (syncQueue.length > 0) {
@@ -192,11 +271,12 @@ export const useSyncQueue: UseSyncQueue = (executeInterval: number) => {
     isInitialSetupDone,
     setInitialSetupDone,
     isWaitingForConnection,
-    syncQueue,
-    setSyncQueue,
+    queue: syncQueue,
+    setQueue: setSyncQueue,
     modulesInExecutionQueue,
     setModuleInExecutionQueue,
     addToQueue,
+    executeNextInQueue,
     updateQueueItems
-  } as UseSyncQueueInterface;
+  } as UseExecutionQueueInterface<T>;
 };

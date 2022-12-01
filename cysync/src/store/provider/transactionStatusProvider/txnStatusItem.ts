@@ -1,7 +1,7 @@
 import { CoinGroup } from '@cypherock/communication';
 
-import { SyncItem } from '../../hooks';
 import { SyncQueueItem } from '../syncProvider/types';
+import { SyncItem } from '../types/syncItem';
 
 export interface TxnStatusSyncItemOptions {
   walletId: string;
@@ -15,10 +15,7 @@ export interface TxnStatusSyncItemOptions {
   parentCoin?: string;
 }
 
-export class TxnStatusItem
-  extends SyncItem
-  implements TxnStatusSyncItemOptions
-{
+export class TxnStatusItem extends SyncItem {
   public walletId: string;
   public txnHash: string;
   public sender: string; // needed in near RPC call param
@@ -53,18 +50,9 @@ export class TxnStatusItem
     this.walletId = walletId;
     this.txnHash = txnHash;
     this.sender = sender;
-    this.coinType = coinType;
-    this.coinGroup = coinGroup;
-    this.isRefresh = isRefresh;
     this.backoffTime = backoffTime;
     this.backoffFactor = 1;
   }
-
-  coinType: string;
-  isRefresh: boolean;
-  coinGroup: CoinGroup;
-  parentCoin: string;
-  retries = 2;
 
   equals(item: SyncQueueItem) {
     if (item instanceof TxnStatusItem) {
