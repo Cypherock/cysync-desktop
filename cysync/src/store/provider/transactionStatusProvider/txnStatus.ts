@@ -26,15 +26,18 @@ export const getCurrentTxnStatus = async (
 ): Promise<Status> => {
   let oldStatus;
   try {
-    // there is some redundancy between coin and slug fields of Transaction DB; Bitcoin
-    // Transactions do not contain the coin field; query for the other if one fails
+    // coin field to be queried only present if there is a parent coin
+    const coin =
+      item.parentCoin && item.parentCoin !== item.coinType
+        ? { coin: item.parentCoin }
+        : {};
     oldStatus = (
-      await transactionDb.getOne({ coin: item.coinType, hash: item.txnHash })
+      await transactionDb.getOne({
+        slug: item.coinType,
+        hash: item.txnHash,
+        ...coin
+      })
     )?.status;
-    if (oldStatus === undefined || oldStatus === null)
-      oldStatus = (
-        await transactionDb.getOne({ slug: item.coinType, hash: item.txnHash })
-      )?.status;
   } catch (e) {
     logger.error('Cannot fetch transaction from DB', e, item);
   }
@@ -147,15 +150,12 @@ export const processResponses = async (
   if (currentStatus !== Status.PENDING) return { isComplete: true };
 
   // potential overwrite of resynced transactions
+  const coinField =
+    item.parentCoin && item.parentCoin !== item.coinType
+      ? { coin: item.parentCoin }
+      : {};
   await transactionDb.findAndUpdate(
-    { coin: item.coinType, hash: item.txnHash },
-    {
-      status,
-      confirmations: status === Status.SUCCESS ? confirmations || 1 : 0
-    }
-  );
-  await transactionDb.findAndUpdate(
-    { slug: item.coinType, hash: item.txnHash },
+    { slug: item.coinType, hash: item.txnHash, ...coinField },
     {
       status,
       confirmations: status === Status.SUCCESS ? confirmations || 1 : 0

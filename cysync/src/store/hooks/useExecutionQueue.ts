@@ -17,7 +17,6 @@ export function sleep(ms: number) {
 }
 
 export interface UseExecutionQueueInterface<T> {
-  BATCH_SIZE: number;
   queue: T[];
   setQueue: React.Dispatch<React.SetStateAction<T[]>>;
   queueExecuteInterval: number;
@@ -72,7 +71,6 @@ export const useSyncQueue: UseExecutionQueue = <T extends ExecutionQueueItem>({
   nextClientItemExecutor,
   updateItemsInQueue
 }: UseExecutionQueueOptions<T>) => {
-  const BATCH_SIZE = 5;
   const [syncQueue, setSyncQueue] = React.useState<T[]>([]);
   const [modulesInExecutionQueue, setModuleInExecutionQueue] = React.useState<
     string[]
@@ -259,7 +257,6 @@ export const useSyncQueue: UseExecutionQueue = <T extends ExecutionQueueItem>({
   }, [syncQueue]);
 
   return {
-    BATCH_SIZE,
     sleep,
     queueExecuteInterval,
     connected,

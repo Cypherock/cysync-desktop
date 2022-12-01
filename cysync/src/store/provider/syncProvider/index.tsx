@@ -78,6 +78,8 @@ export const SyncContext: React.Context<SyncContextInterface> =
   React.createContext<SyncContextInterface>({} as SyncContextInterface);
 
 export const SyncProvider: React.FC = ({ children }) => {
+  const BATCH_SIZE = 5;
+
   const updateAllExecutedItems = async (
     executionResults: Array<ExecutionResult<SyncQueueItem>>
   ) => {
@@ -226,7 +228,6 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const {
-    BATCH_SIZE,
     connected,
     connectedRef,
     queue,

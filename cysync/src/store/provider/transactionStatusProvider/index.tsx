@@ -25,6 +25,8 @@ export const StatusCheckContext: React.Context<TransactionStatusProviderInterfac
   );
 
 export const TransactionStatusProvider: React.FC = ({ children }) => {
+  const BATCH_SIZE = 5;
+
   // pick, batch and execute the queued request items
   const executeNextBatchItemInQueue = async () => {
     let items: TxnStatusItem[] = [];
@@ -45,8 +47,13 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
       );
     }
 
-    if (connected && queue.length > 0 && items.length > 0) {
-      return await executeBatchCheck(items.slice(0, BATCH_SIZE));
+    try {
+      if (connected && queue.length > 0 && items.length > 0) {
+        return await executeBatchCheck(items.slice(0, BATCH_SIZE));
+      }
+    } catch (e) {
+      // Only handling MetadataInfo length mismatch
+      logger.error('Failure in batch execution', e);
     }
     return [];
   };
@@ -120,7 +127,6 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
 
   const { addBalanceSyncItemFromCoin, addHistorySyncItemFromCoin } = useSync();
   const {
-    BATCH_SIZE,
     connected,
     queue,
     queueExecuteInterval,
@@ -154,9 +160,10 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
       walletId: txn.walletId,
       txnHash: txn.hash,
       sender: txn.outputs[0]?.address,
-      coinType: coinData.abbr,
+      coinType: txn.slug,
       coinGroup: coinData.group,
       module: 'refresh',
+      parentCoin: txn.coin,
       isRefresh,
       backoffTime: backoffBaseInterval
     });
