@@ -36,13 +36,13 @@ import { getDesktopLogs, getDeviceLogs } from '../../utils/getLogs';
 import logger from '../../utils/logger';
 // import { initRecorder, stopRecorder } from '../../utils/recorder';
 import { stopRecorder } from '../../utils/recorder';
+import sleep from '../../utils/sleep';
 import { getSystemInfo } from '../../utils/systemInfo';
 import getUUID from '../../utils/uuid';
 import { useLogFetcher } from '../hooks/flows/useLogFetcher';
 
 import { DeviceConnectionState, useConnection } from './connectionProvider';
 import { useSnackbar } from './snackbarProvider';
-import { sleep } from './syncProvider';
 
 const PREFIX = 'FeedbackContext';
 

@@ -107,3 +107,13 @@ export interface CoinDetails {
   price: string;
   parent: string | undefined;
 }
+
+export interface ExecutionResult<T> {
+  item: T;
+  isFailed: boolean;
+  isComplete?: boolean;
+  canRetry?: boolean;
+  error?: Error;
+  processResult?: any;
+  delay?: number;
+}

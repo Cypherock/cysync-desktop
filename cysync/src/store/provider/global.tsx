@@ -12,6 +12,7 @@ import {
   SyncProvider,
   TutorialProvider
 } from '.';
+import { TransactionStatusProvider } from './transactionStatusProvider';
 
 const GlobalProvider = ({ children }: any) => {
   return (
@@ -24,7 +25,11 @@ const GlobalProvider = ({ children }: any) => {
                 {/* SocketProvider is using SyncProvider */}
                 <SyncProvider>
                   <SocketProvider>
-                    <FeedbackProvider>{children}</FeedbackProvider>
+                    <FeedbackProvider>
+                      <TransactionStatusProvider>
+                        {children}
+                      </TransactionStatusProvider>
+                    </FeedbackProvider>
                   </SocketProvider>
                 </SyncProvider>
               </TutorialProvider>

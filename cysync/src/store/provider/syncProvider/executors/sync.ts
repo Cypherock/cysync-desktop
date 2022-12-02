@@ -5,6 +5,7 @@ import {
 } from '@cypherock/server-wrapper';
 import { flatMap } from 'lodash';
 
+import { ExecutionResult } from '../../../hooks';
 import {
   BalanceSyncItem,
   CustomAccountSyncItem,
@@ -26,15 +27,6 @@ export interface RequestMetaProcessInfo {
   item: SyncQueueItem;
   error?: Error;
   isFailed: boolean;
-}
-
-export interface ExecutionResult {
-  item: SyncQueueItem;
-  isFailed: boolean;
-  canRetry?: boolean;
-  error?: Error;
-  processResult?: any;
-  delay?: number;
 }
 
 export interface OptionParams {
@@ -103,7 +95,7 @@ export const getAllProcessResponses = async (
   options: OptionParams
 ) => {
   let responseIndex = 0;
-  const allExeutionResults: ExecutionResult[] = [];
+  const allExeutionResults: Array<ExecutionResult<SyncQueueItem>> = [];
   for (const meta of allMetadataInfo) {
     if (meta.isFailed) {
       allExeutionResults.push({
@@ -184,7 +176,7 @@ export const getAllProcessResponses = async (
 export const executeBatch = async (
   items: SyncQueueItem[],
   options: OptionParams
-): Promise<ExecutionResult[]> => {
+): Promise<Array<ExecutionResult<SyncQueueItem>>> => {
   if (items.length <= 0) return [];
 
   const allMetadataInfo = getAllMetadata(items);
@@ -206,7 +198,7 @@ export const executeBatch = async (
     }
   } catch (error) {
     return allMetadataInfo.map(elem => {
-      const result: ExecutionResult = {
+      const result: ExecutionResult<SyncQueueItem> = {
         item: elem.item,
         isFailed: true,
         canRetry: !elem.isFailed,
