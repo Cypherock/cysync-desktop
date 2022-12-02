@@ -5,8 +5,7 @@ import React, { useEffect } from 'react';
 import logger from '../../../utils/logger';
 import { coinDb, Status, Transaction, transactionDb } from '../../database';
 import { ExecutionResult } from '../../hooks';
-import { useSyncQueue } from '../../hooks/useExecutionQueue';
-import { useNetwork } from '../networkProvider';
+import { useExecutionQueue } from '../../hooks/useExecutionQueue';
 import { RESYNC_INTERVAL, useSync } from '../syncProvider';
 
 import { executeBatchCheck } from './sync';
@@ -28,7 +27,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
   const BATCH_SIZE = 5;
 
   // pick, batch and execute the queued request items
-  const executeNextBatchItemInQueue = async () => {
+  const queueExecutor = async () => {
     let items: TxnStatusItem[] = [];
 
     if (queue.length > 0) {
@@ -49,13 +48,15 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
 
     try {
       if (connected && queue.length > 0 && items.length > 0) {
-        return await executeBatchCheck(items.slice(0, BATCH_SIZE));
+        return await Promise.all([
+          executeBatchCheck(items.slice(0, BATCH_SIZE))
+        ]);
       }
     } catch (e) {
       // Only handling MetadataInfo length mismatch
       logger.error('Failure in batch execution', e);
     }
-    return [];
+    return Promise.all([]);
   };
 
   // finally update the queue after one execution cycle
@@ -129,51 +130,49 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
   const {
     connected,
     queue,
+    setInitialSetupDone,
     queueExecuteInterval,
     addToQueue,
     updateQueueItems
-  } = useSyncQueue<TxnStatusItem>({
+  } = useExecutionQueue<TxnStatusItem>({
     queueName: 'Transaction status queue',
-    connection: useNetwork().connected,
     executeInterval: 2000,
-    nextBatchItemExecutor: executeNextBatchItemInQueue,
+    queueExecutor,
     updateItemsInQueue: updateAllExecutedItems
   });
 
   const backoffExpMultiplier = 2;
   const backoffBaseInterval = 10000;
 
-  const addTransactionStatusCheckItem = (
-    txn: Transaction,
-    { isRefresh = false }
-  ) => {
-    const coinData = COINS[txn.coin || txn.slug];
+  const addTransactionStatusCheckItem: TransactionStatusProviderInterface['addTransactionStatusCheckItem'] =
+    (txn, options) => {
+      const coinData = COINS[txn.coin || txn.slug];
 
-    if (!coinData) {
-      logger.warn('Invalid coin found', {
-        txn,
-        coinType: txn.coin || txn.slug
+      if (!coinData) {
+        logger.warn('Invalid coin found', {
+          txn,
+          coinType: txn.coin || txn.slug
+        });
+        return;
+      }
+
+      const newItem = new TxnStatusItem({
+        walletId: txn.walletId,
+        txnHash: txn.hash,
+        sender: txn.outputs[0]?.address,
+        coinType: txn.slug,
+        coinGroup: coinData.group,
+        module: 'refresh',
+        parentCoin: txn.coin,
+        isRefresh: options?.isRefresh,
+        backoffTime: backoffBaseInterval
       });
-      return;
-    }
-
-    const newItem = new TxnStatusItem({
-      walletId: txn.walletId,
-      txnHash: txn.hash,
-      sender: txn.outputs[0]?.address,
-      coinType: txn.slug,
-      coinGroup: coinData.group,
-      module: 'refresh',
-      parentCoin: txn.coin,
-      isRefresh,
-      backoffTime: backoffBaseInterval
-    });
-    addToQueue(newItem);
-  };
+      addToQueue(newItem);
+    };
 
   // fetch all pending transactions and push them into status check queue
   const setupInitial = async () => {
-    logger.info('Sync: Adding Initial items');
+    logger.info('TransactionStatus: Adding Initial items');
     if (process.env.IS_PRODUCTION === 'true') {
       const allPendingTxns = await transactionDb.getAll({
         status: Status.PENDING
@@ -191,6 +190,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
   useEffect(() => {
     setupInitial();
     transactionDb.failExpiredTxn();
+    setInitialSetupDone(true);
   }, []);
 
   return (

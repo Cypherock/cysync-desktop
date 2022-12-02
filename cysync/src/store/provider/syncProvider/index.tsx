@@ -24,8 +24,7 @@ import {
   transactionDb
 } from '../../database';
 import { ExecutionResult } from '../../hooks';
-import { useSyncQueue } from '../../hooks/useExecutionQueue';
-import { useNetwork } from '../networkProvider';
+import { useExecutionQueue } from '../../hooks/useExecutionQueue';
 import { useNotifications } from '../notificationProvider';
 
 import { executeBatch, executeLatestPriceBatch } from './executors';
@@ -227,6 +226,13 @@ export const SyncProvider: React.FC = ({ children }) => {
     }
   };
 
+  const queueExecutor = async () => {
+    return await Promise.all([
+      executeNextBatchItemInQueue(),
+      executeNextClientItemInQueue()
+    ]);
+  };
+
   const {
     connected,
     connectedRef,
@@ -237,12 +243,10 @@ export const SyncProvider: React.FC = ({ children }) => {
     isWaitingForConnection,
     addToQueue,
     updateQueueItems
-  } = useSyncQueue<SyncQueueItem>({
+  } = useExecutionQueue<SyncQueueItem>({
     queueName: 'Sync queue',
-    connection: useNetwork().connected,
     executeInterval: 1000,
-    nextBatchItemExecutor: executeNextBatchItemInQueue,
-    nextClientItemExecutor: executeNextClientItemInQueue,
+    queueExecutor,
     updateItemsInQueue: updateAllExecutedItems
   });
   const notifications = useNotifications();

@@ -47,7 +47,11 @@ export const getCurrentTxnStatus = async (
 export const getRequestsMetadata = (
   item: SyncQueueItem
 ): IRequestMetadata[] => {
-  const coin = COINS[item.coinType];
+  const abbr =
+    item.parentCoin && item.parentCoin !== item.coinType
+      ? item.parentCoin
+      : item.coinType;
+  const coin = COINS[abbr];
 
   if (!coin || !(item instanceof TxnStatusItem)) {
     logger.warn('Invalid item in transaction status sync queue', item);
@@ -106,7 +110,11 @@ export const processResponses = async (
   item: TxnStatusItem,
   response: batchServer.IBatchResponse
 ): Promise<any> => {
-  const coin = COINS[item.coinType];
+  const abbr =
+    item.parentCoin && item.parentCoin !== item.coinType
+      ? item.parentCoin
+      : item.coinType;
+  const coin = COINS[abbr];
 
   if (!coin) {
     throw new Error(
