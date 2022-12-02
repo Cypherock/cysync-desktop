@@ -16,7 +16,6 @@ import {
   useNetwork,
   useSelectedWallet,
   useSendTransactionContext,
-  useSocket,
   useSync,
   useTokenContext
 } from '../../../../../../store/provider';
@@ -106,8 +105,6 @@ const Summary: React.FC<StepComponentProps> = ({
     'Waiting for signature from X1 wallet'
   );
 
-  const { addTxnConfirmAddressHook } = useSocket();
-
   const { selectedWallet } = useSelectedWallet();
 
   const { coinDetails } = useCurrentCoin();
@@ -141,7 +138,6 @@ const Summary: React.FC<StepComponentProps> = ({
           txHash: res,
           token: token ? token.slug : undefined
         });
-        addTxnConfirmAddressHook(res, coinDetails.slug, selectedWallet._id);
         if (isNear)
           (async () => {
             const coins = await coinDb.getAll({

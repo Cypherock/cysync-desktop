@@ -12,6 +12,7 @@ import {
   InputOutput,
   IOtype,
   SentReceive,
+  Status,
   Transaction
 } from '@cypherock/database';
 import { TransactionSender, WalletStates } from '@cypherock/protocols';
@@ -32,6 +33,7 @@ import {
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { addressDb, coinDb, transactionDb } from '../../database';
+import { useStatusCheck } from '../../provider/transactionStatusProvider';
 
 import * as flowHandlers from './handlers';
 
@@ -271,6 +273,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     new CyError()
   );
   const [isEstimatingFees, setIsEstimatingFees] = useState(false);
+  const { addTransactionStatusCheckItem } = useStatusCheck();
 
   const resetHooks = () => {
     setDeviceConnected(false);
@@ -813,8 +816,9 @@ export const useSendTransaction: UseSendTransaction = () => {
           walletId,
           slug: coin.toLowerCase(),
           coin,
-          confirmations: 0,
-          status: coin.toLowerCase() === 'near' ? 1 : 0,
+          confirmations: coin.toLowerCase() === 'near' ? 1 : 0,
+          status:
+            coin.toLowerCase() === 'near' ? Status.SUCCESS : Status.PENDING, // Near failed txn handled already
           sentReceive: SentReceive.SENT,
           confirmed: new Date().toISOString(),
           blockHeight: -1,
@@ -823,6 +827,9 @@ export const useSendTransaction: UseSendTransaction = () => {
         };
       }
       transactionDb.insert(tx).then(() => {
+        if (tx.status === Status.PENDING) {
+          addTransactionStatusCheckItem(tx);
+        }
         transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
         logger.info('UTXOS blocked');
         logger.info(txnInputs);
@@ -896,8 +903,8 @@ export const useSendTransaction: UseSendTransaction = () => {
             : undefined,
         walletId,
         slug: coin.toLowerCase(),
-        confirmations: 0,
-        status: 1,
+        confirmations: 1,
+        status: Status.SUCCESS,
         sentReceive: SentReceive.SENT,
         confirmed: new Date().toISOString(),
         blockHeight: -1,
@@ -906,6 +913,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       };
 
       transactionDb.insert(tx).then(() => {
+        if (tx.status === Status.PENDING) addTransactionStatusCheckItem(tx);
         transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
         logger.info('UTXOS blocked');
         logger.info(txnInputs);
