@@ -42,6 +42,7 @@ import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 import prevent from '../../../../utils/preventPropagation';
 
 import AddAccount from './addAccount';
+import SendButton from './generalComponents/SendButton';
 import { NearOneCoinProps, NearOneCoinPropTypes } from './OneCoinProps';
 import OneNearAccount from './OneNearAccount';
 import Recieve from './recieve';
@@ -414,29 +415,11 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
           <Grid item xs={2} className={classes.actions}>
             {!(accountData.length > lengthThreshold) ? (
               <>
-                <Button
-                  variant="text"
-                  className={clsx({
-                    [classes.orange]: !isEmpty,
-                    [classes.grey]: isEmpty,
-                    [classes.actionButton]: true
-                  })}
-                  onClick={handleSendFormOpen}
-                  startIcon={
-                    <Icon
-                      className={clsx(classes.icon, classes.actionButtonIcon)}
-                      viewBox="0 0 14 15"
-                      icon={ICONS.walletSend}
-                      color={
-                        !isEmpty
-                          ? theme.palette.secondary.main
-                          : theme.palette.grey[500]
-                      }
-                    />
-                  }
-                >
-                  Send
-                </Button>
+                <SendButton
+                  handleSendFormOpen={handleSendFormOpen}
+                  isEmpty={isEmpty}
+                  prefix={PREFIX}
+                />
                 <div className={classes.divider} />
                 <Button
                   variant="text"

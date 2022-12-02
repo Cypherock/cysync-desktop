@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 
 import DialogBox from '../../../../../designSystem/designComponents/dialog/dialogBox';
-import ErrorDialog from '../../../../../designSystem/designComponents/dialog/errorDialog';
 import {
   useConnection,
   useCurrentCoin,
@@ -64,14 +63,6 @@ const WalletSend = () => {
 
   return (
     <>
-      {sendTransaction.errorObj.isSet && (
-        <ErrorDialog
-          open={sendTransaction.errorObj.isSet && sendForm}
-          handleClose={() => handleSendFormClose(true)}
-          errorObj={sendTransaction.errorObj}
-          flow="Sending Transaction"
-        />
-      )}
       <DialogBox
         fullWidth
         maxWidth="md"
