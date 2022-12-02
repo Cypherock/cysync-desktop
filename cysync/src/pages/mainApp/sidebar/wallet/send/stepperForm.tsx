@@ -304,6 +304,12 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
   const triggerCalcGasLimit = async () => {
     const coin = COINS[coinDetails.slug];
+
+    if (!token) {
+      setGasLimit(21000);
+      return;
+    }
+
     if (
       !(
         estimateGasLimit &&
@@ -312,11 +318,6 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         batchRecipientData[0].recipient.length === 42
       )
     ) {
-      return;
-    }
-
-    if (!token) {
-      setGasLimit(21000);
       return;
     }
 
@@ -610,6 +611,11 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const handleNext = () => {
     setActiveStep(prevActiveStep => prevActiveStep + 1);
   };
+  const resetFlow = () => {
+    sendTransaction.clearErrorObj();
+    sendTransaction.resetHooks();
+    setActiveStep(0);
+  };
 
   const handleErrorBoxClose = () => {
     handleClose(false);
@@ -661,6 +667,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
           props={{
             handleMaxSend,
             handleNext,
+            resetFlow,
             maximum,
             activeButton,
             feeType,

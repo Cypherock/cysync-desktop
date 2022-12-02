@@ -288,6 +288,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
               variant="contained"
               className={classes.button}
               onClick={() => handleClose(false)}
+              autoFocus
             >
               Go to Wallet
             </Button>

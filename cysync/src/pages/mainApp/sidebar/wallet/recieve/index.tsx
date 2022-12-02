@@ -1,12 +1,15 @@
+import { COINS } from '@cypherock/communication';
 import React, { useEffect, useState } from 'react';
 
 import DialogBox from '../../../../../designSystem/designComponents/dialog/dialogBox';
 import {
   useAddCoinContext,
   useConnection,
+  useCurrentCoin,
   useReceiveTransactionContext
 } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
+import { checkCoinSupport } from '../../../../../utils/coinCheck';
 import logger from '../../../../../utils/logger';
 
 import Device from './formStepComponents/Device';
@@ -27,10 +30,17 @@ const WalletReceive = () => {
     useReceiveTransactionContext();
   const { setAddCoinFormOpen, setActiveStep, setXpubMissing } =
     useAddCoinContext();
+  const { deviceConnection, supportedCoinList } = useConnection();
+  const { coinDetails } = useCurrentCoin();
 
-  const { deviceConnection } = useConnection();
+  const coinObj = COINS[coinDetails.slug];
+  const isSupported = checkCoinSupport(supportedCoinList, {
+    id: coinObj.coinListId,
+    versions: coinObj.supportedVersions
+  });
 
   const [isDeviceFlow, setDeviceFlow] = useState(!!deviceConnection);
+  const [exitFlowOnErrorClose, setExitFlowOnErrorClose] = useState(false);
 
   useEffect(() => {
     if (receiveForm) {
@@ -42,6 +52,10 @@ const WalletReceive = () => {
       logger.info('Receive address form opened');
     }
   }, [receiveForm]);
+
+  const handleSetExitFlowOnErrorClose = (value: boolean) => {
+    setExitFlowOnErrorClose(value);
+  };
 
   const handleClose = (abort?: boolean) => {
     if (abort && deviceConnection)
@@ -64,7 +78,7 @@ const WalletReceive = () => {
     setAddCoinFormOpen(true);
   };
 
-  if (isDeviceFlow)
+  if (isDeviceFlow && isSupported)
     return (
       <DialogBox
         fullWidth
@@ -83,6 +97,8 @@ const WalletReceive = () => {
             stepsData={ReceiveFormComponents}
             handleClose={handleClose}
             handleXpubMissing={handleXpubMissing}
+            exitFlowOnErrorClose={exitFlowOnErrorClose}
+            setExitFlowOnErrorClose={handleSetExitFlowOnErrorClose}
           />
         }
       />
@@ -98,7 +114,11 @@ const WalletReceive = () => {
       handleClose={handleClose}
       dialogHeading="Receive"
       restComponents={
-        <Recieve handleClose={handleClose} handleNext={handleClose} />
+        <Recieve
+          handleClose={handleClose}
+          handleNext={handleClose}
+          setExitFlowOnErrorClose={handleSetExitFlowOnErrorClose}
+        />
       }
     />
   );

@@ -166,6 +166,7 @@ const Error = (props: any) => {
               style={{ marginRight: '20px', textTransform: 'none' }}
               variant="outlined"
               onClick={handleAction || handleClose}
+              autoFocus
             >
               {actionText}
             </CustomButton>

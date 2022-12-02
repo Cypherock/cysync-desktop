@@ -2,6 +2,7 @@ import { DeviceConnection, DeviceError } from '@cypherock/communication';
 import { CardAuthenticator } from '@cypherock/protocols';
 import { useEffect, useRef, useState } from 'react';
 
+import packageJson from '../../../../package.json';
 import {
   CyError,
   CysyncError,
@@ -77,6 +78,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
   const [showRetry, setShowRetry] = useState(false);
   const [enableRetry, setEnableRetry] = useState(true);
   const [enableRetryErrorMsg, setEnableRetryErrorMsg] = useState('');
+  const sessionId = useRef<string | undefined>(undefined);
   /**
    * -2 means authentication is remaining
    * -1 means all cards failed authentication
@@ -256,16 +258,14 @@ export const useCardAuth: UseCardAuth = isInitial => {
       const temp = { ...cardsAuth };
       temp[currentCard] = 1;
       setCardsAuth(temp);
-      setTimeout(() => {
-        if (deviceConnection && firmwareVersion) {
-          handleCardAuth({
-            connection: deviceConnection,
-            sdkVersion: deviceSdkVersion,
-            cardNumber: currentCard,
-            isTestApp: inTestApp(deviceState)
-          });
-        }
-      }, 3000);
+      if (deviceConnection && firmwareVersion) {
+        handleCardAuth({
+          connection: deviceConnection,
+          sdkVersion: deviceSdkVersion,
+          cardNumber: currentCard,
+          isTestApp: inTestApp(deviceState)
+        });
+      }
     }
   }, [currentCard]);
 
@@ -310,7 +310,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
           isTestApp: inTestApp(deviceState)
         });
       }
-    }, 1000);
+    }, 500);
   };
 
   const handleCardAuth = async ({
@@ -349,7 +349,6 @@ export const useCardAuth: UseCardAuth = isInitial => {
         cyError.setError(CysyncError.CARD_AUTH_UNKNOWN_ERROR);
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName, { err }));
-      setEnableRetry(false);
     });
 
     cardAuth.on('acceptedRequest', acceptedRequest => {
@@ -369,6 +368,10 @@ export const useCardAuth: UseCardAuth = isInitial => {
 
     cardAuth.on('challengeSigned', () => {
       setProcessStatus(2);
+    });
+
+    cardAuth.on('sessionId', (id: string) => {
+      sessionId.current = id;
     });
 
     cardAuth.on('verified', (v: boolean) => {
@@ -411,12 +414,17 @@ export const useCardAuth: UseCardAuth = isInitial => {
         sdkVersion,
         firmwareVersion: hexToVersion(firmwareVersion),
         cardNumber,
-
-        isTestApp
+        isTestApp,
+        email: (JSON.parse(localStorage.getItem('allowAuthEmail')) as boolean)
+          ? localStorage.getItem('email') || undefined
+          : undefined,
+        cysyncVersion: packageJson.version,
+        grouped: isInitial,
+        sessionId: sessionId.current
       });
       setIsInFlow(false);
       logger.info('CardAuth: completed.');
-      // Solely for UI purpose, to wait and give a UX feeback
+      // Solely for UI purpose, to wait and give a UX feedback
       await sleep(1000);
       setCompleted(true);
     } catch (e) {

@@ -1,15 +1,14 @@
 import { CoinGroup, COINS } from '@cypherock/communication';
-import { Tooltip } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
-import { CysyncError } from '../../../../../../errors';
+import { CyError, CysyncError } from '../../../../../../errors';
 import { coinDb } from '../../../../../../store/database';
 import { broadcastTxn } from '../../../../../../store/hooks/flows';
 import {
@@ -39,8 +38,9 @@ const classes = {
   mainText: `${PREFIX}-mainText`,
   divider: `${PREFIX}-divider`,
   footer: `${PREFIX}-footer`,
-  deviceContinueButton: `${PREFIX}-deviceContinueButton`,
-  center: `${PREFIX}-center`
+  status: `${PREFIX}-status`,
+  center: `${PREFIX}-center`,
+  loading: `${PREFIX}-loading`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -74,23 +74,26 @@ const Root = styled('div')(({ theme }) => ({
     width: '85%',
     justifyContent: 'flex-end'
   },
-  [`& .${classes.deviceContinueButton}`]: {
-    width: '10rem',
-    height: '3rem',
+  [`& .${classes.status}`]: {
     marginTop: 15,
-    textTransform: 'none',
-    color: '#fff'
+    color: theme.palette.text.secondary
   },
   [`& .${classes.center}`]: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%'
+  },
+  [`& .${classes.loading}`]: {
+    margin: '0 10px',
+    position: 'absolute',
+    right: '1rem'
   }
 }));
 
 const Summary: React.FC<StepComponentProps> = ({
   handleNext,
+  resetFlow,
   total,
   batchRecipientData,
   maxSend,
@@ -99,6 +102,9 @@ const Summary: React.FC<StepComponentProps> = ({
 }) => {
   const [broadcastError, setBroadcastError] = useState('');
   const [advanceError, setAdvanceError] = useState('');
+  const [statusText, setStatusText] = useState(
+    'Waiting for signature from X1 wallet'
+  );
 
   const { addTxnConfirmAddressHook } = useSocket();
 
@@ -121,7 +127,7 @@ const Summary: React.FC<StepComponentProps> = ({
 
   const { addCustomAccountSyncItemFromCoin } = useSync();
 
-  const handleSend = () => {
+  const handleSend = async () => {
     setOpen(true);
     setBroadcastError('');
     setAdvanceError('');
@@ -166,29 +172,29 @@ const Summary: React.FC<StepComponentProps> = ({
             }
             if (selectedWallet.passphraseSet) {
               setBroadcastError(
-                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.\nThis may be due to incorrect passphrase.'
+                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime\nThis may be due to incorrect passphrase'
               );
             } else {
               setBroadcastError(
-                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.'
+                'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime'
               );
             }
           } else {
             setBroadcastError(
-              'Failed to broadcast the transaction. Check your internet connection and try again.'
+              'Failed to broadcast the transaction. Check your internet connection and try again'
             );
           }
         } else if (e.message) {
           setAdvanceError(e.message);
           setBroadcastError(
-            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.' +
-              selectedWallet.passphraseSet
-              ? '\nThis may be due to incorrect passphrase.'
-              : ''
+            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime' +
+              (selectedWallet.passphraseSet
+                ? '\nThis may be due to incorrect passphrase'
+                : '')
           );
         } else {
           setBroadcastError(
-            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime.'
+            'Some error occurred while broadcasting the transaction\nNo Funds have been deducted from your wallet account\nTry again in sometime'
           );
         }
         Analytics.Instance.event(
@@ -206,9 +212,22 @@ const Summary: React.FC<StepComponentProps> = ({
       coinAbbr
     );
     logger.info('Send transaction retry');
-    handleSend();
+    resetFlow();
   };
 
+  useEffect(() => {
+    if (!connected) setStatusText('');
+    else {
+      if (sendTransaction.signedTxn) {
+        setStatusText('Broadcasting transaction');
+        handleSend();
+      } else {
+        setStatusText('Waiting for signature from X1 wallet');
+      }
+    }
+  }, [connected, sendTransaction.signedTxn]);
+
+  const cyError = new CyError(CysyncError.SEND_TXN_BROADCAST_FAILED);
   return (
     <Root className={classes.root}>
       {broadcastError && (
@@ -217,6 +236,8 @@ const Summary: React.FC<StepComponentProps> = ({
           handleClose={() => handleClose(true)}
           actionText="Retry"
           handleAction={handleRetry}
+          errorObj={cyError}
+          overrideErrorObj={true}
           text={broadcastError}
           advanceText={advanceError}
           flow="Broadcasting Transaction"
@@ -294,18 +315,14 @@ const Summary: React.FC<StepComponentProps> = ({
       </div>
       <div className={classes.divider} />
       <div className={classes.footer}>
-        <Tooltip title={connected ? '' : 'No internet connection available'}>
-          <div style={{ display: 'inline-block' }}>
-            <CustomButton
-              className={classes.deviceContinueButton}
-              onClick={handleSend}
-              disabled={!sendTransaction.signedTxn || !connected}
-              autoFocus
-            >
-              Send
-            </CustomButton>
-          </div>
-        </Tooltip>
+        <Typography className={classes.status}>{statusText}</Typography>
+        {sendTransaction.signedTxn?.length > 0 || !connected || (
+          <CircularProgress
+            size={22}
+            className={classes.loading}
+            color="secondary"
+          />
+        )}
       </div>
     </Root>
   );

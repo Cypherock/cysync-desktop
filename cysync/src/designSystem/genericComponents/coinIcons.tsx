@@ -14,13 +14,13 @@ import generic from '../../../node_modules/cryptocurrency-icons/svg/color/generi
 import ltc from '../../../node_modules/cryptocurrency-icons/svg/color/ltc.svg';
 import matic from '../../../node_modules/cryptocurrency-icons/svg/color/matic.svg';
 import harmony from '../../../node_modules/cryptocurrency-icons/svg/color/one.svg';
-import solana from '../../../node_modules/cryptocurrency-icons/svg/color/sol.svg';
 import arbitrum from '../../assets/icons/arbitrum.svg';
 import btct from '../../assets/icons/btct.svg';
 import ethr from '../../assets/icons/ethr.svg';
 import ftm from '../../assets/icons/fantom.svg';
 import near from '../../assets/icons/near.svg';
 import optimism from '../../assets/icons/optimism.svg';
+import solana from '../../assets/icons/solana.png';
 
 const PREFIX = 'CoinIcons';
 

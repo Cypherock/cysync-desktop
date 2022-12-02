@@ -39,6 +39,7 @@ export interface ConnectionContextInterface {
   beforeNetworkAction: () => boolean;
   inBackgroundProcess: boolean;
   deviceSerial: string | null;
+  supportedCoinList: Array<{ id: number; version: number }>;
   setDeviceSerial: React.Dispatch<React.SetStateAction<string | null>>;
   deviceSdkVersion: string | null;
   setDeviceSdkVersion: React.Dispatch<React.SetStateAction<string | null>>;
@@ -54,6 +55,7 @@ export interface ConnectionContextInterface {
   isDeviceAvailable: boolean;
   blockConnectionPopup: boolean;
   setBlockConnectionPopup: React.Dispatch<React.SetStateAction<boolean>>;
+  inInitial: boolean;
 }
 
 export const ConnectionContext: React.Context<ConnectionContextInterface> =
@@ -92,6 +94,9 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   const [openCancelFlowPrompt, setOpenCancelFlowPrompt] = useState(false);
   const [openMisconfiguredPrompt, setOpenMisconfiguredPrompt] = useState(false);
   const [deviceSerial, setDeviceSerial] = useState<string | null>(null);
+  const [supportedCoinList, setSupportedCoinList] = useState<
+    Array<{ id: number; version: number }>
+  >([]);
   const [deviceSdkVersion, setDeviceSdkVersion] = useState<string | null>(null);
   const [isInFlow, setIsInFlow] = useState(false);
 
@@ -118,6 +123,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   );
   const [deviceState, setDeviceState] = useState<string | undefined>(undefined);
   const [inBootloader, setInBootloader] = useState(false);
+  const [inInitial, setInInitial] = useState(false);
   const [isDeviceNotReady, setIsDeviceNotReady] = useState(false);
   const [isDeviceNotReadyCheck, setIsDeviceNotReadyCheck] = useState(false);
 
@@ -142,6 +148,11 @@ export const ConnectionProvider: React.FC = ({ children }) => {
   useEffect(() => {
     latestDeviceConnection.current = internalDeviceConnection;
   }, [internalDeviceConnection]);
+
+  useEffect(() => {
+    if (deviceState === '01') setInInitial(true);
+    else setInInitial(false);
+  }, [deviceState]);
 
   useEffect(() => {
     checkForConnection(newStatus => {
@@ -183,7 +194,8 @@ export const ConnectionProvider: React.FC = ({ children }) => {
           setIsInFlow,
           setFirmwareVersion,
           setDeviceSerial,
-          setSdkVersion: setDeviceSdkVersion
+          setSdkVersion: setDeviceSdkVersion,
+          setSupportedCoinList
         });
       } else {
         logger.info('Trigger partial check for device');
@@ -193,7 +205,8 @@ export const ConnectionProvider: React.FC = ({ children }) => {
           setIsInFlow,
           setFirmwareVersion,
           setDeviceSerial,
-          setSdkVersion: setDeviceSdkVersion
+          setSdkVersion: setDeviceSdkVersion,
+          setSupportedCoinList
         });
       }
     } else {
@@ -313,6 +326,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         logger.info('Device connection established in initial application', {
           firmwareVersion,
           deviceSerial,
+          supportedCoinList,
           inBootloader,
           deviceState
         });
@@ -420,6 +434,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
       logger.info('Authenticated Device connection established', {
         firmwareVersion,
         deviceSerial,
+        supportedCoinList,
         inBootloader,
         deviceState
       });
@@ -567,6 +582,7 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         beforeNetworkAction,
         inBackgroundProcess,
         deviceSerial,
+        supportedCoinList,
         setDeviceSerial,
         deviceSdkVersion,
         setDeviceSdkVersion,
@@ -583,7 +599,8 @@ export const ConnectionProvider: React.FC = ({ children }) => {
         setBlockNewConnection: externalSetBlockNewConnection,
         isDeviceAvailable: deviceConnectionStatus,
         setBlockConnectionPopup,
-        blockConnectionPopup
+        blockConnectionPopup,
+        inInitial
       }}
     >
       {children}
