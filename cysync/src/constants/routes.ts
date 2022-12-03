@@ -26,6 +26,9 @@ const routes = {
   },
   tutorial: {
     index: '/tutorial'
+  },
+  swap: {
+    index: '/swap'
   }
 };
 
