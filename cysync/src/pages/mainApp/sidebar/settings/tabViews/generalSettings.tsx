@@ -208,6 +208,8 @@ const GeneralSettings = () => {
         <Button
           className={classes.button}
           onClick={() => {
+            localStorage.setItem('allowAuthEmail', JSON.stringify(true));
+            setAllowAuthEmail(true);
             setRemoveEmail(false);
             setEmailText(localStorage.getItem('email') || '');
             setSetEmailDialog(true);
