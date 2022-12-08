@@ -9,6 +9,7 @@ import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ICONS from '../../../../../designSystem/iconGroups/iconConstants';
 import { useConnection, useCurrentCoin } from '../../../../../store/provider';
 import { checkCoinSupport } from '../../../../../utils/coinCheck';
+import prevent from '../../../../../utils/preventPropagation';
 
 const classesFromPrefix = (PREFIX: string) => {
   return {
@@ -69,7 +70,13 @@ const SendButton: React.FC<SendButtonProps> = ({
             [classes.grey]: isDisabled,
             [classes.actionButton]: true
           })}
-          onClick={handleSendFormOpen}
+          onClick={
+            !isDisabled
+              ? handleSendFormOpen
+              : e => {
+                  prevent(e);
+                }
+          }
           startIcon={
             <Icon
               className={clsx(classes.icon, classes.actionButtonIcon)}
