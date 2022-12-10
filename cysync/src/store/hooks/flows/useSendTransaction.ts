@@ -18,6 +18,7 @@ import {
 import { TransactionSender, WalletStates } from '@cypherock/protocols';
 import Server from '@cypherock/server-wrapper';
 import { WalletError, WalletErrorType } from '@cypherock/wallet';
+import bech32 from 'bech32';
 import BigNumber from 'bignumber.js';
 import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
@@ -34,6 +35,7 @@ import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { addressDb, coinDb, transactionDb } from '../../database';
 import { useStatusCheck } from '../../provider/transactionStatusProvider';
+import { DisplayCoin } from '../types';
 
 import * as flowHandlers from './handlers';
 
@@ -142,8 +144,8 @@ export const broadcastTxn = async (
   }
 };
 
-export const verifyAddress = (address: string, coin: string) => {
-  const coinDetails = COINS[coin];
+export const verifyAddress = (address: string, coin: DisplayCoin) => {
+  const coinDetails = COINS[coin.slug];
 
   if (!coinDetails) {
     throw new Error(`Cannot find coin details for coin: ${coin}`);
@@ -156,9 +158,19 @@ export const verifyAddress = (address: string, coin: string) => {
     return regexImplicit.test(address) || regexRegistered.test(address);
   }
 
+  if (coinDetails.coinListId === 0xe && address.startsWith('one1')) {
+    try {
+      const {prefix} = bech32.decode(address);
+      return (prefix === 'one');
+    } catch (e) {
+      return false;
+    }
+  }
+  const validatorCoinName = coinDetails.group === CoinGroup.Ethereum ? 'eth' : coinDetails.validatorCoinName;
+
   return WAValidator.validate(
     address,
-    coinDetails.validatorCoinName,
+    validatorCoinName,
     coinDetails.validatorNetworkType
   );
 };
