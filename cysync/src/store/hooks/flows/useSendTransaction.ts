@@ -160,13 +160,16 @@ export const verifyAddress = (address: string, coin: DisplayCoin) => {
 
   if (coinDetails.coinListId === 0xe && address.startsWith('one1')) {
     try {
-      const {prefix} = bech32.decode(address);
-      return (prefix === 'one');
+      const { prefix } = bech32.decode(address);
+      return prefix === 'one';
     } catch (e) {
       return false;
     }
   }
-  const validatorCoinName = coinDetails.group === CoinGroup.Ethereum ? 'eth' : coinDetails.validatorCoinName;
+  const validatorCoinName =
+    coinDetails.group === CoinGroup.Ethereum
+      ? 'eth'
+      : coinDetails.validatorCoinName;
 
   return WAValidator.validate(
     address,

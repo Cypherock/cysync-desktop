@@ -73,7 +73,7 @@ export const getRequestsMetadata = (
 
   if (coin instanceof EthCoinData) {
     let address = generateEthAddressFromXpub(item.xpub);
-    if (coin.coinListId === 0x0E) address = formatHarmonyAddress(address);
+    if (coin.coinListId === 0x0e) address = formatHarmonyAddress(address);
 
     const ethTxnMetadata = ethServer.transaction
       .getHistory(
@@ -276,7 +276,7 @@ export const processResponses = async (
 
     let address = generateEthAddressFromXpub(item.xpub);
     // API always return bech32 addresses
-    if (coinData.coinListId === 0x0E) address = formatHarmonyAddress(address);
+    if (coinData.coinListId === 0x0e) address = formatHarmonyAddress(address);
     const rawHistory = responses[0].data?.result;
     const moreParent = responses[0].data?.more;
 
