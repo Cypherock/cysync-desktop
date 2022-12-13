@@ -10,7 +10,8 @@ import {
   SnackbarProvider,
   SocketProvider,
   SyncProvider,
-  TutorialProvider
+  TutorialProvider,
+  UpdateProvider
 } from '.';
 import { TransactionStatusProvider } from './transactionStatusProvider';
 
@@ -27,7 +28,7 @@ const GlobalProvider = ({ children }: any) => {
                   <SocketProvider>
                     <FeedbackProvider>
                       <TransactionStatusProvider>
-                        {children}
+                        <UpdateProvider>{children}</UpdateProvider>
                       </TransactionStatusProvider>
                     </FeedbackProvider>
                   </SocketProvider>

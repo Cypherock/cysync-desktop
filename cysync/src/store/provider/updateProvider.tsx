@@ -16,6 +16,8 @@ export interface UpdateContextInterface {
   appUpdateVersion: string;
   isDeviceUpdateAvailable: boolean;
   deviceVersion: string;
+  downloadUpdate: () => void;
+  installUpdate: () => void;
 }
 
 export const UpdateContext: React.Context<UpdateContextInterface> =
@@ -41,9 +43,12 @@ export const UpdateProvider = ({ children }: any) => {
 
   const { connected } = useNetwork();
 
-  // Allow app update only on linux
-  const allowAppUpdate = () => {
-    return process.platform === 'linux';
+  const downloadUpdate = () => {
+    ipcRenderer.send('start-update');
+  };
+
+  const installUpdate = () => {
+    ipcRenderer.send('install-update');
   };
 
   const onUpdateUnavailable = () => {
@@ -61,13 +66,30 @@ export const UpdateProvider = ({ children }: any) => {
     setIsPersistentAppOpen(true);
   };
 
+  const onUpdateDownloadProgress = (_event: any, _info: any) => {
+    setAppState(2);
+    setIsPersistentAppOpen(true);
+  };
+
+  const onUpdateDownloaded = (_event: any, _info: any) => {
+    setAppState(3);
+    setIsPersistentAppOpen(true);
+  };
+
   useEffect(() => {
     ipcRenderer.on('update-unavailable', onUpdateUnavailable);
     ipcRenderer.on('update-available', onUpdateAvailable);
+    ipcRenderer.on('update-download-progress', onUpdateDownloadProgress);
+    ipcRenderer.on('update-downloaded', onUpdateDownloaded);
 
     return () => {
       ipcRenderer.removeListener('update-unavailable', onUpdateUnavailable);
       ipcRenderer.removeListener('update-available', onUpdateAvailable);
+      ipcRenderer.removeListener(
+        'update-download-progress',
+        onUpdateDownloadProgress
+      );
+      ipcRenderer.removeListener('update-downloaded', onUpdateDownloaded);
     };
   }, []);
 
@@ -92,13 +114,8 @@ export const UpdateProvider = ({ children }: any) => {
 
   useEffect(() => {
     if (connected) {
-      if (allowAppUpdate()) {
-        logger.info('Checking for app update');
-        ipcRenderer.send('check-for-update');
-      } else {
-        logger.info('Checking for auto update');
-        ipcRenderer.send('check-auto-update');
-      }
+      logger.info('Sending update event: ' + new Date().getTime());
+      ipcRenderer.send('check-for-update');
 
       logger.info('Checking for device update');
       checkDeviceUpdate();
@@ -115,7 +132,9 @@ export const UpdateProvider = ({ children }: any) => {
         setIsPersistentAppOpen,
         appUpdateVersion,
         isDeviceUpdateAvailable,
-        deviceVersion
+        deviceVersion,
+        downloadUpdate,
+        installUpdate
       }}
     >
       {children}

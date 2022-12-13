@@ -1,91 +1,130 @@
+import UpdateIcon from '@mui/icons-material/Update';
+import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import Button from '../../../../designSystem/designComponents/buttons/button';
-
 const PREFIX = 'UpdaterAppPersistent';
 
 const classes = {
+  show: `${PREFIX}-show`,
   content: `${PREFIX}-content`,
+  innerContainer: `${PREFIX}-innerContainer`,
   button: `${PREFIX}-button`
 };
 
-const Root = styled('div')(({ theme }) => ({
-  position: 'fixed',
-  top: 0,
-  left: '50%',
-  transform: 'translateX(-50%)',
+const Root = styled(Grid)(() => ({
+  width: '100%',
   display: 'flex',
   justifyContent: 'center',
+  transition: 'height 0.3s',
+  height: '0px',
+  [`&.${classes.show}`]: {
+    height: '35px'
+  },
   [`& .${classes.content}`]: {
-    maxWidth: '800px',
-    padding: '15px',
+    boxSizing: 'border-box',
+    borderRadius: '0',
+    width: '100%',
+    height: '35px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    backgroundColor: '#F57F16'
+  },
+  [`& .${classes.innerContainer}`]: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   [`& .${classes.button}`]: {
-    background: '#71624C',
-    color: theme.palette.text.primary,
+    background: 'none',
+    color: '#fff',
     textTransform: 'none',
-    padding: '0.5rem 1.5rem',
-    marginLeft: '1rem',
-    '&:hover': {
-      background: theme.palette.secondary.dark
-    }
+    padding: '5px',
+    marginLeft: '4px',
+    fontSize: '13px',
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    fontWeight: 'bold'
   }
 }));
 
 interface PersistentInfoProps {
+  show: boolean;
   state: number;
-  showPopup: () => void;
-  close: () => void;
+  downloadUpdate: () => void;
+  installUpdate: () => void;
+  version: string;
 }
 
 const PersistentInfo: React.FC<PersistentInfoProps> = ({
   state,
-  showPopup,
-  close
+  downloadUpdate,
+  installUpdate,
+  version,
+  show
 }) => {
   const getText = () => {
     switch (state) {
       case 0:
-        return 'Checking for update';
+        return null;
       case 1:
-        return 'Update is available';
+        return (
+          <>
+            <UpdateIcon sx={{ color: 'white', mr: 2 }} />
+            Latest version {version} is available.{' '}
+            <div onClick={downloadUpdate} className={classes.button}>
+              Update Available
+            </div>
+          </>
+        );
+      case 2:
+        return (
+          <>
+            <UpdateIcon sx={{ color: 'white', mr: 2 }} />
+            Latest version {version} is available.{' '}
+            <div className={classes.button}>Downloading...</div>
+          </>
+        );
+      case 3:
+        return (
+          <>
+            <UpdateIcon sx={{ color: 'white', mr: 2 }} />
+            Latest version {version} is available.{' '}
+            <div onClick={installUpdate} className={classes.button}>
+              Downloaded, Install Now
+            </div>
+          </>
+        );
       default:
         return null;
     }
   };
 
+  const content = getText();
+
+  if (!content) return null;
+
   return (
-    <Root>
+    <Root container className={show && classes.show}>
       <Paper className={classes.content}>
-        <Typography variant="subtitle1">{getText()}</Typography>
-        {state === 0 ? null : (
-          <Button onClick={showPopup} style={{ marginLeft: '30px' }}>
-            SHOW
-          </Button>
-        )}
-        <Button
-          color="secondary"
-          onClick={close}
-          style={{ marginLeft: '20px' }}
-        >
-          Close
-        </Button>
+        <Typography color="white" variant="body1" sx={{ fontSize: '13px' }}>
+          <div className={classes.innerContainer}>{content}</div>
+        </Typography>
       </Paper>
     </Root>
   );
 };
 
 PersistentInfo.propTypes = {
+  show: PropTypes.bool.isRequired,
   state: PropTypes.number.isRequired,
-  showPopup: PropTypes.func.isRequired,
-  close: PropTypes.func.isRequired
+  downloadUpdate: PropTypes.func.isRequired,
+  installUpdate: PropTypes.func.isRequired,
+  version: PropTypes.string.isRequired
 };
 
 export default PersistentInfo;

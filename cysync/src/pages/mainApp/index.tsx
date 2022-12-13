@@ -5,7 +5,7 @@ import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
 import RouteLinks from '../../constants/routes';
-import { UpdateProvider, WalletsProvider } from '../../store/provider';
+import { useUpdater, WalletsProvider } from '../../store/provider';
 
 import DbCleanup from './dbCleanup';
 import DeviceUpdater from './deviceUpdater';
@@ -24,6 +24,7 @@ const classes = {
   root: `${PREFIX}-root`,
   navbar: `${PREFIX}-navbar`,
   content: `${PREFIX}-content`,
+  contentWithUpdater: `${PREFIX}-contentWithUpdater`,
   contentChild: `${PREFIX}-contentChild`,
   sideBarMain: `${PREFIX}-sideBarMain`,
   dialogHeading: `${PREFIX}-dialogHeading`,
@@ -49,7 +50,12 @@ const StyledGrid = styled(Grid)(({ theme }) => ({
   },
 
   [`& .${classes.content}`]: {
+    transition: 'height 0.3s',
     height: 'calc(100% - 60px)'
+  },
+
+  [`& .${classes.contentWithUpdater}`]: {
+    height: 'calc(100% - 95px)'
   },
 
   [`& .${classes.contentChild}`]: {
@@ -99,61 +105,62 @@ const StyledGrid = styled(Grid)(({ theme }) => ({
 }));
 
 const MainApp: React.FC = () => {
+  const { isPersistentAppOpen } = useUpdater();
   return (
     <HashRouter>
       <WalletsProvider>
-        <UpdateProvider>
-          <StyledGrid container className={classes.root}>
-            <Grid container className={classes.navbar}>
-              <Navbar />
-            </Grid>
+        <StyledGrid container className={classes.root}>
+          <Updater />
+          <Grid container className={classes.navbar}>
+            <Navbar />
+          </Grid>
+          <Grid
+            container
+            justifyContent="center"
+            alignItems="center"
+            className={
+              isPersistentAppOpen ? classes.contentWithUpdater : classes.content
+            }
+          >
             <Grid
-              container
-              justifyContent="center"
-              alignItems="center"
-              className={classes.content}
+              xs={2}
+              item
+              className={clsx(classes.contentChild, classes.sideBarMain)}
             >
-              <Grid
-                xs={2}
-                item
-                className={clsx(classes.contentChild, classes.sideBarMain)}
-              >
-                <Sidebar />
-              </Grid>
-              <Grid item xs={10} className={classes.contentChild}>
-                <Routes>
-                  <Route
-                    path={RouteLinks.wallet.index + '/*'}
-                    element={<Wallet />}
-                  />
-
-                  <Route
-                    path={RouteLinks.transactions.index}
-                    element={<Transaction />}
-                  />
-
-                  <Route
-                    path={RouteLinks.tutorial.index}
-                    element={<Tutorial />}
-                  />
-
-                  <Route
-                    path={RouteLinks.settings.index + '/*'}
-                    element={<Settings />}
-                  />
-
-                  <Route
-                    path={RouteLinks.portfolio.index}
-                    element={<Portfolio />}
-                  />
-                </Routes>
-              </Grid>
+              <Sidebar />
             </Grid>
-            <Updater />
-            <DeviceUpdater />
-            <DbCleanup />
-          </StyledGrid>
-        </UpdateProvider>
+            <Grid item xs={10} className={classes.contentChild}>
+              <Routes>
+                <Route
+                  path={RouteLinks.wallet.index + '/*'}
+                  element={<Wallet />}
+                />
+
+                <Route
+                  path={RouteLinks.transactions.index}
+                  element={<Transaction />}
+                />
+
+                <Route
+                  path={RouteLinks.tutorial.index}
+                  element={<Tutorial />}
+                />
+
+                <Route
+                  path={RouteLinks.settings.index + '/*'}
+                  element={<Settings />}
+                />
+
+                <Route
+                  path={RouteLinks.portfolio.index}
+                  element={<Portfolio />}
+                />
+              </Routes>
+            </Grid>
+          </Grid>
+          <DeviceUpdater />
+          <DbCleanup />
+        </StyledGrid>
       </WalletsProvider>
     </HashRouter>
   );
