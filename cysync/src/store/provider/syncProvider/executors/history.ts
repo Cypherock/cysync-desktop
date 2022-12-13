@@ -272,7 +272,10 @@ export const processResponses = async (
     const history: Transaction[] = [];
     const erc20Tokens = new Set<string>();
 
-    const address = generateEthAddressFromXpub(item.xpub, item.coinType);
+    const address = generateEthAddressFromXpub(
+      item.xpub,
+      item.coinType
+    ).toLowerCase();
     const rawHistory = responses[0].data?.result;
     const moreParent = responses[0].data?.more;
 
@@ -288,8 +291,8 @@ export const processResponses = async (
         new BigNumber(ele.gasUsed || 0)
       );
 
-      const fromAddr = ele.from;
-      const toAddr = ele.to;
+      const fromAddr = ele.from.toLowerCase();
+      const toAddr = ele.to.toLowerCase();
       const selfTransfer = fromAddr === toAddr;
       const amount = String(ele.value || 0);
 
