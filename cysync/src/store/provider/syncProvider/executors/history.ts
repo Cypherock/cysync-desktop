@@ -16,7 +16,6 @@ import {
 } from '@cypherock/server-wrapper';
 import {
   formatEthAddress,
-  formatHarmonyAddress,
   generateEthAddressFromXpub,
   generateSolanaAddressFromXpub,
   getEthAmountFromInput
@@ -72,8 +71,7 @@ export const getRequestsMetadata = (
   }
 
   if (coin instanceof EthCoinData) {
-    let address = generateEthAddressFromXpub(item.xpub);
-    if (coin.coinListId === 0x0e) address = formatHarmonyAddress(address);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinType);
 
     const ethTxnMetadata = ethServer.transaction
       .getHistory(
@@ -274,9 +272,7 @@ export const processResponses = async (
     const history: Transaction[] = [];
     const erc20Tokens = new Set<string>();
 
-    let address = generateEthAddressFromXpub(item.xpub);
-    // API always return bech32 addresses
-    if (coinData.coinListId === 0x0e) address = formatHarmonyAddress(address);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinType);
     const rawHistory = responses[0].data?.result;
     const moreParent = responses[0].data?.more;
 

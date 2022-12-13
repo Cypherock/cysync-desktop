@@ -5,10 +5,7 @@ import {
   EthCoinData,
   SolanaCoinData
 } from '@cypherock/communication';
-import {
-  formatHarmonyAddress,
-  generateEthAddressFromXpub
-} from '@cypherock/wallet';
+import { generateEthAddressFromXpub } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../../../utils/logger';
@@ -196,9 +193,7 @@ export const insertFromFullTxn = async (transaction: {
     await transactionDb.insert(newTxn);
   } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
-    let myAddress = generateEthAddressFromXpub(xpub);
-    if (coin.coinListId === 0x0e) myAddress = formatHarmonyAddress(myAddress);
-
+    const myAddress = generateEthAddressFromXpub(xpub, coinType.toLowerCase());
     const amount = new BigNumber(txn.value);
     const fromAddr = txn.from;
     const inputs: InputOutput[] = [
@@ -523,8 +518,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
     return [newTxn];
   } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
-    let myAddress = generateEthAddressFromXpub(xpub);
-    if (coin.coinListId === 0x0e) myAddress = formatHarmonyAddress(myAddress);
+    const myAddress = generateEthAddressFromXpub(xpub, coinType.toLowerCase());
     let feeTxn: Transaction;
 
     const amount = new BigNumber(txn.value);

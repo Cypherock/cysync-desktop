@@ -158,7 +158,10 @@ export const verifyAddress = (address: string, coin: DisplayCoin) => {
     return regexImplicit.test(address) || regexRegistered.test(address);
   }
 
-  if (coinDetails.coinListId === 0xe && address.startsWith('one1')) {
+  if (
+    coinDetails.coinListId === COINS.one.coinListId &&
+    address.startsWith('one1')
+  ) {
     try {
       const { prefix } = bech32.decode(address);
       return prefix === 'one';
