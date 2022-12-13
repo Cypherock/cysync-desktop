@@ -283,11 +283,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
     for (const recipient of recipientData) {
       const { recipient: recipient1, id } = recipient;
-      const { slug } = coinDetails;
 
       let addressValid;
       if (skipEmpty && recipient1.trim().length === 0) addressValid = true;
-      else addressValid = verifyAddress(recipient1.trim(), slug);
+      else addressValid = verifyAddress(recipient1.trim(), coinDetails);
 
       if (!addressValid) {
         isValid = false;
