@@ -156,7 +156,12 @@ const SelectCoin: React.FC<StepComponentProps> = ({
     if (!allCoinSelected) {
       const newState = coins;
       for (const coin of newState) {
-        coin[2] = !coinsPresent.includes(coin[0]);
+        coin[2] =
+          !coinsPresent.includes(coin[0]) &&
+          checkCoinSupport(supportedCoinList, {
+            id: coin[3],
+            versions: coin[4]
+          });
       }
       setCoins([...newState]);
       setContinueDisabled(false);
@@ -183,7 +188,13 @@ const SelectCoin: React.FC<StepComponentProps> = ({
     let allSelectedFlag = true;
     let noCoinSelected = true;
     newState.forEach(coin => {
-      if (!coin[2]) {
+      if (
+        !coin[2] &&
+        checkCoinSupport(supportedCoinList, {
+          id: coin[3],
+          versions: coin[4]
+        })
+      ) {
         if (!coinsPresent.includes(coin[0])) allSelectedFlag = false;
       } else noCoinSelected = false;
     });
