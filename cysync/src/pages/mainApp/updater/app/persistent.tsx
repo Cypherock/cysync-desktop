@@ -77,7 +77,7 @@ const PersistentInfo: React.FC<PersistentInfoProps> = ({
             <UpdateIcon sx={{ color: 'white', mr: 2 }} />
             Latest version {version} is available.{' '}
             <div onClick={downloadUpdate} className={classes.button}>
-              Update Available
+              Download Now
             </div>
           </>
         );

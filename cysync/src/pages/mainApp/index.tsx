@@ -5,7 +5,11 @@ import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
 import RouteLinks from '../../constants/routes';
-import { useUpdater, WalletsProvider } from '../../store/provider';
+import {
+  ReleaseNotesProvider,
+  useUpdater,
+  WalletsProvider
+} from '../../store/provider';
 
 import DbCleanup from './dbCleanup';
 import DeviceUpdater from './deviceUpdater';
@@ -109,58 +113,62 @@ const MainApp: React.FC = () => {
   return (
     <HashRouter>
       <WalletsProvider>
-        <StyledGrid container className={classes.root}>
-          <Updater />
-          <Grid container className={classes.navbar}>
-            <Navbar />
-          </Grid>
-          <Grid
-            container
-            justifyContent="center"
-            alignItems="center"
-            className={
-              isPersistentAppOpen ? classes.contentWithUpdater : classes.content
-            }
-          >
+        <ReleaseNotesProvider>
+          <StyledGrid container className={classes.root}>
+            <Updater />
+            <Grid container className={classes.navbar}>
+              <Navbar />
+            </Grid>
             <Grid
-              xs={2}
-              item
-              className={clsx(classes.contentChild, classes.sideBarMain)}
+              container
+              justifyContent="center"
+              alignItems="center"
+              className={
+                isPersistentAppOpen
+                  ? classes.contentWithUpdater
+                  : classes.content
+              }
             >
-              <Sidebar />
+              <Grid
+                xs={2}
+                item
+                className={clsx(classes.contentChild, classes.sideBarMain)}
+              >
+                <Sidebar />
+              </Grid>
+              <Grid item xs={10} className={classes.contentChild}>
+                <Routes>
+                  <Route
+                    path={RouteLinks.wallet.index + '/*'}
+                    element={<Wallet />}
+                  />
+
+                  <Route
+                    path={RouteLinks.transactions.index}
+                    element={<Transaction />}
+                  />
+
+                  <Route
+                    path={RouteLinks.tutorial.index}
+                    element={<Tutorial />}
+                  />
+
+                  <Route
+                    path={RouteLinks.settings.index + '/*'}
+                    element={<Settings />}
+                  />
+
+                  <Route
+                    path={RouteLinks.portfolio.index}
+                    element={<Portfolio />}
+                  />
+                </Routes>
+              </Grid>
             </Grid>
-            <Grid item xs={10} className={classes.contentChild}>
-              <Routes>
-                <Route
-                  path={RouteLinks.wallet.index + '/*'}
-                  element={<Wallet />}
-                />
-
-                <Route
-                  path={RouteLinks.transactions.index}
-                  element={<Transaction />}
-                />
-
-                <Route
-                  path={RouteLinks.tutorial.index}
-                  element={<Tutorial />}
-                />
-
-                <Route
-                  path={RouteLinks.settings.index + '/*'}
-                  element={<Settings />}
-                />
-
-                <Route
-                  path={RouteLinks.portfolio.index}
-                  element={<Portfolio />}
-                />
-              </Routes>
-            </Grid>
-          </Grid>
-          <DeviceUpdater />
-          <DbCleanup />
-        </StyledGrid>
+            <DeviceUpdater />
+            <DbCleanup />
+          </StyledGrid>
+        </ReleaseNotesProvider>
       </WalletsProvider>
     </HashRouter>
   );
