@@ -107,8 +107,8 @@ const TermsAndUse: React.FC<TermsAndUseProps> = ({ handleNext }) => {
             Overview
           </Typography>
           <Typography color="textPrimary">
-            This agreement is between you (“you”, “your”, or “User”) and Faucet
-            Labs Private Limited (“Cypherock”, “us”, “we,&apos;&apos; “our”, or
+            This agreement is between you (“you”, “your”, or “User”) and HODL
+            Tech Private Limited (“Cypherock”, “us”, “we,&apos;&apos; “our”, or
             the “Company”). By using or clicking “I agree” to any of the
             services provided by Cypherock or its affiliates in connection with
             the Cypherock CySync software (the “Cypherock Services”), you agree
