@@ -377,8 +377,8 @@ export const processResponses = async (
 
     for (const ele of erc20history) {
       const tokenObj = coinData.tokenList[ele.tokenSymbol.toLowerCase()];
-      const fromAddr = formatEthAddress(ele.from);
-      const toAddr = formatEthAddress(ele.to);
+      const fromAddr = formatEthAddress(ele.from).toLowerCase();
+      const toAddr = formatEthAddress(ele.to).toLowerCase();
       const selfTransfer = fromAddr === toAddr;
       const amount = String(ele.value || 0);
 
