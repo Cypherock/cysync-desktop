@@ -58,12 +58,15 @@ const Root = styled('div')(({ theme }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginRight: '9px'
   },
   [`& .${classes.coinContainer}`]: {
     display: 'flex',
     width: '100%',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    maxHeight: '450px',
+    overflowY: 'auto'
   },
   [`& .${classes.coinItem}`]: {
     display: 'flex',
