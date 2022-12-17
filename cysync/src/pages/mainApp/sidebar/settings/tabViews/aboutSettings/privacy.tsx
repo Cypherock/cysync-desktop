@@ -27,7 +27,7 @@ const Privacy: React.FC<PrivacyProps> = ({ open, handleClose }) => {
             <br />
             <br />
             <Typography color="textPrimary" gutterBottom>
-              Cypherock (hereinafter &quot;Cypherock&quot; or &quot;Faucet Labs
+              Cypherock (hereinafter &quot;Cypherock&quot; or &quot;HODL Tech
               Private Limited&quot; or &quot;we&quot; ) regards as of paramount
               importance the protection and security of information about you.
               The purpose of this Privacy Policy is to inform you about how we
@@ -84,10 +84,9 @@ const Privacy: React.FC<PrivacyProps> = ({ open, handleClose }) => {
             </Typography>
             <Typography color="textPrimary" gutterBottom>
               The processing of any personal data provided or collected on the
-              Website is carried out under the supervision of Cypherock (Faucet
-              Labs Pvt. Limited) whose head office is located at Kh.No. 485,
-              Shahbad Daulatpur Landmark - Near Rana Pub School DELHI North
-              ,West,Delhi,India,110042
+              Website is carried out under the supervision of Cypherock (HODL
+              Tech Private Limited) whose head office is located at 68 Circular
+              Road, #02-01, 049422, Singapore
             </Typography>
             <br />
             <Typography variant="h5" color="textPrimary" gutterBottom>
@@ -563,7 +562,7 @@ const Privacy: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               MISCELLANEOUS
             </Typography>
             <Typography color="textPrimary">
-              24. If a court or competent authority considers that any provision
+              22. If a court or competent authority considers that any provision
               of this Privacy Policy (or any part thereof) is invalid, illegal
               or unenforceable, that provision or relevant part of the provision
               will, to the extent required, be deemed to be deleted. The
@@ -572,13 +571,13 @@ const Privacy: React.FC<PrivacyProps> = ({ open, handleClose }) => {
             </Typography>
             <br />
             <Typography color="textPrimary">
-              25. Unless otherwise agreed, no delay, act or omission by a party
+              23. Unless otherwise agreed, no delay, act or omission by a party
               in exercising a right or remedy will be deemed a waiver of such
               right, or of another right or remedy.
             </Typography>
             <br />
             <Typography color="textPrimary">
-              26. This Privacy Policy will be governed by and interpreted
+              24. This Privacy Policy will be governed by and interpreted
               according to French law. Any dispute arising out of this Privacy
               Policy will be subject to the exclusive jurisdiction of the French
               courts.
@@ -589,7 +588,7 @@ const Privacy: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               OUR COMMITMENT TO YOUR PRIVACY
             </Typography>
             <Typography color="textPrimary">
-              27. We can assure you that we comply with the GDPR and that we
+              25. We can assure you that we comply with the GDPR and that we
               process your Data lawfully, fairly and transparently.
               <br />
               We take confidentiality and privacy issues very seriously. We
@@ -604,7 +603,7 @@ const Privacy: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               CHANGES TO THIS PRIVACY POLICY
             </Typography>
             <Typography color="textPrimary">
-              28. We reserve the right to make changes to this Privacy Policy as
+              26. We reserve the right to make changes to this Privacy Policy as
               we deem necessary from time to time or as may be required by law.
               All changes will be posted immediately on our Website and you are
               deemed to have accepted the new terms of the Privacy Policy when
@@ -612,27 +611,25 @@ const Privacy: React.FC<PrivacyProps> = ({ open, handleClose }) => {
             </Typography>
             <br />
             <Typography color="textPrimary">
-              29. If our company is the subject of a corporate transaction such
+              27. If our company is the subject of a corporate transaction such
               as an acquisition or merger with another company, your information
               may be transferred to the new owners so that we can continue to
               sell our products to you.
             </Typography>
             <br />
             <Typography color="textPrimary">
-              30. In the above cases, we will take steps to protect your
+              28. In the above cases, we will take steps to protect your
               privacy.
             </Typography>
             <br />
             <Typography color="textPrimary">
-              <span>Faucet Labs </span>
+              <span>HODL Tech Private Limited</span>
               <br />
-              <span>Kh.No. 485, </span>
+              <span>#02-01, 049422,</span>
               <br />
-              <span>Shahbad Daulatpur </span>
+              <span>68 Circular Road,</span>
               <br />
-              <span>Landmark - Near Rana Pub School DELHI North, </span>
-              <br />
-              <span>West,Delhi,India,110042 </span>
+              <span>Singapore</span>
             </Typography>
             <br />
             <br />

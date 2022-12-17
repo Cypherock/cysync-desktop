@@ -475,6 +475,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         if (e.target.name === 'amount') {
           if (Number(e.target.value) >= 0 || e.target.value === '') {
             dataCopy.amount = e.target.value;
+            dataCopy.errorAmount = '';
           }
         }
       }
@@ -626,6 +627,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const externalSetMaxSend = (val: boolean) => {
     if (val) {
       sendTransaction.setIsEstimatingFees(true);
+      addbatchRecipientData(
+        batchRecipientData.map(elem => ({ ...elem, errorAmount: '' }))
+      );
     }
     setMaxSend(val);
   };
