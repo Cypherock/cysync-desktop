@@ -5,10 +5,10 @@ import {
   serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 
+import { ExecutionResult } from '../../../hooks';
 import { LatestPriceSyncItem, SyncQueueItem } from '../types';
 
 import {
-  ExecutionResult,
   getAllMetadata,
   getAllProcessResponses,
   getClientResponses,
@@ -58,7 +58,7 @@ const getLatestPriceMetadata = (
 export const executeLatestPriceBatch = async (
   items: LatestPriceSyncItem[],
   options: OptionParams
-): Promise<ExecutionResult[]> => {
+): Promise<Array<ExecutionResult<SyncQueueItem>>> => {
   if (items.length <= 0) return [];
 
   const metadata = getLatestPriceMetadata(items);
@@ -81,7 +81,7 @@ export const executeLatestPriceBatch = async (
     }
   } catch (error) {
     return allMetadataInfo.map(elem => {
-      const result: ExecutionResult = {
+      const result: ExecutionResult<SyncQueueItem> = {
         item: elem.item,
         isFailed: true,
         canRetry: !elem.isFailed,

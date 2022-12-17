@@ -3,17 +3,24 @@ import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import React from 'react';
 
+import avax from '../../../node_modules/cryptocurrency-icons/svg/color/avax.svg';
+import bsc from '../../../node_modules/cryptocurrency-icons/svg/color/bnb.svg';
 import btc from '../../../node_modules/cryptocurrency-icons/svg/color/btc.svg';
 import dash from '../../../node_modules/cryptocurrency-icons/svg/color/dash.svg';
 import doge from '../../../node_modules/cryptocurrency-icons/svg/color/doge.svg';
+import etc from '../../../node_modules/cryptocurrency-icons/svg/color/etc.svg';
 import eth from '../../../node_modules/cryptocurrency-icons/svg/color/eth.svg';
 import generic from '../../../node_modules/cryptocurrency-icons/svg/color/generic.svg';
 import ltc from '../../../node_modules/cryptocurrency-icons/svg/color/ltc.svg';
-import solana from '../../../node_modules/cryptocurrency-icons/svg/color/sol.svg';
+import matic from '../../../node_modules/cryptocurrency-icons/svg/color/matic.svg';
+import harmony from '../../../node_modules/cryptocurrency-icons/svg/color/one.svg';
+import arbitrum from '../../assets/icons/arbitrum.svg';
 import btct from '../../assets/icons/btct.svg';
 import ethr from '../../assets/icons/ethr.svg';
-import matic from '../../assets/icons/matic.svg';
+import ftm from '../../assets/icons/fantom.svg';
 import near from '../../assets/icons/near.svg';
+import optimism from '../../assets/icons/optimism.svg';
+import solana from '../../assets/icons/solana.png';
 
 const PREFIX = 'CoinIcons';
 
@@ -159,6 +166,27 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
           break;
         case 'MATIC':
           src = matic;
+          break;
+        case 'BNB':
+          src = bsc;
+          break;
+        case 'ONE':
+          src = harmony;
+          break;
+        case 'ETC':
+          src = etc;
+          break;
+        case 'OP':
+          src = optimism;
+          break;
+        case 'AVAX':
+          src = avax;
+          break;
+        case 'FTM':
+          src = ftm;
+          break;
+        case 'ARB':
+          src = arbitrum;
           break;
         default:
           src = generic;

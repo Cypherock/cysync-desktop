@@ -12,11 +12,13 @@ import {
   InputOutput,
   IOtype,
   SentReceive,
+  Status,
   Transaction
 } from '@cypherock/database';
 import { TransactionSender, WalletStates } from '@cypherock/protocols';
 import Server from '@cypherock/server-wrapper';
 import { WalletError, WalletErrorType } from '@cypherock/wallet';
+import bech32 from 'bech32';
 import BigNumber from 'bignumber.js';
 import WAValidator from 'multicoin-address-validator';
 import { useEffect, useState } from 'react';
@@ -32,6 +34,8 @@ import {
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import { addressDb, coinDb, transactionDb } from '../../database';
+import { useStatusCheck } from '../../provider/transactionStatusProvider';
+import { DisplayCoin } from '../types';
 
 import * as flowHandlers from './handlers';
 
@@ -140,8 +144,8 @@ export const broadcastTxn = async (
   }
 };
 
-export const verifyAddress = (address: string, coin: string) => {
-  const coinDetails = COINS[coin];
+export const verifyAddress = (address: string, coin: DisplayCoin) => {
+  const coinDetails = COINS[coin.slug];
 
   if (!coinDetails) {
     throw new Error(`Cannot find coin details for coin: ${coin}`);
@@ -154,9 +158,25 @@ export const verifyAddress = (address: string, coin: string) => {
     return regexImplicit.test(address) || regexRegistered.test(address);
   }
 
+  if (
+    coinDetails.coinListId === COINS.one.coinListId &&
+    address.startsWith('one1')
+  ) {
+    try {
+      const { prefix } = bech32.decode(address);
+      return prefix === 'one';
+    } catch (e) {
+      return false;
+    }
+  }
+  const validatorCoinName =
+    coinDetails.group === CoinGroup.Ethereum
+      ? 'eth'
+      : coinDetails.validatorCoinName;
+
   return WAValidator.validate(
     address,
-    coinDetails.validatorCoinName,
+    validatorCoinName,
     coinDetails.validatorNetworkType
   );
 };
@@ -271,6 +291,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     new CyError()
   );
   const [isEstimatingFees, setIsEstimatingFees] = useState(false);
+  const { addTransactionStatusCheckItem } = useStatusCheck();
 
   const resetHooks = () => {
     setDeviceConnected(false);
@@ -813,8 +834,9 @@ export const useSendTransaction: UseSendTransaction = () => {
           walletId,
           slug: coin.toLowerCase(),
           coin,
-          confirmations: 0,
-          status: coin.toLowerCase() === 'near' ? 1 : 0,
+          confirmations: coin.toLowerCase() === 'near' ? 1 : 0,
+          status:
+            coin.toLowerCase() === 'near' ? Status.SUCCESS : Status.PENDING, // Near failed txn handled already
           sentReceive: SentReceive.SENT,
           confirmed: new Date().toISOString(),
           blockHeight: -1,
@@ -823,6 +845,9 @@ export const useSendTransaction: UseSendTransaction = () => {
         };
       }
       transactionDb.insert(tx).then(() => {
+        if (tx.status === Status.PENDING) {
+          addTransactionStatusCheckItem(tx);
+        }
         transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
         logger.info('UTXOS blocked');
         logger.info(txnInputs);
@@ -896,8 +921,8 @@ export const useSendTransaction: UseSendTransaction = () => {
             : undefined,
         walletId,
         slug: coin.toLowerCase(),
-        confirmations: 0,
-        status: 1,
+        confirmations: 1,
+        status: Status.SUCCESS,
         sentReceive: SentReceive.SENT,
         confirmed: new Date().toISOString(),
         blockHeight: -1,
@@ -906,6 +931,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       };
 
       transactionDb.insert(tx).then(() => {
+        if (tx.status === Status.PENDING) addTransactionStatusCheckItem(tx);
         transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
         logger.info('UTXOS blocked');
         logger.info(txnInputs);

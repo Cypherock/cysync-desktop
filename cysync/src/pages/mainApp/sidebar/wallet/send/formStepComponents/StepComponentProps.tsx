@@ -26,6 +26,7 @@ export interface DuplicateBatchAddresses {
 export interface StepComponentProps {
   handleMaxSend: (isMax: boolean) => void;
   handleNext: () => void;
+  resetFlow: () => void;
   maximum: boolean;
   activeButton: number;
   feeType: boolean;
@@ -67,6 +68,7 @@ export interface StepComponentProps {
 export const StepComponentPropTypes = {
   handleMaxSend: PropTypes.func.isRequired,
   handleNext: PropTypes.func.isRequired,
+  resetFlow: PropTypes.func.isRequired,
   maximum: PropTypes.bool.isRequired,
   activeButton: PropTypes.number.isRequired,
   feeType: PropTypes.bool.isRequired,

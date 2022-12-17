@@ -3,6 +3,7 @@ import { Device } from '@cypherock/database';
 import { DeviceAuthenticator } from '@cypherock/protocols';
 import { useEffect, useState } from 'react';
 
+import packageJson from '../../../../package.json';
 import {
   CyError,
   CysyncError,
@@ -235,11 +236,15 @@ export const useDeviceAuth: UseDeviceAuth = isInitial => {
         sdkVersion,
         firmwareVersion,
         mockAuth,
-        inTestApp
+        inTestApp,
+        email: (JSON.parse(localStorage.getItem('allowAuthEmail')) as boolean)
+          ? localStorage.getItem('email') || undefined
+          : undefined,
+        cysyncVersion: packageJson.version
       });
       setIsInFlow(false);
       logger.info('DeviceAuth: completed.');
-      // Solely for UI purpose, to wait and give a UX feeback
+      // Solely for UI purpose, to wait and give a UX feedback
       await sleep(1000);
       setCompleted(true);
     } catch (e) {

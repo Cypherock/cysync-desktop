@@ -1,8 +1,14 @@
 import { COINS } from '@cypherock/communication';
 
-const initialCoins: Array<Array<string | boolean>> = [];
+const initialCoins: Array<Array<string | boolean | number | number[]>> = [];
 for (const [key, value] of Object.entries(COINS)) {
-  const tempCoin = [key, value.name, false];
+  const tempCoin = [
+    key,
+    value.name,
+    false,
+    value.coinListId,
+    value.supportedVersions
+  ];
   initialCoins.push(tempCoin);
 }
 

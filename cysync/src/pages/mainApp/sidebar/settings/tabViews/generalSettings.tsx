@@ -1,3 +1,4 @@
+import { Chip } from '@mui/material';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
@@ -22,6 +23,7 @@ import logger from '../../../../../utils/logger';
 import ChangePassword from './generalSettings/changePassword';
 import ConfirmPassword from './generalSettings/confirmPassword';
 import RemovePasswordComponent from './generalSettings/removePassword';
+import SetEmailComponent from './generalSettings/setEmail';
 
 const PREFIX = 'GeneralSettings';
 
@@ -88,6 +90,15 @@ const GeneralSettings = () => {
   const [confirmPasswordDialog, setConfirmPasswordDialog] =
     React.useState(false);
 
+  const [emailText, setEmailText] = React.useState(
+    localStorage.getItem('email') || ''
+  );
+  const [allowAuthEmail, setAllowAuthEmail] = React.useState(
+    (JSON.parse(localStorage.getItem('allowAuthEmail')) as boolean) ?? false
+  );
+  const [setEmailDialog, setSetEmailDialog] = React.useState(false);
+  const [removeEmail, setRemoveEmail] = React.useState(false);
+
   useEffect(() => {
     Analytics.Instance.screenView(Analytics.ScreenViews.GENERAL_SETTINGS);
     logger.info('In general settings');
@@ -100,10 +111,20 @@ const GeneralSettings = () => {
     }
   }, []);
 
+  useEffect(() => {
+    setEmailText(localStorage.getItem('email') || '');
+  }, [setEmailDialog]);
+
   const handleAutoLockToggle = () => {
     const newAutoLock = !autoLock;
     setAutoLock(newAutoLock);
     storeAutoLock(newAutoLock);
+  };
+
+  const handleAllowAuthEmailToggle = async () => {
+    const newState = !allowAuthEmail;
+    localStorage.setItem('allowAuthEmail', JSON.stringify(newState));
+    setAllowAuthEmail(newState);
   };
 
   const handleDisableProvisionClick = () => {
@@ -148,6 +169,53 @@ const GeneralSettings = () => {
           }}
         >
           Set Password
+        </Button>
+      )
+    },
+    {
+      name: 'Email',
+      chip: emailText && (
+        <Chip
+          label={emailText}
+          style={{ marginLeft: '10px' }}
+          variant="outlined"
+          color="secondary"
+          size="small"
+          onClick={() => {
+            setRemoveEmail(false);
+            setEmailText(localStorage.getItem('email') || '');
+            setSetEmailDialog(true);
+          }}
+          onDelete={() => {
+            setRemoveEmail(true);
+            setEmailText(localStorage.getItem('email') || '');
+            setSetEmailDialog(true);
+          }}
+        />
+      ),
+      secondaryText: !emailText
+        ? 'Add your email to receive authentication report'
+        : allowAuthEmail
+        ? 'Email auth is enabled'
+        : 'Email auth is disabled',
+      element: emailText ? (
+        <SwitchButton
+          name="toggleAuthEmail"
+          completed={allowAuthEmail}
+          handleChange={handleAllowAuthEmailToggle}
+        />
+      ) : (
+        <Button
+          className={classes.button}
+          onClick={() => {
+            localStorage.setItem('allowAuthEmail', JSON.stringify(true));
+            setAllowAuthEmail(true);
+            setRemoveEmail(false);
+            setEmailText(localStorage.getItem('email') || '');
+            setSetEmailDialog(true);
+          }}
+        >
+          Add Email Auth
         </Button>
       )
     },
@@ -273,6 +341,14 @@ const GeneralSettings = () => {
           setPreviousSetPassword(passwordExists());
         }}
       />
+      <SetEmailComponent
+        open={setEmailDialog}
+        onClose={() => {
+          setSetEmailDialog(false);
+        }}
+        remove={removeEmail}
+        emailText={emailText}
+      />
       <ConfirmPassword
         open={confirmPasswordDialog}
         onClose={() => {
@@ -312,7 +388,12 @@ const GeneralSettings = () => {
                 <ListItem disabled={item.disabled}>
                   <ListItemText
                     className={classes.listItem}
-                    primary={item.name}
+                    primary={
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {item.name}
+                        {item.chip}
+                      </div>
+                    }
                     secondary={item.secondaryText ? item.secondaryText : null}
                   />
                   <ListItemSecondaryAction>

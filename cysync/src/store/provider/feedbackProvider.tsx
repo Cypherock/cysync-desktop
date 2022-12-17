@@ -36,6 +36,7 @@ import { getDesktopLogs, getDeviceLogs } from '../../utils/getLogs';
 import logger from '../../utils/logger';
 // import { initRecorder, stopRecorder } from '../../utils/recorder';
 import { stopRecorder } from '../../utils/recorder';
+import sleep from '../../utils/sleep';
 import { getSystemInfo } from '../../utils/systemInfo';
 import getUUID from '../../utils/uuid';
 import { useLogFetcher } from '../hooks/flows/useLogFetcher';
@@ -188,8 +189,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     disableDeviceLogs: false
   };
 
-  const [externalHandleClose, setExternalHandleClose] =
-    useState<HandleCloseType>(undefined);
   const [heading, setHeading] = useState<string | undefined>(undefined);
   const [isContact, setIsContact] = useState(false);
 
@@ -280,7 +279,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
     resetFeedbackState();
     resetRecordingState();
 
-    setExternalHandleClose(_handleClose);
     setIsContact(_isContact || false);
     setHeading(_heading);
 
@@ -309,9 +307,19 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
     const randomId = uuid.v4();
     setOpenId(randomId);
-    setIsOpen(true);
+    triggerOpen();
 
     return randomId;
+  };
+
+  const triggerOpen = async () => {
+    // If already open, then close the previously opened feedback form
+    if (isOpen) {
+      setIsOpen(false);
+      // Wait for the form to be closed before opening the new one
+      await sleep(300);
+    }
+    setIsOpen(true);
   };
 
   const fetchLogs = async () => {
@@ -430,10 +438,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
       } else {
         setSubmitting(true);
 
-        if (_feedbackInput.email) {
-          localStorage.setItem('email', _feedbackInput.email);
-        }
-
         const data: {
           subject: string;
           category: string;
@@ -542,19 +546,23 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
   const handleOk = () => {
     setIsOpen(false);
-
-    if (externalHandleClose) {
-      externalHandleClose();
-    }
   };
 
   const ENTER_KEY = 13;
-  const handleKeyPress = (event: any) => {
+  const handleKeyPress = (isMultiline?: boolean) => (event: any) => {
     if (deviceLogsLoading || submitting) {
       return;
     }
 
-    if (event.keyCode === ENTER_KEY) {
+    let doSubmit = false;
+
+    if (isMultiline) {
+      doSubmit = event.keyCode === ENTER_KEY && event.shiftKey;
+    } else {
+      doSubmit = event.keyCode === ENTER_KEY;
+    }
+
+    if (doSubmit) {
       handleSubmit(feedbackInput);
     }
   };
@@ -640,10 +648,6 @@ export const FeedbackProvider: React.FC = ({ children }) => {
 
     resetLogFetcherHooks();
     clearErrorObj();
-
-    if (externalHandleClose) {
-      externalHandleClose();
-    }
     setOpenId('');
   };
 
@@ -861,7 +865,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     placeholder={"What's about it?"}
                     value={feedbackInput.subject}
                     onChange={handleChange}
-                    onKeyDown={handleKeyPress}
+                    onKeyDown={handleKeyPress(false)}
                   />
                   {feedbackInput.subjectError.length > 0 && (
                     <Typography
@@ -882,7 +886,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     placeholder="Your email"
                     value={feedbackInput.email}
                     onChange={handleChange}
-                    onKeyDown={handleKeyPress}
+                    onKeyDown={handleKeyPress(false)}
                   />
                   {feedbackInput.emailError.length > 0 && (
                     <Typography
@@ -947,7 +951,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     value={feedbackInput.description}
                     onChange={handleChange}
                     className={classes.padBottom}
-                    onKeyDown={handleKeyPress}
+                    onKeyDown={handleKeyPress(true)}
                   />
                   {feedbackInput.descriptionError.length > 0 && (
                     <Typography

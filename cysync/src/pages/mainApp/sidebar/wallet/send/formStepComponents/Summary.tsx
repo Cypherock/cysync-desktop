@@ -16,7 +16,6 @@ import {
   useNetwork,
   useSelectedWallet,
   useSendTransactionContext,
-  useSocket,
   useSync,
   useTokenContext
 } from '../../../../../../store/provider';
@@ -93,6 +92,7 @@ const Root = styled('div')(({ theme }) => ({
 
 const Summary: React.FC<StepComponentProps> = ({
   handleNext,
+  resetFlow,
   total,
   batchRecipientData,
   maxSend,
@@ -104,8 +104,6 @@ const Summary: React.FC<StepComponentProps> = ({
   const [statusText, setStatusText] = useState(
     'Waiting for signature from X1 wallet'
   );
-
-  const { addTxnConfirmAddressHook } = useSocket();
 
   const { selectedWallet } = useSelectedWallet();
 
@@ -140,7 +138,6 @@ const Summary: React.FC<StepComponentProps> = ({
           txHash: res,
           token: token ? token.slug : undefined
         });
-        addTxnConfirmAddressHook(res, coinDetails.slug, selectedWallet._id);
         if (isNear)
           (async () => {
             const coins = await coinDb.getAll({
@@ -211,7 +208,7 @@ const Summary: React.FC<StepComponentProps> = ({
       coinAbbr
     );
     logger.info('Send transaction retry');
-    handleSend();
+    resetFlow();
   };
 
   useEffect(() => {

@@ -1,5 +1,7 @@
 import { CoinGroup } from '@cypherock/communication';
 
+import { ExecutionQueueItem } from '../../hooks/useExecutionQueue';
+
 export interface SyncItemOptions {
   type:
     | 'history'
@@ -7,7 +9,8 @@ export interface SyncItemOptions {
     | 'balance'
     | 'wallet-setup'
     | 'latestPrice'
-    | 'customAccount';
+    | 'customAccount'
+    | 'txnStatus';
   coinType: string;
   module: string;
   isRefresh?: boolean;
@@ -15,7 +18,7 @@ export interface SyncItemOptions {
   coinGroup: CoinGroup;
 }
 
-export abstract class SyncItem {
+export abstract class SyncItem extends ExecutionQueueItem {
   public type: SyncItemOptions['type'];
 
   public coinType: string;
@@ -23,8 +26,6 @@ export abstract class SyncItem {
   public isRefresh: boolean;
 
   public retries: number;
-
-  public module: string;
 
   public parentCoin?: string;
 
@@ -38,6 +39,7 @@ export abstract class SyncItem {
     parentCoin,
     coinGroup
   }: SyncItemOptions) {
+    super();
     this.type = type;
     this.coinType = coinType;
     this.isRefresh = isRefresh;
@@ -45,10 +47,6 @@ export abstract class SyncItem {
     this.retries = 0;
     this.parentCoin = parentCoin;
     this.coinGroup = coinGroup;
-  }
-
-  equals(_item: SyncItem) {
-    throw new Error('equals not implemented for this class');
   }
 
   clone() {
