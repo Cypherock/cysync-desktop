@@ -86,6 +86,8 @@ export const SyncContext: React.Context<SyncContextInterface> =
 
 export const SyncProvider: React.FC = ({ children }) => {
   const BATCH_SIZE = 5;
+  const [hasCoin, setHasCoin] = React.useState(false);
+  const prevHasCoin = React.useRef(false);
 
   const updateAllExecutedItems = async (
     executionResults: Array<ExecutionResult<SyncQueueItem>>
@@ -123,7 +125,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           logger.error(
             `${CysyncError.SYNC_MAX_TRIES_EXCEEDED} Sync: Error, max retries exceeded`
           );
-          logger.error({ error: errorMsg, item });
+          logger.error({ error: errorMsg, item, stack: result.error?.stack });
         }
       } else if (
         item instanceof HistorySyncItem &&
@@ -247,6 +249,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     queue,
     modulesInExecutionQueue,
     isSyncing,
+    isInitialSetupDone,
     setInitialSetupDone,
     isWaitingForConnection,
     addToQueue,
@@ -771,6 +774,7 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const addCoinTask = (coin: Coin, { module = 'default' }) => {
+    setHasCoin(true);
     // allow overlap of resync with flow specific resync
     addCustomAccountSyncItemFromCoin(coin, { module, isRefresh: true });
     addBalanceSyncItemFromCoin(coin, { module, isRefresh: true });
@@ -825,6 +829,11 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const setupInitial = async () => {
+    const coinList = await coinDb.getOne({});
+    const _hasCoin = !!coinList;
+    prevHasCoin.current = _hasCoin;
+    setHasCoin(_hasCoin);
+
     logger.info('Sync: Adding Initial items');
     if (process.env.IS_PRODUCTION === 'true') {
       await addCustomAccountRefresh({
@@ -869,10 +878,13 @@ export const SyncProvider: React.FC = ({ children }) => {
   const isResyncExecuting = useRef(true);
 
   useEffect(() => {
+    if (!isInitialSetupDone) return;
+
     if (process.env.IS_PRODUCTION !== 'true') {
       return;
     }
 
+    logger.debug('Sync: Modules executing', { modulesInExecutionQueue });
     // resync: balances & transaction history
     const resyncKeys = [
       SyncModules.AUTO_RESYNC,
@@ -883,21 +895,35 @@ export const SyncProvider: React.FC = ({ children }) => {
       modulesInExecutionQueue.includes(r)
     );
 
+    // add the timed execution
+    const setTimer = () => {
+      syncTimeout.current = setTimeout(async () => {
+        if (isResyncExecuting.current === true) {
+          logger.info(
+            "Sync: Refresh for latest balance and history skipped, because it's already running"
+          );
+          return;
+        }
+
+        logger.info('Sync: Refresh triggered for latest balance and history');
+        addBalanceRefresh({ isRefresh: true, module: SyncModules.AUTO_RESYNC });
+        addHistoryRefresh({ isRefresh: true, module: SyncModules.AUTO_RESYNC });
+      }, RESYNC_INTERVAL);
+    };
+
     if (isExecuting === true && isResyncExecuting.current === false) {
       // reset the timer for execution
       clearTimeout(syncTimeout.current);
     } else if (isExecuting === false && isResyncExecuting.current === true) {
-      // add the timed execution
-      syncTimeout.current = setTimeout(async () => {
-        if (isResyncExecuting.current === true) return;
-        logger.info('Sync: Refresh triggered for latest balance and history');
-        addBalanceRefresh({ isRefresh: true, module: SyncModules.AUTO_RESYNC });
-        addHistoryRefresh({ isRefresh: true, module: SyncModules.AUTO_RESYNC });
-      }, 1000 * 60 * 5);
+      setTimer();
+    } else if (hasCoin && !prevHasCoin.current) {
+      // Trigger timer after we transition from having `0` coins to non zero coins
+      setTimer();
+      prevHasCoin.current = true;
     }
 
     isResyncExecuting.current = isExecuting;
-  }, [modulesInExecutionQueue]);
+  }, [modulesInExecutionQueue, isInitialSetupDone, hasCoin]);
 
   useEffect(() => {
     setupInitial();
