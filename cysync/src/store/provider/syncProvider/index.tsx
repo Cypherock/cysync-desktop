@@ -43,6 +43,14 @@ import {
 
 export const RESYNC_INTERVAL = 5 * 60 * 1000; // 5 minutes or 300000 ms
 
+export const SyncModules = {
+  INITIAL_RESYNC: 'initial-resync',
+  AUTO_RESYNC: 'auto-resync',
+  MANUAL_RESYNC: 'manual-resync',
+  PRICE_RESYNC: 'price-resync',
+  LATEST_PRICE_RESYNC: 'latest-price-resync'
+};
+
 export interface SyncContextInterface {
   isSyncing: boolean;
   isWaitingForConnection: boolean;
@@ -78,6 +86,8 @@ export const SyncContext: React.Context<SyncContextInterface> =
 
 export const SyncProvider: React.FC = ({ children }) => {
   const BATCH_SIZE = 5;
+  const [hasCoin, setHasCoin] = React.useState(false);
+  const prevHasCoin = React.useRef(false);
 
   const updateAllExecutedItems = async (
     executionResults: Array<ExecutionResult<SyncQueueItem>>
@@ -115,7 +125,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           logger.error(
             `${CysyncError.SYNC_MAX_TRIES_EXCEEDED} Sync: Error, max retries exceeded`
           );
-          logger.error({ error: errorMsg, item });
+          logger.error({ error: errorMsg, item, stack: result.error?.stack });
         }
       } else if (
         item instanceof HistorySyncItem &&
@@ -239,6 +249,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     queue,
     modulesInExecutionQueue,
     isSyncing,
+    isInitialSetupDone,
     setInitialSetupDone,
     isWaitingForConnection,
     addToQueue,
@@ -763,6 +774,7 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const addCoinTask = (coin: Coin, { module = 'default' }) => {
+    setHasCoin(true);
     // allow overlap of resync with flow specific resync
     addCustomAccountSyncItemFromCoin(coin, { module, isRefresh: true });
     addBalanceSyncItemFromCoin(coin, { module, isRefresh: true });
@@ -817,13 +829,33 @@ export const SyncProvider: React.FC = ({ children }) => {
   };
 
   const setupInitial = async () => {
+    const coinList = await coinDb.getOne({});
+    const _hasCoin = !!coinList;
+    prevHasCoin.current = _hasCoin;
+    setHasCoin(_hasCoin);
+
     logger.info('Sync: Adding Initial items');
     if (process.env.IS_PRODUCTION === 'true') {
-      await addCustomAccountRefresh({ isRefresh: true });
-      await addBalanceRefresh({ isRefresh: true });
-      await addHistoryRefresh({ isRefresh: true });
-      await addPriceRefresh({ isRefresh: true });
-      await addLatestPriceRefresh({ isRefresh: true });
+      await addCustomAccountRefresh({
+        isRefresh: true,
+        module: SyncModules.INITIAL_RESYNC
+      });
+      await addBalanceRefresh({
+        isRefresh: true,
+        module: SyncModules.INITIAL_RESYNC
+      });
+      await addHistoryRefresh({
+        isRefresh: true,
+        module: SyncModules.INITIAL_RESYNC
+      });
+      await addPriceRefresh({
+        isRefresh: true,
+        module: SyncModules.INITIAL_RESYNC
+      });
+      await addLatestPriceRefresh({
+        isRefresh: true,
+        module: SyncModules.INITIAL_RESYNC
+      });
     }
 
     setInitialSetupDone(true);
@@ -831,12 +863,13 @@ export const SyncProvider: React.FC = ({ children }) => {
 
   const reSync = async () => {
     logger.info('Sync: ReSyncing items');
+    const module = SyncModules.MANUAL_RESYNC;
 
-    await addCustomAccountRefresh({});
-    await addBalanceRefresh({});
-    await addHistoryRefresh({});
-    await addPriceRefresh({});
-    await addLatestPriceRefresh({});
+    await addCustomAccountRefresh({ module });
+    await addBalanceRefresh({ module });
+    await addHistoryRefresh({ module });
+    await addPriceRefresh({ module });
+    await addLatestPriceRefresh({ module });
     await notifications.updateLatest();
   };
 
@@ -845,27 +878,52 @@ export const SyncProvider: React.FC = ({ children }) => {
   const isResyncExecuting = useRef(true);
 
   useEffect(() => {
+    if (!isInitialSetupDone) return;
+
+    if (process.env.IS_PRODUCTION !== 'true') {
+      return;
+    }
+
+    logger.debug('Sync: Modules executing', { modulesInExecutionQueue });
     // resync: balances & transaction history
-    const resyncKeys = ['refresh-balance', 'refresh-history'];
+    const resyncKeys = [
+      SyncModules.AUTO_RESYNC,
+      SyncModules.MANUAL_RESYNC,
+      SyncModules.INITIAL_RESYNC
+    ];
     const isExecuting = resyncKeys.some(r =>
       modulesInExecutionQueue.includes(r)
     );
+
+    // add the timed execution
+    const setTimer = () => {
+      syncTimeout.current = setTimeout(async () => {
+        if (isResyncExecuting.current === true) {
+          logger.info(
+            "Sync: Refresh for latest balance and history skipped, because it's already running"
+          );
+          return;
+        }
+
+        logger.info('Sync: Refresh triggered for latest balance and history');
+        addBalanceRefresh({ isRefresh: true, module: SyncModules.AUTO_RESYNC });
+        addHistoryRefresh({ isRefresh: true, module: SyncModules.AUTO_RESYNC });
+      }, RESYNC_INTERVAL);
+    };
 
     if (isExecuting === true && isResyncExecuting.current === false) {
       // reset the timer for execution
       clearTimeout(syncTimeout.current);
     } else if (isExecuting === false && isResyncExecuting.current === true) {
-      // add the timed execution
-      syncTimeout.current = setTimeout(async () => {
-        if (isResyncExecuting.current === true) return;
-        logger.info('Sync: Refresh triggered for latest balance and history');
-        addBalanceRefresh({ isRefresh: true });
-        addHistoryRefresh({ isRefresh: true });
-      }, RESYNC_INTERVAL);
+      setTimer();
+    } else if (hasCoin && !prevHasCoin.current) {
+      // Trigger timer after we transition from having `0` coins to non zero coins
+      setTimer();
+      prevHasCoin.current = true;
     }
 
     isResyncExecuting.current = isExecuting;
-  }, [modulesInExecutionQueue]);
+  }, [modulesInExecutionQueue, isInitialSetupDone, hasCoin]);
 
   useEffect(() => {
     setupInitial();
@@ -879,7 +937,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         setInterval(async () => {
           logger.info('Sync: Refresh triggered');
           // Needs refactor
-          addPriceRefresh({ isRefresh: true, module: 'refresh' })
+          addPriceRefresh({ isRefresh: true, module: SyncModules.PRICE_RESYNC })
             .then(() => {
               logger.info('Sync: Price Refresh completed');
             })
@@ -921,14 +979,20 @@ export const SyncProvider: React.FC = ({ children }) => {
         setInterval(async () => {
           logger.info('Sync: Refresh triggered for latest price');
           try {
-            addLatestPriceRefresh({ isRefresh: true });
+            addLatestPriceRefresh({
+              isRefresh: true,
+              module: SyncModules.LATEST_PRICE_RESYNC
+            });
           } catch (error) {
             logger.error(
               `${CysyncError.LATEST_PRICE_REFRESH_FAILED} Sync: Error in refreshing latest price`
             );
             logger.error(error);
           }
-          addCustomAccountRefresh({ isRefresh: true })
+          addCustomAccountRefresh({
+            isRefresh: true,
+            module: SyncModules.LATEST_PRICE_RESYNC
+          })
             .then(() => {
               logger.info('Sync: Custom Accounts Refresh completed');
             })
