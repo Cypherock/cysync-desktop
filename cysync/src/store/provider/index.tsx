@@ -7,6 +7,7 @@ export * from './networkProvider';
 export * from './notificationProvider';
 export * from './snackbarProvider';
 export * from './socketProvider';
+export * from './transactionStatusProvider';
 export * from './updateProvider';
 export * from './walletsProvider';
 export * from './selectedWalletProvider';

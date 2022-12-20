@@ -493,14 +493,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
     for (const recipient of batchRecipientData) {
       const { recipient: recipient1, id } = recipient;
-      let { slug } = coinDetails;
-      if (isEthereum) {
-        slug = 'eth';
-      }
 
       let addressValid;
       if (skipEmpty && recipient1.trim().length === 0) addressValid = true;
-      else addressValid = verifyAddress(recipient1.trim(), slug);
+      else addressValid = verifyAddress(recipient1.trim(), coinDetails);
 
       if (!addressValid) {
         isValid = false;

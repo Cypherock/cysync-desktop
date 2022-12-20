@@ -313,32 +313,34 @@ const WalletView: React.FC<WalletViewProps> = ({
               styleType="light"
             />
             <div className={classes.walletButtons}>
-              {!canAddMoreCoins ? (
-                <Tooltip title="All coins are already added">
-                  <span style={{ width: '100%', height: '100%' }}>
-                    <Button
-                      variant="text"
-                      disableRipple
-                      className={classes.button}
-                      startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
-                      onClick={handleAddCoinFormOpen}
-                      disabled={true}
-                    >
-                      ADD COIN
-                    </Button>
-                  </span>
-                </Tooltip>
-              ) : (
-                <Button
-                  variant="text"
-                  disableRipple
-                  className={classes.button}
-                  startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
-                  onClick={handleAddCoinFormOpen}
+              <Tooltip
+                title={
+                  canAddMoreCoins
+                    ? !deviceConnection
+                      ? 'Connect the device to add coins'
+                      : ''
+                    : 'All coins are already added'
+                }
+              >
+                <span
+                  style={{
+                    display: 'inline-block',
+                    height: '100%',
+                    width: '100%'
+                  }}
                 >
-                  ADD COIN
-                </Button>
-              )}
+                  <Button
+                    variant="text"
+                    disableRipple
+                    className={classes.button}
+                    startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
+                    onClick={handleAddCoinFormOpen}
+                    disabled={!canAddMoreCoins || !deviceConnection}
+                  >
+                    ADD COIN
+                  </Button>
+                </span>
+              </Tooltip>
             </div>
             <IconButton
               onClick={walletConnect.openDialog}

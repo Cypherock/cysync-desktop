@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 
 import DialogBox from '../../../../../designSystem/designComponents/dialog/dialogBox';
-import ErrorDialog from '../../../../../designSystem/designComponents/dialog/errorDialog';
 import {
   useConnection,
   useCurrentCoin,
@@ -71,7 +70,7 @@ const WalletSend: React.FC<WalletSendProps> = ({
   const handleSendFormClose = (abort?: boolean) => {
     if (abort) {
       sendTransaction.cancelSendTxn(deviceConnection);
-      onReject('Rejected');
+      if (onReject) onReject('Rejected');
     }
     Analytics.Instance.event(
       Analytics.Categories.SEND_TXN,
@@ -85,14 +84,6 @@ const WalletSend: React.FC<WalletSendProps> = ({
 
   return (
     <>
-      {sendTransaction.errorObj.isSet && (
-        <ErrorDialog
-          open={sendTransaction.errorObj.isSet && sendForm}
-          handleClose={() => handleSendFormClose(true)}
-          errorObj={sendTransaction.errorObj}
-          flow="Sending Transaction"
-        />
-      )}
       <DialogBox
         fullWidth
         maxWidth="md"

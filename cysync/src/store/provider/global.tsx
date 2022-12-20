@@ -13,6 +13,7 @@ import {
   TutorialProvider,
   WalletConnectProvider
 } from '.';
+import { TransactionStatusProvider } from './transactionStatusProvider';
 
 const GlobalProvider = ({ children }: any) => {
   return (
@@ -26,7 +27,11 @@ const GlobalProvider = ({ children }: any) => {
                 <SyncProvider>
                   <SocketProvider>
                     <FeedbackProvider>
-                      <WalletConnectProvider>{children}</WalletConnectProvider>
+                      <WalletConnectProvider>
+                        <TransactionStatusProvider>
+                          {children}
+                        </TransactionStatusProvider>
+                      </WalletConnectProvider>
                     </FeedbackProvider>
                   </SocketProvider>
                 </SyncProvider>

@@ -1,3 +1,4 @@
+import { Tooltip } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { styled, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -13,6 +14,7 @@ import {
   useConnection,
   useSelectedWallet
 } from '../../../../../../store/provider';
+import { checkCoinSupport } from '../../../../../../utils/coinCheck';
 
 import {
   StepComponentProps,
@@ -56,12 +58,15 @@ const Root = styled('div')(({ theme }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginRight: '9px'
   },
   [`& .${classes.coinContainer}`]: {
     display: 'flex',
     width: '100%',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    maxHeight: '450px',
+    overflowY: 'auto'
   },
   [`& .${classes.coinItem}`]: {
     display: 'flex',
@@ -109,7 +114,8 @@ const SelectCoin: React.FC<StepComponentProps> = ({
     deviceConnection: connection,
     deviceSdkVersion,
     beforeFlowStart,
-    setIsInFlow
+    setIsInFlow,
+    supportedCoinList
   } = useConnection();
 
   const { coinAdder } = useAddCoinContext();
@@ -153,7 +159,12 @@ const SelectCoin: React.FC<StepComponentProps> = ({
     if (!allCoinSelected) {
       const newState = coins;
       for (const coin of newState) {
-        coin[2] = !coinsPresent.includes(coin[0]);
+        coin[2] =
+          !coinsPresent.includes(coin[0]) &&
+          checkCoinSupport(supportedCoinList, {
+            id: coin[3],
+            versions: coin[4]
+          });
       }
       setCoins([...newState]);
       setContinueDisabled(false);
@@ -180,7 +191,13 @@ const SelectCoin: React.FC<StepComponentProps> = ({
     let allSelectedFlag = true;
     let noCoinSelected = true;
     newState.forEach(coin => {
-      if (!coin[2]) {
+      if (
+        !coin[2] &&
+        checkCoinSupport(supportedCoinList, {
+          id: coin[3],
+          versions: coin[4]
+        })
+      ) {
         if (!coinsPresent.includes(coin[0])) allSelectedFlag = false;
       } else noCoinSelected = false;
     });
@@ -227,30 +244,43 @@ const SelectCoin: React.FC<StepComponentProps> = ({
         {coins.map((coin, index) => {
           const name = coin[1];
           const state = !!coin[2];
+          const coinSupported = checkCoinSupport(supportedCoinList, {
+            id: coin[3],
+            versions: coin[4]
+          });
           return (
-            <div
-              key={name}
-              className={clsx(
-                classes.coinItem,
-                coinsPresent.includes(coin[0]) || state
-                  ? classes.selectedItem
+            <Tooltip
+              title={
+                !coinsPresent.includes(coin[0]) && !coinSupported
+                  ? 'Update device firmware to use this coin'
                   : ''
-              )}
+              }
+              key={name}
             >
-              <div className={classes.flexRow}>
-                <CoinIcons
-                  initial={coin[0].toUpperCase()}
-                  style={{ marginRight: '10px' }}
+              <div
+                key={name}
+                className={clsx(
+                  classes.coinItem,
+                  coinsPresent.includes(coin[0]) || state || !coinSupported
+                    ? classes.selectedItem
+                    : ''
+                )}
+              >
+                <div className={classes.flexRow}>
+                  <CoinIcons
+                    initial={coin[0].toUpperCase()}
+                    style={{ marginRight: '10px' }}
+                  />
+                  <Typography color="textPrimary">{name}</Typography>
+                </div>
+                <CustomCheckBox
+                  disabled={coinsPresent.includes(coin[0]) || !coinSupported}
+                  name={index.toString()}
+                  checked={coinsPresent.includes(coin[0]) || state}
+                  onChange={handleCoinChange}
                 />
-                <Typography color="textPrimary">{name}</Typography>
               </div>
-              <CustomCheckBox
-                disabled={coinsPresent.includes(coin[0])}
-                name={index.toString()}
-                checked={coinsPresent.includes(coin[0]) || state}
-                onChange={handleCoinChange}
-              />
-            </div>
+            </Tooltip>
           );
         })}
       </div>

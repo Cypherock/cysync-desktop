@@ -234,7 +234,7 @@ const SendForm: React.FC<StepperProps> = ({
     undefined
   );
   const [estimateGasLimit, setEstimateGasLimit] = React.useState(
-    !txnParams.gas
+    !txnParams?.gas
   );
 
   // State Management Semaphore for Button of Transaction Type
@@ -496,6 +496,7 @@ const SendForm: React.FC<StepperProps> = ({
         if (e.target.name === 'amount') {
           if (Number(e.target.value) >= 0 || e.target.value === '') {
             dataCopy.amount = e.target.value;
+            dataCopy.errorAmount = '';
           }
         }
       }
@@ -632,6 +633,11 @@ const SendForm: React.FC<StepperProps> = ({
   const handleNext = () => {
     setActiveStep(prevActiveStep => prevActiveStep + 1);
   };
+  const resetFlow = () => {
+    sendTransaction.clearErrorObj();
+    sendTransaction.resetHooks();
+    setActiveStep(0);
+  };
 
   const handleErrorBoxClose = () => {
     handleClose(false);
@@ -642,6 +648,9 @@ const SendForm: React.FC<StepperProps> = ({
   const externalSetMaxSend = (val: boolean) => {
     if (val) {
       sendTransaction.setIsEstimatingFees(true);
+      addbatchRecipientData(
+        batchRecipientData.map(elem => ({ ...elem, errorAmount: '' }))
+      );
     }
     setMaxSend(val);
   };
@@ -683,6 +692,7 @@ const SendForm: React.FC<StepperProps> = ({
           props={{
             handleMaxSend,
             handleNext,
+            resetFlow,
             maximum,
             activeButton,
             feeType,

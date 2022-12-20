@@ -71,7 +71,7 @@ export const getRequestsMetadata = (
   }
 
   if (coin instanceof EthCoinData) {
-    const address = generateEthAddressFromXpub(item.xpub);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinType);
 
     const ethTxnMetadata = ethServer.transaction
       .getHistory(
@@ -272,7 +272,10 @@ export const processResponses = async (
     const history: Transaction[] = [];
     const erc20Tokens = new Set<string>();
 
-    const address = generateEthAddressFromXpub(item.xpub);
+    const address = generateEthAddressFromXpub(
+      item.xpub,
+      item.coinType
+    ).toLowerCase();
     const rawHistory = responses[0].data?.result;
     const moreParent = responses[0].data?.more;
 
@@ -288,8 +291,8 @@ export const processResponses = async (
         new BigNumber(ele.gasUsed || 0)
       );
 
-      const fromAddr = formatEthAddress(ele.from);
-      const toAddr = formatEthAddress(ele.to);
+      const fromAddr = ele.from.toLowerCase();
+      const toAddr = ele.to.toLowerCase();
       const selfTransfer = fromAddr === toAddr;
       const amount = String(ele.value || 0);
 
@@ -374,8 +377,8 @@ export const processResponses = async (
 
     for (const ele of erc20history) {
       const tokenObj = coinData.tokenList[ele.tokenSymbol.toLowerCase()];
-      const fromAddr = formatEthAddress(ele.from);
-      const toAddr = formatEthAddress(ele.to);
+      const fromAddr = formatEthAddress(ele.from).toLowerCase();
+      const toAddr = formatEthAddress(ele.to).toLowerCase();
       const selfTransfer = fromAddr === toAddr;
       const amount = String(ele.value || 0);
 
