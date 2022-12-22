@@ -54,7 +54,7 @@ const Authentication: React.FC<Props> = ({
         <br />
         <DynamicTextView
           state={isAuthenticated}
-          text="Verifying updated firmware"
+          text="Authenticating updated firmware"
         />
       </Grid>
     </Grid>
