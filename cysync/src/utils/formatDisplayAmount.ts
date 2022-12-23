@@ -14,12 +14,15 @@ const formatDisplayAmount = (
   precision = 4,
   isFixed = false
 ) => {
+  // if (holding === 'holding') {
+  //   console.log('this here', holding);
+  // }
   if (
     amount === '0' ||
     amount === 0 ||
     (typeof amount === 'object' && amount.toFixed() === '0')
   )
-    return '0';
+    return '0.00';
 
   let amountStr: string;
 
