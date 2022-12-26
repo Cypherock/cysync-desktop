@@ -11,15 +11,18 @@ export interface SyncItemOptions {
     | 'latestPrice'
     | 'customAccount'
     | 'txnStatus';
+  coinId: string;
   coinType: string;
   module: string;
   isRefresh?: boolean;
-  parentCoin?: string;
+  parentCoinId?: string;
   coinGroup: CoinGroup;
 }
 
 export abstract class SyncItem extends ExecutionQueueItem {
   public type: SyncItemOptions['type'];
+
+  public coinId: string;
 
   public coinType: string;
 
@@ -27,16 +30,17 @@ export abstract class SyncItem extends ExecutionQueueItem {
 
   public retries: number;
 
-  public parentCoin?: string;
+  public parentCoinId?: string;
 
   public coinGroup: CoinGroup;
 
   constructor({
     type,
+    coinId,
     coinType,
     module,
     isRefresh = false,
-    parentCoin,
+    parentCoinId,
     coinGroup
   }: SyncItemOptions) {
     super();
@@ -45,8 +49,9 @@ export abstract class SyncItem extends ExecutionQueueItem {
     this.isRefresh = isRefresh;
     this.module = module;
     this.retries = 0;
-    this.parentCoin = parentCoin;
+    this.parentCoinId = parentCoinId;
     this.coinGroup = coinGroup;
+    this.coinId = coinId;
   }
 
   clone() {

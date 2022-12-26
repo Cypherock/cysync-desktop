@@ -44,7 +44,7 @@ export class TxnStatusItem extends SyncItem {
       coinType,
       isRefresh,
       module,
-      parentCoin,
+      parentCoinId: parentCoin,
       coinGroup
     });
     this.walletId = walletId;
@@ -76,7 +76,7 @@ export class TxnStatusItem extends SyncItem {
       coinGroup: this.coinGroup,
       isRefresh: this.isRefresh,
       module: this.module,
-      parentCoin: this.parentCoin,
+      parentCoin: this.parentCoinId,
       backoffTime: this.backoffTime
     });
     newItem.backoffFactor = this.backoffFactor;

@@ -7,8 +7,8 @@ import io, { Socket } from 'socket.io-client';
 import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
+  accountDb,
   addressDb,
-  coinDb,
   insertFromFullTxn,
   prepareFromBlockbookTxn,
   receiveAddressDb,
@@ -77,12 +77,12 @@ export const SocketProvider: React.FC = ({ children }) => {
   const addReceiveAddressHook = (
     address: string,
     walletId: string,
-    coinType: string,
+    coinId: string,
     currentBlockbookSocket?: BlockbookSocket
   ) => {
-    const coin = COINS[coinType];
+    const coin = COINS[coinId];
     if (!coin) {
-      logger.warn('Invalid coinType in addReceiveAddressHook: ' + coinType);
+      logger.warn('Invalid coinType in addReceiveAddressHook: ' + coinId);
       return;
     }
     if (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana) {
@@ -91,7 +91,7 @@ export const SocketProvider: React.FC = ({ children }) => {
       return addReceiveAddressHookFromBlockbookSocket(
         address,
         walletId,
-        coinType,
+        coinId,
         currentBlockbookSocket
       );
     }
@@ -131,7 +131,7 @@ export const SocketProvider: React.FC = ({ children }) => {
           if (payload && payload.walletId && payload.coinType) {
             const wallet = await walletDb.getById(payload.walletId);
             if (wallet) {
-              const coin = await coinDb.getOne({
+              const coin = await accountDb.getOne({
                 walletId: payload.walletId,
                 slug: payload.coinType
               });
@@ -142,7 +142,7 @@ export const SocketProvider: React.FC = ({ children }) => {
                   xpub: coin.xpub,
                   addresses: [],
                   walletId: payload.walletId,
-                  coinType: payload.coinType,
+                  coinId: payload.coinType,
                   addressDB: addressDb
                 });
                 if (payload.tokenAbbr) {
@@ -166,7 +166,7 @@ export const SocketProvider: React.FC = ({ children }) => {
                     `Updating balances of ${allTxWithSameHash.length} txn via receive address hook`
                   );
                   for (const tx of allTxWithSameHash) {
-                    const txXpub = await coinDb.getOne({
+                    const txXpub = await accountDb.getOne({
                       walletId: tx.walletId,
                       slug: tx.slug || tx.coin
                     });
@@ -220,7 +220,7 @@ export const SocketProvider: React.FC = ({ children }) => {
 
               // Update balance when confirmed
               if (payload.walletId) {
-                const xpub = await coinDb.getOne({
+                const xpub = await accountDb.getOne({
                   walletId: payload.walletId,
                   slug: payload.coinType
                 });
@@ -265,7 +265,7 @@ export const SocketProvider: React.FC = ({ children }) => {
     const addressDetails = await addressDb.getOne({ address, coinType });
     if (addressDetails) {
       walletId = addressDetails.walletId;
-      const coinDetails = await coinDb.getOne({
+      const coinDetails = await accountDb.getOne({
         walletId,
         slug: coinType
       });
@@ -352,12 +352,13 @@ export const SocketProvider: React.FC = ({ children }) => {
             payload.txn.confirmations && payload.txn.confirmations > 0;
 
           for (const address of allAddresses) {
-            const coin = await coinDb.getOne({
+            const coin = await accountDb.getOne({
               walletId: address.walletId,
               slug: payload.coinType
             });
 
             if (coin) {
+              // TODO: NOW
               const newTxns = await prepareFromBlockbookTxn({
                 txn: payload.txn,
                 xpub: coin.xpub,
@@ -411,7 +412,7 @@ export const SocketProvider: React.FC = ({ children }) => {
             logger.info(`Updating balances of ${walletIdSet.size} coins`);
 
             for (const walletId of walletIdSet) {
-              const coins = await coinDb.getAll({
+              const coins = await accountDb.getAll({
                 slug: payload.coinType,
                 walletId
               });

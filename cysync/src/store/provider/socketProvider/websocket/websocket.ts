@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 
 import logger from '../../../../utils/logger';
-import { coinDb } from '../../../database';
+import { coinPriceDb } from '../../../database';
 
 import {
   AddressNotification,
@@ -297,7 +297,7 @@ export default class Socket extends EventEmitter {
       const price = latestPrice.rates.usd;
       const priceLastUpdatedAt = latestPrice.ts;
 
-      await coinDb.findAndUpdate(
+      await coinPriceDb.findAndUpdate(
         { slug: this.options.coinType },
         { price, priceLastUpdatedAt }
       );

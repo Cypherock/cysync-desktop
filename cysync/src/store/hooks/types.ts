@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import PropTypes from 'prop-types';
 
 import {
-  Coin,
+  Account,
   CustomAccount,
   InputOutput,
   IOtype,
@@ -10,11 +10,13 @@ import {
   Transaction
 } from '../database/databaseInit';
 
-export interface DisplayCoin extends Coin {
+export interface DisplayCoin extends Account {
   displayValue: string;
   displayPrice: string;
   displayBalance: string;
   isEmpty: boolean;
+  price: number;
+  priceLastUpdatedAt?: Date;
 }
 
 export interface DisplayToken extends Token {
@@ -23,6 +25,8 @@ export interface DisplayToken extends Token {
   displayBalance: string;
   isEmpty: boolean;
   parentCoin: string;
+  price: number;
+  priceLastUpdatedAt?: Date;
 }
 
 export interface DisplayCustomAccount extends CustomAccount {
@@ -62,6 +66,10 @@ export interface DisplayTransaction
 }
 
 export const DisplayTransactionPropTypes = {
+  accountId: PropTypes.string.isRequired,
+  coinId: PropTypes.string.isRequired,
+  parentCoinId: PropTypes.string.isRequired,
+  isSub: PropTypes.bool,
   hash: PropTypes.string.isRequired,
   total: PropTypes.string,
   fees: PropTypes.string,

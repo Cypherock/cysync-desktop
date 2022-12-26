@@ -33,7 +33,7 @@ import {
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
-import { addressDb, coinDb, transactionDb } from '../../database';
+import { accountDb, addressDb, transactionDb } from '../../database';
 import { useStatusCheck } from '../../provider/transactionStatusProvider';
 import { DisplayCoin } from '../types';
 
@@ -43,13 +43,13 @@ const flowName = Analytics.Categories.SEND_TXN;
 
 export const changeFormatOfOutputList = (
   targetList: any,
-  coinType: string,
+  coinId: string,
   token: any
 ): Array<{ address: string; value?: BigNumber }> => {
-  const coin = COINS[coinType];
+  const coin = COINS[coinId];
 
   if (!coin) {
-    throw new Error(`Invalid coinType ${coinType}`);
+    throw new Error(`Invalid coinType ${coinId}`);
   }
 
   let multiplier = coin.multiplier;
@@ -58,7 +58,7 @@ export const changeFormatOfOutputList = (
     const tokenObj = coin.tokenList[token.toLowerCase()];
 
     if (!coin) {
-      throw new Error(`Invalid token ${token}, in ${coinType}`);
+      throw new Error(`Invalid token ${token}, in ${coinId}`);
     }
 
     multiplier = tokenObj.multiplier;
@@ -80,12 +80,12 @@ export const changeFormatOfOutputList = (
 
 export const broadcastTxn = async (
   signedTxn: string,
-  coinType: string
+  coinId: string
 ): Promise<string> => {
-  const coin = COINS[coinType];
+  const coin = COINS[coinId];
 
   if (!coin) {
-    throw new Error(`Invalid coinType ${coinType}`);
+    throw new Error(`Invalid coinType ${coinId}`);
   }
 
   if (coin instanceof EthCoinData) {
@@ -137,7 +137,7 @@ export const broadcastTxn = async (
     const res = await Server.bitcoin.transaction
       .broadcastTxn({
         transaction: signedTxn,
-        coinType
+        coinType: coinId
       })
       .request();
     return res.data.tx.hash;
@@ -145,7 +145,7 @@ export const broadcastTxn = async (
 };
 
 export const verifyAddress = (address: string, coin: DisplayCoin) => {
-  const coinDetails = COINS[coin.slug];
+  const coinDetails = COINS[coin.coinId];
 
   if (!coinDetails) {
     throw new Error(`Cannot find coin details for coin: ${coin}`);
@@ -188,6 +188,7 @@ export interface HandleSendTransactionOptions {
   walletId: string;
   pinExists: boolean;
   passphraseExists: boolean;
+  coinId: string;
   xpub: string;
   zpub: string | undefined;
   customAccount: string | undefined;
@@ -365,7 +366,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         setSendMaxAmount(amt);
       });
 
-      const { walletId } = await coinDb.getOne({ xpub, slug: coinType });
+      const { walletId } = await accountDb.getOne({ xpub, slug: coinType });
       sendTransaction
         .calcApproxFee(
           xpub,
@@ -461,6 +462,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       zpub,
       customAccount,
       newAccountId,
+      coinId,
       coinType,
       outputList,
       fees,
@@ -534,7 +536,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         } else {
           const cyError = new CyError(
             CysyncError.SEND_TXN_REJECTED,
-            COINS[coinType].name
+            COINS[coinId].name
           );
           setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
         }
@@ -579,7 +581,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         if (funds) {
           const cyError = new CyError(
             WalletErrorType.INSUFFICIENT_FUNDS,
-            COINS[coinType].name
+            COINS[coinId].name
           );
           setErrorObj(
             handleErrors(errorObj, cyError, flowName, { coinType, funds })
@@ -726,19 +728,19 @@ export const useSendTransaction: UseSendTransaction = () => {
 
   const onTxnBroadcast = ({
     walletId,
-    coin,
+    coinId,
     txHash,
     token
   }: {
     walletId: string;
-    coin: string;
+    coinId: string;
     txHash: string;
     token?: string;
   }) => {
     try {
-      const coinObj = COINS[coin];
+      const coinObj = COINS[coinId];
       if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${coin}`);
+        throw new Error(`Cannot find coinType: ${coinId}`);
       }
 
       let tx: Transaction;
@@ -798,7 +800,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           sentReceive: SentReceive.SENT,
           confirmed: new Date().toISOString(),
           blockHeight: -1,
-          coin,
+          coin: coinId,
           inputs: formattedInputs,
           outputs: formattedOutputs
         };
@@ -808,35 +810,35 @@ export const useSendTransaction: UseSendTransaction = () => {
           total: fees.toString(),
           fees: '0',
           walletId,
-          slug: coin.toLowerCase(),
+          slug: coinId.toLowerCase(),
           confirmations: 0,
           status: 0,
           sentReceive: SentReceive.FEES,
           confirmed: new Date().toISOString(),
           blockHeight: -1,
-          coin
+          coin: coinId
         };
         transactionDb.insert(feeTxn);
       } else {
         tx = {
           hash: txHash,
           customIdentifier:
-            coin.toLowerCase() === 'near'
+            coinId.toLowerCase() === 'near'
               ? formattedInputs[0].address
               : undefined,
           type:
-            coin.toLowerCase() === 'near' || coin.toLowerCase() === 'sol'
+            coinId.toLowerCase() === 'near' || coinId.toLowerCase() === 'sol'
               ? 'TRANSFER'
               : undefined,
           amount: amount.toString(),
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
           walletId,
-          slug: coin.toLowerCase(),
-          coin,
-          confirmations: coin.toLowerCase() === 'near' ? 1 : 0,
+          slug: coinId.toLowerCase(),
+          coin: coinId,
+          confirmations: coinId.toLowerCase() === 'near' ? 1 : 0,
           status:
-            coin.toLowerCase() === 'near' ? Status.SUCCESS : Status.PENDING, // Near failed txn handled already
+            coinId.toLowerCase() === 'near' ? Status.SUCCESS : Status.PENDING, // Near failed txn handled already
           sentReceive: SentReceive.SENT,
           confirmed: new Date().toISOString(),
           blockHeight: -1,
@@ -859,17 +861,17 @@ export const useSendTransaction: UseSendTransaction = () => {
   };
   const onAddAccountTxnBroadcast = ({
     walletId,
-    coin,
+    coinId,
     txHash
   }: {
     walletId: string;
-    coin: string;
+    coinId: string;
     txHash: string;
   }) => {
     try {
-      const coinObj = COINS[coin];
+      const coinObj = COINS[coinId];
       if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${coin}`);
+        throw new Error(`Cannot find coinType: ${coinId}`);
       }
 
       let amount = new BigNumber(0);
@@ -911,16 +913,16 @@ export const useSendTransaction: UseSendTransaction = () => {
         total: amount.plus(fees).toString(),
         fees: fees.toString(),
         customIdentifier:
-          coin.toLowerCase() === 'near'
+          coinId.toLowerCase() === 'near'
             ? formattedInputs[0].address
             : undefined,
-        type: coin.toLowerCase() === 'near' ? 'FUNCTION_CALL' : undefined,
+        type: coinId.toLowerCase() === 'near' ? 'FUNCTION_CALL' : undefined,
         description:
-          coin.toLowerCase() === 'near'
+          coinId.toLowerCase() === 'near'
             ? `Created account ${formattedOutputs[0]?.address}`
             : undefined,
         walletId,
-        slug: coin.toLowerCase(),
+        slug: coinId.toLowerCase(),
         confirmations: 1,
         status: Status.SUCCESS,
         sentReceive: SentReceive.SENT,

@@ -19,26 +19,26 @@ import {
 } from '@cypherock/wallet';
 import BigNumber from 'bignumber.js';
 
-import { coinDb, customAccountDb, tokenDb } from '../../../database';
+import { accountDb, customAccountDb, tokenDb } from '../../../database';
 import { BalanceSyncItem } from '../types';
 
 export const getRequestsMetadata = (
   item: BalanceSyncItem
 ): IRequestMetadata[] => {
-  if (item.parentCoin) {
-    const parentCoin = COINS[item.parentCoin];
+  if (item.parentCoinId && item.parentCoinId !== item.coinId) {
+    const parentCoin = COINS[item.parentCoinId];
     if (!parentCoin || !(parentCoin instanceof EthCoinData)) {
-      throw new Error('Unexpected parentCoin: ' + item.parentCoin);
+      throw new Error('Unexpected parentCoin: ' + item.parentCoinId);
     }
 
-    const token = parentCoin.tokenList[item.coinType];
+    const token = parentCoin.tokenList[item.coinId];
 
     if (!token) {
       throw new Error('Invalid coin in balance sync item: ' + item.coinType);
     }
 
     const address = generateEthAddressFromXpub(item.xpub);
-    if (!item.parentCoin) {
+    if (!item.parentCoinId) {
       throw new Error('Invalid ethCoin found in balance sync item' + token);
     }
 
@@ -57,7 +57,7 @@ export const getRequestsMetadata = (
     return [balanceMetadata];
   }
 
-  const coin = COINS[item.coinType];
+  const coin = COINS[item.coinId];
 
   if (!coin) {
     throw new Error('Invalid coin in balance sync item: ' + item.coinType);
@@ -115,19 +115,19 @@ export const processResponses = async (
   if (responses.length <= 0) {
     throw new Error('Did not find responses while processing');
   }
-  if (item.parentCoin) {
-    const parentCoin = COINS[item.parentCoin];
+  if (item.parentCoinId && item.parentCoinId !== item.coinId) {
+    const parentCoin = COINS[item.parentCoinId];
     if (!parentCoin) {
-      throw new Error('Unexpected parentCoin: ' + item.parentCoin);
+      throw new Error('Unexpected parentCoin: ' + item.parentCoinId);
     }
 
-    const token = parentCoin.tokenList[item.coinType];
+    const token = parentCoin.tokenList[item.coinId];
 
     if (!token) {
       throw new Error('Invalid coin in balance sync item: ' + item.coinType);
     }
 
-    if (!item.parentCoin) {
+    if (!item.parentCoinId) {
       throw new Error('Invalid ethCoin found in balance sync item' + token);
     }
 
@@ -141,14 +141,14 @@ export const processResponses = async (
     }
 
     await tokenDb.updateBalance({
-      walletId: item.walletId,
-      slug: item.coinType,
+      coinId: item.coinId,
+      accountId: item.accountId,
       balance: balance.toString()
     });
     return;
   }
 
-  const coin = COINS[item.coinType];
+  const coin = COINS[item.coinId];
 
   if (!coin) {
     throw new Error('Invalid coin in balance sync item: ' + item.coinType);
@@ -159,9 +159,8 @@ export const processResponses = async (
 
     const balance = new BigNumber(balanceRes.data.balance);
 
-    await coinDb.updateTotalBalance({
-      xpub: item.xpub,
-      slug: item.coinType,
+    await accountDb.updateBalance({
+      accountId: item.accountId,
       totalBalance: balance.toString(),
       totalUnconfirmedBalance: '0'
     });
@@ -171,7 +170,7 @@ export const processResponses = async (
     const balance = new BigNumber(balanceRes.data.balance ?? 0);
     if (item.customAccount) {
       await customAccountDb.updateBalance({
-        walletId: item.walletId,
+        accountId: item.accountId,
         name: item.customAccount,
         balance: balance.toString()
       });
@@ -184,9 +183,8 @@ export const processResponses = async (
     for (const customAccount of customAccounts) {
       totalBalance = totalBalance.plus(new BigNumber(customAccount.balance));
     }
-    await coinDb.updateTotalBalance({
-      xpub: item.xpub,
-      slug: item.coinType,
+    await accountDb.updateBalance({
+      accountId: item.accountId,
       totalBalance: totalBalance.toString(),
       totalUnconfirmedBalance: '0'
     });
@@ -194,9 +192,8 @@ export const processResponses = async (
     const balanceRes = responses[0];
 
     const totalBalance = new BigNumber(balanceRes.data.balance ?? 0);
-    await coinDb.updateTotalBalance({
-      xpub: item.xpub,
-      slug: item.coinType,
+    await accountDb.updateBalance({
+      accountId: item.accountId,
       totalBalance: totalBalance.toString(),
       totalUnconfirmedBalance: '0'
     });

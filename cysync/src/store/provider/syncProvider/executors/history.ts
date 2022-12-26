@@ -25,8 +25,8 @@ import BigNumber from 'bignumber.js';
 import { CysyncError } from '../../../../errors';
 import logger from '../../../../utils/logger';
 import {
+  accountDb,
   addressDb,
-  coinDb,
   IOtype,
   prepareFromBlockbookTxn,
   SentReceive,
@@ -34,17 +34,12 @@ import {
   Transaction,
   transactionDb
 } from '../../../database';
-import {
-  BalanceSyncItem,
-  HistorySyncItem,
-  ModifiedCoin,
-  SyncProviderTypes
-} from '../types';
+import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
 
 export const getRequestsMetadata = (
   item: HistorySyncItem
 ): IRequestMetadata[] => {
-  const coin = COINS[item.coinType];
+  const coin = COINS[item.coinId];
 
   if (!coin) {
     logger.warn('Invalid coin in sync queue', {
@@ -57,7 +52,7 @@ export const getRequestsMetadata = (
     const metadata = v2Server
       .getTransaction(
         {
-          xpub: item.zpub ? item.zpub : item.xpub,
+          xpub: item.xpub,
           coinType: item.coinType,
           from: item.afterBlock,
           page: item.page || 1,
@@ -148,11 +143,11 @@ export const processResponses = async (
   responses: batchServer.IBatchResponse[],
   options: {
     addToQueue: SyncProviderTypes['addToQueue'];
-    addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'];
-    addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
+    addPriceSyncItemFromAccount: SyncProviderTypes['addPriceSyncItemFromAccount'];
+    addLatestPriceSyncItemFromAccount: SyncProviderTypes['addLatestPriceSyncItemFromAccount'];
   }
 ): Promise<any> => {
-  const coinData = COINS[item.coinType];
+  const coinData = COINS[item.coinId];
   if (!coinData) {
     logger.warn('Invalid coin in sync queue', {
       coinType: item.coinType
@@ -174,48 +169,17 @@ export const processResponses = async (
       throw new Error(errorMessage);
     }
 
-    let balance = new BigNumber(response.data.balance);
+    const balance = new BigNumber(response.data.balance);
     const unconfirmedBalance = new BigNumber(response.data.unconfirmedBalance);
-    const coin = await coinDb.getOne({
-      walletId: item.walletId,
-      slug: item.coinType
+    const coin = await accountDb.getOne({
+      accountId: item.accountId
     });
 
     if (!coin) {
       logger.warn('Cannot find xpub while fetching txn', { item });
     } else {
-      if (item.zpub) {
-        await coinDb.updateZpubBalance({
-          zpub: item.zpub,
-          slug: item.coinType,
-          zpubBalance: balance.toString(),
-          zpubUnconfirmedBalance: unconfirmedBalance.toString()
-        });
-        if (coin.xpubBalance) {
-          balance = balance.plus(coin.xpubBalance);
-        }
-        if (coin.xpubUnconfirmedBalance) {
-          balance = balance.plus(coin.xpubUnconfirmedBalance);
-        }
-      } else {
-        await coinDb.updateXpubBalance({
-          xpub: item.xpub,
-          slug: item.coinType,
-          xpubBalance: balance.toString(),
-          xpubUnconfirmedBalance: unconfirmedBalance.toString()
-        });
-
-        if (coin.zpubBalance) {
-          balance = balance.plus(coin.zpubBalance);
-        }
-        if (coin.zpubUnconfirmedBalance) {
-          balance = balance.plus(coin.zpubUnconfirmedBalance);
-        }
-      }
-
-      await coinDb.updateTotalBalance({
-        xpub: item.xpub,
-        slug: item.coinType,
+      await accountDb.updateBalance({
+        accountId: item.accountId,
         totalBalance: balance.toString(),
         totalUnconfirmedBalance: unconfirmedBalance.toString()
       });
@@ -227,14 +191,16 @@ export const processResponses = async (
       for (const txn of response.data.transactions) {
         const newTxns = await prepareFromBlockbookTxn({
           txn,
+          accountId: item.accountId,
+          coinId: item.coinId,
+          parentCoinId: item.coinId,
           xpub: item.xpub,
           addresses: response.data.tokens
             ? response.data.tokens.map((elem: any) => elem.name)
             : [],
           walletId: item.walletId,
           coinType: item.coinType,
-          addressDB: addressDb,
-          walletName: item.walletName
+          addressDB: addressDb
         });
         newTxns.forEach(newTxn => transactionDbList.push(newTxn));
       }
@@ -297,6 +263,10 @@ export const processResponses = async (
       const amount = String(ele.value || 0);
 
       const txn: Transaction = {
+        accountId: item.accountId,
+        coinId: item.coinId,
+        parentCoinId: item.coinId,
+        isSub: false,
         hash: ele.hash,
         amount: selfTransfer ? '0' : amount,
         fees: fees.toString(),
@@ -349,6 +319,10 @@ export const processResponses = async (
           // Even if the token transaction failed, the transaction fee is still deducted.
           if (txn.sentReceive === SentReceive.SENT) {
             history.push({
+              accountId: item.accountId,
+              coinId: item.coinId,
+              parentCoinId: item.coinId,
+              isSub: false,
               hash: ele.hash as string,
               amount: fees.toString(),
               fees: '0',
@@ -376,7 +350,9 @@ export const processResponses = async (
     }
 
     for (const ele of erc20history) {
-      const tokenObj = coinData.tokenList[ele.tokenSymbol.toLowerCase()];
+      const tokenObj = Object.values(coinData.tokenList).find(
+        e => ele.tokenSymbol.toLowerCase() === e.abbr
+      );
       const fromAddr = formatEthAddress(ele.from).toLowerCase();
       const toAddr = formatEthAddress(ele.to).toLowerCase();
       const selfTransfer = fromAddr === toAddr;
@@ -392,8 +368,12 @@ export const processResponses = async (
           new BigNumber(ele.gasUsed || 0)
         );
 
-        erc20Tokens.add(ele.tokenSymbol.toLowerCase());
+        erc20Tokens.add(tokenObj.id);
         const txn: Transaction = {
+          accountId: item.accountId,
+          coinId: tokenObj.id,
+          parentCoinId: item.coinId,
+          isSub: true,
           hash: ele.hash as string,
           amount: selfTransfer ? '0' : amount,
           fees: fees.toString(),
@@ -436,6 +416,10 @@ export const processResponses = async (
           new BigNumber(ele.gasUsed || 0)
         );
         history.push({
+          accountId: item.accountId,
+          coinId: item.coinId,
+          parentCoinId: item.coinId,
+          isSub: false,
           hash: ele.hash as string,
           amount: amt.toString(),
           fees: '0',
@@ -466,41 +450,56 @@ export const processResponses = async (
       logger.error(error);
     }
 
-    for (const tokenName of erc20Tokens) {
+    for (const tokenId of erc20Tokens) {
+      const tokenObj = coinData.tokenList[tokenId];
       const token = await tokenDb.getOne({
         walletId: item.walletId,
-        slug: tokenName.toLowerCase(),
+        slug: tokenId.toLowerCase(),
         coin: item.coinType
       });
       if (!token) {
         tokenDb.insert({
+          accountId: item.accountId,
+          parentCoinId: item.coinId,
+          coinId: tokenObj.id,
           walletId: item.walletId,
-          slug: tokenName.toLowerCase(),
+          slug: tokenObj.abbr,
           coin: item.coinType,
-          balance: '0',
-          price: 0,
-          priceLastUpdatedAt: undefined
+          balance: '0'
         });
         options.addToQueue(
           new BalanceSyncItem({
+            accountId: item.accountId,
+            accountType: item.accountType,
+            coinId: tokenObj.id,
+            parentCoinId: item.coinId,
             xpub: item.xpub,
             walletId: item.walletId,
-            coinType: tokenName,
-            parentCoin: item.coinType,
+            coinType: tokenId,
             coinGroup: CoinGroup.ERC20Tokens,
             module: item.module,
             isRefresh: true
           })
         );
-        options.addPriceSyncItemFromCoin(
-          { slug: tokenName, parentCoin: item.coinType } as ModifiedCoin,
+        options.addPriceSyncItemFromAccount(
+          {
+            ...item,
+            slug: tokenObj.abbr,
+            coinId: tokenObj.id,
+            parentCoinId: item.coinId
+          },
           {
             isRefresh: true,
             module: item.module
           }
         );
-        options.addLatestPriceSyncItemFromCoin(
-          { slug: tokenName, parentCoin: item.coinType } as ModifiedCoin,
+        options.addLatestPriceSyncItemFromAccount(
+          {
+            ...item,
+            slug: tokenObj.abbr,
+            coinId: tokenObj.id,
+            parentCoinId: item.coinId
+          },
           {
             isRefresh: true,
             module: 'default'
@@ -554,6 +553,10 @@ export const processResponses = async (
         description = `Created account ${argsJson.new_account_id}`;
       }
       const txn: Transaction = {
+        accountId: item.accountId,
+        coinId: item.coinId,
+        parentCoinId: item.coinId,
+        isSub: false,
         hash: ele.transaction_hash,
         customIdentifier: address,
         amount: selfTransfer ? '0' : amount,
@@ -597,6 +600,10 @@ export const processResponses = async (
       if (isAddAccountTransaction) {
         const newAccountAddress = argsJson?.new_account_id;
         const addAccountTxn: Transaction = {
+          accountId: item.accountId,
+          coinId: item.coinId,
+          parentCoinId: item.coinId,
+          isSub: false,
           hash: ele.transaction_hash,
           customIdentifier: newAccountAddress,
           amount,
@@ -681,6 +688,10 @@ export const processResponses = async (
           const selfTransfer = fromAddr === toAddr;
           const amount = String(instruction.parsed?.info?.lamports || 0);
           const txn: Transaction = {
+            accountId: item.accountId,
+            coinId: item.coinId,
+            parentCoinId: item.coinId,
+            isSub: false,
             hash: ele.signature,
             amount: selfTransfer ? '0' : amount,
             fees: fees.toString(),

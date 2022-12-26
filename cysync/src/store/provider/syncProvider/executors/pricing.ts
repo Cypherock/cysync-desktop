@@ -36,6 +36,7 @@ export const processResponses = async (
   const res = responses[0];
 
   await priceHistoryDb.insert({
+    coinId: item.coinId,
     slug: item.coinType,
     interval: item.days,
     data: usesNewApi ? res.data.prices : res.data.data.entries
@@ -43,6 +44,7 @@ export const processResponses = async (
 
   if (item.days === 30 && usesNewApi) {
     await priceHistoryDb.insert({
+      coinId: item.coinId,
       slug: item.coinType,
       interval: 7,
       data: res.data.prices.slice(-168) // 7 * 24 for hourly interval

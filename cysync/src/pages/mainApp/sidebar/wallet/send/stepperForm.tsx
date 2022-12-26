@@ -245,7 +245,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [transactionFee, setTransactionFee] = React.useState('75');
 
   const { coinDetails } = useCurrentCoin();
-  const isBtcFork = COINS[coinDetails.slug]?.group === CoinGroup.BitcoinForks;
+  const isBtcFork = COINS[coinDetails.coinId]?.group === CoinGroup.BitcoinForks;
   const { token } = useTokenContext();
   const { customAccount } = useCustomAccountContext();
 
@@ -271,9 +271,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const triggerCalcFee = () => {
     let coin;
     if (token) {
-      coin = COINS[token.coin].tokenList[token.slug];
+      coin = COINS[token.parentCoinId].tokenList[token.coinId];
     } else {
-      coin = COINS[coinDetails.slug];
+      coin = COINS[coinDetails.coinId];
     }
     let contractAddress: string | undefined;
     if (token && coin instanceof Erc20CoinData) {
@@ -303,7 +303,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const debouncedCaclFee = useDebouncedFunction(triggerCalcFee, 500);
 
   const triggerCalcGasLimit = async () => {
-    const coin = COINS[coinDetails.slug];
+    const coin = COINS[coinDetails.coinId];
 
     if (!token) {
       setGasLimit(21000);
@@ -378,7 +378,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   };
 
   useEffect(() => {
-    const coin = COINS[coinDetails.slug];
+    const coin = COINS[coinDetails.coinId];
     if (coin instanceof EthCoinData) {
       debouncedCaclFee();
     }
@@ -507,7 +507,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       JSON.stringify(batchRecipientData)
     );
     let isValid = true;
-    const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
+    const isEthereum = COINS[coinDetails.coinId].group === CoinGroup.Ethereum;
     let index = 0;
 
     for (const recipient of batchRecipientData) {
@@ -535,7 +535,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const validateInputs = () => {
     const isAmountValid = verifyRecipientAmount();
 
-    const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
+    const isEthereum = COINS[coinDetails.coinId].group === CoinGroup.Ethereum;
 
     const isGasLimitValid = isEthereum ? gasLimit > 0 : true;
 
@@ -562,7 +562,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       ) {
         if (!error) {
           copyRecipient.errorRecipient = `This is not a valid ${
-            COINS[coinDetails.slug].name
+            COINS[coinDetails.coinId].name
           } address`;
         } else {
           copyRecipient.errorRecipient = '';

@@ -3,11 +3,12 @@ import { CoinGroup } from '@cypherock/communication';
 import { SyncItem } from '../../types/syncItem';
 
 export interface PriceSyncItemOptions {
+  coinId: string;
   coinType: string;
   days: 7 | 30 | 365;
   module: string;
   isRefresh?: boolean;
-  parentCoin?: string;
+  parentCoinId?: string;
   id?: string;
   coinGroup: CoinGroup;
 }
@@ -22,8 +23,9 @@ export class PriceSyncItem extends SyncItem {
     isRefresh,
     module,
     coinGroup,
-    parentCoin,
-    id
+    parentCoinId,
+    id,
+    coinId
   }: PriceSyncItemOptions) {
     super({
       type: 'price',
@@ -31,7 +33,8 @@ export class PriceSyncItem extends SyncItem {
       isRefresh,
       module,
       coinGroup,
-      parentCoin
+      parentCoinId,
+      coinId
     });
     this.days = days;
     this.id = id;
@@ -43,6 +46,7 @@ export class PriceSyncItem extends SyncItem {
         this.days === item.days &&
         this.coinType === item.coinType &&
         this.coinGroup === item.coinGroup &&
+        this.coinId === item.coinId &&
         this.id === item.id
       );
     }
@@ -52,11 +56,12 @@ export class PriceSyncItem extends SyncItem {
 
   clone() {
     const newItem = new PriceSyncItem({
+      coinId: this.coinId,
       days: this.days,
       coinType: this.coinType,
       isRefresh: this.isRefresh,
       module: this.module,
-      parentCoin: this.parentCoin,
+      parentCoinId: this.parentCoinId,
       coinGroup: this.coinGroup,
       id: this.id
     });

@@ -54,6 +54,8 @@ const Root = styled(Grid)(({ theme }) => ({
 }));
 
 interface OneCoinProps {
+  coinId: string;
+  parentCoinId: string;
   coinInitial: string;
   coinHolding: string;
   coinValue: string;
@@ -67,6 +69,8 @@ interface OneCoinProps {
 const OneCoin: React.FC<OneCoinProps> = props => {
   const discreetMode = useDiscreetMode();
   const {
+    coinId,
+    parentCoinId,
     coinInitial,
     coinHolding,
     coinPrice,
@@ -85,16 +89,16 @@ const OneCoin: React.FC<OneCoinProps> = props => {
   };
 
   let coin;
-  if (coinParent) {
-    const parent = COINS[coinParent];
+  if (parentCoinId) {
+    const parent = COINS[parentCoinId];
     if (!parent) {
-      throw new Error(`Cannot find coinType: ${coinParent}`);
+      throw new Error(`Cannot find coinType: ${parentCoinId}`);
     }
-    coin = parent.tokenList[coinInitial];
-  } else coin = COINS[coinInitial];
+    coin = parent.tokenList[coinId];
+  } else coin = COINS[coinId];
 
   if (!coin) {
-    throw new Error(`Cannot find coinType: ${coinInitial}`);
+    throw new Error(`Cannot find coinType: ${coinId}`);
   }
 
   return (

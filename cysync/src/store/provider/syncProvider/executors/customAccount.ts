@@ -17,7 +17,7 @@ import {
 export const getRequestsMetadata = (
   item: CustomAccountSyncItem
 ): IRequestMetadata[] => {
-  const coin = COINS[item.coinType];
+  const coin = COINS[item.coinId];
   if (!coin) {
     throw new Error(
       'Invalid coin in customAccount sync item: ' + item.coinType
@@ -49,11 +49,11 @@ export const processResponses = async (
   responses: batchServer.IBatchResponse[],
   options: {
     addToQueue: SyncProviderTypes['addToQueue'];
-    addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'];
-    addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
+    addPriceSyncItemFromAccount: SyncProviderTypes['addPriceSyncItemFromAccount'];
+    addLatestPriceSyncItemFromAccount: SyncProviderTypes['addLatestPriceSyncItemFromAccount'];
   }
 ): Promise<any> => {
-  const coin = COINS[item.coinType];
+  const coin = COINS[item.coinId];
   if (!coin) {
     throw new Error(
       'Invalid coin in customAccount sync item: ' + item.coinType
@@ -74,11 +74,16 @@ export const processResponses = async (
         name: account.account_id,
         walletId: item.walletId,
         coin: item.coinType,
+        accountId: item.accountId,
+        coinId: item.coinId,
         price: '0',
         balance: '0'
       });
       options.addToQueue(
         new BalanceSyncItem({
+          accountId: item.accountId,
+          accountType: item.accountType,
+          coinId: item.coinId,
           xpub: item.xpub,
           walletId: item.walletId,
           coinType: item.coinType,
@@ -91,7 +96,9 @@ export const processResponses = async (
       options.addToQueue(
         new HistorySyncItem({
           xpub: item.xpub,
-          walletName: '',
+          accountId: item.accountId,
+          accountType: item.accountType,
+          coinId: item.coinId,
           walletId: item.walletId,
           coinType: item.coinType,
           isRefresh: true,
@@ -102,8 +109,7 @@ export const processResponses = async (
       );
     }
     await customAccountDb.rebuild(data, {
-      walletId: item.walletId,
-      coin: item.coinType
+      accountId: item.accountId
     });
   } else {
     throw new Error(

@@ -3,6 +3,9 @@ import { CoinGroup } from '@cypherock/communication';
 import { SyncItem } from '../../types/syncItem';
 
 export interface CustomAccountSyncItemOptions {
+  accountId: string;
+  accountType?: string;
+  coinId: string;
   coinType: string;
   xpub: string;
   walletId: string;
@@ -13,23 +16,31 @@ export interface CustomAccountSyncItemOptions {
 export class CustomAccountSyncItem extends SyncItem {
   public walletId: string;
   public xpub: string;
+  public accountId: string;
+  public accountType: string;
 
   constructor({
     coinType,
     xpub,
     walletId,
     module,
-    isRefresh
+    isRefresh,
+    coinId,
+    accountId,
+    accountType
   }: CustomAccountSyncItemOptions) {
     super({
       type: 'customAccount',
       coinGroup: CoinGroup.Near,
       coinType,
       isRefresh,
-      module
+      module,
+      coinId
     });
     this.walletId = walletId;
     this.xpub = xpub;
+    this.accountId = accountId;
+    this.accountType = accountType;
   }
 
   equals(item: CustomAccountSyncItem | SyncItem) {
@@ -37,6 +48,9 @@ export class CustomAccountSyncItem extends SyncItem {
       return (
         this.coinType === item.coinType &&
         this.walletId === item.walletId &&
+        this.coinId === item.coinId &&
+        this.accountId === item.accountId &&
+        this.accountType === item.accountType &&
         this.xpub === item.xpub
       );
     }
@@ -46,6 +60,9 @@ export class CustomAccountSyncItem extends SyncItem {
 
   clone() {
     const newItem = new CustomAccountSyncItem({
+      accountId: this.accountId,
+      accountType: this.accountType,
+      coinId: this.coinId,
       coinType: this.coinType,
       walletId: this.walletId,
       xpub: this.xpub,

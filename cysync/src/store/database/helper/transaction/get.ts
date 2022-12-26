@@ -4,7 +4,10 @@ import { SentReceive, Status } from '../../index';
 export interface TxQuery {
   hash?: string;
   walletId?: string;
-  walletName?: string;
+  coinId?: string;
+  parentCoinId?: string;
+  isSub?: boolean;
+  accountId?: string;
   slug?: string;
   coin?: string;
   customIdentifier?: string;

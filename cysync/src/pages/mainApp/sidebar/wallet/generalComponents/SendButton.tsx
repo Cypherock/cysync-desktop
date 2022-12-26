@@ -37,7 +37,7 @@ const SendButton: React.FC<SendButtonProps> = ({
   const { deviceConnection, supportedCoinList } = useConnection();
   const { coinDetails } = useCurrentCoin();
 
-  const coinObj = COINS[coinDetails.slug];
+  const coinObj = COINS[coinDetails.coinId];
   const coinSupported = checkCoinSupport(supportedCoinList, {
     id: coinObj.coinListId,
     versions: coinObj.supportedVersions

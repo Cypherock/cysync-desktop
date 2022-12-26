@@ -1,7 +1,9 @@
-import { Coin } from '@cypherock/database';
+import { Account } from '@cypherock/database';
 import PropTypes from 'prop-types';
 
 export interface OneCoinProps {
+  accountId: string;
+  coinId: string;
   initial: string;
   name: string;
   holding: string;
@@ -9,12 +11,14 @@ export interface OneCoinProps {
   price: string;
   decimal: number;
   isEmpty: boolean;
-  deleteCoin: (xpub: string, coin: string, walletId: string) => Promise<void>;
-  deleteHistory: (coin: Coin) => Promise<void>;
+  deleteCoin: (accountId: string) => Promise<void>;
+  deleteHistory: (accountId: string) => Promise<void>;
   walletId: string;
 }
 
 export const OneCoinPropTypes = {
+  accountId: PropTypes.string.isRequired,
+  coinId: PropTypes.string.isRequired,
   initial: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   holding: PropTypes.string.isRequired,

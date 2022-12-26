@@ -1,11 +1,10 @@
-import { CoinGroup } from '@cypherock/communication';
 import {
   IRequestMetadata,
   pricing as pricingServer,
   serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 
-import { coinDb, tokenDb } from '../../../database';
+import { coinPriceDb } from '../../../database';
 import { LatestPriceSyncItem } from '../types';
 
 export const getRequestsMetadata = (
@@ -44,14 +43,9 @@ export const processResponses = async (
     data = res.data.data.price;
   }
 
-  if (item.coinGroup === CoinGroup.ERC20Tokens)
-    await tokenDb.findAndUpdate(
-      { slug: item.coinType },
-      { price: data, priceLastUpdatedAt }
-    );
-  else
-    await coinDb.findAndUpdate(
-      { slug: item.coinType },
-      { price: data, priceLastUpdatedAt }
-    );
+  await coinPriceDb.insert({
+    coinId: item.coinId,
+    price: data,
+    priceLastUpdatedAt
+  });
 };

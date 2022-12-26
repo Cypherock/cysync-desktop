@@ -25,7 +25,9 @@ import {
   ReceiveTransactionContext,
   SendTransactionContext,
   useConnection,
-  useDiscreetMode
+  useDiscreetMode,
+  useSnackbar,
+  useSync
 } from '../../../../store/provider';
 import formatDisplayAmount from '../../../../utils/formatDisplayAmount';
 import prevent from '../../../../utils/preventPropagation';
@@ -38,6 +40,7 @@ const PREFIX = 'WalletOneToken';
 
 const classes = {
   root: `${PREFIX}-root`,
+  loading: `${PREFIX}-loading`,
   icon: `${PREFIX}-icon`,
   divider: `${PREFIX}-divider`,
   actions: `${PREFIX}-actions`,
@@ -63,6 +66,9 @@ const Root = styled('div')(({ theme }) => ({
     '&:hover': {
       background: '#343a42'
     }
+  },
+  [`& .${classes.loading}`]: {
+    opacity: 0.6
   },
   [`& .${classes.icon}`]: {
     margin: '0px !important'
@@ -129,6 +135,8 @@ const Root = styled('div')(({ theme }) => ({
 }));
 
 interface OneTokenProps {
+  coinId: string;
+  accountId: string;
   initial: string;
   name: string;
   holding: string;
@@ -137,7 +145,7 @@ interface OneTokenProps {
   isEmpty: boolean;
   decimal: number;
   walletId: string;
-  ethCoin: string;
+  ethCoinId: string;
 }
 
 const OneToken: React.FC<OneTokenProps> = ({
@@ -149,11 +157,17 @@ const OneToken: React.FC<OneTokenProps> = ({
   decimal,
   isEmpty,
   walletId,
-  ethCoin
+  ethCoinId,
+  coinId,
+  accountId
 }) => {
   const discreetMode = useDiscreetMode();
   const theme = useTheme();
   const navigate = useNavigate();
+  const sync = useSync();
+  const snackbar = useSnackbar();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const { beforeNetworkAction } = useConnection();
 
@@ -161,27 +175,47 @@ const OneToken: React.FC<OneTokenProps> = ({
 
   const sendTransaction = useSendTransaction();
 
+  const beforeAction = () => {
+    if (isLoading) {
+      snackbar.showSnackbar(
+        `Wait while we fetch the balance and latest price rates for ${name}`,
+        'warning'
+      );
+      return false;
+    }
+    return true;
+  };
+
   const handleSendFormOpen = (e: React.MouseEvent) => {
     prevent(e);
-    if (beforeNetworkAction() && !isEmpty) setSendForm(true);
+    if (beforeAction() && beforeNetworkAction() && !isEmpty) setSendForm(true);
   };
 
   const [receiveForm, setReceiveForm] = useState(false);
 
   const receiveTransaction = useReceiveTransaction();
 
+  React.useEffect(() => {
+    const key = accountId;
+    if (initial && walletId && sync.modulesInExecutionQueue.includes(key)) {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [sync.modulesInExecutionQueue, walletId, initial]);
+
   const handleReceiveFormOpen = (e: React.MouseEvent) => {
     prevent(e);
-    if (beforeNetworkAction()) setReceiveForm(true);
+    if (beforeAction() && beforeNetworkAction()) setReceiveForm(true);
   };
 
   const onClick = (e: React.MouseEvent) => {
     prevent(e);
-    navigate(
-      `${
-        Routes.transactions.index
-      }?slug=${initial.toLowerCase()}&wallet=${walletId}`
-    );
+    if (beforeAction()) {
+      navigate(
+        `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}`
+      );
+    }
   };
 
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -199,7 +233,7 @@ const OneToken: React.FC<OneTokenProps> = ({
     await tokenDb.delete({
       walletId,
       slug: initial.toLowerCase(),
-      coin: ethCoin.toLowerCase()
+      coin: ethCoinId.toLowerCase()
     });
   };
 
@@ -237,18 +271,18 @@ const OneToken: React.FC<OneTokenProps> = ({
         <Recieve />
       </ReceiveTransactionContext.Provider>
 
-      <Grid container onClick={onClick} className={classes.root}>
+      <Grid
+        container
+        onClick={onClick}
+        className={clsx({ [classes.root]: true, [classes.loading]: isLoading })}
+      >
         <Grid
           item
           xs={3}
           className={clsx(classes.alignStartCenter, classes.nameWrapper)}
         >
           <div className={classes.borderLeft} />
-          <CoinIcons
-            initial={initial.toUpperCase()}
-            parentCoin={ethCoin.toLowerCase()}
-            size="sm"
-          />
+          <CoinIcons initial={coinId} parentCoin={ethCoinId} size="sm" />
           <PopOverText
             color="textPrimary"
             hoverText={name}
@@ -341,6 +375,8 @@ const OneToken: React.FC<OneTokenProps> = ({
 };
 
 OneToken.propTypes = {
+  coinId: PropTypes.string.isRequired,
+  accountId: PropTypes.string.isRequired,
   initial: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   holding: PropTypes.string.isRequired,
@@ -349,7 +385,7 @@ OneToken.propTypes = {
   price: PropTypes.string.isRequired,
   decimal: PropTypes.number.isRequired,
   walletId: PropTypes.string.isRequired,
-  ethCoin: PropTypes.string.isRequired
+  ethCoinId: PropTypes.string.isRequired
 };
 
 export default OneToken;

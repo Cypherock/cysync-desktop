@@ -9,7 +9,11 @@ import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
-import { coinDb, customAccountDb } from '../../../../../../store/database';
+import {
+  accountDb,
+  CustomAccount,
+  customAccountDb
+} from '../../../../../../store/database';
 import { broadcastTxn } from '../../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
@@ -99,7 +103,7 @@ const Summary: React.FC<StepComponentProps> = ({
   const { selectedWallet } = useSelectedWallet();
 
   const { coinDetails } = useCurrentCoin();
-  const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
+  const coinNetwork = (COINS[coinDetails.coinId] as NearCoinData).network;
   const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
 
   const { token } = useTokenContext();
@@ -128,12 +132,14 @@ const Summary: React.FC<StepComponentProps> = ({
         });
         (async () => {
           try {
-            const coins = await coinDb.getAll({
+            const coins = await accountDb.getAll({
               walletId: coinDetails.walletId,
               slug: coinDetails.slug
             });
             if (coins.length < 1) throw new Error('No coins found');
-            const data = {
+            const data: CustomAccount = {
+              accountId: '', // TODO: NOW
+              coinId: 'near', // TODO: NOW
               name: recipientData[0].recipient + nearSuffix,
               walletId: coinDetails.walletId,
               coin: coinDetails.slug,

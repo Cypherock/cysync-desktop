@@ -394,6 +394,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const { token } = useTokenContext();
 
+  const coinId = token ? token.coinId : coinDetails.coinId;
   const coinAbbr = token ? token.slug : coinDetails.slug;
   const coinPrice = token ? token.displayPrice : coinDetails.displayPrice;
 
@@ -535,7 +536,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
       let contractAddress: string | undefined;
       if (token) {
-        const tokenData = COINS[token.parentCoin].tokenList[token.slug];
+        const tokenData = COINS[token.parentCoinId].tokenList[token.coinId];
         contractAddress = tokenData.address;
       }
 
@@ -638,7 +639,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           value={transactionFee}
           customIcon={
             <Typography className={classes.feeUnit}>
-              {COINS[coinDetails.slug.toLowerCase()]?.fees}
+              {COINS[coinDetails.coinId]?.fees}
             </Typography>
           }
         />
@@ -738,7 +739,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             error={!!batchRecipientData[0].errorAmount}
             helperText={batchRecipientData[0].errorAmount}
             placeHolder="0"
-            decimal={(COINS[coinAbbr] || { decimal: 18 }).decimal}
+            decimal={(COINS[coinId] || { decimal: 18 }).decimal}
             disabled={maxSend}
             customIcon={
               <Button

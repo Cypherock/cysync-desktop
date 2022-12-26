@@ -145,7 +145,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
   }, [sendTransaction.hash]);
 
   const handleExternalLink = async () => {
-    const coin = COINS[coinDetails.slug];
+    const coin = COINS[coinDetails.coinId];
 
     if (!coin) {
       logger.error('Invalid COIN in coinDetails: ' + coinDetails.slug);

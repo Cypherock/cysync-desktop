@@ -67,7 +67,7 @@ export const useCustomAccount: UseCustomAccount = () => {
   const getCustomAccountWithPrices = async (accounts: CustomAccount[]) => {
     const customAccountWithPrice: DisplayCustomAccount[] = [];
     for (const account of accounts) {
-      const coinObj = COINS[account.coin.toLowerCase()];
+      const coinObj = COINS[account.coinId];
       if (!coinObj || coinObj.group !== CoinGroup.Near) {
         throw new Error(`Cannot find coinType: ${account.coin}`);
       }

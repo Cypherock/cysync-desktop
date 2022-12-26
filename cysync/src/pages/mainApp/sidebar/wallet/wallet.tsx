@@ -450,7 +450,7 @@ const WalletView: React.FC<WalletViewProps> = ({
             <Grid container className={classes.coinDataContainer}>
               {coinData
                 .filter(coin => {
-                  const coinObj = COINS[coin.slug];
+                  const coinObj = COINS[coin.coinId];
                   return (
                     (coinObj &&
                       coinObj.name
@@ -460,14 +460,16 @@ const WalletView: React.FC<WalletViewProps> = ({
                   );
                 })
                 .map(coin => {
-                  const coinObj = COINS[coin.slug];
+                  const coinObj = COINS[coin.coinId];
                   return (
                     <CurrentCoinContext.Provider
                       value={{ coinDetails: coin }}
-                      key={coin.slug}
+                      key={coin.accountId}
                     >
                       {coinObj && coinObj.group === CoinGroup.Ethereum ? (
                         <EthereumOneCoin
+                          coinId={coin.coinId}
+                          accountId={coin.accountId}
                           initial={coin.slug.toUpperCase()}
                           name={coinObj.name}
                           holding={coin.displayBalance}
@@ -482,6 +484,8 @@ const WalletView: React.FC<WalletViewProps> = ({
                         />
                       ) : coinObj && coinObj.group === CoinGroup.Near ? (
                         <NearOneCoin
+                          coinId={coin.coinId}
+                          accountId={coin.accountId}
                           initial={coin.slug.toUpperCase()}
                           name={coinObj.name}
                           holding={coin.displayBalance}
@@ -496,6 +500,8 @@ const WalletView: React.FC<WalletViewProps> = ({
                         />
                       ) : (
                         <OneCoin
+                          coinId={coin.coinId}
+                          accountId={coin.accountId}
                           initial={coin.slug.toUpperCase()}
                           name={coinObj ? coinObj.name : ''}
                           holding={coin.displayBalance}

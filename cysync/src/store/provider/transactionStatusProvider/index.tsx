@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 
 import logger from '../../../utils/logger';
-import { coinDb, Status, Transaction, transactionDb } from '../../database';
+import { accountDb, Status, Transaction, transactionDb } from '../../database';
 import { ExecutionResult } from '../../hooks';
 import { useExecutionQueue } from '../../hooks/useExecutionQueue';
 import { RESYNC_INTERVAL, useSync } from '../syncProvider';
@@ -99,7 +99,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
 
       try {
         // status is final, resync balances and history
-        const coinEntry = await coinDb.getOne({
+        const coinEntry = await accountDb.getOne({
           walletId: item.walletId,
           slug: item.coinType
         });
@@ -107,7 +107,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
           {
             ...coinEntry,
             coinGroup: item.coinGroup,
-            parentCoin: item.parentCoin
+            parentCoinId: item.parentCoinId
           },
           {}
         );
@@ -115,7 +115,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
           {
             ...coinEntry,
             coinGroup: item.coinGroup,
-            parentCoin: item.parentCoin
+            parentCoinId: item.parentCoinId
           },
           {}
         );
@@ -146,7 +146,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
 
   const addTransactionStatusCheckItem: TransactionStatusProviderInterface['addTransactionStatusCheckItem'] =
     (txn, options) => {
-      const coinData = COINS[txn.coin || txn.slug];
+      const coinData = COINS[txn.parentCoinId || txn.coinId];
 
       if (!coinData) {
         logger.warn('Invalid coin found', {

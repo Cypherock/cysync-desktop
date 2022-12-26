@@ -3,12 +3,13 @@ import { CoinGroup, COINS } from '@cypherock/communication';
 import { SyncItem } from '../../types/syncItem';
 
 export interface HistorySyncItemOptions {
+  accountId: string;
+  coinId: string;
   coinType: string;
   xpub: string;
-  walletName: string;
   walletId: string;
   module: string;
-  zpub?: string;
+  accountType?: string;
   page?: number;
   afterBlock?: number;
   afterTokenBlock?: number;
@@ -21,13 +22,13 @@ export interface HistorySyncItemOptions {
 }
 
 export class HistorySyncItem extends SyncItem {
-  public walletName: string;
+  public accountId: string;
 
   public walletId: string;
 
   public xpub: string;
 
-  public zpub?: string;
+  public accountType?: string;
 
   public page?: number;
 
@@ -43,8 +44,8 @@ export class HistorySyncItem extends SyncItem {
 
   constructor({
     xpub,
-    zpub,
-    walletName,
+    accountId,
+    accountType,
     walletId,
     coinType,
     module,
@@ -56,19 +57,20 @@ export class HistorySyncItem extends SyncItem {
     coinGroup,
     customAccount,
     afterHash,
-    beforeHash
+    beforeHash,
+    coinId
   }: HistorySyncItemOptions) {
     super({
       type: 'history',
       coinType,
       isRefresh,
       module,
-      parentCoin,
-      coinGroup
+      parentCoinId: parentCoin,
+      coinGroup,
+      coinId
     });
     this.xpub = xpub;
-    this.zpub = zpub;
-    this.walletName = walletName;
+    this.accountType = accountType;
     this.walletId = walletId;
     this.page = page;
     this.afterBlock = afterBlock;
@@ -76,16 +78,25 @@ export class HistorySyncItem extends SyncItem {
     this.customAccount = customAccount;
     this.afterHash = afterHash;
     this.beforeHash = beforeHash;
+    this.accountId = accountId;
   }
 
   equals(item: HistorySyncItem | SyncItem) {
     if (item instanceof HistorySyncItem) {
-      const coin = COINS[item.coinType];
+      const coin = COINS[item.coinId];
       if (coin && coin.group === CoinGroup.Ethereum) {
-        return this.xpub === item.xpub && this.coinType === item.coinType;
+        return (
+          this.xpub === item.xpub &&
+          this.coinType === item.coinType &&
+          this.accountId === item.accountId &&
+          this.coinId === item.coinId
+        );
       }
       return (
-        this.walletName === item.walletName &&
+        this.accountId === item.accountId &&
+        this.coinId === item.coinId &&
+        this.xpub === item.xpub &&
+        this.accountType === item.accountType &&
         this.coinType === item.coinType &&
         this.customAccount === item.customAccount &&
         this.afterTokenBlock === item.afterTokenBlock &&
@@ -100,8 +111,8 @@ export class HistorySyncItem extends SyncItem {
   clone() {
     const newItem = new HistorySyncItem({
       xpub: this.xpub,
-      zpub: this.zpub,
-      walletName: this.walletName,
+      coinId: this.coinId,
+      accountType: this.accountType,
       walletId: this.walletId,
       coinType: this.coinType,
       module: this.module,
@@ -110,7 +121,7 @@ export class HistorySyncItem extends SyncItem {
       afterTokenBlock: this.afterTokenBlock,
       isRefresh: this.isRefresh,
       coinGroup: this.coinGroup,
-      parentCoin: this.parentCoin,
+      parentCoin: this.parentCoinId,
       customAccount: this.customAccount,
       afterHash: this.afterHash,
       beforeHash: this.beforeHash

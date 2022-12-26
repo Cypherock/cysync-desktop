@@ -9,7 +9,7 @@ import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import { CyError, CysyncError } from '../../../../../../errors';
-import { coinDb } from '../../../../../../store/database';
+import { accountDb } from '../../../../../../store/database';
 import { broadcastTxn } from '../../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
@@ -108,7 +108,7 @@ const Summary: React.FC<StepComponentProps> = ({
   const { selectedWallet } = useSelectedWallet();
 
   const { coinDetails } = useCurrentCoin();
-  const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
+  const isNear = COINS[coinDetails.coinId].group === CoinGroup.Near;
 
   const { token } = useTokenContext();
 
@@ -140,7 +140,7 @@ const Summary: React.FC<StepComponentProps> = ({
         });
         if (isNear)
           (async () => {
-            const coins = await coinDb.getAll({
+            const coins = await accountDb.getAll({
               walletId: coinDetails.walletId,
               slug: coinDetails.slug
             });

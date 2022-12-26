@@ -28,8 +28,8 @@ export const getCurrentTxnStatus = async (
   try {
     // coin field to be queried only present if there is a parent coin
     const coin =
-      item.parentCoin && item.parentCoin !== item.coinType
-        ? { coin: item.parentCoin }
+      item.parentCoinId && item.parentCoinId !== item.coinType
+        ? { coin: item.parentCoinId }
         : {};
     oldStatus = (
       await transactionDb.getOne({
@@ -47,11 +47,11 @@ export const getCurrentTxnStatus = async (
 export const getRequestsMetadata = (
   item: SyncQueueItem
 ): IRequestMetadata[] => {
-  const abbr =
-    item.parentCoin && item.parentCoin !== item.coinType
-      ? item.parentCoin
-      : item.coinType;
-  const coin = COINS[abbr];
+  const coinId =
+    item.parentCoinId && item.parentCoinId !== item.coinId
+      ? item.parentCoinId
+      : item.coinId;
+  const coin = COINS[coinId];
 
   if (!coin || !(item instanceof TxnStatusItem)) {
     logger.warn('Invalid item in transaction status sync queue', item);
@@ -110,11 +110,11 @@ export const processResponses = async (
   item: TxnStatusItem,
   response: batchServer.IBatchResponse
 ): Promise<any> => {
-  const abbr =
-    item.parentCoin && item.parentCoin !== item.coinType
-      ? item.parentCoin
-      : item.coinType;
-  const coin = COINS[abbr];
+  const coinId =
+    item.parentCoinId && item.parentCoinId !== item.coinId
+      ? item.parentCoinId
+      : item.coinId;
+  const coin = COINS[coinId];
 
   if (!coin) {
     throw new Error(
@@ -159,8 +159,8 @@ export const processResponses = async (
 
   // potential overwrite of resynced transactions
   const coinField =
-    item.parentCoin && item.parentCoin !== item.coinType
-      ? { coin: item.parentCoin }
+    item.parentCoinId && item.parentCoinId !== item.coinType
+      ? { coin: item.parentCoinId }
       : {};
   await transactionDb.findAndUpdate(
     { slug: item.coinType, hash: item.txnHash, ...coinField },

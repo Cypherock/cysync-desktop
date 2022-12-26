@@ -111,8 +111,8 @@ const Verify = (props: any) => {
   const coinAbbr = token ? token.slug : coinDetails.slug;
 
   const coinName = token
-    ? COINS[coinDetails.slug]?.tokenList[token.slug]?.name
-    : COINS[coinDetails.slug].name;
+    ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.name
+    : COINS[coinDetails.coinId].name;
 
   const { sendTransaction } = useSendTransactionContext();
 

@@ -1,51 +1,48 @@
-import { CoinGroup, COINS } from '@cypherock/communication';
+import { AbsCoinData, COINS } from '@cypherock/communication';
 
 import logger from '../../../utils/logger';
-import { coinDb, tokenDb } from '../databaseInit';
+import { coinPriceDb } from '../databaseInit';
 
 export const getLatestPriceForCoin = async (
-  coin: string,
-  parentCoin?: string
+  coinId: string,
+  parentCoinId?: string
 ) => {
-  let coinData: any = COINS[coin];
-  if (parentCoin && parentCoin !== coin) {
-    const parentCoinData = COINS[parentCoin];
+  let coinData: AbsCoinData = COINS[coinId];
+  if (parentCoinId && parentCoinId !== coinId) {
+    const parentCoinData = COINS[parentCoinId];
     if (!parentCoinData) {
-      throw new Error('Invalid parentCoin: ' + parentCoin);
+      throw new Error('Invalid parentCoin: ' + parentCoinId);
     }
 
-    const token = parentCoinData.tokenList[coin];
+    const token = parentCoinData.tokenList[coinId];
     if (!token) {
       throw new Error(
-        'Invalid token: ' + coin + ' in parentCoin: ' + parentCoin
+        'Invalid token: ' + coinId + ' in parentCoin: ' + parentCoinId
       );
     }
     coinData = token;
   }
 
-  if (!coinData) throw new Error('Invalid coin: ' + coin);
+  if (!coinData) throw new Error('Invalid coin: ' + coinId);
   if (coinData && coinData.isTest) return 0;
 
-  let res;
-  if (coinData.group === CoinGroup.ERC20Tokens)
-    res = await tokenDb.getOne({ slug: coin });
-  else res = await coinDb.getOne({ slug: coin });
+  const res = await coinPriceDb.getOne({ coinId: coinData.id });
 
   if (!res) {
-    logger.warn(`Cannot find price for coin ${coin}`);
+    logger.warn(`Cannot find price for coin ${coinId}`);
     return 0;
   }
   return res.price || 0;
 };
 
 export const getLatestPriceForCoins = async (
-  coins: Array<{ slug: string; parent?: string }>
+  coins: Array<{ coinId: string; parentCoinId?: string }>
 ) => {
   const latestPrices: Record<string, number | undefined> = {};
   for (const coin of coins) {
-    latestPrices[coin.slug.toLowerCase()] = await getLatestPriceForCoin(
-      coin.slug,
-      coin.parent
+    latestPrices[coin.coinId] = await getLatestPriceForCoin(
+      coin.coinId,
+      coin.parentCoinId
     );
   }
   return latestPrices;

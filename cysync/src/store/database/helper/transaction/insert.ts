@@ -24,9 +24,9 @@ export const insertFromFullTxn = async (transaction: {
   xpub: string;
   addresses: any[];
   walletId: string;
+  coinId: string;
   coinType: string;
   addressDB: AddressDB;
-  walletName?: string;
   status?: 'PENDING' | 'SUCCESS' | 'FAILED';
 }) => {
   const {
@@ -34,10 +34,10 @@ export const insertFromFullTxn = async (transaction: {
     xpub,
     addresses,
     walletId,
-    walletName,
-    coinType,
+    coinId,
     addressDB,
-    status
+    status,
+    coinType
   } = transaction;
 
   let statusCode: Status;
@@ -52,7 +52,7 @@ export const insertFromFullTxn = async (transaction: {
     }
   }
 
-  const coin = COINS[coinType.toLowerCase()];
+  const coin = COINS[coinId];
   if (!coin) {
     throw new Error('Invalid coin');
   }
@@ -67,7 +67,7 @@ export const insertFromFullTxn = async (transaction: {
     // Get all addresses of that xpub and coin
     // This is because the address from the API is of only 1 wallet,
     // Whereas there are 2 (or 4 in case od BTC & BTCT) wallets.
-    const addressFromDB = await addressDB.getAll({ walletId, coinType });
+    const addressFromDB = await addressDB.getAll({ walletId, coinId });
 
     if (addressFromDB && addressFromDB.length > 0) {
       myAddresses = myAddresses.concat(
@@ -112,7 +112,7 @@ export const insertFromFullTxn = async (transaction: {
     const existingTxns = await transactionDb.getAll({
       hash: txn.hash,
       walletId,
-      slug: coinType
+      coinId
     });
 
     if (existingTxns && existingTxns.length > 0) {
@@ -171,7 +171,6 @@ export const insertFromFullTxn = async (transaction: {
       amount: totalValue.absoluteValue().toString(),
       confirmations: txn.confirmations || 0,
       walletId,
-      walletName,
       slug: coinType,
       sentReceive,
       status: statusCode,
@@ -299,13 +298,13 @@ export const insertFromFullTxn = async (transaction: {
           total: new BigNumber(amount).plus(fees).toString(),
           confirmations: 1,
           walletId: transaction.walletId,
-          slug: transaction.coinType,
+          slug: transaction.coinId,
           status: ele.meta?.err || ele.err ? 2 : 1,
           sentReceive:
             address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
           confirmed: new Date(parseInt(ele.blockTime, 10) * 1000).toISOString(), // conversion from timestamp in seconds
           blockHeight: ele.slot,
-          coin: transaction.coinType,
+          coin: transaction.coinId,
           inputs: [
             {
               address: fromAddr,
@@ -336,20 +335,24 @@ export const insertFromFullTxn = async (transaction: {
 
 export const prepareFromBlockbookTxn = async (transaction: {
   txn: any;
+  accountId: string;
+  coinId: string;
+  parentCoinId: string;
   xpub: string;
   addresses: any[];
   walletId: string;
   coinType: string;
   addressDB: AddressDB;
-  walletName?: string;
   status?: 'PENDING' | 'SUCCESS' | 'FAILED';
 }): Promise<Transaction[]> => {
   const {
     txn,
     xpub,
+    accountId,
+    coinId,
+    parentCoinId,
     addresses,
     walletId,
-    walletName,
     coinType,
     addressDB,
     status
@@ -367,7 +370,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
     }
   }
 
-  const coin = COINS[coinType.toLowerCase()];
+  const coin = COINS[coinId];
   if (!coin) {
     throw new Error('Invalid coin');
   }
@@ -382,7 +385,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
     // Get all addresses of that xpub and coin
     // This is because the address from the API is of only 1 wallet,
     // Whereas there are 2 (or 4 in case od BTC & BTCT) wallets.
-    const addressFromDB = await addressDB.getAll({ walletId, coinType });
+    const addressFromDB = await addressDB.getAll({ walletId, coinId });
 
     if (addressFromDB && addressFromDB.length > 0) {
       myAddresses = myAddresses.concat(
@@ -488,13 +491,16 @@ export const prepareFromBlockbookTxn = async (transaction: {
     }
 
     const newTxn: Transaction = {
+      accountId,
+      coinId,
+      parentCoinId,
+      isSub: parentCoinId !== coinId,
       hash: txn.txid,
       total: String(txn.value),
       fees: String(txn.fees),
       amount: totalValue.absoluteValue().toString(),
       confirmations: txn.confirmations || 0,
       walletId,
-      walletName,
       slug: coinType,
       sentReceive,
       status: statusCode,
@@ -563,6 +569,10 @@ export const prepareFromBlockbookTxn = async (transaction: {
       }
 
       feeTxn = {
+        accountId,
+        coinId,
+        parentCoinId,
+        isSub: parentCoinId !== coinId,
         hash: txn.hash,
         amount: fees.toString(),
         fees: '0',
@@ -582,6 +592,10 @@ export const prepareFromBlockbookTxn = async (transaction: {
     }
 
     const newTxn: Transaction = {
+      accountId,
+      coinId,
+      parentCoinId,
+      isSub: parentCoinId !== coinId,
       hash: txn.hash,
       amount: amount.toString(),
       fees: fees.toString(),

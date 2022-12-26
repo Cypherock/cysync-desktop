@@ -4,8 +4,8 @@ import BigNumber from 'bignumber.js';
 import { getPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
+  accountDb,
   Coin,
-  coinDb,
   getAllTxns,
   getLatestPriceForCoin,
   priceHistoryDb,
@@ -62,7 +62,7 @@ export const getCoinPriceHistory = async (
       if (token) totalBalance = new BigNumber(token.balance);
       else return null;
     } else {
-      const coin = await coinDb.getOne({ walletId, slug: coinType });
+      const coin = await accountDb.getOne({ walletId, slug: coinType });
       if (coin)
         totalBalance = new BigNumber(coin.totalBalance ? coin.totalBalance : 0);
       else return null;
@@ -91,7 +91,7 @@ export const getCoinPriceHistory = async (
         totalBalance = totalBalance.plus(token.balance);
       }
     } else {
-      const allCoins = await coinDb.getAll({ slug: coinType });
+      const allCoins = await accountDb.getAll({ slug: coinType });
       if (allCoins.length === 0) return null;
       for (const coin of allCoins) {
         totalBalance = totalBalance.plus(
@@ -328,7 +328,7 @@ export const coinsUserHas = async (params: {
         if (token) totalBalance = new BigNumber(token.balance);
         else continue;
       } else {
-        const xpub = await coinDb.getOne({ walletId, slug: item.slug });
+        const xpub = await accountDb.getOne({ walletId, slug: item.slug });
         if (xpub)
           totalBalance = new BigNumber(
             xpub.totalBalance ? xpub.totalBalance : 0
@@ -343,7 +343,7 @@ export const coinsUserHas = async (params: {
           totalBalance = totalBalance.plus(token.balance);
         }
       } else {
-        const coinsData = await coinDb.getAll({ slug: item.slug });
+        const coinsData = await accountDb.getAll({ slug: item.slug });
         if (coinsData.length === 0) continue;
         for (const coin of coinsData) {
           totalBalance = totalBalance.plus(
@@ -391,7 +391,7 @@ export const getCoinData = async (params: {
   onlyGraphChange?: boolean;
 }) => {
   const { days, walletId, isRefresh } = params;
-  const allCoins = await coinDb.getAll();
+  const allCoins = await accountDb.getAll();
   const allTokens = await tokenDb.getAll();
   const allCoinItems = [
     ...new Map(

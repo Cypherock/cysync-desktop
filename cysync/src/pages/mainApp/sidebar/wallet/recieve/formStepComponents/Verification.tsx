@@ -1,6 +1,6 @@
 import { COINS, NearCoinData } from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
-import wallet, { NearWallet } from '@cypherock/wallet';
+import { NearWallet } from '@cypherock/wallet';
 import LaunchIcon from '@mui/icons-material/Launch';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -103,7 +103,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
 
   const handleExternalLink = async () => {
     setLinkOpened(true);
-    const coin = COINS[coinDetails.slug];
+    const coin = COINS[coinDetails.coinId];
 
     if (!coin) {
       logger.error('Invalid COIN in coinDetails: ' + coinDetails.slug);
@@ -114,11 +114,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
       logger.error('Not a near coin');
       return;
     } else {
-      const w = wallet({
-        coinType: coinDetails.slug,
-        xpub: coinDetails.xpub,
-        walletId: coinDetails.walletId
-      });
+      const w = new NearWallet(coinDetails.xpub, coin);
       const url = Server.near.wallet.getCreateTxnLink({
         network: coin.network,
         address: customAccount.name,

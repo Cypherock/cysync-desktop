@@ -50,7 +50,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
     }
 
     let name = '';
-    const coin = COINS[coinDetails.slug];
+    const coin = COINS[coinDetails.coinId];
     if (!coin) {
       throw new Error('Invalid coinType: ' + coinDetails.slug);
     }
@@ -61,7 +61,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
       if (!coin) {
         throw new Error('Invalid coinType: ' + coinDetails.slug);
       }
-      const tokenData = COINS[coin.abbr.toLowerCase()].tokenList[token.slug];
+      const tokenData = coin.tokenList[token.slug];
       if (!tokenData) {
         throw new Error('Invalid coinType: ' + coinDetails.slug);
       }
@@ -75,9 +75,12 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         setIsInFlow,
         walletId: selectedWallet._id,
         coinType: coinDetails.slug,
+        coinId: coinDetails.coinId,
+        accountId: coinDetails.accountId,
+        accountIndex: coinDetails.accountIndex,
+        accountType: coinDetails.accountType,
         coinName: name,
         xpub: coinDetails.xpub,
-        zpub: coinDetails.zpub,
         customAccount: customAccount?.name,
         contractAbbr: token ? token.slug : undefined,
         passphraseExists: selectedWallet.passphraseSet

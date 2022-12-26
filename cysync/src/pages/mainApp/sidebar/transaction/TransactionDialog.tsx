@@ -129,15 +129,15 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   const [ethCoinPrice, setEthCoinPrice] = useState(0);
 
   useEffect(() => {
-    if (txn && txn.slug) {
-      getLatestPriceForCoin(txn.slug.toLowerCase(), txn.coin?.toLowerCase())
+    if (txn && txn.coinId) {
+      getLatestPriceForCoin(txn.coinId, txn.parentCoinId)
         .then(price => {
           setCoinPrice(price);
         })
         .catch(logger.error);
 
-      if (txn.coin && txn.coin !== txn.slug) {
-        getLatestPriceForCoin(txn.coin.toLowerCase())
+      if (txn.parentCoinId && txn.parentCoinId !== txn.coinId) {
+        getLatestPriceForCoin(txn.parentCoinId)
           .then(price => {
             setEthCoinPrice(price);
           })
@@ -164,12 +164,12 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
     return (parseFloat(coins) || 0) * coinPrice;
   };
 
-  const getFeeCoinName = () => {
-    if (txn.isErc20 && txn.coin) {
-      return txn.coin.toUpperCase();
+  const getFeeCoinData = () => {
+    if (txn.isErc20 && txn.parentCoinId) {
+      return COINS[txn.parentCoinId];
     }
 
-    return txn.slug.toUpperCase();
+    return COINS[txn.coinId];
   };
 
   const getFeePrice = (showFull?: boolean) => {
@@ -193,10 +193,10 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   };
 
   const openTxn = () => {
-    const coin = COINS[txn.slug];
+    const coin = COINS[txn.coinId];
 
-    if (ETHCOINS[txn.coin] || txn.isErc20) {
-      const ecoin = ETHCOINS[txn.coin];
+    if (ETHCOINS[txn.parentCoinId] || txn.isErc20) {
+      const ecoin = ETHCOINS[txn.parentCoinId];
 
       if (!ecoin) {
         logger.error('Invalid ETH COIN in txn: ' + txn.coin);
@@ -272,13 +272,13 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   let coinData;
   const coinParent = txn.coin?.toLowerCase();
   const coinInitial = txn.slug?.toLowerCase();
-  if (coinParent && coinParent !== coinInitial) {
-    const parent = COINS[coinParent];
+  if (txn.parentCoinId && txn.parentCoinId !== txn.coinId) {
+    const parent = COINS[txn.parentCoinId];
     if (!parent) {
       logger.warn(`Cannot find coinType parent: ${coinParent}`);
     }
-    coinData = parent.tokenList[coinInitial];
-  } else coinData = COINS[coinInitial];
+    coinData = parent.tokenList[txn.coinId];
+  } else coinData = COINS[txn.coinId];
   if (!coinData) {
     logger.warn(`Cannot find coinType: ${coinInitial}`);
   }
@@ -336,8 +336,8 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         <div className={classes.flex}>
           <CoinIcons
             style={{ marginLeft: '0', marginRight: '10px' }}
-            initial={txn.slug.toUpperCase()}
-            parentCoin={txn.coin?.toLowerCase()}
+            initial={txn.coinId}
+            parentCoin={txn.parentCoinId}
           />
           <Typography sx={{ mr: 1 }}>
             {`${txn.slug.toUpperCase()} ${formatCoins(txn.displayAmount)} `}
@@ -363,9 +363,11 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         <div className={classes.flex}>
           <CoinIcons
             style={{ marginLeft: '0', marginRight: '10px' }}
-            initial={getFeeCoinName()}
+            initial={getFeeCoinData().id}
           />
-          <Typography sx={{ mr: 1 }}>{`${getFeeCoinName()} ${formatCoins(
+          <Typography
+            sx={{ mr: 1 }}
+          >{`${getFeeCoinData().abbr.toUpperCase()} ${formatCoins(
             txn.displayFees
           )}`}</Typography>
           <PopOverText

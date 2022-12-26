@@ -3,36 +3,42 @@ import { CoinGroup } from '@cypherock/communication';
 import { SyncItem } from '../../types/syncItem';
 
 export interface BalanceSyncItemOptions {
+  accountId: string;
+  coinId: string;
   coinType: string;
   xpub: string;
   walletId: string;
   module: string;
-  parentCoin?: string;
+  parentCoinId?: string;
   coinGroup: CoinGroup;
-  zpub?: string;
+  accountType?: string;
   customAccount?: string;
   isRefresh?: boolean;
 }
 
 export class BalanceSyncItem extends SyncItem {
+  public accountId: string;
+
   public xpub: string;
 
   public walletId: string;
 
-  public zpub?: string;
+  public accountType?: string;
 
   public customAccount?: string;
 
   constructor({
     xpub,
-    zpub,
+    accountType,
     coinType,
     walletId,
-    parentCoin,
+    parentCoinId: parentCoinId,
     coinGroup,
     customAccount,
     module,
-    isRefresh
+    isRefresh,
+    coinId,
+    accountId
   }: BalanceSyncItemOptions) {
     super({
       type: 'balance',
@@ -40,12 +46,14 @@ export class BalanceSyncItem extends SyncItem {
       isRefresh,
       module,
       coinGroup,
-      parentCoin
+      parentCoinId,
+      coinId
     });
     this.xpub = xpub;
-    this.zpub = zpub;
+    this.accountType = accountType;
     this.walletId = walletId;
     this.customAccount = customAccount;
+    this.accountId = accountId;
   }
 
   equals(item: BalanceSyncItem | SyncItem) {
@@ -54,6 +62,7 @@ export class BalanceSyncItem extends SyncItem {
         this.xpub === item.xpub &&
         this.coinType === item.coinType &&
         this.coinGroup === item.coinGroup &&
+        this.coinId === item.coinId &&
         this.customAccount === item.customAccount
       );
     }
@@ -63,11 +72,13 @@ export class BalanceSyncItem extends SyncItem {
 
   clone() {
     const newItem = new BalanceSyncItem({
+      accountId: this.accountId,
       xpub: this.xpub,
-      zpub: this.zpub,
+      accountType: this.accountType,
+      coinId: this.coinId,
       coinType: this.coinType,
       walletId: this.walletId,
-      parentCoin: this.parentCoin,
+      parentCoinId: this.parentCoinId,
       coinGroup: this.coinGroup,
       customAccount: this.customAccount,
       module: this.module,

@@ -21,7 +21,7 @@ import {
   handleErrors
 } from '../../../errors';
 import logger from '../../../utils/logger';
-import { addressDb, Coin, coinDb } from '../../database';
+import { Account, accountDb, addressDb } from '../../database';
 import { useSync } from '../../provider';
 
 import * as flowHandlers from './handlers';
@@ -31,7 +31,7 @@ function sleep(ms: number) {
 }
 
 export interface AddCoinStatus {
-  coin: Coin;
+  coin: Account;
   name: string;
   status: -1 | 0 | 1 | 2;
 }
@@ -134,12 +134,16 @@ export const useAddCoin: UseAddCoin = () => {
   };
 
   // This starts the adding coin task in a queue similar to `syncProvider`.
-  const setUpCoinWallets = async (coinList: Coin[]) => {
+  const setUpCoinWallets = async (coinList: Account[]) => {
     const coinStatus: AddCoinStatus[] = [];
 
     for (const [i, coin] of coinList.entries()) {
-      const coinData = COINS[coin.slug];
-      coinStatus.push({ coin, name: coinData.name, status: i === 0 ? 1 : 0 });
+      const coinData = COINS[coin.coinId];
+      coinStatus.push({
+        coin,
+        name: coinData.name,
+        status: i === 0 ? 1 : 0
+      });
     }
 
     setAddCoinIndex(0);
@@ -163,14 +167,16 @@ export const useAddCoin: UseAddCoin = () => {
       const { coin } = currentCoin;
       try {
         const wallet = newWallet({
-          coinType: coin.slug,
+          coinId: coin.coinId,
+          accountIndex: coin.accountIndex,
           xpub: coin.xpub,
           walletId: coin.walletId,
-          zpub: coin.zpub,
-          addressDB: addressDb
+          addressDB: addressDb,
+          accountId: coin.accountId,
+          accountType: coin.accountType
         });
         await wallet.setupNewWallet();
-        await coinDb.insert(coin);
+        await accountDb.insert(coin);
         coinStatus[addCoinIndex].status = 2;
       } catch (error) {
         coinStatus[addCoinIndex].status = -1;
@@ -236,7 +242,7 @@ export const useAddCoin: UseAddCoin = () => {
       const filteredXpubList = coinStatus.filter(elem => elem.status === 2);
       for (const coin of filteredXpubList) {
         sync.addCoinTask(coin.coin, {
-          module: `${coin.coin.walletId}-${coin.coin.slug}`
+          module: coin.coin.accountId
         });
       }
 
