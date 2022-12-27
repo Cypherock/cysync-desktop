@@ -128,15 +128,16 @@ const Summary: React.FC<StepComponentProps> = ({
     setOpen(true);
     setBroadcastError('');
     setAdvanceError('');
-    broadcastTxn(sendTransaction.signedTxn, coinDetails.slug)
+    broadcastTxn(sendTransaction.signedTxn, coinDetails.coinId)
       .then(res => {
         setOpen(false);
         sendTransaction.setHash(res);
         sendTransaction.onTxnBroadcast({
+          accountId: coinDetails.accountId,
           walletId: selectedWallet._id,
-          coin: coinDetails.slug,
-          txHash: res,
-          token: token ? token.slug : undefined
+          coinId: token?.coinId || coinDetails.coinId,
+          parentCoinId: coinDetails.coinId,
+          txHash: res
         });
         if (isNear)
           (async () => {

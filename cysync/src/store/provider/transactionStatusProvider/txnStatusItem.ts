@@ -4,6 +4,9 @@ import { SyncQueueItem } from '../syncProvider/types';
 import { SyncItem } from '../types/syncItem';
 
 export interface TxnStatusSyncItemOptions {
+  accountId: string;
+  coinId: string;
+  parentCoinId?: string;
   walletId: string;
   coinType: string;
   coinGroup: CoinGroup;
@@ -16,6 +19,7 @@ export interface TxnStatusSyncItemOptions {
 }
 
 export class TxnStatusItem extends SyncItem {
+  public accountId: string;
   public walletId: string;
   public txnHash: string;
   public sender: string; // needed in near RPC call param
@@ -36,17 +40,21 @@ export class TxnStatusItem extends SyncItem {
     coinGroup,
     isRefresh,
     module,
-    parentCoin,
-    backoffTime
+    backoffTime,
+    accountId,
+    coinId,
+    parentCoinId
   }: TxnStatusSyncItemOptions) {
     super({
       type: 'txnStatus',
       coinType,
+      coinId,
+      parentCoinId,
       isRefresh,
       module,
-      parentCoinId: parentCoin,
       coinGroup
     });
+    this.accountId = accountId;
     this.walletId = walletId;
     this.txnHash = txnHash;
     this.sender = sender;
@@ -56,12 +64,7 @@ export class TxnStatusItem extends SyncItem {
 
   equals(item: SyncQueueItem) {
     if (item instanceof TxnStatusItem) {
-      return (
-        this.walletId === item.walletId &&
-        this.coinType === item.coinType &&
-        this.coinGroup === item.coinGroup &&
-        this.txnHash === item.txnHash
-      );
+      return this.accountId === item.accountId && this.txnHash === item.txnHash;
     }
 
     return false;
@@ -69,6 +72,9 @@ export class TxnStatusItem extends SyncItem {
 
   clone() {
     const newItem = new TxnStatusItem({
+      accountId: this.accountId,
+      coinId: this.coinId,
+      parentCoinId: this.parentCoinId,
       walletId: this.walletId,
       txnHash: this.txnHash,
       sender: this.sender,

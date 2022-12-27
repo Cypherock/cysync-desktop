@@ -614,7 +614,7 @@ export const SyncProvider: React.FC = ({ children }) => {
       const coinId = coin.coinId;
       let coinData: AbsCoinData;
 
-      if (coin.parentCoinId) {
+      if (coin.parentCoinId && coin.parentCoinId !== coin.coinId) {
         const parentCoinData = COINS[coin.parentCoinId];
         if (!parentCoinData) {
           logger.warn('Invalid parentCoin in add latest price sync item', {
@@ -744,7 +744,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         {
           slug: token.slug,
           coinId: token.coinId,
-          parentCoinId: token.coinId,
+          parentCoinId: token.parentCoinId,
           coinGroup: CoinGroup.ERC20Tokens
         },
         {

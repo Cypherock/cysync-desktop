@@ -235,7 +235,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
     } else {
       shell.openExternal(
         bitcoinServer.transaction.getOpenTxnLink({
-          coinType: txn.slug.toLowerCase(),
+          coinType: coin.abbr,
           txHash: txn.hash,
           isConfirmed: txn.confirmations && txn.confirmations > 0
         })

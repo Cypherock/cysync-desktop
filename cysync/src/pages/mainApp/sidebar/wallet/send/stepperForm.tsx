@@ -280,24 +280,28 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       contractAddress = coin.address;
     }
 
-    sendTransaction.handleEstimateFee(
-      coinDetails.xpub,
-      coinDetails.zpub,
-      coinDetails.slug,
-      changeFormatOfOutputList(
+    sendTransaction.handleEstimateFee({
+      xpub: coinDetails.xpub,
+      accountId: coinDetails.accountId,
+      accountIndex: coinDetails.accountIndex,
+      accountType: coinDetails.accountType,
+      coinId: coinDetails.coinId,
+      coinType: coinDetails.slug,
+      outputList: changeFormatOfOutputList(
         batchRecipientData,
-        coinDetails.slug,
-        token?.slug
+        coinDetails.coinId,
+        token?.coinId
       ),
-      parseFloat(transactionFee) || 0,
-      maxSend,
-      {
+      fees: parseFloat(transactionFee) || 0,
+      isSendAll: maxSend,
+      data: {
         gasLimit,
         contractAddress,
-        contractAbbr: token ? token.slug.toLowerCase() : undefined
+        contractAbbr: token ? token.slug.toLowerCase() : undefined,
+        subCoinId: token?.coinId
       },
-      customAccount?.name
-    );
+      customAccount: customAccount?.name
+    });
   };
 
   const debouncedCaclFee = useDebouncedFunction(triggerCalcFee, 500);
@@ -326,7 +330,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     const fromAddress = wallet.address;
     const toAddress = batchRecipientData[0].recipient.trim();
     const { network } = coin;
-    const tokenData = coin.tokenList[token.slug];
+    const tokenData = coin.tokenList[token.coinId];
     const contractAddress = tokenData.address;
     // According to our research, amount does not matter in estimating gas limit, small or large,
     let amount = '1';

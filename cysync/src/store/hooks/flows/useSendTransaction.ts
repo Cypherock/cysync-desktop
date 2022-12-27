@@ -1,10 +1,14 @@
 import {
+  AbsCoinData,
+  CoinData,
   CoinGroup,
   COINS,
   DeviceConnection,
   DeviceError,
   DeviceErrorType,
   EthCoinData,
+  EthCoinMap,
+  ETHCOINS,
   NearCoinData,
   SolanaCoinData
 } from '@cypherock/communication';
@@ -43,22 +47,22 @@ const flowName = Analytics.Categories.SEND_TXN;
 
 export const changeFormatOfOutputList = (
   targetList: any,
-  coinId: string,
-  token: any
+  parentCoinId: string,
+  coinId: string
 ): Array<{ address: string; value?: BigNumber }> => {
-  const coin = COINS[coinId];
+  const coin = COINS[parentCoinId];
 
   if (!coin) {
-    throw new Error(`Invalid coinType ${coinId}`);
+    throw new Error(`Invalid coinType ${parentCoinId}`);
   }
 
   let multiplier = coin.multiplier;
 
-  if (token && coin instanceof EthCoinData) {
-    const tokenObj = coin.tokenList[token.toLowerCase()];
+  if (coinId && coin instanceof EthCoinData) {
+    const tokenObj = coin.tokenList[coinId];
 
-    if (!coin) {
-      throw new Error(`Invalid token ${token}, in ${coinId}`);
+    if (!tokenObj) {
+      throw new Error(`Invalid token ${coinId}, in ${parentCoinId}`);
     }
 
     multiplier = tokenObj.multiplier;
@@ -137,7 +141,7 @@ export const broadcastTxn = async (
     const res = await Server.bitcoin.transaction
       .broadcastTxn({
         transaction: signedTxn,
-        coinType: coinId
+        coinType: coin.abbr
       })
       .request();
     return res.data.tx.hash;
@@ -159,7 +163,7 @@ export const verifyAddress = (address: string, coin: DisplayCoin) => {
   }
 
   if (
-    coinDetails.coinListId === COINS.one.coinListId &&
+    coinDetails.coinListId === ETHCOINS[EthCoinMap.harmony].coinListId &&
     address.startsWith('one1')
   ) {
     try {
@@ -188,16 +192,23 @@ export interface HandleSendTransactionOptions {
   walletId: string;
   pinExists: boolean;
   passphraseExists: boolean;
+  accountId: string;
+  accountIndex: number;
+  accountType: string;
   coinId: string;
   xpub: string;
-  zpub: string | undefined;
   customAccount: string | undefined;
   newAccountId: string | undefined;
   coinType: string;
   outputList: any[];
   fees: number;
   isSendAll: boolean | undefined;
-  data: any;
+  data?: {
+    gasLimit: number;
+    contractAddress?: string;
+    contractAbbr?: string;
+    subCoinId?: string;
+  };
 }
 
 export interface UseSendTransactionValues {
@@ -231,27 +242,36 @@ export interface UseSendTransactionValues {
   sendMaxAmount: string;
   resetHooks: () => void;
   cancelSendTxn: (connection: DeviceConnection) => void;
-  handleEstimateFee: (
-    xpub: string,
-    zpub: string | undefined,
-    coinType: string,
-    outputList: any[],
-    fees: number,
-    isSendAll: boolean | undefined,
-    data: any,
-    customAccount: string | undefined
-  ) => Promise<void>;
+  handleEstimateFee: (params: {
+    xpub: string;
+    coinId: string;
+    accountId: string;
+    accountIndex: number;
+    accountType: string;
+    coinType: string;
+    outputList: any[];
+    fees: number;
+    isSendAll: boolean | undefined;
+    data?: {
+      gasLimit: number;
+      contractAddress?: string;
+      contractAbbr?: string;
+      subCoinId?: string;
+    };
+    customAccount: string | undefined;
+  }) => Promise<void>;
   onTxnBroadcast: (params: {
     walletId: string;
-    coin: string;
+    accountId: string;
+    coinId: string;
+    parentCoinId?: string;
     txHash: string;
-    token?: string;
   }) => void;
   onAddAccountTxnBroadcast: (params: {
     walletId: string;
-    coin: string;
+    coinId: string;
     txHash: string;
-    token?: string;
+    accountId: string;
   }) => void;
   estimationError: CyError;
   isEstimatingFees: boolean;
@@ -318,16 +338,19 @@ export const useSendTransaction: UseSendTransaction = () => {
   };
 
   const handleEstimateFee: UseSendTransactionValues['handleEstimateFee'] =
-    async (
+    async ({
       xpub,
-      zpub,
+      coinId,
+      accountId,
+      accountIndex,
+      accountType,
       coinType,
       outputList,
       fees,
       isSendAll,
       data,
       customAccount
-    ) => {
+    }) => {
       // If it has no input, then set the tx fee and amount to 0.
       if (!isSendAll && outputList.length > 0) {
         let hasInput = false;
@@ -368,18 +391,21 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       const { walletId } = await accountDb.getOne({ xpub, slug: coinType });
       sendTransaction
-        .calcApproxFee(
+        .calcApproxFee({
           xpub,
-          zpub,
+          accountId,
+          accountIndex,
+          accountType,
+          coinId,
           walletId,
           coinType,
           outputList,
-          fees,
+          fee: fees,
           isSendAll,
           data,
-          transactionDb,
+          transactionDB: transactionDb,
           customAccount
-        )
+        })
         .then(() => {
           setEstimationError(undefined);
           setIsEstimatingFees(false);
@@ -459,7 +485,9 @@ export const useSendTransaction: UseSendTransaction = () => {
       pinExists,
       passphraseExists,
       xpub,
-      zpub,
+      accountId,
+      accountType,
+      accountIndex,
       customAccount,
       newAccountId,
       coinId,
@@ -482,8 +510,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         data
       });
       logger.debug('SendTransaction Xpub', {
-        xpub,
-        zpub
+        xpub
       });
 
       if (!connection) {
@@ -682,6 +709,10 @@ export const useSendTransaction: UseSendTransaction = () => {
          */
         await sendTransaction.run({
           connection,
+          coinId,
+          accountId,
+          accountIndex,
+          accountType,
           sdkVersion,
           addressDB: addressDb,
           transactionDB: transactionDb,
@@ -689,7 +720,6 @@ export const useSendTransaction: UseSendTransaction = () => {
           pinExists,
           passphraseExists,
           xpub,
-          zpub,
           customAccount,
           newAccountId,
           coinType,
@@ -726,19 +756,30 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
   };
 
-  const onTxnBroadcast = ({
+  const onTxnBroadcast: UseSendTransactionValues['onTxnBroadcast'] = ({
     walletId,
+    accountId,
+    parentCoinId,
     coinId,
-    txHash,
-    token
-  }: {
-    walletId: string;
-    coinId: string;
-    txHash: string;
-    token?: string;
+    txHash
   }) => {
     try {
-      const coinObj = COINS[coinId];
+      let parentCoinObj: CoinData;
+      let coinObj: AbsCoinData;
+      let isSub = false;
+
+      if (parentCoinId && parentCoinId !== coinId) {
+        parentCoinObj = COINS[parentCoinId];
+        if (!parentCoinId) {
+          throw new Error(`Cannot find coinType: ${parentCoinId}`);
+        }
+
+        coinObj = parentCoinObj.tokenList[coinId];
+        isSub = true;
+      } else {
+        coinObj = COINS[coinId];
+      }
+
       if (!coinObj) {
         throw new Error(`Cannot find coinType: ${coinId}`);
       }
@@ -787,14 +828,18 @@ export const useSendTransaction: UseSendTransaction = () => {
         }
       }
 
-      if (token) {
+      if (isSub) {
         tx = {
+          coinId,
+          accountId,
+          parentCoinId,
+          isSub,
           hash: txHash,
           amount: amount.toString(),
           total: amount.toString(),
           fees: fees.toString(),
           walletId,
-          slug: token.toLowerCase(),
+          slug: coinObj.abbr.toLowerCase(),
           confirmations: 0,
           status: 0,
           sentReceive: SentReceive.SENT,
@@ -805,6 +850,10 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputs: formattedOutputs
         };
         const feeTxn: Transaction = {
+          coinId: parentCoinId,
+          accountId,
+          parentCoinId,
+          isSub: false,
           hash: txHash,
           amount: fees.toString(),
           total: fees.toString(),
@@ -821,6 +870,10 @@ export const useSendTransaction: UseSendTransaction = () => {
         transactionDb.insert(feeTxn);
       } else {
         tx = {
+          coinId,
+          accountId,
+          parentCoinId: coinId,
+          isSub: false,
           hash: txHash,
           customIdentifier:
             coinId.toLowerCase() === 'near'
@@ -850,7 +903,7 @@ export const useSendTransaction: UseSendTransaction = () => {
         if (tx.status === Status.PENDING) {
           addTransactionStatusCheckItem(tx);
         }
-        transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
+        transactionDb.blockUTXOS(txnInputs, tx.accountId);
         logger.info('UTXOS blocked');
         logger.info(txnInputs);
       });
@@ -859,90 +912,88 @@ export const useSendTransaction: UseSendTransaction = () => {
       setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
     }
   };
-  const onAddAccountTxnBroadcast = ({
-    walletId,
-    coinId,
-    txHash
-  }: {
-    walletId: string;
-    coinId: string;
-    txHash: string;
-  }) => {
-    try {
-      const coinObj = COINS[coinId];
-      if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${coinId}`);
-      }
 
-      let amount = new BigNumber(0);
-      const fees = new BigNumber(0.0012).multipliedBy(coinObj.multiplier); // near function-call hardcoded fees
-      const formattedInputs: InputOutput[] = [];
-      const formattedOutputs: InputOutput[] = [];
-
-      if (txnInputs) {
-        for (const [i, input] of txnInputs.entries()) {
-          amount = amount.plus(new BigNumber(input.value));
-          formattedInputs.push({
-            address: input.address,
-            indexNumber: i,
-            value: String(input.value),
-            isMine: input.isMine,
-            type: IOtype.INPUT
-          });
+  const onAddAccountTxnBroadcast: UseSendTransactionValues['onAddAccountTxnBroadcast'] =
+    ({ walletId, coinId, txHash, accountId }) => {
+      try {
+        const coinObj = COINS[coinId];
+        if (!coinObj) {
+          throw new Error(`Cannot find coinType: ${coinId}`);
         }
-      }
 
-      if (txnOutputs) {
-        for (const [i, output] of txnOutputs.entries()) {
-          if (output.isMine) {
-            amount = amount.minus(new BigNumber(output.value));
+        let amount = new BigNumber(0);
+        const fees = new BigNumber(0.0012).multipliedBy(coinObj.multiplier); // near function-call hardcoded fees
+        const formattedInputs: InputOutput[] = [];
+        const formattedOutputs: InputOutput[] = [];
+
+        if (txnInputs) {
+          for (const [i, input] of txnInputs.entries()) {
+            amount = amount.plus(new BigNumber(input.value));
+            formattedInputs.push({
+              address: input.address,
+              indexNumber: i,
+              value: String(input.value),
+              isMine: input.isMine,
+              type: IOtype.INPUT
+            });
           }
-          formattedOutputs.push({
-            address: output.address,
-            indexNumber: i,
-            value: String(output.value),
-            isMine: output.isMine,
-            type: IOtype.OUTPUT
-          });
         }
+
+        if (txnOutputs) {
+          for (const [i, output] of txnOutputs.entries()) {
+            if (output.isMine) {
+              amount = amount.minus(new BigNumber(output.value));
+            }
+            formattedOutputs.push({
+              address: output.address,
+              indexNumber: i,
+              value: String(output.value),
+              isMine: output.isMine,
+              type: IOtype.OUTPUT
+            });
+          }
+        }
+
+        const tx: Transaction = {
+          accountId,
+          coinId,
+          parentCoinId: coinId,
+          isSub: false,
+          hash: txHash,
+          amount: amount.toString(),
+          total: amount.plus(fees).toString(),
+          fees: fees.toString(),
+          customIdentifier:
+            coinId.toLowerCase() === 'near'
+              ? formattedInputs[0].address
+              : undefined,
+          type: coinId.toLowerCase() === 'near' ? 'FUNCTION_CALL' : undefined,
+          description:
+            coinId.toLowerCase() === 'near'
+              ? `Created account ${formattedOutputs[0]?.address}`
+              : undefined,
+          walletId,
+          slug: coinId.toLowerCase(),
+          confirmations: 1,
+          status: Status.SUCCESS,
+          sentReceive: SentReceive.SENT,
+          confirmed: new Date().toISOString(),
+          blockHeight: -1,
+          inputs: formattedInputs,
+          outputs: formattedOutputs
+        };
+
+        transactionDb.insert(tx).then(() => {
+          if (tx.status === Status.PENDING) addTransactionStatusCheckItem(tx);
+          transactionDb.blockUTXOS(txnInputs, tx.accountId);
+          logger.info('UTXOS blocked');
+          logger.info(txnInputs);
+        });
+      } catch (error) {
+        const cyError = new CyError(CysyncError.SEND_TXN_BROADCAST_FAILED);
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
       }
-
-      const tx: Transaction = {
-        hash: txHash,
-        amount: amount.toString(),
-        total: amount.plus(fees).toString(),
-        fees: fees.toString(),
-        customIdentifier:
-          coinId.toLowerCase() === 'near'
-            ? formattedInputs[0].address
-            : undefined,
-        type: coinId.toLowerCase() === 'near' ? 'FUNCTION_CALL' : undefined,
-        description:
-          coinId.toLowerCase() === 'near'
-            ? `Created account ${formattedOutputs[0]?.address}`
-            : undefined,
-        walletId,
-        slug: coinId.toLowerCase(),
-        confirmations: 1,
-        status: Status.SUCCESS,
-        sentReceive: SentReceive.SENT,
-        confirmed: new Date().toISOString(),
-        blockHeight: -1,
-        inputs: formattedInputs,
-        outputs: formattedOutputs
-      };
-
-      transactionDb.insert(tx).then(() => {
-        if (tx.status === Status.PENDING) addTransactionStatusCheckItem(tx);
-        transactionDb.blockUTXOS(txnInputs, tx.slug, tx.walletId);
-        logger.info('UTXOS blocked');
-        logger.info(txnInputs);
-      });
-    } catch (error) {
-      const cyError = new CyError(CysyncError.SEND_TXN_BROADCAST_FAILED);
-      setErrorObj(handleErrors(errorObj, cyError, flowName, { error }));
-    }
-  };
+    };
 
   // I think this will work, reset the error obj if its cancelled
   useEffect(() => {

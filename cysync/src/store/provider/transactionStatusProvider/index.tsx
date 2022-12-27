@@ -157,6 +157,9 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
       }
 
       const newItem = new TxnStatusItem({
+        accountId: txn.accountId,
+        coinId: txn.coinId,
+        parentCoinId: txn.parentCoinId,
         walletId: txn.walletId,
         txnHash: txn.hash,
         sender: txn.outputs[0]?.address,

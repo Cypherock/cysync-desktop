@@ -52,18 +52,18 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
     let name = '';
     const coin = COINS[coinDetails.coinId];
     if (!coin) {
-      throw new Error('Invalid coinType: ' + coinDetails.slug);
+      throw new Error('Invalid coinType: ' + coinDetails.coinId);
     }
 
     name = coin.name;
 
     if (token) {
       if (!coin) {
-        throw new Error('Invalid coinType: ' + coinDetails.slug);
+        throw new Error('Invalid coinType: ' + coinDetails.coinId);
       }
-      const tokenData = coin.tokenList[token.slug];
+      const tokenData = coin.tokenList[token.coinId];
       if (!tokenData) {
-        throw new Error('Invalid coinType: ' + coinDetails.slug);
+        throw new Error('Invalid coinType: ' + token.coinId);
       }
       name = tokenData.name;
     }

@@ -121,13 +121,14 @@ const Summary: React.FC<StepComponentProps> = ({
     setOpen(true);
     setBroadcastError('');
     setAdvanceError('');
-    broadcastTxn(sendTransaction.signedTxn, coinDetails.slug)
+    broadcastTxn(sendTransaction.signedTxn, coinDetails.coinId)
       .then(res => {
         setOpen(false);
         sendTransaction.setHash(res);
         sendTransaction.onAddAccountTxnBroadcast({
           walletId: selectedWallet._id,
-          coin: coinDetails.slug,
+          coinId: coinDetails.coinId,
+          accountId: coinDetails.accountId,
           txHash: res
         });
         (async () => {
