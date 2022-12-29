@@ -25,6 +25,8 @@ export const insertFromFullTxn = async (transaction: {
   addresses: any[];
   walletId: string;
   coinId: string;
+  parentCoinId: string;
+  accountId: string;
   coinType: string;
   addressDB: AddressDB;
   status?: 'PENDING' | 'SUCCESS' | 'FAILED';
@@ -35,6 +37,8 @@ export const insertFromFullTxn = async (transaction: {
     addresses,
     walletId,
     coinId,
+    parentCoinId,
+    accountId,
     addressDB,
     status,
     coinType
@@ -67,7 +71,7 @@ export const insertFromFullTxn = async (transaction: {
     // Get all addresses of that xpub and coin
     // This is because the address from the API is of only 1 wallet,
     // Whereas there are 2 (or 4 in case od BTC & BTCT) wallets.
-    const addressFromDB = await addressDB.getAll({ walletId, coinId });
+    const addressFromDB = await addressDB.getAll({ accountId });
 
     if (addressFromDB && addressFromDB.length > 0) {
       myAddresses = myAddresses.concat(
@@ -111,8 +115,7 @@ export const insertFromFullTxn = async (transaction: {
 
     const existingTxns = await transactionDb.getAll({
       hash: txn.hash,
-      walletId,
-      coinId
+      accountId
     });
 
     if (existingTxns && existingTxns.length > 0) {
@@ -165,6 +168,10 @@ export const insertFromFullTxn = async (transaction: {
     }
 
     const newTxn: Transaction = {
+      accountId,
+      coinId,
+      parentCoinId,
+      isSub: parentCoinId && parentCoinId !== coinId,
       hash: txn.hash,
       total: String(txn.total),
       fees: String(txn.fees),
@@ -235,6 +242,10 @@ export const insertFromFullTxn = async (transaction: {
       }
 
       const feeTxn: Transaction = {
+        accountId,
+        coinId,
+        parentCoinId: coinId,
+        isSub: false,
         hash: txn.hash,
         amount: fees.toString(),
         fees: '0',
@@ -256,6 +267,10 @@ export const insertFromFullTxn = async (transaction: {
     }
 
     const newTxn: Transaction = {
+      accountId,
+      coinId,
+      parentCoinId,
+      isSub: parentCoinId && parentCoinId !== coinId,
       hash: txn.hash,
       amount: amount.toString(),
       fees: fees.toString(),
@@ -292,6 +307,10 @@ export const insertFromFullTxn = async (transaction: {
         const selfTransfer = fromAddr === toAddr;
         const amount = String(instruction.parsed?.info?.lamports || 0);
         const newTxn: Transaction = {
+          accountId,
+          coinId,
+          parentCoinId,
+          isSub: parentCoinId && parentCoinId !== coinId,
           hash: ele.signature,
           amount: selfTransfer ? '0' : amount,
           fees: fees.toString(),

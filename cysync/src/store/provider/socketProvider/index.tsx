@@ -1,4 +1,4 @@
-import { CoinGroup, COINS } from '@cypherock/communication';
+import { BtcCoinMap, CoinGroup, COINS } from '@cypherock/communication';
 import { getServerUrl } from '@cypherock/server-wrapper';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
@@ -142,7 +142,10 @@ export const SocketProvider: React.FC = ({ children }) => {
                   xpub: coin.xpub,
                   addresses: [],
                   walletId: payload.walletId,
-                  coinId: payload.coinType,
+                  coinId: coin.coinId,
+                  parentCoinId: coin.coinId,
+                  accountId: coin.accountId,
+                  coinType: payload.coinType,
                   addressDB: addressDb
                 });
                 if (payload.tokenAbbr) {
@@ -256,18 +259,18 @@ export const SocketProvider: React.FC = ({ children }) => {
   };
 
   const getWalletDataFromAddress = async (
-    coinType: string,
+    coinId: string,
     address: string
   ): Promise<{ walletId: string | undefined; xpub: string | undefined }> => {
     let walletId: string | undefined;
     let xpub: string | undefined;
 
-    const addressDetails = await addressDb.getOne({ address, coinType });
+    const addressDetails = await addressDb.getOne({ address, coinId });
     if (addressDetails) {
       walletId = addressDetails.walletId;
       const coinDetails = await accountDb.getOne({
         walletId,
-        slug: coinType
+        slug: coinId
       });
       xpub = coinDetails.xpub;
     }
@@ -362,6 +365,9 @@ export const SocketProvider: React.FC = ({ children }) => {
               const newTxns = await prepareFromBlockbookTxn({
                 txn: payload.txn,
                 xpub: coin.xpub,
+                accountId: coin.accountId,
+                coinId: coin.coinId,
+                parentCoinId: coin.coinId,
                 addresses: [],
                 walletId: address.walletId,
                 coinType: payload.coinType,
@@ -453,14 +459,17 @@ export const SocketProvider: React.FC = ({ children }) => {
         };
       }
 
-      const webServers = ['btc', 'btct', 'ltc', 'dash', 'doge'];
+      const webServers = Object.values(BtcCoinMap).map(elem => {
+        const coin = COINS[elem];
+        return {
+          coinId: coin.id,
+          name: coin.abbr,
+          url: `https://${coin.abbr}1.cypherock.com`
+        };
+      });
 
       logger.info('Setting Blockbook websocket');
-      const currentBlockbookSocket = new BlockbookSocket(
-        webServers.map(elem => {
-          return { name: elem, url: `https://${elem}1.cypherock.com` };
-        })
-      );
+      const currentBlockbookSocket = new BlockbookSocket(webServers);
 
       currentBlockbookSocket
         .connect()

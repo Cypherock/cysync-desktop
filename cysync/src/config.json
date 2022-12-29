@@ -4,6 +4,6 @@
   "SERVER_ENV": "development",
   "GITHUB_REPO": "Cypherock/cysync-desktop-dev",
   "ALLOW_PRERELEASE": true,
-  "SIMULATE_PRODUCTION": true,
+  "SIMULATE_PRODUCTION": false,
   "BUILD_VERSION": "DEVELOPMENT"
 }

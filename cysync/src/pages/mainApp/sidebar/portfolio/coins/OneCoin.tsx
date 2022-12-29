@@ -63,7 +63,6 @@ interface OneCoinProps {
   coinPortfolio: string;
   decimal: number;
   index: number;
-  coinParent: string | undefined;
 }
 
 const OneCoin: React.FC<OneCoinProps> = props => {
@@ -77,8 +76,7 @@ const OneCoin: React.FC<OneCoinProps> = props => {
     coinValue,
     decimal,
     coinPortfolio,
-    index,
-    coinParent
+    index
   } = props;
 
   const navigate = useNavigate();
@@ -105,8 +103,8 @@ const OneCoin: React.FC<OneCoinProps> = props => {
     <Root onClick={onClick} container>
       <Grid item xs={3} className={classes.coin}>
         <CoinIcons
-          initial={coinInitial.toUpperCase()}
-          parentCoin={coinParent?.toLowerCase()}
+          initial={coinId}
+          parentCoin={parentCoinId}
           style={{ marginRight: '10px' }}
         />
         <div className={classes.coinText}>
@@ -182,6 +180,8 @@ const OneCoin: React.FC<OneCoinProps> = props => {
 };
 
 OneCoin.propTypes = {
+  coinId: PropTypes.string.isRequired,
+  parentCoinId: PropTypes.string,
   coinInitial: PropTypes.string.isRequired,
   coinHolding: PropTypes.string.isRequired,
   coinValue: PropTypes.string.isRequired,

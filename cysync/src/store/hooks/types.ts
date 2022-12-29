@@ -109,11 +109,12 @@ export interface CoinHistory {
 
 export interface CoinDetails {
   name: string;
+  coinId: string;
   decimal: number;
   balance: string;
   value: string;
   price: string;
-  parent: string | undefined;
+  parentCoinId: string | undefined;
 }
 
 export interface ExecutionResult<T> {

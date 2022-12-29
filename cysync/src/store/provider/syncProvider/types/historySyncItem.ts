@@ -110,6 +110,7 @@ export class HistorySyncItem extends SyncItem {
 
   clone() {
     const newItem = new HistorySyncItem({
+      accountId: this.accountId,
       xpub: this.xpub,
       coinId: this.coinId,
       accountType: this.accountType,

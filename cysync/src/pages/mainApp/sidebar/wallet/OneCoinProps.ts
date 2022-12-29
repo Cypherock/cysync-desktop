@@ -1,4 +1,3 @@
-import { Account } from '@cypherock/database';
 import PropTypes from 'prop-types';
 
 export interface OneCoinProps {

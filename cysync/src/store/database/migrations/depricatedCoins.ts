@@ -6,7 +6,6 @@ const deleteDepricatedCoins: MigrationFunction = async ({
   coinDb,
   priceHistoryDb,
   tokenDb,
-  addressDb,
   receiveAddressDb,
   transactionDb,
   customAccountDb
@@ -35,8 +34,9 @@ const deleteDepricatedCoins: MigrationFunction = async ({
       },
       {
         name: 'Addresses',
-        promises: depricatedCoins.map(elem =>
-          addressDb.delete({ coinType: elem.abbr })
+        promises: depricatedCoins.map(
+          elem => Promise.resolve(elem)
+          // addressDb.delete({ coinType: elem.abbr })
         )
       },
       {

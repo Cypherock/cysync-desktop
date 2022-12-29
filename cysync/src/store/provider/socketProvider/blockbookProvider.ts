@@ -2,9 +2,10 @@ import { EventEmitter } from 'events';
 
 import logger from '../../../utils/logger';
 
-import BlockbookSocket from './websocket';
+import Socket from './websocket';
 
 export interface WebSocketServerInfo {
+  coinId: string;
   name: string;
   url: string;
 }
@@ -19,7 +20,7 @@ export interface AddressInfo {
 }
 
 interface SocketInfo {
-  socket: BlockbookSocket;
+  socket: Socket;
   info: WebSocketServerInfo;
   isSubscribedToBlock: boolean;
   connectRetryTimeout?: ReturnType<typeof setTimeout>;
@@ -46,9 +47,9 @@ export default class BlockbookProvider extends EventEmitter {
     this.websocketServerInfoList = [...serverInfo];
 
     for (const server of this.websocketServerInfoList) {
-      const socket = new BlockbookSocket({
+      const socket = new Socket({
         url: server.url,
-        coinType: server.name,
+        coinId: server.coinId,
         keepAlive: true
       });
 

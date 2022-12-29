@@ -4,8 +4,8 @@ import BigNumber from 'bignumber.js';
 import { getPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
+  Account,
   accountDb,
-  Coin,
   getAllTxns,
   getLatestPriceForCoin,
   priceHistoryDb,
@@ -21,26 +21,27 @@ import { CoinDetails, CoinHistory, CoinPriceHistory } from '../types';
  * wallets
  */
 export const getCoinPriceHistory = async (
-  coinType: string,
+  coinId: string,
   days: number,
   walletId = '',
-  parent?: string
+  parentCoinId?: string
 ) => {
   let coinData;
-  if (parent) {
-    const parentData = COINS[parent];
-    if (!parentData) throw new Error(`Parent coin ${parent} not found`);
-    coinData = parentData.tokenList[coinType];
-  } else coinData = COINS[coinType];
+  if (parentCoinId) {
+    const parentData = COINS[parentCoinId];
+    if (!parentData) throw new Error(`Parent coin ${parentCoinId} not found`);
+    coinData = parentData.tokenList[coinId];
+  } else coinData = COINS[coinId];
   if (!coinData) {
-    throw new Error(`Cannot find coinType: ${coinType}`);
+    throw new Error(`Cannot find coinType: ${coinId}`);
   }
 
   let totalBalance = new BigNumber(0);
   const allPrices = await priceHistoryDb.getOne({
-    slug: coinType,
+    coinId,
     interval: days
   });
+
   if (!allPrices) {
     return null;
   }
@@ -55,23 +56,30 @@ export const getCoinPriceHistory = async (
 
   if (walletId && walletId !== 'null') {
     if (coinData.group === CoinGroup.ERC20Tokens) {
-      const token = await tokenDb.getOne({
+      const tokens = await tokenDb.getAll({
         walletId,
-        slug: coinType
+        coinId
       });
-      if (token) totalBalance = new BigNumber(token.balance);
+      if (tokens)
+        totalBalance = tokens.reduce(
+          (a, v) => a.plus(new BigNumber(v.balance || 0)),
+          new BigNumber(totalBalance)
+        );
       else return null;
     } else {
-      const coin = await accountDb.getOne({ walletId, slug: coinType });
-      if (coin)
-        totalBalance = new BigNumber(coin.totalBalance ? coin.totalBalance : 0);
+      const accounts = await accountDb.getAll({ walletId, coinId });
+      if (accounts)
+        totalBalance = accounts.reduce(
+          (a, v) => a.plus(new BigNumber(v.totalBalance || 0)),
+          new BigNumber(totalBalance)
+        );
       else return null;
     }
 
     transactionHistory = await getAllTxns(
       {
         walletId,
-        slug: coinType
+        coinId
       },
       {
         excludeFailed: true,
@@ -85,13 +93,13 @@ export const getCoinPriceHistory = async (
     );
   } else {
     if (coinData.group === CoinGroup.ERC20Tokens) {
-      const tokens = await tokenDb.getAll({ slug: coinType });
+      const tokens = await tokenDb.getAll({ coinId });
       if (tokens.length === 0) return null;
       for (const token of tokens) {
         totalBalance = totalBalance.plus(token.balance);
       }
     } else {
-      const allCoins = await accountDb.getAll({ slug: coinType });
+      const allCoins = await accountDb.getAll({ coinId });
       if (allCoins.length === 0) return null;
       for (const coin of allCoins) {
         totalBalance = totalBalance.plus(
@@ -102,7 +110,7 @@ export const getCoinPriceHistory = async (
 
     transactionHistory = await getAllTxns(
       {
-        slug: coinType
+        coinId
       },
       {
         excludeFailed: true,
@@ -175,9 +183,9 @@ export const getCoinPriceHistory = async (
   }
 
   if (hasNegative) {
-    logger.warn('Portfolio: Negative value found in ' + coinType, {
-      coinType,
-      parent,
+    logger.warn('Portfolio: Negative value found in ' + coinId, {
+      coinType: coinId,
+      parent: parentCoinId,
       hasWallet: !!walletId,
       days
     });
@@ -197,9 +205,9 @@ const getAllCoinPriceHistory = async (params: {
   days: number;
   walletId?: string;
   isRefresh?: boolean;
-  allCoins: Coin[];
+  allCoins: Account[];
   allTokens: Token[];
-  allCoinItems: Array<{ parent?: string; slug: string }>;
+  allCoinItems: Array<{ parentCoinId?: string; coinId: string }>;
 }) => {
   const { days, walletId, isRefresh, allCoinItems } = params;
 
@@ -236,11 +244,11 @@ const getAllCoinPriceHistory = async (params: {
 
   for (const item of allCoinItems) {
     let coin;
-    if (item.parent) {
-      const parent = COINS[item.parent];
-      coin = parent.tokenList[item.slug];
+    if (item.parentCoinId) {
+      const parent = COINS[item.parentCoinId];
+      coin = parent.tokenList[item.coinId];
     } else {
-      coin = COINS[item.slug];
+      coin = COINS[item.coinId];
     }
 
     if (!coin) {
@@ -248,16 +256,16 @@ const getAllCoinPriceHistory = async (params: {
     }
     if (coin.isTest) continue;
     const coinPrices = await getCoinPriceHistory(
-      item.slug,
+      item.coinId,
       days,
       walletId,
-      item.parent
+      item.parentCoinId
     );
     if (!coinPrices || !coinPrices.pricesToDisplay) continue;
 
-    allCoinList.push(item.slug);
+    allCoinList.push(coin.name);
     const tempCoin: CoinHistory = {
-      name: item.slug,
+      name: item.coinId,
       data: coinPrices.pricesToDisplay
     };
 
@@ -285,9 +293,9 @@ const getAllCoinPriceHistory = async (params: {
 
 export const coinsUserHas = async (params: {
   walletId?: string;
-  allCoins: Coin[];
+  allAccounts: Account[];
   allTokens: Token[];
-  allCoinItems: Array<{ parent?: string; slug: string }>;
+  allCoinItems: Array<{ parentCoinId?: string; coinId: string }>;
 }) => {
   const { walletId, allCoinItems } = params;
 
@@ -297,63 +305,60 @@ export const coinsUserHas = async (params: {
 
   for (const item of allCoinItems) {
     let coinData;
-    if (item.parent) {
-      const parent = COINS[item.parent];
+    if (item.parentCoinId) {
+      const parent = COINS[item.parentCoinId];
       if (!parent) {
-        throw new Error(`Cannot find parent coinType: ${item.parent}`);
+        throw new Error(`Cannot find parent coinType: ${item.parentCoinId}`);
       }
-      coinData = parent.tokenList[item.slug];
+      coinData = parent.tokenList[item.coinId];
     } else {
-      coinData = COINS[item.slug];
+      coinData = COINS[item.coinId];
     }
     if (!coinData) {
-      throw new Error(`Cannot find coinType: ${item.slug}`);
+      throw new Error(`Cannot find coinType: ${item.coinId}`);
     }
     let totalBalance = new BigNumber(0);
     const currentTempCoin: CoinDetails = {
-      name: item.slug,
-      parent: item.parent,
+      name: coinData.abbr,
+      coinId: item.coinId,
+      parentCoinId: item.parentCoinId,
       decimal: coinData.decimal,
       balance: '0',
       value: '0',
       price: '0'
     };
 
+    const extraFilter: any = {};
     if (walletId && walletId !== 'null') {
-      if (coinData.group === CoinGroup.ERC20Tokens) {
-        const token = await tokenDb.getOne({
-          walletId,
-          slug: item.slug
-        });
-        if (token) totalBalance = new BigNumber(token.balance);
-        else continue;
-      } else {
-        const xpub = await accountDb.getOne({ walletId, slug: item.slug });
-        if (xpub)
-          totalBalance = new BigNumber(
-            xpub.totalBalance ? xpub.totalBalance : 0
-          );
-        else continue;
-      }
-    } else {
-      if (coinData.group === CoinGroup.ERC20Tokens) {
-        const tokens = await tokenDb.getAll({ slug: item.slug });
-        if (tokens.length === 0) continue;
+      extraFilter.walletId = walletId;
+    }
+
+    if (coinData.group === CoinGroup.ERC20Tokens) {
+      const tokens = await tokenDb.getAll({
+        coinId: item.coinId,
+        ...extraFilter
+      });
+      if (tokens.length !== 0)
         for (const token of tokens) {
           totalBalance = totalBalance.plus(token.balance);
         }
-      } else {
-        const coinsData = await accountDb.getAll({ slug: item.slug });
-        if (coinsData.length === 0) continue;
+    } else {
+      const coinsData = await accountDb.getAll({
+        coinId: item.coinId,
+        ...extraFilter
+      });
+      if (coinsData.length !== 0)
         for (const coin of coinsData) {
           totalBalance = totalBalance.plus(
             coin.totalBalance ? coin.totalBalance : 0
           );
         }
-      }
     }
 
-    const latestPrice = await getLatestPriceForCoin(item.slug, item.parent);
+    const latestPrice = await getLatestPriceForCoin(
+      item.coinId,
+      item.parentCoinId
+    );
 
     const balance = totalBalance.dividedBy(coinData.multiplier);
 
@@ -391,20 +396,20 @@ export const getCoinData = async (params: {
   onlyGraphChange?: boolean;
 }) => {
   const { days, walletId, isRefresh } = params;
-  const allCoins = await accountDb.getAll();
+  const allAccounts = await accountDb.getAll();
   const allTokens = await tokenDb.getAll();
   const allCoinItems = [
     ...new Map(
-      allCoins
+      allAccounts
         .map(coin => {
-          return { parent: undefined, slug: coin.slug };
+          return { parentCoinId: undefined, coinId: coin.coinId };
         })
         .map(item => [JSON.stringify(item), item])
     ).values(),
     ...new Map(
       allTokens
         .map(token => {
-          return { parent: token.coin, slug: token.slug };
+          return { parentCoinId: token.parentCoinId, coinId: token.coinId };
         })
         .map(item => [JSON.stringify(item), item])
     ).values()
@@ -419,7 +424,7 @@ export const getCoinData = async (params: {
   if (!params.onlyGraphChange) {
     data1 = await coinsUserHas({
       walletId,
-      allCoins,
+      allAccounts,
       allTokens,
       allCoinItems
     });
@@ -429,7 +434,7 @@ export const getCoinData = async (params: {
     days,
     walletId,
     isRefresh,
-    allCoins,
+    allCoins: allAccounts,
     allTokens,
     allCoinItems
   });
