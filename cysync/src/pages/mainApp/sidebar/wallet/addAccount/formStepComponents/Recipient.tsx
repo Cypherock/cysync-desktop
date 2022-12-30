@@ -228,7 +228,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     useCustomAccount();
 
   const [availableAccounts, setAvailableAccounts] = useState<string[]>([]);
-  const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
+  const coinNetwork = (COINS[coinDetails.coinId] as NearCoinData).network;
   const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
 
   const {
@@ -237,7 +237,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   useEffect(() => {
     setCurrentWalletId(_id);
-    setCurrentCoin(coinDetails.slug);
+    setCurrentCoin(coinDetails.coinId);
   }, [_id]);
 
   useEffect(() => {
@@ -262,7 +262,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.slug : coinDetails.slug;
+  const coinAbbr = token
+    ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.abbr
+    : COINS[coinDetails.coinId].abbr;
 
   const { sendTransaction } = useSendTransactionContext();
 
@@ -309,7 +311,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     200
   );
   const checkNearAccount = async (address: string) => {
-    const coin = COINS[coinDetails.slug];
+    const coin = COINS[coinDetails.coinId];
     if (coin instanceof NearCoinData) {
       if (address.includes('.')) return 'This is not a valid Near address';
       if ((address + nearSuffix).length > 64)
@@ -351,7 +353,6 @@ const Recipient: React.FC<StepComponentProps> = props => {
         xpub: coinDetails.xpub,
         customAccount: creatorAccount,
         newAccountId: recipientData[0].recipient + nearSuffix,
-        coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
           recipientData,
           coinDetails.coinId,

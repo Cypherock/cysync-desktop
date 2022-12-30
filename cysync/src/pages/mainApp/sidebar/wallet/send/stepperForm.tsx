@@ -286,7 +286,6 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       accountIndex: coinDetails.accountIndex,
       accountType: coinDetails.accountType,
       coinId: coinDetails.coinId,
-      coinType: coinDetails.slug,
       outputList: changeFormatOfOutputList(
         batchRecipientData,
         coinDetails.coinId,
@@ -297,7 +296,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       data: {
         gasLimit,
         contractAddress,
-        contractAbbr: token ? token.slug.toLowerCase() : undefined,
+        contractAbbr: token
+          ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.abbr
+          : undefined,
         subCoinId: token?.coinId
       },
       customAccount: customAccount?.name

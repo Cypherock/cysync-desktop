@@ -106,7 +106,7 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
     const coin = COINS[coinDetails.coinId];
 
     if (!coin) {
-      logger.error('Invalid COIN in coinDetails: ' + coinDetails.slug);
+      logger.error('Invalid COIN in coinDetails: ' + coinDetails.coinId);
       return;
     }
 

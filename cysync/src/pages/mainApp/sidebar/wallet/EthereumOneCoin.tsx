@@ -212,13 +212,8 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
 
   const { beforeNetworkAction } = useConnection();
 
-  const {
-    tokenData,
-    tokenList,
-    setCurrentEthCoin,
-    setCurrentWalletId,
-    sortTokensByIndex
-  } = useToken();
+  const { tokenData, tokenList, setCurrentAccountId, sortTokensByIndex } =
+    useToken();
 
   useEffect(() => {
     const key = accountId;
@@ -261,7 +256,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
     await Promise.all(
       tokenList.map(async token => {
         await addressDb.delete({ accountId, coinId: token });
-        await receiveAddressDb.delete({ accountId, coinType: token });
+        await receiveAddressDb.delete({ accountId, coinId: token });
         await transactionDb.delete({ accountId, coinId: token });
       })
     );
@@ -308,9 +303,8 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   };
 
   useEffect(() => {
-    setCurrentWalletId(selectedWallet._id);
-    setCurrentEthCoin(coinDetails.slug);
-  }, [selectedWallet._id]);
+    setCurrentAccountId(coinDetails.accountId);
+  }, [coinDetails]);
 
   useEffect(() => {
     setCollapseTab(false);
@@ -327,8 +321,6 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
         parentCoinId: coinId,
         accountId,
         walletId: selectedWallet._id,
-        coin: initial,
-        slug: selectedToken,
         balance: '0',
         price: 0,
         displayValue: '0',
@@ -529,17 +521,17 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
                   {tokenData.map(token => {
                     const oneTokenData = COINS[coinId].tokenList[token.coinId];
                     if (!oneTokenData) {
-                      throw new Error(`Cannot find coinType: ${token.coin}`);
+                      throw new Error(`Cannot find coinId: ${token.coinId}`);
                     }
                     return (
-                      <React.Fragment key={token.slug}>
+                      <React.Fragment key={token.coinId}>
                         <TokenContext.Provider
                           value={{ token, ethCoinId: initial }}
                         >
                           <OneToken
                             coinId={token.coinId}
                             accountId={accountId}
-                            initial={token.slug.toUpperCase()}
+                            initial={oneTokenData.abbr.toUpperCase()}
                             name={oneTokenData.name}
                             holding={token.displayBalance}
                             price={token.displayPrice}

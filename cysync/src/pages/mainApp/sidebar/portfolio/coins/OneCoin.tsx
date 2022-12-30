@@ -83,20 +83,20 @@ const OneCoin: React.FC<OneCoinProps> = props => {
   const color = ['#DB953C', '#328332', '#F3BA2F'];
 
   const onClick = () => {
-    navigate(`${Routes.transactions.index}?slug=${coinInitial.toLowerCase()}`);
+    navigate(`${Routes.transactions.index}?coinId=${coinId}`);
   };
 
   let coin;
   if (parentCoinId) {
     const parent = COINS[parentCoinId];
     if (!parent) {
-      throw new Error(`Cannot find coinType: ${parentCoinId}`);
+      throw new Error(`Cannot find parentCoinId: ${parentCoinId}`);
     }
     coin = parent.tokenList[coinId];
   } else coin = COINS[coinId];
 
   if (!coin) {
-    throw new Error(`Cannot find coinType: ${coinId}`);
+    throw new Error(`Cannot find coinId: ${coinId}`);
   }
 
   return (

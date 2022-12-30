@@ -69,7 +69,7 @@ export const useCustomAccount: UseCustomAccount = () => {
     for (const account of accounts) {
       const coinObj = COINS[account.coinId];
       if (!coinObj || coinObj.group !== CoinGroup.Near) {
-        throw new Error(`Cannot find coinType: ${account.coin}`);
+        throw new Error(`Cannot find coinId: ${account.coinId}`);
       }
       const coinWithPrice: DisplayCustomAccount = {
         ...account,
@@ -119,9 +119,9 @@ export const useCustomAccount: UseCustomAccount = () => {
 
   const getAllCustomAccountsFromWallet = async (
     walletId: string,
-    coin: string
+    coinId: string
   ) => {
-    const res = await customAccountDb.getAll({ walletId, coin });
+    const res = await customAccountDb.getAll({ walletId, coinId });
     const accounts: string[] = [];
     res.forEach(account => {
       accounts.push(account.name);

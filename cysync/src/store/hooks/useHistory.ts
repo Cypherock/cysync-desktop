@@ -16,7 +16,6 @@ import { DisplayInputOutput, DisplayTransaction } from './types';
 export interface UseHistoryGetAllParams {
   sinceDate?: Date | undefined;
   walletId?: string | undefined;
-  coinType?: string | undefined;
   accountId?: string | undefined;
   coinId?: string | undefined;
 }
@@ -32,7 +31,6 @@ export const useHistory: UseHistory = () => {
   const getAll: UseHistoryValues['getAll'] = async ({
     sinceDate,
     walletId,
-    coinType,
     accountId,
     coinId
   }) => {
@@ -40,9 +38,6 @@ export const useHistory: UseHistory = () => {
     const query: TxQuery = {};
     if (walletId) {
       query.walletId = walletId;
-    }
-    if (coinType) {
-      query.slug = coinType;
     }
     if (accountId) {
       query.accountId = accountId;
@@ -90,7 +85,7 @@ export const useHistory: UseHistory = () => {
       }
 
       if (!coin) {
-        logger.warn(`Cannot find coinType: ${txn.coinId}`);
+        logger.warn(`Cannot find coinId: ${txn.coinId}`);
         continue;
       }
       const feeCoinMultiplier = isToken

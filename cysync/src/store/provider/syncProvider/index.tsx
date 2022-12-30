@@ -5,6 +5,7 @@ import {
   COINS,
   EthCoinData,
   NearCoinData,
+  NearCoinMap,
   SolanaCoinData
 } from '@cypherock/communication';
 import PropTypes from 'prop-types';
@@ -269,14 +270,12 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       if (!coinData) {
         logger.warn('Xpub with invalid coin found', {
-          coin,
-          coinType: coin.slug
+          coin
         });
         logger.debug(
           'Xpub with invalid coin found addHistorySyncItemFromCoin',
           {
             coinData,
-            coinType: coin.slug,
             coin
           }
         );
@@ -301,7 +300,6 @@ export const SyncProvider: React.FC = ({ children }) => {
           accountType: coin.accountType,
           xpub: coin.xpub,
           walletId: coin.walletId,
-          coinType: coinData.abbr,
           isRefresh,
           module,
           afterBlock: topBlock,
@@ -338,7 +336,6 @@ export const SyncProvider: React.FC = ({ children }) => {
           coinId: coin.coinId,
           xpub: coin.xpub,
           walletId: coin.walletId,
-          coinType: coinData.abbr,
           afterBlock: topBlock,
           afterTokenBlock: topTokenBlock,
           isRefresh,
@@ -369,7 +366,6 @@ export const SyncProvider: React.FC = ({ children }) => {
             coinId: coin.coinId,
             xpub: coin.xpub,
             walletId: coin.walletId,
-            coinType: coinData.abbr,
             afterBlock: topBlock,
             coinGroup: CoinGroup.Near,
             isRefresh,
@@ -394,7 +390,6 @@ export const SyncProvider: React.FC = ({ children }) => {
           coinId: coin.coinId,
           xpub: coin.xpub,
           walletId: coin.walletId,
-          coinType: coinData.abbr,
           afterHash: topHash,
           coinGroup: CoinGroup.Solana,
           isRefresh,
@@ -403,12 +398,10 @@ export const SyncProvider: React.FC = ({ children }) => {
         addToQueue(newItem);
       } else {
         logger.warn('Xpub with invalid coin found', {
-          coinData,
-          coinType: coin.slug
+          coinData
         });
         logger.debug('Xpub with invalid coin found', {
           coinData,
-          coinType: coin.slug,
           coin
         });
       }
@@ -429,7 +422,6 @@ export const SyncProvider: React.FC = ({ children }) => {
             accountType: coin.accountType,
             xpub: coin.xpub,
             walletId: coin.walletId,
-            coinType: coin.slug,
             coinGroup: CoinGroup.ERC20Tokens,
             module,
             isRefresh
@@ -441,13 +433,12 @@ export const SyncProvider: React.FC = ({ children }) => {
       if (!coinData) {
         logger.warn('Xpub with invalid coin found', {
           coinData,
-          coinType: coin.slug
+          coinId: coin.coinId
         });
         logger.debug(
           'Xpub with invalid coin found addBalanceSyncItemFromCoin',
           {
             coinData,
-            coinType: coin.slug,
             coin
           }
         );
@@ -462,7 +453,6 @@ export const SyncProvider: React.FC = ({ children }) => {
             accountType: coin.accountType,
             xpub: coin.xpub,
             walletId: coin.walletId,
-            coinType: coin.slug,
             module,
             isRefresh,
             coinGroup: CoinGroup.Ethereum
@@ -470,7 +460,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         );
       } else if (coinData.group === CoinGroup.Near) {
         const customAccounts = await customAccountDb.getAll({
-          coin: coin.slug,
+          coinId: coin.coinId,
           walletId: coin.walletId
         });
         for (const account of customAccounts) {
@@ -481,7 +471,6 @@ export const SyncProvider: React.FC = ({ children }) => {
             accountType: coin.accountType,
             xpub: coin.xpub,
             walletId: coin.walletId,
-            coinType: coin.slug,
             isRefresh,
             coinGroup: CoinGroup.Near,
             module,
@@ -496,7 +485,6 @@ export const SyncProvider: React.FC = ({ children }) => {
           accountType: coin.accountType,
           xpub: coin.xpub,
           walletId: coin.walletId,
-          coinType: coin.slug,
           isRefresh,
           coinGroup: CoinGroup.Solana,
           module
@@ -515,13 +503,13 @@ export const SyncProvider: React.FC = ({ children }) => {
       if (!coinData) {
         logger.warn('Xpub with invalid coin found', {
           coinData,
-          coinType: coin.slug
+          coinId: coin.coinId
         });
         logger.debug(
           'Xpub with invalid coin found addCustomAccountSyncItemFromCoin',
           {
             coinData,
-            coinType: coin.slug,
+            coinId: coin.coinId,
             coin
           }
         );
@@ -534,7 +522,6 @@ export const SyncProvider: React.FC = ({ children }) => {
           coinId: coin.coinId,
           xpub: coin.xpub,
           walletId: coin.walletId,
-          coinType: coin.slug,
           isRefresh,
           module
         });
@@ -552,7 +539,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         const parentCoinData = COINS[coin.parentCoinId];
         if (!parentCoinData) {
           logger.warn('Invalid parentCoin in add price sync item', {
-            coinType: coin.parentCoinId
+            coinId: coin.parentCoinId
           });
           return;
         }
@@ -563,7 +550,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       if (!coinData) {
         logger.warn('Invalid coin in add price sync item', {
-          coinType: coinId
+          coinId
         });
         return;
       }
@@ -596,7 +583,6 @@ export const SyncProvider: React.FC = ({ children }) => {
             const newItem = new PriceSyncItem({
               days,
               coinId: coinData.id,
-              coinType: coinData.abbr,
               coinGroup: coinData.group,
               parentCoinId: coin.parentCoinId,
               id: coinData.coinGeckoId,
@@ -618,7 +604,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         const parentCoinData = COINS[coin.parentCoinId];
         if (!parentCoinData) {
           logger.warn('Invalid parentCoin in add latest price sync item', {
-            coinType: coin.parentCoinId
+            coinId: coin.parentCoinId
           });
           return;
         }
@@ -629,7 +615,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       if (!coinData) {
         logger.warn('Invalid coin in add latest price sync item', {
-          coinType: coinId
+          coinId
         });
         return;
       }
@@ -637,7 +623,6 @@ export const SyncProvider: React.FC = ({ children }) => {
       if (!coinData.isTest) {
         const newItem = new LatestPriceSyncItem({
           coinId: coin.coinId,
-          coinType: coinData.abbr,
           parentCoinId: coin.parentCoinId,
           coinGroup: coinData.group,
           id: coinData.coinGeckoId,
@@ -684,7 +669,6 @@ export const SyncProvider: React.FC = ({ children }) => {
           coinId: token.coinId,
           xpub: ethXpub.xpub,
           walletId: token.walletId,
-          coinType: token.slug,
           parentCoinId: token.parentCoinId,
           coinGroup: CoinGroup.ERC20Tokens,
           module,
@@ -698,7 +682,7 @@ export const SyncProvider: React.FC = ({ children }) => {
     isRefresh = false,
     module = 'refresh-custom-acc'
   }) => {
-    const coins = await accountDb.getAll({ slug: 'near' });
+    const coins = await accountDb.getAll({ coinId: NearCoinMap.near });
     for (const coin of coins) {
       addCustomAccountSyncItemFromCoin(coin, { isRefresh, module });
     }
@@ -717,7 +701,6 @@ export const SyncProvider: React.FC = ({ children }) => {
         {
           coinId: token.coinId,
           parentCoinId: token.parentCoinId,
-          slug: token.slug,
           coinGroup: CoinGroup.ERC20Tokens
         },
         {
@@ -742,7 +725,6 @@ export const SyncProvider: React.FC = ({ children }) => {
     for (const token of tokens) {
       addLatestPriceSyncItemFromCoin(
         {
-          slug: token.slug,
           coinId: token.coinId,
           parentCoinId: token.parentCoinId,
           coinGroup: CoinGroup.ERC20Tokens

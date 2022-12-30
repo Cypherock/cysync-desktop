@@ -5,7 +5,6 @@ import { SyncItem } from '../../types/syncItem';
 export interface HistorySyncItemOptions {
   accountId: string;
   coinId: string;
-  coinType: string;
   xpub: string;
   walletId: string;
   module: string;
@@ -47,7 +46,6 @@ export class HistorySyncItem extends SyncItem {
     accountId,
     accountType,
     walletId,
-    coinType,
     module,
     page,
     afterBlock,
@@ -62,7 +60,6 @@ export class HistorySyncItem extends SyncItem {
   }: HistorySyncItemOptions) {
     super({
       type: 'history',
-      coinType,
       isRefresh,
       module,
       parentCoinId: parentCoin,
@@ -87,7 +84,6 @@ export class HistorySyncItem extends SyncItem {
       if (coin && coin.group === CoinGroup.Ethereum) {
         return (
           this.xpub === item.xpub &&
-          this.coinType === item.coinType &&
           this.accountId === item.accountId &&
           this.coinId === item.coinId
         );
@@ -97,7 +93,6 @@ export class HistorySyncItem extends SyncItem {
         this.coinId === item.coinId &&
         this.xpub === item.xpub &&
         this.accountType === item.accountType &&
-        this.coinType === item.coinType &&
         this.customAccount === item.customAccount &&
         this.afterTokenBlock === item.afterTokenBlock &&
         this.afterHash === item.afterHash &&
@@ -115,7 +110,6 @@ export class HistorySyncItem extends SyncItem {
       coinId: this.coinId,
       accountType: this.accountType,
       walletId: this.walletId,
-      coinType: this.coinType,
       module: this.module,
       page: this.page,
       afterBlock: this.afterBlock,

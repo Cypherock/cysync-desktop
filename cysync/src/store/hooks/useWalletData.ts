@@ -60,7 +60,7 @@ export const useWalletData: UseWalletData = () => {
     for (const coin of coins) {
       const coinObj = COINS[coin.coinId];
       if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${coin.slug}`);
+        throw new Error(`Cannot find coinId: ${coin.coinId}`);
       }
 
       const coinWithPrice: DisplayCoin = {
@@ -114,7 +114,7 @@ export const useWalletData: UseWalletData = () => {
       case 2:
         setCoinData(
           [...coins].sort((a, b) => {
-            return a.slug.localeCompare(b.slug);
+            return a.coinId.localeCompare(b.coinId);
           })
         );
         break;
@@ -122,7 +122,7 @@ export const useWalletData: UseWalletData = () => {
       case 3:
         setCoinData(
           [...coins].sort((a, b) => {
-            return b.slug.localeCompare(a.slug);
+            return b.coinId.localeCompare(a.coinId);
           })
         );
         break;

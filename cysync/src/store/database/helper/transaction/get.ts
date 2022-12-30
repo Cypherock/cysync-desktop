@@ -8,8 +8,6 @@ export interface TxQuery {
   parentCoinId?: string;
   isSub?: boolean;
   accountId?: string;
-  slug?: string;
-  coin?: string;
   customIdentifier?: string;
   sentReceive?: SentReceive;
   status?: Status;

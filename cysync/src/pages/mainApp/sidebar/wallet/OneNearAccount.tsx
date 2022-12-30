@@ -125,6 +125,7 @@ const Root = styled('div')(({ theme }) => ({
 }));
 
 interface OneNearAccountProps {
+  coinId: string;
   initial: string;
   name: string;
   holding: string;
@@ -136,6 +137,7 @@ interface OneNearAccountProps {
 }
 
 const OneNearAccount: React.FC<OneNearAccountProps> = ({
+  coinId,
   initial,
   name,
   holding,
@@ -172,9 +174,7 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
   const onClick = (e: React.MouseEvent) => {
     prevent(e);
     navigate(
-      `${
-        Routes.transactions.index
-      }?slug=${initial.toLowerCase()}&wallet=${walletId}`
+      `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}`
     );
   };
 
@@ -297,6 +297,7 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
 };
 
 OneNearAccount.propTypes = {
+  coinId: PropTypes.string.isRequired,
   initial: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   holding: PropTypes.string.isRequired,

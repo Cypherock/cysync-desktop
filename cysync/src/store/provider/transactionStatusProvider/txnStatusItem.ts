@@ -8,7 +8,6 @@ export interface TxnStatusSyncItemOptions {
   coinId: string;
   parentCoinId?: string;
   walletId: string;
-  coinType: string;
   coinGroup: CoinGroup;
   isRefresh: boolean;
   txnHash: string;
@@ -36,7 +35,6 @@ export class TxnStatusItem extends SyncItem {
     walletId,
     txnHash,
     sender,
-    coinType,
     coinGroup,
     isRefresh,
     module,
@@ -47,7 +45,6 @@ export class TxnStatusItem extends SyncItem {
   }: TxnStatusSyncItemOptions) {
     super({
       type: 'txnStatus',
-      coinType,
       coinId,
       parentCoinId,
       isRefresh,
@@ -78,7 +75,6 @@ export class TxnStatusItem extends SyncItem {
       walletId: this.walletId,
       txnHash: this.txnHash,
       sender: this.sender,
-      coinType: this.coinType,
       coinGroup: this.coinGroup,
       isRefresh: this.isRefresh,
       module: this.module,

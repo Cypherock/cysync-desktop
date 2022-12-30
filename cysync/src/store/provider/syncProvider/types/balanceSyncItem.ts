@@ -5,7 +5,6 @@ import { SyncItem } from '../../types/syncItem';
 export interface BalanceSyncItemOptions {
   accountId: string;
   coinId: string;
-  coinType: string;
   xpub: string;
   walletId: string;
   module: string;
@@ -30,7 +29,6 @@ export class BalanceSyncItem extends SyncItem {
   constructor({
     xpub,
     accountType,
-    coinType,
     walletId,
     parentCoinId: parentCoinId,
     coinGroup,
@@ -42,7 +40,6 @@ export class BalanceSyncItem extends SyncItem {
   }: BalanceSyncItemOptions) {
     super({
       type: 'balance',
-      coinType,
       isRefresh,
       module,
       coinGroup,
@@ -60,7 +57,6 @@ export class BalanceSyncItem extends SyncItem {
     if (item instanceof BalanceSyncItem) {
       return (
         this.xpub === item.xpub &&
-        this.coinType === item.coinType &&
         this.coinGroup === item.coinGroup &&
         this.coinId === item.coinId &&
         this.customAccount === item.customAccount
@@ -76,7 +72,6 @@ export class BalanceSyncItem extends SyncItem {
       xpub: this.xpub,
       accountType: this.accountType,
       coinId: this.coinId,
-      coinType: this.coinType,
       walletId: this.walletId,
       parentCoinId: this.parentCoinId,
       coinGroup: this.coinGroup,

@@ -20,8 +20,7 @@ import {
   useNetwork,
   useSelectedWallet,
   useSendTransactionContext,
-  useSync,
-  useTokenContext
+  useSync
 } from '../../../../../../store/provider';
 import Analytics from '../../../../../../utils/analytics';
 import formatDisplayAmount from '../../../../../../utils/formatDisplayAmount';
@@ -106,11 +105,7 @@ const Summary: React.FC<StepComponentProps> = ({
   const coinNetwork = (COINS[coinDetails.coinId] as NearCoinData).network;
   const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
 
-  const { token } = useTokenContext();
-
   const { connected } = useNetwork();
-
-  const coinAbbr = token ? token.slug : coinDetails.slug;
 
   const { sendTransaction } = useSendTransactionContext();
 
@@ -133,22 +128,20 @@ const Summary: React.FC<StepComponentProps> = ({
         });
         (async () => {
           try {
-            const coins = await accountDb.getAll({
-              walletId: coinDetails.walletId,
-              slug: coinDetails.slug
+            const coin = await accountDb.getOne({
+              accountId: coinDetails.accountId
             });
-            if (coins.length < 1) throw new Error('No coins found');
+            if (!coin) throw new Error('No coins found');
             const data: CustomAccount = {
-              accountId: '', // TODO: NOW
-              coinId: 'near', // TODO: NOW
+              accountId: coinDetails.accountId,
+              coinId: coinDetails.coinId,
               name: recipientData[0].recipient + nearSuffix,
               walletId: coinDetails.walletId,
-              coin: coinDetails.slug,
               price: coinDetails.price.toString(),
               balance: '0'
             };
             await customAccountDb.insert(data);
-            addBalanceSyncItemFromCoin(coins[0], {});
+            addBalanceSyncItemFromCoin(coin, {});
           } catch (error) {
             logger.error('Custom Account database update failed', error);
           }
@@ -156,8 +149,7 @@ const Summary: React.FC<StepComponentProps> = ({
         handleNext();
         Analytics.Instance.event(
           Analytics.Categories.SEND_TXN,
-          Analytics.Actions.COMPLETED,
-          coinAbbr
+          Analytics.Actions.COMPLETED
         );
         return null;
       })
@@ -190,17 +182,17 @@ const Summary: React.FC<StepComponentProps> = ({
         }
         Analytics.Instance.event(
           Analytics.Categories.SEND_TXN,
-          Analytics.Actions.BROADCAST_ERROR,
-          coinAbbr
+          Analytics.Actions.BROADCAST_ERROR
         );
       });
   };
 
+  const coinAbbr = COINS[coinDetails.coinId]?.abbr?.toUpperCase();
+
   const handleRetry = () => {
     Analytics.Instance.event(
       Analytics.Categories.SEND_TXN,
-      Analytics.Actions.RETRY,
-      coinAbbr
+      Analytics.Actions.RETRY
     );
     logger.info('Send transaction retry');
     handleSend();
@@ -238,7 +230,7 @@ const Summary: React.FC<StepComponentProps> = ({
         />
         <LabelText
           label="Amount"
-          text={`~ ${0.1} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
+          text={`~ ${0.1} ${coinAbbr} ( $${formatDisplayAmount(
             0.1 * parseFloat(coinDetails.displayPrice),
             2,
             true
@@ -247,7 +239,7 @@ const Summary: React.FC<StepComponentProps> = ({
         />
         <LabelText
           label="Transaction Fee"
-          text={`~ ${0.0012} ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
+          text={`~ ${0.0012} ${coinAbbr} ~( $${formatDisplayAmount(
             0.0012 * parseFloat(coinDetails.displayPrice),
             2,
             true

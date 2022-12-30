@@ -114,7 +114,9 @@ const Summary: React.FC<StepComponentProps> = ({
 
   const { connected } = useNetwork();
 
-  const coinAbbr = token ? token.slug : coinDetails.slug;
+  const coinAbbr = token
+    ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.abbr
+    : COINS[coinDetails.coinId]?.abbr;
 
   const coinPrice = token ? token.displayPrice : coinDetails.displayPrice;
 
@@ -142,8 +144,7 @@ const Summary: React.FC<StepComponentProps> = ({
         if (isNear)
           (async () => {
             const coins = await accountDb.getAll({
-              walletId: coinDetails.walletId,
-              slug: coinDetails.slug
+              accountId: coinDetails.accountId
             });
             if (coins.length >= 1)
               addCustomAccountSyncItemFromCoin(coins[0], {});
@@ -287,9 +288,9 @@ const Summary: React.FC<StepComponentProps> = ({
         )}
         <LabelText
           label="Transaction Fee"
-          text={`~ ${
-            sendTransaction.totalFees
-          } ${coinDetails.slug.toUpperCase()} ~( $${formatDisplayAmount(
+          text={`~ ${sendTransaction.totalFees} ${COINS[
+            coinDetails.coinId
+          ]?.abbr.toUpperCase()} ~( $${formatDisplayAmount(
             parseFloat(sendTransaction.totalFees) *
               parseFloat(coinDetails.displayPrice),
             2,

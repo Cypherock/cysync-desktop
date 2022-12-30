@@ -11,7 +11,7 @@ const getFees = async (coinId: string) => {
   const coin = COINS[coinId];
 
   if (!coin) {
-    throw new Error(`Invalid coinType ${coinId}`);
+    throw new Error(`Invalid coinId ${coinId}`);
   }
 
   if (coin instanceof EthCoinData) {

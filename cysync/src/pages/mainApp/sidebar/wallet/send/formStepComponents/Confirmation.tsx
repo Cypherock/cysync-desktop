@@ -148,7 +148,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
     const coin = COINS[coinDetails.coinId];
 
     if (!coin) {
-      logger.error('Invalid COIN in coinDetails: ' + coinDetails.slug);
+      logger.error('Invalid COIN in coinDetails: ' + coinDetails.coinId);
       return;
     }
 
@@ -193,7 +193,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
     } else {
       shell.openExternal(
         Server.bitcoin.transaction.getOpenTxnLink({
-          coinType: coinDetails.slug,
+          coinType: coin.abbr,
           txHash: sendTransaction.hash,
           isConfirmed
         })

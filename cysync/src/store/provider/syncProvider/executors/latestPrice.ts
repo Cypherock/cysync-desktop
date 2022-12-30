@@ -10,13 +10,12 @@ import { LatestPriceSyncItem } from '../types';
 export const getRequestsMetadata = (
   item: LatestPriceSyncItem
 ): IRequestMetadata[] => {
-  const usesNewApi = Boolean(item.id);
   const pricingMetadata = pricingServer
     .getLatest(
       {
-        coin: usesNewApi ? item.id : item.coinType
+        coin: item.id
       },
-      usesNewApi
+      true
     )
     .getMetadata();
 
@@ -33,15 +32,8 @@ export const processResponses = async (
 
   const res = responses[0];
 
-  const usesNewApi = Boolean(item.id);
-  let data;
-  let priceLastUpdatedAt;
-  if (usesNewApi) {
-    data = res.data[item.id].usd;
-    priceLastUpdatedAt = res.data[item.id].last_updated_at;
-  } else {
-    data = res.data.data.price;
-  }
+  const data = res.data[item.id].usd;
+  const priceLastUpdatedAt = res.data[item.id].last_updated_at;
 
   await coinPriceDb.insert({
     coinId: item.coinId,

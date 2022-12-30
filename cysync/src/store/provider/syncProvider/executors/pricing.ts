@@ -10,14 +10,13 @@ import { PriceSyncItem } from '../types';
 export const getRequestsMetadata = (
   item: PriceSyncItem
 ): IRequestMetadata[] => {
-  const usesNewApi = Boolean(item.id);
   const pricingMetadata = pricingServer
     .get(
       {
-        coin: usesNewApi ? item.id : item.coinType,
+        coin: item.id,
         days: item.days
       },
-      usesNewApi
+      true
     )
     .getMetadata();
 
@@ -28,7 +27,6 @@ export const processResponses = async (
   item: PriceSyncItem,
   responses: batchServer.IBatchResponse[]
 ): Promise<any> => {
-  const usesNewApi = Boolean(item.id);
   if (responses.length <= 0) {
     throw new Error('Did not find responses while processing');
   }
@@ -37,15 +35,13 @@ export const processResponses = async (
 
   await priceHistoryDb.insert({
     coinId: item.coinId,
-    slug: item.coinType,
     interval: item.days,
-    data: usesNewApi ? res.data.prices : res.data.data.entries
+    data: res.data.prices
   });
 
-  if (item.days === 30 && usesNewApi) {
+  if (item.days === 30) {
     await priceHistoryDb.insert({
       coinId: item.coinId,
-      slug: item.coinType,
       interval: 7,
       data: res.data.prices.slice(-168) // 7 * 24 for hourly interval
     });

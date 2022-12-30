@@ -14,6 +14,7 @@ import {
   useSelectedWallet
 } from '../../../../../../store/provider';
 import { checkCoinSupport } from '../../../../../../utils/coinCheck';
+import logger from '../../../../../../utils/logger';
 
 import {
   StepComponentProps,
@@ -128,6 +129,12 @@ const SelectCoin: React.FC<StepComponentProps> = ({
     }
 
     const coin = coins.find(e => e.isSelected);
+
+    if (!coin) {
+      logger.warn('No coin selected');
+      return;
+    }
+
     coinAdder.handleCoinAdd({
       connection,
       sdkVersion: deviceSdkVersion,
@@ -145,7 +152,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
 
             return coin.id === el.id;
           })?.accountIndex || -1) + 1,
-        accountType: coin.accountType.id
+        accountType: coin.accountType?.id
       },
       pinExists: selectedWallet.passwordSet,
       passphraseExists: selectedWallet.passphraseSet

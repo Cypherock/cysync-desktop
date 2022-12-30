@@ -6,7 +6,6 @@ export interface CustomAccountSyncItemOptions {
   accountId: string;
   accountType?: string;
   coinId: string;
-  coinType: string;
   xpub: string;
   walletId: string;
   module: string;
@@ -20,7 +19,6 @@ export class CustomAccountSyncItem extends SyncItem {
   public accountType: string;
 
   constructor({
-    coinType,
     xpub,
     walletId,
     module,
@@ -32,7 +30,6 @@ export class CustomAccountSyncItem extends SyncItem {
     super({
       type: 'customAccount',
       coinGroup: CoinGroup.Near,
-      coinType,
       isRefresh,
       module,
       coinId
@@ -46,7 +43,6 @@ export class CustomAccountSyncItem extends SyncItem {
   equals(item: CustomAccountSyncItem | SyncItem) {
     if (item instanceof CustomAccountSyncItem) {
       return (
-        this.coinType === item.coinType &&
         this.walletId === item.walletId &&
         this.coinId === item.coinId &&
         this.accountId === item.accountId &&
@@ -63,7 +59,6 @@ export class CustomAccountSyncItem extends SyncItem {
       accountId: this.accountId,
       accountType: this.accountType,
       coinId: this.coinId,
-      coinType: this.coinType,
       walletId: this.walletId,
       xpub: this.xpub,
       module: this.module,

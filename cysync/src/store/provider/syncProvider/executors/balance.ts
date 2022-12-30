@@ -34,10 +34,10 @@ export const getRequestsMetadata = (
     const token = parentCoin.tokenList[item.coinId];
 
     if (!token) {
-      throw new Error('Invalid coin in balance sync item: ' + item.coinType);
+      throw new Error('Invalid coin in balance sync item: ' + item.coinId);
     }
 
-    const address = generateEthAddressFromXpub(item.xpub);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinId);
     if (!item.parentCoinId) {
       throw new Error('Invalid ethCoin found in balance sync item' + token);
     }
@@ -60,11 +60,11 @@ export const getRequestsMetadata = (
   const coin = COINS[item.coinId];
 
   if (!coin) {
-    throw new Error('Invalid coin in balance sync item: ' + item.coinType);
+    throw new Error('Invalid coin in balance sync item: ' + item.coinId);
   }
 
   if (coin instanceof EthCoinData) {
-    const address = generateEthAddressFromXpub(item.xpub);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinId);
     const balanceMetadata = ethServer.wallet
       .getBalance(
         {
@@ -104,7 +104,7 @@ export const getRequestsMetadata = (
       .getMetadata();
     return [balanceMetadata];
   } else {
-    throw new Error('Invalid coin in balance sync item: ' + item.coinType);
+    throw new Error('Invalid coin in balance sync item: ' + item.coinId);
   }
 };
 
@@ -124,7 +124,7 @@ export const processResponses = async (
     const token = parentCoin.tokenList[item.coinId];
 
     if (!token) {
-      throw new Error('Invalid coin in balance sync item: ' + item.coinType);
+      throw new Error('Invalid coin in balance sync item: ' + item.coinId);
     }
 
     if (!item.parentCoinId) {
@@ -151,7 +151,7 @@ export const processResponses = async (
   const coin = COINS[item.coinId];
 
   if (!coin) {
-    throw new Error('Invalid coin in balance sync item: ' + item.coinType);
+    throw new Error('Invalid coin in balance sync item: ' + item.coinId);
   }
 
   if (coin instanceof EthCoinData) {
@@ -177,7 +177,7 @@ export const processResponses = async (
     }
     const customAccounts = await customAccountDb.getAll({
       walletId: item.walletId,
-      coin: item.coinType
+      coinId: item.coinId
     });
     let totalBalance = new BigNumber(0);
     for (const customAccount of customAccounts) {
@@ -198,6 +198,6 @@ export const processResponses = async (
       totalUnconfirmedBalance: '0'
     });
   } else {
-    throw new Error('Invalid coin in balance sync item: ' + item.coinType);
+    throw new Error('Invalid coin in balance sync item: ' + item.coinId);
   }
 };

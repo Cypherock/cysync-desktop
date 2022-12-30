@@ -4,7 +4,6 @@ import { SyncItem } from '../../types/syncItem';
 
 export interface PriceSyncItemOptions {
   coinId: string;
-  coinType: string;
   days: 7 | 30 | 365;
   module: string;
   isRefresh?: boolean;
@@ -19,7 +18,6 @@ export class PriceSyncItem extends SyncItem {
 
   constructor({
     days,
-    coinType,
     isRefresh,
     module,
     coinGroup,
@@ -29,7 +27,6 @@ export class PriceSyncItem extends SyncItem {
   }: PriceSyncItemOptions) {
     super({
       type: 'price',
-      coinType,
       isRefresh,
       module,
       coinGroup,
@@ -44,7 +41,6 @@ export class PriceSyncItem extends SyncItem {
     if (item instanceof PriceSyncItem) {
       return (
         this.days === item.days &&
-        this.coinType === item.coinType &&
         this.coinGroup === item.coinGroup &&
         this.coinId === item.coinId &&
         this.id === item.id
@@ -58,7 +54,6 @@ export class PriceSyncItem extends SyncItem {
     const newItem = new PriceSyncItem({
       coinId: this.coinId,
       days: this.days,
-      coinType: this.coinType,
       isRefresh: this.isRefresh,
       module: this.module,
       parentCoinId: this.parentCoinId,

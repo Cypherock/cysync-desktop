@@ -27,7 +27,6 @@ export const insertFromFullTxn = async (transaction: {
   coinId: string;
   parentCoinId: string;
   accountId: string;
-  coinType: string;
   addressDB: AddressDB;
   status?: 'PENDING' | 'SUCCESS' | 'FAILED';
 }) => {
@@ -40,8 +39,7 @@ export const insertFromFullTxn = async (transaction: {
     parentCoinId,
     accountId,
     addressDB,
-    status,
-    coinType
+    status
   } = transaction;
 
   let statusCode: Status;
@@ -178,7 +176,6 @@ export const insertFromFullTxn = async (transaction: {
       amount: totalValue.absoluteValue().toString(),
       confirmations: txn.confirmations || 0,
       walletId,
-      slug: coinType,
       sentReceive,
       status: statusCode,
       confirmed: new Date(txn.confirmed).toISOString(),
@@ -199,7 +196,7 @@ export const insertFromFullTxn = async (transaction: {
     await transactionDb.insert(newTxn);
   } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
-    const myAddress = generateEthAddressFromXpub(xpub, coinType.toLowerCase());
+    const myAddress = generateEthAddressFromXpub(xpub, coin.id);
     const amount = new BigNumber(txn.value);
     const fromAddr = txn.from;
     const inputs: InputOutput[] = [
@@ -252,13 +249,11 @@ export const insertFromFullTxn = async (transaction: {
         total: fees.toString(),
         confirmations: txn.confirmations || 0,
         walletId,
-        coin: coinType,
         // 2 for failed, 1 for pass
         status: txn.isError ? 2 : 1,
         sentReceive: SentReceive.FEES,
         confirmed: new Date(txn.timeStamp).toISOString(),
         blockHeight: txn.blockNumber,
-        slug: coinType,
         inputs: [],
         outputs: []
       };
@@ -277,7 +272,6 @@ export const insertFromFullTxn = async (transaction: {
       total: token ? amount.toString() : amount.plus(fees).toString(),
       confirmations: txn.confirmations || 0,
       walletId,
-      slug: token ? token : coinType,
       // 2 for failed, 1 for pass
       status: txn.isError ? 2 : 1,
       sentReceive:
@@ -286,7 +280,6 @@ export const insertFromFullTxn = async (transaction: {
           : SentReceive.RECEIVED,
       confirmed: new Date(txn.timeStamp).toISOString(),
       blockHeight: txn.blockNumber,
-      coin: coinType,
       inputs,
       outputs
     };
@@ -317,13 +310,11 @@ export const insertFromFullTxn = async (transaction: {
           total: new BigNumber(amount).plus(fees).toString(),
           confirmations: 1,
           walletId: transaction.walletId,
-          slug: transaction.coinId,
           status: ele.meta?.err || ele.err ? 2 : 1,
           sentReceive:
             address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
           confirmed: new Date(parseInt(ele.blockTime, 10) * 1000).toISOString(), // conversion from timestamp in seconds
           blockHeight: ele.slot,
-          coin: transaction.coinId,
           inputs: [
             {
               address: fromAddr,
@@ -360,7 +351,6 @@ export const prepareFromBlockbookTxn = async (transaction: {
   xpub: string;
   addresses: any[];
   walletId: string;
-  coinType: string;
   addressDB: AddressDB;
   status?: 'PENDING' | 'SUCCESS' | 'FAILED';
 }): Promise<Transaction[]> => {
@@ -372,7 +362,6 @@ export const prepareFromBlockbookTxn = async (transaction: {
     parentCoinId,
     addresses,
     walletId,
-    coinType,
     addressDB,
     status
   } = transaction;
@@ -450,8 +439,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
 
     const existingTxns = await transactionDb.getAll({
       hash: txn.txid,
-      walletId,
-      slug: coinType
+      accountId
     });
 
     if (existingTxns && existingTxns.length > 0) {
@@ -520,7 +508,6 @@ export const prepareFromBlockbookTxn = async (transaction: {
       amount: totalValue.absoluteValue().toString(),
       confirmations: txn.confirmations || 0,
       walletId,
-      slug: coinType,
       sentReceive,
       status: statusCode,
       confirmed: confirmed.toISOString(),
@@ -543,7 +530,7 @@ export const prepareFromBlockbookTxn = async (transaction: {
     return [newTxn];
   } else if (coin instanceof EthCoinData) {
     // Derive address from Xpub (It'll always give a mixed case address with checksum)
-    const myAddress = generateEthAddressFromXpub(xpub, coinType.toLowerCase());
+    const myAddress = generateEthAddressFromXpub(xpub, coin.id);
     let feeTxn: Transaction;
 
     const amount = new BigNumber(txn.value);
@@ -598,13 +585,11 @@ export const prepareFromBlockbookTxn = async (transaction: {
         total: fees.toString(),
         confirmations: txn.confirmations || 0,
         walletId,
-        slug: coinType,
         // 2 for failed, 1 for pass
         status: txn.isError ? 2 : 1,
         sentReceive: SentReceive.FEES,
         confirmed: new Date(txn.timeStamp).toISOString(),
         blockHeight: txn.blockNumber,
-        coin: coinType,
         inputs: [],
         outputs: []
       };
@@ -621,7 +606,6 @@ export const prepareFromBlockbookTxn = async (transaction: {
       total: token ? amount.toString() : amount.plus(fees).toString(),
       confirmations: txn.confirmations || 0,
       walletId,
-      slug: token ? token : coinType,
       // 2 for failed, 1 for pass
       status: txn.isError ? 2 : 1,
       sentReceive:
@@ -630,7 +614,6 @@ export const prepareFromBlockbookTxn = async (transaction: {
           : SentReceive.RECEIVED,
       confirmed: new Date(txn.timeStamp).toISOString(),
       blockHeight: txn.blockNumber,
-      coin: coinType,
       inputs,
       outputs
     };

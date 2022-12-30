@@ -19,9 +19,7 @@ export const getRequestsMetadata = (
 ): IRequestMetadata[] => {
   const coin = COINS[item.coinId];
   if (!coin) {
-    throw new Error(
-      'Invalid coin in customAccount sync item: ' + item.coinType
-    );
+    throw new Error('Invalid coin in customAccount sync item: ' + item.coinId);
   }
 
   if (coin instanceof NearCoinData) {
@@ -38,9 +36,7 @@ export const getRequestsMetadata = (
       .getMetadata();
     return [customAccountMetadata];
   } else {
-    throw new Error(
-      'Invalid coin in customAccount sync item: ' + item.coinType
-    );
+    throw new Error('Invalid coin in customAccount sync item: ' + item.coinId);
   }
 };
 
@@ -55,9 +51,7 @@ export const processResponses = async (
 ): Promise<any> => {
   const coin = COINS[item.coinId];
   if (!coin) {
-    throw new Error(
-      'Invalid coin in customAccount sync item: ' + item.coinType
-    );
+    throw new Error('Invalid coin in customAccount sync item: ' + item.coinId);
   }
 
   if (responses.length <= 0) {
@@ -73,7 +67,6 @@ export const processResponses = async (
       data.push({
         name: account.account_id,
         walletId: item.walletId,
-        coin: item.coinType,
         accountId: item.accountId,
         coinId: item.coinId,
         price: '0',
@@ -86,7 +79,6 @@ export const processResponses = async (
           coinId: item.coinId,
           xpub: item.xpub,
           walletId: item.walletId,
-          coinType: item.coinType,
           module: item.module,
           customAccount: account.account_id,
           coinGroup: CoinGroup.Near,
@@ -100,7 +92,6 @@ export const processResponses = async (
           accountType: item.accountType,
           coinId: item.coinId,
           walletId: item.walletId,
-          coinType: item.coinType,
           isRefresh: true,
           customAccount: account.account_id,
           coinGroup: CoinGroup.Near,
@@ -112,8 +103,6 @@ export const processResponses = async (
       accountId: item.accountId
     });
   } else {
-    throw new Error(
-      'Invalid coin in customAccount sync item: ' + item.coinType
-    );
+    throw new Error('Invalid coin in customAccount sync item: ' + item.coinId);
   }
 };

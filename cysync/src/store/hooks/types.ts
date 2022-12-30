@@ -77,8 +77,6 @@ export const DisplayTransactionPropTypes = {
   confirmations: PropTypes.number.isRequired,
   walletId: PropTypes.string.isRequired,
   walletName: PropTypes.string,
-  slug: PropTypes.string.isRequired,
-  coin: PropTypes.string,
   status: PropTypes.number.isRequired,
   sentReceive: PropTypes.any.isRequired,
   confirmed: PropTypes.any.isRequired,

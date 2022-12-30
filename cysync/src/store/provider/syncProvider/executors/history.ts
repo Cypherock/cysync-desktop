@@ -43,7 +43,7 @@ export const getRequestsMetadata = (
 
   if (!coin) {
     logger.warn('Invalid coin in sync queue', {
-      coinType: item.coinType
+      coinId: item.coinId
     });
     return undefined;
   }
@@ -53,7 +53,7 @@ export const getRequestsMetadata = (
       .getTransaction(
         {
           xpub: item.xpub,
-          coinType: item.coinType,
+          coinType: coin.abbr,
           from: item.afterBlock,
           page: item.page || 1,
           limit: 100
@@ -66,7 +66,7 @@ export const getRequestsMetadata = (
   }
 
   if (coin instanceof EthCoinData) {
-    const address = generateEthAddressFromXpub(item.xpub, item.coinType);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinId);
 
     const ethTxnMetadata = ethServer.transaction
       .getHistory(
@@ -133,7 +133,7 @@ export const getRequestsMetadata = (
   }
 
   logger.warn('Invalid coin in sync queue', {
-    coinType: item.coinType
+    coinId: item.coinId
   });
   return [];
 };
@@ -150,7 +150,7 @@ export const processResponses = async (
   const coinData = COINS[item.coinId];
   if (!coinData) {
     logger.warn('Invalid coin in sync queue', {
-      coinType: item.coinType
+      coinId: item.coinId
     });
     return undefined;
   }
@@ -199,7 +199,6 @@ export const processResponses = async (
             ? response.data.tokens.map((elem: any) => elem.name)
             : [],
           walletId: item.walletId,
-          coinType: item.coinType,
           addressDB: addressDb
         });
         newTxns.forEach(newTxn => transactionDbList.push(newTxn));
@@ -240,7 +239,7 @@ export const processResponses = async (
 
     const address = generateEthAddressFromXpub(
       item.xpub,
-      item.coinType
+      item.coinId
     ).toLowerCase();
     const rawHistory = responses[0].data?.result;
     const moreParent = responses[0].data?.more;
@@ -273,14 +272,12 @@ export const processResponses = async (
         total: new BigNumber(amount).plus(fees).toString(),
         confirmations: ele.confirmations || 0,
         walletId: item.walletId,
-        slug: item.coinType,
         // 2 for failed, 1 for pass
         status: ele.isError === '0' ? 1 : 2,
         sentReceive:
           address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
         confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
         blockHeight: ele.blockNumber,
-        coin: item.coinType,
         inputs: [
           {
             address: fromAddr,
@@ -313,7 +310,6 @@ export const processResponses = async (
             txnAmount = String(getEthAmountFromInput(ele.input));
           }
 
-          txn.slug = token.abbr;
           txn.amount = txnAmount;
 
           // Even if the token transaction failed, the transaction fee is still deducted.
@@ -329,14 +325,12 @@ export const processResponses = async (
               total: fees.toString(),
               confirmations: (ele.confirmations as number) || 0,
               walletId: item.walletId,
-              slug: item.coinType,
               status: 1,
               sentReceive: SentReceive.FEES,
               confirmed: new Date(
                 parseInt(ele.timeStamp, 10) * 1000
               ).toISOString(),
-              blockHeight: ele.blockNumber as number,
-              coin: item.coinType
+              blockHeight: ele.blockNumber as number
             });
           }
         }
@@ -380,13 +374,11 @@ export const processResponses = async (
           total: amount,
           confirmations: (ele.confirmations as number) || 0,
           walletId: item.walletId,
-          slug: (ele.tokenSymbol as string).toLowerCase(),
           status: 1,
           sentReceive:
             address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
           confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
           blockHeight: ele.blockNumber as number,
-          coin: item.coinType,
           inputs: [
             {
               address: fromAddr,
@@ -426,12 +418,10 @@ export const processResponses = async (
           total: amt.toString(),
           confirmations: (ele.confirmations as number) || 0,
           walletId: item.walletId,
-          slug: item.coinType,
           status: 1,
           sentReceive: SentReceive.FEES,
           confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
-          blockHeight: ele.blockNumber as number,
-          coin: item.coinType
+          blockHeight: ele.blockNumber as number
         });
       }
     }
@@ -453,9 +443,8 @@ export const processResponses = async (
     for (const tokenId of erc20Tokens) {
       const tokenObj = coinData.tokenList[tokenId];
       const token = await tokenDb.getOne({
-        walletId: item.walletId,
-        slug: tokenId.toLowerCase(),
-        coin: item.coinType
+        accountId: item.accountId,
+        coinId: tokenObj.id
       });
       if (!token) {
         tokenDb.insert({
@@ -463,8 +452,6 @@ export const processResponses = async (
           parentCoinId: item.coinId,
           coinId: tokenObj.id,
           walletId: item.walletId,
-          slug: tokenObj.abbr,
-          coin: item.coinType,
           balance: '0'
         });
         options.addToQueue(
@@ -475,7 +462,6 @@ export const processResponses = async (
             parentCoinId: item.coinId,
             xpub: item.xpub,
             walletId: item.walletId,
-            coinType: tokenId,
             coinGroup: CoinGroup.ERC20Tokens,
             module: item.module,
             isRefresh: true
@@ -484,7 +470,6 @@ export const processResponses = async (
         options.addPriceSyncItemFromAccount(
           {
             ...item,
-            slug: tokenObj.abbr,
             coinId: tokenObj.id,
             parentCoinId: item.coinId
           },
@@ -496,7 +481,6 @@ export const processResponses = async (
         options.addLatestPriceSyncItemFromAccount(
           {
             ...item,
-            slug: tokenObj.abbr,
             coinId: tokenObj.id,
             parentCoinId: item.coinId
           },
@@ -564,7 +548,6 @@ export const processResponses = async (
         total: new BigNumber(amount).plus(fees).toString(),
         confirmations: 0,
         walletId: item.walletId,
-        slug: item.coinType,
         status: ele.status ? 1 : 2,
         sentReceive:
           address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
@@ -572,7 +555,6 @@ export const processResponses = async (
           parseInt(ele.block_timestamp, 10) / 1000000
         ).toISOString(), //conversion from timestamp in nanoseconds
         blockHeight: parseInt(ele.block_height, 10) || 0,
-        coin: item.coinType,
         inputs: [
           {
             address: fromAddr,
@@ -611,14 +593,12 @@ export const processResponses = async (
           total: new BigNumber(amount).plus(fees).toString(),
           confirmations: 0,
           walletId: item.walletId,
-          slug: item.coinType,
           status: ele.status ? 1 : 2,
           sentReceive: SentReceive.RECEIVED,
           confirmed: new Date(
             parseInt(ele.block_timestamp, 10) / 1000000
           ).toISOString(), //conversion from timestamp in nanoseconds
           blockHeight: 0,
-          coin: item.coinType,
           inputs: [
             {
               address: fromAddr,
@@ -698,7 +678,6 @@ export const processResponses = async (
             total: new BigNumber(amount).plus(fees).toString(),
             confirmations: 1,
             walletId: item.walletId,
-            slug: item.coinType,
             status: ele.meta?.err || ele.err ? 2 : 1,
             sentReceive:
               address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
@@ -706,7 +685,6 @@ export const processResponses = async (
               parseInt(ele.blockTime, 10) * 1000
             ).toISOString(), // conversion from timestamp in seconds
             blockHeight: ele.slot,
-            coin: item.coinType,
             inputs: [
               {
                 address: fromAddr,

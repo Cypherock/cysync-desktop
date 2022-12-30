@@ -1,3 +1,4 @@
+import { COINS } from '@cypherock/communication';
 import React, { useEffect } from 'react';
 
 import DialogBox from '../../../../../designSystem/designComponents/dialog/dialogBox';
@@ -34,7 +35,9 @@ const WalletSend = () => {
   const { coinDetails } = useCurrentCoin();
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.slug : coinDetails.slug;
+  const coinAbbr = token
+    ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.abbr
+    : COINS[coinDetails.coinId]?.abbr;
 
   useEffect(() => {
     if (sendForm) {

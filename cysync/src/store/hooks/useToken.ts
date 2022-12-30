@@ -13,12 +13,10 @@ import { DisplayToken } from './types';
 import { useDebouncedFunction } from './useDebounce';
 
 export interface UseTokenValues {
-  getAllTokensFromWallet: (walletId: string, ethCoin: string) => Promise<void>;
+  getAllTokensFromWallet: (accountId: string) => Promise<void>;
   tokenData: DisplayToken[];
   tokenList: string[];
-  setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
-  setCurrentEthCoin: React.Dispatch<React.SetStateAction<string>>;
-  sortTokenData: (tokens: DisplayToken[], index: number) => void;
+  setCurrentAccountId: React.Dispatch<React.SetStateAction<string>>;
   sortTokensByIndex: (index: number) => void;
 }
 
@@ -28,8 +26,7 @@ export const useToken: UseToken = () => {
   const [tokenData, setTokenData] = useState<UseTokenValues['tokenData']>([]);
   const [tokenList, setTokenList] = useState<UseTokenValues['tokenList']>([]);
 
-  const [currentWalletId, setCurrentWalletId] = useState('');
-  const [currentEthCoin, setCurrentEthCoin] = useState('');
+  const [currentAccountId, setCurrentAccountId] = useState('');
   const [sortIndex, setSortIndex] = useState(0);
 
   // Using doRefresh mechanish because hooks state change do not work with event listeners.
@@ -62,7 +59,7 @@ export const useToken: UseToken = () => {
     sortTokenData(tokenData, sortIndex);
   }, [sortIndex]);
 
-  const getTokensWithPrices = async (tokens: Token[], parentCoin: string) => {
+  const getTokensWithPrices = async (tokens: Token[]) => {
     const tokensWithPrice: DisplayToken[] = [];
 
     for (const token of tokens) {
@@ -74,7 +71,7 @@ export const useToken: UseToken = () => {
 
       const coinObj = coin.tokenList[token.coinId];
       if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${token.slug}`);
+        throw new Error(`Cannot find coinId: ${token.coinId}`);
       }
 
       const coinWithPrice: DisplayToken = {
@@ -84,7 +81,7 @@ export const useToken: UseToken = () => {
         displayPrice: '0',
         displayValue: '0',
         displayBalance: '0',
-        parentCoin
+        parentCoin: token.parentCoinId
       };
       const balance = new BigNumber(token.balance || 0).dividedBy(
         coinObj.multiplier
@@ -112,7 +109,7 @@ export const useToken: UseToken = () => {
     });
   };
 
-  const sortTokenData: UseTokenValues['sortTokenData'] = (tokens, index) => {
+  const sortTokenData = (tokens: DisplayToken[], index: number) => {
     switch (index) {
       case 0:
         setTokenData(
@@ -143,7 +140,7 @@ export const useToken: UseToken = () => {
 
             const coinObjA = coinA.tokenList[a.coinId];
             if (!coinObjA) {
-              throw new Error(`Cannot find coinType: ${a.slug}`);
+              throw new Error(`Cannot find coinId: ${a.coinId}`);
             }
 
             const coinB = COINS[b.parentCoinId];
@@ -154,7 +151,7 @@ export const useToken: UseToken = () => {
 
             const coinObjB = coinB.tokenList[a.coinId];
             if (!coinObjB) {
-              throw new Error(`Cannot find coinType: ${b.slug}`);
+              throw new Error(`Cannot find coinId: ${a.coinId}`);
             }
 
             const tokenA = coinObjA.name;
@@ -174,7 +171,7 @@ export const useToken: UseToken = () => {
 
             const coinObjA = coinA.tokenList[a.coinId];
             if (!coinObjA) {
-              throw new Error(`Cannot find coinType: ${a.slug}`);
+              throw new Error(`Cannot find coinId: ${a.coinId}`);
             }
 
             const coinB = COINS[b.parentCoinId];
@@ -185,7 +182,7 @@ export const useToken: UseToken = () => {
 
             const coinObjB = coinB.tokenList[a.coinId];
             if (!coinObjB) {
-              throw new Error(`Cannot find coinType: ${b.slug}`);
+              throw new Error(`Cannot find coinId: ${a.coinId}`);
             }
 
             const tokenA = coinObjA.name;
@@ -243,27 +240,26 @@ export const useToken: UseToken = () => {
     if (index !== sortIndex) setSortIndex(index);
   };
 
-  const getAllTokensFromWallet = async (walletId: string, ethCoin: string) => {
-    const res = await tokenDb.getAll({ walletId, coin: ethCoin });
+  const getAllTokensFromWallet = async (accountId: string) => {
+    const res = await tokenDb.getAll({ accountId });
     const tokens: string[] = [];
     res.forEach(token => {
       tokens.push(token.coinId);
     });
     setTokenList(tokens);
-    const unsortedTokens = await getTokensWithPrices(res, ethCoin);
+    const unsortedTokens = await getTokensWithPrices(res);
     sortTokenData(unsortedTokens, sortIndex);
   };
 
   useEffect(() => {
     // We handle only Ethereum Mainnet ERC20 tokens
-    if (currentWalletId && currentEthCoin)
-      getAllTokensFromWallet(currentWalletId, currentEthCoin);
-  }, [currentWalletId, currentEthCoin]);
+    if (currentAccountId) getAllTokensFromWallet(currentAccountId);
+  }, [currentAccountId]);
 
   useEffect(() => {
     if (doRefresh) {
       setDoRefresh(false);
-      getAllTokensFromWallet(currentWalletId, currentEthCoin);
+      getAllTokensFromWallet(currentAccountId);
     }
   }, [doRefresh]);
 
@@ -271,8 +267,7 @@ export const useToken: UseToken = () => {
     getAllTokensFromWallet,
     tokenData,
     tokenList,
-    setCurrentWalletId,
-    setCurrentEthCoin,
+    setCurrentAccountId,
     sortTokensByIndex
-  } as UseTokenValues;
+  };
 };

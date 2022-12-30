@@ -94,7 +94,7 @@ export const getRequestsMetadata = (
   }
 
   logger.warn('Invalid coin in sync queue', {
-    coinType: coinId
+    coinId
   });
   return [];
 };

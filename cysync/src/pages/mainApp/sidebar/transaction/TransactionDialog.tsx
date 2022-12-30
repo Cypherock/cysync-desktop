@@ -1,4 +1,5 @@
 import {
+  AbsCoinData,
   CoinGroup,
   COINS,
   ETHCOINS,
@@ -269,18 +270,16 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   if (!txn) return <></>;
 
   //used for displaying eth or erc20Tokens addresses in lower case
-  let coinData;
-  const coinParent = txn.coin?.toLowerCase();
-  const coinInitial = txn.slug?.toLowerCase();
+  let coinData: AbsCoinData;
   if (txn.parentCoinId && txn.parentCoinId !== txn.coinId) {
     const parent = COINS[txn.parentCoinId];
     if (!parent) {
-      logger.warn(`Cannot find coinType parent: ${coinParent}`);
+      logger.warn(`Cannot find parentCoinId parent: ${txn.parentCoinId}`);
     }
     coinData = parent.tokenList[txn.coinId];
   } else coinData = COINS[txn.coinId];
   if (!coinData) {
-    logger.warn(`Cannot find coinType: ${coinInitial}`);
+    logger.warn(`Cannot find coinId: ${txn.coinId}`);
   }
   const isEth =
     coinData.group === CoinGroup.Ethereum ||
@@ -340,7 +339,9 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
             parentCoin={txn.parentCoinId}
           />
           <Typography sx={{ mr: 1 }}>
-            {`${txn.slug.toUpperCase()} ${formatCoins(txn.displayAmount)} `}
+            {`${coinData.abbr.toUpperCase()} ${formatCoins(
+              txn.displayAmount
+            )} `}
           </Typography>
           <PopOverText
             color="textPrimary"
@@ -431,7 +432,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {`${txn.slug.toUpperCase()} ${formatCoins(
+                      {`${coinData.abbr.toUpperCase()} ${formatCoins(
                         elem.displayValue
                       )}`}
                     </Typography>
@@ -470,7 +471,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
                       style={{ userSelect: 'text' }}
                       color={elem.isMine ? 'secondary' : undefined}
                     >
-                      {`${txn.slug.toUpperCase()} ${formatCoins(
+                      {`${coinData.abbr.toUpperCase()} ${formatCoins(
                         elem.displayValue
                       )}`}
                     </Typography>

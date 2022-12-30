@@ -449,7 +449,7 @@ const WalletView: React.FC<WalletViewProps> = ({
                       coinObj.name
                         .toUpperCase()
                         .includes(search.toUpperCase())) ||
-                    coin.slug.toUpperCase().includes(search.toUpperCase())
+                    coinObj.abbr.toUpperCase().includes(search.toUpperCase())
                   );
                 })
                 .map(coin => {
@@ -463,7 +463,7 @@ const WalletView: React.FC<WalletViewProps> = ({
                         <EthereumOneCoin
                           coinId={coin.coinId}
                           accountId={coin.accountId}
-                          initial={coin.slug.toUpperCase()}
+                          initial={coinObj.abbr.toUpperCase()}
                           name={coinObj.name}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
@@ -479,7 +479,7 @@ const WalletView: React.FC<WalletViewProps> = ({
                         <NearOneCoin
                           coinId={coin.coinId}
                           accountId={coin.accountId}
-                          initial={coin.slug.toUpperCase()}
+                          initial={coinObj.abbr.toUpperCase()}
                           name={coinObj.name}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
@@ -495,7 +495,7 @@ const WalletView: React.FC<WalletViewProps> = ({
                         <OneCoin
                           coinId={coin.coinId}
                           accountId={coin.accountId}
-                          initial={coin.slug.toUpperCase()}
+                          initial={coinObj.abbr.toUpperCase()}
                           name={coinObj ? coinObj.name : ''}
                           holding={coin.displayBalance}
                           value={coin.displayValue}

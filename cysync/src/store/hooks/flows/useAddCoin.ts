@@ -349,7 +349,7 @@ export const useAddCoin: UseAddCoin = () => {
       if (!isXpubMissing) {
         // if there is a coin present in the list that is unknown while setting up,
         // that would caught in a previous step in the name of ADD_COIN_UNKNOWN_ASSET
-        await setUpCoinWallets(xpubList);
+        await setUpCoinWallets([xpubList]);
       } else {
         setAddCoinCompleted(true);
       }

@@ -50,22 +50,25 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
     }
 
     let name = '';
+    let contractAbbr = '';
     const coin = COINS[coinDetails.coinId];
     if (!coin) {
-      throw new Error('Invalid coinType: ' + coinDetails.coinId);
+      throw new Error('Invalid coinId: ' + coinDetails.coinId);
     }
 
     name = coin.name;
+    contractAbbr = coin.abbr;
 
     if (token) {
       if (!coin) {
-        throw new Error('Invalid coinType: ' + coinDetails.coinId);
+        throw new Error('Invalid coinId: ' + coinDetails.coinId);
       }
       const tokenData = coin.tokenList[token.coinId];
       if (!tokenData) {
-        throw new Error('Invalid coinType: ' + token.coinId);
+        throw new Error('Invalid tokenCoinId: ' + token.coinId);
       }
       name = tokenData.name;
+      contractAbbr = tokenData.abbr;
     }
 
     receiveTransaction
@@ -74,7 +77,6 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
         walletId: selectedWallet._id,
-        coinType: coinDetails.slug,
         coinId: coinDetails.coinId,
         accountId: coinDetails.accountId,
         accountIndex: coinDetails.accountIndex,
@@ -82,7 +84,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         coinName: name,
         xpub: coinDetails.xpub,
         customAccount: customAccount?.name,
-        contractAbbr: token ? token.slug : undefined,
+        contractAbbr,
         passphraseExists: selectedWallet.passphraseSet
       })
       .then(() => {

@@ -1,3 +1,4 @@
+import { COINS } from '@cypherock/communication';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
@@ -207,7 +208,13 @@ const Transaction = () => {
           date={new Date(data.confirmed).toLocaleDateString()}
           time={new Date(data.confirmed).toLocaleTimeString()}
           walletName={data.walletName}
-          initial={data.slug?.toUpperCase()}
+          initial={
+            data.parentCoinId === data.coinId
+              ? COINS[data.coinId]?.abbr?.toUpperCase()
+              : COINS[data.parentCoinId]?.tokenList[
+                  data.coinId
+                ]?.abbr?.toUpperCase()
+          }
           coinId={data.coinId}
           parentCoinId={
             data.parentCoinId === data.coinId ? undefined : data.parentCoinId
@@ -397,8 +404,6 @@ const Transaction = () => {
                     confirmations: showTxn.confirmations,
                     walletId: showTxn.walletId,
                     walletName: showTxn.walletName,
-                    slug: showTxn.slug,
-                    coin: showTxn.coin,
                     status: showTxn.status,
                     sentReceive: showTxn.sentReceive,
                     confirmed: showTxn.confirmed,

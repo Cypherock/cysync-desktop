@@ -100,8 +100,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
       try {
         // status is final, resync balances and history
         const coinEntry = await accountDb.getOne({
-          walletId: item.walletId,
-          slug: item.coinType
+          accountId: item.accountId
         });
         addBalanceSyncItemFromCoin(
           {
@@ -151,7 +150,8 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
       if (!coinData) {
         logger.warn('Invalid coin found', {
           txn,
-          coinType: txn.coin || txn.slug
+          coinId: txn.coinId,
+          parentCoinId: txn.parentCoinId
         });
         return;
       }
@@ -163,7 +163,6 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
         walletId: txn.walletId,
         txnHash: txn.hash,
         sender: txn.outputs[0]?.address,
-        coinType: txn.slug,
         coinGroup: coinData.group,
         module: 'refresh',
         parentCoin: txn.coin,

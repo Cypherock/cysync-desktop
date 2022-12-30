@@ -53,7 +53,7 @@ export const changeFormatOfOutputList = (
   const coin = COINS[parentCoinId];
 
   if (!coin) {
-    throw new Error(`Invalid coinType ${parentCoinId}`);
+    throw new Error(`Invalid coinId ${parentCoinId}`);
   }
 
   let multiplier = coin.multiplier;
@@ -89,7 +89,7 @@ export const broadcastTxn = async (
   const coin = COINS[coinId];
 
   if (!coin) {
-    throw new Error(`Invalid coinType ${coinId}`);
+    throw new Error(`Invalid coinId ${coinId}`);
   }
 
   if (coin instanceof EthCoinData) {
@@ -199,7 +199,6 @@ export interface HandleSendTransactionOptions {
   xpub: string;
   customAccount: string | undefined;
   newAccountId: string | undefined;
-  coinType: string;
   outputList: any[];
   fees: number;
   isSendAll: boolean | undefined;
@@ -248,7 +247,6 @@ export interface UseSendTransactionValues {
     accountId: string;
     accountIndex: number;
     accountType: string;
-    coinType: string;
     outputList: any[];
     fees: number;
     isSendAll: boolean | undefined;
@@ -344,7 +342,6 @@ export const useSendTransaction: UseSendTransaction = () => {
       accountId,
       accountIndex,
       accountType,
-      coinType,
       outputList,
       fees,
       isSendAll,
@@ -372,24 +369,24 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       const subFlowName = Analytics.Categories.ESTIMATE_FEE;
       logger.info(
-        `${subFlowName}: Initiated , ${[coinType, fees, isSendAll].join(',')}`
+        `${subFlowName}: Initiated , ${[coinId, fees, isSendAll].join(',')}`
       );
 
       sendTransaction.on('approxTotalFee', fee => {
-        logger.verbose(`${subFlowName}: Total fee generated , ${coinType}`);
+        logger.verbose(`${subFlowName}: Total fee generated , ${coinId}`);
         setApproxTotalFees(Number(fee));
       });
 
       sendTransaction.on('sendMaxAmount', amt => {
         logger.verbose(
-          `${subFlowName}: Send Max amount generated: ${[amt, coinType].join(
+          `${subFlowName}: Send Max amount generated: ${[amt, coinId].join(
             ','
           )}`
         );
         setSendMaxAmount(amt);
       });
 
-      const { walletId } = await accountDb.getOne({ xpub, slug: coinType });
+      const { walletId } = await accountDb.getOne({ accountId });
       sendTransaction
         .calcApproxFee({
           xpub,
@@ -398,7 +395,6 @@ export const useSendTransaction: UseSendTransaction = () => {
           accountType,
           coinId,
           walletId,
-          coinType,
           outputList,
           fee: fees,
           isSendAll,
@@ -409,10 +405,10 @@ export const useSendTransaction: UseSendTransaction = () => {
         .then(() => {
           setEstimationError(undefined);
           setIsEstimatingFees(false);
-          logger.info(`${subFlowName}: Completed', ${coinType}`);
+          logger.info(`${subFlowName}: Completed', ${coinId}`);
         })
         .catch(error => {
-          logger.info(`${subFlowName}: Error', ${coinType}`);
+          logger.info(`${subFlowName}: Error', ${coinId}`);
           logger.error(error);
           const cyError = new CyError();
           // Don't show error other than network error, because the data may be
@@ -422,7 +418,7 @@ export const useSendTransaction: UseSendTransaction = () => {
             setErrorObj(handleErrors(errorObj, cyError, subFlowName));
             return;
           } else if (error instanceof WalletError) {
-            handleWalletErrors(cyError, error, { coinType });
+            handleWalletErrors(cyError, error, { coinId });
           } else {
             cyError.setError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
           }
@@ -491,7 +487,6 @@ export const useSendTransaction: UseSendTransaction = () => {
       customAccount,
       newAccountId,
       coinId,
-      coinType,
       outputList,
       fees,
       isSendAll,
@@ -499,11 +494,11 @@ export const useSendTransaction: UseSendTransaction = () => {
     }) => {
       clearAll();
 
-      logger.info('SendTransaction: Initiated', { coinType });
+      logger.info('SendTransaction: Initiated', { coinId });
       logger.info('SendTransaction Data', {
         walletId,
         pinExists,
-        coinType,
+        coinId,
         outputList,
         fees,
         isSendAll,
@@ -515,7 +510,7 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       if (!connection) {
         const cyError = new CyError(DeviceErrorType.NOT_CONNECTED);
-        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
         return;
       }
 
@@ -529,13 +524,13 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       sendTransaction.on('cardError', () => {
         const cyError = new CyError(CysyncError.UNKNOWN_CARD_ERROR);
-        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
       });
 
       sendTransaction.on('error', err => {
         const cyError = new CyError();
         if (err instanceof WalletError) {
-          handleWalletErrors(cyError, err, { coinType });
+          handleWalletErrors(cyError, err, { coinId });
         } else if (err.isAxiosError) {
           handleAxiosErrors(cyError, err);
         } else if (err instanceof DeviceError) {
@@ -548,37 +543,37 @@ export const useSendTransaction: UseSendTransaction = () => {
 
       sendTransaction.on('locked', () => {
         const cyError = new CyError(CysyncError.WALLET_IS_LOCKED);
-        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
       });
 
       sendTransaction.on('notReady', () => {
         const cyError = new CyError(CysyncError.DEVICE_NOT_READY);
-        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
       });
 
       sendTransaction.on('coinsConfirmed', coins => {
         if (coins) {
-          logger.verbose('SendTransaction: Txn confirmed', { coinType });
+          logger.verbose('SendTransaction: Txn confirmed', { coinId });
           setCoinsConfirmed(true);
         } else {
           const cyError = new CyError(
             CysyncError.SEND_TXN_REJECTED,
             COINS[coinId].name
           );
-          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
         }
       });
 
       sendTransaction.on('txnTooLarge', () => {
         const cyError = new CyError(CysyncError.SEND_TXN_SIZE_TOO_LARGE);
-        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
       });
 
       sendTransaction.on('noWalletFound', (walletState: WalletStates) => {
         const cyError = flowHandlers.noWalletFound(walletState);
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
-            coinType,
+            coinId,
             walletState
           })
         );
@@ -590,13 +585,13 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
 
       sendTransaction.on('totalFees', fee => {
-        logger.info('SendTransaction: Total fee generated', { coinType, fee });
+        logger.info('SendTransaction: Total fee generated', { coinId, fee });
         setTotalFees(fee);
       });
 
       sendTransaction.on('inputOutput', ({ inputs, outputs }) => {
         logger.info('SendTransaction: Txn input output generated', {
-          coinType,
+          coinId,
           inputs,
           outputs
         });
@@ -611,7 +606,7 @@ export const useSendTransaction: UseSendTransaction = () => {
             COINS[coinId].name
           );
           setErrorObj(
-            handleErrors(errorObj, cyError, flowName, { coinType, funds })
+            handleErrors(errorObj, cyError, flowName, { coinId, funds })
           );
         }
       });
@@ -619,13 +614,13 @@ export const useSendTransaction: UseSendTransaction = () => {
       // Verified receives `true` if verified, otherwise the index of the rejection screen
       sendTransaction.on('verified', val => {
         if (val === true) {
-          logger.verbose('SendTransaction: Txn verified', { coinType });
+          logger.verbose('SendTransaction: Txn verified', { coinId });
           setVerified(true);
         } else {
           const cyError = new CyError(CysyncError.SEND_TXN_REJECTED);
 
           logger.info('SendTransaction: Txn rejected from device', {
-            coinType,
+            coinId,
             command: val
           });
 
@@ -643,43 +638,43 @@ export const useSendTransaction: UseSendTransaction = () => {
       });
 
       sendTransaction.on('passphraseEntered', () => {
-        logger.verbose('SendTransaction: Passphrase entered', { coinType });
+        logger.verbose('SendTransaction: Passphrase entered', { coinId });
         setPassphraseEntered(true);
       });
 
       sendTransaction.on('pinEntered', pin => {
         if (pin) {
-          logger.verbose('SendTransaction: Pin entered', { coinType });
+          logger.verbose('SendTransaction: Pin entered', { coinId });
           setPinEntered(true);
         } else {
           const cyError = new CyError(
             CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
           );
-          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
+          setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
         }
       });
 
       sendTransaction.on('cardsTapped', cards => {
         if (cards) {
-          logger.verbose('SendTransaction: Cards tapped', { coinType });
+          logger.verbose('SendTransaction: Cards tapped', { coinId });
           setCardsTapped(true);
         }
       });
 
       sendTransaction.on('metadataSent', () => {
-        logger.verbose('SendTransaction: Metadata sent', { coinType });
+        logger.verbose('SendTransaction: Metadata sent', { coinId });
         setMetadataSent(true);
       });
 
       sendTransaction.on('signedTxn', txn => {
         if (txn) {
-          logger.verbose('SendTransaction: Signed txn generated', { coinType });
+          logger.verbose('SendTransaction: Signed txn generated', { coinId });
           setSignedTxn(txn);
         } else {
           const cyError = new CyError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
           cyError.pushSubErrors(CysyncError.SEND_TXN_SIGNED_TXN_NOT_FOUND);
           setErrorObj(
-            handleErrors(errorObj, cyError, flowName, { txn, coinType })
+            handleErrors(errorObj, cyError, flowName, { txn, coinId })
           );
         }
       });
@@ -722,19 +717,18 @@ export const useSendTransaction: UseSendTransaction = () => {
           xpub,
           customAccount,
           newAccountId,
-          coinType,
           outputList,
           fee: fees,
           isSendAll,
           data
         });
         setIsInFlow(false);
-        logger.info('SendTransaction: Completed', { coinType });
+        logger.info('SendTransaction: Completed', { coinId });
         setCompleted(true);
       } catch (e) {
         setIsInFlow(false);
         const cyError = new CyError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
-        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType, e }));
+        setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId, e }));
         sendTransaction.removeAllListeners();
       }
     };
@@ -771,7 +765,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       if (parentCoinId && parentCoinId !== coinId) {
         parentCoinObj = COINS[parentCoinId];
         if (!parentCoinId) {
-          throw new Error(`Cannot find coinType: ${parentCoinId}`);
+          throw new Error(`Cannot find coinId: ${parentCoinId}`);
         }
 
         coinObj = parentCoinObj.tokenList[coinId];
@@ -781,7 +775,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       }
 
       if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${coinId}`);
+        throw new Error(`Cannot find coinId: ${coinId}`);
       }
 
       let tx: Transaction;
@@ -839,13 +833,11 @@ export const useSendTransaction: UseSendTransaction = () => {
           total: amount.toString(),
           fees: fees.toString(),
           walletId,
-          slug: coinObj.abbr.toLowerCase(),
           confirmations: 0,
           status: 0,
           sentReceive: SentReceive.SENT,
           confirmed: new Date().toISOString(),
           blockHeight: -1,
-          coin: coinId,
           inputs: formattedInputs,
           outputs: formattedOutputs
         };
@@ -859,13 +851,11 @@ export const useSendTransaction: UseSendTransaction = () => {
           total: fees.toString(),
           fees: '0',
           walletId,
-          slug: coinId.toLowerCase(),
           confirmations: 0,
           status: 0,
           sentReceive: SentReceive.FEES,
           confirmed: new Date().toISOString(),
-          blockHeight: -1,
-          coin: coinId
+          blockHeight: -1
         };
         transactionDb.insert(feeTxn);
       } else {
@@ -887,8 +877,6 @@ export const useSendTransaction: UseSendTransaction = () => {
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
           walletId,
-          slug: coinId.toLowerCase(),
-          coin: coinId,
           confirmations: coinId.toLowerCase() === 'near' ? 1 : 0,
           status:
             coinId.toLowerCase() === 'near' ? Status.SUCCESS : Status.PENDING, // Near failed txn handled already
@@ -918,7 +906,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       try {
         const coinObj = COINS[coinId];
         if (!coinObj) {
-          throw new Error(`Cannot find coinType: ${coinId}`);
+          throw new Error(`Cannot find coinId: ${coinId}`);
         }
 
         let amount = new BigNumber(0);
@@ -973,7 +961,6 @@ export const useSendTransaction: UseSendTransaction = () => {
               ? `Created account ${formattedOutputs[0]?.address}`
               : undefined,
           walletId,
-          slug: coinId.toLowerCase(),
           confirmations: 1,
           status: Status.SUCCESS,
           sentReceive: SentReceive.SENT,

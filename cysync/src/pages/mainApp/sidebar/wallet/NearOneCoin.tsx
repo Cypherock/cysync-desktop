@@ -1,3 +1,4 @@
+import { COINS } from '@cypherock/communication';
 import { generateNearAddressFromXpub } from '@cypherock/wallet';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -300,7 +301,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
 
   useEffect(() => {
     setCurrentWalletId(selectedWallet._id);
-    setCurrentCoin(coinDetails.slug);
+    setCurrentCoin(coinDetails.coinId);
   }, [selectedWallet._id]);
 
   useEffect(() => {
@@ -474,11 +475,13 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                   {accountData
                     .slice(0, maxAccountThreshold + lengthThreshold)
                     .map(account => {
+                      const coinObj = COINS[coinDetails.coinId];
                       return (
                         <React.Fragment key={account.name}>
                           {account.name === implicitAccount && (
                             <OneNearAccount
-                              initial={coinDetails.slug.toUpperCase()}
+                              coinId={coinDetails.coinId}
+                              initial={coinObj.abbr.toUpperCase()}
                               name={account.name}
                               holding={account.displayBalance}
                               price={account.displayPrice}
@@ -493,7 +496,8 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                           >
                             {account.name === implicitAccount || (
                               <OneNearAccount
-                                initial={coinDetails.slug.toUpperCase()}
+                                coinId={coinObj.id}
+                                initial={coinObj.abbr.toUpperCase()}
                                 name={account.name}
                                 holding={account.displayBalance}
                                 price={account.displayPrice}

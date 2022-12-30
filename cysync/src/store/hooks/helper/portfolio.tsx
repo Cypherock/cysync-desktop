@@ -33,7 +33,7 @@ export const getCoinPriceHistory = async (
     coinData = parentData.tokenList[coinId];
   } else coinData = COINS[coinId];
   if (!coinData) {
-    throw new Error(`Cannot find coinType: ${coinId}`);
+    throw new Error(`Cannot find coinId: ${coinId}`);
   }
 
   let totalBalance = new BigNumber(0);
@@ -184,7 +184,7 @@ export const getCoinPriceHistory = async (
 
   if (hasNegative) {
     logger.warn('Portfolio: Negative value found in ' + coinId, {
-      coinType: coinId,
+      coinId,
       parent: parentCoinId,
       hasWallet: !!walletId,
       days
@@ -308,14 +308,14 @@ export const coinsUserHas = async (params: {
     if (item.parentCoinId) {
       const parent = COINS[item.parentCoinId];
       if (!parent) {
-        throw new Error(`Cannot find parent coinType: ${item.parentCoinId}`);
+        throw new Error(`Cannot find parent coinId: ${item.parentCoinId}`);
       }
       coinData = parent.tokenList[item.coinId];
     } else {
       coinData = COINS[item.coinId];
     }
     if (!coinData) {
-      throw new Error(`Cannot find coinType: ${item.coinId}`);
+      throw new Error(`Cannot find coinId: ${item.coinId}`);
     }
     let totalBalance = new BigNumber(0);
     const currentTempCoin: CoinDetails = {

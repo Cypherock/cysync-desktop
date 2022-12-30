@@ -12,7 +12,6 @@ export interface SyncItemOptions {
     | 'customAccount'
     | 'txnStatus';
   coinId: string;
-  coinType: string;
   module: string;
   isRefresh?: boolean;
   parentCoinId?: string;
@@ -23,8 +22,6 @@ export abstract class SyncItem extends ExecutionQueueItem {
   public type: SyncItemOptions['type'];
 
   public coinId: string;
-
-  public coinType: string;
 
   public isRefresh: boolean;
 
@@ -37,7 +34,6 @@ export abstract class SyncItem extends ExecutionQueueItem {
   constructor({
     type,
     coinId,
-    coinType,
     module,
     isRefresh = false,
     parentCoinId,
@@ -45,7 +41,6 @@ export abstract class SyncItem extends ExecutionQueueItem {
   }: SyncItemOptions) {
     super();
     this.type = type;
-    this.coinType = coinType;
     this.isRefresh = isRefresh;
     this.module = module;
     this.retries = 0;

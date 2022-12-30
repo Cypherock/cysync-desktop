@@ -4,7 +4,6 @@ import { SyncItem } from '../../types/syncItem';
 
 export interface LatestPriceSyncItemOptions {
   coinId: string;
-  coinType: string;
   parentCoinId?: string;
   coinGroup: CoinGroup;
   module: string;
@@ -15,7 +14,6 @@ export interface LatestPriceSyncItemOptions {
 export class LatestPriceSyncItem extends SyncItem {
   public id: string | undefined;
   constructor({
-    coinType,
     isRefresh,
     module,
     parentCoinId,
@@ -25,7 +23,6 @@ export class LatestPriceSyncItem extends SyncItem {
   }: LatestPriceSyncItemOptions) {
     super({
       type: 'latestPrice',
-      coinType,
       isRefresh,
       module,
       coinGroup,
@@ -38,7 +35,6 @@ export class LatestPriceSyncItem extends SyncItem {
   equals(item: LatestPriceSyncItem | SyncItem) {
     if (item instanceof LatestPriceSyncItem) {
       return (
-        this.coinType === item.coinType &&
         this.coinGroup === item.coinGroup &&
         this.parentCoinId === item.parentCoinId &&
         this.coinId === item.coinId &&
@@ -52,7 +48,6 @@ export class LatestPriceSyncItem extends SyncItem {
   clone() {
     const newItem = new LatestPriceSyncItem({
       coinId: this.coinId,
-      coinType: this.coinType,
       parentCoinId: this.parentCoinId,
       coinGroup: this.coinGroup,
       isRefresh: this.isRefresh,
