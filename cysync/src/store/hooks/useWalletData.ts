@@ -19,7 +19,11 @@ export interface UseWalletDataValues {
   coinData: DisplayCoin[];
   setCoinData: React.Dispatch<React.SetStateAction<DisplayCoin[]>>;
   isLoading: boolean;
-  coinsPresent: string[];
+  coinsPresent: Array<{
+    id: string;
+    accountIndex: number;
+    accountType: string;
+  }>;
   deleteCoinByXpub: (accountId: string) => Promise<void>;
   setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
   currentWalletId: string;
@@ -34,7 +38,13 @@ export type UseWalletData = () => UseWalletDataValues;
 
 export const useWalletData: UseWalletData = () => {
   const [coinData, setCoinData] = useState<UseWalletDataValues['coinData']>([]);
-  const [coinsPresent, setCoinsPresent] = useState<string[]>([]);
+  const [coinsPresent, setCoinsPresent] = useState<
+    Array<{
+      id: string;
+      accountIndex: number;
+      accountType: string;
+    }>
+  >([]);
 
   const [currentWalletId, setCurrentWalletId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -176,9 +186,17 @@ export const useWalletData: UseWalletData = () => {
     if (currentWalletId) {
       if (loader) setIsLoading(true);
       const res = await accountDb.getAll({ walletId: currentWalletId });
-      const coinList: string[] = [];
+      const coinList: Array<{
+        id: string;
+        accountIndex: number;
+        accountType: string;
+      }> = [];
       res.forEach(coin => {
-        coinList.push(coin.accountId);
+        coinList.push({
+          id: coin.coinId,
+          accountIndex: coin.accountIndex,
+          accountType: coin.accountType
+        });
       });
       setCoinsPresent(coinList);
       const unsortedCoins = await getCoinsWithPrices(res);

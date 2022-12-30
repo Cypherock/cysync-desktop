@@ -25,7 +25,6 @@ import {
 import Analytics from '../../../../utils/analytics';
 
 import AddCoinForm from './addCoin';
-import allCoins from './addCoin/coins';
 import EthereumOneCoin from './EthereumOneCoin';
 import NearOneCoin from './NearOneCoin';
 import OneCoin from './OneCoin';
@@ -196,8 +195,6 @@ const WalletView: React.FC<WalletViewProps> = ({
     }
   }, [openAddCoinForm]);
 
-  const canAddMoreCoins = allCoins.length !== coinsPresent.length;
-
   const getMainContent = () => {
     if (isLoading) {
       return (
@@ -311,11 +308,7 @@ const WalletView: React.FC<WalletViewProps> = ({
             <div className={classes.walletButtons}>
               <Tooltip
                 title={
-                  canAddMoreCoins
-                    ? !deviceConnection
-                      ? 'Connect the device to add coins'
-                      : ''
-                    : 'All coins are already added'
+                  !deviceConnection ? 'Connect the device to add coins' : ''
                 }
               >
                 <span
@@ -331,7 +324,7 @@ const WalletView: React.FC<WalletViewProps> = ({
                     className={classes.button}
                     startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
                     onClick={handleAddCoinFormOpen}
-                    disabled={!canAddMoreCoins || !deviceConnection}
+                    disabled={!deviceConnection}
                   >
                     ADD COIN
                   </Button>

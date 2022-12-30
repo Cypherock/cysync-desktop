@@ -1,11 +1,17 @@
 import PropTypes from 'prop-types';
 
+import { AddableAccountDetails } from '../coins';
+
 export interface StepComponentProps {
   handleNext: () => void;
   handleClose: (abort?: boolean) => void;
-  coins: any[][];
-  setCoins: (coins: any[][]) => void;
-  coinsPresent: any[];
+  selectedCoin: AddableAccountDetails[];
+  setSelectedCoin: (coins: AddableAccountDetails[]) => void;
+  coinsPresent: Array<{
+    id: string;
+    accountIndex: number;
+    accountType: string;
+  }>;
   isXpubMissing: boolean;
 }
 

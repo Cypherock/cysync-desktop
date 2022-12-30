@@ -41,7 +41,7 @@ export interface HandleAddCoinOptions {
   sdkVersion: string;
   setIsInFlow: (val: boolean) => void;
   walletId: string;
-  coinsFromGUI: string[];
+  selectedCoin: { accountIndex: number; accountType: string; id: string };
   pinExists: boolean;
   passphraseExists: boolean;
   isXpubMissing?: boolean;
@@ -95,17 +95,6 @@ export const useAddCoin: UseAddCoin = () => {
 
   const sync = useSync();
   const addCoin = new CoinAdder();
-
-  // converts data from GUI to required format;
-  const getCoinList = (coinsFromGUI: string[]) => {
-    return coinsFromGUI
-      .filter(coin => {
-        return coin[2];
-      })
-      .map(coin => {
-        return coin[0];
-      });
-  };
 
   // To call resetHooks outside of this function
   const resetHooks = () => {
@@ -268,14 +257,13 @@ export const useAddCoin: UseAddCoin = () => {
     sdkVersion,
     setIsInFlow,
     walletId,
-    coinsFromGUI,
+    selectedCoin,
     pinExists,
     passphraseExists,
     isXpubMissing = false
   }: HandleAddCoinOptions) => {
     clearAll();
 
-    const selectedCoins = getCoinList(coinsFromGUI);
     const flowName = isXpubMissing ? `ResyncCoin` : `AddCoin`;
     logger.info(`${flowName}: Initiated`);
 
@@ -401,8 +389,7 @@ export const useAddCoin: UseAddCoin = () => {
         connection,
         sdkVersion,
         walletId,
-        selectedCoins,
-        isResync: isXpubMissing,
+        selectedCoin,
         pinExists,
         passphraseExists
       });

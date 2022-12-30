@@ -21,7 +21,11 @@ const addCoinWalletData = [
 
 interface AddCoinProps {
   handleClose: (abort?: boolean) => void;
-  coinsPresent: any[];
+  coinsPresent: Array<{
+    id: string;
+    accountIndex: number;
+    accountType: string;
+  }>;
 }
 
 const AddCoin: React.FC<AddCoinProps> = ({ handleClose, coinsPresent }) => {

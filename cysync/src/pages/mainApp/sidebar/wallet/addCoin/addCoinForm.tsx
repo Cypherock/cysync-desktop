@@ -24,7 +24,7 @@ import {
 import Analytics from '../../../../../utils/analytics';
 import logger from '../../../../../utils/logger';
 
-import initialCoins from './coins';
+import initialCoins, { AddableAccountDetails } from './coins';
 
 const QontoConnector = withStyles((theme: Theme) =>
   createStyles({
@@ -207,7 +207,11 @@ const Root = styled('div')(({ theme }) => ({
 type StepperProps = {
   stepsData: any[];
   handleClose: (abort?: boolean) => void;
-  coinsPresent: any[];
+  coinsPresent: Array<{
+    id: string;
+    accountIndex: number;
+    accountType: string;
+  }>;
 };
 
 const AddCoinForm: React.FC<StepperProps> = ({
@@ -234,7 +238,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
   };
 
   // Using JSON.parse to create a deep copy instead of passing by referrence
-  const [coins, setCoins] = React.useState(
+  const [coins, setCoins] = React.useState<AddableAccountDetails[]>(
     JSON.parse(JSON.stringify(initialCoins))
   );
 
@@ -324,8 +328,8 @@ const AddCoinForm: React.FC<StepperProps> = ({
               props={{
                 handleNext,
                 handleClose,
-                coins,
-                setCoins,
+                selectedCoin: coins,
+                setSelectedCoin: setCoins,
                 coinsPresent,
                 isXpubMissing
               }}
