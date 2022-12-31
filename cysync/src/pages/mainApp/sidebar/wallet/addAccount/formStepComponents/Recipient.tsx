@@ -224,8 +224,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const { connected } = useNetwork();
   const { coinDetails } = useCurrentCoin();
 
-  const { customAccountData, setCurrentWalletId, setCurrentCoin } =
-    useCustomAccount();
+  const { customAccountData, setCurrentAccountId } = useCustomAccount();
 
   const [availableAccounts, setAvailableAccounts] = useState<string[]>([]);
   const coinNetwork = (COINS[coinDetails.coinId] as NearCoinData).network;
@@ -236,9 +235,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = useSelectedWallet();
 
   useEffect(() => {
-    setCurrentWalletId(_id);
-    setCurrentCoin(coinDetails.coinId);
-  }, [_id]);
+    setCurrentAccountId(coinDetails.accountId);
+  }, [coinDetails]);
 
   useEffect(() => {
     if (connected) debouncedHandleCheckAddresses();
