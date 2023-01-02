@@ -327,7 +327,11 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     }
 
     setIsButtonLoading(true);
-    const wallet = new EthereumWallet(coinDetails.xpub, coin);
+    const wallet = new EthereumWallet(
+      coinDetails.accountIndex,
+      coinDetails.xpub,
+      coin
+    );
     const fromAddress = wallet.address;
     const toAddress = batchRecipientData[0].recipient.trim();
     const { network } = coin;

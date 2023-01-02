@@ -316,7 +316,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
       if (address.includes('.')) return 'This is not a valid Near address';
       if ((address + nearSuffix).length > 64)
         return 'Near address cannot be more than 64 characters';
-      const wallet = new NearWallet(coinDetails.xpub, coin);
+      const wallet = new NearWallet(
+        coinDetails.accountIndex,
+        coinDetails.xpub,
+        coin
+      );
       const check = await wallet.getTotalBalanceCustom(address + nearSuffix);
       if (check.balance !== undefined) {
         return 'This account already exists';
