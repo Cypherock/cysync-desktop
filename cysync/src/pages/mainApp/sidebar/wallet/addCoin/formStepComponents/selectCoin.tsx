@@ -135,6 +135,21 @@ const SelectCoin: React.FC<StepComponentProps> = ({
       return;
     }
 
+    const existingCoinIndexes = coinsPresent
+      .filter(el => {
+        if (el.accountType) {
+          return coin.id === el.id && coin.accountType.id === el.accountType;
+        }
+
+        return coin.id === el.id;
+      })
+      .map(el => el.accountIndex);
+
+    const newAccountIndex =
+      existingCoinIndexes.length !== 0
+        ? Math.max(...existingCoinIndexes) + 1
+        : 0;
+
     coinAdder.handleCoinAdd({
       connection,
       sdkVersion: deviceSdkVersion,
@@ -142,16 +157,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
       walletId: selectedWallet._id,
       selectedCoin: {
         id: coin.id,
-        accountIndex:
-          (coinsPresent.find(el => {
-            if (el.accountType) {
-              return (
-                coin.id === el.id && coin.accountType.id === el.accountType
-              );
-            }
-
-            return coin.id === el.id;
-          })?.accountIndex || -1) + 1,
+        accountIndex: newAccountIndex,
         accountType: coin.accountType?.id
       },
       pinExists: selectedWallet.passwordSet,
@@ -179,7 +185,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
               title={
                 !coinSupported ? 'Update device firmware to use this coin' : ''
               }
-              key={name}
+              key={coin.id + (coin.accountType?.id || '')}
             >
               <div
                 key={name}
@@ -195,7 +201,11 @@ const SelectCoin: React.FC<StepComponentProps> = ({
                   />
                   <Typography color="textPrimary">{name}</Typography>
                   {coin.accountType && (
-                    <Chip color="primary" label={coin.accountType.tag} />
+                    <Chip
+                      color="primary"
+                      label={coin.accountType.tag}
+                      sx={{ ml: 1 }}
+                    />
                   )}
                 </div>
                 <CustomCheckBox

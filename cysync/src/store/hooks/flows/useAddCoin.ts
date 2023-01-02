@@ -265,7 +265,7 @@ export const useAddCoin: UseAddCoin = () => {
     clearAll();
 
     const flowName = isXpubMissing ? `ResyncCoin` : `AddCoin`;
-    logger.info(`${flowName}: Initiated`);
+    logger.info(`${flowName}: Initiated`, { selectedCoin });
 
     if (!connection) {
       logger.error(`${flowName}: Failed - Device not connected`);
