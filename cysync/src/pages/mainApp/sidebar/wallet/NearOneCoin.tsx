@@ -211,11 +211,8 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
 
   const { beforeNetworkAction } = useConnection();
 
-  const {
-    customAccountData: accountData,
-    setCurrentWalletId,
-    setCurrentCoin
-  } = useCustomAccount();
+  const { customAccountData: accountData, setCurrentAccountId } =
+    useCustomAccount();
 
   const implicitAccount = generateNearAddressFromXpub(coinDetails.xpub);
 
@@ -300,8 +297,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   };
 
   useEffect(() => {
-    setCurrentWalletId(selectedWallet._id);
-    setCurrentCoin(coinDetails.coinId);
+    setCurrentAccountId(coinDetails.accountId);
   }, [selectedWallet._id]);
 
   useEffect(() => {

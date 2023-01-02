@@ -25,8 +25,6 @@ export interface DisplayToken extends Token {
   displayBalance: string;
   isEmpty: boolean;
   parentCoin: string;
-  price: number;
-  priceLastUpdatedAt?: Date;
 }
 
 export interface DisplayCustomAccount extends CustomAccount {

@@ -13,7 +13,7 @@ import {
   WalletDB
 } from '@cypherock/database';
 
-export type MigrationFunction = (params: {
+export interface MigrationFunctionParams {
   deviceDb: DeviceDB;
   walletDb: WalletDB;
   coinDb: CoinDB;
@@ -26,4 +26,8 @@ export type MigrationFunction = (params: {
   priceHistoryDb: PriceHistoryDB;
   accountDb: AccountDB;
   coinPriceDb: CoinPriceDB;
-}) => Promise<void>;
+}
+
+export type MigrationFunction = (
+  params: MigrationFunctionParams
+) => Promise<void>;

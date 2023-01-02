@@ -137,7 +137,6 @@ const Summary: React.FC<StepComponentProps> = ({
               coinId: coinDetails.coinId,
               name: recipientData[0].recipient + nearSuffix,
               walletId: coinDetails.walletId,
-              price: coinDetails.price.toString(),
               balance: '0'
             };
             await customAccountDb.insert(data);
