@@ -41,6 +41,7 @@ export interface SyncProviderTypes {
     account: Omit<
       ModifiedAccount,
       | 'xpub'
+      | 'name'
       | 'walletId'
       | 'accountIndex'
       | 'totalBalance'
@@ -57,6 +58,7 @@ export interface SyncProviderTypes {
     account: Omit<
       ModifiedAccount,
       | 'xpub'
+      | 'name'
       | 'walletId'
       | 'accountIndex'
       | 'totalBalance'

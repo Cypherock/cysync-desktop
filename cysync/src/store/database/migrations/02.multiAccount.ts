@@ -42,6 +42,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
 
     if (coinObj instanceof BtcCoinData) {
       const accountX: Account = {
+        name: '',
         accountId: '',
         walletId: coin.walletId,
         coinId: coinObj.id,
@@ -52,11 +53,13 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
         totalUnconfirmedBalance: coin.xpubUnconfirmedBalance
       };
       accountX.accountId = AccountDB.buildAccountIndex(accountX);
+      accountX.name = AccountDB.createAccountName(accountX);
 
       accountList.push(accountX);
 
       if (coin.zpub) {
         const accountY: Account = {
+          name: '',
           accountId: '',
           walletId: coin.walletId,
           coinId: coinObj.id,
@@ -67,11 +70,13 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
           totalUnconfirmedBalance: coin.zpubUnconfirmedBalance
         };
         accountY.accountId = AccountDB.buildAccountIndex(accountY);
+        accountY.name = AccountDB.createAccountName(accountY);
 
         accountList.push(accountY);
       }
     } else {
       const account: Account = {
+        name: '',
         accountId: '',
         walletId: coin.walletId,
         coinId: coinObj.id,
@@ -83,6 +88,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
       };
 
       account.accountId = AccountDB.buildAccountIndex(account);
+      account.name = AccountDB.createAccountName(account);
 
       accountList.push(account);
     }
