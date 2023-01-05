@@ -426,7 +426,7 @@ const Privacy: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               RECIPIENTS OF PERSONAL DATA
             </Typography>
             <Typography color="textPrimary">
-              9.We transmit your Data to our employees who are authorized to
+              9. We transmit your Data to our employees who are authorized to
               process them as part of their duties.
               <br />
               <br />
