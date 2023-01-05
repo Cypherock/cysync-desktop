@@ -29,6 +29,7 @@ const WalletConnectSign = () => {
     walletConnect.callRequestId &&
     (
       [
+        WalletConnectCallRequestMethodMap.SIGN_TYPED,
         WalletConnectCallRequestMethodMap.SIGN_PERSONAL,
         WalletConnectCallRequestMethodMap.ETH_SIGN
       ] as WalletConnectCallRequestMethod[]

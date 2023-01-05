@@ -28,7 +28,8 @@ const ACCEPTED_CALL_METHODS = [
   WalletConnectCallRequestMethodMap.ETH_SIGN_TXN,
   WalletConnectCallRequestMethodMap.ETH_SEND_TXN,
   WalletConnectCallRequestMethodMap.ETH_SIGN,
-  WalletConnectCallRequestMethodMap.SIGN_PERSONAL
+  WalletConnectCallRequestMethodMap.SIGN_PERSONAL,
+  WalletConnectCallRequestMethodMap.SIGN_TYPED
 ];
 
 const CONNECTION_TIMEOUT = 5000;

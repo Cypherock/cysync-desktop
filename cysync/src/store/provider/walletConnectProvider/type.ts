@@ -28,6 +28,15 @@ export enum WalletConnectConnectionState {
   CONNECTED
 }
 
+const protobufEnumMapper = [
+  WalletConnectCallRequestMethodMap.ETH_SIGN,
+  WalletConnectCallRequestMethodMap.SIGN_PERSONAL,
+  WalletConnectCallRequestMethodMap.SIGN_TYPED
+];
+
+export const getProtoBufferEnum = (type: WalletConnectCallRequestMethod) =>
+  protobufEnumMapper.findIndex(el => el === type) + 1;
+
 export interface WalletConnectionConnectionClientMeta {
   description?: string;
   url?: string;

@@ -8,6 +8,7 @@ import ErrorDialog from '../../../../../designSystem/designComponents/dialog/err
 import TextView from '../../../../../designSystem/designComponents/textComponents/textView';
 import { UseSignMessageValues } from '../../../../../store/hooks';
 import {
+  getProtoBufferEnum,
   useConnection,
   useWalletConnect,
   WalletConnectCallRequestMethodMap
@@ -133,7 +134,8 @@ const WalletConnectSignMessageDevice: React.FC<Props> = ({
       passphraseExists: account.passphraseExists,
       coinType: account.slug,
       setIsInFlow,
-      message
+      message,
+      requestType: getProtoBufferEnum(walletConnect.callRequestMethod)
     });
   };
 

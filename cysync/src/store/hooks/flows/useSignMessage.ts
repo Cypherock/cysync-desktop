@@ -33,6 +33,7 @@ export interface HandleSignMessageOptions {
   xpub: string;
   coinType: string;
   message: string;
+  requestType: number;
 }
 
 export interface UseSignMessageValues {
@@ -99,7 +100,8 @@ export const useSignMessage: UseSignMessage = () => {
     passphraseExists,
     xpub,
     coinType,
-    message
+    message,
+    requestType
   }) => {
     clearAll();
 
@@ -272,7 +274,8 @@ export const useSignMessage: UseSignMessage = () => {
         passphraseExists,
         xpub,
         coinType,
-        message
+        message,
+        requestType
       });
       setIsInFlow(false);
       logger.info('SignMessage: Completed', { coinType });
