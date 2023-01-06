@@ -18,8 +18,8 @@ export interface StepComponentProps {
 export const StepComponentPropTypes = {
   handleNext: PropTypes.func.isRequired,
   handleClose: PropTypes.func.isRequired,
-  coins: PropTypes.array.isRequired,
-  setCoins: PropTypes.func.isRequired,
+  selectedCoin: PropTypes.array.isRequired,
+  setSelectedCoin: PropTypes.func.isRequired,
   coinsPresent: PropTypes.array.isRequired,
   isXpubMissing: PropTypes.bool.isRequired
 };

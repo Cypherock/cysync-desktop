@@ -520,7 +520,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
     const coinObj = COINS[coinDetails.coinId];
     if (coinObj instanceof NearCoinData) {
       if (address.length === 64) return undefined;
-      const wallet = new NearWallet(coinDetails.xpub, coinObj);
+      const wallet = new NearWallet(
+        coinDetails.accountIndex,
+        coinDetails.xpub,
+        coinObj
+      );
       const check = await wallet.getTotalBalanceCustom(address);
       if (check.balance === undefined) {
         return "This account dosen't exists";

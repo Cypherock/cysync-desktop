@@ -114,7 +114,11 @@ const Verification: React.FC<StepComponentProps> = ({ handleNext }) => {
       logger.error('Not a near coin');
       return;
     } else {
-      const w = new NearWallet(coinDetails.xpub, coin);
+      const w = new NearWallet(
+        coinDetails.accountIndex,
+        coinDetails.xpub,
+        coin
+      );
       const url = Server.near.wallet.getCreateTxnLink({
         network: coin.network,
         address: customAccount.name,

@@ -23,7 +23,8 @@ export const getRequestsMetadata = (
   }
 
   if (coin instanceof NearCoinData) {
-    const wallet = new NearWallet(item.xpub, coin);
+    // TODO: use real account index inplace of 0
+    const wallet = new NearWallet(0, item.xpub, coin);
     const address = wallet.nearPublicKey;
     const customAccountMetadata = nearServer.wallet
       .getAccounts(
