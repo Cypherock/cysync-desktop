@@ -1,4 +1,4 @@
-import { COINS } from '@cypherock/communication';
+// import { COINS } from '@cypherock/communication';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
@@ -9,6 +9,7 @@ import {
   DisplayCoin,
   useReceiveTransaction,
   useSendTransaction,
+  useSwapTransaction,
   useWalletData
 } from '../hooks';
 import { useConnection, useWallets } from '../provider';
@@ -59,6 +60,7 @@ export const useExchange: UseExchange = () => {
   const { deviceConnection, deviceSdkVersion, setIsInFlow } = useConnection();
   const receiveTransaction = useReceiveTransaction();
   const sendTransaction = useSendTransaction();
+  const fswapTransaction = useSwapTransaction();
 
   const [fromToken, setFromToken] = useState<DisplayCoin>();
   const [toToken, setToToken] = useState<DisplayCoin>();
@@ -215,24 +217,31 @@ export const useExchange: UseExchange = () => {
    * Starts the first part of the swap process i.e the receive flow.
    */
   const startReceiveFlow = () => {
-    receiveTransaction
-      .handleReceiveTransaction({
-        connection: deviceConnection,
-        sdkVersion: deviceSdkVersion,
-        setIsInFlow,
-        walletId: toWallet._id,
-        coinType: toToken.slug,
-        coinName: COINS[toToken.slug]?.name,
-        xpub: toToken.xpub,
-        zpub: toToken.zpub,
-        passphraseExists: toWallet.passphraseSet
-      })
-      .then(() => {
-        logger.info('Swap Transaction: Receive Flow Started');
-      })
-      .catch(err => {
-        logger.error('Swap Transaction: Receive Flow Failed', err);
-      });
+    fswapTransaction.handleSwapTransaction({
+      connection: deviceConnection,
+      sdkVersion: deviceSdkVersion,
+      setIsInFlow,
+      sendFlow,
+      receiveFlow
+    });
+    // receiveTransaction
+    //   .handleReceiveTransaction({
+    //     connection: deviceConnection,
+    //     sdkVersion: deviceSdkVersion,
+    //     setIsInFlow,
+    //     walletId: toWallet._id,
+    //     coinType: toToken.slug,
+    //     coinName: COINS[toToken.slug]?.name,
+    //     xpub: toToken.xpub,
+    //     zpub: toToken.zpub,
+    //     passphraseExists: toWallet.passphraseSet
+    //   })
+    //   .then(() => {
+    //     logger.info('Swap Transaction: Receive Flow Started');
+    //   })
+    //   .catch(err => {
+    //     logger.error('Swap Transaction: Receive Flow Failed', err);
+    //   });
   };
 
   /**
