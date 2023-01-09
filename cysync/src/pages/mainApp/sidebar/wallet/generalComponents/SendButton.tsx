@@ -58,7 +58,7 @@ const SendButton: React.FC<SendButtonProps> = ({
     >
       <span
         style={{
-          display: 'inline-block',
+          display: 'flex',
           height: '100%',
           width: '100%'
         }}

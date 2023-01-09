@@ -4,6 +4,7 @@ export interface AddableAccountDetails {
   id: string;
   name: string;
   isSelected: boolean;
+  isDisabled?: boolean;
   coinListId: number;
   supportedVersions: number[];
   accountType?: AccountType;

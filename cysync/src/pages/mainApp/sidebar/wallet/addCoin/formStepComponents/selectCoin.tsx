@@ -116,11 +116,15 @@ const SelectCoin: React.FC<StepComponentProps> = ({
       if (index === +e.target.name) {
         coin.isSelected = !coin.isSelected;
       } else {
-        coin.isSelected = false;
+        if (!coin.isDisabled) {
+          coin.isSelected = false;
+        }
       }
     }
     setCoins([...newState]);
-    setContinueDisabled(!newState.reduce((a, el) => a || el.isSelected, false));
+    setContinueDisabled(
+      !newState.reduce((a, el) => a || (el.isSelected && !el.isDisabled), false)
+    );
   };
 
   const onContinue = () => {
@@ -128,7 +132,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
       return;
     }
 
-    const coin = coins.find(e => e.isSelected);
+    const coin = coins.find(e => e.isSelected && !e.isDisabled);
 
     if (!coin) {
       logger.warn('No coin selected');
@@ -180,10 +184,16 @@ const SelectCoin: React.FC<StepComponentProps> = ({
             versions: coin.supportedVersions
           });
 
+          const isDisabled = !coinSupported || coin.isDisabled;
+
           return (
             <Tooltip
               title={
-                !coinSupported ? 'Update device firmware to use this coin' : ''
+                !coinSupported
+                  ? 'Update device firmware to use this coin'
+                  : coin.isDisabled
+                  ? 'Already added'
+                  : ''
               }
               key={coin.id + (coin.accountType?.id || '')}
             >
@@ -191,7 +201,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
                 key={name}
                 className={clsx(
                   classes.coinItem,
-                  state || !coinSupported ? classes.selectedItem : ''
+                  state || isDisabled ? classes.selectedItem : ''
                 )}
               >
                 <div className={classes.flexRow}>
@@ -209,7 +219,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
                   )}
                 </div>
                 <CustomCheckBox
-                  disabled={!coinSupported}
+                  disabled={isDisabled}
                   name={index.toString()}
                   checked={state}
                   onChange={handleCoinChange}

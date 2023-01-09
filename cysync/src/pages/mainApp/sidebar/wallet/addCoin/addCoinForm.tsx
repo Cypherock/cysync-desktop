@@ -242,6 +242,36 @@ const AddCoinForm: React.FC<StepperProps> = ({
     JSON.parse(JSON.stringify(initialCoins))
   );
 
+  const resetCoins = () => {
+    const newCoins: AddableAccountDetails[] = JSON.parse(
+      JSON.stringify(initialCoins)
+    );
+    setDisabledCoins(newCoins);
+  };
+
+  const setDisabledCoins = (_newCoins?: AddableAccountDetails[]) => {
+    const coinsList = _newCoins || coins;
+    for (const coinItem of coinsList) {
+      if (coinItem.accountType && !coinItem.accountType.allowMultiple) {
+        const hasCoin = coinsPresent.some(
+          elem =>
+            elem.id === coinItem.id &&
+            elem.accountType === coinItem.accountType.id
+        );
+        if (hasCoin) {
+          coinItem.isDisabled = true;
+          coinItem.isSelected = true;
+        }
+      }
+    }
+
+    setCoins([...coinsList]);
+  };
+
+  React.useEffect(() => {
+    setDisabledCoins();
+  }, [coinsPresent]);
+
   const handleErrorBoxClose = () => {
     handleClose(true);
     setActiveStep(0);
@@ -257,7 +287,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
     logger.info('Add coin form retry');
     setIsAddCoinLoading(false);
     coinAdder.clearErrorObj();
-    setCoins(JSON.parse(JSON.stringify(initialCoins)));
+    resetCoins();
     if (deviceConnection) coinAdder.cancelAddCoin(deviceConnection);
     coinAdder.resetHooks();
     setActiveStep(0);
