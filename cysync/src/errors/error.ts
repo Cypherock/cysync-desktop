@@ -64,13 +64,13 @@ class CyError extends DisplayError {
     let parentCode = code;
     // Traverse the object tree until parent error is reached
     // Only parent errors are displayed in the UI
-    while (CyError.map[parentCode].parent) {
-      parentCode = CyError.map[parentCode].parent;
+    while (CyError.map[parentCode]?.parent) {
+      parentCode = CyError.map[parentCode]?.parent;
     }
     this.code = parentCode;
 
     // Handle strings and function I18N values
-    const messageUnion = CyError.map[parentCode].message;
+    const messageUnion = CyError.map[parentCode]?.message;
     if (meta && typeof messageUnion === 'function') {
       this.message = messageUnion(meta);
     } else if (typeof messageUnion === 'string') {

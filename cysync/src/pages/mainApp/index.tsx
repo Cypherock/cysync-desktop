@@ -5,7 +5,11 @@ import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
 import RouteLinks from '../../constants/routes';
-import { UpdateProvider, WalletsProvider } from '../../store/provider';
+import {
+  ReleaseNotesProvider,
+  useUpdater,
+  WalletsProvider
+} from '../../store/provider';
 
 import DbCleanup from './dbCleanup';
 import DeviceUpdater from './deviceUpdater';
@@ -24,6 +28,7 @@ const classes = {
   root: `${PREFIX}-root`,
   navbar: `${PREFIX}-navbar`,
   content: `${PREFIX}-content`,
+  contentWithUpdater: `${PREFIX}-contentWithUpdater`,
   contentChild: `${PREFIX}-contentChild`,
   sideBarMain: `${PREFIX}-sideBarMain`,
   dialogHeading: `${PREFIX}-dialogHeading`,
@@ -49,7 +54,12 @@ const StyledGrid = styled(Grid)(({ theme }) => ({
   },
 
   [`& .${classes.content}`]: {
+    transition: 'height 0.3s',
     height: 'calc(100% - 60px)'
+  },
+
+  [`& .${classes.contentWithUpdater}`]: {
+    height: 'calc(100% - 95px)'
   },
 
   [`& .${classes.contentChild}`]: {
@@ -99,11 +109,13 @@ const StyledGrid = styled(Grid)(({ theme }) => ({
 }));
 
 const MainApp: React.FC = () => {
+  const { isPersistentAppOpen } = useUpdater();
   return (
     <HashRouter>
       <WalletsProvider>
-        <UpdateProvider>
+        <ReleaseNotesProvider>
           <StyledGrid container className={classes.root}>
+            <Updater />
             <Grid container className={classes.navbar}>
               <Navbar />
             </Grid>
@@ -111,7 +123,11 @@ const MainApp: React.FC = () => {
               container
               justifyContent="center"
               alignItems="center"
-              className={classes.content}
+              className={
+                isPersistentAppOpen
+                  ? classes.contentWithUpdater
+                  : classes.content
+              }
             >
               <Grid
                 xs={2}
@@ -149,11 +165,10 @@ const MainApp: React.FC = () => {
                 </Routes>
               </Grid>
             </Grid>
-            <Updater />
             <DeviceUpdater />
             <DbCleanup />
           </StyledGrid>
-        </UpdateProvider>
+        </ReleaseNotesProvider>
       </WalletsProvider>
     </HashRouter>
   );

@@ -1,3 +1,4 @@
+import { shell } from 'electron';
 import React, { useEffect, useState } from 'react';
 
 import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
@@ -8,20 +9,22 @@ import {
 import logger from '../../../../utils/logger';
 
 import PopupComponent from './popup';
+import UpdaterComponent from './updater';
 
 const DeviceErrorPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { deviceConnectionState } = useConnection();
-
-  const onClose = () => {
-    setIsOpen(false);
-    logger.info('Initial Device error prompt closed by user');
-  };
+  const [openUpdaterPopup, setOpenUpdaterPopup] = useState(false);
+  const {
+    deviceConnectionState,
+    setOpenMisconfiguredPrompt,
+    updateRequiredType
+  } = useConnection();
 
   useEffect(() => {
     // Open only when device is not ready or unknown error occurred.
     const doOpen = [
       DeviceConnectionState.DEVICE_NOT_READY,
+      DeviceConnectionState.UPDATE_REQUIRED,
       DeviceConnectionState.UNKNOWN_ERROR
     ].includes(deviceConnectionState);
     setIsOpen(doOpen);
@@ -32,15 +35,45 @@ const DeviceErrorPopup = () => {
     }
   }, [deviceConnectionState]);
 
+  const onConfirmation = (val?: boolean) => {
+    setOpenMisconfiguredPrompt(false);
+    if (val) {
+      if (deviceConnectionState === DeviceConnectionState.UPDATE_REQUIRED) {
+        if (updateRequiredType !== 'device') {
+          shell.openExternal('https://cypherock.com/gs');
+          return;
+        }
+        setOpenUpdaterPopup(true);
+      }
+    } else {
+      setIsOpen(false);
+    }
+  };
+
+  if (openUpdaterPopup) {
+    return (
+      <DialogBox
+        fullWidth
+        maxWidth="md"
+        open={openUpdaterPopup}
+        handleClose={() => setOpenUpdaterPopup(false)}
+        isClosePresent
+        restComponents={
+          <UpdaterComponent handleClose={() => setOpenUpdaterPopup(false)} />
+        }
+      />
+    );
+  }
+
   if (isOpen) {
     return (
       <DialogBox
         fullWidth
         maxWidth="md"
         open={isOpen}
-        handleClose={onClose}
+        handleClose={() => onConfirmation()}
         isClosePresent
-        restComponents={<PopupComponent handleClose={onClose} />}
+        restComponents={<PopupComponent handleClose={onConfirmation} />}
       />
     );
   }
