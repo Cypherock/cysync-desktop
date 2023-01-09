@@ -4,6 +4,7 @@ import { SyncItem } from '../../types/syncItem';
 
 export interface CustomAccountSyncItemOptions {
   accountId: string;
+  accountIndex: number;
   accountType?: string;
   coinId: string;
   xpub: string;
@@ -16,11 +17,13 @@ export class CustomAccountSyncItem extends SyncItem {
   public walletId: string;
   public xpub: string;
   public accountId: string;
+  public accountIndex: number;
   public accountType: string;
 
   constructor({
     xpub,
     walletId,
+    accountIndex,
     module,
     isRefresh,
     coinId,
@@ -38,6 +41,7 @@ export class CustomAccountSyncItem extends SyncItem {
     this.xpub = xpub;
     this.accountId = accountId;
     this.accountType = accountType;
+    this.accountIndex = accountIndex;
   }
 
   equals(item: CustomAccountSyncItem | SyncItem) {
@@ -46,6 +50,7 @@ export class CustomAccountSyncItem extends SyncItem {
         this.walletId === item.walletId &&
         this.coinId === item.coinId &&
         this.accountId === item.accountId &&
+        this.accountIndex === item.accountIndex &&
         this.accountType === item.accountType &&
         this.xpub === item.xpub
       );
@@ -62,7 +67,8 @@ export class CustomAccountSyncItem extends SyncItem {
       walletId: this.walletId,
       xpub: this.xpub,
       module: this.module,
-      isRefresh: this.isRefresh
+      isRefresh: this.isRefresh,
+      accountIndex: this.accountIndex
     });
 
     newItem.retries = this.retries;

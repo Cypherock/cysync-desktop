@@ -176,8 +176,7 @@ export const processResponses = async (
       });
     }
     const customAccounts = await customAccountDb.getAll({
-      walletId: item.walletId,
-      coinId: item.coinId
+      accountId: item.accountId
     });
     let totalBalance = new BigNumber(0);
     for (const customAccount of customAccounts) {

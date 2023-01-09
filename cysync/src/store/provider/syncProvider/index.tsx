@@ -345,7 +345,6 @@ export const SyncProvider: React.FC = ({ children }) => {
         addToQueue(newItem);
       } else if (coinData instanceof NearCoinData) {
         const customAccounts = await customAccountDb.getAll({
-          coinId: coin.coinId,
           accountId: coin.accountId
         });
         for (const account of customAccounts) {
@@ -460,8 +459,7 @@ export const SyncProvider: React.FC = ({ children }) => {
         );
       } else if (coinData.group === CoinGroup.Near) {
         const customAccounts = await customAccountDb.getAll({
-          coinId: coin.coinId,
-          walletId: coin.walletId
+          accountId: coin.accountId
         });
         for (const account of customAccounts) {
           const customAccount = account.name;
@@ -518,6 +516,7 @@ export const SyncProvider: React.FC = ({ children }) => {
 
       if (coinData.group === CoinGroup.Near) {
         const newItem = new CustomAccountSyncItem({
+          accountIndex: coin.accountIndex,
           accountId: coin.accountId,
           coinId: coin.coinId,
           xpub: coin.xpub,
