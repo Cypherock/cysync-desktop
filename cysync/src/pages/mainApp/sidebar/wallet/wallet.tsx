@@ -265,7 +265,7 @@ const WalletView: React.FC<WalletViewProps> = ({
                 startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
                 onClick={handleAddCoinFormOpen}
               >
-                ADD COIN
+                ADD ACCOUNT
               </Button>
             </div>
           </div>
@@ -308,7 +308,7 @@ const WalletView: React.FC<WalletViewProps> = ({
             <div className={classes.walletButtons}>
               <Tooltip
                 title={
-                  !deviceConnection ? 'Connect the device to add coins' : ''
+                  !deviceConnection ? 'Connect the device to add account' : ''
                 }
               >
                 <span
@@ -326,7 +326,7 @@ const WalletView: React.FC<WalletViewProps> = ({
                     onClick={handleAddCoinFormOpen}
                     disabled={!deviceConnection}
                   >
-                    ADD COIN
+                    ADD ACCOUNT
                   </Button>
                 </span>
               </Tooltip>

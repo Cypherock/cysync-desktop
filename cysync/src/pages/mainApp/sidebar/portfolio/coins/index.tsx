@@ -123,7 +123,7 @@ const PortfolioCoins = ({
           handleRedirecttoAddCoin(currentWallet);
         }}
       >
-        Add Coins
+        Add Account
       </CustomButton>
     );
   };

@@ -10,7 +10,9 @@ import {
   EthCoinMap,
   ETHCOINS,
   NearCoinData,
-  SolanaCoinData
+  NearCoinMap,
+  SolanaCoinData,
+  SolanaCoinMap
 } from '@cypherock/communication';
 import {
   InputOutput,
@@ -866,20 +868,19 @@ export const useSendTransaction: UseSendTransaction = () => {
           isSub: false,
           hash: txHash,
           customIdentifier:
-            coinId.toLowerCase() === 'near'
+            coinId === NearCoinMap.near
               ? formattedInputs[0].address
               : undefined,
           type:
-            coinId.toLowerCase() === 'near' || coinId.toLowerCase() === 'sol'
+            coinId === NearCoinMap.near || coinId === SolanaCoinMap.solana
               ? 'TRANSFER'
               : undefined,
           amount: amount.toString(),
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
           walletId,
-          confirmations: coinId.toLowerCase() === 'near' ? 1 : 0,
-          status:
-            coinId.toLowerCase() === 'near' ? Status.SUCCESS : Status.PENDING, // Near failed txn handled already
+          confirmations: coinId === NearCoinMap.near ? 1 : 0,
+          status: coinId === NearCoinMap.near ? Status.SUCCESS : Status.PENDING, // Near failed txn handled already
           sentReceive: SentReceive.SENT,
           confirmed: new Date().toISOString(),
           blockHeight: -1,
@@ -952,12 +953,12 @@ export const useSendTransaction: UseSendTransaction = () => {
           total: amount.plus(fees).toString(),
           fees: fees.toString(),
           customIdentifier:
-            coinId.toLowerCase() === 'near'
+            coinId === NearCoinMap.near
               ? formattedInputs[0].address
               : undefined,
-          type: coinId.toLowerCase() === 'near' ? 'FUNCTION_CALL' : undefined,
+          type: coinId === NearCoinMap.near ? 'FUNCTION_CALL' : undefined,
           description:
-            coinId.toLowerCase() === 'near'
+            coinId === NearCoinMap.near
               ? `Created account ${formattedOutputs[0]?.address}`
               : undefined,
           walletId,

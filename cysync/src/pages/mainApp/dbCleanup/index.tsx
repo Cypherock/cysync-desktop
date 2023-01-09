@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
 import {
   addressDb,
+  coinDb,
   customAccountDb,
   deviceDb,
   notificationDb,
@@ -33,6 +34,10 @@ const DBCleaupPopup = () => {
         {
           name: 'Price History',
           promise: priceHistoryDb.hasIncompatableData.bind(priceHistoryDb)
+        },
+        {
+          name: 'Coin',
+          promise: coinDb.hasIncompatableData.bind(coinDb)
         },
         {
           name: 'Wallet',

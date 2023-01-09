@@ -72,7 +72,7 @@ const AddCoin: React.FC<AddCoinProps> = ({ handleClose, coinsPresent }) => {
           ? 'Configure Wallet'
           : activeStep === 4
           ? ''
-          : 'Add Coin(s)'
+          : 'Add Account'
       }
       disableBackdropClick
       disableEscapeKeyDown={isAddCoinLoading}

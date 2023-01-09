@@ -302,7 +302,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
         text={coinAdder.errorObj.showError()}
         actionText="Retry"
         handleAction={onRetry}
-        flow="Adding Coin"
+        flow="Adding Account"
         detailedText={coinAdder.detailedMessage}
         detailedCTAText="Show Details"
       />
@@ -316,7 +316,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
             >
               {isXpubMissing
                 ? 'Wallet configured successfully'
-                : 'Coin(s) added successfully'}
+                : 'Account added successfully'}
             </Typography>
             <Button
               variant="contained"
