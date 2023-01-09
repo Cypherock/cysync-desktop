@@ -130,7 +130,7 @@ const AddWalletForm: React.FC<AddWalletFormProps> = ({
               startIcon={<AddCircleIcon />}
               onClick={() => handleClose(true, true)}
             >
-              ADD COINS
+              ADD ACCOUNT
             </CustomButton>
           </>
         );

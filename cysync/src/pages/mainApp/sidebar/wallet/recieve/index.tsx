@@ -33,7 +33,7 @@ const WalletReceive = () => {
   const { deviceConnection, supportedCoinList } = useConnection();
   const { coinDetails } = useCurrentCoin();
 
-  const coinObj = COINS[coinDetails.slug];
+  const coinObj = COINS[coinDetails.coinId];
   const isSupported = checkCoinSupport(supportedCoinList, {
     id: coinObj.coinListId,
     versions: coinObj.supportedVersions

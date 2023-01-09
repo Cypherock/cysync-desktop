@@ -102,14 +102,16 @@ const Verify = (props: any) => {
   const { recipientData, creatorAccount } = props;
 
   const { coinDetails } = useCurrentCoin();
-  const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
+  const coinNetwork = (COINS[coinDetails.coinId] as NearCoinData).network;
   const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
 
   const { token } = useTokenContext();
 
   const { connected } = useNetwork();
 
-  const coinAbbr = token ? token.slug : coinDetails.slug;
+  const coinAbbr = token
+    ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.abbr
+    : COINS[coinDetails.coinId].abbr;
 
   const { sendTransaction } = useSendTransactionContext();
 
@@ -169,7 +171,9 @@ const Verify = (props: any) => {
           />
           <LabelText
             label="Amount"
-            text={`~ ${0.1} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
+            text={`~ ${0.1} ${COINS[
+              coinDetails.coinId
+            ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
               0.1 * parseFloat(coinDetails.displayPrice),
               2,
               true
@@ -178,7 +182,9 @@ const Verify = (props: any) => {
           />
           <LabelText
             label="Transaction Fee"
-            text={`~ ${0.0012} ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
+            text={`~ ${0.0012} ${COINS[
+              coinDetails.coinId
+            ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
               0.0012 * parseFloat(coinDetails.displayPrice),
               2,
               true

@@ -226,6 +226,7 @@ type BatchRecipientProps = {
   id: string | undefined;
   recipient: BatchRecipientData;
   coinAbbr: string;
+  coinId: string;
   handleCopyFromClipboard: (id: string) => void;
   index: number;
   allowDelete: boolean;
@@ -244,14 +245,14 @@ const BatchRecipient: React.FC<BatchRecipientProps> = props => {
     handleChange,
     handleDelete,
     recipient,
-    coinAbbr,
+    coinId,
     handleCopyFromClipboard,
     index,
     allowDelete,
     handleKeyPress
   } = props;
-  const coin = COINS[coinAbbr];
-  if (!coin) throw new Error(`Cannot find coinType: ${coinAbbr}`);
+  const coin = COINS[coinId];
+  if (!coin) throw new Error(`Cannot find coinId: ${coinId}`);
   return (
     <Grid container spacing={2}>
       <Grid item xs={6}>
@@ -385,7 +386,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = classes;
 
   const { coinDetails } = useCurrentCoin();
-  const isBtcFork = COINS[coinDetails.slug]?.group === CoinGroup.BitcoinForks;
+  const isBtcFork = COINS[coinDetails.coinId]?.group === CoinGroup.BitcoinForks;
   const { customAccount } = useCustomAccountContext();
 
   const {
@@ -394,7 +395,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.slug : coinDetails.slug;
+  const coin = token
+    ? COINS[coinDetails.coinId]?.tokenList[token.coinId]
+    : COINS[coinDetails.coinId];
+  const coinAbbr = coin.abbr;
   const coinPrice = token ? token.displayPrice : coinDetails.displayPrice;
 
   const { sendTransaction } = useSendTransactionContext();
@@ -422,7 +426,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
       }
     }
 
-    return prevInfo[coinDetails.slug];
+    return prevInfo[coinDetails.coinId];
   };
 
   // TODO: This parameter should be dynamic as it depends on the coin and network congestion
@@ -441,13 +445,13 @@ const Recipient: React.FC<StepComponentProps> = props => {
       }
     }
 
-    prevInfo[coinDetails.slug] = fees;
+    prevInfo[coinDetails.coinId] = fees;
     localStorage.setItem('mediumFees', JSON.stringify(prevInfo));
   };
 
   useEffect(() => {
     setIsMediumFeeLoading(true);
-    getFees(coinDetails.slug)
+    getFees(coinDetails.coinId)
       .then(res => {
         logger.info(`Medium Fee is ${res}`);
         setMediumFee(res);
@@ -472,10 +476,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   let validatedAddresses: any[any] = [];
 
-  const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
-  const isNear = COINS[coinDetails.slug].group === CoinGroup.Near;
-  const isSolana = COINS[coinDetails.slug].group === CoinGroup.Solana;
-  const isBtc = COINS[coinDetails.slug].group === CoinGroup.BitcoinForks;
+  const isEthereum = COINS[coinDetails.coinId].group === CoinGroup.Ethereum;
+  const isNear = COINS[coinDetails.coinId].group === CoinGroup.Near;
+  const isSolana = COINS[coinDetails.coinId].group === CoinGroup.Solana;
+  const isBtc = COINS[coinDetails.coinId].group === CoinGroup.BitcoinForks;
 
   const handleCheckAddresses = async (skipEmpty = false) => {
     let isValid = true;
@@ -513,10 +517,14 @@ const Recipient: React.FC<StepComponentProps> = props => {
   }, [connected]);
 
   const checkNearAccount = async (address: string) => {
-    const coin = COINS[coinDetails.slug];
-    if (coin instanceof NearCoinData) {
+    const coinObj = COINS[coinDetails.coinId];
+    if (coinObj instanceof NearCoinData) {
       if (address.length === 64) return undefined;
-      const wallet = new NearWallet(coinDetails.xpub, coin);
+      const wallet = new NearWallet(
+        coinDetails.accountIndex,
+        coinDetails.xpub,
+        coinObj
+      );
       const check = await wallet.getTotalBalanceCustom(address);
       if (check.balance === undefined) {
         return "This account dosen't exists";
@@ -535,7 +543,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
       let contractAddress: string | undefined;
       if (token) {
-        const tokenData = COINS[token.parentCoin].tokenList[token.slug];
+        const tokenData = COINS[token.parentCoinId].tokenList[token.coinId];
         contractAddress = tokenData.address;
       }
 
@@ -547,14 +555,16 @@ const Recipient: React.FC<StepComponentProps> = props => {
         pinExists: passwordSet,
         passphraseExists: passphraseSet,
         xpub: coinDetails.xpub,
-        zpub: coinDetails.zpub,
         customAccount: customAccount?.name,
         newAccountId: null,
-        coinType: coinDetails.slug,
+        coinId: coinDetails.coinId,
+        accountId: coinDetails.accountId,
+        accountIndex: coinDetails.accountIndex,
+        accountType: coinDetails.accountType,
         outputList: changeFormatOfOutputList(
           batchRecipientData,
-          coinDetails.slug,
-          token?.slug
+          coinDetails.coinId,
+          token?.coinId
         ),
         // rounding the data to handle decimals for now
         // TODO: Need to figure out support everywhere properly
@@ -563,7 +573,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
         data: {
           gasLimit,
           contractAddress,
-          contractAbbr: token ? coinAbbr.toUpperCase() : undefined
+          contractAbbr: token ? coinAbbr.toUpperCase() : undefined,
+          subCoinId: token?.coinId
         }
       });
       handleNext();
@@ -638,7 +649,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
           value={transactionFee}
           customIcon={
             <Typography className={classes.feeUnit}>
-              {COINS[coinDetails.slug.toLowerCase()]?.fees}
+              {COINS[coinDetails.coinId]?.fees}
             </Typography>
           }
         />
@@ -738,7 +749,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             error={!!batchRecipientData[0].errorAmount}
             helperText={batchRecipientData[0].errorAmount}
             placeHolder="0"
-            decimal={(COINS[coinAbbr] || { decimal: 18 }).decimal}
+            decimal={coin.decimal}
             disabled={maxSend}
             customIcon={
               <Button
@@ -812,6 +823,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               return (
                 <div key={recipient.id}>
                   <BatchRecipient
+                    coinId={coinDetails.coinId}
                     handleKeyPress={handleKeyPress}
                     handleDelete={handleDelete}
                     handleChange={e => {
@@ -917,7 +929,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
                 <small>TRANSACTION FEE:</small>
                 {` ~${formatDisplayAmount(sendTransaction.approxTotalFee)} `}
                 <span className="amountCurrency">
-                  {coinDetails.slug.toUpperCase()}
+                  {COINS[coinDetails.coinId]?.abbr?.toUpperCase()}
                   &nbsp;&nbsp;&nbsp;
                 </span>
                 <span style={{ fontSize: '0.7rem' }}>

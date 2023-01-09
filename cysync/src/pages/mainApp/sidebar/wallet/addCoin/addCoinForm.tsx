@@ -24,7 +24,7 @@ import {
 import Analytics from '../../../../../utils/analytics';
 import logger from '../../../../../utils/logger';
 
-import initialCoins from './coins';
+import initialCoins, { AddableAccountDetails } from './coins';
 
 const QontoConnector = withStyles((theme: Theme) =>
   createStyles({
@@ -207,7 +207,11 @@ const Root = styled('div')(({ theme }) => ({
 type StepperProps = {
   stepsData: any[];
   handleClose: (abort?: boolean) => void;
-  coinsPresent: any[];
+  coinsPresent: Array<{
+    id: string;
+    accountIndex: number;
+    accountType: string;
+  }>;
 };
 
 const AddCoinForm: React.FC<StepperProps> = ({
@@ -234,9 +238,39 @@ const AddCoinForm: React.FC<StepperProps> = ({
   };
 
   // Using JSON.parse to create a deep copy instead of passing by referrence
-  const [coins, setCoins] = React.useState(
+  const [coins, setCoins] = React.useState<AddableAccountDetails[]>(
     JSON.parse(JSON.stringify(initialCoins))
   );
+
+  const resetCoins = () => {
+    const newCoins: AddableAccountDetails[] = JSON.parse(
+      JSON.stringify(initialCoins)
+    );
+    setDisabledCoins(newCoins);
+  };
+
+  const setDisabledCoins = (_newCoins?: AddableAccountDetails[]) => {
+    const coinsList = _newCoins || coins;
+    for (const coinItem of coinsList) {
+      if (coinItem.accountType && !coinItem.accountType.allowMultiple) {
+        const hasCoin = coinsPresent.some(
+          elem =>
+            elem.id === coinItem.id &&
+            elem.accountType === coinItem.accountType.id
+        );
+        if (hasCoin) {
+          coinItem.isDisabled = true;
+          coinItem.isSelected = true;
+        }
+      }
+    }
+
+    setCoins([...coinsList]);
+  };
+
+  React.useEffect(() => {
+    setDisabledCoins();
+  }, [coinsPresent]);
 
   const handleErrorBoxClose = () => {
     handleClose(true);
@@ -253,7 +287,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
     logger.info('Add coin form retry');
     setIsAddCoinLoading(false);
     coinAdder.clearErrorObj();
-    setCoins(JSON.parse(JSON.stringify(initialCoins)));
+    resetCoins();
     if (deviceConnection) coinAdder.cancelAddCoin(deviceConnection);
     coinAdder.resetHooks();
     setActiveStep(0);
@@ -268,7 +302,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
         text={coinAdder.errorObj.showError()}
         actionText="Retry"
         handleAction={onRetry}
-        flow="Adding Coin"
+        flow="Adding Account"
         detailedText={coinAdder.detailedMessage}
         detailedCTAText="Show Details"
       />
@@ -282,7 +316,7 @@ const AddCoinForm: React.FC<StepperProps> = ({
             >
               {isXpubMissing
                 ? 'Wallet configured successfully'
-                : 'Coin(s) added successfully'}
+                : 'Account added successfully'}
             </Typography>
             <Button
               variant="contained"
@@ -324,8 +358,8 @@ const AddCoinForm: React.FC<StepperProps> = ({
               props={{
                 handleNext,
                 handleClose,
-                coins,
-                setCoins,
+                selectedCoin: coins,
+                setSelectedCoin: setCoins,
                 coinsPresent,
                 isXpubMissing
               }}

@@ -132,6 +132,7 @@ const Root = styled(Grid)(({ theme }) => ({
 }));
 
 const OneCoin: React.FC<OneCoinProps> = ({
+  coinId,
   initial,
   name,
   holding,
@@ -141,7 +142,8 @@ const OneCoin: React.FC<OneCoinProps> = ({
   isEmpty,
   deleteCoin,
   deleteHistory,
-  walletId
+  walletId,
+  accountId
 }) => {
   const discreetMode = useDiscreetMode();
   const navigate = useNavigate();
@@ -156,7 +158,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
   const { beforeNetworkAction } = useConnection();
 
   useEffect(() => {
-    const key = `${walletId}-${initial.toLowerCase()}`;
+    const key = accountId;
     if (initial && walletId && sync.modulesInExecutionQueue.includes(key)) {
       setIsLoading(true);
     } else {
@@ -188,8 +190,8 @@ const OneCoin: React.FC<OneCoinProps> = ({
   };
 
   const handleDeleteConfirmation = async () => {
-    await deleteCoin(coinDetails.xpub, coinDetails.slug, walletId);
-    await deleteHistory(coinDetails);
+    await deleteCoin(coinDetails.accountId);
+    await deleteHistory(coinDetails.accountId);
   };
 
   const [sendForm, setSendForm] = useState(false);
@@ -213,9 +215,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
   const onClick = () => {
     if (beforeAction()) {
       navigate(
-        `${
-          Routes.transactions.index
-        }?slug=${initial.toLowerCase()}&wallet=${walletId}`
+        `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}`
       );
     }
   };
@@ -269,10 +269,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
           className={classes.alignStartCenter}
           style={{ paddingLeft: '1rem' }}
         >
-          <CoinIcons
-            initial={initial.toUpperCase()}
-            style={{ marginRight: '10px' }}
-          />
+          <CoinIcons initial={coinId} style={{ marginRight: '10px' }} />
           <PopOverText
             color="textPrimary"
             hoverText={name}

@@ -25,8 +25,8 @@ import BigNumber from 'bignumber.js';
 import { CysyncError } from '../../../../errors';
 import logger from '../../../../utils/logger';
 import {
+  accountDb,
   addressDb,
-  coinDb,
   IOtype,
   prepareFromBlockbookTxn,
   SentReceive,
@@ -34,21 +34,16 @@ import {
   Transaction,
   transactionDb
 } from '../../../database';
-import {
-  BalanceSyncItem,
-  HistorySyncItem,
-  ModifiedCoin,
-  SyncProviderTypes
-} from '../types';
+import { BalanceSyncItem, HistorySyncItem, SyncProviderTypes } from '../types';
 
 export const getRequestsMetadata = (
   item: HistorySyncItem
 ): IRequestMetadata[] => {
-  const coin = COINS[item.coinType];
+  const coin = COINS[item.coinId];
 
   if (!coin) {
     logger.warn('Invalid coin in sync queue', {
-      coinType: item.coinType
+      coinId: item.coinId
     });
     return undefined;
   }
@@ -57,8 +52,8 @@ export const getRequestsMetadata = (
     const metadata = v2Server
       .getTransaction(
         {
-          xpub: item.zpub ? item.zpub : item.xpub,
-          coinType: item.coinType,
+          xpub: item.xpub,
+          coinType: coin.abbr,
           from: item.afterBlock,
           page: item.page || 1,
           limit: 100
@@ -71,7 +66,7 @@ export const getRequestsMetadata = (
   }
 
   if (coin instanceof EthCoinData) {
-    const address = generateEthAddressFromXpub(item.xpub, item.coinType);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinId);
 
     const ethTxnMetadata = ethServer.transaction
       .getHistory(
@@ -138,7 +133,7 @@ export const getRequestsMetadata = (
   }
 
   logger.warn('Invalid coin in sync queue', {
-    coinType: item.coinType
+    coinId: item.coinId
   });
   return [];
 };
@@ -148,14 +143,14 @@ export const processResponses = async (
   responses: batchServer.IBatchResponse[],
   options: {
     addToQueue: SyncProviderTypes['addToQueue'];
-    addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'];
-    addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
+    addPriceSyncItemFromAccount: SyncProviderTypes['addPriceSyncItemFromAccount'];
+    addLatestPriceSyncItemFromAccount: SyncProviderTypes['addLatestPriceSyncItemFromAccount'];
   }
 ): Promise<any> => {
-  const coinData = COINS[item.coinType];
+  const coinData = COINS[item.coinId];
   if (!coinData) {
     logger.warn('Invalid coin in sync queue', {
-      coinType: item.coinType
+      coinId: item.coinId
     });
     return undefined;
   }
@@ -174,48 +169,17 @@ export const processResponses = async (
       throw new Error(errorMessage);
     }
 
-    let balance = new BigNumber(response.data.balance);
+    const balance = new BigNumber(response.data.balance);
     const unconfirmedBalance = new BigNumber(response.data.unconfirmedBalance);
-    const coin = await coinDb.getOne({
-      walletId: item.walletId,
-      slug: item.coinType
+    const coin = await accountDb.getOne({
+      accountId: item.accountId
     });
 
     if (!coin) {
       logger.warn('Cannot find xpub while fetching txn', { item });
     } else {
-      if (item.zpub) {
-        await coinDb.updateZpubBalance({
-          zpub: item.zpub,
-          slug: item.coinType,
-          zpubBalance: balance.toString(),
-          zpubUnconfirmedBalance: unconfirmedBalance.toString()
-        });
-        if (coin.xpubBalance) {
-          balance = balance.plus(coin.xpubBalance);
-        }
-        if (coin.xpubUnconfirmedBalance) {
-          balance = balance.plus(coin.xpubUnconfirmedBalance);
-        }
-      } else {
-        await coinDb.updateXpubBalance({
-          xpub: item.xpub,
-          slug: item.coinType,
-          xpubBalance: balance.toString(),
-          xpubUnconfirmedBalance: unconfirmedBalance.toString()
-        });
-
-        if (coin.zpubBalance) {
-          balance = balance.plus(coin.zpubBalance);
-        }
-        if (coin.zpubUnconfirmedBalance) {
-          balance = balance.plus(coin.zpubUnconfirmedBalance);
-        }
-      }
-
-      await coinDb.updateTotalBalance({
-        xpub: item.xpub,
-        slug: item.coinType,
+      await accountDb.updateBalance({
+        accountId: item.accountId,
         totalBalance: balance.toString(),
         totalUnconfirmedBalance: unconfirmedBalance.toString()
       });
@@ -227,14 +191,15 @@ export const processResponses = async (
       for (const txn of response.data.transactions) {
         const newTxns = await prepareFromBlockbookTxn({
           txn,
+          accountId: item.accountId,
+          coinId: item.coinId,
+          parentCoinId: item.coinId,
           xpub: item.xpub,
           addresses: response.data.tokens
             ? response.data.tokens.map((elem: any) => elem.name)
             : [],
           walletId: item.walletId,
-          coinType: item.coinType,
-          addressDB: addressDb,
-          walletName: item.walletName
+          addressDB: addressDb
         });
         newTxns.forEach(newTxn => transactionDbList.push(newTxn));
       }
@@ -274,7 +239,7 @@ export const processResponses = async (
 
     const address = generateEthAddressFromXpub(
       item.xpub,
-      item.coinType
+      item.coinId
     ).toLowerCase();
     const rawHistory = responses[0].data?.result;
     const moreParent = responses[0].data?.more;
@@ -297,20 +262,22 @@ export const processResponses = async (
       const amount = String(ele.value || 0);
 
       const txn: Transaction = {
+        accountId: item.accountId,
+        coinId: item.coinId,
+        parentCoinId: item.coinId,
+        isSub: false,
         hash: ele.hash,
         amount: selfTransfer ? '0' : amount,
         fees: fees.toString(),
         total: new BigNumber(amount).plus(fees).toString(),
         confirmations: ele.confirmations || 0,
         walletId: item.walletId,
-        slug: item.coinType,
         // 2 for failed, 1 for pass
         status: ele.isError === '0' ? 1 : 2,
         sentReceive:
           address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
         confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
         blockHeight: ele.blockNumber,
-        coin: item.coinType,
         inputs: [
           {
             address: fromAddr,
@@ -343,26 +310,27 @@ export const processResponses = async (
             txnAmount = String(getEthAmountFromInput(ele.input));
           }
 
-          txn.slug = token.abbr;
           txn.amount = txnAmount;
 
           // Even if the token transaction failed, the transaction fee is still deducted.
           if (txn.sentReceive === SentReceive.SENT) {
             history.push({
+              accountId: item.accountId,
+              coinId: item.coinId,
+              parentCoinId: item.coinId,
+              isSub: false,
               hash: ele.hash as string,
               amount: fees.toString(),
               fees: '0',
               total: fees.toString(),
               confirmations: (ele.confirmations as number) || 0,
               walletId: item.walletId,
-              slug: item.coinType,
               status: 1,
               sentReceive: SentReceive.FEES,
               confirmed: new Date(
                 parseInt(ele.timeStamp, 10) * 1000
               ).toISOString(),
-              blockHeight: ele.blockNumber as number,
-              coin: item.coinType
+              blockHeight: ele.blockNumber as number
             });
           }
         }
@@ -376,7 +344,9 @@ export const processResponses = async (
     }
 
     for (const ele of erc20history) {
-      const tokenObj = coinData.tokenList[ele.tokenSymbol.toLowerCase()];
+      const tokenObj = Object.values(coinData.tokenList).find(
+        e => ele.tokenSymbol.toLowerCase() === e.abbr
+      );
       const fromAddr = formatEthAddress(ele.from).toLowerCase();
       const toAddr = formatEthAddress(ele.to).toLowerCase();
       const selfTransfer = fromAddr === toAddr;
@@ -392,21 +362,23 @@ export const processResponses = async (
           new BigNumber(ele.gasUsed || 0)
         );
 
-        erc20Tokens.add(ele.tokenSymbol.toLowerCase());
+        erc20Tokens.add(tokenObj.id);
         const txn: Transaction = {
+          accountId: item.accountId,
+          coinId: tokenObj.id,
+          parentCoinId: item.coinId,
+          isSub: true,
           hash: ele.hash as string,
           amount: selfTransfer ? '0' : amount,
           fees: fees.toString(),
           total: amount,
           confirmations: (ele.confirmations as number) || 0,
           walletId: item.walletId,
-          slug: (ele.tokenSymbol as string).toLowerCase(),
           status: 1,
           sentReceive:
             address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
           confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
           blockHeight: ele.blockNumber as number,
-          coin: item.coinType,
           inputs: [
             {
               address: fromAddr,
@@ -436,18 +408,20 @@ export const processResponses = async (
           new BigNumber(ele.gasUsed || 0)
         );
         history.push({
+          accountId: item.accountId,
+          coinId: item.coinId,
+          parentCoinId: item.coinId,
+          isSub: false,
           hash: ele.hash as string,
           amount: amt.toString(),
           fees: '0',
           total: amt.toString(),
           confirmations: (ele.confirmations as number) || 0,
           walletId: item.walletId,
-          slug: item.coinType,
           status: 1,
           sentReceive: SentReceive.FEES,
           confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
-          blockHeight: ele.blockNumber as number,
-          coin: item.coinType
+          blockHeight: ele.blockNumber as number
         });
       }
     }
@@ -466,41 +440,50 @@ export const processResponses = async (
       logger.error(error);
     }
 
-    for (const tokenName of erc20Tokens) {
+    for (const tokenId of erc20Tokens) {
+      const tokenObj = coinData.tokenList[tokenId];
       const token = await tokenDb.getOne({
-        walletId: item.walletId,
-        slug: tokenName.toLowerCase(),
-        coin: item.coinType
+        accountId: item.accountId,
+        coinId: tokenObj.id
       });
       if (!token) {
         tokenDb.insert({
+          accountId: item.accountId,
+          parentCoinId: item.coinId,
+          coinId: tokenObj.id,
           walletId: item.walletId,
-          slug: tokenName.toLowerCase(),
-          coin: item.coinType,
-          balance: '0',
-          price: 0,
-          priceLastUpdatedAt: undefined
+          balance: '0'
         });
         options.addToQueue(
           new BalanceSyncItem({
+            accountId: item.accountId,
+            accountType: item.accountType,
+            coinId: tokenObj.id,
+            parentCoinId: item.coinId,
             xpub: item.xpub,
             walletId: item.walletId,
-            coinType: tokenName,
-            parentCoin: item.coinType,
             coinGroup: CoinGroup.ERC20Tokens,
             module: item.module,
             isRefresh: true
           })
         );
-        options.addPriceSyncItemFromCoin(
-          { slug: tokenName, parentCoin: item.coinType } as ModifiedCoin,
+        options.addPriceSyncItemFromAccount(
+          {
+            ...item,
+            coinId: tokenObj.id,
+            parentCoinId: item.coinId
+          },
           {
             isRefresh: true,
             module: item.module
           }
         );
-        options.addLatestPriceSyncItemFromCoin(
-          { slug: tokenName, parentCoin: item.coinType } as ModifiedCoin,
+        options.addLatestPriceSyncItemFromAccount(
+          {
+            ...item,
+            coinId: tokenObj.id,
+            parentCoinId: item.coinId
+          },
           {
             isRefresh: true,
             module: 'default'
@@ -554,6 +537,10 @@ export const processResponses = async (
         description = `Created account ${argsJson.new_account_id}`;
       }
       const txn: Transaction = {
+        accountId: item.accountId,
+        coinId: item.coinId,
+        parentCoinId: item.coinId,
+        isSub: false,
         hash: ele.transaction_hash,
         customIdentifier: address,
         amount: selfTransfer ? '0' : amount,
@@ -561,7 +548,6 @@ export const processResponses = async (
         total: new BigNumber(amount).plus(fees).toString(),
         confirmations: 0,
         walletId: item.walletId,
-        slug: item.coinType,
         status: ele.status ? 1 : 2,
         sentReceive:
           address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
@@ -569,7 +555,6 @@ export const processResponses = async (
           parseInt(ele.block_timestamp, 10) / 1000000
         ).toISOString(), //conversion from timestamp in nanoseconds
         blockHeight: parseInt(ele.block_height, 10) || 0,
-        coin: item.coinType,
         inputs: [
           {
             address: fromAddr,
@@ -597,6 +582,10 @@ export const processResponses = async (
       if (isAddAccountTransaction) {
         const newAccountAddress = argsJson?.new_account_id;
         const addAccountTxn: Transaction = {
+          accountId: item.accountId,
+          coinId: item.coinId,
+          parentCoinId: item.coinId,
+          isSub: false,
           hash: ele.transaction_hash,
           customIdentifier: newAccountAddress,
           amount,
@@ -604,14 +593,12 @@ export const processResponses = async (
           total: new BigNumber(amount).plus(fees).toString(),
           confirmations: 0,
           walletId: item.walletId,
-          slug: item.coinType,
           status: ele.status ? 1 : 2,
           sentReceive: SentReceive.RECEIVED,
           confirmed: new Date(
             parseInt(ele.block_timestamp, 10) / 1000000
           ).toISOString(), //conversion from timestamp in nanoseconds
           blockHeight: 0,
-          coin: item.coinType,
           inputs: [
             {
               address: fromAddr,
@@ -681,13 +668,16 @@ export const processResponses = async (
           const selfTransfer = fromAddr === toAddr;
           const amount = String(instruction.parsed?.info?.lamports || 0);
           const txn: Transaction = {
+            accountId: item.accountId,
+            coinId: item.coinId,
+            parentCoinId: item.coinId,
+            isSub: false,
             hash: ele.signature,
             amount: selfTransfer ? '0' : amount,
             fees: fees.toString(),
             total: new BigNumber(amount).plus(fees).toString(),
             confirmations: 1,
             walletId: item.walletId,
-            slug: item.coinType,
             status: ele.meta?.err || ele.err ? 2 : 1,
             sentReceive:
               address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
@@ -695,7 +685,6 @@ export const processResponses = async (
               parseInt(ele.blockTime, 10) * 1000
             ).toISOString(), // conversion from timestamp in seconds
             blockHeight: ele.slot,
-            coin: item.coinType,
             inputs: [
               {
                 address: fromAddr,

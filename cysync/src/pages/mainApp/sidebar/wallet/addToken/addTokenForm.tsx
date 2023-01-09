@@ -93,13 +93,13 @@ const Root = styled('div')(({ theme }) => ({
 
 export interface AddTokenFormProps {
   tokenList: string[];
-  ethCoin: string;
+  ethCoinId: string;
   handleClose: (token?: string) => void;
 }
 
 const AddTokenForm: React.FC<AddTokenFormProps> = ({
   tokenList,
-  ethCoin,
+  ethCoinId: ethCoinId,
   handleClose
 }) => {
   const theme = useTheme();
@@ -108,7 +108,7 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
   // Using useRef because this variable will not change throught the lifecycle
   // of this component.
   const tokens = useRef<IInitialToken[]>(
-    JSON.parse(JSON.stringify(getTokens(ethCoin.toLowerCase())))
+    JSON.parse(JSON.stringify(getTokens(ethCoinId)))
   );
 
   const [selectedToken, setSelectedToken] = useState<string | undefined>(
@@ -160,7 +160,7 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
 
   const renderCoinRow = ({ index, key, style }: ListRowProps) => {
     const item = search ? searchResults[index] : tokens.current[index];
-    const { abbr, name } = item;
+    const { abbr, name, coinId } = item;
     const wasAlreadyAdded = tokenList.includes(abbr);
     const isSelected = wasAlreadyAdded || selectedToken === abbr;
 
@@ -174,8 +174,8 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
         >
           <div className={classes.flexRow}>
             <CoinIcons
-              initial={abbr.toUpperCase()}
-              parentCoin={ethCoin.toLowerCase()}
+              initial={coinId}
+              parentCoin={ethCoinId}
               style={{ marginRight: '10px' }}
             />
             <Typography color="textPrimary">{name}</Typography>
@@ -270,7 +270,7 @@ const AddTokenForm: React.FC<AddTokenFormProps> = ({
 
 AddTokenForm.propTypes = {
   tokenList: PropTypes.array.isRequired,
-  ethCoin: PropTypes.string.isRequired,
+  ethCoinId: PropTypes.string.isRequired,
   handleClose: PropTypes.func.isRequired
 };
 

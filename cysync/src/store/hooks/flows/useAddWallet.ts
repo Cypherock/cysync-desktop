@@ -15,8 +15,8 @@ import {
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
 import {
+  accountDb,
   addressDb,
-  coinDb,
   customAccountDb,
   receiveAddressDb,
   tokenDb,
@@ -260,7 +260,7 @@ export const useAddWallet: UseAddWallet = () => {
       await receiveAddressDb.delete({
         walletId
       });
-      await coinDb.delete({ walletId });
+      await accountDb.delete({ walletId });
       await tokenDb.delete({ walletId });
       await transactionDb.delete({ walletId });
       await customAccountDb.delete({ walletId });

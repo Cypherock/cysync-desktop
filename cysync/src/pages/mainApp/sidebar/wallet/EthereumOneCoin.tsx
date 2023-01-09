@@ -178,6 +178,8 @@ const CoinCardBtn = withStyles((theme: Theme) => ({
 }))(Button);
 
 const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
+  coinId,
+  accountId,
   initial,
   name,
   holding,
@@ -201,7 +203,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   // Using useRef because this variable will not change throught the lifecycle
   // of this component.
   const tokens = useRef<IInitialToken[]>(
-    JSON.parse(JSON.stringify(getTokens(initial.toLowerCase())))
+    JSON.parse(JSON.stringify(getTokens(coinId)))
   );
 
   const { selectedWallet } = useSelectedWallet();
@@ -210,22 +212,17 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
 
   const { beforeNetworkAction } = useConnection();
 
-  const {
-    tokenData,
-    tokenList,
-    setCurrentEthCoin,
-    setCurrentWalletId,
-    sortTokensByIndex
-  } = useToken();
+  const { tokenData, tokenList, setCurrentAccountId, sortTokensByIndex } =
+    useToken();
 
   useEffect(() => {
-    const key = `${walletId}-${initial.toLowerCase()}`;
-    if (initial && walletId && sync.modulesInExecutionQueue.includes(key)) {
+    const key = accountId;
+    if (accountId && sync.modulesInExecutionQueue.includes(key)) {
       setIsLoading(true);
     } else {
       setIsLoading(false);
     }
-  }, [sync.modulesInExecutionQueue, walletId, initial]);
+  }, [sync.modulesInExecutionQueue, accountId]);
 
   useEffect(() => {
     sortTokensByIndex(sortIndex);
@@ -254,18 +251,19 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
     setDeleteOpen(false);
   };
   const handleDeleteConfirmation = async () => {
-    await deleteHistory(coinDetails);
-    await deleteCoin(coinDetails.xpub, coinDetails.slug, walletId);
+    await deleteHistory(coinDetails.accountId);
+    await deleteCoin(coinDetails.accountId);
     await Promise.all(
       tokenList.map(async token => {
-        await addressDb.delete({ coinType: token, walletId });
-        await receiveAddressDb.delete({ walletId, coinType: token });
-        await transactionDb.delete({ walletId, slug: token });
+        await addressDb.delete({ accountId, coinId: token });
+        await receiveAddressDb.delete({ accountId, coinId: token });
+        await transactionDb.delete({ accountId, coinId: token });
       })
     );
     await tokenDb.delete({
       walletId: selectedWallet._id,
-      coin: coinDetails.slug
+      parentCoinId: coinDetails.coinId,
+      accountId
     });
   };
 
@@ -299,17 +297,14 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   const onClick = () => {
     if (beforeAction()) {
       navigate(
-        `${
-          Routes.transactions.index
-        }?slug=${initial.toLowerCase()}&wallet=${walletId}`
+        `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}`
       );
     }
   };
 
   useEffect(() => {
-    setCurrentWalletId(selectedWallet._id);
-    setCurrentEthCoin(coinDetails.slug);
-  }, [selectedWallet._id]);
+    setCurrentAccountId(coinDetails.accountId);
+  }, [coinDetails]);
 
   useEffect(() => {
     setCollapseTab(false);
@@ -322,9 +317,10 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
 
     if (elem) {
       const token: DisplayToken = {
+        coinId: elem.coinId,
+        parentCoinId: coinId,
+        accountId,
         walletId: selectedWallet._id,
-        coin: initial,
-        slug: selectedToken,
         balance: '0',
         price: 0,
         displayValue: '0',
@@ -373,12 +369,12 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
         openAddToken={openAddToken}
         tokenList={tokenList}
         handleClose={handleAddTokenFormClose}
-        ethCoin={initial}
+        ethCoinId={coinId}
       />
 
       {selectedAddToken && (
         <TokenContext.Provider
-          value={{ token: selectedAddToken, ethCoin: initial }}
+          value={{ token: selectedAddToken, ethCoinId: coinId }}
         >
           <ReceiveTransactionContext.Provider
             value={{
@@ -428,10 +424,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
             className={classes.alignStartCenter}
             style={{ paddingLeft: '1rem' }}
           >
-            <CoinIcons
-              initial={initial.toUpperCase()}
-              style={{ marginRight: '10px' }}
-            />
+            <CoinIcons initial={coinId} style={{ marginRight: '10px' }} />
             <PopOverText
               color="textPrimary"
               hoverText={name}
@@ -526,18 +519,19 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
               <Grid item xs={12}>
                 <Collapse in={collapseTab} timeout="auto" unmountOnExit>
                   {tokenData.map(token => {
-                    const oneTokenData =
-                      COINS[initial.toLowerCase()].tokenList[token.slug];
+                    const oneTokenData = COINS[coinId].tokenList[token.coinId];
                     if (!oneTokenData) {
-                      throw new Error(`Cannot find coinType: ${token.coin}`);
+                      throw new Error(`Cannot find coinId: ${token.coinId}`);
                     }
                     return (
-                      <React.Fragment key={token.slug}>
+                      <React.Fragment key={token.coinId}>
                         <TokenContext.Provider
-                          value={{ token, ethCoin: initial }}
+                          value={{ token, ethCoinId: initial }}
                         >
                           <OneToken
-                            initial={token.slug.toUpperCase()}
+                            coinId={token.coinId}
+                            accountId={accountId}
+                            initial={oneTokenData.abbr.toUpperCase()}
                             name={oneTokenData.name}
                             holding={token.displayBalance}
                             price={token.displayPrice}
@@ -545,7 +539,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
                             value={token.displayValue}
                             isEmpty={token.isEmpty}
                             walletId={walletId}
-                            ethCoin={initial}
+                            ethCoinId={token.parentCoinId}
                           />
                         </TokenContext.Provider>
                       </React.Fragment>

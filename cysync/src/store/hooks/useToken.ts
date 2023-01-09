@@ -2,18 +2,21 @@ import { COINS } from '@cypherock/communication';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
-import { priceHistoryDb, Token, tokenDb } from '../database';
+import {
+  getLatestPriceForCoin,
+  priceHistoryDb,
+  Token,
+  tokenDb
+} from '../database';
 
 import { DisplayToken } from './types';
 import { useDebouncedFunction } from './useDebounce';
 
 export interface UseTokenValues {
-  getAllTokensFromWallet: (walletId: string, ethCoin: string) => Promise<void>;
+  getAllTokensFromWallet: (accountId: string) => Promise<void>;
   tokenData: DisplayToken[];
   tokenList: string[];
-  setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
-  setCurrentEthCoin: React.Dispatch<React.SetStateAction<string>>;
-  sortTokenData: (tokens: DisplayToken[], index: number) => void;
+  setCurrentAccountId: React.Dispatch<React.SetStateAction<string>>;
   sortTokensByIndex: (index: number) => void;
 }
 
@@ -23,8 +26,7 @@ export const useToken: UseToken = () => {
   const [tokenData, setTokenData] = useState<UseTokenValues['tokenData']>([]);
   const [tokenList, setTokenList] = useState<UseTokenValues['tokenList']>([]);
 
-  const [currentWalletId, setCurrentWalletId] = useState('');
-  const [currentEthCoin, setCurrentEthCoin] = useState('');
+  const [currentAccountId, setCurrentAccountId] = useState('');
   const [sortIndex, setSortIndex] = useState(0);
 
   // Using doRefresh mechanish because hooks state change do not work with event listeners.
@@ -57,34 +59,38 @@ export const useToken: UseToken = () => {
     sortTokenData(tokenData, sortIndex);
   }, [sortIndex]);
 
-  const getTokensWithPrices = async (tokens: Token[], parentCoin: string) => {
+  const getTokensWithPrices = async (tokens: Token[]) => {
     const tokensWithPrice: DisplayToken[] = [];
 
     for (const token of tokens) {
-      const coin = COINS[token.coin.toLowerCase()];
+      const coin = COINS[token.parentCoinId];
 
       if (!coin) {
         throw new Error(`Cannot find parentCoin: ${coin}`);
       }
 
-      const coinObj = coin.tokenList[token.slug.toLowerCase()];
+      const coinObj = coin.tokenList[token.coinId];
       if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${token.slug}`);
+        throw new Error(`Cannot find coinId: ${token.coinId}`);
       }
 
       const coinWithPrice: DisplayToken = {
         ...token,
         isEmpty: true,
+        price: 0,
         displayPrice: '0',
         displayValue: '0',
         displayBalance: '0',
-        parentCoin
+        parentCoin: token.parentCoinId
       };
       const balance = new BigNumber(token.balance || 0).dividedBy(
         coinObj.multiplier
       );
 
-      const price = token.price || 0;
+      const price = await getLatestPriceForCoin(
+        token.coinId,
+        token.parentCoinId
+      );
       const value = balance.multipliedBy(price);
 
       coinWithPrice.displayBalance = balance.toString();
@@ -103,7 +109,7 @@ export const useToken: UseToken = () => {
     });
   };
 
-  const sortTokenData: UseTokenValues['sortTokenData'] = (tokens, index) => {
+  const sortTokenData = (tokens: DisplayToken[], index: number) => {
     switch (index) {
       case 0:
         setTokenData(
@@ -126,26 +132,26 @@ export const useToken: UseToken = () => {
       case 2:
         setTokenData(
           [...tokens].sort((a, b) => {
-            const coinA = COINS[a.coin.toLowerCase()];
+            const coinA = COINS[a.parentCoinId];
 
             if (!coinA) {
               throw new Error(`Cannot find parentCoin: ${coinA}`);
             }
 
-            const coinObjA = coinA.tokenList[a.slug.toLowerCase()];
+            const coinObjA = coinA.tokenList[a.coinId];
             if (!coinObjA) {
-              throw new Error(`Cannot find coinType: ${a.slug}`);
+              throw new Error(`Cannot find coinId: ${a.coinId}`);
             }
 
-            const coinB = COINS[b.coin.toLowerCase()];
+            const coinB = COINS[b.parentCoinId];
 
             if (!coinB) {
               throw new Error(`Cannot find parentCoin: ${coinB}`);
             }
 
-            const coinObjB = coinB.tokenList[a.slug.toLowerCase()];
+            const coinObjB = coinB.tokenList[a.coinId];
             if (!coinObjB) {
-              throw new Error(`Cannot find coinType: ${b.slug}`);
+              throw new Error(`Cannot find coinId: ${a.coinId}`);
             }
 
             const tokenA = coinObjA.name;
@@ -157,26 +163,26 @@ export const useToken: UseToken = () => {
       case 3:
         setTokenData(
           [...tokens].sort((a, b) => {
-            const coinA = COINS[a.coin.toLowerCase()];
+            const coinA = COINS[a.parentCoinId];
 
             if (!coinA) {
               throw new Error(`Cannot find parentCoin: ${coinA}`);
             }
 
-            const coinObjA = coinA.tokenList[a.slug.toLowerCase()];
+            const coinObjA = coinA.tokenList[a.coinId];
             if (!coinObjA) {
-              throw new Error(`Cannot find coinType: ${a.slug}`);
+              throw new Error(`Cannot find coinId: ${a.coinId}`);
             }
 
-            const coinB = COINS[b.coin.toLowerCase()];
+            const coinB = COINS[b.parentCoinId];
 
             if (!coinB) {
               throw new Error(`Cannot find parentCoin: ${coinB}`);
             }
 
-            const coinObjB = coinB.tokenList[a.slug.toLowerCase()];
+            const coinObjB = coinB.tokenList[a.coinId];
             if (!coinObjB) {
-              throw new Error(`Cannot find coinType: ${b.slug}`);
+              throw new Error(`Cannot find coinId: ${a.coinId}`);
             }
 
             const tokenA = coinObjA.name;
@@ -234,27 +240,26 @@ export const useToken: UseToken = () => {
     if (index !== sortIndex) setSortIndex(index);
   };
 
-  const getAllTokensFromWallet = async (walletId: string, ethCoin: string) => {
-    const res = await tokenDb.getAll({ walletId, coin: ethCoin });
+  const getAllTokensFromWallet = async (accountId: string) => {
+    const res = await tokenDb.getAll({ accountId });
     const tokens: string[] = [];
     res.forEach(token => {
-      tokens.push(token.slug);
+      tokens.push(token.coinId);
     });
     setTokenList(tokens);
-    const unsortedTokens = await getTokensWithPrices(res, ethCoin);
+    const unsortedTokens = await getTokensWithPrices(res);
     sortTokenData(unsortedTokens, sortIndex);
   };
 
   useEffect(() => {
     // We handle only Ethereum Mainnet ERC20 tokens
-    if (currentWalletId && currentEthCoin)
-      getAllTokensFromWallet(currentWalletId, currentEthCoin);
-  }, [currentWalletId, currentEthCoin]);
+    if (currentAccountId) getAllTokensFromWallet(currentAccountId);
+  }, [currentAccountId]);
 
   useEffect(() => {
     if (doRefresh) {
       setDoRefresh(false);
-      getAllTokensFromWallet(currentWalletId, currentEthCoin);
+      getAllTokensFromWallet(currentAccountId);
     }
   }, [doRefresh]);
 
@@ -262,8 +267,7 @@ export const useToken: UseToken = () => {
     getAllTokensFromWallet,
     tokenData,
     tokenList,
-    setCurrentWalletId,
-    setCurrentEthCoin,
+    setCurrentAccountId,
     sortTokensByIndex
-  } as UseTokenValues;
+  };
 };

@@ -8,7 +8,7 @@ import AddTokenForm from './addTokenForm';
 export interface AddTokenProps {
   openAddToken: boolean;
   tokenList: string[];
-  ethCoin: string;
+  ethCoinId: string;
   handleClose: () => void;
 }
 
@@ -16,7 +16,7 @@ const AddToken: React.FC<AddTokenProps> = ({
   openAddToken,
   tokenList,
   handleClose,
-  ethCoin
+  ethCoinId
 }) => {
   return (
     <DialogBox
@@ -30,7 +30,7 @@ const AddToken: React.FC<AddTokenProps> = ({
       restComponents={
         <AddTokenForm
           tokenList={tokenList}
-          ethCoin={ethCoin}
+          ethCoinId={ethCoinId}
           handleClose={handleClose}
         />
       }
@@ -42,7 +42,7 @@ AddToken.propTypes = {
   openAddToken: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
   tokenList: PropTypes.array.isRequired,
-  ethCoin: PropTypes.string.isRequired
+  ethCoinId: PropTypes.string.isRequired
 };
 
 export default AddToken;

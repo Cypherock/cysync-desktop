@@ -224,11 +224,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const { connected } = useNetwork();
   const { coinDetails } = useCurrentCoin();
 
-  const { customAccountData, setCurrentWalletId, setCurrentCoin } =
-    useCustomAccount();
+  const { customAccountData, setCurrentAccountId } = useCustomAccount();
 
   const [availableAccounts, setAvailableAccounts] = useState<string[]>([]);
-  const coinNetwork = (COINS[coinDetails.slug] as NearCoinData).network;
+  const coinNetwork = (COINS[coinDetails.coinId] as NearCoinData).network;
   const nearSuffix = coinNetwork === 'testnet' ? '.testnet' : '.near';
 
   const {
@@ -236,9 +235,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
   } = useSelectedWallet();
 
   useEffect(() => {
-    setCurrentWalletId(_id);
-    setCurrentCoin(coinDetails.slug);
-  }, [_id]);
+    setCurrentAccountId(coinDetails.accountId);
+  }, [coinDetails]);
 
   useEffect(() => {
     if (connected) debouncedHandleCheckAddresses();
@@ -262,7 +260,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   const { token } = useTokenContext();
 
-  const coinAbbr = token ? token.slug : coinDetails.slug;
+  const coinAbbr = token
+    ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.abbr
+    : COINS[coinDetails.coinId].abbr;
 
   const { sendTransaction } = useSendTransactionContext();
 
@@ -309,12 +309,16 @@ const Recipient: React.FC<StepComponentProps> = props => {
     200
   );
   const checkNearAccount = async (address: string) => {
-    const coin = COINS[coinDetails.slug];
+    const coin = COINS[coinDetails.coinId];
     if (coin instanceof NearCoinData) {
       if (address.includes('.')) return 'This is not a valid Near address';
       if ((address + nearSuffix).length > 64)
         return 'Near address cannot be more than 64 characters';
-      const wallet = new NearWallet(coinDetails.xpub, coin);
+      const wallet = new NearWallet(
+        coinDetails.accountIndex,
+        coinDetails.xpub,
+        coin
+      );
       const check = await wallet.getTotalBalanceCustom(address + nearSuffix);
       if (check.balance !== undefined) {
         return 'This account already exists';
@@ -338,6 +342,10 @@ const Recipient: React.FC<StepComponentProps> = props => {
       }
 
       sendTransaction.handleSendTransaction({
+        accountId: coinDetails.accountId,
+        accountIndex: coinDetails.accountIndex,
+        accountType: coinDetails.accountType,
+        coinId: coinDetails.coinId,
         connection: deviceConnection,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
@@ -345,21 +353,20 @@ const Recipient: React.FC<StepComponentProps> = props => {
         pinExists: passwordSet,
         passphraseExists: passphraseSet,
         xpub: coinDetails.xpub,
-        zpub: coinDetails.zpub,
         customAccount: creatorAccount,
         newAccountId: recipientData[0].recipient + nearSuffix,
-        coinType: coinDetails.slug,
         outputList: changeFormatOfOutputList(
           recipientData,
-          coinDetails.slug,
-          token?.slug
+          coinDetails.coinId,
+          token?.coinId
         ),
         fees: intTransactionFee,
         isSendAll: false,
         data: {
           gasLimit: 0,
           contractAddress,
-          contractAbbr: token ? coinAbbr.toUpperCase() : undefined
+          contractAbbr: token ? coinAbbr.toUpperCase() : undefined,
+          subCoinId: token?.coinId
         }
       });
       handleNext();

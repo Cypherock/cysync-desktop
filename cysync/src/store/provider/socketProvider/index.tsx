@@ -1,21 +1,15 @@
-import { CoinGroup, COINS } from '@cypherock/communication';
-import { getServerUrl } from '@cypherock/server-wrapper';
+import { BtcCoinMap, CoinGroup, COINS } from '@cypherock/communication';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
-import io, { Socket } from 'socket.io-client';
 
-import { deleteAllPortfolioCache } from '../../../utils/cache';
 import logger from '../../../utils/logger';
 import {
+  accountDb,
   addressDb,
-  coinDb,
-  insertFromFullTxn,
   prepareFromBlockbookTxn,
   receiveAddressDb,
   Status,
-  transactionDb,
-  updateConfirmations,
-  walletDb
+  transactionDb
 } from '../../database';
 import { useNetwork } from '../networkProvider';
 import { useSync } from '../syncProvider';
@@ -24,11 +18,10 @@ import { useStatusCheck } from '../transactionStatusProvider';
 import BlockbookSocket from './blockbookProvider';
 
 export interface SocketContextInterface {
-  socket: Socket | undefined;
   addReceiveAddressHook: (
     address: string,
-    walletId: string,
-    coinType: string,
+    accountId: string,
+    coinId: string,
     blockbookSocket?: BlockbookSocket
   ) => void;
 }
@@ -38,7 +31,6 @@ export const SocketContext: React.Context<SocketContextInterface> =
 
 export const SocketProvider: React.FC = ({ children }) => {
   const { connected } = useNetwork();
-  const [socket, setSocket] = useState<Socket | undefined>(undefined);
   const [blockbookSocket, setBlockbookSocket] = useState<
     BlockbookSocket | undefined
   >(undefined);
@@ -47,8 +39,8 @@ export const SocketProvider: React.FC = ({ children }) => {
 
   const addReceiveAddressHookFromBlockbookSocket = async (
     address: string,
-    walletId: string,
-    coinType: string,
+    accountId: string,
+    coinId: string,
     currentSocket?: BlockbookSocket
   ) => {
     try {
@@ -65,10 +57,10 @@ export const SocketProvider: React.FC = ({ children }) => {
 
       logger.info('Setting Receive address hook on Blockbook', {
         address,
-        walletId,
-        coinType
+        accountId,
+        coinId
       });
-      await usableSocket.addAddressListener(coinType, [{ address, walletId }]);
+      await usableSocket.addAddressListener(coinId, [{ address, accountId }]);
     } catch (error) {
       logger.error(error);
     }
@@ -76,13 +68,13 @@ export const SocketProvider: React.FC = ({ children }) => {
 
   const addReceiveAddressHook = (
     address: string,
-    walletId: string,
-    coinType: string,
+    accountId: string,
+    coinId: string,
     currentBlockbookSocket?: BlockbookSocket
   ) => {
-    const coin = COINS[coinType];
+    const coin = COINS[coinId];
     if (!coin) {
-      logger.warn('Invalid coinType in addReceiveAddressHook: ' + coinType);
+      logger.warn('Invalid coinId in addReceiveAddressHook: ' + coinId);
       return;
     }
     if (coin.group === CoinGroup.Ethereum || coin.group === CoinGroup.Solana) {
@@ -90,8 +82,8 @@ export const SocketProvider: React.FC = ({ children }) => {
     } else {
       return addReceiveAddressHookFromBlockbookSocket(
         address,
-        walletId,
-        coinType,
+        accountId,
+        coinId,
         currentBlockbookSocket
       );
     }
@@ -107,183 +99,59 @@ export const SocketProvider: React.FC = ({ children }) => {
     const allReceiveAddr = await receiveAddressDb.getAll();
 
     for (const receiveAddr of allReceiveAddr) {
-      const coin = COINS[receiveAddr.coinType];
+      const coin = COINS[receiveAddr.coinId];
       if (coin && coin.group === CoinGroup.BitcoinForks) {
         addReceiveAddressHook(
           receiveAddr.address,
-          receiveAddr.walletId,
-          receiveAddr.coinType,
+          receiveAddr.accountId,
+          receiveAddr.coinId,
           currentBlockbookSocket
         );
       }
     }
   };
 
-  const setSocketEvents = (currentSocket: Socket) => {
-    currentSocket.on('disconnect', () => {
-      logger.info('Socket disconnected');
-    });
-
-    currentSocket.on('connect', async () => {
-      currentSocket.on('receivedTransaction', async (payload: any) => {
-        try {
-          logger.info('Received receive txn hook', { payload });
-          if (payload && payload.walletId && payload.coinType) {
-            const wallet = await walletDb.getById(payload.walletId);
-            if (wallet) {
-              const coin = await coinDb.getOne({
-                walletId: payload.walletId,
-                slug: payload.coinType
-              });
-
-              if (coin) {
-                insertFromFullTxn({
-                  txn: payload,
-                  xpub: coin.xpub,
-                  addresses: [],
-                  walletId: payload.walletId,
-                  coinType: payload.coinType,
-                  addressDB: addressDb
-                });
-                if (payload.tokenAbbr) {
-                  addBalanceSyncItemFromCoin(coin, {
-                    isRefresh: true,
-                    token: payload.tokenAbbr as string
-                  });
-                } else {
-                  addBalanceSyncItemFromCoin(coin, {
-                    isRefresh: true
-                  });
-                }
-
-                // Update the confirmation if the database has a txn with same hash
-                await updateConfirmations(payload);
-                const allTxWithSameHash = await transactionDb.getAll({
-                  hash: payload.hash
-                });
-                if (allTxWithSameHash && allTxWithSameHash.length > 0) {
-                  logger.info(
-                    `Updating balances of ${allTxWithSameHash.length} txn via receive address hook`
-                  );
-                  for (const tx of allTxWithSameHash) {
-                    const txXpub = await coinDb.getOne({
-                      walletId: tx.walletId,
-                      slug: tx.slug || tx.coin
-                    });
-                    if (txXpub) {
-                      if (payload.tokenAbbr) {
-                        addBalanceSyncItemFromCoin(txXpub, {
-                          isRefresh: true,
-                          token: payload.tokenAbbr as string
-                        });
-                      } else {
-                        addBalanceSyncItemFromCoin(txXpub, {
-                          isRefresh: true
-                        });
-                      }
-                    } else {
-                      logger.warn('Could not found xpub for wallet', {
-                        walletId: tx.walletId,
-                        coin: tx.slug || tx.coin
-                      });
-                    }
-                  }
-                }
-              } else {
-                logger.warn('Receive txn hook, xpub not found');
-              }
-            } else {
-              logger.warn('Receive txn hook wallet does not exist');
-            }
-          } else {
-            logger.warn('Receive txn hook does not have proper data');
-          }
-        } catch (error) {
-          logger.error('Error while processing receive txn hook');
-          logger.error(error);
-        }
-      });
-
-      currentSocket.on('txnConfirm', async (payload: any) => {
-        try {
-          logger.info('Received txn confirmation hook', { payload });
-          if (payload && payload.hash && payload.coinType) {
-            const confirmations = await updateConfirmations(payload);
-            logger.info('Txn confirmed', {
-              hash: payload.hash,
-              coinType: payload.coinType
-            });
-            if (confirmations >= 1) {
-              // Remove the hook once confirmed
-              currentSocket.emit('removeTxnConfirm', payload.hash);
-              deleteAllPortfolioCache();
-
-              // Update balance when confirmed
-              if (payload.walletId) {
-                const xpub = await coinDb.getOne({
-                  walletId: payload.walletId,
-                  slug: payload.coinType
-                });
-
-                if (xpub) {
-                  logger.verbose(
-                    'Txn confirm hook changed state from pending to confirmed'
-                  );
-                  if (payload.tokenAbbr) {
-                    addBalanceSyncItemFromCoin(xpub, {
-                      isRefresh: true,
-                      token: payload.tokenAbbr as string
-                    });
-                  } else {
-                    addBalanceSyncItemFromCoin(xpub, {
-                      isRefresh: true
-                    });
-                  }
-                } else {
-                  logger.warn('Txn Confirm hook does not proper walletId');
-                }
-              }
-            }
-          } else {
-            logger.warn('Txn Confirm hook does not have proper data');
-          }
-        } catch (error) {
-          logger.error('Error while processing txn confirmation hook');
-          logger.error(error);
-        }
-      });
-    });
-  };
-
   const getWalletDataFromAddress = async (
-    coinType: string,
+    coinId: string,
     address: string
-  ): Promise<{ walletId: string | undefined; xpub: string | undefined }> => {
+  ): Promise<{
+    walletId: string | undefined;
+    xpub: string | undefined;
+    accountId: string;
+  }> => {
     let walletId: string | undefined;
     let xpub: string | undefined;
 
-    const addressDetails = await addressDb.getOne({ address, coinType });
+    const addressDetails = await addressDb.getOne({ address, coinId });
     if (addressDetails) {
       walletId = addressDetails.walletId;
-      const coinDetails = await coinDb.getOne({
-        walletId,
-        slug: coinType
+      const coinDetails = await accountDb.getOne({
+        accountId: addressDetails.accountId,
+        coinId
       });
       xpub = coinDetails.xpub;
     }
 
-    return { xpub, walletId };
+    return { xpub, walletId, accountId: addressDetails.accountId };
   };
 
   const getDetailsFromTxn = async (
-    coinType: string,
+    coinId: string,
     txn: any
-  ): Promise<Array<{ xpub: string; walletId: string; address: string }>> => {
+  ): Promise<
+    Array<{
+      xpub: string;
+      walletId: string;
+      address: string;
+      accountId: string;
+    }>
+  > => {
     const addresses = new Set<string>();
     const finalResp: Array<{
       xpub: string;
       walletId: string;
       address: string;
+      accountId: string;
     }> = [];
 
     if (!txn) {
@@ -323,12 +191,17 @@ export const SocketProvider: React.FC = ({ children }) => {
     const addressesList = Array.from(addresses);
 
     for (const address of addressesList) {
-      const walletDetails = await getWalletDataFromAddress(coinType, address);
-      if (walletDetails.walletId && walletDetails.xpub) {
+      const walletDetails = await getWalletDataFromAddress(coinId, address);
+      if (
+        walletDetails.walletId &&
+        walletDetails.xpub &&
+        walletDetails.accountId
+      ) {
         finalResp.push({
           address,
           walletId: walletDetails.walletId,
-          xpub: walletDetails.xpub
+          xpub: walletDetails.xpub,
+          accountId: walletDetails.accountId
         });
       }
     }
@@ -342,9 +215,9 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket.on('txn', async (payload: any) => {
       try {
         logger.info('Received txn from blockbookSocket', { payload });
-        if (payload && payload.coinType && payload.txn) {
+        if (payload && payload.coinId && payload.txn) {
           const allAddresses = await getDetailsFromTxn(
-            payload.coinType,
+            payload.coinId,
             payload.txn
           );
 
@@ -352,18 +225,19 @@ export const SocketProvider: React.FC = ({ children }) => {
             payload.txn.confirmations && payload.txn.confirmations > 0;
 
           for (const address of allAddresses) {
-            const coin = await coinDb.getOne({
-              walletId: address.walletId,
-              slug: payload.coinType
+            const coin = await accountDb.getOne({
+              accountId: address.accountId
             });
 
             if (coin) {
               const newTxns = await prepareFromBlockbookTxn({
                 txn: payload.txn,
                 xpub: coin.xpub,
+                accountId: coin.accountId,
+                coinId: coin.coinId,
+                parentCoinId: coin.coinId,
                 addresses: [],
                 walletId: address.walletId,
-                coinType: payload.coinType,
                 addressDB: addressDb
               });
               await Promise.all(
@@ -394,26 +268,25 @@ export const SocketProvider: React.FC = ({ children }) => {
     currentBlockbookSocket.on('block', async (payload: any) => {
       logger.info('Received block from blockbookSocket', { payload });
       try {
-        if (payload && payload.coinType) {
+        if (payload && payload.coinId) {
           const pendingTxns = await transactionDb.getAll({
-            slug: payload.coinType,
+            coinId: payload.coinId,
             status: Status.PENDING
           });
 
           if (pendingTxns && pendingTxns.length > 0) {
-            const walletIdSet = new Set<string>();
+            const accountIdSet = new Set<string>();
             for (const txn of pendingTxns) {
-              if (txn && txn.walletId) {
-                walletIdSet.add(txn.walletId);
+              if (txn && txn.accountId) {
+                accountIdSet.add(txn.accountId);
               }
             }
 
-            logger.info(`Updating balances of ${walletIdSet.size} coins`);
+            logger.info(`Updating balances of ${accountIdSet.size} coins`);
 
-            for (const walletId of walletIdSet) {
-              const coins = await coinDb.getAll({
-                slug: payload.coinType,
-                walletId
+            for (const accountId of accountIdSet) {
+              const coins = await accountDb.getAll({
+                accountId
               });
 
               for (const coin of coins) {
@@ -452,14 +325,17 @@ export const SocketProvider: React.FC = ({ children }) => {
         };
       }
 
-      const webServers = ['btc', 'btct', 'ltc', 'dash', 'doge'];
+      const webServers = Object.values(BtcCoinMap).map(elem => {
+        const coin = COINS[elem];
+        return {
+          coinId: coin.id,
+          name: coin.abbr,
+          url: `https://${coin.abbr}1.cypherock.com`
+        };
+      });
 
       logger.info('Setting Blockbook websocket');
-      const currentBlockbookSocket = new BlockbookSocket(
-        webServers.map(elem => {
-          return { name: elem, url: `https://${elem}1.cypherock.com` };
-        })
-      );
+      const currentBlockbookSocket = new BlockbookSocket(webServers);
 
       currentBlockbookSocket
         .connect()
@@ -482,24 +358,10 @@ export const SocketProvider: React.FC = ({ children }) => {
           logger.error(error);
         });
 
-      logger.info('Setting Socket');
-      const currentSocket = io(getServerUrl(), {
-        transports: ['polling', 'websocket']
-      });
-
-      setSocketEvents(currentSocket);
-
-      setSocket(currentSocket);
-
       // Destroys the socket reference
       // when the connection is closed
       return () => {
         logger.info('Removing socket');
-
-        if (currentSocket) {
-          currentSocket.removeAllListeners();
-          currentSocket.disconnect();
-        }
 
         if (currentBlockbookSocket) {
           currentBlockbookSocket.removeAllListeners();
@@ -507,7 +369,6 @@ export const SocketProvider: React.FC = ({ children }) => {
         }
 
         setBlockbookSocket(undefined);
-        setSocket(undefined);
       };
     }
 
@@ -519,8 +380,7 @@ export const SocketProvider: React.FC = ({ children }) => {
   return (
     <SocketContext.Provider
       value={{
-        addReceiveAddressHook,
-        socket
+        addReceiveAddressHook
       }}
     >
       {children}

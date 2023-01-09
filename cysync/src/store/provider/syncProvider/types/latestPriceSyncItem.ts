@@ -3,8 +3,8 @@ import { CoinGroup } from '@cypherock/communication';
 import { SyncItem } from '../../types/syncItem';
 
 export interface LatestPriceSyncItemOptions {
-  coinType: string;
-  parentCoin?: string;
+  coinId: string;
+  parentCoinId?: string;
   coinGroup: CoinGroup;
   module: string;
   isRefresh?: boolean;
@@ -14,20 +14,20 @@ export interface LatestPriceSyncItemOptions {
 export class LatestPriceSyncItem extends SyncItem {
   public id: string | undefined;
   constructor({
-    coinType,
     isRefresh,
     module,
-    parentCoin,
+    parentCoinId,
     coinGroup,
-    id
+    id,
+    coinId
   }: LatestPriceSyncItemOptions) {
     super({
       type: 'latestPrice',
-      coinType,
       isRefresh,
       module,
       coinGroup,
-      parentCoin
+      parentCoinId,
+      coinId
     });
     this.id = id;
   }
@@ -35,9 +35,9 @@ export class LatestPriceSyncItem extends SyncItem {
   equals(item: LatestPriceSyncItem | SyncItem) {
     if (item instanceof LatestPriceSyncItem) {
       return (
-        this.coinType === item.coinType &&
         this.coinGroup === item.coinGroup &&
-        this.parentCoin === item.parentCoin &&
+        this.parentCoinId === item.parentCoinId &&
+        this.coinId === item.coinId &&
         this.id === item.id
       );
     }
@@ -47,8 +47,8 @@ export class LatestPriceSyncItem extends SyncItem {
 
   clone() {
     const newItem = new LatestPriceSyncItem({
-      coinType: this.coinType,
-      parentCoin: this.parentCoin,
+      coinId: this.coinId,
+      parentCoinId: this.parentCoinId,
       coinGroup: this.coinGroup,
       isRefresh: this.isRefresh,
       module: this.module,

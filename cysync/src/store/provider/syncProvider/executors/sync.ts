@@ -31,8 +31,8 @@ export interface RequestMetaProcessInfo {
 
 export interface OptionParams {
   addToQueue: SyncProviderTypes['addToQueue'];
-  addPriceSyncItemFromCoin: SyncProviderTypes['addPriceSyncItemFromCoin'];
-  addLatestPriceSyncItemFromCoin: SyncProviderTypes['addLatestPriceSyncItemFromCoin'];
+  addPriceSyncItemFromAccount: SyncProviderTypes['addPriceSyncItemFromAccount'];
+  addLatestPriceSyncItemFromAccount: SyncProviderTypes['addLatestPriceSyncItemFromAccount'];
   isClientBatch?: boolean;
 }
 

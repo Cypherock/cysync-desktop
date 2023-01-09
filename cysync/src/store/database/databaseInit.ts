@@ -1,6 +1,8 @@
 import {
+  AccountDB,
   AddressDB,
   CoinDB,
+  CoinPriceDB,
   CustomAccountDB,
   DeviceDB,
   NotificationDB,
@@ -15,6 +17,8 @@ import {
 import { getAnalyticsId } from '../../utils/analytics';
 import logger from '../../utils/logger';
 
+import migrationFunctions from './migrations';
+
 export const passEnDb = new PassEncrypt(getAnalyticsId());
 
 export const deviceDb = new DeviceDB();
@@ -27,76 +31,10 @@ export const receiveAddressDb = new ReceiveAddressDB();
 export const transactionDb = new TransactionDB();
 export const notificationDb = new NotificationDB();
 export const priceHistoryDb = new PriceHistoryDB();
+export const accountDb = new AccountDB();
+export const coinPriceDb = new CoinPriceDB();
 
 export * from '@cypherock/database';
-
-const deleteDepricatedCoins = async () => {
-  try {
-    const depricatedCoins = [{ abbr: 'ethr' }];
-
-    const promiseList = [
-      {
-        name: 'Coins',
-        promises: depricatedCoins.map(elem =>
-          coinDb.delete({ slug: elem.abbr })
-        )
-      },
-      {
-        name: 'Price History',
-        promises: depricatedCoins.map(elem =>
-          priceHistoryDb.delete({ slug: elem.abbr })
-        )
-      },
-      {
-        name: 'ERC20 Tokens',
-        promises: depricatedCoins.map(elem =>
-          tokenDb.delete({ coin: elem.abbr })
-        )
-      },
-      {
-        name: 'Addresses',
-        promises: depricatedCoins.map(elem =>
-          addressDb.delete({ coinType: elem.abbr })
-        )
-      },
-      {
-        name: 'Receive Address',
-        promises: depricatedCoins.map(elem =>
-          receiveAddressDb.delete({ coinType: elem.abbr })
-        )
-      },
-      {
-        name: 'Transactions per slug',
-        promises: depricatedCoins.map(elem =>
-          transactionDb.delete({ slug: elem.abbr })
-        )
-      },
-      {
-        name: 'Transaction per coin',
-        promises: depricatedCoins.map(elem =>
-          transactionDb.delete({ coin: elem.abbr })
-        )
-      },
-      {
-        name: 'Custom Account',
-        promises: depricatedCoins.map(elem =>
-          customAccountDb.delete({ coin: elem.abbr })
-        )
-      }
-    ];
-
-    const promises: Array<Promise<any>> = [];
-
-    for (const elem of promiseList) {
-      promises.push(...elem.promises);
-    }
-
-    await Promise.all(promises);
-  } catch (error) {
-    logger.error('Error in deleting depricated coins.');
-    logger.error(error);
-  }
-};
 
 const initializeDatabases = async () => {
   await transactionDb.intialise();
@@ -113,5 +51,25 @@ const initializeDatabases = async () => {
 
 export const initDatabases = async () => {
   await initializeDatabases();
-  await deleteDepricatedCoins();
+  for (const func of migrationFunctions) {
+    try {
+      await func({
+        coinDb,
+        priceHistoryDb,
+        tokenDb,
+        addressDb,
+        receiveAddressDb,
+        transactionDb,
+        customAccountDb,
+        notificationDb,
+        walletDb,
+        deviceDb,
+        accountDb,
+        coinPriceDb
+      });
+    } catch (error) {
+      logger.error('Migration of database failed: ' + func.name);
+      logger.error(error);
+    }
+  }
 };
