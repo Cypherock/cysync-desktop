@@ -173,7 +173,7 @@ const GeneralSettings = () => {
       )
     },
     {
-      name: 'Email',
+      name: 'Email Auth',
       chip: emailText && (
         <Chip
           label={emailText}
@@ -193,11 +193,20 @@ const GeneralSettings = () => {
           }}
         />
       ),
-      secondaryText: !emailText
-        ? 'Add your email to receive authentication report'
-        : allowAuthEmail
-        ? 'Email auth is enabled'
-        : 'Email auth is disabled',
+      secondaryText: !emailText ? (
+        <div>
+          <div>
+            Email Authentication helps you verify the integrity of the X1 Cards{' '}
+          </div>
+          <div>
+            and the X1 Wallet by receiving authentication reports on your mail
+          </div>
+        </div>
+      ) : allowAuthEmail ? (
+        'Email auth is enabled'
+      ) : (
+        'Email auth is disabled'
+      ),
       element: emailText ? (
         <SwitchButton
           name="toggleAuthEmail"

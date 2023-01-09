@@ -39,7 +39,6 @@ const classes = {
 
 const Root = styled(Grid)(({ theme }) => ({
   [`& .${classes.wrapperContainer}`]: {
-    background: '#0E121A',
     padding: '1rem 1.5rem',
     height: 'calc(100vh - 230px)',
     width: '100%',

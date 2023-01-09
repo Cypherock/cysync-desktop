@@ -1,18 +1,24 @@
-import { COINS } from '@cypherock/communication';
+import { AbsCoinData, COINS } from '@cypherock/communication';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { coinDb, tokenDb, Wallet, walletDb } from '../database';
+import { accountDb, tokenDb, Wallet, walletDb } from '../database';
 
-export interface Coin {
+export interface Account {
   name: string;
   abbr: string;
+  coinName: string;
+  coinId: string;
+  accountType?: string;
+  accountIndex: number;
+  accountId: string;
 }
 
 export interface WalletsContextInterface {
   allWallets: Wallet[];
-  allCoins: Coin[];
+  allAccounts: Account[];
+  allCoins: AbsCoinData[];
   getAll: () => void;
   isLoading: boolean;
 }
@@ -33,7 +39,8 @@ export const WalletsProvider: React.FC = ({ children }) => {
     }
   ]);
 
-  const [allCoins, setAllCoins] = useState<Coin[]>([]);
+  const [allAccounts, setAllAccounts] = useState<Account[]>([]);
+  const [allCoins, setAllCoins] = useState<AbsCoinData[]>([]);
 
   const getAll = async () => {
     try {
@@ -58,25 +65,41 @@ export const WalletsProvider: React.FC = ({ children }) => {
     }
 
     try {
-      const coins = await coinDb.getAll();
+      const accounts = await accountDb.getAll();
       const erc20Res = await tokenDb.getAll();
       const coinTypeSet = new Set<string>();
-      const coinList: Coin[] = [];
-      for (const coin of coins) {
-        if (coinTypeSet.has(coin.slug)) continue;
-        const { name, abbr } = COINS[coin.slug];
-        coinList.push({ name, abbr });
-        coinTypeSet.add(coin.slug);
+      const accountList: Account[] = [];
+      const coinList: AbsCoinData[] = [];
+
+      for (const account of accounts) {
+        const coin = COINS[account.coinId];
+
+        accountList.push({
+          name: coin.name,
+          abbr: coin.abbr,
+          coinId: account.coinId,
+          accountId: account.accountId,
+          accountIndex: account.accountIndex,
+          accountType: account.accountType,
+          coinName: `${name} ${account.accountType}:${account.accountIndex}`
+        });
+
+        if (!coinTypeSet.has(account.coinId)) {
+          coinList.push(coin);
+          coinTypeSet.add(account.coinId);
+        }
       }
 
       for (const erc of erc20Res) {
-        if (coinTypeSet.has(erc.slug)) continue;
-        const parentData = COINS[erc.coin];
-        const { name, abbr } = parentData.tokenList[erc.slug];
-        coinList.push({ name, abbr });
-        coinTypeSet.add(erc.slug);
+        const parentData = COINS[erc.parentCoinId];
+        const coin = parentData.tokenList[erc.coinId];
+        if (!coinTypeSet.has(coin.id)) {
+          coinList.push(coin);
+          coinTypeSet.add(coin.id);
+        }
       }
 
+      setAllAccounts(accountList);
       setAllCoins(coinList);
     } catch (error) {
       logger.error(error);
@@ -103,8 +126,8 @@ export const WalletsProvider: React.FC = ({ children }) => {
     walletDb.emitter.on('update', onUpdate);
     walletDb.emitter.on('delete', onUpdate);
 
-    coinDb.emitter.on('insert', onUpdate);
-    coinDb.emitter.on('delete', onUpdate);
+    accountDb.emitter.on('insert', onUpdate);
+    accountDb.emitter.on('delete', onUpdate);
 
     tokenDb.emitter.on('insert', onUpdate);
     tokenDb.emitter.on('delete', onUpdate);
@@ -115,8 +138,8 @@ export const WalletsProvider: React.FC = ({ children }) => {
       walletDb.emitter.removeListener('update', onUpdate);
       walletDb.emitter.removeListener('delete', onUpdate);
 
-      coinDb.emitter.removeListener('insert', onUpdate);
-      coinDb.emitter.removeListener('delete', onUpdate);
+      accountDb.emitter.removeListener('insert', onUpdate);
+      accountDb.emitter.removeListener('delete', onUpdate);
 
       tokenDb.emitter.removeListener('insert', onUpdate);
       tokenDb.emitter.removeListener('delete', onUpdate);
@@ -125,7 +148,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
 
   return (
     <WalletsContext.Provider
-      value={{ allWallets, allCoins, getAll, isLoading }}
+      value={{ allWallets, allAccounts, allCoins, getAll, isLoading }}
     >
       {children}
     </WalletsContext.Provider>

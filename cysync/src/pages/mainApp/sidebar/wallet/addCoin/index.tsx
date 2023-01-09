@@ -21,7 +21,11 @@ const addCoinWalletData = [
 
 interface AddCoinProps {
   handleClose: (abort?: boolean) => void;
-  coinsPresent: any[];
+  coinsPresent: Array<{
+    id: string;
+    accountIndex: number;
+    accountType: string;
+  }>;
 }
 
 const AddCoin: React.FC<AddCoinProps> = ({ handleClose, coinsPresent }) => {
@@ -68,7 +72,7 @@ const AddCoin: React.FC<AddCoinProps> = ({ handleClose, coinsPresent }) => {
           ? 'Configure Wallet'
           : activeStep === 4
           ? ''
-          : 'Add Coin(s)'
+          : 'Add Account'
       }
       disableBackdropClick
       disableEscapeKeyDown={isAddCoinLoading}

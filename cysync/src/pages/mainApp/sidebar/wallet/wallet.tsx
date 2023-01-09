@@ -25,7 +25,6 @@ import {
 import Analytics from '../../../../utils/analytics';
 
 import AddCoinForm from './addCoin';
-import allCoins from './addCoin/coins';
 import EthereumOneCoin from './EthereumOneCoin';
 import NearOneCoin from './NearOneCoin';
 import OneCoin from './OneCoin';
@@ -196,8 +195,6 @@ const WalletView: React.FC<WalletViewProps> = ({
     }
   }, [openAddCoinForm]);
 
-  const canAddMoreCoins = allCoins.length !== coinsPresent.length;
-
   const getMainContent = () => {
     if (isLoading) {
       return (
@@ -268,7 +265,7 @@ const WalletView: React.FC<WalletViewProps> = ({
                 startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
                 onClick={handleAddCoinFormOpen}
               >
-                ADD COIN
+                ADD ACCOUNT
               </Button>
             </div>
           </div>
@@ -311,11 +308,7 @@ const WalletView: React.FC<WalletViewProps> = ({
             <div className={classes.walletButtons}>
               <Tooltip
                 title={
-                  canAddMoreCoins
-                    ? !deviceConnection
-                      ? 'Connect the device to add coins'
-                      : ''
-                    : 'All coins are already added'
+                  !deviceConnection ? 'Connect the device to add account' : ''
                 }
               >
                 <span
@@ -331,9 +324,9 @@ const WalletView: React.FC<WalletViewProps> = ({
                     className={classes.button}
                     startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
                     onClick={handleAddCoinFormOpen}
-                    disabled={!canAddMoreCoins || !deviceConnection}
+                    disabled={!deviceConnection}
                   >
-                    ADD COIN
+                    ADD ACCOUNT
                   </Button>
                 </span>
               </Tooltip>
@@ -450,26 +443,28 @@ const WalletView: React.FC<WalletViewProps> = ({
             <Grid container className={classes.coinDataContainer}>
               {coinData
                 .filter(coin => {
-                  const coinObj = COINS[coin.slug];
+                  const coinObj = COINS[coin.coinId];
                   return (
                     (coinObj &&
                       coinObj.name
                         .toUpperCase()
                         .includes(search.toUpperCase())) ||
-                    coin.slug.toUpperCase().includes(search.toUpperCase())
+                    coinObj.abbr.toUpperCase().includes(search.toUpperCase())
                   );
                 })
                 .map(coin => {
-                  const coinObj = COINS[coin.slug];
+                  const coinObj = COINS[coin.coinId];
                   return (
                     <CurrentCoinContext.Provider
                       value={{ coinDetails: coin }}
-                      key={coin.slug}
+                      key={coin.accountId}
                     >
                       {coinObj && coinObj.group === CoinGroup.Ethereum ? (
                         <EthereumOneCoin
-                          initial={coin.slug.toUpperCase()}
-                          name={coinObj.name}
+                          coinId={coin.coinId}
+                          accountId={coin.accountId}
+                          initial={coinObj.abbr.toUpperCase()}
+                          name={coin.name}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
                           price={coin.displayPrice}
@@ -482,8 +477,10 @@ const WalletView: React.FC<WalletViewProps> = ({
                         />
                       ) : coinObj && coinObj.group === CoinGroup.Near ? (
                         <NearOneCoin
-                          initial={coin.slug.toUpperCase()}
-                          name={coinObj.name}
+                          coinId={coin.coinId}
+                          accountId={coin.accountId}
+                          initial={coinObj.abbr.toUpperCase()}
+                          name={coin.name}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
                           price={coin.displayPrice}
@@ -496,8 +493,10 @@ const WalletView: React.FC<WalletViewProps> = ({
                         />
                       ) : (
                         <OneCoin
-                          initial={coin.slug.toUpperCase()}
-                          name={coinObj ? coinObj.name : ''}
+                          coinId={coin.coinId}
+                          accountId={coin.accountId}
+                          initial={coinObj.abbr.toUpperCase()}
+                          name={coin.name}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
                           price={coin.displayPrice}

@@ -102,7 +102,8 @@ const PortfolioCoins = ({
             decimal={data.decimal}
             key={data.name}
             index={i}
-            coinParent={data.parent}
+            parentCoinId={data.parentCoinId}
+            coinId={data.coinId}
           />
         );
       });
@@ -122,7 +123,7 @@ const PortfolioCoins = ({
           handleRedirecttoAddCoin(currentWallet);
         }}
       >
-        Add Coins
+        Add Account
       </CustomButton>
     );
   };

@@ -45,7 +45,7 @@ function ThumbComponent(props: ThumbComponentProps) {
       {children}
       <span className={thumbClasses.currentValue}>
         {`${props.ownerState.value} ${
-          (COINS[coinDetails.slug] || { fees: '0' }).fees
+          (COINS[coinDetails.coinId] || { fees: '0' }).fees
         }`}
       </span>
       <span className={thumbClasses.innerCircle} />

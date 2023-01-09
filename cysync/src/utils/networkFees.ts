@@ -7,11 +7,11 @@ import {
 import Server from '@cypherock/server-wrapper';
 import BigNumber from 'bignumber.js';
 
-const getFees = async (coinType: string) => {
-  const coin = COINS[coinType];
+const getFees = async (coinId: string) => {
+  const coin = COINS[coinId];
 
   if (!coin) {
-    throw new Error(`Invalid coinType ${coinType}`);
+    throw new Error(`Invalid coinId ${coinId}`);
   }
 
   if (coin instanceof EthCoinData) {
@@ -63,7 +63,9 @@ const getFees = async (coinType: string) => {
     return resp.data.fees;
   }
 
-  const res = await Server.bitcoin.transaction.getFees({ coinType }).request();
+  const res = await Server.bitcoin.transaction
+    .getFees({ coinType: coin.abbr })
+    .request();
   return Math.round(res.data.medium_fee_per_kb / 1024);
 };
 

@@ -118,13 +118,13 @@ const handleWalletErrors = (
   cyError: CyError,
   error: any,
   metadata: {
-    coinType: string;
+    coinId: string;
   }
 ) => {
   if (error.errorType === WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE)
     cyError.setError(WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE);
   else if (error.errorType === WalletErrorType.INSUFFICIENT_FUNDS)
-    cyError.setError(WalletErrorType.INSUFFICIENT_FUNDS, metadata.coinType);
+    cyError.setError(WalletErrorType.INSUFFICIENT_FUNDS, metadata.coinId);
 };
 
 export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {

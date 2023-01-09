@@ -245,7 +245,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [transactionFee, setTransactionFee] = React.useState('75');
 
   const { coinDetails } = useCurrentCoin();
-  const isBtcFork = COINS[coinDetails.slug]?.group === CoinGroup.BitcoinForks;
+  const isBtcFork = COINS[coinDetails.coinId]?.group === CoinGroup.BitcoinForks;
   const { token } = useTokenContext();
   const { customAccount } = useCustomAccountContext();
 
@@ -271,39 +271,44 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const triggerCalcFee = () => {
     let coin;
     if (token) {
-      coin = COINS[token.coin].tokenList[token.slug];
+      coin = COINS[token.parentCoinId].tokenList[token.coinId];
     } else {
-      coin = COINS[coinDetails.slug];
+      coin = COINS[coinDetails.coinId];
     }
     let contractAddress: string | undefined;
     if (token && coin instanceof Erc20CoinData) {
       contractAddress = coin.address;
     }
 
-    sendTransaction.handleEstimateFee(
-      coinDetails.xpub,
-      coinDetails.zpub,
-      coinDetails.slug,
-      changeFormatOfOutputList(
+    sendTransaction.handleEstimateFee({
+      xpub: coinDetails.xpub,
+      accountId: coinDetails.accountId,
+      accountIndex: coinDetails.accountIndex,
+      accountType: coinDetails.accountType,
+      coinId: coinDetails.coinId,
+      outputList: changeFormatOfOutputList(
         batchRecipientData,
-        coinDetails.slug,
-        token?.slug
+        coinDetails.coinId,
+        token?.coinId
       ),
-      parseFloat(transactionFee) || 0,
-      maxSend,
-      {
+      fees: parseFloat(transactionFee) || 0,
+      isSendAll: maxSend,
+      data: {
         gasLimit,
         contractAddress,
-        contractAbbr: token ? token.slug.toLowerCase() : undefined
+        contractAbbr: token
+          ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.abbr
+          : undefined,
+        subCoinId: token?.coinId
       },
-      customAccount?.name
-    );
+      customAccount: customAccount?.name
+    });
   };
 
   const debouncedCaclFee = useDebouncedFunction(triggerCalcFee, 500);
 
   const triggerCalcGasLimit = async () => {
-    const coin = COINS[coinDetails.slug];
+    const coin = COINS[coinDetails.coinId];
 
     if (!token) {
       setGasLimit(21000);
@@ -322,11 +327,15 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     }
 
     setIsButtonLoading(true);
-    const wallet = new EthereumWallet(coinDetails.xpub, coin);
+    const wallet = new EthereumWallet(
+      coinDetails.accountIndex,
+      coinDetails.xpub,
+      coin
+    );
     const fromAddress = wallet.address;
     const toAddress = batchRecipientData[0].recipient.trim();
     const { network } = coin;
-    const tokenData = coin.tokenList[token.slug];
+    const tokenData = coin.tokenList[token.coinId];
     const contractAddress = tokenData.address;
     // According to our research, amount does not matter in estimating gas limit, small or large,
     let amount = '1';
@@ -378,7 +387,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   };
 
   useEffect(() => {
-    const coin = COINS[coinDetails.slug];
+    const coin = COINS[coinDetails.coinId];
     if (coin instanceof EthCoinData) {
       debouncedCaclFee();
     }
@@ -475,6 +484,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         if (e.target.name === 'amount') {
           if (Number(e.target.value) >= 0 || e.target.value === '') {
             dataCopy.amount = e.target.value;
+            dataCopy.errorAmount = '';
           }
         }
       }
@@ -506,7 +516,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       JSON.stringify(batchRecipientData)
     );
     let isValid = true;
-    const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
+    const isEthereum = COINS[coinDetails.coinId].group === CoinGroup.Ethereum;
     let index = 0;
 
     for (const recipient of batchRecipientData) {
@@ -534,7 +544,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const validateInputs = () => {
     const isAmountValid = verifyRecipientAmount();
 
-    const isEthereum = COINS[coinDetails.slug].group === CoinGroup.Ethereum;
+    const isEthereum = COINS[coinDetails.coinId].group === CoinGroup.Ethereum;
 
     const isGasLimitValid = isEthereum ? gasLimit > 0 : true;
 
@@ -561,7 +571,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       ) {
         if (!error) {
           copyRecipient.errorRecipient = `This is not a valid ${
-            COINS[coinDetails.slug].name
+            COINS[coinDetails.coinId].name
           } address`;
         } else {
           copyRecipient.errorRecipient = '';
@@ -626,6 +636,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const externalSetMaxSend = (val: boolean) => {
     if (val) {
       sendTransaction.setIsEstimatingFees(true);
+      addbatchRecipientData(
+        batchRecipientData.map(elem => ({ ...elem, errorAmount: '' }))
+      );
     }
     setMaxSend(val);
   };

@@ -13,14 +13,10 @@ import { DisplayCustomAccount } from './types';
 import { useDebouncedFunction } from './useDebounce';
 
 export interface UseCustomAccountValues {
-  getAllCustomAccountsFromWallet: (
-    walletId: string,
-    coin: string
-  ) => Promise<void>;
+  getAllCustomAccountsFromWallet: (accountId: string) => Promise<void>;
   customAccountData: DisplayCustomAccount[];
   customAccountList: string[];
-  setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
-  setCurrentCoin: React.Dispatch<React.SetStateAction<string>>;
+  setCurrentAccountId: React.Dispatch<React.SetStateAction<string>>;
   sortCustomAccountData: (accounts: DisplayCustomAccount[]) => void;
 }
 
@@ -34,8 +30,7 @@ export const useCustomAccount: UseCustomAccount = () => {
     UseCustomAccountValues['customAccountList']
   >([]);
 
-  const [currentWalletId, setCurrentWalletId] = useState('');
-  const [currentCoin, setCurrentCoin] = useState('');
+  const [currentAccountId, setCurrentAccountId] = useState('');
 
   // Using doRefresh mechanish because hooks state change do not work with event listeners.
   const [doRefresh, setDoRefresh] = useState(false);
@@ -67,9 +62,9 @@ export const useCustomAccount: UseCustomAccount = () => {
   const getCustomAccountWithPrices = async (accounts: CustomAccount[]) => {
     const customAccountWithPrice: DisplayCustomAccount[] = [];
     for (const account of accounts) {
-      const coinObj = COINS[account.coin.toLowerCase()];
+      const coinObj = COINS[account.coinId];
       if (!coinObj || coinObj.group !== CoinGroup.Near) {
-        throw new Error(`Cannot find coinType: ${account.coin}`);
+        throw new Error(`Cannot find coinId: ${account.coinId}`);
       }
       const coinWithPrice: DisplayCustomAccount = {
         ...account,
@@ -83,7 +78,7 @@ export const useCustomAccount: UseCustomAccount = () => {
         coinObj.multiplier
       );
 
-      const price = await getLatestPriceForCoin(account.coin);
+      const price = await getLatestPriceForCoin(account.coinId);
       const value = balance.multipliedBy(price);
 
       coinWithPrice.displayBalance = balance.toString();
@@ -117,11 +112,8 @@ export const useCustomAccount: UseCustomAccount = () => {
       );
     };
 
-  const getAllCustomAccountsFromWallet = async (
-    walletId: string,
-    coin: string
-  ) => {
-    const res = await customAccountDb.getAll({ walletId, coin });
+  const getAllCustomAccountsFromWallet = async (accountId: string) => {
+    const res = await customAccountDb.getAll({ accountId });
     const accounts: string[] = [];
     res.forEach(account => {
       accounts.push(account.name);
@@ -132,14 +124,13 @@ export const useCustomAccount: UseCustomAccount = () => {
   };
 
   useEffect(() => {
-    if (currentWalletId && currentCoin)
-      getAllCustomAccountsFromWallet(currentWalletId, currentCoin);
-  }, [currentWalletId, currentCoin]);
+    if (currentAccountId) getAllCustomAccountsFromWallet(currentAccountId);
+  }, [currentAccountId]);
 
   useEffect(() => {
     if (doRefresh) {
       setDoRefresh(false);
-      getAllCustomAccountsFromWallet(currentWalletId, currentCoin);
+      getAllCustomAccountsFromWallet(currentAccountId);
     }
   }, [doRefresh]);
 
@@ -147,7 +138,7 @@ export const useCustomAccount: UseCustomAccount = () => {
     getAllCustomAccountsFromWallet,
     customAccountData,
     customAccountList,
-    setCurrentWalletId,
-    setCurrentCoin
-  } as UseCustomAccountValues;
+    setCurrentAccountId,
+    sortCustomAccountData
+  };
 };

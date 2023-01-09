@@ -54,6 +54,8 @@ const Root = styled(Grid)(({ theme }) => ({
 }));
 
 interface OneCoinProps {
+  coinId: string;
+  parentCoinId: string;
   coinInitial: string;
   coinHolding: string;
   coinValue: string;
@@ -61,48 +63,48 @@ interface OneCoinProps {
   coinPortfolio: string;
   decimal: number;
   index: number;
-  coinParent: string | undefined;
 }
 
 const OneCoin: React.FC<OneCoinProps> = props => {
   const discreetMode = useDiscreetMode();
   const {
+    coinId,
+    parentCoinId,
     coinInitial,
     coinHolding,
     coinPrice,
     coinValue,
     decimal,
     coinPortfolio,
-    index,
-    coinParent
+    index
   } = props;
 
   const navigate = useNavigate();
   const color = ['#DB953C', '#328332', '#F3BA2F'];
 
   const onClick = () => {
-    navigate(`${Routes.transactions.index}?slug=${coinInitial.toLowerCase()}`);
+    navigate(`${Routes.transactions.index}?coinId=${coinId}`);
   };
 
   let coin;
-  if (coinParent) {
-    const parent = COINS[coinParent];
+  if (parentCoinId) {
+    const parent = COINS[parentCoinId];
     if (!parent) {
-      throw new Error(`Cannot find coinType: ${coinParent}`);
+      throw new Error(`Cannot find parentCoinId: ${parentCoinId}`);
     }
-    coin = parent.tokenList[coinInitial];
-  } else coin = COINS[coinInitial];
+    coin = parent.tokenList[coinId];
+  } else coin = COINS[coinId];
 
   if (!coin) {
-    throw new Error(`Cannot find coinType: ${coinInitial}`);
+    throw new Error(`Cannot find coinId: ${coinId}`);
   }
 
   return (
     <Root onClick={onClick} container>
       <Grid item xs={3} className={classes.coin}>
         <CoinIcons
-          initial={coinInitial.toUpperCase()}
-          parentCoin={coinParent?.toLowerCase()}
+          initial={coinId}
+          parentCoin={parentCoinId}
           style={{ marginRight: '10px' }}
         />
         <div className={classes.coinText}>
@@ -178,6 +180,8 @@ const OneCoin: React.FC<OneCoinProps> = props => {
 };
 
 OneCoin.propTypes = {
+  coinId: PropTypes.string.isRequired,
+  parentCoinId: PropTypes.string,
   coinInitial: PropTypes.string.isRequired,
   coinHolding: PropTypes.string.isRequired,
   coinValue: PropTypes.string.isRequired,

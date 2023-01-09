@@ -1,10 +1,9 @@
 import { Tooltip } from '@mui/material';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import { styled, Theme } from '@mui/material/styles';
+import Chip from '@mui/material/Chip';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import CustomCheckBox from '../../../../../../designSystem/designComponents/input/checkbox';
@@ -15,21 +14,12 @@ import {
   useSelectedWallet
 } from '../../../../../../store/provider';
 import { checkCoinSupport } from '../../../../../../utils/coinCheck';
+import logger from '../../../../../../utils/logger';
 
 import {
   StepComponentProps,
   StepComponentPropTypes
 } from './StepComponentProps';
-
-const FormLabel = withStyles((theme: Theme) => ({
-  root: {
-    color: theme.palette.text.secondary
-  },
-  disabled: {
-    color: `${theme.palette.text.secondary} !important`,
-    opacity: 0.8
-  }
-}))(FormControlLabel);
 
 const PREFIX = 'AddCoinSelect';
 
@@ -58,12 +48,15 @@ const Root = styled('div')(({ theme }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginRight: '9px'
   },
   [`& .${classes.coinContainer}`]: {
     display: 'flex',
     width: '100%',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    maxHeight: '450px',
+    overflowY: 'auto'
   },
   [`& .${classes.coinItem}`]: {
     display: 'flex',
@@ -97,14 +90,11 @@ const Root = styled('div')(({ theme }) => ({
 }));
 
 const SelectCoin: React.FC<StepComponentProps> = ({
-  coins,
-  setCoins,
+  selectedCoin: coins,
+  setSelectedCoin: setCoins,
   coinsPresent,
-  isXpubMissing,
   handleNext
 }) => {
-  const [allCoinSelected, setAllCoinSelected] = React.useState(false);
-
   const { selectedWallet } = useSelectedWallet();
 
   const {
@@ -117,79 +107,24 @@ const SelectCoin: React.FC<StepComponentProps> = ({
 
   const { coinAdder } = useAddCoinContext();
 
-  const [allCoinsPresent, setAllCoinsPresent] = useState(false);
-
   const [continueDisabled, setContinueDisabled] = useState(true);
-
-  useEffect(() => {
-    if (coinsPresent.length === Object.keys(coins).length) {
-      setAllCoinsPresent(true);
-      setContinueDisabled(true);
-    }
-  }, [coinsPresent]);
-
-  useEffect(() => {
-    if (isXpubMissing) {
-      const coinsToAdd = coins
-        .filter(coin => coinsPresent.includes(coin[0]))
-        .map(coin => {
-          const newCoin = [...coin];
-          newCoin[2] = true;
-          return newCoin;
-        });
-
-      coinAdder.handleCoinAdd({
-        connection,
-        sdkVersion: deviceSdkVersion,
-        setIsInFlow,
-        walletId: selectedWallet._id,
-        coinsFromGUI: coinsToAdd as any,
-        pinExists: selectedWallet.passwordSet,
-        passphraseExists: selectedWallet.passphraseSet,
-        isXpubMissing
-      });
-      handleNext();
-    }
-  }, [isXpubMissing]);
-
-  const handleAllCoinSelectedChange = () => {
-    if (!allCoinSelected) {
-      const newState = coins;
-      for (const coin of newState) {
-        coin[2] = !coinsPresent.includes(coin[0]);
-      }
-      setCoins([...newState]);
-      setContinueDisabled(false);
-    } else {
-      const newState = coins;
-      for (const coin of newState) {
-        coin[2] = false;
-      }
-      setCoins([...newState]);
-      setContinueDisabled(true);
-    }
-    setAllCoinSelected(!allCoinSelected);
-  };
 
   const handleCoinChange = (e: any) => {
     const newState = coins;
     for (let index = 0; index < newState.length; index += 1) {
       const coin = newState[index];
-      const prevState = coin[2];
       if (index === +e.target.name) {
-        coin[2] = !prevState;
+        coin.isSelected = !coin.isSelected;
+      } else {
+        if (!coin.isDisabled) {
+          coin.isSelected = false;
+        }
       }
     }
-    let allSelectedFlag = true;
-    let noCoinSelected = true;
-    newState.forEach(coin => {
-      if (!coin[2]) {
-        if (!coinsPresent.includes(coin[0])) allSelectedFlag = false;
-      } else noCoinSelected = false;
-    });
-    setAllCoinSelected(allSelectedFlag);
-    setContinueDisabled(noCoinSelected);
     setCoins([...newState]);
+    setContinueDisabled(
+      !newState.reduce((a, el) => a || (el.isSelected && !el.isDisabled), false)
+    );
   };
 
   const onContinue = () => {
@@ -197,12 +132,38 @@ const SelectCoin: React.FC<StepComponentProps> = ({
       return;
     }
 
+    const coin = coins.find(e => e.isSelected && !e.isDisabled);
+
+    if (!coin) {
+      logger.warn('No coin selected');
+      return;
+    }
+
+    const existingCoinIndexes = coinsPresent
+      .filter(el => {
+        if (el.accountType) {
+          return coin.id === el.id && coin.accountType.id === el.accountType;
+        }
+
+        return coin.id === el.id;
+      })
+      .map(el => el.accountIndex);
+
+    const newAccountIndex =
+      existingCoinIndexes.length !== 0
+        ? Math.max(...existingCoinIndexes) + 1
+        : 0;
+
     coinAdder.handleCoinAdd({
       connection,
       sdkVersion: deviceSdkVersion,
       setIsInFlow,
       walletId: selectedWallet._id,
-      coinsFromGUI: coins as any,
+      selectedCoin: {
+        id: coin.id,
+        accountIndex: newAccountIndex,
+        accountType: coin.accountType?.id
+      },
       pinExists: selectedWallet.passwordSet,
       passphraseExists: selectedWallet.passphraseSet
     });
@@ -212,57 +173,55 @@ const SelectCoin: React.FC<StepComponentProps> = ({
   return (
     <Root className={classes.root}>
       <div className={classes.head}>
-        <Typography className={classes.heading}>Select coins</Typography>
-        <FormLabel
-          style={{ margin: 0 }}
-          control={
-            <CustomCheckBox
-              checked={allCoinSelected || allCoinsPresent}
-              onChange={handleAllCoinSelectedChange}
-              disabled={allCoinsPresent}
-            />
-          }
-          label="Select all coins"
-          labelPlacement="start"
-        />
+        <Typography className={classes.heading}>Select coin</Typography>
       </div>
       <div className={classes.coinContainer}>
         {coins.map((coin, index) => {
-          const name = coin[1];
-          const state = !!coin[2];
+          const name = coin.name;
+          const state = !!coin.isSelected;
           const coinSupported = checkCoinSupport(supportedCoinList, {
-            id: coin[3],
-            versions: coin[4]
+            id: coin.coinListId,
+            versions: coin.supportedVersions
           });
+
+          const isDisabled = !coinSupported || coin.isDisabled;
+
           return (
             <Tooltip
               title={
-                !coinsPresent.includes(coin[0]) && !coinSupported
+                !coinSupported
                   ? 'Update device firmware to use this coin'
+                  : coin.isDisabled
+                  ? 'Already added'
                   : ''
               }
-              key={name}
+              key={coin.id + (coin.accountType?.id || '')}
             >
               <div
                 key={name}
                 className={clsx(
                   classes.coinItem,
-                  coinsPresent.includes(coin[0]) || state || !coinSupported
-                    ? classes.selectedItem
-                    : ''
+                  state || isDisabled ? classes.selectedItem : ''
                 )}
               >
                 <div className={classes.flexRow}>
                   <CoinIcons
-                    initial={coin[0].toUpperCase()}
+                    initial={coin.id}
                     style={{ marginRight: '10px' }}
                   />
                   <Typography color="textPrimary">{name}</Typography>
+                  {coin.accountType && (
+                    <Chip
+                      color="primary"
+                      label={coin.accountType.tag}
+                      sx={{ ml: 1 }}
+                    />
+                  )}
                 </div>
                 <CustomCheckBox
-                  disabled={coinsPresent.includes(coin[0]) || !coinSupported}
+                  disabled={isDisabled}
                   name={index.toString()}
-                  checked={coinsPresent.includes(coin[0]) || state}
+                  checked={state}
                   onChange={handleCoinChange}
                 />
               </div>

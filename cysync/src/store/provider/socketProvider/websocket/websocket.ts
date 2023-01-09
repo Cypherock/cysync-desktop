@@ -1,7 +1,8 @@
+import { BtcCoinMap } from '@cypherock/communication';
 import { EventEmitter } from 'events';
 
 import logger from '../../../../utils/logger';
-import { coinDb } from '../../../database';
+import { coinPriceDb } from '../../../database';
 
 import {
   AddressNotification,
@@ -47,7 +48,7 @@ interface Subscription {
 
 interface Options {
   url: string;
-  coinType: string;
+  coinId: string;
   timeout?: number;
   pingTimeout?: number;
   pongTimeout?: number;
@@ -132,7 +133,7 @@ export default class Socket extends EventEmitter {
     // make sure that connection is alive if there are subscriptions
     if (this.ws && this.isConnected()) {
       if (this.subscriptions.length > 0 || this.options.keepAlive) {
-        if (this.options.coinType !== 'btct') {
+        if (this.options.coinId !== BtcCoinMap.bitcoinTestnet) {
           const latestPrice = await this.getCurrentFiatRates();
           this.updateLatestPriceDatabase(latestPrice);
         } else {
@@ -297,8 +298,8 @@ export default class Socket extends EventEmitter {
       const price = latestPrice.rates.usd;
       const priceLastUpdatedAt = latestPrice.ts;
 
-      await coinDb.findAndUpdate(
-        { slug: this.options.coinType },
+      await coinPriceDb.findAndUpdate(
+        { coinId: this.options.coinId },
         { price, priceLastUpdatedAt }
       );
     } catch (e) {

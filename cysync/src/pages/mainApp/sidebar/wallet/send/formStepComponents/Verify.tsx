@@ -108,11 +108,13 @@ const Verify = (props: any) => {
 
   const { connected } = useNetwork();
 
-  const coinAbbr = token ? token.slug : coinDetails.slug;
+  const coinAbbr = token
+    ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.abbr
+    : COINS[coinDetails.coinId].abbr;
 
   const coinName = token
-    ? COINS[coinDetails.slug]?.tokenList[token.slug]?.name
-    : COINS[coinDetails.slug].name;
+    ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.name
+    : COINS[coinDetails.coinId].name;
 
   const { sendTransaction } = useSendTransactionContext();
 
@@ -188,9 +190,9 @@ const Verify = (props: any) => {
             />
             <LabelText
               label="Transaction Fee"
-              text={`~ ${
-                sendTransaction.totalFees
-              } ${coinDetails.slug.toUpperCase()} ( $${formatDisplayAmount(
+              text={`~ ${sendTransaction.totalFees} ${COINS[
+                coinDetails.coinId
+              ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
                 parseFloat(sendTransaction.totalFees) *
                   parseFloat(coinDetails.displayPrice),
                 2,
@@ -235,9 +237,9 @@ const Verify = (props: any) => {
             <div className={classes.transactionFeeDetails}>
               <LabelText
                 label="Transaction Fee"
-                text={`~ ${
-                  sendTransaction.totalFees
-                } ${coinDetails.slug.toUpperCase()} ~( $${
+                text={`~ ${sendTransaction.totalFees} ${COINS[
+                  coinDetails.coinId
+                ]?.abbr?.toUpperCase()} ~( $${
                   parseFloat(sendTransaction.totalFees) *
                   parseFloat(coinDetails.displayPrice)
                 })`}
