@@ -2,7 +2,7 @@ import { generateNearAddressFromXpub } from '@cypherock/wallet';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { Collapse } from '@mui/material';
+import { Collapse, Tooltip } from '@mui/material';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { styled, Theme, useTheme } from '@mui/material/styles';
@@ -565,20 +565,30 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                 [classes.loading]: isLoading
               })}
             >
-              <CoinCardBtn
-                onClick={handleAddAccountFormOpen}
-                fullWidth
-                startIcon={<AddCircleIcon />}
-                style={{
-                  borderRadius: '0',
-                  borderTop: '1px solid #222',
-                  padding: '6px'
-                }}
-                disabled={isLoading || canAddAccounts}
-                disableRipple
-              >
-                ADD ACCOUNT
-              </CoinCardBtn>
+              <Tooltip title="Insufficient funds in Near account">
+                <span
+                  style={{
+                    display: 'inline-block',
+                    height: '100%',
+                    width: '100%'
+                  }}
+                >
+                  <CoinCardBtn
+                    onClick={handleAddAccountFormOpen}
+                    fullWidth
+                    startIcon={<AddCircleIcon />}
+                    style={{
+                      borderRadius: '0',
+                      borderTop: '1px solid #222',
+                      padding: '6px'
+                    }}
+                    disabled={isLoading || canAddAccounts}
+                    disableRipple
+                  >
+                    ADD ACCOUNT
+                  </CoinCardBtn>
+                </span>
+              </Tooltip>
             </Grid>
           )}
         </>
