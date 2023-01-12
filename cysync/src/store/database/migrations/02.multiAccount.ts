@@ -1,9 +1,12 @@
 import {
   AbsCoinData,
   BitcoinAccountTypes,
-  BtcCoinData,
+  BtcCoinMap,
   CoinData,
-  COINS
+  COINS,
+  EthCoinMap,
+  SolanaAccountTypes,
+  SolanaCoinMap
 } from '@cypherock/communication';
 import {
   Account,
@@ -40,7 +43,11 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
       continue;
     }
 
-    if (coinObj instanceof BtcCoinData) {
+    if (
+      ([BtcCoinMap.bitcoin, BtcCoinMap.bitcoinTestnet] as string[]).includes(
+        coinObj.id
+      )
+    ) {
       const accountX: Account = {
         name: '',
         accountId: '',
@@ -75,13 +82,18 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
         accountList.push(accountY);
       }
     } else {
+      let accountType = '';
+      if (coinObj.id === SolanaCoinMap.solana) {
+        accountType = SolanaAccountTypes.ledger;
+      }
+
       const account: Account = {
         name: '',
         accountId: '',
         walletId: coin.walletId,
         coinId: coinObj.id,
         xpub: coin.xpub,
-        accountType: '',
+        accountType,
         accountIndex: 0,
         totalBalance: coin.totalBalance,
         totalUnconfirmedBalance: coin.totalUnconfirmedBalance
@@ -317,56 +329,58 @@ const mapReceiveAddressDb: MapFunction<ReceiveAddress> = async ({
   return newReceiveAddressList;
 };
 
-const mapTokenDb: MapFunction<Token> = async ({ tokenDb, allAccounts }) => {
-  const newTokenList: Token[] = [];
-  const allTokens = await tokenDb.getAll({
-    databaseVersion: 'v1'
-  });
+const mapTokenDb: MapFunction<Token> = async () => {
+  // Don't add ETH Tokens so the application will have to refresh the history
+  return [];
+  // const newTokenList: Token[] = [];
+  // const allTokens = await tokenDb.getAll({
+  //   databaseVersion: 'v1'
+  // });
 
-  for (const token of allTokens) {
-    const coinObj = Object.values(COINS).find(
-      elem => elem.oldId === token.coin
-    );
+  // for (const token of allTokens) {
+  //   const coinObj = Object.values(COINS).find(
+  //     elem => elem.oldId === token.coin
+  //   );
 
-    if (!coinObj) {
-      logger.warn('Invalid slug found in tokenDb', {
-        token
-      });
-      continue;
-    }
+  //   if (!coinObj) {
+  //     logger.warn('Invalid slug found in tokenDb', {
+  //       token
+  //     });
+  //     continue;
+  //   }
 
-    const tokenObj = Object.values(coinObj.tokenList).find(
-      elem => elem.oldId === token.slug
-    );
+  //   const tokenObj = Object.values(coinObj.tokenList).find(
+  //     elem => elem.oldId === token.slug
+  //   );
 
-    if (!tokenObj) {
-      logger.warn('Invalid slug found in tokenDb', { token });
-      continue;
-    }
+  //   if (!tokenObj) {
+  //     logger.warn('Invalid slug found in tokenDb', { token });
+  //     continue;
+  //   }
 
-    const account = allAccounts.find(
-      acc => acc.walletId === token.walletId && coinObj.id === acc.coinId
-    );
+  //   const account = allAccounts.find(
+  //     acc => acc.walletId === token.walletId && coinObj.id === acc.coinId
+  //   );
 
-    if (!account) {
-      logger.warn('No account found for receiveAddressDb entry', {
-        receiveAddress: token
-      });
-      continue;
-    }
+  //   if (!account) {
+  //     logger.warn('No account found for receiveAddressDb entry', {
+  //       receiveAddress: token
+  //     });
+  //     continue;
+  //   }
 
-    const newToken: Token = {
-      coinId: tokenObj.id,
-      parentCoinId: coinObj.id,
-      accountId: account.accountId,
-      walletId: account.walletId,
-      balance: token.balance
-    };
+  //   const newToken: Token = {
+  //     coinId: tokenObj.id,
+  //     parentCoinId: coinObj.id,
+  //     accountId: account.accountId,
+  //     walletId: account.walletId,
+  //     balance: token.balance
+  //   };
 
-    newTokenList.push(newToken);
-  }
+  //   newTokenList.push(newToken);
+  // }
 
-  return newTokenList;
+  // return newTokenList;
 };
 
 const mapTransactionDb: MapFunction<Transaction> = async ({
@@ -407,6 +421,11 @@ const mapTransactionDb: MapFunction<Transaction> = async ({
       logger.warn('Invalid slug found in transactionDb', {
         transaction
       });
+      continue;
+    }
+
+    // Don't add ETH Tokens so the application will have to refresh the history
+    if (parentCoinObj?.id === EthCoinMap.ethereum) {
       continue;
     }
 
