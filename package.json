@@ -24,8 +24,11 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.63.1",
+    "@walletconnect/client": "^1.8.0",
     "axios": "^0.26.1",
-    "fs-extra": "^10.0.0"
+    "eip-712": "^1.0.0",
+    "fs-extra": "^10.0.0",
+    "ts-proto": "^1.138.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",

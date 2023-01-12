@@ -3,10 +3,12 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
+import SensorsIcon from '@mui/icons-material/Sensors';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { styled, useTheme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
@@ -20,7 +22,8 @@ import {
   CurrentCoinContext,
   useAddCoinContext,
   useConnection,
-  useSelectedWallet
+  useSelectedWallet,
+  useWalletConnect
 } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 
@@ -117,6 +120,7 @@ const WalletView: React.FC<WalletViewProps> = ({
   addCoinOpened
 }) => {
   const theme = useTheme();
+  const walletConnect = useWalletConnect();
 
   const {
     coinData,
@@ -331,6 +335,12 @@ const WalletView: React.FC<WalletViewProps> = ({
                 </span>
               </Tooltip>
             </div>
+            <IconButton
+              onClick={walletConnect.openDialog}
+              sx={{ marginLeft: '12px' }}
+            >
+              <SensorsIcon />
+            </IconButton>
           </Grid>
         </Grid>
         <div style={{ width: '100%' }}>

@@ -134,6 +134,25 @@ if (
   require('electron-debug')();
 }
 
+const handleUriOpen = async (uri: string) => {
+  try {
+    const newUrl = uri.startsWith('cypherock://') ? uri : 'cypherock://' + uri;
+    const url = new URL(newUrl);
+
+    // Handle wallet connect open
+    if (url.host === 'wc') {
+      const connectionString = url.searchParams.get('uri');
+
+      if (connectionString && mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('wallet-connect', connectionString);
+      }
+    }
+  } catch (error) {
+    logger.error('Error in handling URL');
+    logger.error(error);
+  }
+};
+
 const createWindow = async () => {
   if (isDevelopment) {
     await installExtensions();
@@ -153,9 +172,24 @@ const createWindow = async () => {
   }
 
   if (applicationLock) {
-    app.on('second-instance', (_event, commandLine, workingDirectory) => {
+    app.on('second-instance', (_event, argv, workingDirectory) => {
       // Handle Deeplink for windows
-      logger.info('Second instance opened', { commandLine, workingDirectory });
+      logger.info('Second instance opened', {
+        commandLine: argv,
+        workingDirectory
+      });
+
+      if (argv.length > 1) {
+        // Only try this if there is an argv (might be redundant)
+        if (process.platform === 'win32' || process.platform === 'linux') {
+          try {
+            handleUriOpen(argv[argv.length - 1].split('cypherock://')[1]);
+          } catch {
+            logger.error(`Direct link to file - FAILED: ${argv}`);
+          }
+        }
+      }
+
       if (mainWindow) {
         if (mainWindow.isMinimized()) mainWindow.restore();
         mainWindow.focus();
@@ -470,5 +504,6 @@ app.on('activate', () => {
 app.on('open-url', (event, url) => {
   // Handle deeplink for macos and linux
   event.preventDefault();
-  logger.info('deep link uri', url);
+  logger.info('deep link uri', { url });
+  handleUriOpen(url);
 });

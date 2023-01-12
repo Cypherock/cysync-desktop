@@ -11,16 +11,17 @@ import {
   WalletsProvider
 } from '../../store/provider';
 
-import DbCleanup from './dbCleanup';
-import DeviceUpdater from './deviceUpdater';
 import Navbar from './navbar';
+import DbCleanup from './popups/dbCleanup';
+import DeviceUpdater from './popups/deviceUpdater';
+import Updater from './popups/updater';
+import WalletConnectPopup from './popups/walletConnect';
 import Sidebar from './sidebar';
 import Portfolio from './sidebar/portfolio';
 import Settings from './sidebar/settings';
 import Transaction from './sidebar/transaction';
 import Tutorial from './sidebar/tutorial';
 import Wallet from './sidebar/wallet';
-import Updater from './updater';
 
 const PREFIX = 'MainApp';
 
@@ -167,6 +168,7 @@ const MainApp: React.FC = () => {
             </Grid>
             <DeviceUpdater />
             <DbCleanup />
+            <WalletConnectPopup />
           </StyledGrid>
         </ReleaseNotesProvider>
       </WalletsProvider>

@@ -16,7 +16,19 @@
     "resolveJsonModule": true,
     "downlevelIteration": true,
     "paths": {
-      "*": ["node_modules/*"]
+      "*": ["node_modules/*"],
+      "@src/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@config/*": ["src/config/*"],
+      "@constants/*": ["src/constants/*"],
+      "@designSystem/*": ["src/designSystem/*"],
+      "@errorBoundary/*": ["src/errorBoundary/*"],
+      "@errors/*": ["src/errors/*"],
+      "@loading/*": ["src/loading/*"],
+      "@mainProcess/*": ["src/mainProcess/*"],
+      "@pages/*": ["src/pages/*"],
+      "@store/*": ["src/store/*"],
+      "@utils/*": ["src/utils/*"]
     }
   },
   "include": ["src/**/*"]

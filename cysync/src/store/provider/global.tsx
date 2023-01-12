@@ -11,7 +11,8 @@ import {
   SocketProvider,
   SyncProvider,
   TutorialProvider,
-  UpdateProvider
+  UpdateProvider,
+  WalletConnectProvider
 } from '.';
 import { TransactionStatusProvider } from './transactionStatusProvider';
 
@@ -28,7 +29,13 @@ const GlobalProvider = ({ children }: any) => {
                   <SocketProvider>
                     <FeedbackProvider>
                       <TransactionStatusProvider>
-                        <UpdateProvider>{children}</UpdateProvider>
+                        <UpdateProvider>
+                          <WalletConnectProvider>
+                            <TransactionStatusProvider>
+                              {children}
+                            </TransactionStatusProvider>
+                          </WalletConnectProvider>
+                        </UpdateProvider>
                       </TransactionStatusProvider>
                     </FeedbackProvider>
                   </SocketProvider>

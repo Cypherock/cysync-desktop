@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import CreateComponent from '../../../../components/createComponent';
+import CreateComponent from '../../../../../components/createComponent';
 
 const QontoConnector = withStyles((theme: Theme) =>
   createStyles({

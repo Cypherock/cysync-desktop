@@ -7,12 +7,12 @@ import {
   accountDb,
   addressDb,
   customAccountDb,
+  DisplayCoin,
   getLatestPriceForCoin,
   priceHistoryDb,
   receiveAddressDb
 } from '../database';
 
-import { DisplayCoin } from './types';
 import { useDebouncedFunction } from './useDebounce';
 
 export interface UseWalletDataValues {

@@ -63,6 +63,18 @@ export interface StepComponentProps {
   estimateGasLimit: boolean;
   setEstimateGasLimit: (val: boolean) => void;
   duplicateBatchAddresses: string[];
+  onSuccess?: (result: string) => void;
+  onReject?: (reason?: string) => void;
+  txnParams?: {
+    from: string;
+    to: string;
+    data?: string;
+    gas?: string; // hex
+    gasPrice?: string; // hex
+    value?: string; // hex
+    nonce?: string; // hex
+  };
+  resultType?: 'signature' | 'hash';
 }
 
 export const StepComponentPropTypes = {
@@ -100,5 +112,17 @@ export const StepComponentPropTypes = {
   estimateGasLimit: PropTypes.bool.isRequired,
   setEstimateGasLimit: PropTypes.func.isRequired,
   duplicateBatchAddresses: PropTypes.array.isRequired,
-  validateInputs: PropTypes.func.isRequired
+  validateInputs: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func,
+  onReject: PropTypes.func,
+  txnParams: PropTypes.exact({
+    from: PropTypes.string.isRequired,
+    to: PropTypes.string.isRequired,
+    data: PropTypes.string,
+    gas: PropTypes.string,
+    gasPrice: PropTypes.string,
+    value: PropTypes.string,
+    nonce: PropTypes.string
+  }),
+  resultType: PropTypes.any
 };

@@ -7,3 +7,4 @@ export * from './useSendTransaction';
 export * from './useReceiveTransation';
 export * from './useLogFetcher';
 export * from './useGetDeviceInfo';
+export * from './useSignMessage';
