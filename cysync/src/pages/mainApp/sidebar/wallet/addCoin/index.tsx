@@ -13,8 +13,8 @@ import Syncing from './formStepComponents/syncing';
 import Verify from './formStepComponents/verify';
 
 const addCoinWalletData = [
-  ['Select Coins', SelectCoin],
-  ['Confirm Coins', SelectWallet],
+  ['Select Asset', SelectCoin],
+  ['Confirm Asset', SelectWallet],
   ['Tap X1 Card', Verify],
   ['Fetch Balance', Syncing]
 ];

@@ -173,7 +173,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
   return (
     <Root className={classes.root}>
       <div className={classes.head}>
-        <Typography className={classes.heading}>Select coin</Typography>
+        <Typography className={classes.heading}>Select asset</Typography>
       </div>
       <div className={classes.coinContainer}>
         {coins.map((coin, index) => {

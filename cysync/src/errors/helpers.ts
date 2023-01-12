@@ -254,7 +254,7 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
         langStrings.ERRORS.ADD_COIN_FAILED_INTERNAL_ERROR(coin)
     },
     [CysyncError.ADD_COIN_UNKNOWN_ASSET]: {
-      message: 'Unknown Coin requested to the device',
+      message: 'Unknown account requested to the device',
       parent: CysyncError.ADD_COIN_UNKNOWN_ASSET
     },
     [CysyncError.ADD_COIN_UNKNOWN_ERROR]: {
