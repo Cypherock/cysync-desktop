@@ -37,7 +37,9 @@ export const getRequestsMetadata = (
       throw new Error('Invalid coin in balance sync item: ' + item.coinId);
     }
 
-    const address = generateEthAddressFromXpub(item.xpub, item.coinId);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinId, {
+      forceHex: true
+    });
     if (!item.parentCoinId) {
       throw new Error('Invalid ethCoin found in balance sync item' + token);
     }
@@ -64,7 +66,9 @@ export const getRequestsMetadata = (
   }
 
   if (coin instanceof EthCoinData) {
-    const address = generateEthAddressFromXpub(item.xpub, item.coinId);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinId, {
+      forceHex: true
+    });
     const balanceMetadata = ethServer.wallet
       .getBalance(
         {
