@@ -69,11 +69,11 @@ export default class BlockbookProvider extends EventEmitter {
   private setAllSocketListeners(socketInfo: SocketInfo) {
     socketInfo.socket.addListener(
       'notification',
-      this.onNotification.bind(this, socketInfo.info.name)
+      this.onNotification.bind(this, socketInfo.info.coinId)
     );
     socketInfo.socket.addListener(
       'block',
-      this.onBlock.bind(this, socketInfo.info.name)
+      this.onBlock.bind(this, socketInfo.info.coinId)
     );
     socketInfo.socket.addListener(
       'disconnected',
@@ -152,10 +152,10 @@ export default class BlockbookProvider extends EventEmitter {
   private async establishPreviousSocketState(socketInfo: SocketInfo) {
     try {
       if (socketInfo.isSubscribedToBlock) {
-        await this.subscribeBlock(socketInfo.info.name);
+        await this.subscribeBlock(socketInfo.info.coinId);
       }
 
-      await this.addAddressListener(socketInfo.info.name, []);
+      await this.addAddressListener(socketInfo.info.coinId, []);
     } catch (error) {
       logger.error('Unable to establishPreviousSocketState');
       logger.error(error);
