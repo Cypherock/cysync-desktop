@@ -20,9 +20,11 @@ import generic from '../../../node_modules/cryptocurrency-icons/svg/color/generi
 import ltc from '../../../node_modules/cryptocurrency-icons/svg/color/ltc.svg';
 import matic from '../../../node_modules/cryptocurrency-icons/svg/color/matic.svg';
 import harmony from '../../../node_modules/cryptocurrency-icons/svg/color/one.svg';
+import arbitrum from '../../assets/icons/arbitrum.svg';
 import btct from '../../assets/icons/btct.svg';
 import ftm from '../../assets/icons/fantom.svg';
 import near from '../../assets/icons/near.svg';
+import optimism from '../../assets/icons/optimism.svg';
 import solana from '../../assets/icons/solana.png';
 
 const PREFIX = 'CoinIcons';
@@ -176,18 +178,18 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
         case EthCoinMap['ethereum-c']:
           src = etc;
           break;
-        // case EthCoinMap.optimism:
-        // src = optimism;
-        // break;
+        case EthCoinMap.optimism:
+          src = optimism;
+          break;
         case EthCoinMap.avalanche:
           src = avax;
           break;
         case EthCoinMap.fantom:
           src = ftm;
           break;
-        // case EthCoinMap.arbitrum:
-        // src = arbitrum;
-        // break;
+        case EthCoinMap.arbitrum:
+          src = arbitrum;
+          break;
         default:
           src = generic;
       }
