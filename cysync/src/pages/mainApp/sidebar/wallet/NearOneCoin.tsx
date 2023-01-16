@@ -1,9 +1,10 @@
-import { COINS } from '@cypherock/communication';
+import { AccountTypeDetails, COINS } from '@cypherock/communication';
 import { generateNearAddressFromXpub } from '@cypherock/wallet';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { Collapse } from '@mui/material';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
+import { Collapse, Tooltip } from '@mui/material';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { styled, Theme, useTheme } from '@mui/material/styles';
@@ -59,6 +60,9 @@ const classes = {
   divider: `${PREFIX}-divider`,
   actions: `${PREFIX}-actions`,
   alignStartCenter: `${PREFIX}-alignStartCenter`,
+  coinNameContainer: `${PREFIX}-coinNameContainer`,
+  infoIcon: `${PREFIX}-infoIcon`,
+  accountTag: `${PREFIX}-accountTag`,
   alignCenterCenter: `${PREFIX}-alignCenterCenter`,
   recieveButton: `${PREFIX}-recieveButton`,
   red: `${PREFIX}-red`,
@@ -111,6 +115,24 @@ const Root = styled('div')(({ theme }) => ({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center'
+  },
+  [`& .${classes.coinNameContainer}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start'
+  },
+  [`& .${classes.infoIcon}`]: {
+    fontSize: '12px',
+    color: '#ADABAA'
+  },
+  [`& .${classes.accountTag}`]: {
+    color: '#ADABAA',
+    border: '1px solid #ADABAA',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontSize: '8px',
+    width: 'fit-content'
   },
   [`& .${classes.alignCenterCenter}`]: {
     display: 'flex',
@@ -185,7 +207,10 @@ const CoinCardBtn = withStyles((theme: Theme) => ({
 
 const NearOneCoin: React.FC<NearOneCoinProps> = ({
   initial,
-  name,
+  coinName,
+  accountIndex,
+  accountType,
+  derivationPath,
   holding,
   price,
   value,
@@ -304,6 +329,14 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
     setCollapseTab(false);
   }, [selectedWallet._id]);
 
+  const getName = () => {
+    return `${coinName} ${accountIndex + 1}`;
+  };
+
+  const getAccountTag = () => {
+    return AccountTypeDetails[accountType]?.tag;
+  };
+
   return (
     <Root>
       <CustomizedDialog
@@ -368,13 +401,25 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
               initial={initial.toUpperCase()}
               style={{ marginRight: '10px' }}
             />
-            <PopOverText
-              color="textPrimary"
-              hoverText={name}
-              style={{ paddingRight: '8px' }}
-            >
-              {name}
-            </PopOverText>
+            <Typography style={{ paddingRight: '8px' }} noWrap={true}>
+              <div className={classes.coinNameContainer}>
+                <PopOverText
+                  color="textPrimary"
+                  hoverText={getName()}
+                  style={{ marginRight: 2 }}
+                >
+                  {getName()}
+                </PopOverText>
+                <Tooltip title={derivationPath}>
+                  <InfoIcon className={classes.infoIcon} />
+                </Tooltip>
+              </div>
+              {getAccountTag() && (
+                <Typography className={classes.accountTag} noWrap={true}>
+                  {getAccountTag()}
+                </Typography>
+              )}
+            </Typography>
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
             <PopOverText
