@@ -1,4 +1,8 @@
-import { COINS } from '@cypherock/communication';
+import {
+  AbsCoinData,
+  AccountTypeDetails,
+  COINS
+} from '@cypherock/communication';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
@@ -18,7 +22,7 @@ import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import Input from '../../../../designSystem/designComponents/input/input';
 import DropMenu from '../../../../designSystem/designComponents/menu/DropMenu';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
-import { convertToDisplayValue } from '../../../../store/database';
+import { Account, convertToDisplayValue } from '../../../../store/database';
 import {
   DisplayTransaction,
   useDebouncedFunction,
@@ -104,13 +108,21 @@ const Transaction = () => {
     sortIndex,
     setSortIndex,
     onInitialSetupDone,
-    isInitialSetupDone
+    isInitialSetupDone,
+    accountIndex,
+    currentCoin,
+    currentAccount,
+    setCurrentAccount,
+    setAccountIndex
   } = useTransactionData();
 
-  const { allWallets, allCoins } = useWallets();
+  const { allWallets, allCoins, allAccounts } = useWallets();
+
+  const [displayCoins, setDisplayCoins] = useState<AbsCoinData[]>([]);
+  const [displayAccounts, setDisplayAccounts] = useState<Account[]>([]);
 
   const theme = useTheme();
-  const [weekIndex, setWeekIndex] = React.useState(3);
+  const [weekIndex, setWeekIndex] = useState(3);
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<DisplayTransaction[]>([]);
   const [isSearchLoading, setSearchLoading] = React.useState(false);
@@ -119,6 +131,38 @@ const Transaction = () => {
     Analytics.Instance.screenView(Analytics.ScreenViews.LAST_TRANSACTIONS);
     logger.info('In last transactions');
   }, []);
+
+  useEffect(() => {
+    const newCoinList = allWallets[walletIndex - 1]
+      ? allWallets[walletIndex - 1].coins
+      : allCoins;
+    if (
+      !(
+        newCoinList.length >= coinIndex &&
+        newCoinList[coinIndex - 1]?.id === currentCoin
+      )
+    ) {
+      setCoinIndex(0);
+      setCurrentCoin(undefined);
+    }
+    setDisplayCoins(newCoinList);
+
+    const newAccountList = (
+      allWallets[walletIndex - 1]
+        ? allWallets[walletIndex - 1].accounts
+        : allAccounts
+    ).filter(elem => (currentCoin ? elem.coinId === currentCoin : true));
+    if (
+      !(
+        newAccountList.length >= accountIndex &&
+        newAccountList[accountIndex - 1]?.accountId === currentAccount
+      )
+    ) {
+      setAccountIndex(0);
+      setCurrentAccount(undefined);
+    }
+    setDisplayAccounts(newAccountList);
+  }, [allCoins, allAccounts, allWallets, walletIndex, coinIndex]);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -191,12 +235,22 @@ const Transaction = () => {
     setWalletIndex(selectedIndex);
     if (selectedIndex === 0) setCurrentWallet(undefined);
     else setCurrentWallet(allWallets[selectedIndex - 1]._id);
+    setCoinIndex(0);
+    setCurrentCoin(undefined);
   };
 
   const handleCoinChange = (selectedIndex: number) => {
     setCoinIndex(selectedIndex);
     if (selectedIndex === 0) setCurrentCoin(undefined);
-    else setCurrentCoin(allCoins[selectedIndex - 1].id);
+    else setCurrentCoin(displayCoins[selectedIndex - 1].id);
+    setAccountIndex(0);
+    setCurrentAccount(undefined);
+  };
+
+  const handleAccountChange = (selectedIndex: number) => {
+    setAccountIndex(selectedIndex);
+    if (selectedIndex === 0) setCurrentAccount(undefined);
+    else setCurrentAccount(displayAccounts[selectedIndex - 1].accountId);
   };
 
   const renderTxnRow = ({ index, key, style }: any) => {
@@ -456,11 +510,31 @@ const Transaction = () => {
               style={{ marginRight: '10px' }}
             />
           )}
-          {allCoins.length !== 0 && (
+          {displayCoins.length !== 0 && (
             <DropMenu
-              options={['All Coins', ...allCoins.map(coin => coin.name)]}
+              options={['All Coins', ...displayCoins.map(coin => coin.name)]}
               handleMenuItemSelectionChange={handleCoinChange}
               index={coinIndex}
+              bg={false}
+              style={{ marginRight: '10px' }}
+            />
+          )}
+          {displayAccounts.length !== 0 && (
+            <DropMenu
+              options={[
+                'All Accounts',
+                ...displayAccounts.map(account => {
+                  const name = COINS[account.coinId]?.name || '';
+                  return {
+                    name: `${name} ${account.accountIndex + 1}`,
+                    tooltip: 'm/12/123/123/123',
+                    tag: AccountTypeDetails[account.accountType]?.tag || '',
+                    value: account.accountId
+                  };
+                })
+              ]}
+              handleMenuItemSelectionChange={handleAccountChange}
+              index={accountIndex}
               bg={false}
             />
           )}
