@@ -55,13 +55,10 @@ const ApexChart = (props: any) => {
   const handleSensitiveDataDisplay = React.useRef(
     discreetMode.handleSensitiveDataDisplay
   );
-  const chart = React.useRef<any>();
 
   React.useEffect(() => {
     handleSensitiveDataDisplay.current =
       discreetMode.handleSensitiveDataDisplay;
-
-    (chart.current as any)?.chart.updateOptions(options);
   }, [discreetMode.handleSensitiveDataDisplay]);
 
   const { timeActiveButton, setTimeActive, series } = props;
@@ -150,7 +147,7 @@ const ApexChart = (props: any) => {
       },
       y: {
         formatter: (data: any) => {
-          return `$${handleSensitiveDataDisplay.current(
+          return `$ ${handleSensitiveDataDisplay.current(
             formatDisplayAmount(data, 2, true)
           )}`;
         },
@@ -270,7 +267,7 @@ const ApexChart = (props: any) => {
           </Button>
         </div>
       </div>
-      <Chart ref={chart} options={options} series={series} type="area" />
+      <Chart options={options} series={series} type="area" />
     </Root>
   );
 };
