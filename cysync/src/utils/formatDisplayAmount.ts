@@ -9,20 +9,28 @@ import BigNumber from 'bignumber.js';
  * - Removes ending decimal zeroes
  * - Uses toPrecision or toFixed to round off
  */
+
 const formatDisplayAmount = (
   amount: string | number | BigNumber,
   precision = 4,
   isFixed = false
 ) => {
-  // if (holding === 'holding') {
-  //   console.log('this here', holding);
-  // }
   if (
     amount === '0' ||
     amount === 0 ||
     (typeof amount === 'object' && amount.toFixed() === '0')
   )
     return '0.00';
+
+  if (typeof amount === 'string') {
+    if (amount.indexOf('.') === -1) {
+      return `${amount}${'.'}${'00'}`;
+    }
+  }
+
+  if (Number.isInteger(amount)) {
+    return `${amount}${'.'}${'00'}`;
+  }
 
   let amountStr: string;
 
