@@ -327,7 +327,6 @@ const WalletView: React.FC<WalletViewProps> = ({
                 >
                   <Button
                     variant="text"
-                    disableRipple
                     className={classes.button}
                     startIcon={<AddCircleIcon style={{ color: '#84633E' }} />}
                     onClick={handleAddCoinFormOpen}
