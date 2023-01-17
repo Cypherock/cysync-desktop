@@ -253,7 +253,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
       ) {
         if (!error) {
           copyRecipient.errorRecipient = `This is not a valid ${
-            COINS[coinDetails.slug].name
+            COINS[coinDetails.coinId].name
           } address`;
         } else {
           copyRecipient.errorRecipient = '';

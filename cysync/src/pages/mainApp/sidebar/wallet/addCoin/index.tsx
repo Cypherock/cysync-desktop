@@ -13,15 +13,19 @@ import Syncing from './formStepComponents/syncing';
 import Verify from './formStepComponents/verify';
 
 const addCoinWalletData = [
-  ['Select Coins', SelectCoin],
-  ['Confirm Coins', SelectWallet],
+  ['Select Asset', SelectCoin],
+  ['Confirm Asset', SelectWallet],
   ['Tap X1 Card', Verify],
   ['Fetch Balance', Syncing]
 ];
 
 interface AddCoinProps {
   handleClose: (abort?: boolean) => void;
-  coinsPresent: any[];
+  coinsPresent: Array<{
+    id: string;
+    accountIndex: number;
+    accountType: string;
+  }>;
 }
 
 const AddCoin: React.FC<AddCoinProps> = ({ handleClose, coinsPresent }) => {
@@ -68,7 +72,7 @@ const AddCoin: React.FC<AddCoinProps> = ({ handleClose, coinsPresent }) => {
           ? 'Configure Wallet'
           : activeStep === 4
           ? ''
-          : 'Add Coin(s)'
+          : 'Add Account'
       }
       disableBackdropClick
       disableEscapeKeyDown={isAddCoinLoading}

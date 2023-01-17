@@ -155,7 +155,7 @@ const VerifySwapDetailsDialog: React.FC<VerifySwapDetailsDialogProps> = ({
                 Amount to receive
               </Typography>
               <Typography variant="body1" color="textPrimary">
-                {amountToReceive} {sourceCoinSlug}
+                {amountToReceive} {targetCoinSlug}
               </Typography>
             </Grid>
             <Grid
@@ -210,7 +210,7 @@ const VerifySwapDetailsDialog: React.FC<VerifySwapDetailsDialogProps> = ({
                 alignItems={'center'}
                 gap={1}
               >
-                <CoinIcons initial={sourceCoinSlug} size="sm" />
+                <CoinIcons initial={sourceCoinName} size="sm" />
                 {sourceCoinName}
               </Typography>
             </Grid>
@@ -231,7 +231,7 @@ const VerifySwapDetailsDialog: React.FC<VerifySwapDetailsDialogProps> = ({
                 alignItems={'center'}
                 gap={1}
               >
-                <CoinIcons initial={targetCoinSlug} size="sm" />
+                <CoinIcons initial={targetCoinName} size="sm" />
                 {targetCoinName}
               </Typography>
             </Grid>

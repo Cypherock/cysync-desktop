@@ -9,6 +9,7 @@ import Icon from '../../../../../designSystem/designComponents/icons/Icon';
 import ICONS from '../../../../../designSystem/iconGroups/iconConstants';
 import { useConnection, useCurrentCoin } from '../../../../../store/provider';
 import { checkCoinSupport } from '../../../../../utils/coinCheck';
+import prevent from '../../../../../utils/preventPropagation';
 
 const classesFromPrefix = (PREFIX: string) => {
   return {
@@ -36,7 +37,7 @@ const SendButton: React.FC<SendButtonProps> = ({
   const { deviceConnection, supportedCoinList } = useConnection();
   const { coinDetails } = useCurrentCoin();
 
-  const coinObj = COINS[coinDetails.slug];
+  const coinObj = COINS[coinDetails.coinId];
   const coinSupported = checkCoinSupport(supportedCoinList, {
     id: coinObj.coinListId,
     versions: coinObj.supportedVersions
@@ -57,7 +58,7 @@ const SendButton: React.FC<SendButtonProps> = ({
     >
       <span
         style={{
-          display: 'inline-block',
+          display: 'flex',
           height: '100%',
           width: '100%'
         }}
@@ -69,7 +70,13 @@ const SendButton: React.FC<SendButtonProps> = ({
             [classes.grey]: isDisabled,
             [classes.actionButton]: true
           })}
-          onClick={handleSendFormOpen}
+          onClick={
+            !isDisabled
+              ? handleSendFormOpen
+              : e => {
+                  prevent(e);
+                }
+          }
           startIcon={
             <Icon
               className={clsx(classes.icon, classes.actionButtonIcon)}

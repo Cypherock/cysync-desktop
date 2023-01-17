@@ -2,7 +2,13 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { coinDb, priceHistoryDb, tokenDb, transactionDb } from '../database';
+import {
+  accountDb,
+  coinPriceDb,
+  priceHistoryDb,
+  tokenDb,
+  transactionDb
+} from '../database';
 
 import { getCoinData } from './helper/portfolio';
 import { CoinDetails, CoinHistory } from './types';
@@ -75,9 +81,13 @@ export const usePortfolio: UsePortfolio = () => {
     priceHistoryDb.emitter.on('insert', debouncedRefreshFromDB);
     priceHistoryDb.emitter.on('update', debouncedRefreshFromDB);
 
-    coinDb.emitter.on('update', debouncedRefreshFromDB);
-    coinDb.emitter.on('delete', debouncedRefreshFromDB);
-    coinDb.emitter.on('delete', debouncedRefreshFromDB);
+    accountDb.emitter.on('update', debouncedRefreshFromDB);
+    accountDb.emitter.on('delete', debouncedRefreshFromDB);
+    accountDb.emitter.on('delete', debouncedRefreshFromDB);
+
+    coinPriceDb.emitter.on('update', debouncedRefreshFromDB);
+    coinPriceDb.emitter.on('delete', debouncedRefreshFromDB);
+    coinPriceDb.emitter.on('delete', debouncedRefreshFromDB);
 
     transactionDb.emitter.on('insert', debouncedRefreshFromDB);
     transactionDb.emitter.on('update', debouncedRefreshFromDB);
@@ -92,9 +102,13 @@ export const usePortfolio: UsePortfolio = () => {
       priceHistoryDb.emitter.removeListener('insert', debouncedRefreshFromDB);
       priceHistoryDb.emitter.removeListener('update', debouncedRefreshFromDB);
 
-      coinDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      coinDb.emitter.removeListener('delete', debouncedRefreshFromDB);
-      coinDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      accountDb.emitter.removeListener('update', debouncedRefreshFromDB);
+      accountDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      accountDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+
+      coinPriceDb.emitter.removeListener('update', debouncedRefreshFromDB);
+      coinPriceDb.emitter.removeListener('delete', debouncedRefreshFromDB);
+      coinPriceDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
       transactionDb.emitter.removeListener('insert', debouncedRefreshFromDB);
       transactionDb.emitter.removeListener('update', debouncedRefreshFromDB);

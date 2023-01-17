@@ -11,6 +11,7 @@ import React, { useEffect } from 'react';
 
 import packageJson from '../../../../../../package.json';
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
+import { useReleaseNotes } from '../../../../../store/provider';
 import Analytics from '../../../../../utils/analytics';
 import logger from '../../../../../utils/logger';
 
@@ -81,6 +82,7 @@ const Root = styled('div')(({ theme }) => ({
 
 const AboutSettings = () => {
   const theme = useTheme();
+  const { showReleaseNotes } = useReleaseNotes();
 
   const [dialogState, setDialogState] = React.useState({
     termsofuse: false,
@@ -95,30 +97,17 @@ const AboutSettings = () => {
   const ListData = [
     {
       name: 'Version',
-      secondaryText: '',
+      secondaryText: `v${packageJson.version} - ${process.env.BUILD_VERSION}`,
       element: (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end'
+        <CustomButton
+          variant="contained"
+          className={classes.button}
+          onClick={() => {
+            showReleaseNotes();
           }}
         >
-          <Typography
-            style={{ textAlign: 'right' }}
-            variant="body1"
-            color="textPrimary"
-          >
-            {packageJson.version}
-          </Typography>
-          <Typography
-            style={{ textAlign: 'right' }}
-            variant="caption"
-            color="textSecondary"
-          >
-            Build Version: {process.env.BUILD_VERSION}
-          </Typography>
-        </div>
+          Details
+        </CustomButton>
       )
     },
     {
@@ -152,6 +141,7 @@ const AboutSettings = () => {
       )
     }
   ];
+
   return (
     <Root style={{ width: '100%' }}>
       <Terms

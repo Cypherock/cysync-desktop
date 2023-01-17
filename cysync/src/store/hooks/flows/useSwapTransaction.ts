@@ -10,7 +10,6 @@ import {
   WalletStates
 } from '@cypherock/protocols';
 import { WalletErrorType } from '@cypherock/wallet';
-import BigNumber from 'bignumber.js';
 import { useEffect, useRef, useState } from 'react';
 
 import {
@@ -40,20 +39,29 @@ export interface HandleSwapTransactionOptions {
     walletId: string;
     pinExists: boolean;
     passphraseExists: boolean;
-    coinType: string;
+    accountId: string;
+    accountIndex: number;
+    accountType: string;
+    coinId: string;
     xpub: string;
-    zpub?: string;
-    customAccount?: string;
-    newAccountId?: string;
-    outputList: any;
+    customAccount: string | undefined;
+    newAccountId: string | undefined;
+    outputList: any[];
     fees: number;
-    isSendAll?: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any;
+    isSendAll: boolean | undefined;
+    data?: {
+      gasLimit: number;
+      contractAddress?: string;
+      contractAbbr?: string;
+      subCoinId?: string;
+    };
   };
   receiveFlow: {
     walletId: string;
-    coinType: string;
+    accountId: string;
+    accountIndex: number;
+    accountType: string;
+    coinId: string;
     coinName: string;
     xpub: string;
     zpub?: string;
@@ -166,15 +174,12 @@ export const useSwapTransaction: UseSwapTransaction = () => {
   const onNewReceiveAddr = (
     addr: string,
     walletId: string,
-    coinType: string
+    accountId: string,
+    coinId: string
   ) => {
-    logger.info('SwapTransaction: New receive address', {
-      coinType,
-      walletId,
-      addr
-    });
-    addReceiveAddressHook(addr, walletId, coinType);
-    receiveAddressDb.insert({ address: addr, walletId, coinType });
+    logger.info('New receive address', { walletId, addr });
+    addReceiveAddressHook(addr, accountId, coinId);
+    receiveAddressDb.insert({ address: addr, walletId, coinId, accountId });
   };
 
   const handleSwapTransactionError = (coinType: string, error: CysyncError) => {
@@ -203,7 +208,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
 
       logger.debug('SwapTransaction: Receive Flow Details', {
         walletId: receiveFlow.walletId,
-        coinType: receiveFlow.coinType,
+        coinId: receiveFlow.coinId,
         contactAbbr: receiveFlow.contractAbbr
       });
 
@@ -215,15 +220,14 @@ export const useSwapTransaction: UseSwapTransaction = () => {
       logger.info('SwapTransaction: SendTransaction Data', {
         walletId: sendFlow.walletId,
         pinExists: sendFlow.pinExists,
-        coinType: sendFlow.coinType,
+        coinId: sendFlow.coinId,
         outputList: sendFlow.outputList,
         fees: sendFlow.fees,
         isSendAll: sendFlow.isSendAll,
         data: sendFlow.data
       });
       logger.debug('SwapTransaction: SendTransaction Xpub', {
-        xpub: sendFlow.xpub,
-        zpub: sendFlow.zpub
+        xpub: sendFlow.xpub
       });
 
       if (!connection) {
@@ -231,8 +235,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
             connection,
-            sendCoinType: sendFlow.coinType,
-            receiveCoinType: receiveFlow.coinType
+            sendCoinId: sendFlow.coinId,
+            receiveCoinId: receiveFlow.coinId
           })
         );
         return;
@@ -250,7 +254,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         SWAP_TRANSACTION_EVENTS.RECEIVE_FLOW_CARD_ERROR,
         () => {
           handleSwapTransactionError(
-            receiveFlow.coinType,
+            receiveFlow.coinId,
             CysyncError.UNKNOWN_CARD_ERROR
           );
         }
@@ -258,7 +262,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
 
       swapTransaction.on(SWAP_TRANSACTION_EVENTS.SEND_FLOW_CARD_ERROR, () => {
         handleSwapTransactionError(
-          sendFlow.coinType,
+          sendFlow.coinId,
           CysyncError.UNKNOWN_CARD_ERROR
         );
       });
@@ -277,14 +281,14 @@ export const useSwapTransaction: UseSwapTransaction = () => {
 
       swapTransaction.on(SWAP_TRANSACTION_EVENTS.RECEIVE_WALLET_LOCKED, () => {
         handleSwapTransactionError(
-          receiveFlow.coinType,
+          receiveFlow.coinId,
           CysyncError.WALLET_IS_LOCKED
         );
       });
 
       swapTransaction.on(SWAP_TRANSACTION_EVENTS.LOCKED, () => {
         handleSwapTransactionError(
-          sendFlow.coinType,
+          sendFlow.coinId,
           CysyncError.WALLET_IS_LOCKED
         );
       });
@@ -293,8 +297,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         const cyError = new CyError(CysyncError.DEVICE_NOT_READY);
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
-            sendCoinType: sendFlow.coinType,
-            receiveCoinType: receiveFlow.coinType
+            sendCoinId: sendFlow.coinId,
+            receiveCoinId: receiveFlow.coinId
           })
         );
       });
@@ -305,7 +309,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
           const cyError = flowHandlers.noWalletFound(walletState);
           setErrorObj(
             handleErrors(errorObj, cyError, flowName, {
-              coinType: receiveFlow.coinType,
+              coinId: receiveFlow.coinId,
               walletState
             })
           );
@@ -326,7 +330,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
           if (coins) {
             logger.verbose(
               'SwapTransaction: ReceiveAddress: Confirmed on device',
-              { coinType: receiveFlow.coinType }
+              { coinId: receiveFlow.coinId }
             );
             setReceiveCoinsConfirmed(true);
           } else {
@@ -336,7 +340,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
             );
             setErrorObj(
               handleErrors(errorObj, cyError, flowName, {
-                coinType: receiveFlow.coinType
+                coinId: receiveFlow.coinId
               })
             );
           }
@@ -350,7 +354,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
             logger.verbose(
               'SwapTransaction: ReceiveAddress: Custom Account exits on device',
               {
-                coinType: receiveFlow.coinType
+                coinId: receiveFlow.coinId
               }
             );
             setReceiveAccountExists(true);
@@ -362,8 +366,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         SWAP_TRANSACTION_EVENTS.SWAP_TRANSACTION_METADATA_SENT,
         () => {
           logger.verbose('SwapTransaction: Swap Details sent', {
-            sendCoinType: sendFlow.coinType,
-            receiveCoinType: receiveFlow.coinType
+            sendCoinId: sendFlow.coinId,
+            receiveCoinId: receiveFlow.coinId
           });
           setTransactionMetadataSent(true);
         }
@@ -378,7 +382,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
               'SwapTransaction: Received address generated on device',
               {
                 deviceAddress: val,
-                coinType: receiveFlow.coinType,
+                coinId: receiveFlow.coinId,
                 desktopAddress: recAddr
               }
             );
@@ -401,13 +405,14 @@ export const useSwapTransaction: UseSwapTransaction = () => {
               onNewReceiveAddr(
                 recAddr,
                 receiveFlow.walletId,
-                receiveFlow.coinType
+                receiveFlow.accountId,
+                receiveFlow.coinId
               );
             }
             if (receiveFlow.customAccount) {
               logger.verbose(
                 'ReceiveAddress: Address comparison skipped, found customAccount',
-                receiveFlow.coinType
+                receiveFlow.coinId
               );
             }
 
@@ -415,7 +420,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
             onNewReceiveAddr(
               recAddr,
               receiveFlow.walletId,
-              receiveFlow.coinType
+              receiveFlow.accountId,
+              receiveFlow.coinId
             );
           } else {
             cyError.setError(CysyncError.RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER);
@@ -424,7 +430,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
           if (cyError.isSet)
             setErrorObj(
               handleErrors(errorObj, cyError, flowName, {
-                coinType: receiveFlow.coinType
+                coinId: receiveFlow.coinId
               })
             );
         }
@@ -432,7 +438,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
 
       swapTransaction.on(SWAP_TRANSACTION_EVENTS.RECEIVE_ADDRESS, address => {
         logger.info('SwapTransaction: ReceiveAddress: Address generated', {
-          coinType: receiveFlow.coinType,
+          coinId: receiveFlow.coinId,
           address
         });
         setReceiveAddress(address);
@@ -443,7 +449,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         SWAP_TRANSACTION_EVENTS.RECEIVE_FLOW_PASSPHRASE_ENTERED,
         () => {
           logger.info('SwapTransaction: ReceiveAddress: Passphrase entered', {
-            coinType: receiveFlow.coinType
+            coinId: receiveFlow.coinId
           });
           setReceiveFlowPassphraseEntered(true);
         }
@@ -454,7 +460,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         pin => {
           if (pin) {
             logger.verbose('SwapTransaction: ReceiveAddress: Pin entered', {
-              coinType: receiveFlow.coinType
+              coinId: receiveFlow.coinId
             });
             setReceiveFlowPinEntered(true);
           } else {
@@ -470,7 +476,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         SWAP_TRANSACTION_EVENTS.RECEIVE_FLOW_CARD_TAPPED,
         () => {
           logger.verbose('SwapTransaction: ReceiveAddress: Card Tapped', {
-            coinType: receiveFlow.coinType
+            coinId: receiveFlow.coinId
           });
           setReceiveFlowCardTapped(true);
         }
@@ -478,8 +484,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
 
       swapTransaction.on(SWAP_TRANSACTION_EVENTS.CHANGELLY_ADDRESS, address => {
         logger.verbose('SwapTransaction: ChangellyAddress: Address generated', {
-          receiveCoinType: receiveFlow.coinType,
-          sendCoinType: sendFlow.coinType,
+          receiveCoinId: receiveFlow.coinId,
+          sendCoinId: sendFlow.coinId,
           address
         });
         setChangellyAddress(address);
@@ -487,8 +493,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
 
       swapTransaction.on(SWAP_TRANSACTION_EVENTS.CHANGELLY_ID, id => {
         logger.verbose('SwapTransaction: ChangellyId: Id generated', {
-          receiveCoinType: receiveFlow.coinType,
-          sendCoinType: sendFlow.coinType,
+          receiveCoinId: receiveFlow.coinId,
+          sendCoinId: sendFlow.coinId,
           id
         });
         setChangellyTxnId(id);
@@ -499,17 +505,17 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         coins => {
           if (coins) {
             logger.verbose('SendTransaction: Txn confirmed', {
-              coinType: sendFlow.coinType
+              coinId: sendFlow.coinId
             });
             setSendCoinsConfirmed(true);
           } else {
             const cyError = new CyError(
               CysyncError.SEND_TXN_REJECTED,
-              COINS[sendFlow.coinType].name
+              COINS[sendFlow.coinId].name
             );
             setErrorObj(
               handleErrors(errorObj, cyError, flowName, {
-                coinType: sendFlow.coinType
+                coinId: sendFlow.coinId
               })
             );
           }
@@ -520,7 +526,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         const cyError = new CyError(CysyncError.SEND_TXN_SIZE_TOO_LARGE);
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
-            coinType: sendFlow.coinType
+            coinId: sendFlow.coinId
           })
         );
       });
@@ -531,7 +537,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
           const cyError = flowHandlers.noWalletFound(walletState);
           setErrorObj(
             handleErrors(errorObj, cyError, flowName, {
-              coinType: sendFlow.coinType,
+              coinId: sendFlow.coinId,
               walletState
             })
           );
@@ -545,7 +551,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
 
       swapTransaction.on('totalFees', fee => {
         logger.info('SendTransaction: Total fee generated', {
-          coinType: sendFlow.coinType,
+          coinId: sendFlow.coinId,
           fee
         });
         setTotalFees(fee);
@@ -553,7 +559,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
 
       swapTransaction.on('inputOutput', ({ inputs, outputs }) => {
         logger.info('SendTransaction: Txn input output generated', {
-          coinType: sendFlow.coinType,
+          coinId: sendFlow.coinId,
           inputs,
           outputs
         });
@@ -565,11 +571,11 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         if (funds) {
           const cyError = new CyError(
             WalletErrorType.INSUFFICIENT_FUNDS,
-            COINS[sendFlow.coinType].name
+            COINS[sendFlow.coinId].name
           );
           setErrorObj(
             handleErrors(errorObj, cyError, flowName, {
-              coinType: sendFlow.coinType,
+              coinId: sendFlow.coinId,
               funds
             })
           );
@@ -580,14 +586,14 @@ export const useSwapTransaction: UseSwapTransaction = () => {
       swapTransaction.on(SWAP_TRANSACTION_EVENTS.SEND_FLOW_VERIFIED, val => {
         if (val === true) {
           logger.verbose('SendTransaction: Txn verified', {
-            coinType: sendFlow.coinType
+            coinId: sendFlow.coinId
           });
           setSendFlowVerified(true);
         } else {
           const cyError = new CyError(CysyncError.SEND_TXN_REJECTED);
 
           logger.info('SendTransaction: Txn rejected from device', {
-            coinType: sendFlow.coinType,
+            coinId: sendFlow.coinId,
             command: val
           });
 
@@ -609,7 +615,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         () => {
           logger.verbose(
             'SwapTransaction: SendTransaction: Passphrase entered',
-            { coinType: sendFlow.coinType }
+            { coinId: sendFlow.coinId }
           );
           setSendFlowPassphraseEntered(true);
         }
@@ -618,7 +624,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
       swapTransaction.on(SWAP_TRANSACTION_EVENTS.SEND_FLOW_PIN_ENTERED, pin => {
         if (pin) {
           logger.verbose('SwapTransaction: SendTransaction: Pin entered', {
-            coinType: sendFlow.coinType
+            coinId: sendFlow.coinId
           });
           setSendFlowPinEntered(true);
         } else {
@@ -627,7 +633,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
           );
           setErrorObj(
             handleErrors(errorObj, cyError, flowName, {
-              coinType: sendFlow.coinType
+              coinId: sendFlow.coinId
             })
           );
         }
@@ -638,7 +644,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         cards => {
           if (cards) {
             logger.verbose('SendTransaction: Cards tapped', {
-              coinType: sendFlow.coinType
+              coinId: sendFlow.coinId
             });
             setSendFlowCardsTapped(true);
           }
@@ -649,7 +655,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         if (txn) {
           logger.verbose(
             'SwapTransaction: SendTransaction: Signed txn generated',
-            { coinType: sendFlow.coinType }
+            { coinId: sendFlow.coinId }
           );
           setSignedTxn(txn);
         } else {
@@ -658,7 +664,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
           setErrorObj(
             handleErrors(errorObj, cyError, flowName, {
               txn,
-              coinType: sendFlow.coinType
+              coinId: sendFlow.coinId
             })
           );
         }
@@ -700,10 +706,11 @@ export const useSwapTransaction: UseSwapTransaction = () => {
             sdkVersion,
             addressDB: addressDb,
             walletId: receiveFlow.walletId,
-            coinType: receiveFlow.coinType,
+            accountId: receiveFlow.accountId,
+            accountIndex: receiveFlow.accountIndex,
+            coinId: receiveFlow.coinId,
             xpub: receiveFlow.xpub,
-            zpub: receiveFlow.zpub,
-            contractAbbr: receiveFlow.contractAbbr || receiveFlow.coinType,
+            contractAbbr: receiveFlow.contractAbbr || receiveFlow.coinId,
             passphraseExists: receiveFlow.passphraseExists,
             customAccount: receiveFlow.customAccount,
             userAction: userAction.current,
@@ -715,13 +722,15 @@ export const useSwapTransaction: UseSwapTransaction = () => {
             addressDB: addressDb,
             transactionDB: transactionDb,
             walletId: sendFlow.walletId,
+            accountId: sendFlow.accountId,
+            accountIndex: sendFlow.accountIndex,
+            accountType: sendFlow.accountType,
             pinExists: sendFlow.pinExists,
             passphraseExists: sendFlow.passphraseExists,
             xpub: sendFlow.xpub,
-            zpub: sendFlow.zpub,
             customAccount: sendFlow.customAccount,
             newAccountId: sendFlow.newAccountId,
-            coinType: sendFlow.coinType,
+            coinId: sendFlow.coinId,
             outputList: sendFlow.outputList,
             fee: sendFlow.fees,
             isSendAll: sendFlow.isSendAll,
@@ -731,8 +740,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
 
         setIsInFlow(false);
         logger.info('SendTransaction: Completed', {
-          sendCoinType: sendFlow.coinType,
-          receiveCoinType: receiveFlow.coinType
+          sendCoinId: sendFlow.coinId,
+          receiveCoinId: receiveFlow.coinId
         });
         setCompleted(true);
       } catch (error) {
@@ -741,8 +750,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         setErrorObj(
           handleErrors(errorObj, cyError, flowName, {
             error,
-            receiveCoinType: receiveFlow.coinType,
-            sendCoinType: sendFlow.coinType
+            receiveCoinId: receiveFlow.coinId,
+            sendCoinId: sendFlow.coinId
           })
         );
         swapTransaction.removeAllListeners();

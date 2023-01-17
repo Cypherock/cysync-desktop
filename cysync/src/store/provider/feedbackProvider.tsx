@@ -60,7 +60,6 @@ const classes = {
   errorColor: `${PREFIX}-errorColor`
 };
 
-// TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
 const Root = styled(Grid)(({ theme }) => ({
   [`& .${classes.option}`]: {
     backgroundColor: theme.palette.primary.main,
@@ -549,12 +548,20 @@ export const FeedbackProvider: React.FC = ({ children }) => {
   };
 
   const ENTER_KEY = 13;
-  const handleKeyPress = (event: any) => {
+  const handleKeyPress = (isMultiline?: boolean) => (event: any) => {
     if (deviceLogsLoading || submitting) {
       return;
     }
 
-    if (event.keyCode === ENTER_KEY) {
+    let doSubmit = false;
+
+    if (isMultiline) {
+      doSubmit = event.keyCode === ENTER_KEY && event.shiftKey;
+    } else {
+      doSubmit = event.keyCode === ENTER_KEY;
+    }
+
+    if (doSubmit) {
       handleSubmit(feedbackInput);
     }
   };
@@ -857,7 +864,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     placeholder={"What's about it?"}
                     value={feedbackInput.subject}
                     onChange={handleChange}
-                    onKeyDown={handleKeyPress}
+                    onKeyDown={handleKeyPress(false)}
                   />
                   {feedbackInput.subjectError.length > 0 && (
                     <Typography
@@ -878,7 +885,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     placeholder="Your email"
                     value={feedbackInput.email}
                     onChange={handleChange}
-                    onKeyDown={handleKeyPress}
+                    onKeyDown={handleKeyPress(false)}
                   />
                   {feedbackInput.emailError.length > 0 && (
                     <Typography
@@ -943,7 +950,7 @@ export const FeedbackProvider: React.FC = ({ children }) => {
                     value={feedbackInput.description}
                     onChange={handleChange}
                     className={classes.padBottom}
-                    onKeyDown={handleKeyPress}
+                    onKeyDown={handleKeyPress(true)}
                   />
                   {feedbackInput.descriptionError.length > 0 && (
                     <Typography

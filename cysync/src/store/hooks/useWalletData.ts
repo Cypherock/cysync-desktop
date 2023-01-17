@@ -3,10 +3,11 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 
 import {
+  Account,
+  accountDb,
   addressDb,
-  Coin,
-  coinDb,
   customAccountDb,
+  getLatestPriceForCoin,
   priceHistoryDb,
   receiveAddressDb
 } from '../database';
@@ -18,12 +19,12 @@ export interface UseWalletDataValues {
   coinData: DisplayCoin[];
   setCoinData: React.Dispatch<React.SetStateAction<DisplayCoin[]>>;
   isLoading: boolean;
-  coinsPresent: string[];
-  deleteCoinByXpub: (
-    xpub: string,
-    coin: string,
-    walletId: string
-  ) => Promise<void>;
+  coinsPresent: Array<{
+    id: string;
+    accountIndex: number;
+    accountType: string;
+  }>;
+  deleteCoinByXpub: (accountId: string) => Promise<void>;
   setCurrentWalletId: React.Dispatch<React.SetStateAction<string>>;
   currentWalletId: string;
   refreshCoins: () => void;
@@ -31,14 +32,20 @@ export interface UseWalletDataValues {
   setSortIndex: React.Dispatch<React.SetStateAction<number>>;
   sortCoinData: (coins: DisplayCoin[], index: number) => void;
   sortCoinsByIndex: (index: number) => void;
-  getCoinsWithPrices: (coins: Coin[]) => Promise<DisplayCoin[]>;
+  getCoinsWithPrices: (coins: Account[]) => Promise<DisplayCoin[]>;
 }
 
 export type UseWalletData = () => UseWalletDataValues;
 
 export const useWalletData: UseWalletData = () => {
   const [coinData, setCoinData] = useState<UseWalletDataValues['coinData']>([]);
-  const [coinsPresent, setCoinsPresent] = useState<string[]>([]);
+  const [coinsPresent, setCoinsPresent] = useState<
+    Array<{
+      id: string;
+      accountIndex: number;
+      accountType: string;
+    }>
+  >([]);
 
   const [currentWalletId, setCurrentWalletId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -48,18 +55,19 @@ export const useWalletData: UseWalletData = () => {
   // Using doRefresh mechanish because hooks state change do not work with event listeners.
   const [doRefresh, setDoRefresh] = useState(false);
 
-  const getCoinsWithPrices = async (coins: Coin[]) => {
+  const getCoinsWithPrices = async (coins: Account[]) => {
     const mappedCoins: DisplayCoin[] = [];
 
     for (const coin of coins) {
-      const coinObj = COINS[coin.slug];
+      const coinObj = COINS[coin.coinId];
       if (!coinObj) {
-        throw new Error(`Cannot find coinType: ${coin.slug}`);
+        throw new Error(`Cannot find coinId: ${coin.coinId}`);
       }
 
       const coinWithPrice: DisplayCoin = {
         ...coin,
         isEmpty: true,
+        price: await getLatestPriceForCoin(coin.coinId),
         displayValue: '0',
         displayPrice: '0',
         displayBalance: '0'
@@ -70,7 +78,7 @@ export const useWalletData: UseWalletData = () => {
 
       coinWithPrice.displayBalance = balance.toString();
 
-      const latestPrice = coin.price || 0;
+      const latestPrice = coinWithPrice.price;
       const value = balance.multipliedBy(latestPrice || 0);
       coinWithPrice.displayValue = value.toString();
       coinWithPrice.displayPrice = latestPrice.toString() || '0';
@@ -107,7 +115,7 @@ export const useWalletData: UseWalletData = () => {
       case 2:
         setCoinData(
           [...coins].sort((a, b) => {
-            return a.slug.localeCompare(b.slug);
+            return a.coinId.localeCompare(b.coinId);
           })
         );
         break;
@@ -115,7 +123,7 @@ export const useWalletData: UseWalletData = () => {
       case 3:
         setCoinData(
           [...coins].sort((a, b) => {
-            return b.slug.localeCompare(a.slug);
+            return b.coinId.localeCompare(a.coinId);
           })
         );
         break;
@@ -178,10 +186,18 @@ export const useWalletData: UseWalletData = () => {
   const getAllCoinsFromWallet = async (loader = false) => {
     if (currentWalletId) {
       if (loader) setIsLoading(true);
-      const res = await coinDb.getAll({ walletId: currentWalletId });
-      const coinList: string[] = [];
+      const res = await accountDb.getAll({ walletId: currentWalletId });
+      const coinList: Array<{
+        id: string;
+        accountIndex: number;
+        accountType: string;
+      }> = [];
       res.forEach(coin => {
-        coinList.push(coin.slug);
+        coinList.push({
+          id: coin.coinId,
+          accountIndex: coin.accountIndex,
+          accountType: coin.accountType
+        });
       });
       setCoinsPresent(coinList);
       const unsortedCoins = await getCoinsWithPrices(res);
@@ -190,15 +206,11 @@ export const useWalletData: UseWalletData = () => {
     }
   };
 
-  const deleteCoinByXpub = async (
-    xpub: string,
-    coin: string,
-    walletId: string
-  ) => {
-    await addressDb.delete({ walletId, coinType: coin });
-    await receiveAddressDb.delete({ walletId, coinType: coin });
-    await customAccountDb.delete({ walletId, coin });
-    await coinDb.delete({ xpub, slug: coin });
+  const deleteCoinByXpub = async (accountId: string) => {
+    await addressDb.delete({ accountId });
+    await receiveAddressDb.delete({ accountId });
+    await customAccountDb.delete({ accountId });
+    await accountDb.delete({ accountId });
     refreshCoinsDebounced();
   };
 
@@ -213,17 +225,17 @@ export const useWalletData: UseWalletData = () => {
     priceHistoryDb.emitter.on('insert', onChange);
     priceHistoryDb.emitter.on('update', onChange);
 
-    coinDb.emitter.on('insert', onChange);
-    coinDb.emitter.on('update', onChange);
-    coinDb.emitter.on('delete', onChange);
+    accountDb.emitter.on('insert', onChange);
+    accountDb.emitter.on('update', onChange);
+    accountDb.emitter.on('delete', onChange);
 
     return () => {
       priceHistoryDb.emitter.removeListener('insert', onChange);
       priceHistoryDb.emitter.removeListener('update', onChange);
 
-      coinDb.emitter.removeListener('insert', onChange);
-      coinDb.emitter.removeListener('update', onChange);
-      coinDb.emitter.removeListener('delete', onChange);
+      accountDb.emitter.removeListener('insert', onChange);
+      accountDb.emitter.removeListener('update', onChange);
+      accountDb.emitter.removeListener('delete', onChange);
     };
   }, []);
 

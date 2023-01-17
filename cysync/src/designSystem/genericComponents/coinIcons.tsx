@@ -1,4 +1,10 @@
-import { COINS } from '@cypherock/communication';
+import {
+  BtcCoinMap,
+  COINS,
+  EthCoinMap,
+  NearCoinMap,
+  SolanaCoinMap
+} from '@cypherock/communication';
 import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import React from 'react';
@@ -14,12 +20,9 @@ import generic from '../../../node_modules/cryptocurrency-icons/svg/color/generi
 import ltc from '../../../node_modules/cryptocurrency-icons/svg/color/ltc.svg';
 import matic from '../../../node_modules/cryptocurrency-icons/svg/color/matic.svg';
 import harmony from '../../../node_modules/cryptocurrency-icons/svg/color/one.svg';
-import arbitrum from '../../assets/icons/arbitrum.svg';
 import btct from '../../assets/icons/btct.svg';
-import ethr from '../../assets/icons/ethr.svg';
 import ftm from '../../assets/icons/fantom.svg';
 import near from '../../assets/icons/near.svg';
-import optimism from '../../assets/icons/optimism.svg';
 import solana from '../../assets/icons/solana.png';
 
 const PREFIX = 'CoinIcons';
@@ -119,75 +122,72 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
     coinInitial: string,
     csize: 'sm' | 'lg' | null | undefined
   ) => {
-    if (parentCoin && parentCoin.toLowerCase() !== coinInitial.toLowerCase()) {
+    if (parentCoin && parentCoin !== coinInitial) {
       const coin = COINS[parentCoin];
       if (!coin) {
         throw new Error('Invalid parentCoin: ' + parentCoin);
       }
 
-      const token = coin.tokenList[coinInitial.toLowerCase()];
+      const token = coin.tokenList[coinInitial];
       if (!token) {
         throw new Error('Invalid token: ' + coinInitial);
       }
 
       try {
-        src = requestErc20ImageFile(coinInitial.toLowerCase());
+        src = requestErc20ImageFile(token.abbr.toLowerCase());
       } catch (error) {
         src = generic;
       }
     } else {
-      switch (coinInitial.toUpperCase()) {
-        case 'BTC':
+      switch (coinInitial.toLowerCase()) {
+        case BtcCoinMap.bitcoin:
           src = btc;
           break;
-        case 'BTCT':
+        case BtcCoinMap.bitcoinTestnet:
           src = btct;
           break;
-        case 'ETH':
+        case EthCoinMap.ethereum:
           src = eth;
           break;
-        case 'ETHR':
-          src = ethr;
-          break;
-        case 'DOGE':
+        case BtcCoinMap.dogecoin:
           src = doge;
           break;
-        case 'DASH':
+        case BtcCoinMap.dash:
           src = dash;
           break;
-        case 'LTC':
+        case BtcCoinMap.litecoin:
           src = ltc;
           break;
-        case 'NEAR':
+        case NearCoinMap.near:
           src = near;
           break;
-        case 'SOL':
+        case SolanaCoinMap.solana:
           src = solana;
           break;
-        case 'MATIC':
+        case EthCoinMap.polygon:
           src = matic;
           break;
-        case 'BNB':
+        case EthCoinMap.binance:
           src = bsc;
           break;
-        case 'ONE':
+        case EthCoinMap.harmony:
           src = harmony;
           break;
-        case 'ETC':
+        case EthCoinMap['ethereum-c']:
           src = etc;
           break;
-        case 'OP':
-          src = optimism;
-          break;
-        case 'AVAX':
+        // case EthCoinMap.optimism:
+        // src = optimism;
+        // break;
+        case EthCoinMap.avalanche:
           src = avax;
           break;
-        case 'FTM':
+        case EthCoinMap.fantom:
           src = ftm;
           break;
-        case 'ARB':
-          src = arbitrum;
-          break;
+        // case EthCoinMap.arbitrum:
+        // src = arbitrum;
+        // break;
         default:
           src = generic;
       }

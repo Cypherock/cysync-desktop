@@ -1,21 +1,26 @@
 import { COINS } from '@cypherock/communication';
 
 export interface IInitialToken {
+  coinId: string;
   abbr: string;
   name: string;
 }
 
-const getTokens = (ethCoin: string) => {
-  const coin = COINS[ethCoin];
+const getTokens = (ethCoinId: string) => {
+  const coin = COINS[ethCoinId];
 
   if (!coin) {
-    throw new Error('Invalid ethCoin: ' + ethCoin);
+    throw new Error('Invalid ethCoin: ' + ethCoinId);
   }
 
   const initialTokens: IInitialToken[] = [];
   for (const [key, value] of Object.entries(coin.tokenList)) {
     if (value) {
-      const tempCoin: IInitialToken = { abbr: key, name: value.name };
+      const tempCoin: IInitialToken = {
+        abbr: key,
+        name: value.name,
+        coinId: value.id
+      };
       initialTokens.push(tempCoin);
     }
   }

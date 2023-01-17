@@ -194,6 +194,9 @@ export const useExecutionQueue: UseExecutionQueue = <
 
         setIsSyncing(true);
       } else if (isInitialSetupDone) {
+        if (!isWaitingForConnection) {
+          logger.info(`${name}: Waiting for internet`);
+        }
         setWaitingForConnection(true);
       }
     } else {
@@ -230,7 +233,12 @@ export const useExecutionQueue: UseExecutionQueue = <
         }
       } else {
         startTime.current = performance.now();
-        logger.info(`${name}: started executing with ${queue.length} items`);
+        const modules = Array.from(
+          new Set(queue.map(elem => elem.module))
+        ).join(',');
+        logger.info(
+          `${name}: started executing with ${queue.length} items, ${modules}}`
+        );
       }
     } else {
       if (startTime.current > 0) {

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 
 import logger from '../../../utils/logger';
-import { coinDb, Status, Transaction, transactionDb } from '../../database';
+import { accountDb, Status, Transaction, transactionDb } from '../../database';
 import { ExecutionResult } from '../../hooks';
 import { useExecutionQueue } from '../../hooks/useExecutionQueue';
 import { RESYNC_INTERVAL, useSync } from '../syncProvider';
@@ -99,15 +99,14 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
 
       try {
         // status is final, resync balances and history
-        const coinEntry = await coinDb.getOne({
-          walletId: item.walletId,
-          slug: item.coinType
+        const coinEntry = await accountDb.getOne({
+          accountId: item.accountId
         });
         addBalanceSyncItemFromCoin(
           {
             ...coinEntry,
             coinGroup: item.coinGroup,
-            parentCoin: item.parentCoin
+            parentCoinId: item.parentCoinId
           },
           {}
         );
@@ -115,7 +114,7 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
           {
             ...coinEntry,
             coinGroup: item.coinGroup,
-            parentCoin: item.parentCoin
+            parentCoinId: item.parentCoinId
           },
           {}
         );
@@ -146,21 +145,24 @@ export const TransactionStatusProvider: React.FC = ({ children }) => {
 
   const addTransactionStatusCheckItem: TransactionStatusProviderInterface['addTransactionStatusCheckItem'] =
     (txn, options) => {
-      const coinData = COINS[txn.coin || txn.slug];
+      const coinData = COINS[txn.parentCoinId || txn.coinId];
 
       if (!coinData) {
         logger.warn('Invalid coin found', {
           txn,
-          coinType: txn.coin || txn.slug
+          coinId: txn.coinId,
+          parentCoinId: txn.parentCoinId
         });
         return;
       }
 
       const newItem = new TxnStatusItem({
+        accountId: txn.accountId,
+        coinId: txn.coinId,
+        parentCoinId: txn.parentCoinId,
         walletId: txn.walletId,
         txnHash: txn.hash,
         sender: txn.outputs[0]?.address,
-        coinType: txn.slug,
         coinGroup: coinData.group,
         module: 'refresh',
         parentCoin: txn.coin,

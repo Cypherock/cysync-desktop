@@ -23,7 +23,7 @@ instance.setup();
 
 WebFont.load({
   google: {
-    families: ['Lato', 'Droid Sans', 'Roboto']
+    families: ['Lato:200,300,400,500,600,700', 'Droid Sans', 'Roboto']
   }
 });
 

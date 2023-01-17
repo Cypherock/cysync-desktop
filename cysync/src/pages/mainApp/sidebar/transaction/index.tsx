@@ -1,3 +1,4 @@
+import { COINS } from '@cypherock/communication';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
@@ -121,15 +122,13 @@ const Transaction = () => {
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    const coin = query.get('slug');
+    const coinId = query.get('coinId');
     const walletId = query.get('wallet');
 
-    if (coin) {
-      const index = allCoins.findIndex(
-        elem => elem.abbr.toLowerCase() === coin.toLowerCase()
-      );
+    if (coinId) {
+      const index = allCoins.findIndex(elem => elem.id === coinId);
       if (index !== -1) {
-        setCurrentCoin(coin);
+        setCurrentCoin(coinId);
         setCoinIndex(index + 1);
       }
     }
@@ -197,7 +196,7 @@ const Transaction = () => {
   const handleCoinChange = (selectedIndex: number) => {
     setCoinIndex(selectedIndex);
     if (selectedIndex === 0) setCurrentCoin(undefined);
-    else setCurrentCoin(allCoins[selectedIndex - 1].abbr);
+    else setCurrentCoin(allCoins[selectedIndex - 1].id);
   };
 
   const renderTxnRow = ({ index, key, style }: any) => {
@@ -209,8 +208,17 @@ const Transaction = () => {
           date={new Date(data.confirmed).toLocaleDateString()}
           time={new Date(data.confirmed).toLocaleTimeString()}
           walletName={data.walletName}
-          initial={data.slug?.toUpperCase()}
-          coinParent={data.coin === data.slug ? undefined : data.coin}
+          initial={
+            data.parentCoinId === data.coinId
+              ? COINS[data.coinId]?.abbr?.toUpperCase()
+              : COINS[data.parentCoinId]?.tokenList[
+                  data.coinId
+                ]?.abbr?.toUpperCase()
+          }
+          coinId={data.coinId}
+          parentCoinId={
+            data.parentCoinId === data.coinId ? undefined : data.parentCoinId
+          }
           amount={data.displayAmount}
           value={data.displayValue}
           result={convertToDisplayValue(data.sentReceive).toUpperCase()}
@@ -385,6 +393,10 @@ const Transaction = () => {
             txn={
               showTxn
                 ? {
+                    accountId: showTxn.accountId,
+                    coinId: showTxn.coinId,
+                    parentCoinId: showTxn.parentCoinId,
+                    isSub: showTxn.isSub,
                     hash: showTxn.hash,
                     total: showTxn.total,
                     fees: showTxn.fees,
@@ -392,8 +404,6 @@ const Transaction = () => {
                     confirmations: showTxn.confirmations,
                     walletId: showTxn.walletId,
                     walletName: showTxn.walletName,
-                    slug: showTxn.slug,
-                    coin: showTxn.coin,
                     status: showTxn.status,
                     sentReceive: showTxn.sentReceive,
                     confirmed: showTxn.confirmed,

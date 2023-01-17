@@ -1,3 +1,4 @@
+import { COINS } from '@cypherock/communication';
 import { generateNearAddressFromXpub } from '@cypherock/wallet';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -192,7 +193,9 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   decimal,
   walletId,
   deleteCoin,
-  deleteHistory
+  deleteHistory,
+  accountId,
+  coinId
 }) => {
   const discreetMode = useDiscreetMode();
   const theme = useTheme();
@@ -208,16 +211,13 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
 
   const { beforeNetworkAction } = useConnection();
 
-  const {
-    customAccountData: accountData,
-    setCurrentWalletId,
-    setCurrentCoin
-  } = useCustomAccount();
+  const { customAccountData: accountData, setCurrentAccountId } =
+    useCustomAccount();
 
   const implicitAccount = generateNearAddressFromXpub(coinDetails.xpub);
 
   useEffect(() => {
-    const key = `${walletId}-${initial.toLowerCase()}`;
+    const key = accountId;
     if (initial && walletId && sync.modulesInExecutionQueue.includes(key)) {
       setIsLoading(true);
     } else {
@@ -254,8 +254,8 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
     setDeleteOpen(false);
   };
   const handleDeleteConfirmation = async () => {
-    await deleteCoin(coinDetails.xpub, coinDetails.slug, walletId);
-    await deleteHistory(coinDetails);
+    await deleteCoin(accountId);
+    await deleteHistory(accountId);
   };
 
   const [sendForm, setSendForm] = useState(false);
@@ -291,16 +291,13 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   const onClick = () => {
     if (beforeAction()) {
       navigate(
-        `${
-          Routes.transactions.index
-        }?slug=${initial.toLowerCase()}&wallet=${walletId}`
+        `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}`
       );
     }
   };
 
   useEffect(() => {
-    setCurrentWalletId(selectedWallet._id);
-    setCurrentCoin(coinDetails.slug);
+    setCurrentAccountId(coinDetails.accountId);
   }, [selectedWallet._id]);
 
   useEffect(() => {
@@ -474,11 +471,13 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                   {accountData
                     .slice(0, maxAccountThreshold + lengthThreshold)
                     .map(account => {
+                      const coinObj = COINS[coinDetails.coinId];
                       return (
                         <React.Fragment key={account.name}>
                           {account.name === implicitAccount && (
                             <OneNearAccount
-                              initial={coinDetails.slug.toUpperCase()}
+                              coinId={coinDetails.coinId}
+                              initial={coinObj.abbr.toUpperCase()}
                               name={account.name}
                               holding={account.displayBalance}
                               price={account.displayPrice}
@@ -493,7 +492,8 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                           >
                             {account.name === implicitAccount || (
                               <OneNearAccount
-                                initial={coinDetails.slug.toUpperCase()}
+                                coinId={coinObj.id}
+                                initial={coinObj.abbr.toUpperCase()}
                                 name={account.name}
                                 holding={account.displayBalance}
                                 price={account.displayPrice}

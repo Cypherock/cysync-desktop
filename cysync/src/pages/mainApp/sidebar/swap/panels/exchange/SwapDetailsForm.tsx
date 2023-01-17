@@ -78,12 +78,14 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
   const handleChangeFromToken = (event: SelectChangeEvent) => {
     setFromTokenSlug(event.target.value);
     setFromToken(
-      fromWalletCoinData.find(coin => coin.slug === event.target.value)
+      fromWalletCoinData.find(coin => coin.coinId === event.target.value)
     );
   };
   const handleChangeToToken = (event: SelectChangeEvent) => {
     setToTokenSlug(event.target.value);
-    setToToken(toWalletCoinData.find(coin => coin.slug === event.target.value));
+    setToToken(
+      toWalletCoinData.find(coin => coin.coinId === event.target.value)
+    );
   };
 
   return (
@@ -122,19 +124,22 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
               labelId="select-source-helper-label"
             >
               {fromWalletCoinData
-                .filter(coin => coin.totalBalance !== '0')
+                .filter(coin => !coin.isEmpty)
                 .map(coin => {
-                  const coinSlugName = coin.slug.toUpperCase();
-                  const coinName = COINS[coin.slug]?.name;
+                  const coinId = coin.coinId;
+                  const coinName = coin.name;
+                  const coinAbbr = COINS[coin.coinId].abbr;
                   return (
-                    <MenuItem value={coin.slug} key={`from-${coin.slug}`}>
+                    <MenuItem value={coinId} key={`from-${coinName}`}>
                       <CoinIcons
-                        initial={coinSlugName}
+                        initial={coinId}
                         style={{ marginRight: '10px' }}
                       />
                       <ListItemText
                         primary={coinName}
-                        secondary={`${coin.displayBalance} ${coinSlugName}`}
+                        secondary={`${
+                          coin.displayBalance
+                        } ${coinAbbr.toUpperCase()}`}
                       />
                     </MenuItem>
                   );
@@ -225,15 +230,19 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
               variant="outlined"
             >
               {toWalletCoinData.map(coin => {
-                const coinSlugName = coin.slug.toUpperCase();
-                const coinName = COINS[coin.slug]?.name;
+                const coinId = coin.coinId;
+                const coinName = coin.name;
+                const coinAbbr = COINS[coin.coinId].abbr;
                 return (
-                  <MenuItem value={coin.slug} key={`to-${coin.slug}`}>
+                  <MenuItem value={coinId} key={`to-${coinName}`}>
                     <CoinIcons
-                      initial={coinSlugName}
+                      initial={coinId}
                       style={{ marginRight: '10px' }}
                     />
-                    <ListItemText primary={coinName} secondary={coinSlugName} />
+                    <ListItemText
+                      primary={coinName}
+                      secondary={coinAbbr.toUpperCase()}
+                    />
                   </MenuItem>
                 );
               })}

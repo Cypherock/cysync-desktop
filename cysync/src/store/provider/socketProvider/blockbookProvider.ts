@@ -2,24 +2,25 @@ import { EventEmitter } from 'events';
 
 import logger from '../../../utils/logger';
 
-import BlockbookSocket from './websocket';
+import Socket from './websocket';
 
 export interface WebSocketServerInfo {
+  coinId: string;
   name: string;
   url: string;
 }
 
-export interface AddressWalletMap {
+export interface AddressAccountMap {
   [key: string]: string | undefined;
 }
 
 export interface AddressInfo {
   address: string;
-  walletId: string;
+  accountId: string;
 }
 
 interface SocketInfo {
-  socket: BlockbookSocket;
+  socket: Socket;
   info: WebSocketServerInfo;
   isSubscribedToBlock: boolean;
   connectRetryTimeout?: ReturnType<typeof setTimeout>;
@@ -35,7 +36,7 @@ export default class BlockbookProvider extends EventEmitter {
 
   private addressesList: string[][] = [];
 
-  private addressWalletMap: AddressWalletMap = {};
+  private addressAccountMap: AddressAccountMap = {};
 
   constructor(serverInfo: WebSocketServerInfo[]) {
     super();
@@ -46,9 +47,9 @@ export default class BlockbookProvider extends EventEmitter {
     this.websocketServerInfoList = [...serverInfo];
 
     for (const server of this.websocketServerInfoList) {
-      const socket = new BlockbookSocket({
+      const socket = new Socket({
         url: server.url,
-        coinType: server.name,
+        coinId: server.coinId,
         keepAlive: true
       });
 
@@ -68,11 +69,11 @@ export default class BlockbookProvider extends EventEmitter {
   private setAllSocketListeners(socketInfo: SocketInfo) {
     socketInfo.socket.addListener(
       'notification',
-      this.onNotification.bind(this, socketInfo.info.name)
+      this.onNotification.bind(this, socketInfo.info.coinId)
     );
     socketInfo.socket.addListener(
       'block',
-      this.onBlock.bind(this, socketInfo.info.name)
+      this.onBlock.bind(this, socketInfo.info.coinId)
     );
     socketInfo.socket.addListener(
       'disconnected',
@@ -151,26 +152,26 @@ export default class BlockbookProvider extends EventEmitter {
   private async establishPreviousSocketState(socketInfo: SocketInfo) {
     try {
       if (socketInfo.isSubscribedToBlock) {
-        await this.subscribeBlock(socketInfo.info.name);
+        await this.subscribeBlock(socketInfo.info.coinId);
       }
 
-      await this.addAddressListener(socketInfo.info.name, []);
+      await this.addAddressListener(socketInfo.info.coinId, []);
     } catch (error) {
       logger.error('Unable to establishPreviousSocketState');
       logger.error(error);
     }
   }
 
-  public getWalletIdFromAddress(address: string) {
-    return this.addressWalletMap[address];
+  public getAccountIdFromAddress(address: string) {
+    return this.addressAccountMap[address];
   }
 
-  public onNotification(coinType: string, params: any) {
-    this.emit('txn', { coinType, txn: params.tx, address: params.address });
+  public onNotification(coinId: string, params: any) {
+    this.emit('txn', { coinId, txn: params.tx, address: params.address });
   }
 
-  public onBlock(coinType: string, params: any) {
-    this.emit('block', { coinType, ...params });
+  public onBlock(coinId: string, params: any) {
+    this.emit('block', { coinId, ...params });
   }
 
   public async connect() {
@@ -193,7 +194,7 @@ export default class BlockbookProvider extends EventEmitter {
   }
 
   public dispose() {
-    this.addressWalletMap = {};
+    this.addressAccountMap = {};
     for (const socket of this.socketInfoList) {
       socket.doConnect = false;
       socket.socket.dispose();
@@ -201,59 +202,56 @@ export default class BlockbookProvider extends EventEmitter {
     logger.info('All websocket disposed');
   }
 
-  private getIndexFromCoin(coinType: string) {
+  private getIndexFromCoin(coinId: string) {
     const index = this.websocketServerInfoList.findIndex(
-      elem => elem.name === coinType
+      elem => elem.coinId === coinId
     );
 
     if (index === -1) {
       throw new Error(
-        'Cannot find coinType in websocketServerInfoList: ' + coinType
+        'Cannot find coinId in websocketServerInfoList: ' + coinId
       );
     }
 
     return index;
   }
 
-  private getSocketInfoFromCoin(coinType: string) {
-    return this.socketInfoList[this.getIndexFromCoin(coinType)];
+  private getSocketInfoFromCoin(coinId: string) {
+    return this.socketInfoList[this.getIndexFromCoin(coinId)];
   }
 
-  private getAddressesFromCoin(coinType: string) {
-    return this.addressesList[this.getIndexFromCoin(coinType)];
+  private getAddressesFromCoin(coinId: string) {
+    return this.addressesList[this.getIndexFromCoin(coinId)];
   }
 
-  private setAddressesForCoin(coinType: string, addresses: string[]) {
-    this.addressesList[this.getIndexFromCoin(coinType)] = addresses;
+  private setAddressesForCoin(coinId: string, addresses: string[]) {
+    this.addressesList[this.getIndexFromCoin(coinId)] = addresses;
   }
 
-  public async addAddressListener(coinType: string, addresses: AddressInfo[]) {
-    const socketInfo = this.getSocketInfoFromCoin(coinType);
-    const prevAddresses = this.getAddressesFromCoin(coinType);
+  public async addAddressListener(coinId: string, addresses: AddressInfo[]) {
+    const socketInfo = this.getSocketInfoFromCoin(coinId);
+    const prevAddresses = this.getAddressesFromCoin(coinId);
 
     const newAddressSet = new Set([...prevAddresses]);
 
     for (const address of addresses) {
-      this.addressWalletMap[address.address] = address.walletId;
+      this.addressAccountMap[address.address] = address.accountId;
       newAddressSet.add(address.address);
     }
 
     const newAddressList = Array.from(newAddressSet);
 
-    this.setAddressesForCoin(coinType, newAddressList);
+    this.setAddressesForCoin(coinId, newAddressList);
 
     return socketInfo.socket.subscribeAddresses(newAddressList);
   }
 
-  public async removeAddressListener(
-    coinType: string,
-    addresses: AddressInfo[]
-  ) {
-    const socketInfo = this.getSocketInfoFromCoin(coinType);
-    const prevAddresses = this.getAddressesFromCoin(coinType);
+  public async removeAddressListener(coinId: string, addresses: AddressInfo[]) {
+    const socketInfo = this.getSocketInfoFromCoin(coinId);
+    const prevAddresses = this.getAddressesFromCoin(coinId);
 
     for (const address of addresses) {
-      delete this.addressWalletMap[address.address];
+      delete this.addressAccountMap[address.address];
     }
 
     const newAddressList = Array.from(
@@ -264,13 +262,13 @@ export default class BlockbookProvider extends EventEmitter {
       )
     );
 
-    this.setAddressesForCoin(coinType, newAddressList);
+    this.setAddressesForCoin(coinId, newAddressList);
 
     return socketInfo.socket.subscribeAddresses(newAddressList);
   }
 
-  public async subscribeBlock(coinType: string) {
-    const socketInfo = this.getSocketInfoFromCoin(coinType);
+  public async subscribeBlock(coinId: string) {
+    const socketInfo = this.getSocketInfoFromCoin(coinId);
     socketInfo.isSubscribedToBlock = true;
 
     return socketInfo.socket.subscribeBlock();
@@ -279,7 +277,7 @@ export default class BlockbookProvider extends EventEmitter {
   public async subscribeAllBlocks() {
     const promiseList: Array<Promise<any>> = [];
     for (const server of this.websocketServerInfoList) {
-      promiseList.push(this.subscribeBlock(server.name));
+      promiseList.push(this.subscribeBlock(server.coinId));
     }
 
     const results = await Promise.allSettled(promiseList);

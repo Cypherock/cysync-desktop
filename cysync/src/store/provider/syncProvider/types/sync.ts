@@ -1,6 +1,6 @@
 import { CoinGroup } from '@cypherock/communication';
 
-import { Coin } from '../../../../store/database/databaseInit';
+import { Account } from '../../../../store/database/databaseInit';
 import { TxnStatusItem } from '../../transactionStatusProvider/txnStatusItem';
 
 import { BalanceSyncItem } from './balanceSyncItem';
@@ -8,8 +8,9 @@ import { HistorySyncItem } from './historySyncItem';
 import { LatestPriceSyncItem } from './latestPriceSyncItem';
 import { PriceSyncItem } from './priceSyncItem';
 
-export interface ModifiedCoin extends Coin {
-  parentCoin?: string;
+export interface ModifiedAccount extends Account {
+  parentCoinId?: string;
+  isSub?: boolean;
   coinGroup?: CoinGroup;
   id?: string;
 }
@@ -23,12 +24,12 @@ export type SyncQueueItem =
 
 export interface SyncProviderTypes {
   addToQueue: (item: SyncQueueItem) => void;
-  addHistorySyncItemFromCoin: (
-    coin: ModifiedCoin,
+  addHistorySyncItemFromAccount: (
+    account: ModifiedAccount,
     options: { module?: string; isRefresh?: boolean; customAccount?: string }
   ) => void;
-  addBalanceSyncItemFromCoin: (
-    coin: ModifiedCoin,
+  addBalanceSyncItemFromAccount: (
+    account: ModifiedAccount,
     options: {
       token?: string;
       module?: string;
@@ -36,16 +37,34 @@ export interface SyncProviderTypes {
       customAccount?: string;
     }
   ) => void;
-  addPriceSyncItemFromCoin: (
-    coin: ModifiedCoin,
+  addPriceSyncItemFromAccount: (
+    account: Omit<
+      ModifiedAccount,
+      | 'xpub'
+      | 'name'
+      | 'walletId'
+      | 'accountIndex'
+      | 'totalBalance'
+      | 'totalUnconfirmedBalance'
+      | 'accountType'
+    >,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
-  addCustomAccountSyncItemFromCoin: (
-    coin: Coin,
+  addCustomAccountSyncItemFromAccount: (
+    account: Account,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
-  addLatestPriceSyncItemFromCoin: (
-    coin: ModifiedCoin,
+  addLatestPriceSyncItemFromAccount: (
+    account: Omit<
+      ModifiedAccount,
+      | 'xpub'
+      | 'name'
+      | 'walletId'
+      | 'accountIndex'
+      | 'totalBalance'
+      | 'totalUnconfirmedBalance'
+      | 'accountType'
+    >,
     options: { module?: string; isRefresh?: boolean }
   ) => void;
 }

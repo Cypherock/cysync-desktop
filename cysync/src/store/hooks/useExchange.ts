@@ -3,7 +3,7 @@ import Server from '@cypherock/server-wrapper';
 import { useEffect, useState } from 'react';
 
 import logger from '../../mainProcess/logger';
-import { coinDb, customAccountDb, Wallet } from '../database';
+import { accountDb, Wallet } from '../database';
 import {
   changeFormatOfOutputList,
   DisplayCoin,
@@ -159,8 +159,8 @@ export const useExchange: UseExchange = () => {
   const getCurrentExchangeRate = async () => {
     const { data } = await Server.swap
       .getExchangeRate({
-        from: fromToken.slug,
-        to: toToken.slug,
+        from: COINS[fromToken.coinId]?.abbr,
+        to: COINS[toToken.coinId]?.abbr,
         amount: amountToSend
       })
       .request();
@@ -183,19 +183,10 @@ export const useExchange: UseExchange = () => {
 
   const startSwapFlow = async () => {
     logger.info('SwapTransaction: Swap Flow Started');
-    let customAccount: string | undefined;
-
-    if (fromToken.slug === 'near') {
-      const customAccounts = await customAccountDb.getAll({
-        coin: fromToken.slug,
-        walletId: fromToken.walletId
-      });
-      customAccount = customAccounts[0].name;
-    }
 
     const recipientData = {
       id: 0,
-      recipient: '', // will be set to changelly address by the protocol
+      recipient: '',
       amount: amountToSend,
       errorRecipient: '',
       errorAmount: ''
@@ -211,28 +202,34 @@ export const useExchange: UseExchange = () => {
         changellyFee: fees,
         sendFlow: {
           walletId: fromWallet?._id,
+          accountId: fromToken.accountId,
+          accountIndex: fromToken.accountIndex,
+          accountType: fromToken.accountType,
           xpub: fromToken.xpub,
-          zpub: fromToken.zpub,
-          coinType: fromToken.slug,
+          coinId: fromToken.coinId,
           fees: +fees,
           pinExists: fromWallet?.passwordSet,
           passphraseExists: fromWallet?.passphraseSet,
-          customAccount,
+          customAccount: null,
           newAccountId: null,
           outputList: changeFormatOfOutputList(
             [recipientData],
-            fromToken.slug,
+            fromToken.coinId,
             undefined
           ),
-          data: {},
+          data: {
+            gasLimit: 21000
+          },
           isSendAll: false
         },
         receiveFlow: {
           walletId: toWallet._id,
-          coinType: toToken.slug,
-          coinName: COINS[toToken.slug]?.name,
+          accountId: toToken.accountId,
+          accountIndex: toToken.accountIndex,
+          accountType: toToken.accountType,
+          coinId: toToken.coinId,
+          coinName: COINS[toToken.coinId]?.name,
           xpub: toToken.xpub,
-          zpub: toToken.zpub,
           passphraseExists: toWallet.passphraseSet
         }
       })
@@ -268,7 +265,8 @@ export const useExchange: UseExchange = () => {
   const getAllCoinsFromWallet = async (
     walletId: string
   ): Promise<DisplayCoin[]> => {
-    const res = await coinDb.getAll({ walletId });
+    // const res = await coinDb.getAll({ walletId });
+    const res = await accountDb.getAll({ walletId });
     const unsortedCoins = await getCoinsWithPrices(res);
     return unsortedCoins;
   };

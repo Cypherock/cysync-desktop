@@ -1,5 +1,4 @@
 import { AbsCoinData, COINS } from '@cypherock/communication';
-import { Coin } from '@cypherock/database';
 import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';
@@ -17,12 +16,13 @@ import { DisplayInputOutput, DisplayTransaction } from './types';
 export interface UseHistoryGetAllParams {
   sinceDate?: Date | undefined;
   walletId?: string | undefined;
-  coinType?: string | undefined;
+  accountId?: string | undefined;
+  coinId?: string | undefined;
 }
 
 export interface UseHistoryValues {
   getAll: (params: UseHistoryGetAllParams) => Promise<DisplayTransaction[]>;
-  deleteCoinHistory: (coin: Coin) => Promise<void>;
+  deleteCoinHistory: (account: string) => Promise<void>;
 }
 
 export type UseHistory = () => UseHistoryValues;
@@ -31,15 +31,19 @@ export const useHistory: UseHistory = () => {
   const getAll: UseHistoryValues['getAll'] = async ({
     sinceDate,
     walletId,
-    coinType
+    accountId,
+    coinId
   }) => {
     const options: TxQueryOptions = { excludeFees: true, sinceDate };
     const query: TxQuery = {};
     if (walletId) {
       query.walletId = walletId;
     }
-    if (coinType) {
-      query.slug = coinType;
+    if (accountId) {
+      query.accountId = accountId;
+    }
+    if (coinId) {
+      query.coinId = coinId;
     }
     const res = await getAllTxns(query, options, {
       field: 'confirmed',
@@ -53,8 +57,9 @@ export const useHistory: UseHistory = () => {
         res
           .map(txn => {
             return {
-              parent: txn.slug !== txn.coin ? txn.coin : undefined,
-              slug: txn.slug
+              parentCoinId:
+                txn.parentCoinId !== txn.coinId ? txn.parentCoinId : undefined,
+              coinId: txn.coinId
             };
           })
           .map(item => [JSON.stringify(item), item])
@@ -67,24 +72,24 @@ export const useHistory: UseHistory = () => {
     for (const txn of res) {
       let coin: AbsCoinData;
       let isToken = false;
-      if (txn.coin && txn.coin !== txn.slug) {
-        const parent = COINS[txn.coin.toLowerCase()];
+      if (txn.parentCoinId && txn.parentCoinId !== txn.coinId) {
+        const parent = COINS[txn.parentCoinId];
         if (!parent) {
-          logger.warn(`Cannot find parent coin ${txn.coin}`);
+          logger.warn(`Cannot find parent coin ${txn.parentCoinId}`);
           continue;
         }
-        coin = parent.tokenList[txn.slug.toLowerCase()];
+        coin = parent.tokenList[txn.coinId];
         isToken = true;
       } else {
-        coin = COINS[txn.slug.toLowerCase()];
+        coin = COINS[txn.coinId];
       }
 
       if (!coin) {
-        logger.warn(`Cannot find coinType: ${txn.slug}`);
+        logger.warn(`Cannot find coinId: ${txn.coinId}`);
         continue;
       }
       const feeCoinMultiplier = isToken
-        ? COINS[txn.coin.toLowerCase()].multiplier
+        ? COINS[txn.parentCoinId].multiplier
         : coin.multiplier;
 
       const newTxn: DisplayTransaction = {
@@ -134,9 +139,7 @@ export const useHistory: UseHistory = () => {
 
       const total = new BigNumber(txn.total || 0).dividedBy(coin.multiplier);
 
-      const value = amount.multipliedBy(
-        latestPrices[txn.slug.toLowerCase()] || 0
-      );
+      const value = amount.multipliedBy(latestPrices[txn.coinId] || 0);
 
       newTxn.displayAmount = amount.toString();
       newTxn.displayFees = fees.toString();
@@ -161,8 +164,8 @@ export const useHistory: UseHistory = () => {
     return latestTransactionsWithPrice;
   };
 
-  const deleteCoinHistory = (coin: Coin) => {
-    return transactionDb.delete({ walletId: coin.walletId, slug: coin.slug });
+  const deleteCoinHistory = (accountId: string) => {
+    return transactionDb.delete({ accountId });
   };
 
   return {

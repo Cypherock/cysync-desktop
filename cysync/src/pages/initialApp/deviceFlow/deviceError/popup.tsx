@@ -31,11 +31,12 @@ const Root = styled(Grid)(() => ({
 }));
 
 type Props = {
-  handleClose: () => void;
+  handleClose: (val?: boolean) => void;
 };
 
 const Popup: React.FC<Props> = ({ handleClose }) => {
-  const { retryConnection, deviceConnectionState } = useConnection();
+  const { retryConnection, updateRequiredType, deviceConnectionState } =
+    useConnection();
 
   const getHeading = () => {
     switch (deviceConnectionState) {
@@ -43,6 +44,16 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
         return 'Looks like the device is not in the main menu.';
       case DeviceConnectionState.UNKNOWN_ERROR:
         return 'An unknown error occurred while connecting the device.';
+      case DeviceConnectionState.UPDATE_REQUIRED:
+        if (updateRequiredType === 'app') {
+          return 'The current version of CySync is not compatible with the X1 wallet connected';
+        }
+
+        if (updateRequiredType === 'device') {
+          return 'The current version of X1 wallet is not compatible with this CySync';
+        }
+
+        return 'The current versions of CySync and X1 wallet are not compatible';
       default:
         return 'An unknown error occurred while connecting the device.';
     }
@@ -54,6 +65,16 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
         return 'Bring the device to the main menu and try again.';
       case DeviceConnectionState.UNKNOWN_ERROR:
         return 'Reconnect the device and try again';
+      case DeviceConnectionState.UPDATE_REQUIRED:
+        if (updateRequiredType === 'app') {
+          return 'Update CySync from https://cypherock.com/gs';
+        }
+
+        if (updateRequiredType === 'device') {
+          return 'Update the X1 wallet';
+        }
+
+        return 'Make sure both CySync and X1 wallet are updated from https://cypherock.com/gs';
       default:
         return 'Reconnect the device and try again';
     }
@@ -63,6 +84,12 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
     switch (deviceConnectionState) {
       case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Try again';
+      case DeviceConnectionState.UPDATE_REQUIRED:
+        if (updateRequiredType === 'device') {
+          return 'Yes';
+        }
+
+        return 'Ok';
       case DeviceConnectionState.UNKNOWN_ERROR:
       default:
         return 'Ok';
@@ -73,6 +100,7 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
     switch (deviceConnectionState) {
       case DeviceConnectionState.DEVICE_NOT_READY:
         return 'Cancel';
+      case DeviceConnectionState.UPDATE_REQUIRED:
       case DeviceConnectionState.UNKNOWN_ERROR:
       default:
         return undefined;
@@ -93,6 +121,9 @@ const Popup: React.FC<Props> = ({ handleClose }) => {
         );
         retryConnection();
         handleClose();
+        break;
+      case DeviceConnectionState.UPDATE_REQUIRED:
+        handleClose(true);
         break;
       case DeviceConnectionState.UNKNOWN_ERROR:
       default:

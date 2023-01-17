@@ -1,86 +1,141 @@
 import axios from 'axios';
-import { ipcMain, WebContents } from 'electron';
-import autoUpdater from 'update-electron-app';
+import {
+  app,
+  AutoUpdater,
+  autoUpdater,
+  ipcMain,
+  shell,
+  WebContents
+} from 'electron';
+import os from 'os';
+import { format } from 'util';
 
 import packageJson from '../../package.json';
 
-const currentVersion = packageJson.version;
-
 import logger from './logger';
 
+const currentVersion = app.getVersion();
+
+const host = 'https://update.electronjs.org';
+
 export default class Updater {
+  private updater: AutoUpdater;
+
   private checkingForUpdate: boolean;
-  private autoUpdateInitiated: boolean;
+
+  private foundUpdate: boolean;
+
   private latestReleaseUrl: string;
+
+  private githubReleaseUrl: string;
 
   private renderer: WebContents;
 
+  private interval: NodeJS.Timeout;
+
+  private hasAutoUpdateFeature = process.platform !== 'linux';
+
   constructor(mainWindow: WebContents) {
     this.checkingForUpdate = false;
-    this.autoUpdateInitiated = false;
+    this.foundUpdate = false;
     this.renderer = mainWindow;
-    this.latestReleaseUrl = `https://api.github.com/repos/${process.env.GITHUB_REPO}/releases/latest`;
-  }
-  private async startAutoUpdate() {
-    if (
-      this.isAutoupdateAvailable() &&
-      !this.autoUpdateInitiated &&
-      process.env.NODE_ENV !== 'development'
-    ) {
-      logger.info('Starting autoupdate');
-      this.autoUpdateInitiated = true;
-      autoUpdater({
-        repo: process.env.GITHUB_REPO,
-        // Winston logger is incompatable with `update-electron-app`, thus it needs to be modified.
-        logger: {
-          log: (...args: any) => {
-            if (args.length > 0) {
-              logger.info(args[0], { params: args.slice(1) });
-            }
-          },
-          info: (...args: any) => {
-            if (args.length > 0) {
-              logger.info(args[0], { params: args.slice(1) });
-            }
-          },
-          error: (...args: any) => {
-            if (args.length > 0) {
-              logger.error(args[0], { params: args.slice(1) });
-            }
-          },
-          warn: (...args: any) => {
-            if (args.length > 0) {
-              logger.warn(args[0], { params: args.slice(1) });
-            }
-          }
-        },
-
-        notifyUser: true
-      });
-    }
+    this.updater = autoUpdater;
+    this.githubReleaseUrl = `https://api.github.com/repos/${process.env.GITHUB_REPO}/releases/latest`;
+    this.latestReleaseUrl = `${host}/${process.env.GITHUB_REPO}/${
+      process.platform
+    }-${process.arch}/${app.getVersion()}`;
+    this.setupConfig();
   }
 
-  private isAutoupdateAvailable() {
-    // Autoupdater is only available for windows and Mac for now
-    return process.platform && ['darwin', 'win32'].includes(process.platform);
+  private setupConfig() {
+    const userAgent = format(
+      '%s/%s (%s: %s)',
+      packageJson.name,
+      packageJson.version,
+      os.platform(),
+      os.arch()
+    );
+    logger.info({ latestReleaseUrl: this.latestReleaseUrl, userAgent });
+    this.updater.setFeedURL({
+      url: this.latestReleaseUrl,
+      headers: { 'User-Agent': userAgent }
+    });
   }
 
   public setupListeners() {
-    ipcMain.on('check-for-update', () => {
-      this.checkForUpdates();
+    this.updater.on('error', error => {
+      logger.error(error);
+      this.onError(error);
     });
 
-    ipcMain.on('check-auto-update', () => {
-      this.startAutoUpdate();
+    this.updater.on('checking-for-update', () => {
+      logger.info('AppUpdater: Checking for update and downloading...');
+    });
+
+    this.updater.on('update-available', (_info: any) => {
+      logger.info('AppUpdater: Update available downloading...');
+    });
+
+    this.updater.on('update-not-available', () => {
+      logger.info('AppUpdater: Update not available');
+      this.updateNotAvailable();
+    });
+
+    this.updater.on('update-downloaded', () => {
+      logger.info('AppUpdater: Update downloaded');
+      this.downloadComplete();
+    });
+
+    ipcMain.on('check-for-update', () => {
+      logger.info('AppUpdater: Initiated checking for update');
+      this.initiateUpdateChecks();
+    });
+
+    ipcMain.on('start-update', () => {
+      logger.info('AppUpdater: Updating application approved');
+      if (this.hasAutoUpdateFeature) {
+        this.startUpdating();
+        this.downloadProgress(0);
+      } else {
+        shell.openExternal(`https://www.cypherock.com/gs`);
+      }
+    });
+
+    ipcMain.on('install-update', () => {
+      logger.info('AppUpdater: Installing application');
+      this.updater.quitAndInstall();
     });
   }
 
-  private async checkForUpdates() {
+  private initiateUpdateChecks() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    } else {
+      this.checkForUpdates();
+    }
+
+    this.interval = setInterval(
+      this.checkForUpdates.bind(this),
+      10 * 60 * 1000
+    );
+  }
+
+  private checkForUpdates() {
+    // Use this for testing
+    // const updateInfo = { version: '1.4.0' };
+    // setTimeout(() => this.updateAvailable(updateInfo), 1000);
+    // return;
+
     // This check is so that 2 simultanious update flows does not take place
     if (this.checkingForUpdate) {
-      logger.info('Already checking for update.');
-      if (this.renderer && !this.renderer.isDestroyed()) {
-        this.renderer.send('duplicate-update');
+      logger.warn('Already checking for update.');
+      this.renderer.send('duplicate-update');
+      return;
+    }
+
+    if (this.foundUpdate) {
+      if (this.interval) {
+        clearInterval(this.interval);
       }
       return;
     }
@@ -88,43 +143,82 @@ export default class Updater {
     this.checkingForUpdate = true;
 
     axios
-      .get(this.latestReleaseUrl)
+      .get(
+        this.hasAutoUpdateFeature
+          ? this.latestReleaseUrl
+          : this.githubReleaseUrl
+      )
       .then(resp => {
-        let tagName: string = resp?.data?.tag_name;
-        if (tagName) {
-          if (tagName.startsWith('v')) {
-            tagName = tagName.slice(1);
-          }
+        logger.info(resp.data);
+        logger.info(currentVersion);
+        if (resp && resp.status === 200) {
+          if (!this.hasAutoUpdateFeature) {
+            let tagName: string = resp?.data?.tag_name;
+            if (tagName) {
+              if (tagName.startsWith('v')) {
+                tagName = tagName.slice(1);
+              }
 
-          if (tagName !== currentVersion) {
+              if (tagName !== currentVersion) {
+                this.foundUpdate = true;
+                this.updateAvailable({
+                  version: resp.data.tag_name
+                });
+              }
+            }
+          } else {
+            this.foundUpdate = true;
             this.updateAvailable({
-              version: resp.data.tag_name
+              version: resp.data.name,
+              notes: resp.data.notes
             });
           }
-          return;
         }
 
-        this.updateNotAvailable();
+        if (!this.foundUpdate) {
+          this.foundUpdate = false;
+          this.updateNotAvailable();
+        }
       })
-      .catch(error => {
-        logger.error(error);
+      .catch(() => {
         this.updateNotAvailable();
       });
   }
 
-  private updateAvailable(info: { version: string }) {
-    this.checkingForUpdate = false;
-    logger.info('Update available.');
-    if (this.renderer && !this.renderer.isDestroyed()) {
-      this.renderer.send('update-available', info);
-    }
-  }
-
   private updateNotAvailable() {
     this.checkingForUpdate = false;
-    logger.info('Update not available.');
-    if (this.renderer && !this.renderer.isDestroyed()) {
-      this.renderer.send('update-unavailable');
+    this.renderer.send('update-unavailable');
+  }
+
+  private startUpdating() {
+    if (!this.hasAutoUpdateFeature) {
+      return;
     }
+
+    logger.info('Downloading update...');
+    this.renderer.send('update-downloading');
+    this.updater.checkForUpdates();
+  }
+
+  private updateAvailable(info: any) {
+    logger.info('Update available.', { info });
+    this.foundUpdate = true;
+    this.renderer.send('update-available', info);
+  }
+
+  private downloadProgress(percent: number) {
+    logger.info(`Download progress ${percent}`);
+    this.renderer.send('update-download-progress', percent);
+  }
+
+  private downloadComplete() {
+    logger.info('Download completed');
+    this.renderer.send('update-downloaded');
+  }
+
+  private onError(error: any) {
+    this.checkingForUpdate = false;
+    logger.error('Error on update', error);
+    this.renderer.send('update-error', error);
   }
 }

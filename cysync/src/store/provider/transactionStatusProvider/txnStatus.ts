@@ -26,16 +26,10 @@ export const getCurrentTxnStatus = async (
 ): Promise<Status> => {
   let oldStatus;
   try {
-    // coin field to be queried only present if there is a parent coin
-    const coin =
-      item.parentCoin && item.parentCoin !== item.coinType
-        ? { coin: item.parentCoin }
-        : {};
     oldStatus = (
       await transactionDb.getOne({
-        slug: item.coinType,
-        hash: item.txnHash,
-        ...coin
+        accountId: item.accountId,
+        hash: item.txnHash
       })
     )?.status;
   } catch (e) {
@@ -47,11 +41,11 @@ export const getCurrentTxnStatus = async (
 export const getRequestsMetadata = (
   item: SyncQueueItem
 ): IRequestMetadata[] => {
-  const abbr =
-    item.parentCoin && item.parentCoin !== item.coinType
-      ? item.parentCoin
-      : item.coinType;
-  const coin = COINS[abbr];
+  const coinId =
+    item.parentCoinId && item.parentCoinId !== item.coinId
+      ? item.parentCoinId
+      : item.coinId;
+  const coin = COINS[coinId];
 
   if (!coin || !(item instanceof TxnStatusItem)) {
     logger.warn('Invalid item in transaction status sync queue', item);
@@ -100,7 +94,7 @@ export const getRequestsMetadata = (
   }
 
   logger.warn('Invalid coin in sync queue', {
-    coinType: item.coinType
+    coinId
   });
   return [];
 };
@@ -110,16 +104,14 @@ export const processResponses = async (
   item: TxnStatusItem,
   response: batchServer.IBatchResponse
 ): Promise<any> => {
-  const abbr =
-    item.parentCoin && item.parentCoin !== item.coinType
-      ? item.parentCoin
-      : item.coinType;
-  const coin = COINS[abbr];
+  const coinId =
+    item.parentCoinId && item.parentCoinId !== item.coinId
+      ? item.parentCoinId
+      : item.coinId;
+  const coin = COINS[coinId];
 
   if (!coin) {
-    throw new Error(
-      'Invalid coin in transaction status sync item: ' + item.coinType
-    );
+    throw new Error('Invalid coin in transaction status sync item: ' + coinId);
   }
 
   let status;
@@ -151,19 +143,15 @@ export const processResponses = async (
     confirmations = response.data?.result?.confirmations;
     status = confirmations > 0 ? Status.SUCCESS : Status.PENDING;
   } else {
-    throw new Error('Invalid coin type' + item.coinType);
+    throw new Error('Invalid coin type' + coinId);
   }
 
   // status already updated; no db update needed
   if (currentStatus !== Status.PENDING) return { isComplete: true };
 
   // potential overwrite of resynced transactions
-  const coinField =
-    item.parentCoin && item.parentCoin !== item.coinType
-      ? { coin: item.parentCoin }
-      : {};
   await transactionDb.findAndUpdate(
-    { slug: item.coinType, hash: item.txnHash, ...coinField },
+    { accountId: item.accountId, hash: item.txnHash },
     {
       status,
       confirmations: status === Status.SUCCESS ? confirmations || 1 : 0

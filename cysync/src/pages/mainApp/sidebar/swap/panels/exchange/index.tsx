@@ -106,8 +106,8 @@ const ExchangePanel = () => {
         <>
           {
             <NetworkFeeDetails
-              fromToken={fromToken.slug.toUpperCase()}
-              toToken={toToken.slug.toUpperCase()}
+              fromToken={COINS[fromToken.coinId].abbr.toUpperCase()}
+              toToken={COINS[toToken.coinId].abbr.toUpperCase()}
               fees={fees}
               exchangeRate={exchangeRate}
               result={+amountToReceive}
@@ -150,10 +150,10 @@ const ExchangePanel = () => {
           amountToSend={amountToSend}
           amountToReceive={amountToReceive}
           networkFees={fees}
-          sourceCoinSlug={fromToken.slug.toUpperCase()}
-          sourceCoinName={COINS[fromToken.slug]?.name}
-          targetCoinSlug={toToken.slug.toUpperCase()}
-          targetCoinName={COINS[toToken.slug]?.name}
+          sourceCoinSlug={COINS[fromToken.coinId].abbr.toUpperCase()}
+          sourceCoinName={fromToken.coinId}
+          targetCoinSlug={COINS[toToken.coinId].abbr.toUpperCase()}
+          targetCoinName={toToken.coinId}
           receiveAddress={receiveAddress}
           receiveFlowStep={receiveFlowStep}
           sendFlowStep={sendFlowStep}
@@ -165,7 +165,7 @@ const ExchangePanel = () => {
           onClose={() => {
             setSwapCompletedDialog(false);
           }}
-          toTokenName={COINS[toToken.slug]?.name}
+          toTokenName={COINS[toToken.coinId]?.name}
           transactionId={swapTransaction.changellyTxnId}
         />
       )}

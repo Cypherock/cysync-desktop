@@ -1,23 +1,21 @@
-import { CoinGroup } from '@cypherock/communication';
 import {
   IRequestMetadata,
   pricing as pricingServer,
   serverBatch as batchServer
 } from '@cypherock/server-wrapper';
 
-import { coinDb, tokenDb } from '../../../database';
+import { coinPriceDb } from '../../../database';
 import { LatestPriceSyncItem } from '../types';
 
 export const getRequestsMetadata = (
   item: LatestPriceSyncItem
 ): IRequestMetadata[] => {
-  const usesNewApi = Boolean(item.id);
   const pricingMetadata = pricingServer
     .getLatest(
       {
-        coin: usesNewApi ? item.id : item.coinType
+        coin: item.id
       },
-      usesNewApi
+      true
     )
     .getMetadata();
 
@@ -34,24 +32,12 @@ export const processResponses = async (
 
   const res = responses[0];
 
-  const usesNewApi = Boolean(item.id);
-  let data;
-  let priceLastUpdatedAt;
-  if (usesNewApi) {
-    data = res.data[item.id].usd;
-    priceLastUpdatedAt = res.data[item.id].last_updated_at;
-  } else {
-    data = res.data.data.price;
-  }
+  const data = res.data[item.id].usd;
+  const priceLastUpdatedAt = res.data[item.id].last_updated_at;
 
-  if (item.coinGroup === CoinGroup.ERC20Tokens)
-    await tokenDb.findAndUpdate(
-      { slug: item.coinType },
-      { price: data, priceLastUpdatedAt }
-    );
-  else
-    await coinDb.findAndUpdate(
-      { slug: item.coinType },
-      { price: data, priceLastUpdatedAt }
-    );
+  await coinPriceDb.insert({
+    coinId: item.coinId,
+    price: data,
+    priceLastUpdatedAt
+  });
 };

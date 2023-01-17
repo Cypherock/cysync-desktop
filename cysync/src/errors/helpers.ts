@@ -118,13 +118,13 @@ const handleWalletErrors = (
   cyError: CyError,
   error: any,
   metadata: {
-    coinType: string;
+    coinId: string;
   }
 ) => {
   if (error.errorType === WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE)
     cyError.setError(WalletErrorType.BLOCKED_UTXOS_WITH_SUFFICIENT_BALANCE);
   else if (error.errorType === WalletErrorType.INSUFFICIENT_FUNDS)
-    cyError.setError(WalletErrorType.INSUFFICIENT_FUNDS, metadata.coinType);
+    cyError.setError(WalletErrorType.INSUFFICIENT_FUNDS, metadata.coinId);
 };
 
 export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
@@ -258,7 +258,7 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
         langStrings.ERRORS.ADD_COIN_FAILED_INTERNAL_ERROR(coin)
     },
     [CysyncError.ADD_COIN_UNKNOWN_ASSET]: {
-      message: 'Unknown Coin requested to the device',
+      message: 'Unknown account requested to the device',
       parent: CysyncError.ADD_COIN_UNKNOWN_ASSET
     },
     [CysyncError.ADD_COIN_UNKNOWN_ERROR]: {

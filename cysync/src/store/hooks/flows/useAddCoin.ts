@@ -21,7 +21,7 @@ import {
   handleErrors
 } from '../../../errors';
 import logger from '../../../utils/logger';
-import { addressDb, Coin, coinDb } from '../../database';
+import { Account, accountDb, addressDb } from '../../database';
 import { useSync } from '../../provider';
 
 import * as flowHandlers from './handlers';
@@ -31,7 +31,7 @@ function sleep(ms: number) {
 }
 
 export interface AddCoinStatus {
-  coin: Coin;
+  coin: Account;
   name: string;
   status: -1 | 0 | 1 | 2;
 }
@@ -41,7 +41,7 @@ export interface HandleAddCoinOptions {
   sdkVersion: string;
   setIsInFlow: (val: boolean) => void;
   walletId: string;
-  coinsFromGUI: string[];
+  selectedCoin: { accountIndex: number; accountType: string; id: string };
   pinExists: boolean;
   passphraseExists: boolean;
   isXpubMissing?: boolean;
@@ -96,17 +96,6 @@ export const useAddCoin: UseAddCoin = () => {
   const sync = useSync();
   const addCoin = new CoinAdder();
 
-  // converts data from GUI to required format;
-  const getCoinList = (coinsFromGUI: string[]) => {
-    return coinsFromGUI
-      .filter(coin => {
-        return coin[2];
-      })
-      .map(coin => {
-        return coin[0];
-      });
-  };
-
   // To call resetHooks outside of this function
   const resetHooks = () => {
     setCoinsConfirmed(false);
@@ -134,12 +123,16 @@ export const useAddCoin: UseAddCoin = () => {
   };
 
   // This starts the adding coin task in a queue similar to `syncProvider`.
-  const setUpCoinWallets = async (coinList: Coin[]) => {
+  const setUpCoinWallets = async (coinList: Account[]) => {
     const coinStatus: AddCoinStatus[] = [];
 
     for (const [i, coin] of coinList.entries()) {
-      const coinData = COINS[coin.slug];
-      coinStatus.push({ coin, name: coinData.name, status: i === 0 ? 1 : 0 });
+      const coinData = COINS[coin.coinId];
+      coinStatus.push({
+        coin,
+        name: coinData.name,
+        status: i === 0 ? 1 : 0
+      });
     }
 
     setAddCoinIndex(0);
@@ -163,14 +156,16 @@ export const useAddCoin: UseAddCoin = () => {
       const { coin } = currentCoin;
       try {
         const wallet = newWallet({
-          coinType: coin.slug,
+          coinId: coin.coinId,
+          accountIndex: coin.accountIndex,
           xpub: coin.xpub,
           walletId: coin.walletId,
-          zpub: coin.zpub,
-          addressDB: addressDb
+          addressDB: addressDb,
+          accountId: coin.accountId,
+          accountType: coin.accountType
         });
         await wallet.setupNewWallet();
-        await coinDb.insert(coin);
+        await accountDb.insert(coin);
         coinStatus[addCoinIndex].status = 2;
       } catch (error) {
         coinStatus[addCoinIndex].status = -1;
@@ -236,7 +231,7 @@ export const useAddCoin: UseAddCoin = () => {
       const filteredXpubList = coinStatus.filter(elem => elem.status === 2);
       for (const coin of filteredXpubList) {
         sync.addCoinTask(coin.coin, {
-          module: `${coin.coin.walletId}-${coin.coin.slug}`
+          module: coin.coin.accountId
         });
       }
 
@@ -262,16 +257,15 @@ export const useAddCoin: UseAddCoin = () => {
     sdkVersion,
     setIsInFlow,
     walletId,
-    coinsFromGUI,
+    selectedCoin,
     pinExists,
     passphraseExists,
     isXpubMissing = false
   }: HandleAddCoinOptions) => {
     clearAll();
 
-    const selectedCoins = getCoinList(coinsFromGUI);
     const flowName = isXpubMissing ? `ResyncCoin` : `AddCoin`;
-    logger.info(`${flowName}: Initiated`);
+    logger.info(`${flowName}: Initiated`, { selectedCoin });
 
     if (!connection) {
       logger.error(`${flowName}: Failed - Device not connected`);
@@ -355,7 +349,7 @@ export const useAddCoin: UseAddCoin = () => {
       if (!isXpubMissing) {
         // if there is a coin present in the list that is unknown while setting up,
         // that would caught in a previous step in the name of ADD_COIN_UNKNOWN_ASSET
-        await setUpCoinWallets(xpubList);
+        await setUpCoinWallets([xpubList]);
       } else {
         setAddCoinCompleted(true);
       }
@@ -395,8 +389,7 @@ export const useAddCoin: UseAddCoin = () => {
         connection,
         sdkVersion,
         walletId,
-        selectedCoins,
-        isResync: isXpubMissing,
+        selectedCoin,
         pinExists,
         passphraseExists
       });

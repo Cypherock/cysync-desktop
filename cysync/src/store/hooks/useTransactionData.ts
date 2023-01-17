@@ -17,8 +17,11 @@ export interface UseTransactionDataValues {
   setCurrentWallet: React.Dispatch<React.SetStateAction<string | undefined>>;
   walletIndex: number;
   coinIndex: number;
+  accountIndex: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setCoinIndex: React.Dispatch<React.SetStateAction<number>>;
+  setAccountIndex: React.Dispatch<React.SetStateAction<number>>;
+  setCurrentAccount: React.Dispatch<React.SetStateAction<string | undefined>>;
   setCurrentCoin: React.Dispatch<React.SetStateAction<string | undefined>>;
   setWalletIndex: React.Dispatch<React.SetStateAction<number>>;
   sortTxns: (index: number) => void;
@@ -40,8 +43,12 @@ export const useTransactionData: UseTransactionData = () => {
   const [currentWallet, setCurrentWallet] = useState<string | undefined>(
     undefined
   );
+  const [currentAccount, setCurrentAccount] = useState<string | undefined>(
+    undefined
+  );
   const [currentCoin, setCurrentCoin] = useState<string | undefined>(undefined);
   const [walletIndex, setWalletIndex] = useState(0);
+  const [accountIndex, setAccountIndex] = useState(0);
   const [coinIndex, setCoinIndex] = useState(0);
   const [sortIndex, setSortIndex] = useState(3);
   // If the initial setup is done (i.e, the coin and wallet data are added), then only the txns will be fetched.
@@ -169,7 +176,8 @@ export const useTransactionData: UseTransactionData = () => {
       const txns = await getAll({
         sinceDate,
         walletId: currentWallet,
-        coinType: currentCoin
+        accountId: currentAccount,
+        coinId: currentCoin
       });
 
       sortFromTxns(txns, sortIndex);
@@ -203,7 +211,7 @@ export const useTransactionData: UseTransactionData = () => {
           setIsLoading(false);
         });
     }
-  }, [days, currentWallet, currentCoin, isInitialSetupDone]);
+  }, [days, currentWallet, currentAccount, currentCoin, isInitialSetupDone]);
 
   useEffect(() => {
     sortTxns(sortIndex);
@@ -220,12 +228,15 @@ export const useTransactionData: UseTransactionData = () => {
     coinIndex,
     setIsLoading,
     setCoinIndex,
-    setCurrentCoin,
+    setCurrentAccount,
     setWalletIndex,
     sortTxns,
     sortIndex,
     setSortIndex,
     onInitialSetupDone: debouncedSetInitialSetupDone,
-    isInitialSetupDone
-  } as UseTransactionDataValues;
+    isInitialSetupDone,
+    setCurrentCoin,
+    accountIndex,
+    setAccountIndex
+  };
 };
