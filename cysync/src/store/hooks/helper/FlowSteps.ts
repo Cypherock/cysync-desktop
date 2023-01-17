@@ -1,5 +1,6 @@
 export enum ReceiveFlowSteps {
-  EnterPinAndTapCard,
+  EnterPin,
+  TapCard,
   VerifyReceiveAddress,
   Completed
 }

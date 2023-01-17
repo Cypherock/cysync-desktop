@@ -28,7 +28,8 @@ const rotateKeyframe = keyframes`
 const receiveFlowStepsMessages: {
   [key in ReceiveFlowSteps]: string;
 } = {
-  [ReceiveFlowSteps.EnterPinAndTapCard]: 'Pin entered and card tapped',
+  [ReceiveFlowSteps.EnterPin]: 'Pin entered',
+  [ReceiveFlowSteps.TapCard]: 'Card tapped',
   [ReceiveFlowSteps.VerifyReceiveAddress]: 'Receive address verified',
   [ReceiveFlowSteps.Completed]: 'Receive flow completed'
 };

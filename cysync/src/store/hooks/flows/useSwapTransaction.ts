@@ -10,6 +10,7 @@ import {
   WalletStates
 } from '@cypherock/protocols';
 import { WalletErrorType } from '@cypherock/wallet';
+import BigNumber from 'bignumber.js';
 import { useEffect, useRef, useState } from 'react';
 
 import {
@@ -44,8 +45,7 @@ export interface HandleSwapTransactionOptions {
     zpub?: string;
     customAccount?: string;
     newAccountId?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    outputList: any[];
+    outputList: any;
     fees: number;
     isSendAll?: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,6 +71,7 @@ export interface UseSwapTransactionValues {
   receiveFlow: {
     receiveAddress: string;
     transactionMetadataSent: boolean;
+    receiveFlowPinEntered: boolean;
     receiveFlowCardTapped: boolean;
     receiveAddressVerified: boolean;
     receiveFlowPassphraseEntered: boolean;
@@ -87,6 +88,8 @@ export interface UseSwapTransactionValues {
     signedTxn: string;
     completed: boolean;
   };
+  changellyAddress: string;
+  changellyTxnId: string;
 }
 
 export type UseSwapTransaction = () => UseSwapTransactionValues;
@@ -102,6 +105,10 @@ export const useSwapTransaction: UseSwapTransaction = () => {
   const [receiveFlowPassphraseEntered, setReceiveFlowPassphraseEntered] =
     useState(false);
   const [receiveFlowCardTapped, setReceiveFlowCardTapped] = useState(false);
+  const [receiveFlowPinEntered, setReceiveFlowPinEntered] = useState(false);
+
+  const [changellyAddress, setChangellyAddress] = useState('');
+  const [changellyTxnId, setChangellyTxnId] = useState('');
 
   const [sendCoinsConfirmed, setSendCoinsConfirmed] = useState(false);
   const [totalFees, setTotalFees] = useState('0');
@@ -130,29 +137,22 @@ export const useSwapTransaction: UseSwapTransaction = () => {
   const resetHooks = () => {
     setReceiveCoinsConfirmed(false);
     setSendCoinsConfirmed(false);
-    // setCoinsConfirmed(false);
     setReceiveAddressVerified(false);
-    // setVerified(false);
     setCompleted(false);
     setReceiveAddress('');
     setTransactionMetadataSent(false);
-    // setPathSent(false);
-    // setCardTapped(false);
     setReceiveFlowCardTapped(false);
+    setReceiveFlowPinEntered(false);
     setSendFlowCardsTapped(false);
     setReceiveFlowPassphraseEntered(false);
     setSendFlowPassphraseEntered(false);
-    // setXpubMissing(false);
     setReceiveAccountExists(false);
-    // setAccountExists(false);
-    // setReplaceAccount(false);
-    // setVerifiedAccountId(false);
-    // setVerifiedReplaceAccount(false);
-    // setReplaceAccountStarted(false);
     setTotalFees('0');
     setSendFlowVerified(false);
     setSendFlowPinEntered(false);
     setSignedTxn('');
+    setChangellyAddress('');
+    setChangellyTxnId('');
     userAction.current = new DeferredReference<void>();
     replaceAccountAction.current = new DeferredReference<void>();
     swapTransaction.removeAllListeners();
@@ -160,7 +160,6 @@ export const useSwapTransaction: UseSwapTransaction = () => {
 
   const clearAll = () => {
     setIsCancelled(false);
-    // clearErrorObj();
     resetHooks();
   };
 
@@ -169,7 +168,11 @@ export const useSwapTransaction: UseSwapTransaction = () => {
     walletId: string,
     coinType: string
   ) => {
-    logger.info('New receive address', { coinType, walletId, addr });
+    logger.info('SwapTransaction: New receive address', {
+      coinType,
+      walletId,
+      addr
+    });
     addReceiveAddressHook(addr, walletId, coinType);
     receiveAddressDb.insert({ address: addr, walletId, coinType });
   };
@@ -197,11 +200,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
       clearAll();
 
       logger.info(`SwapTransaction: Initiated`);
-      // logger.info('Swap Transaction Send Flow Details', {
-      //     walletId: sendFlow.walletId,
-      //     coinType: sendFlow.coinType,
-      //     contactAbbr: sendFlow.data.contractAbbr,
-      // });
+
       logger.debug('SwapTransaction: Receive Flow Details', {
         walletId: receiveFlow.walletId,
         coinType: receiveFlow.coinType,
@@ -209,7 +208,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
       });
 
       logger.debug('SwapTransaction: ReceiveAddress Xpub', {
-        xpud: receiveFlow.xpub,
+        xpub: receiveFlow.xpub,
         zpub: receiveFlow.zpub
       });
 
@@ -359,79 +358,6 @@ export const useSwapTransaction: UseSwapTransaction = () => {
         }
       );
 
-      // EVENT CURRENTLY DOESN'T EXIST
-      // receiveTransaction.on('replaceAccountRequired', value => {
-      //     if (value) {
-      //         logger.verbose(
-      //             'ReceiveAddress: Device needs to replace an account to add a new one',
-      //             {
-      //                 coinType
-      //             }
-      //         );
-      //         setReplaceAccount(true);
-      //     }
-      // });
-
-      // EVENT CURRENTLY DOESN'T EXIST
-      // receiveTransaction.on('accountVerified', value => {
-      //     if (value) {
-      //         logger.verbose('ReceiveAddress: Account confirmed on device', {
-      //             coinType
-      //         });
-      //         setVerifiedAccountId(true);
-      //     } else {
-      //         const cyError = new CyError(
-      //             CysyncError.RECEIVE_TXN_REJECTED,
-      //             coinName
-      //         );
-      //         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
-      //     }
-      // });
-
-      // EVENT CURRENTLY DOESN'T EXIST
-      // receiveTransaction.on('replaceAccountSelected', value => {
-      //     if (value) {
-      //         logger.verbose('ReceiveAddress: Replace account selected on device', {
-      //             coinType
-      //         });
-      //         setReplaceAccountSelected(true);
-      //     } else {
-      //         setReplaceAccountSelected(false);
-      //     }
-      // });
-
-      // EVENT CURRENTLY DOESN'T EXIST
-      // receiveTransaction.on('replaceAccountVerified', value => {
-      //     if (value) {
-      //         logger.verbose(
-      //             'ReceiveAddress: Replace account confirmed on device',
-      //             { coinType }
-      //         );
-      //         setVerifiedReplaceAccount(true);
-      //     } else {
-      //         const cyError = new CyError(
-      //             CysyncError.RECEIVE_TXN_REJECTED,
-      //             coinName
-      //         );
-      //         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
-      //     }
-      // });
-
-      // EVENT WAS ONLY ON RUN LEGACY
-      // receiveTransaction.on('noXpub', () => {
-      //     setTimeout(() => {
-      //         setXpubMissing(true);
-      //         const cyError = new CyError(
-      //             CysyncError.RECEIVE_TXN_DEVICE_MISCONFIGURED
-      //         );
-      //         cyError.pushSubErrors(
-      //             CysyncError.RECEIVE_TXN_XPUB_MISSING,
-      //             'Xpub missing on device'
-      //         );
-      //         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinType }));
-      //     }, 3000);
-      // });
-
       swapTransaction.on(
         SWAP_TRANSACTION_EVENTS.SWAP_TRANSACTION_METADATA_SENT,
         () => {
@@ -449,7 +375,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
           const cyError = new CyError();
           if (val) {
             logger.verbose(
-              'ReceiveAddress: Received address generated on device',
+              'SwapTransaction: Received address generated on device',
               {
                 deviceAddress: val,
                 coinType: receiveFlow.coinType,
@@ -494,6 +420,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
           } else {
             cyError.setError(CysyncError.RECEIVE_TXN_DIFFERENT_ADDRESS_BY_USER);
           }
+
           if (cyError.isSet)
             setErrorObj(
               handleErrors(errorObj, cyError, flowName, {
@@ -504,7 +431,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
       );
 
       swapTransaction.on(SWAP_TRANSACTION_EVENTS.RECEIVE_ADDRESS, address => {
-        logger.info('ReceiveAddress: Address generated', {
+        logger.info('SwapTransaction: ReceiveAddress: Address generated', {
           coinType: receiveFlow.coinType,
           address
         });
@@ -529,7 +456,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
             logger.verbose('SwapTransaction: ReceiveAddress: Pin entered', {
               coinType: receiveFlow.coinType
             });
-            setReceiveFlowCardTapped(true);
+            setReceiveFlowPinEntered(true);
           } else {
             const cyError = new CyError(
               CysyncError.WALLET_LOCKED_DUE_TO_INCORRECT_PIN
@@ -548,6 +475,24 @@ export const useSwapTransaction: UseSwapTransaction = () => {
           setReceiveFlowCardTapped(true);
         }
       );
+
+      swapTransaction.on(SWAP_TRANSACTION_EVENTS.CHANGELLY_ADDRESS, address => {
+        logger.verbose('SwapTransaction: ChangellyAddress: Address generated', {
+          receiveCoinType: receiveFlow.coinType,
+          sendCoinType: sendFlow.coinType,
+          address
+        });
+        setChangellyAddress(address);
+      });
+
+      swapTransaction.on(SWAP_TRANSACTION_EVENTS.CHANGELLY_ID, id => {
+        logger.verbose('SwapTransaction: ChangellyId: Id generated', {
+          receiveCoinType: receiveFlow.coinType,
+          sendCoinType: sendFlow.coinType,
+          id
+        });
+        setChangellyTxnId(id);
+      });
 
       swapTransaction.on(
         SWAP_TRANSACTION_EVENTS.SEND_COINS_CONFIRMED,
@@ -838,6 +783,7 @@ export const useSwapTransaction: UseSwapTransaction = () => {
     receiveFlow: {
       receiveAddress,
       transactionMetadataSent,
+      receiveFlowPinEntered,
       receiveFlowCardTapped,
       receiveAddressVerified,
       receiveFlowPassphraseEntered,
@@ -855,6 +801,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
       sendFlowCardsTapped,
       signedTxn,
       completed
-    }
+    },
+    changellyAddress,
+    changellyTxnId
   };
 };

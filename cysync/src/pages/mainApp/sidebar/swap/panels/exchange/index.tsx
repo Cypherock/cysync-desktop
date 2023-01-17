@@ -5,10 +5,8 @@ import React, { useEffect, useState } from 'react';
 
 import Button from '../../../../../../designSystem/designComponents/buttons/button';
 import { useExchange } from '../../../../../../store/hooks';
-import { ReceiveFlowSteps } from '../../../../../../store/hooks/helper/FlowSteps';
 
 import SwapCompletedDialog from './dialogs/SwapCompletedDialog';
-import VerifySendAddressDialog from './dialogs/VerifySendAddressDialog';
 import VerifySwapDetailsDialog from './dialogs/VerifySwapDetailsDialog';
 import NetworkFeeDetails from './NetworkFeeDetails';
 import SwapDetailsForm from './SwapDetailsForm';
@@ -48,14 +46,13 @@ const ExchangePanel = () => {
     exchangeRate,
     fees,
     amountToReceive,
-    startReceiveFlow,
+    startSwapFlow,
     cancelSwapTransaction,
     receiveFlowStep,
     sendFlowStep,
     receiveAddress,
     isSwapCompleted,
     swapTransaction,
-    handleUserVerifiedSendAddress,
     toWallet,
     setToWallet,
     fromWallet,
@@ -66,8 +63,6 @@ const ExchangePanel = () => {
   } = useExchange();
 
   const [showSwapCompletedDialog, setSwapCompletedDialog] = useState(false);
-  const [showSendAddressVerifyDialog, setShowSendAddressVerifyDialog] =
-    useState(false);
   const [showSwapDetailsVerifyDialog, setShowSwapDetailsVerifyDialog] =
     useState(false);
 
@@ -77,15 +72,6 @@ const ExchangePanel = () => {
       setSwapCompletedDialog(true);
     }
   }, [isSwapCompleted]);
-
-  useEffect(() => {
-    if (
-      swapTransaction.payinAddress &&
-      receiveFlowStep === ReceiveFlowSteps.Completed
-    ) {
-      setShowSendAddressVerifyDialog(true);
-    }
-  }, [swapTransaction, receiveFlowStep]);
 
   const handleChangeAmountToSend = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -139,7 +125,7 @@ const ExchangePanel = () => {
               <Button
                 onClick={() => {
                   setShowSwapDetailsVerifyDialog(true);
-                  startReceiveFlow();
+                  startSwapFlow();
                 }}
               >
                 <Typography
@@ -180,17 +166,9 @@ const ExchangePanel = () => {
             setSwapCompletedDialog(false);
           }}
           toTokenName={COINS[toToken.slug]?.name}
-          transactionId={swapTransaction.id}
+          transactionId={swapTransaction.changellyTxnId}
         />
       )}
-      <VerifySendAddressDialog
-        open={showSendAddressVerifyDialog}
-        onVerify={() => {
-          handleUserVerifiedSendAddress();
-          setShowSendAddressVerifyDialog(false);
-        }}
-        url={`https://changelly.com/track/${swapTransaction.id}`}
-      />
     </Root>
   );
 };

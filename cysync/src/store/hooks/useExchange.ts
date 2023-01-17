@@ -1,5 +1,5 @@
-// import { COINS } from '@cypherock/communication';
-import axios from 'axios';
+import { COINS } from '@cypherock/communication';
+import Server from '@cypherock/server-wrapper';
 import { useEffect, useState } from 'react';
 
 import logger from '../../mainProcess/logger';
@@ -7,17 +7,13 @@ import { coinDb, customAccountDb, Wallet } from '../database';
 import {
   changeFormatOfOutputList,
   DisplayCoin,
-  useReceiveTransaction,
-  useSendTransaction,
   useSwapTransaction,
+  UseSwapTransactionValues,
   useWalletData
 } from '../hooks';
 import { useConnection, useWallets } from '../provider';
 
 import { ReceiveFlowSteps, SendFlowSteps } from './helper/FlowSteps';
-
-// TODO: get the base URL from the config
-const baseUrl = 'http://localhost:5000/swap';
 
 export interface UseExchangeValues {
   fromToken: DisplayCoin;
@@ -32,14 +28,10 @@ export interface UseExchangeValues {
   receiveAddress: string;
   // tslint:disable-next-line: no-any
   getSwapTransactions: (walletId: string) => Promise<any>;
-  startReceiveFlow: () => void;
-  generateSwapTransaction: () => Promise<void>;
-  startSendFlow: () => void;
+  startSwapFlow: () => void;
   cancelSwapTransaction: () => void;
   isSwapCompleted: boolean;
-  // tslint:disable-next-line: no-any
-  swapTransaction: any;
-  handleUserVerifiedSendAddress: () => void;
+  swapTransaction: UseSwapTransactionValues;
   toWallet: Wallet;
   setToWallet: React.Dispatch<React.SetStateAction<Wallet>>;
   fromWallet: Wallet;
@@ -58,9 +50,7 @@ export const useExchange: UseExchange = () => {
   const { getCoinsWithPrices } = useWalletData();
 
   const { deviceConnection, deviceSdkVersion, setIsInFlow } = useConnection();
-  const receiveTransaction = useReceiveTransaction();
-  const sendTransaction = useSendTransaction();
-  const fswapTransaction = useSwapTransaction();
+  const swapTransaction = useSwapTransaction();
 
   const [fromToken, setFromToken] = useState<DisplayCoin>();
   const [toToken, setToToken] = useState<DisplayCoin>();
@@ -76,12 +66,9 @@ export const useExchange: UseExchange = () => {
   const [exchangeRate, setExchangeRate] = useState('');
   const [receiveAddress, setReceiveAddress] = useState('');
   const [isSwapCompleted, setIsSwapCompleted] = useState(false);
-  const [swapTransaction, setSwapTransaction] = useState({
-    id: '',
-    payinAddress: ''
-  });
+
   const [receiveFlowStep, setReceiveFlowStep] = useState<ReceiveFlowSteps>(
-    ReceiveFlowSteps.EnterPinAndTapCard
+    ReceiveFlowSteps.EnterPin
   );
   const [sendFlowStep, setSendFlowStep] = useState<SendFlowSteps>(
     SendFlowSteps.Waiting
@@ -113,38 +100,45 @@ export const useExchange: UseExchange = () => {
     }
   }, [isWalletLoading, allWallets]);
 
+  useEffect(() => {
+    if (swapTransaction.receiveFlow.receiveFlowCardTapped) {
+      setReceiveFlowStep(ReceiveFlowSteps.TapCard);
+      setReceiveAddress(swapTransaction.receiveFlow.receiveAddress);
+    }
+  }, [swapTransaction.receiveFlow.receiveFlowPinEntered]);
+
   // Set the receive address once the card is tapped
   useEffect(() => {
-    if (receiveTransaction.cardTapped) {
+    if (swapTransaction.receiveFlow.receiveFlowCardTapped) {
       setReceiveFlowStep(ReceiveFlowSteps.VerifyReceiveAddress);
-      setReceiveAddress(receiveTransaction?.receiveAddress);
+      setReceiveAddress(swapTransaction.receiveFlow.receiveAddress);
     }
-  }, [receiveTransaction.cardTapped]);
+  }, [swapTransaction.receiveFlow.receiveFlowCardTapped]);
 
   useEffect(() => {
-    if (receiveTransaction.verified) {
+    if (swapTransaction.receiveFlow.receiveAddressVerified) {
       setReceiveFlowStep(ReceiveFlowSteps.Completed);
       setSendFlowStep(SendFlowSteps.VerifySendAddress);
     }
-  }, [receiveTransaction.verified]);
+  }, [swapTransaction.receiveFlow.receiveAddressVerified]);
 
   useEffect(() => {
-    if (sendTransaction.verified) {
+    if (swapTransaction.sendFlow.sendFlowCardsTapped) {
+      setSendFlowStep(SendFlowSteps.VerifySendAddress);
+    }
+  }, [swapTransaction.sendFlow.sendFlowCardsTapped]);
+
+  useEffect(() => {
+    if (swapTransaction.sendFlow.sendFlowVerified) {
       setSendFlowStep(SendFlowSteps.EnterPin);
     }
-  }, [sendTransaction.verified]);
+  }, [swapTransaction.sendFlow.sendFlowVerified]);
 
   useEffect(() => {
-    if (sendTransaction.pinEntered) {
+    if (swapTransaction.sendFlow.sendFlowPinEntered) {
       setSendFlowStep(SendFlowSteps.TapCard);
     }
-  }, [sendTransaction.pinEntered]);
-
-  useEffect(() => {
-    if (sendTransaction.cardsTapped) {
-      setSendFlowStep(SendFlowSteps.SignTransaction);
-    }
-  }, [sendTransaction.cardsTapped]);
+  }, [swapTransaction.sendFlow.sendFlowPinEntered]);
 
   useEffect(() => {
     if (fromToken && toToken && amountToSend) {
@@ -153,51 +147,27 @@ export const useExchange: UseExchange = () => {
   }, [fromToken, toToken, amountToSend]);
 
   useEffect(() => {
-    if (receiveTransaction.verified) {
-      generateSwapTransaction();
-    }
-  }, [receiveTransaction.verified]);
-
-  useEffect(() => {
-    if (sendTransaction.signedTxn) {
+    if (swapTransaction.sendFlow.signedTxn) {
       setIsSwapCompleted(true);
     }
-  }, [sendTransaction.signedTxn]);
+  }, [swapTransaction.sendFlow.signedTxn]);
 
   /**
    * Fetches the rate of exchanging tokens from `fromToken` to `toToken` for an
    * amount of `amountToSend`. Also updates the `fees` and `amountToReceive`.
    */
   const getCurrentExchangeRate = async () => {
-    const { data } = await axios.get(`${baseUrl}/exchangeDetails`, {
-      params: { from: fromToken.slug, to: toToken.slug, amount: amountToSend }
-    });
+    const { data } = await Server.swap
+      .getExchangeRate({
+        from: fromToken.slug,
+        to: toToken.slug,
+        amount: amountToSend
+      })
+      .request();
+
     setExchangeRate(data.message.result[0].rate);
     setFees(data.message.result[0].fee);
     setAmountToReceive(data.message.result[0].result);
-  };
-
-  /**
-   *  Creates a swap transaction between `fromToken` and `toToken` for an amount
-   *
-   * @param walletId The wallet to use for the swap
-   * @returns The transaction ID to later check the status of the swap and the
-   * payment address to send the tokens to.
-   */
-  const createSwapTransaction = async (walletId: string) => {
-    const { data } = await axios.get(`${baseUrl}/transaction`, {
-      params: {
-        walletId,
-        from: fromToken.slug,
-        to: toToken.slug,
-        amount: amountToSend,
-        address: receiveAddress
-      }
-    });
-    return {
-      id: data.message.result.id,
-      payinAddress: data.message.result.payinAddress
-    };
   };
 
   /**
@@ -207,57 +177,12 @@ export const useExchange: UseExchange = () => {
    * @returns An array of transactions.
    */
   const getSwapTransactions = async (walletId: string) => {
-    const { data } = await axios.get(`${baseUrl}/transactions`, {
-      params: { walletId }
-    });
+    const { data } = await Server.swap.getTransactions({ walletId }).request();
     return data.message.result;
   };
 
-  /**
-   * Starts the first part of the swap process i.e the receive flow.
-   */
-  const startReceiveFlow = () => {
-    fswapTransaction.handleSwapTransaction({
-      connection: deviceConnection,
-      sdkVersion: deviceSdkVersion,
-      setIsInFlow,
-      sendFlow,
-      receiveFlow
-    });
-    // receiveTransaction
-    //   .handleReceiveTransaction({
-    //     connection: deviceConnection,
-    //     sdkVersion: deviceSdkVersion,
-    //     setIsInFlow,
-    //     walletId: toWallet._id,
-    //     coinType: toToken.slug,
-    //     coinName: COINS[toToken.slug]?.name,
-    //     xpub: toToken.xpub,
-    //     zpub: toToken.zpub,
-    //     passphraseExists: toWallet.passphraseSet
-    //   })
-    //   .then(() => {
-    //     logger.info('Swap Transaction: Receive Flow Started');
-    //   })
-    //   .catch(err => {
-    //     logger.error('Swap Transaction: Receive Flow Failed', err);
-    //   });
-  };
-
-  /**
-   * Creates a swap transaction with the toWallet id as the receiving wallet.
-   */
-  const generateSwapTransaction = async () => {
-    const sendDetails = await createSwapTransaction(toWallet?._id);
-    setSwapTransaction(sendDetails);
-  };
-
-  /**
-   * Starts the second part of the swap process i.e the send flow.
-   */
-  const startSendFlow = async () => {
-    logger.info('Swap Transaction: Swap Transaction Created', swapTransaction);
-
+  const startSwapFlow = async () => {
+    logger.info('SwapTransaction: Swap Flow Started');
     let customAccount: string | undefined;
 
     if (fromToken.slug === 'near') {
@@ -270,58 +195,68 @@ export const useExchange: UseExchange = () => {
 
     const recipientData = {
       id: 0,
-      recipient: swapTransaction.payinAddress,
+      recipient: '', // will be set to changelly address by the protocol
       amount: amountToSend,
       errorRecipient: '',
       errorAmount: ''
     };
 
-    sendTransaction
-      .handleSendTransaction({
+    swapTransaction
+      .handleSwapTransaction({
         connection: deviceConnection,
         sdkVersion: deviceSdkVersion,
         setIsInFlow,
-        walletId: fromWallet?._id,
-        xpub: fromToken.xpub,
-        zpub: fromToken.zpub,
-        coinType: fromToken.slug,
-        fees: +fees,
-        pinExists: fromWallet?.passwordSet,
-        passphraseExists: fromWallet?.passphraseSet,
-        customAccount,
-        newAccountId: null,
-        outputList: changeFormatOfOutputList(
-          [recipientData],
-          fromToken.slug,
-          undefined
-        ),
-        data: {},
-        isSendAll: false
+        sendAmount: amountToSend,
+        receiveAmount: amountToReceive,
+        changellyFee: fees,
+        sendFlow: {
+          walletId: fromWallet?._id,
+          xpub: fromToken.xpub,
+          zpub: fromToken.zpub,
+          coinType: fromToken.slug,
+          fees: +fees,
+          pinExists: fromWallet?.passwordSet,
+          passphraseExists: fromWallet?.passphraseSet,
+          customAccount,
+          newAccountId: null,
+          outputList: changeFormatOfOutputList(
+            [recipientData],
+            fromToken.slug,
+            undefined
+          ),
+          data: {},
+          isSendAll: false
+        },
+        receiveFlow: {
+          walletId: toWallet._id,
+          coinType: toToken.slug,
+          coinName: COINS[toToken.slug]?.name,
+          xpub: toToken.xpub,
+          zpub: toToken.zpub,
+          passphraseExists: toWallet.passphraseSet
+        }
       })
       .then(() => {
-        logger.info('Swap Transaction: Send Flow Completed');
+        logger.info('SwapTransaction: Started');
+        setIsSwapCompleted(true);
       })
       .catch(err => {
-        logger.error('Swap Transaction: Send Flow Failed', err);
+        logger.error('SwapTransaction: Failed', err);
       });
+  };
+
+  const resetStates = () => {
+    setReceiveFlowStep(ReceiveFlowSteps.EnterPin);
+    setSendFlowStep(SendFlowSteps.Waiting);
   };
 
   /**
    * Cancel the receive and send flow.
    */
   const cancelSwapTransaction = () => {
-    receiveTransaction.cancelReceiveTxn(deviceConnection);
-    logger.info('Swap Transaction: Receive Flow Cancelled');
-
-    sendTransaction.cancelSendTxn(deviceConnection);
-    logger.info('Swap Transaction: Send Flow Cancelled');
-  };
-
-  /**
-   * Start the send flow once the user verifies the send address.
-   */
-  const handleUserVerifiedSendAddress = () => {
-    startSendFlow();
+    resetStates();
+    swapTransaction.cancelSwapTransaction(deviceConnection);
+    logger.info('SwapTransaction: Cancelled');
   };
 
   /**
@@ -350,13 +285,10 @@ export const useExchange: UseExchange = () => {
     amountToReceive,
     receiveAddress,
     getSwapTransactions,
-    startReceiveFlow,
-    generateSwapTransaction,
-    startSendFlow,
+    startSwapFlow,
     cancelSwapTransaction,
     isSwapCompleted,
     swapTransaction,
-    handleUserVerifiedSendAddress,
     toWallet,
     setToWallet,
     fromWallet,
