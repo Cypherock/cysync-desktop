@@ -553,7 +553,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
                     fullWidth
                     startIcon={<AddCircleIcon />}
                     style={{
-                      borderRadius: '0',
+                      borderRadius: '0 0 5px 5px',
                       borderTop: '1px solid #222',
                       padding: '6px'
                     }}

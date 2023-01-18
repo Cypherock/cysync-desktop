@@ -72,16 +72,28 @@ export const useCustomAccount: UseCustomAccount = () => {
         isEmpty: true,
         displayPrice: '0',
         displayValue: '0',
-        displayBalance: '0'
+        displayBalance: '0',
+        displayNearReservedForProtocol: '0',
+        displayNearNativeBalance: '0'
       };
+
       const balance = new BigNumber(account.balance || 0).dividedBy(
         coinObj.multiplier
+      );
+      const nativeBalance = new BigNumber(
+        account.metadata?.near?.nativeBalance ?? 0
+      ).dividedBy(coinObj.multiplier);
+      const reservedBalance = BigNumber.max(
+        nativeBalance.minus(balance),
+        new BigNumber(0)
       );
 
       const price = await getLatestPriceForCoin(account.coinId);
       const value = balance.multipliedBy(price);
 
       coinWithPrice.displayBalance = balance.toString();
+      coinWithPrice.displayNearNativeBalance = nativeBalance.toString();
+      coinWithPrice.displayNearReservedForProtocol = reservedBalance.toString();
 
       coinWithPrice.displayValue = value.toString();
       coinWithPrice.displayPrice = price.toString();

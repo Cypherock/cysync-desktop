@@ -3,7 +3,7 @@ import { generateNearAddressFromXpub } from '@cypherock/wallet';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { Collapse } from '@mui/material';
+import { Collapse, Tooltip } from '@mui/material';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { styled, Theme, useTheme } from '@mui/material/styles';
@@ -195,15 +195,18 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   deleteCoin,
   deleteHistory,
   accountId,
-  coinId
+  coinId,
+  reservedBalance,
+  nativeBalance
 }) => {
   const discreetMode = useDiscreetMode();
   const theme = useTheme();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [canAddAccounts, setCanAddAccounts] = useState(false);
+  const [cantAddAccounts, setCanAddAccounts] = useState(false);
   const sync = useSync();
   const snackbar = useSnackbar();
+  const minimumBalanceForAddAccount = 0.2;
 
   const { selectedWallet } = useSelectedWallet();
 
@@ -227,7 +230,8 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
 
   useEffect(() => {
     setCanAddAccounts(
-      Math.max(...accountData.map(acc => parseFloat(acc.displayBalance))) < 0.25
+      Math.max(...accountData.map(acc => parseFloat(acc.displayBalance))) <
+        minimumBalanceForAddAccount
     );
   }, [accountData]);
 
@@ -378,16 +382,30 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
             <PopOverText
-              color="textPrimary"
-              hoverText={`${discreetMode.handleSensitiveDataDisplay(
-                formatDisplayAmount(holding, decimal, true)
-              )} ${initial}`}
-              style={{ paddingRight: '8px' }}
-            >
-              {`${discreetMode.handleSensitiveDataDisplay(
+              text={`${discreetMode.handleSensitiveDataDisplay(
                 formatDisplayAmount(holding, 5, true)
               )} ${initial}`}
-            </PopOverText>
+              color="textPrimary"
+              hoverChildren={
+                <div>
+                  <div>
+                    Reserved for protocol:{' '}
+                    {discreetMode.handleSensitiveDataDisplay(
+                      formatDisplayAmount(reservedBalance, decimal, true)
+                    )}{' '}
+                    {initial}
+                  </div>
+                  <div>
+                    Native balance:{' '}
+                    {discreetMode.handleSensitiveDataDisplay(
+                      formatDisplayAmount(nativeBalance, decimal, true)
+                    )}{' '}
+                    {initial}
+                  </div>
+                </div>
+              }
+              style={{ paddingRight: '8px' }}
+            />
           </Grid>
           <Grid item xs={2} className={classes.alignStartCenter}>
             <PopOverText
@@ -485,6 +503,10 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                               value={account.displayValue}
                               isEmpty={account.isEmpty}
                               walletId={walletId}
+                              reservedBalance={
+                                account.displayNearReservedForProtocol
+                              }
+                              nativeBalance={account.displayNearNativeBalance}
                             />
                           )}
                           <CustomAccountContext.Provider
@@ -501,6 +523,10 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                                 value={account.displayValue}
                                 isEmpty={account.isEmpty}
                                 walletId={walletId}
+                                reservedBalance={
+                                  account.displayNearReservedForProtocol
+                                }
+                                nativeBalance={account.displayNearNativeBalance}
                               />
                             )}
                           </CustomAccountContext.Provider>
@@ -509,20 +535,30 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                     })}
                   {accountData.length <
                   maxAccountThreshold + lengthThreshold ? (
-                    <CoinCardBtn
-                      onClick={handleAddAccountFormOpen}
-                      fullWidth
-                      startIcon={<AddCircleIcon />}
-                      style={{
-                        borderRadius: '0',
-                        borderTop: '1px solid #222',
-                        padding: '6px'
-                      }}
-                      disabled={isLoading || canAddAccounts}
-                      disableRipple
+                    <Tooltip
+                      title={
+                        cantAddAccounts
+                          ? `At least ${minimumBalanceForAddAccount} NEAR is required to add an account`
+                          : ''
+                      }
                     >
-                      ADD ACCOUNT
-                    </CoinCardBtn>
+                      <div style={{ width: '100%' }}>
+                        <CoinCardBtn
+                          onClick={handleAddAccountFormOpen}
+                          fullWidth
+                          startIcon={<AddCircleIcon />}
+                          style={{
+                            borderRadius: '0 0 5px 5px',
+                            borderTop: '1px solid #222',
+                            padding: '6px'
+                          }}
+                          disabled={isLoading || cantAddAccounts}
+                          disableRipple
+                        >
+                          ADD ACCOUNT
+                        </CoinCardBtn>
+                      </div>
+                    </Tooltip>
                   ) : accountData.length ===
                     maxAccountThreshold + lengthThreshold ? (
                     <></>
@@ -565,20 +601,30 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                 [classes.loading]: isLoading
               })}
             >
-              <CoinCardBtn
-                onClick={handleAddAccountFormOpen}
-                fullWidth
-                startIcon={<AddCircleIcon />}
-                style={{
-                  borderRadius: '0',
-                  borderTop: '1px solid #222',
-                  padding: '6px'
-                }}
-                disabled={isLoading || canAddAccounts}
-                disableRipple
+              <Tooltip
+                title={
+                  cantAddAccounts
+                    ? `At least ${minimumBalanceForAddAccount} NEAR is required to add an account`
+                    : ''
+                }
               >
-                ADD ACCOUNT
-              </CoinCardBtn>
+                <div style={{ width: '100%' }}>
+                  <CoinCardBtn
+                    onClick={handleAddAccountFormOpen}
+                    fullWidth
+                    startIcon={<AddCircleIcon />}
+                    style={{
+                      borderRadius: '0 0 5px 5px',
+                      borderTop: '1px solid #222',
+                      padding: '6px'
+                    }}
+                    disabled={isLoading || cantAddAccounts}
+                    disableRipple
+                  >
+                    ADD ACCOUNT
+                  </CoinCardBtn>
+                </div>
+              </Tooltip>
             </Grid>
           )}
         </>
