@@ -206,7 +206,6 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   const [cantAddAccounts, setCanAddAccounts] = useState(false);
   const sync = useSync();
   const snackbar = useSnackbar();
-  const minimumBalanceForAddAccount = 0.2;
 
   const { selectedWallet } = useSelectedWallet();
 
@@ -214,8 +213,11 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
 
   const { beforeNetworkAction } = useConnection();
 
-  const { customAccountData: accountData, setCurrentAccountId } =
-    useCustomAccount();
+  const {
+    customAccountData: accountData,
+    setCurrentAccountId,
+    minimumBalanceForAddAccount
+  } = useCustomAccount();
 
   const implicitAccount = generateNearAddressFromXpub(coinDetails.xpub);
 

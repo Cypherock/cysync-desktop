@@ -18,11 +18,13 @@ export interface UseCustomAccountValues {
   customAccountList: string[];
   setCurrentAccountId: React.Dispatch<React.SetStateAction<string>>;
   sortCustomAccountData: (accounts: DisplayCustomAccount[]) => void;
+  minimumBalanceForAddAccount: number;
 }
 
 export type UseCustomAccount = () => UseCustomAccountValues;
 
 export const useCustomAccount: UseCustomAccount = () => {
+  const minimumBalanceForAddAccount = 0.25;
   const [customAccountData, setCustomAccountData] = useState<
     UseCustomAccountValues['customAccountData']
   >([]);
@@ -151,6 +153,7 @@ export const useCustomAccount: UseCustomAccount = () => {
     customAccountData,
     customAccountList,
     setCurrentAccountId,
-    sortCustomAccountData
+    sortCustomAccountData,
+    minimumBalanceForAddAccount
   };
 };
