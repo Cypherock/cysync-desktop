@@ -21,9 +21,11 @@ import migrationFunctions from './migrations';
 
 export const passEnDb = new PassEncrypt(getAnalyticsId());
 
+export const coinDb = new CoinDB(passEnDb);
+export const accountDb = new AccountDB(passEnDb);
+
 export const deviceDb = new DeviceDB();
 export const walletDb = new WalletDB();
-export const coinDb = new CoinDB(passEnDb);
 export const tokenDb = new TokenDB();
 export const customAccountDb = new CustomAccountDB();
 export const addressDb = new AddressDB();
@@ -31,7 +33,6 @@ export const receiveAddressDb = new ReceiveAddressDB();
 export const transactionDb = new TransactionDB();
 export const notificationDb = new NotificationDB();
 export const priceHistoryDb = new PriceHistoryDB();
-export const accountDb = new AccountDB();
 export const coinPriceDb = new CoinPriceDB();
 
 export * from '@cypherock/database';
