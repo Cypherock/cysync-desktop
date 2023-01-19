@@ -1,4 +1,3 @@
-import { BtcCoinMap } from '@cypherock/communication';
 import { EventEmitter } from 'events';
 
 import logger from '../../../../utils/logger';
@@ -133,12 +132,8 @@ export default class Socket extends EventEmitter {
     // make sure that connection is alive if there are subscriptions
     if (this.ws && this.isConnected()) {
       if (this.subscriptions.length > 0 || this.options.keepAlive) {
-        if (this.options.coinId !== BtcCoinMap.bitcoinTestnet) {
-          const latestPrice = await this.getCurrentFiatRates();
-          this.updateLatestPriceDatabase(latestPrice);
-        } else {
-          await this.getBlockHash(0);
-        }
+        const latestPrice = await this.getCurrentFiatRates();
+        this.updateLatestPriceDatabase(latestPrice);
       } else {
         try {
           this.ws.close();

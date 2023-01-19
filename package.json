@@ -20,7 +20,8 @@
     "pretty:local:check": "prettier --config cysync/.prettierrc --check '*.{js,json}'",
     "pretty:cysync:check": "node ./run.js cysync \"yarn pretty:check\"",
     "pretty": "yarn pretty:local && yarn pretty:cysync",
-    "pretty:check": "yarn pretty:local:check && yarn pretty:cysync:check"
+    "pretty:check": "yarn pretty:local:check && yarn pretty:cysync:check",
+    "update-notes": "node scripts/updateReleaseNotes.js && git add cysync/release_notes.json"
   },
   "dependencies": {
     "@solana/web3.js": "^1.63.1",

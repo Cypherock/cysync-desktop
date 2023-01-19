@@ -1,10 +1,9 @@
 import { COINS, NearCoinData } from '@cypherock/communication';
-import { Tooltip } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
 import ErrorDialog from '../../../../../../designSystem/designComponents/dialog/errorDialog';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
@@ -41,7 +40,9 @@ const classes = {
   divider: `${PREFIX}-divider`,
   footer: `${PREFIX}-footer`,
   deviceContinueButton: `${PREFIX}-deviceContinueButton`,
-  center: `${PREFIX}-center`
+  status: `${PREFIX}-status`,
+  center: `${PREFIX}-center`,
+  loading: `${PREFIX}-loading`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -82,11 +83,20 @@ const Root = styled('div')(({ theme }) => ({
     textTransform: 'none',
     color: '#fff'
   },
+  [`& .${classes.status}`]: {
+    marginTop: 15,
+    color: theme.palette.text.secondary
+  },
   [`& .${classes.center}`]: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%'
+  },
+  [`& .${classes.loading}`]: {
+    margin: '0 10px',
+    position: 'absolute',
+    right: '1rem'
   }
 }));
 
@@ -98,6 +108,9 @@ const Summary: React.FC<StepComponentProps> = ({
 }) => {
   const [broadcastError, setBroadcastError] = useState('');
   const [advanceError, setAdvanceError] = useState('');
+  const [statusText, setStatusText] = useState(
+    'Waiting for signature from X1 wallet'
+  );
 
   const { selectedWallet } = useSelectedWallet();
 
@@ -197,6 +210,18 @@ const Summary: React.FC<StepComponentProps> = ({
     handleSend();
   };
 
+  useEffect(() => {
+    if (!connected) setStatusText('');
+    else {
+      if (sendTransaction.signedTxn) {
+        setStatusText('Broadcasting transaction');
+        handleSend();
+      } else {
+        setStatusText('Waiting for signature from X1 wallet');
+      }
+    }
+  }, [connected, sendTransaction.signedTxn]);
+
   return (
     <Root className={classes.root}>
       {broadcastError && (
@@ -218,8 +243,7 @@ const Summary: React.FC<StepComponentProps> = ({
           variant="h5"
           style={{ marginBottom: '0.5rem' }}
         >
-          The new account is successfully verified. You may now complete account
-          creation
+          The new account is successfully verified. Confirm the details
         </Typography>
         <LabelText label="Create From" text={creatorAccount} verified />
         <LabelText
@@ -260,17 +284,14 @@ const Summary: React.FC<StepComponentProps> = ({
       </div>
       <div className={classes.divider} />
       <div className={classes.footer}>
-        <Tooltip title={connected ? '' : 'No internet connection available'}>
-          <div style={{ display: 'inline-block' }}>
-            <CustomButton
-              className={classes.deviceContinueButton}
-              onClick={handleSend}
-              disabled={!sendTransaction.signedTxn || !connected}
-            >
-              Create Account
-            </CustomButton>
-          </div>
-        </Tooltip>
+        <Typography className={classes.status}>{statusText}</Typography>
+        {sendTransaction.signedTxn?.length > 0 || !connected || (
+          <CircularProgress
+            size={22}
+            className={classes.loading}
+            color="secondary"
+          />
+        )}
       </div>
     </Root>
   );
