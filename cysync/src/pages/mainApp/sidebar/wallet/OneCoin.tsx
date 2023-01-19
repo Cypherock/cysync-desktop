@@ -1,3 +1,6 @@
+import { AccountTypeDetails } from '@cypherock/communication';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
+import { Tooltip } from '@mui/material';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
@@ -46,6 +49,9 @@ const classes = {
   divider: `${PREFIX}-divider`,
   actions: `${PREFIX}-actions`,
   alignStartCenter: `${PREFIX}-alignStartCenter`,
+  coinNameContainer: `${PREFIX}-coinNameContainer`,
+  infoIcon: `${PREFIX}-infoIcon`,
+  accountTag: `${PREFIX}-accountTag`,
   alignCenterCenter: `${PREFIX}-alignCenterCenter`,
   recieveButton: `${PREFIX}-recieveButton`,
   red: `${PREFIX}-red`,
@@ -93,6 +99,24 @@ const Root = styled(Grid)(({ theme }) => ({
     justifyContent: 'flex-start',
     alignItems: 'center'
   },
+  [`& .${classes.coinNameContainer}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start'
+  },
+  [`& .${classes.infoIcon}`]: {
+    fontSize: '12px',
+    color: '#ADABAA'
+  },
+  [`& .${classes.accountTag}`]: {
+    color: '#ADABAA',
+    border: '1px solid #ADABAA',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontSize: '8px',
+    width: 'fit-content'
+  },
   [`& .${classes.alignCenterCenter}`]: {
     display: 'flex',
     flexDirection: 'row',
@@ -134,7 +158,10 @@ const Root = styled(Grid)(({ theme }) => ({
 const OneCoin: React.FC<OneCoinProps> = ({
   coinId,
   initial,
-  name,
+  coinName,
+  accountIndex,
+  accountType,
+  derivationPath,
   holding,
   price,
   value,
@@ -169,7 +196,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
   const beforeAction = () => {
     if (isLoading) {
       snackbar.showSnackbar(
-        `Wait while we fetch the balance and latest price rates for ${name}`,
+        `Wait while we fetch the balance and latest price rates for ${coinName}`,
         'warning'
       );
       return false;
@@ -220,6 +247,14 @@ const OneCoin: React.FC<OneCoinProps> = ({
     }
   };
 
+  const getName = () => {
+    return `${coinName} ${accountIndex + 1}`;
+  };
+
+  const getAccountTag = () => {
+    return AccountTypeDetails[accountType]?.tag;
+  };
+
   return (
     <>
       <CustomizedDialog
@@ -236,7 +271,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
         >
           Are you sure
         </Typography>
-        <Typography color="textPrimary">{`You want to delete ${name} ?`}</Typography>
+        <Typography color="textPrimary">{`You want to delete ${getName()} ?`}</Typography>
       </CustomizedDialog>
       <SendTransactionContext.Provider
         value={{
@@ -270,13 +305,25 @@ const OneCoin: React.FC<OneCoinProps> = ({
           style={{ paddingLeft: '1rem' }}
         >
           <CoinIcons initial={coinId} style={{ marginRight: '10px' }} />
-          <PopOverText
-            color="textPrimary"
-            hoverText={name}
-            style={{ paddingRight: '8px' }}
-          >
-            {name}
-          </PopOverText>
+          <Typography style={{ paddingRight: '8px' }} noWrap={true}>
+            <div className={classes.coinNameContainer}>
+              <PopOverText
+                color="textPrimary"
+                hoverText={getName()}
+                style={{ marginRight: 2 }}
+              >
+                {getName()}
+              </PopOverText>
+              <Tooltip title={derivationPath}>
+                <InfoIcon className={classes.infoIcon} />
+              </Tooltip>
+            </div>
+            {getAccountTag() && (
+              <Typography className={classes.accountTag} noWrap={true}>
+                {getAccountTag()}
+              </Typography>
+            )}
+          </Typography>
         </Grid>
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText

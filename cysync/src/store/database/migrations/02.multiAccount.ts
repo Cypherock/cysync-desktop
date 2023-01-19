@@ -1,11 +1,15 @@
 import {
   AbsCoinData,
   BitcoinAccountTypes,
+  BtcCoinData,
   BtcCoinMap,
   CoinData,
   COINS,
+  EthCoinData,
   EthCoinMap,
+  NearCoinData,
   SolanaAccountTypes,
+  SolanaCoinData,
   SolanaCoinMap
 } from '@cypherock/communication';
 import {
@@ -20,6 +24,12 @@ import {
   Token,
   Transaction
 } from '@cypherock/database';
+import {
+  BitcoinWallet,
+  EthereumWallet,
+  NearWallet,
+  SolanaWallet
+} from '@cypherock/wallet';
 
 import logger from '../../../utils/logger';
 
@@ -31,6 +41,38 @@ interface MapFunctionParams extends MigrationFunctionParams {
 }
 
 type MapFunction<T> = (params: MapFunctionParams) => Promise<T[]>;
+
+const getDerivationPath = (partialAccount: Account) => {
+  const coinData = COINS[partialAccount.coinId];
+
+  const params = {
+    accountIndex: partialAccount.accountIndex,
+    accountType: partialAccount.accountType,
+    coinIndex: coinData.coinIndex
+  };
+
+  let path = '';
+
+  if (coinData instanceof BtcCoinData) {
+    path = BitcoinWallet.getDerivationPath(params);
+  } else if (coinData instanceof EthCoinData) {
+    path = EthereumWallet.getDerivationPath({
+      ...params,
+      chainId: coinData.chain
+    });
+  } else if (coinData instanceof NearCoinData) {
+    path = NearWallet.getDerivationPath({
+      ...params,
+      addressIndex: partialAccount.accountIndex
+    });
+  } else if (coinData instanceof SolanaCoinData) {
+    path = SolanaWallet.getDerivationPath(params);
+  } else {
+    throw new Error('Invalid coin type: ' + partialAccount.coinId);
+  }
+
+  return path;
+};
 
 const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
   const accountList: Account[] = [];
@@ -49,6 +91,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
       const accountX: Account = {
         name: '',
         accountId: '',
+        derivationPath: '',
         walletId: coin.walletId,
         coinId: coinObj.id,
         xpub: coin.xpub,
@@ -59,6 +102,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
       };
       accountX.accountId = AccountDB.buildAccountIndex(accountX);
       accountX.name = AccountDB.createAccountName(accountX);
+      accountX.derivationPath = getDerivationPath(accountX);
 
       accountList.push(accountX);
 
@@ -66,6 +110,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
         const accountY: Account = {
           name: '',
           accountId: '',
+          derivationPath: '',
           walletId: coin.walletId,
           coinId: coinObj.id,
           xpub: coin.zpub,
@@ -76,6 +121,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
         };
         accountY.accountId = AccountDB.buildAccountIndex(accountY);
         accountY.name = AccountDB.createAccountName(accountY);
+        accountY.derivationPath = getDerivationPath(accountY);
 
         accountList.push(accountY);
       }
@@ -88,6 +134,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
       const account: Account = {
         name: '',
         accountId: '',
+        derivationPath: '',
         walletId: coin.walletId,
         coinId: coinObj.id,
         xpub: coin.xpub,
@@ -99,6 +146,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
 
       account.accountId = AccountDB.buildAccountIndex(account);
       account.name = AccountDB.createAccountName(account);
+      account.derivationPath = getDerivationPath(account);
 
       accountList.push(account);
     }
