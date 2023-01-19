@@ -1,5 +1,7 @@
 import {
   AbsCoinData,
+  AccountTypeDetails,
+  CoinData,
   CoinGroup,
   COINS,
   ETHCOINS,
@@ -13,6 +15,8 @@ import {
   solana as solanaServer
 } from '@cypherock/server-wrapper';
 import CopyIcon from '@mui/icons-material/FileCopyOutlined';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
+import { Tooltip } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
@@ -29,6 +33,8 @@ import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import CoinIcons from '../../../../designSystem/genericComponents/coinIcons';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
 import {
+  Account,
+  accountDb,
   convertToDisplayValue,
   getLatestPriceForCoin,
   SentReceive
@@ -54,7 +60,10 @@ const classes = {
   blue: `${PREFIX}-blue`,
   red: `${PREFIX}-red`,
   orange: `${PREFIX}-orange`,
-  inputOutputContainer: `${PREFIX}-inputOutputContainer`
+  inputOutputContainer: `${PREFIX}-inputOutputContainer`,
+  coinNameContainer: `${PREFIX}-coinNameContainer`,
+  infoIcon: `${PREFIX}-infoIcon`,
+  accountTag: `${PREFIX}-accountTag`
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -82,6 +91,24 @@ const Root = styled('div')(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  [`& .${classes.coinNameContainer}`]: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start'
+  },
+  [`& .${classes.infoIcon}`]: {
+    fontSize: '12px',
+    color: '#ADABAA'
+  },
+  [`& .${classes.accountTag}`]: {
+    color: '#ADABAA',
+    border: '1px solid #ADABAA',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontSize: '8px',
+    width: 'fit-content'
   },
   [`& .${classes.button}`]: {
     background: '#71624C',
@@ -128,6 +155,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
   const [coinPrice, setCoinPrice] = useState(0);
   const [ethCoinPrice, setEthCoinPrice] = useState(0);
+  const [account, setAccount] = useState<Account | undefined>();
 
   useEffect(() => {
     if (txn && txn.coinId) {
@@ -144,8 +172,17 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
           })
           .catch(logger.error);
       }
+
+      accountDb
+        .getOne({ accountId: txn.accountId })
+        .then(acc => setAccount(acc))
+        .catch(error => {
+          logger.error('Cannot find account for accountId: ' + txn.accountId);
+          logger.error(error);
+        });
     } else {
       setCoinPrice(0);
+      setAccount(undefined);
     }
   }, [txn]);
 
@@ -271,12 +308,14 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
 
   //used for displaying eth or erc20Tokens addresses in lower case
   let coinData: AbsCoinData;
+  let parentCoinData: CoinData;
+
   if (txn.parentCoinId && txn.parentCoinId !== txn.coinId) {
-    const parent = COINS[txn.parentCoinId];
-    if (!parent) {
+    parentCoinData = COINS[txn.parentCoinId];
+    if (!parentCoinData) {
       logger.warn(`Cannot find parentCoinId parent: ${txn.parentCoinId}`);
     }
-    coinData = parent.tokenList[txn.coinId];
+    coinData = parentCoinData.tokenList[txn.coinId];
   } else coinData = COINS[txn.coinId];
   if (!coinData) {
     logger.warn(`Cannot find coinId: ${txn.coinId}`);
@@ -284,6 +323,22 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
   const isEth =
     coinData.group === CoinGroup.Ethereum ||
     coinData.group === CoinGroup.ERC20Tokens;
+
+  const getName = () => {
+    if (account) {
+      return `${(parentCoinData || coinData).name} ${account.accountIndex + 1}`;
+    }
+    return '';
+  };
+
+  const getAccountTag = () => {
+    if (account) {
+      return AccountTypeDetails[account.accountType]?.tag;
+    }
+
+    return '';
+  };
+
   return (
     <Root>
       <div className={classes.dateTimeContainer}>
@@ -297,6 +352,34 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
       <div className={classes.dataContainer}>
         <Typography color="textSecondary">Wallet</Typography>
         <Typography>{txn.walletName}</Typography>
+      </div>
+      <div className={classes.dataContainer}>
+        <Typography color="textSecondary">Account</Typography>
+        <div className={classes.flex}>
+          <CoinIcons
+            initial={txn.parentCoinId || txn.coinId}
+            style={{ marginRight: '10px' }}
+          />
+          <Typography style={{ paddingRight: '8px' }} noWrap={true}>
+            <div className={classes.coinNameContainer}>
+              <PopOverText
+                color="textPrimary"
+                hoverText={getName()}
+                style={{ marginRight: 2 }}
+              >
+                {getName()}
+              </PopOverText>
+              <Tooltip title={account?.derivationPath}>
+                <InfoIcon className={classes.infoIcon} />
+              </Tooltip>
+            </div>
+            {getAccountTag() && (
+              <Typography className={classes.accountTag} noWrap={true}>
+                {getAccountTag()}
+              </Typography>
+            )}
+          </Typography>
+        </div>
       </div>
       <div className={classes.dataContainer}>
         <Typography color="textSecondary">Action</Typography>
