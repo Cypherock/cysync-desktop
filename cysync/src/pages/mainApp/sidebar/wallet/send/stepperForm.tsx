@@ -402,7 +402,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   useEffect(() => {
     sendTransaction.setIsEstimatingFees(true);
     debouncedCaclFee();
-    if (!transactionFee || (parseInt(transactionFee, 10) || 0) <= 0) {
+    if (!transactionFee || (parseFloat(transactionFee) || 0) <= 0) {
       setButtonDisabled(true);
     } else {
       setButtonDisabled(false);
