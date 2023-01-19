@@ -196,7 +196,7 @@ const OneCoin: React.FC<OneCoinProps> = ({
   const beforeAction = () => {
     if (isLoading) {
       snackbar.showSnackbar(
-        `Wait while we fetch the balance and latest price rates for ${coinId}`,
+        `Wait while we fetch the balance and latest price rates for ${coinName}`,
         'warning'
       );
       return false;
