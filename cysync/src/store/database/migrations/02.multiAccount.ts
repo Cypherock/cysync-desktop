@@ -44,9 +44,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
     }
 
     if (
-      ([BtcCoinMap.bitcoin, BtcCoinMap.bitcoinTestnet] as string[]).includes(
-        coinObj.id
-      )
+      ([BtcCoinMap.bitcoin, 'bitcoin-testnet'] as string[]).includes(coinObj.id)
     ) {
       const accountX: Account = {
         name: '',

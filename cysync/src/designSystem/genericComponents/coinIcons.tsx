@@ -20,7 +20,6 @@ import generic from '../../../node_modules/cryptocurrency-icons/svg/color/generi
 import ltc from '../../../node_modules/cryptocurrency-icons/svg/color/ltc.svg';
 import matic from '../../../node_modules/cryptocurrency-icons/svg/color/matic.svg';
 import harmony from '../../../node_modules/cryptocurrency-icons/svg/color/one.svg';
-import btct from '../../assets/icons/btct.svg';
 import ftm from '../../assets/icons/fantom.svg';
 import near from '../../assets/icons/near.svg';
 import solana from '../../assets/icons/solana.png';
@@ -142,9 +141,6 @@ const CoinIcons: React.FC<CoinIconsProps> = ({
       switch (coinInitial.toLowerCase()) {
         case BtcCoinMap.bitcoin:
           src = btc;
-          break;
-        case BtcCoinMap.bitcoinTestnet:
-          src = btct;
           break;
         case EthCoinMap.ethereum:
           src = eth;
