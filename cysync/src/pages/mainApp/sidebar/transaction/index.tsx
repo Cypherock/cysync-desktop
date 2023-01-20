@@ -141,7 +141,7 @@ const Transaction = () => {
     {
       const index = newCoinList.findIndex(elem => elem.id === currentCoin);
       if (index !== -1) {
-        setCoinIndex(index + 1);
+        if (coinIndex !== index + 1) setCoinIndex(index + 1);
       } else {
         setCoinIndex(0);
         setCurrentCoin(undefined);
