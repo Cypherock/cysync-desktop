@@ -1,6 +1,7 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Typography } from '@mui/material';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
+import { Tooltip, Typography } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 import Menu, { MenuProps } from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -118,7 +119,9 @@ const DropMenu = (props: DropMenuProps) => {
         disabled={disabled}
       >
         {startAdornment || null}
-        {options[index]}
+        {typeof options[index] === 'string'
+          ? options[index]
+          : (options[index] as any)?.name}
         {anchorEl === null ? (
           <ExpandMoreIcon
             style={{
@@ -167,7 +170,7 @@ const DropMenu = (props: DropMenuProps) => {
               disabled={disabled}
             >
               {tag || tooltip ? (
-                <Typography>
+                <div>
                   <div
                     style={{
                       display: 'flex',
@@ -176,7 +179,18 @@ const DropMenu = (props: DropMenuProps) => {
                       alignItems: 'flex-start'
                     }}
                   >
-                    {name}
+                    <Typography>{name}</Typography>
+                    {tooltip && (
+                      <Tooltip title={tooltip}>
+                        <InfoIcon
+                          style={{
+                            marginLeft: '5px',
+                            fontSize: '12px',
+                            color: '#ADABAA'
+                          }}
+                        />
+                      </Tooltip>
+                    )}
                   </div>
                   {tag && (
                     <Typography
@@ -192,7 +206,7 @@ const DropMenu = (props: DropMenuProps) => {
                       {tag}
                     </Typography>
                   )}
-                </Typography>
+                </div>
               ) : (
                 name
               )}

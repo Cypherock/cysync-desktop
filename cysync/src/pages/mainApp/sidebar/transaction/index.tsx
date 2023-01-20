@@ -112,6 +112,7 @@ const Transaction = () => {
     accountIndex,
     currentCoin,
     currentAccount,
+    currentWallet,
     setCurrentAccount,
     setAccountIndex
   } = useTransactionData();
@@ -136,14 +137,15 @@ const Transaction = () => {
     const newCoinList = allWallets[walletIndex - 1]
       ? allWallets[walletIndex - 1].coins
       : allCoins;
-    if (
-      !(
-        newCoinList.length >= coinIndex &&
-        newCoinList[coinIndex - 1]?.id === currentCoin
-      )
-    ) {
-      setCoinIndex(0);
-      setCurrentCoin(undefined);
+
+    {
+      const index = newCoinList.findIndex(elem => elem.id === currentCoin);
+      if (index !== -1) {
+        setCoinIndex(index + 1);
+      } else {
+        setCoinIndex(0);
+        setCurrentCoin(undefined);
+      }
     }
     setDisplayCoins(newCoinList);
 
@@ -152,14 +154,17 @@ const Transaction = () => {
         ? allWallets[walletIndex - 1].accounts
         : allAccounts
     ).filter(elem => (currentCoin ? elem.coinId === currentCoin : true));
-    if (
-      !(
-        newAccountList.length >= accountIndex &&
-        newAccountList[accountIndex - 1]?.accountId === currentAccount
-      )
-    ) {
-      setAccountIndex(0);
-      setCurrentAccount(undefined);
+
+    {
+      const index = newAccountList.findIndex(
+        elem => elem.accountId === currentAccount
+      );
+      if (index !== -1) {
+        setAccountIndex(index + 1);
+      } else {
+        setAccountIndex(0);
+        setCurrentAccount(undefined);
+      }
     }
     setDisplayAccounts(newAccountList);
   }, [allCoins, allAccounts, allWallets, walletIndex, coinIndex]);
@@ -168,6 +173,15 @@ const Transaction = () => {
     const query = new URLSearchParams(location.search);
     const coinId = query.get('coinId');
     const walletId = query.get('wallet');
+    const accountId = query.get('accountId');
+
+    if (accountId) {
+      const index = allAccounts.findIndex(elem => elem.accountId === accountId);
+      if (index !== -1) {
+        setCurrentAccount(accountId);
+        setAccountIndex(index + 1);
+      }
+    }
 
     if (coinId) {
       const index = allCoins.findIndex(elem => elem.id === coinId);
@@ -237,6 +251,8 @@ const Transaction = () => {
     else setCurrentWallet(allWallets[selectedIndex - 1]._id);
     setCoinIndex(0);
     setCurrentCoin(undefined);
+    setAccountIndex(0);
+    setCurrentAccount(undefined);
   };
 
   const handleCoinChange = (selectedIndex: number) => {
@@ -527,12 +543,13 @@ const Transaction = () => {
                   const name = COINS[account.coinId]?.name || '';
                   return {
                     name: `${name} ${account.accountIndex + 1}`,
-                    tooltip: 'm/12/123/123/123',
+                    tooltip: account.derivationPath,
                     tag: AccountTypeDetails[account.accountType]?.tag || '',
                     value: account.accountId
                   };
                 })
               ]}
+              disabled={!(currentWallet || currentCoin)}
               handleMenuItemSelectionChange={handleAccountChange}
               index={accountIndex}
               bg={false}
