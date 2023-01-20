@@ -153,7 +153,9 @@ const Transaction = () => {
       allWallets[walletIndex - 1]
         ? allWallets[walletIndex - 1].accounts
         : allAccounts
-    ).filter(elem => (currentCoin ? elem.coinId === currentCoin : true));
+    ).filter(elem => {
+      return currentCoin ? elem.coinId === currentCoin?.split(':')[0] : true;
+    });
 
     {
       const index = newAccountList.findIndex(
