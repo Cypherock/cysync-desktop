@@ -134,6 +134,7 @@ interface OneNearAccountProps {
   isEmpty: boolean;
   decimal: number;
   walletId: string;
+  accountId: string;
 }
 
 const OneNearAccount: React.FC<OneNearAccountProps> = ({
@@ -145,7 +146,8 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
   value,
   decimal,
   isEmpty,
-  walletId
+  walletId,
+  accountId
 }) => {
   const discreetMode = useDiscreetMode();
   const theme = useTheme();
@@ -174,7 +176,7 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
   const onClick = (e: React.MouseEvent) => {
     prevent(e);
     navigate(
-      `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}`
+      `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}&accountId=${accountId}`
     );
   };
 
