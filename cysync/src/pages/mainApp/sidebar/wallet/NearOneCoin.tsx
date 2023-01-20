@@ -316,7 +316,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
   const onClick = () => {
     if (beforeAction()) {
       navigate(
-        `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}`
+        `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}&accountId=${accountId}`
       );
     }
   };
@@ -522,6 +522,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                           {account.name === implicitAccount && (
                             <OneNearAccount
                               coinId={coinDetails.coinId}
+                              accountId={accountId}
                               initial={coinObj.abbr.toUpperCase()}
                               name={account.name}
                               holding={account.displayBalance}
@@ -538,6 +539,7 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
                             {account.name === implicitAccount || (
                               <OneNearAccount
                                 coinId={coinObj.id}
+                                accountId={accountId}
                                 initial={coinObj.abbr.toUpperCase()}
                                 name={account.name}
                                 holding={account.displayBalance}

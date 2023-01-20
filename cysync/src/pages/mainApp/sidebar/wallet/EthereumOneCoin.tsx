@@ -322,7 +322,7 @@ const EthereumOneCoin: React.FC<EthereumOneCoinProps> = ({
   const onClick = () => {
     if (beforeAction()) {
       navigate(
-        `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}`
+        `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}&accountId=${accountId}`
       );
     }
   };

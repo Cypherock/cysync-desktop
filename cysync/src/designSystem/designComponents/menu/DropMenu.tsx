@@ -1,5 +1,7 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
+import { Tooltip, Typography } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 import Menu, { MenuProps } from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -70,7 +72,21 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-const DropMenu = (props: any) => {
+export interface DropMenuProps {
+  startAdornment?: React.ReactNode;
+  stylex?: any;
+  index: number;
+  bg?: boolean;
+  disabled?: boolean;
+  handleMenuItemSelectionChange?: (index: number, type?: string) => void;
+  type?: string;
+  options: Array<
+    string | { name: string; tag?: string; value: string; tooltip?: string }
+  >;
+  style?: any;
+}
+
+const DropMenu = (props: DropMenuProps) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -103,7 +119,9 @@ const DropMenu = (props: any) => {
         disabled={disabled}
       >
         {startAdornment || null}
-        {options[index]}
+        {typeof options[index] === 'string'
+          ? options[index]
+          : (options[index] as any)?.name}
         {anchorEl === null ? (
           <ExpandMoreIcon
             style={{
@@ -127,17 +145,74 @@ const DropMenu = (props: any) => {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        {options.map((option: string, i: number) => (
-          <StyledMenuItem
-            key={option}
-            selected={i === index}
-            color="secondary"
-            onClick={event => handleMenuItemClick(event, i)}
-            disabled={disabled}
-          >
-            {option.toUpperCase()}
-          </StyledMenuItem>
-        ))}
+        {options.map((option, i: number) => {
+          let name = '';
+          let value = '';
+          let tag = '';
+          let tooltip = '';
+
+          if (typeof option === 'string') {
+            name = option.toUpperCase();
+            value = option;
+          } else {
+            name = option.name;
+            value = option.value;
+            tag = option.tag;
+            tooltip = option.tooltip;
+          }
+
+          return (
+            <StyledMenuItem
+              key={value}
+              selected={i === index}
+              color="secondary"
+              onClick={event => handleMenuItemClick(event, i)}
+              disabled={disabled}
+            >
+              {tag || tooltip ? (
+                <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      justifyContent: 'flex-start',
+                      alignItems: 'flex-start'
+                    }}
+                  >
+                    <Typography>{name}</Typography>
+                    {tooltip && (
+                      <Tooltip title={tooltip}>
+                        <InfoIcon
+                          style={{
+                            marginLeft: '5px',
+                            fontSize: '12px',
+                            color: '#ADABAA'
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                  </div>
+                  {tag && (
+                    <Typography
+                      style={{
+                        color: '#ADABAA',
+                        border: '1px solid #ADABAA',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '8px',
+                        width: 'fit-content'
+                      }}
+                    >
+                      {tag}
+                    </Typography>
+                  )}
+                </div>
+              ) : (
+                name
+              )}
+            </StyledMenuItem>
+          );
+        })}
       </StyledMenu>
     </Root>
   );
