@@ -3,7 +3,14 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { Account, accountDb, tokenDb, Wallet, walletDb } from '../database';
+import {
+  Account,
+  accountDb,
+  Token,
+  tokenDb,
+  Wallet,
+  walletDb
+} from '../database';
 
 export interface ModifiedWallet extends Wallet {
   accounts: Account[];
@@ -41,11 +48,13 @@ export const WalletsProvider: React.FC = ({ children }) => {
 
   const getAll = async () => {
     let accounts: Account[] = [];
+    let erc20Res: Token[];
     try {
       setIsLoading(true);
       logger.verbose('Getting all wallets and xpub data');
       const walletRes = await walletDb.getAll();
       accounts = await accountDb.getAll();
+      erc20Res ??= await tokenDb.getAll();
 
       if (walletRes.length !== 0)
         setAllWallets(
@@ -64,6 +73,14 @@ export const WalletsProvider: React.FC = ({ children }) => {
               if (!coinTypeSet.has(account.coinId)) {
                 coinList.push(coin);
                 coinTypeSet.add(account.coinId);
+              }
+            }
+            for (const erc of erc20Res) {
+              const parentData = COINS[erc.parentCoinId];
+              const coin = parentData.tokenList[erc.coinId];
+              if (!coinTypeSet.has(coin.id)) {
+                coinList.push(coin);
+                coinTypeSet.add(coin.id);
               }
             }
 
@@ -92,7 +109,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
     }
 
     try {
-      const erc20Res = await tokenDb.getAll();
+      erc20Res ??= await tokenDb.getAll();
       const coinTypeSet = new Set<string>();
       const accountList: Account[] = [];
       const coinList: AbsCoinData[] = [];

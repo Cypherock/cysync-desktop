@@ -1,7 +1,8 @@
 import {
   AbsCoinData,
   AccountTypeDetails,
-  COINS
+  COINS,
+  TOKENS
 } from '@cypherock/communication';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -153,7 +154,12 @@ const Transaction = () => {
       allWallets[walletIndex - 1]
         ? allWallets[walletIndex - 1].accounts
         : allAccounts
-    ).filter(elem => (currentCoin ? elem.coinId === currentCoin : true));
+    ).filter(elem =>
+      currentCoin
+        ? elem.coinId === currentCoin ||
+          elem.coinId === TOKENS[currentCoin]?.parentId
+        : true
+    );
 
     {
       const index = newAccountList.findIndex(
