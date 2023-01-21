@@ -8,6 +8,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import { Tooltip } from '@mui/material';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
@@ -542,24 +543,27 @@ const Transaction = () => {
             />
           )}
           {displayAccounts.length !== 0 && (
-            <DropMenu
-              options={[
-                'All Accounts',
-                ...displayAccounts.map(account => {
-                  const name = COINS[account.coinId]?.name || '';
-                  return {
-                    name: `${name} ${account.accountIndex + 1}`,
-                    tooltip: account.derivationPath,
-                    tag: AccountTypeDetails[account.accountType]?.tag || '',
-                    value: account.accountId
-                  };
-                })
-              ]}
-              disabled={!(currentWallet || currentCoin)}
-              handleMenuItemSelectionChange={handleAccountChange}
-              index={accountIndex}
-              bg={false}
-            />
+            <Tooltip title={currentWallet ? '' : 'No wallet selected'}>
+              <div>
+                <DropMenu
+                  options={[
+                    'All Accounts',
+                    ...displayAccounts.map(account => {
+                      const name = COINS[account.coinId]?.name || '';
+                      return {
+                        name: `${name} ${account.accountIndex + 1}`,
+                        tag: AccountTypeDetails[account.accountType]?.tag || '',
+                        value: account.accountId
+                      };
+                    })
+                  ]}
+                  disabled={!currentWallet}
+                  handleMenuItemSelectionChange={handleAccountChange}
+                  index={accountIndex}
+                  bg={false}
+                />
+              </div>
+            </Tooltip>
           )}
         </Grid>
         <Grid
