@@ -14,10 +14,10 @@ const getTokens = (ethCoinId: string) => {
   }
 
   const initialTokens: IInitialToken[] = [];
-  for (const [key, value] of Object.entries(coin.tokenList)) {
+  for (const [_, value] of Object.entries(coin.tokenList)) {
     if (value) {
       const tempCoin: IInitialToken = {
-        abbr: key,
+        abbr: value.abbr,
         name: value.name,
         coinId: value.id
       };
