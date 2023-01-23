@@ -3,20 +3,22 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import logger from '../../utils/logger';
-import { accountDb, tokenDb, Wallet, walletDb } from '../database';
+import {
+  Account,
+  accountDb,
+  Token,
+  tokenDb,
+  Wallet,
+  walletDb
+} from '../database';
 
-export interface Account {
-  name: string;
-  abbr: string;
-  coinName: string;
-  coinId: string;
-  accountType?: string;
-  accountIndex: number;
-  accountId: string;
+export interface ModifiedWallet extends Wallet {
+  accounts: Account[];
+  coins: AbsCoinData[];
 }
 
 export interface WalletsContextInterface {
-  allWallets: Wallet[];
+  allWallets: ModifiedWallet[];
   allAccounts: Account[];
   allCoins: AbsCoinData[];
   getAll: () => void;
@@ -28,14 +30,16 @@ export const WalletsContext: React.Context<WalletsContextInterface> =
 
 export const WalletsProvider: React.FC = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [allWallets, setAllWallets] = useState<Wallet[]>([
+  const [allWallets, setAllWallets] = useState<ModifiedWallet[]>([
     {
       // UI breaks if the list is empty, hence dummy empty wallet. WalletID is null specially for Portfolio, to differenciate between initial state (walletId is 'null') and no wallets (walletId is '')
       _id: 'null',
       device: '',
       name: '',
       passwordSet: true,
-      passphraseSet: false
+      passphraseSet: false,
+      accounts: [],
+      coins: []
     }
   ]);
 
@@ -43,12 +47,50 @@ export const WalletsProvider: React.FC = ({ children }) => {
   const [allCoins, setAllCoins] = useState<AbsCoinData[]>([]);
 
   const getAll = async () => {
+    let accounts: Account[] = [];
+    let erc20Res: Token[];
     try {
       setIsLoading(true);
       logger.verbose('Getting all wallets and xpub data');
       const walletRes = await walletDb.getAll();
+      accounts = await accountDb.getAll();
+      erc20Res ??= await tokenDb.getAll();
 
-      if (walletRes.length !== 0) setAllWallets(walletRes);
+      if (walletRes.length !== 0)
+        setAllWallets(
+          walletRes.map(wallet => {
+            const newAccountList = accounts.filter(
+              acc => acc.walletId === wallet._id
+            );
+
+            const coinTypeSet = new Set<string>();
+            const coinList: AbsCoinData[] = [];
+
+            for (const account of newAccountList) {
+              const coin = COINS[account.coinId];
+              if (!coin) continue;
+
+              if (!coinTypeSet.has(account.coinId)) {
+                coinList.push(coin);
+                coinTypeSet.add(account.coinId);
+              }
+            }
+            for (const erc of erc20Res) {
+              const parentData = COINS[erc.parentCoinId];
+              const coin = parentData.tokenList[erc.coinId];
+              if (!coinTypeSet.has(coin.id)) {
+                coinList.push(coin);
+                coinTypeSet.add(coin.id);
+              }
+            }
+
+            return {
+              ...wallet,
+              accounts: accounts.filter(acc => acc.walletId === wallet._id),
+              coins: coinList
+            };
+          })
+        );
       else {
         setAllWallets([
           {
@@ -56,7 +98,9 @@ export const WalletsProvider: React.FC = ({ children }) => {
             device: '',
             name: '',
             passwordSet: true,
-            passphraseSet: false
+            passphraseSet: false,
+            accounts: [],
+            coins: []
           }
         ]);
       }
@@ -65,8 +109,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
     }
 
     try {
-      const accounts = await accountDb.getAll();
-      const erc20Res = await tokenDb.getAll();
+      erc20Res ??= await tokenDb.getAll();
       const coinTypeSet = new Set<string>();
       const accountList: Account[] = [];
       const coinList: AbsCoinData[] = [];
@@ -74,15 +117,7 @@ export const WalletsProvider: React.FC = ({ children }) => {
       for (const account of accounts) {
         const coin = COINS[account.coinId];
 
-        accountList.push({
-          name: coin.name,
-          abbr: coin.abbr,
-          coinId: account.coinId,
-          accountId: account.accountId,
-          accountIndex: account.accountIndex,
-          accountType: account.accountType,
-          coinName: `${name} ${account.accountType}:${account.accountIndex}`
-        });
+        accountList.push(account);
 
         if (!coinTypeSet.has(account.coinId)) {
           coinList.push(coin);

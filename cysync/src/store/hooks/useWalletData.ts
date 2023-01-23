@@ -125,7 +125,7 @@ export const useWalletData: UseWalletData = () => {
       case 2:
         setCoinData(
           [...coins].sort((a, b) => {
-            return a.coinId.localeCompare(b.coinId);
+            return a.name.localeCompare(b.name);
           })
         );
         break;
@@ -133,7 +133,7 @@ export const useWalletData: UseWalletData = () => {
       case 3:
         setCoinData(
           [...coins].sort((a, b) => {
-            return b.coinId.localeCompare(a.coinId);
+            return b.name.localeCompare(a.name);
           })
         );
         break;
