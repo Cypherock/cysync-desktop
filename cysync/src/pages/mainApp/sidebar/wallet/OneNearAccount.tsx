@@ -137,6 +137,7 @@ interface OneNearAccountProps {
   nativeBalance: string;
   reservedBalance: string;
   accountId: string;
+  accountId: string;
 }
 
 const OneNearAccount: React.FC<OneNearAccountProps> = ({
@@ -151,6 +152,7 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
   walletId,
   reservedBalance,
   nativeBalance,
+  accountId,
   accountId
 }) => {
   const discreetMode = useDiscreetMode();
