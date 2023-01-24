@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js';
 
 import logger from '../../utils/logger';
 import {
+  accountDb,
   getAllTxns,
   getLatestPriceForCoins,
   transactionDb,
@@ -50,6 +51,7 @@ export const useHistory: UseHistory = () => {
       order: 'desc'
     });
     const allWallets = await walletDb.getAll();
+    const allAccounts = await accountDb.getAll();
     const latestTransactionsWithPrice: DisplayTransaction[] = [];
 
     const allUniqueCoins = [
@@ -152,11 +154,27 @@ export const useHistory: UseHistory = () => {
       newTxn.isErc20 = isToken;
 
       const wallet = allWallets.find(ob => ob._id === newTxn.walletId);
+      let doAdd = true;
+
       if (!wallet) {
         logger.warn(`Cannot find wallet with name: ${newTxn.walletId}`);
+        doAdd = false;
       } else {
         newTxn.walletName = wallet.name;
         newTxn.coinName = coin.name;
+      }
+
+      const account = allAccounts.find(ob => ob.accountId === newTxn.accountId);
+      if (!account && doAdd) {
+        logger.warn(`Cannot find account with id: ${newTxn.accountId}`);
+        doAdd = false;
+      } else {
+        newTxn.accountName = account.name;
+        newTxn.accountType = account.accountType;
+        newTxn.accountIndex = account.accountIndex;
+      }
+
+      if (doAdd) {
         latestTransactionsWithPrice.push(newTxn);
       }
     }

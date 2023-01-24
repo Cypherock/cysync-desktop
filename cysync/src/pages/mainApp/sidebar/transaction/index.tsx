@@ -221,17 +221,23 @@ const Transaction = () => {
   };
 
   const handleSearch = () => {
-    const results = allTxn.filter(txn => {
-      if (txn.coin && txn.coin.toLowerCase().indexOf(search) !== -1) {
-        return true;
-      }
-
-      if (txn.coinName && txn.coinName.toLowerCase().indexOf(search) !== -1) {
-        return true;
-      }
-
-      if (txn.hash && txn.hash.toLowerCase().indexOf(search) !== -1) {
-        return true;
+    const results = allTxn.filter(_txn => {
+      const searchParams: string[] = [
+        'hash',
+        'coinName',
+        'walletName',
+        'accountName',
+        'accountType'
+      ];
+      for (const searhParam of searchParams) {
+        const txn = _txn as any;
+        if (
+          txn[searhParam] &&
+          typeof txn[searhParam] === 'string' &&
+          txn[searhParam].toLowerCase().indexOf(search) !== -1
+        ) {
+          return true;
+        }
       }
 
       return false;
@@ -573,7 +579,7 @@ const Transaction = () => {
         >
           <Input
             style={{ width: '70%' }}
-            placeholder="Search Your Coins"
+            placeholder="Search Your Transactions"
             value={search}
             onChange={handleSearchChange}
             InputProps={{

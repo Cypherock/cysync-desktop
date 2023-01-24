@@ -65,6 +65,9 @@ export interface DisplayTransaction
   outputs?: DisplayInputOutput[];
   type?: string;
   description?: string;
+  accountName?: string;
+  accountType?: string;
+  accountIndex?: number;
 }
 
 export const DisplayTransactionPropTypes = {
