@@ -31,7 +31,7 @@ class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
         subject: 'Crash Report from error boundary',
         uuid: await getUuid(),
         description,
-        email: localStorage.getItem('email') || ''
+        email: ''
       });
     } catch (error) {
       logger.error('Error in sending crash report');
@@ -55,7 +55,11 @@ class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
       console.log({ error, errorInfo });
     }
     logger.error('Error caught in error boundary', { error, errorInfo });
-    ErrorBoundary.reportCrashToServer(JSON.stringify({ error, errorInfo }));
+    logger.error(error);
+    logger.error(errorInfo);
+    ErrorBoundary.reportCrashToServer(
+      JSON.stringify({ message: error?.toString(), error, errorInfo })
+    );
   }
 
   render() {
