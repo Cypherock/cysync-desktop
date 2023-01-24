@@ -434,22 +434,31 @@ const NearOneCoin: React.FC<NearOneCoinProps> = ({
               )} ${initial}`}
               color="textPrimary"
               hoverChildren={
-                <div>
+                reservedBalance && nativeBalance ? (
                   <div>
-                    Reserved for protocol:{' '}
+                    <div>
+                      Reserved for protocol:{' '}
+                      {discreetMode.handleSensitiveDataDisplay(
+                        formatDisplayAmount(reservedBalance, decimal, true)
+                      )}{' '}
+                      {initial}
+                    </div>
+                    <div>
+                      Native balance:{' '}
+                      {discreetMode.handleSensitiveDataDisplay(
+                        formatDisplayAmount(nativeBalance, decimal, true)
+                      )}{' '}
+                      {initial}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
                     {discreetMode.handleSensitiveDataDisplay(
-                      formatDisplayAmount(reservedBalance, decimal, true)
+                      formatDisplayAmount(holding, decimal, true)
                     )}{' '}
                     {initial}
                   </div>
-                  <div>
-                    Native balance:{' '}
-                    {discreetMode.handleSensitiveDataDisplay(
-                      formatDisplayAmount(nativeBalance, decimal, true)
-                    )}{' '}
-                    {initial}
-                  </div>
-                </div>
+                )
               }
               style={{ paddingRight: '8px' }}
             />

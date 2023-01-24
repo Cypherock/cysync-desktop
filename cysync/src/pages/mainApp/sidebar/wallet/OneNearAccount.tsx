@@ -245,22 +245,31 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
             color="textPrimary"
             style={{ fontSize: '0.9rem', paddingRight: '8px' }}
             hoverChildren={
-              <div>
+              reservedBalance && nativeBalance ? (
                 <div>
-                  Reserved for protocol:{' '}
+                  <div>
+                    Reserved for protocol:{' '}
+                    {discreetMode.handleSensitiveDataDisplay(
+                      formatDisplayAmount(reservedBalance, decimal, true)
+                    )}{' '}
+                    {initial}
+                  </div>
+                  <div>
+                    Native balance:{' '}
+                    {discreetMode.handleSensitiveDataDisplay(
+                      formatDisplayAmount(nativeBalance, decimal, true)
+                    )}{' '}
+                    {initial}
+                  </div>
+                </div>
+              ) : (
+                <div>
                   {discreetMode.handleSensitiveDataDisplay(
-                    formatDisplayAmount(reservedBalance, decimal, true)
+                    formatDisplayAmount(holding, decimal, true)
                   )}{' '}
                   {initial}
                 </div>
-                <div>
-                  Native balance:{' '}
-                  {discreetMode.handleSensitiveDataDisplay(
-                    formatDisplayAmount(nativeBalance, decimal, true)
-                  )}{' '}
-                  {initial}
-                </div>
-              </div>
+              )
             }
           >
             {`${discreetMode.handleSensitiveDataDisplay(
