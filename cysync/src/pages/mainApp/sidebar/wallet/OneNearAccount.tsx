@@ -134,6 +134,8 @@ interface OneNearAccountProps {
   isEmpty: boolean;
   decimal: number;
   walletId: string;
+  nativeBalance: string;
+  reservedBalance: string;
   accountId: string;
 }
 
@@ -147,6 +149,8 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
   decimal,
   isEmpty,
   walletId,
+  reservedBalance,
+  nativeBalance,
   accountId
 }) => {
   const discreetMode = useDiscreetMode();
@@ -239,10 +243,25 @@ const OneNearAccount: React.FC<OneNearAccountProps> = ({
         <Grid item xs={2} className={classes.alignStartCenter}>
           <PopOverText
             color="textPrimary"
-            hoverText={`${discreetMode.handleSensitiveDataDisplay(
-              formatDisplayAmount(holding, decimal, true)
-            )} ${initial}`}
             style={{ fontSize: '0.9rem', paddingRight: '8px' }}
+            hoverChildren={
+              <div>
+                <div>
+                  Reserved for protocol:{' '}
+                  {discreetMode.handleSensitiveDataDisplay(
+                    formatDisplayAmount(reservedBalance, decimal, true)
+                  )}{' '}
+                  {initial}
+                </div>
+                <div>
+                  Native balance:{' '}
+                  {discreetMode.handleSensitiveDataDisplay(
+                    formatDisplayAmount(nativeBalance, decimal, true)
+                  )}{' '}
+                  {initial}
+                </div>
+              </div>
+            }
           >
             {`${discreetMode.handleSensitiveDataDisplay(
               formatDisplayAmount(holding, 5, true)

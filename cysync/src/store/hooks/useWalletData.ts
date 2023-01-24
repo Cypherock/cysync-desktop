@@ -69,13 +69,24 @@ export const useWalletData: UseWalletData = () => {
         price: await getLatestPriceForCoin(coin.coinId),
         displayValue: '0',
         displayPrice: '0',
-        displayBalance: '0'
+        displayBalance: '0',
+        displayNearReservedForProtocol: '0',
+        displayNearNativeBalance: '0'
       };
       const balance = new BigNumber(
         coin.totalBalance ? coin.totalBalance : 0
       ).dividedBy(coinObj.multiplier);
+      const nativeBalance = new BigNumber(
+        coin.metadata?.near?.nativeBalance ?? 0
+      ).dividedBy(coinObj.multiplier);
+      const reservedBalance = BigNumber.max(
+        nativeBalance.minus(balance),
+        new BigNumber(0)
+      );
 
       coinWithPrice.displayBalance = balance.toString();
+      coinWithPrice.displayNearNativeBalance = nativeBalance.toString();
+      coinWithPrice.displayNearReservedForProtocol = reservedBalance.toString();
 
       const latestPrice = coinWithPrice.price;
       const value = balance.multipliedBy(latestPrice || 0);
