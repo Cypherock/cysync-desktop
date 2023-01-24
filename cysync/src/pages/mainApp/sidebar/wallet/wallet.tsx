@@ -498,6 +498,8 @@ const WalletView: React.FC<WalletViewProps> = ({
                           deleteHistory={deleteCoinHistory}
                           walletId={selectedWallet._id}
                           sortIndex={sortIndex}
+                          reservedBalance={coin.displayNearReservedForProtocol}
+                          nativeBalance={coin.displayNearNativeBalance}
                         />
                       ) : (
                         <OneCoin
