@@ -49,6 +49,8 @@ export const EthereumOneCoinPropTypes = {
 
 export interface NearOneCoinProps extends OneCoinProps {
   sortIndex: number;
+  nativeBalance: string;
+  reservedBalance: string;
 }
 
 export const NearOneCoinPropTypes = {

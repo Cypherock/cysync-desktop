@@ -17,6 +17,8 @@ export interface DisplayCoin extends Account {
   isEmpty: boolean;
   price: number;
   priceLastUpdatedAt?: Date;
+  displayNearReservedForProtocol?: string;
+  displayNearNativeBalance?: string;
 }
 
 export interface DisplayToken extends Token {
@@ -33,6 +35,8 @@ export interface DisplayCustomAccount extends CustomAccount {
   displayBalance: string;
   isEmpty: boolean;
   isImplicit: boolean;
+  displayNearReservedForProtocol?: string;
+  displayNearNativeBalance?: string;
 }
 
 export interface DisplayInputOutput extends InputOutput {
