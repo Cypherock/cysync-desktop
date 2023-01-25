@@ -258,7 +258,7 @@ export const usePortfolio: UsePortfolio = () => {
           setTotal(result.totalAmount);
         }
         if (result.setOfCoins !== undefined) {
-          setCoins(result.setOfCoins);
+          sortCoins(result.setOfCoins, sortIndex);
         }
         if (result.allCoinholding !== undefined) {
           setCoinHolding(result.allCoinholding);
