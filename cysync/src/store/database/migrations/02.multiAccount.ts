@@ -8,6 +8,7 @@ import {
   EthCoinData,
   EthCoinMap,
   NearCoinData,
+  NearCoinMap,
   SolanaAccountTypes,
   SolanaCoinData,
   SolanaCoinMap
@@ -127,8 +128,14 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
       }
     } else {
       let accountType = '';
+      let accountIndex = 0;
+
       if (coinObj.id === SolanaCoinMap.solana) {
         accountType = SolanaAccountTypes.ledger;
+      }
+
+      if (coinObj.id === NearCoinMap.near) {
+        accountIndex = 1;
       }
 
       const account: Account = {
@@ -139,7 +146,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
         coinId: coinObj.id,
         xpub: coin.xpub,
         accountType,
-        accountIndex: 0,
+        accountIndex,
         totalBalance: coin.totalBalance,
         totalUnconfirmedBalance: coin.totalUnconfirmedBalance
       };
