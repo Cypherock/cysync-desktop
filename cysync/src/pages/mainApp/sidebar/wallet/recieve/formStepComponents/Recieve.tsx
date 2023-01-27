@@ -170,7 +170,7 @@ const Receive: React.FC<StepComponentProps> = ({
             <></>
           )}
           <Typography color="textSecondary">
-            QR Code Receiver Coin Address
+            QR Code Receiver Address
           </Typography>
         </Grid>
         {receiveTransaction.verified ? (

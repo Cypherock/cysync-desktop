@@ -29,6 +29,9 @@ export interface UseTransactionDataValues {
   setSortIndex: React.Dispatch<React.SetStateAction<number>>;
   onInitialSetupDone: () => void;
   isInitialSetupDone: boolean;
+  currentCoin: string;
+  currentWallet: string;
+  currentAccount: string;
 }
 
 export type UseTransactionData = () => UseTransactionDataValues;
@@ -237,6 +240,9 @@ export const useTransactionData: UseTransactionData = () => {
     isInitialSetupDone,
     setCurrentCoin,
     accountIndex,
-    setAccountIndex
+    setAccountIndex,
+    currentCoin,
+    currentWallet,
+    currentAccount
   };
 };

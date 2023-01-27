@@ -2,8 +2,8 @@ import Button from '@mui/material/Button';
 import { styled, useTheme } from '@mui/material/styles';
 import { ApexOptions } from 'apexcharts';
 import clsx from 'clsx';
-import React from 'react';
-import Chart from 'react-apexcharts';
+import React, { useRef } from 'react';
+import ReactApexChart from 'react-apexcharts';
 
 import { useDiscreetMode } from '../../../../../store/provider';
 import formatDisplayAmount from '../../../../../utils/formatDisplayAmount';
@@ -48,24 +48,14 @@ const Root = styled('div')(({ theme }) => ({
   }
 }));
 
-const ApexChart = (props: any) => {
+const LineChart = (props: any) => {
   const discreetMode = useDiscreetMode();
   const theme = useTheme();
+  const chartRef = useRef<ReactApexChart>();
 
   const handleSensitiveDataDisplay = React.useRef(
     discreetMode.handleSensitiveDataDisplay
   );
-
-  React.useEffect(() => {
-    handleSensitiveDataDisplay.current =
-      discreetMode.handleSensitiveDataDisplay;
-  }, [discreetMode.handleSensitiveDataDisplay]);
-
-  const { timeActiveButton, setTimeActive, series } = props;
-
-  const handleButtonChange = (selectedIndex: number) => {
-    setTimeActive(selectedIndex);
-  };
 
   const options: ApexOptions = {
     chart: {
@@ -231,6 +221,21 @@ const ApexChart = (props: any) => {
     ]
   };
 
+  React.useEffect(() => {
+    handleSensitiveDataDisplay.current =
+      discreetMode.handleSensitiveDataDisplay;
+    const chart = (chartRef.current as any)?.chart;
+    if (chart) {
+      chart.updateOptions(options);
+    }
+  }, [discreetMode.handleSensitiveDataDisplay]);
+
+  const { timeActiveButton, setTimeActive, series } = props;
+
+  const handleButtonChange = (selectedIndex: number) => {
+    setTimeActive(selectedIndex);
+  };
+
   return (
     <Root className={classes.root}>
       <div className={classes.mapNavigation}>
@@ -267,9 +272,14 @@ const ApexChart = (props: any) => {
           </Button>
         </div>
       </div>
-      <Chart options={options} series={series} type="area" />
+      <ReactApexChart
+        ref={chartRef}
+        options={options}
+        series={series}
+        type="area"
+      />
     </Root>
   );
 };
 
-export default ApexChart;
+export default LineChart;

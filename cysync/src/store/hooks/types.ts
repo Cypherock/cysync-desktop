@@ -23,6 +23,8 @@ export interface DisplayCustomAccount extends CustomAccount {
   displayBalance: string;
   isEmpty: boolean;
   isImplicit: boolean;
+  displayNearReservedForProtocol?: string;
+  displayNearNativeBalance?: string;
 }
 
 export interface DisplayInputOutput extends InputOutput {
@@ -51,6 +53,9 @@ export interface DisplayTransaction
   outputs?: DisplayInputOutput[];
   type?: string;
   description?: string;
+  accountName?: string;
+  accountType?: string;
+  accountIndex?: number;
 }
 
 export const DisplayTransactionPropTypes = {

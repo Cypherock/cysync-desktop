@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
-import { accountDb, coinDb } from '../store/database';
+import { accountDb, coinDb, passEnDb } from '../store/database';
 
 export const bcryptPass = async (pass: string): Promise<string> => {
   return bcrypt.hash(pass, 16);
@@ -62,12 +62,15 @@ export const resetDesktopApplication = (): void => {
  * @param singleHash
  */
 export const passChangeEffect = async (singleHash: string) => {
+  const oldHash = passEnDb.getPassHash();
   if (singleHash) {
-    await coinDb.encryptSecrets(singleHash);
-    await accountDb.encryptSecrets(singleHash);
+    await coinDb.encryptSecrets(singleHash, oldHash);
+    await accountDb.encryptSecrets(singleHash, oldHash);
+    passEnDb.setPassHash(singleHash);
   } else {
-    await coinDb.decryptSecrets();
-    await accountDb.decryptSecrets();
+    await coinDb.decryptSecrets(oldHash);
+    await accountDb.decryptSecrets(oldHash);
+    passEnDb.destroyHash();
   }
 };
 

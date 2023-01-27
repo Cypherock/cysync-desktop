@@ -12,8 +12,6 @@ const getIcon = (initial: string) => {
   switch (initial) {
     case 'BTC':
       return <Icon size={40} viewBox="0 0 30 30" iconGroup={<BTC />} />;
-    case 'BTCT':
-      return <Icon size={40} viewBox="0 0 30 30" iconGroup={<BTC />} />;
     case 'ETH':
     case 'ETHR':
       return <Icon size={40} viewBox="0 0 30 30" iconGroup={<ETH />} />;

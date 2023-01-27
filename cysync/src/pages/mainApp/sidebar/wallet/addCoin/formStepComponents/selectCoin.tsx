@@ -147,12 +147,20 @@ const SelectCoin: React.FC<StepComponentProps> = ({
 
         return coin.id === el.id;
       })
-      .map(el => el.accountIndex);
+      .map(el => el.accountIndex)
+      .sort((a, b) => a - b);
 
-    const newAccountIndex =
-      existingCoinIndexes.length !== 0
-        ? Math.max(...existingCoinIndexes) + 1
-        : 0;
+    let newAccountIndex =
+      existingCoinIndexes.length === 0
+        ? 0
+        : existingCoinIndexes[existingCoinIndexes.length - 1] + 1;
+
+    for (let i = 0; i < existingCoinIndexes.length; i++) {
+      if (i !== existingCoinIndexes[i]) {
+        newAccountIndex = i;
+        break;
+      }
+    }
 
     coinAdder.handleCoinAdd({
       connection,
@@ -173,7 +181,7 @@ const SelectCoin: React.FC<StepComponentProps> = ({
   return (
     <Root className={classes.root}>
       <div className={classes.head}>
-        <Typography className={classes.heading}>Select coin</Typography>
+        <Typography className={classes.heading}>Select asset</Typography>
       </div>
       <div className={classes.coinContainer}>
         {coins.map((coin, index) => {

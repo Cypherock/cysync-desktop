@@ -42,6 +42,7 @@ export interface SyncProviderTypes {
       ModifiedAccount,
       | 'xpub'
       | 'name'
+      | 'derivationPath'
       | 'walletId'
       | 'accountIndex'
       | 'totalBalance'
@@ -59,6 +60,7 @@ export interface SyncProviderTypes {
       ModifiedAccount,
       | 'xpub'
       | 'name'
+      | 'derivationPath'
       | 'walletId'
       | 'accountIndex'
       | 'totalBalance'

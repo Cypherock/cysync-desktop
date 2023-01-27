@@ -5,6 +5,10 @@ export interface OneCoinProps {
   coinId: string;
   initial: string;
   name: string;
+  coinName: string;
+  accountType?: string;
+  accountIndex: number;
+  derivationPath: string;
   holding: string;
   value: string;
   price: string;
@@ -20,6 +24,10 @@ export const OneCoinPropTypes = {
   coinId: PropTypes.string.isRequired,
   initial: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  coinName: PropTypes.string.isRequired,
+  accountType: PropTypes.string,
+  accountIndex: PropTypes.number.isRequired,
+  derivationPath: PropTypes.string.isRequired,
   holding: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   price: PropTypes.string.isRequired,
@@ -41,6 +49,8 @@ export const EthereumOneCoinPropTypes = {
 
 export interface NearOneCoinProps extends OneCoinProps {
   sortIndex: number;
+  nativeBalance: string;
+  reservedBalance: string;
 }
 
 export const NearOneCoinPropTypes = {

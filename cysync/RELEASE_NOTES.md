@@ -1,41 +1,9 @@
-# v1.1.3
+# v1.1.281
 
-### Features
+### 🚀 Features
 
-- EVM Chain support is here
-- EVM Chain support is here
-- EVM Chain support is here
+- Multi account support is here
 
-### Fixes
+### 🌟 Improvements
 
-- Some bug fixes
-- Some bug fixes
-- Some bug fixes
-
-# v1.1.2
-
-### Features
-
-- EVM Chain support is here
-- EVM Chain support is here
-- EVM Chain support is here
-
-### Fixes
-
-- Some bug fixes
-- Some bug fixes
-- Some bug fixes
-
-# v1.1.1
-
-### Features
-
-- EVM Chain support is here
-- EVM Chain support is here
-- EVM Chain support is here
-
-### Fixes
-
-- Some bug fixes
-- Some bug fixes
-- Some bug fixes
+- Improved auto update

@@ -2,8 +2,16 @@ import {
   AbsCoinData,
   BitcoinAccountTypes,
   BtcCoinData,
+  BtcCoinMap,
   CoinData,
-  COINS
+  COINS,
+  EthCoinData,
+  EthCoinMap,
+  NearCoinData,
+  NearCoinMap,
+  SolanaAccountTypes,
+  SolanaCoinData,
+  SolanaCoinMap
 } from '@cypherock/communication';
 import {
   Account,
@@ -17,6 +25,12 @@ import {
   Token,
   Transaction
 } from '@cypherock/database';
+import {
+  BitcoinWallet,
+  EthereumWallet,
+  NearWallet,
+  SolanaWallet
+} from '@cypherock/wallet';
 
 import logger from '../../../utils/logger';
 
@@ -29,6 +43,38 @@ interface MapFunctionParams extends MigrationFunctionParams {
 
 type MapFunction<T> = (params: MapFunctionParams) => Promise<T[]>;
 
+const getDerivationPath = (partialAccount: Account) => {
+  const coinData = COINS[partialAccount.coinId];
+
+  const params = {
+    accountIndex: partialAccount.accountIndex,
+    accountType: partialAccount.accountType,
+    coinIndex: coinData.coinIndex
+  };
+
+  let path = '';
+
+  if (coinData instanceof BtcCoinData) {
+    path = BitcoinWallet.getDerivationPath(params);
+  } else if (coinData instanceof EthCoinData) {
+    path = EthereumWallet.getDerivationPath({
+      ...params,
+      chainId: coinData.chain
+    });
+  } else if (coinData instanceof NearCoinData) {
+    path = NearWallet.getDerivationPath({
+      ...params,
+      addressIndex: partialAccount.accountIndex
+    });
+  } else if (coinData instanceof SolanaCoinData) {
+    path = SolanaWallet.getDerivationPath(params);
+  } else {
+    throw new Error('Invalid coin type: ' + partialAccount.coinId);
+  }
+
+  return path;
+};
+
 const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
   const accountList: Account[] = [];
 
@@ -40,10 +86,13 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
       continue;
     }
 
-    if (coinObj instanceof BtcCoinData) {
+    if (
+      ([BtcCoinMap.bitcoin, 'bitcoin-testnet'] as string[]).includes(coinObj.id)
+    ) {
       const accountX: Account = {
         name: '',
         accountId: '',
+        derivationPath: '',
         walletId: coin.walletId,
         coinId: coinObj.id,
         xpub: coin.xpub,
@@ -54,6 +103,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
       };
       accountX.accountId = AccountDB.buildAccountIndex(accountX);
       accountX.name = AccountDB.createAccountName(accountX);
+      accountX.derivationPath = getDerivationPath(accountX);
 
       accountList.push(accountX);
 
@@ -61,6 +111,7 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
         const accountY: Account = {
           name: '',
           accountId: '',
+          derivationPath: '',
           walletId: coin.walletId,
           coinId: coinObj.id,
           xpub: coin.zpub,
@@ -71,24 +122,38 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
         };
         accountY.accountId = AccountDB.buildAccountIndex(accountY);
         accountY.name = AccountDB.createAccountName(accountY);
+        accountY.derivationPath = getDerivationPath(accountY);
 
         accountList.push(accountY);
       }
     } else {
+      let accountType = '';
+      let accountIndex = 0;
+
+      if (coinObj.id === SolanaCoinMap.solana) {
+        accountType = SolanaAccountTypes.ledger;
+      }
+
+      if (coinObj.id === NearCoinMap.near) {
+        accountIndex = 1;
+      }
+
       const account: Account = {
         name: '',
         accountId: '',
+        derivationPath: '',
         walletId: coin.walletId,
         coinId: coinObj.id,
         xpub: coin.xpub,
-        accountType: '',
-        accountIndex: 0,
+        accountType,
+        accountIndex,
         totalBalance: coin.totalBalance,
         totalUnconfirmedBalance: coin.totalUnconfirmedBalance
       };
 
       account.accountId = AccountDB.buildAccountIndex(account);
       account.name = AccountDB.createAccountName(account);
+      account.derivationPath = getDerivationPath(account);
 
       accountList.push(account);
     }
@@ -317,56 +382,58 @@ const mapReceiveAddressDb: MapFunction<ReceiveAddress> = async ({
   return newReceiveAddressList;
 };
 
-const mapTokenDb: MapFunction<Token> = async ({ tokenDb, allAccounts }) => {
-  const newTokenList: Token[] = [];
-  const allTokens = await tokenDb.getAll({
-    databaseVersion: 'v1'
-  });
+const mapTokenDb: MapFunction<Token> = async () => {
+  // Don't add ETH Tokens so the application will have to refresh the history
+  return [];
+  // const newTokenList: Token[] = [];
+  // const allTokens = await tokenDb.getAll({
+  //   databaseVersion: 'v1'
+  // });
 
-  for (const token of allTokens) {
-    const coinObj = Object.values(COINS).find(
-      elem => elem.oldId === token.coin
-    );
+  // for (const token of allTokens) {
+  //   const coinObj = Object.values(COINS).find(
+  //     elem => elem.oldId === token.coin
+  //   );
 
-    if (!coinObj) {
-      logger.warn('Invalid slug found in tokenDb', {
-        token
-      });
-      continue;
-    }
+  //   if (!coinObj) {
+  //     logger.warn('Invalid slug found in tokenDb', {
+  //       token
+  //     });
+  //     continue;
+  //   }
 
-    const tokenObj = Object.values(coinObj.tokenList).find(
-      elem => elem.oldId === token.slug
-    );
+  //   const tokenObj = Object.values(coinObj.tokenList).find(
+  //     elem => elem.oldId === token.slug
+  //   );
 
-    if (!tokenObj) {
-      logger.warn('Invalid slug found in tokenDb', { token });
-      continue;
-    }
+  //   if (!tokenObj) {
+  //     logger.warn('Invalid slug found in tokenDb', { token });
+  //     continue;
+  //   }
 
-    const account = allAccounts.find(
-      acc => acc.walletId === token.walletId && coinObj.id === acc.coinId
-    );
+  //   const account = allAccounts.find(
+  //     acc => acc.walletId === token.walletId && coinObj.id === acc.coinId
+  //   );
 
-    if (!account) {
-      logger.warn('No account found for receiveAddressDb entry', {
-        receiveAddress: token
-      });
-      continue;
-    }
+  //   if (!account) {
+  //     logger.warn('No account found for receiveAddressDb entry', {
+  //       receiveAddress: token
+  //     });
+  //     continue;
+  //   }
 
-    const newToken: Token = {
-      coinId: tokenObj.id,
-      parentCoinId: coinObj.id,
-      accountId: account.accountId,
-      walletId: account.walletId,
-      balance: token.balance
-    };
+  //   const newToken: Token = {
+  //     coinId: tokenObj.id,
+  //     parentCoinId: coinObj.id,
+  //     accountId: account.accountId,
+  //     walletId: account.walletId,
+  //     balance: token.balance
+  //   };
 
-    newTokenList.push(newToken);
-  }
+  //   newTokenList.push(newToken);
+  // }
 
-  return newTokenList;
+  // return newTokenList;
 };
 
 const mapTransactionDb: MapFunction<Transaction> = async ({
@@ -407,6 +474,11 @@ const mapTransactionDb: MapFunction<Transaction> = async ({
       logger.warn('Invalid slug found in transactionDb', {
         transaction
       });
+      continue;
+    }
+
+    // Don't add ETH Tokens so the application will have to refresh the history
+    if (parentCoinObj?.id === EthCoinMap.ethereum) {
       continue;
     }
 

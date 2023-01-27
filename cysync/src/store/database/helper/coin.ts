@@ -11,6 +11,8 @@ export interface DisplayCoin extends Account {
   isEmpty: boolean;
   price: number;
   priceLastUpdatedAt?: Date;
+  displayNearReservedForProtocol?: string;
+  displayNearNativeBalance?: string;
 }
 
 export const getLatestPriceForCoin = async (

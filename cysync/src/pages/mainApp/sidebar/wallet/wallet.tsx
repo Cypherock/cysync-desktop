@@ -256,7 +256,7 @@ const WalletView: React.FC<WalletViewProps> = ({
                 color="textPrimary"
                 style={{ marginBottom: '2rem' }}
               >
-                Add a coin in your wallet.
+                Add an account in your wallet.
               </Typography>
               <Button
                 variant="text"
@@ -293,7 +293,7 @@ const WalletView: React.FC<WalletViewProps> = ({
             }}
           >
             <Input
-              placeholder="Search Your Coin"
+              placeholder="Search Your Account"
               value={search}
               onChange={handleSearchChange}
               InputProps={{
@@ -346,7 +346,7 @@ const WalletView: React.FC<WalletViewProps> = ({
         <div style={{ width: '100%' }}>
           <Grid container className={classes.totalFilter}>
             <Grid item xs={6}>
-              <Typography color="textPrimary">{`Total Coins - ${coinData.length}`}</Typography>
+              <Typography color="textPrimary">{`Total Accounts - ${coinData.length}`}</Typography>
             </Grid>
           </Grid>
           <Grid container>
@@ -372,7 +372,7 @@ const WalletView: React.FC<WalletViewProps> = ({
                     )
                   }
                 >
-                  <Typography color="textSecondary">Coin</Typography>
+                  <Typography color="textSecondary">Account</Typography>
                 </Button>
               </Grid>
               <Grid item xs={2}>
@@ -475,6 +475,10 @@ const WalletView: React.FC<WalletViewProps> = ({
                           accountId={coin.accountId}
                           initial={coinObj.abbr.toUpperCase()}
                           name={coin.name}
+                          coinName={coinObj.name}
+                          accountType={coin.accountType}
+                          accountIndex={coin.accountIndex}
+                          derivationPath={coin.derivationPath}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
                           price={coin.displayPrice}
@@ -491,6 +495,10 @@ const WalletView: React.FC<WalletViewProps> = ({
                           accountId={coin.accountId}
                           initial={coinObj.abbr.toUpperCase()}
                           name={coin.name}
+                          coinName={coinObj.name}
+                          accountType={coin.accountType}
+                          accountIndex={coin.accountIndex}
+                          derivationPath={coin.derivationPath}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
                           price={coin.displayPrice}
@@ -500,6 +508,8 @@ const WalletView: React.FC<WalletViewProps> = ({
                           deleteHistory={deleteCoinHistory}
                           walletId={selectedWallet._id}
                           sortIndex={sortIndex}
+                          reservedBalance={coin.displayNearReservedForProtocol}
+                          nativeBalance={coin.displayNearNativeBalance}
                         />
                       ) : (
                         <OneCoin
@@ -507,6 +517,10 @@ const WalletView: React.FC<WalletViewProps> = ({
                           accountId={coin.accountId}
                           initial={coinObj.abbr.toUpperCase()}
                           name={coin.name}
+                          coinName={coinObj.name}
+                          accountType={coin.accountType}
+                          accountIndex={coin.accountIndex}
+                          derivationPath={coin.derivationPath}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
                           price={coin.displayPrice}

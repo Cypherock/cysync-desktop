@@ -1,11 +1,10 @@
 import { Grid, styled, Typography } from '@mui/material';
-import fs from 'fs/promises';
-import path from 'path';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import pkg from '../../../package.json';
+import releaseNotesJson from '../../../release_notes.json';
 import CustomButton from '../../designSystem/designComponents/buttons/button';
 import DialogBox from '../../designSystem/designComponents/dialog/dialogBox';
 import logger from '../../utils/logger';
@@ -44,27 +43,7 @@ const Root = styled(Grid)(() => ({
   [`& .${classes.content}`]: {
     maxHeight: '450px',
     overflowY: 'auto',
-    padding: '0 45px',
-
-    background: `linear-gradient(
-      #02020233 30%,
-      rgba(255, 255, 255, 0)
-    ) center top,linear-gradient(
-      rgba(255, 255, 255, 0), 
-      #02020233 70%
-    ) center bottom,radial-gradient(
-      farthest-side at 50% 0,
-      rgba(0, 0, 0, 0),
-      rgba(0, 0, 0, 0)
-    ) center top,radial-gradient(
-      farthest-side at 50% 100%,
-      rgba(0, 0, 0, 0.2),
-      rgba(0, 0, 0, 0)
-    ) center bottom`,
-
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: '100% 30px, 100% 30px, 100% 14px, 100% 14px',
-    backgroundAttachment: 'local, local, scroll, scroll'
+    padding: '0 45px'
   },
   [`& .${classes.btnContainer}`]: {
     display: 'flex',
@@ -89,10 +68,7 @@ export const ReleaseNotesProvider: React.FC = ({ children }) => {
 
   const readFile = async () => {
     try {
-      const releaseNotes = await fs.readFile(
-        path.join(__dirname, '..', '..', '..', 'RELEASE_NOTES.md')
-      );
-      setContent(releaseNotes.toString());
+      setContent(releaseNotesJson.notes);
       showReleaseNotesOnFirstBoot();
     } catch (error) {
       logger.error(error);

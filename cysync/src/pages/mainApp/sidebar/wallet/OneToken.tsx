@@ -213,7 +213,7 @@ const OneToken: React.FC<OneTokenProps> = ({
     prevent(e);
     if (beforeAction()) {
       navigate(
-        `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}`
+        `${Routes.transactions.index}?coinId=${coinId}&wallet=${walletId}&accountId=${accountId}`
       );
     }
   };
