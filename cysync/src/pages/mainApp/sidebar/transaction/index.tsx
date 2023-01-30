@@ -1,8 +1,14 @@
-import { COINS } from '@cypherock/communication';
+import {
+  AbsCoinData,
+  AccountTypeDetails,
+  COINS,
+  TOKENS
+} from '@cypherock/communication';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import { Tooltip } from '@mui/material';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
@@ -18,7 +24,7 @@ import Icon from '../../../../designSystem/designComponents/icons/Icon';
 import Input from '../../../../designSystem/designComponents/input/input';
 import DropMenu from '../../../../designSystem/designComponents/menu/DropMenu';
 import ICONS from '../../../../designSystem/iconGroups/iconConstants';
-import { convertToDisplayValue } from '../../../../store/database';
+import { Account, convertToDisplayValue } from '../../../../store/database';
 import {
   DisplayTransaction,
   useDebouncedFunction,
@@ -104,13 +110,22 @@ const Transaction = () => {
     sortIndex,
     setSortIndex,
     onInitialSetupDone,
-    isInitialSetupDone
+    isInitialSetupDone,
+    accountIndex,
+    currentCoin,
+    currentAccount,
+    currentWallet,
+    setCurrentAccount,
+    setAccountIndex
   } = useTransactionData();
 
-  const { allWallets, allCoins } = useWallets();
+  const { allWallets, allCoins, allAccounts } = useWallets();
+
+  const [displayCoins, setDisplayCoins] = useState<AbsCoinData[]>([]);
+  const [displayAccounts, setDisplayAccounts] = useState<Account[]>([]);
 
   const theme = useTheme();
-  const [weekIndex, setWeekIndex] = React.useState(3);
+  const [weekIndex, setWeekIndex] = useState(3);
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<DisplayTransaction[]>([]);
   const [isSearchLoading, setSearchLoading] = React.useState(false);
@@ -121,9 +136,59 @@ const Transaction = () => {
   }, []);
 
   useEffect(() => {
+    const newCoinList = allWallets[walletIndex - 1]
+      ? allWallets[walletIndex - 1].coins
+      : allCoins;
+
+    {
+      const index = newCoinList.findIndex(elem => elem.id === currentCoin);
+      if (index !== -1) {
+        if (coinIndex !== index + 1) setCoinIndex(index + 1);
+      } else {
+        setCoinIndex(0);
+        setCurrentCoin(undefined);
+      }
+    }
+    setDisplayCoins(newCoinList);
+
+    const newAccountList = (
+      allWallets[walletIndex - 1]
+        ? allWallets[walletIndex - 1].accounts
+        : allAccounts
+    ).filter(elem =>
+      currentCoin
+        ? elem.coinId === currentCoin ||
+          elem.coinId === TOKENS[currentCoin]?.parentId
+        : true
+    );
+
+    {
+      const index = newAccountList.findIndex(
+        elem => elem.accountId === currentAccount
+      );
+      if (index !== -1) {
+        setAccountIndex(index + 1);
+      } else {
+        setAccountIndex(0);
+        setCurrentAccount(undefined);
+      }
+    }
+    setDisplayAccounts(newAccountList);
+  }, [allCoins, allAccounts, allWallets, walletIndex, coinIndex]);
+
+  useEffect(() => {
     const query = new URLSearchParams(location.search);
     const coinId = query.get('coinId');
     const walletId = query.get('wallet');
+    const accountId = query.get('accountId');
+
+    if (accountId) {
+      const index = allAccounts.findIndex(elem => elem.accountId === accountId);
+      if (index !== -1) {
+        setCurrentAccount(accountId);
+        setAccountIndex(index + 1);
+      }
+    }
 
     if (coinId) {
       const index = allCoins.findIndex(elem => elem.id === coinId);
@@ -156,17 +221,23 @@ const Transaction = () => {
   };
 
   const handleSearch = () => {
-    const results = allTxn.filter(txn => {
-      if (txn.coin && txn.coin.toLowerCase().indexOf(search) !== -1) {
-        return true;
-      }
-
-      if (txn.coinName && txn.coinName.toLowerCase().indexOf(search) !== -1) {
-        return true;
-      }
-
-      if (txn.hash && txn.hash.toLowerCase().indexOf(search) !== -1) {
-        return true;
+    const results = allTxn.filter(_txn => {
+      const searchParams: string[] = [
+        'hash',
+        'coinName',
+        'walletName',
+        'accountName',
+        'accountType'
+      ];
+      for (const searhParam of searchParams) {
+        const txn = _txn as any;
+        if (
+          txn[searhParam] &&
+          typeof txn[searhParam] === 'string' &&
+          txn[searhParam].toLowerCase().indexOf(search) !== -1
+        ) {
+          return true;
+        }
       }
 
       return false;
@@ -191,12 +262,24 @@ const Transaction = () => {
     setWalletIndex(selectedIndex);
     if (selectedIndex === 0) setCurrentWallet(undefined);
     else setCurrentWallet(allWallets[selectedIndex - 1]._id);
+    setCoinIndex(0);
+    setCurrentCoin(undefined);
+    setAccountIndex(0);
+    setCurrentAccount(undefined);
   };
 
   const handleCoinChange = (selectedIndex: number) => {
     setCoinIndex(selectedIndex);
     if (selectedIndex === 0) setCurrentCoin(undefined);
-    else setCurrentCoin(allCoins[selectedIndex - 1].id);
+    else setCurrentCoin(displayCoins[selectedIndex - 1].id);
+    setAccountIndex(0);
+    setCurrentAccount(undefined);
+  };
+
+  const handleAccountChange = (selectedIndex: number) => {
+    setAccountIndex(selectedIndex);
+    if (selectedIndex === 0) setCurrentAccount(undefined);
+    else setCurrentAccount(displayAccounts[selectedIndex - 1].accountId);
   };
 
   const renderTxnRow = ({ index, key, style }: any) => {
@@ -456,13 +539,37 @@ const Transaction = () => {
               style={{ marginRight: '10px' }}
             />
           )}
-          {allCoins.length !== 0 && (
+          {displayCoins.length !== 0 && (
             <DropMenu
-              options={['All Coins', ...allCoins.map(coin => coin.name)]}
+              options={['All Coins', ...displayCoins.map(coin => coin.name)]}
               handleMenuItemSelectionChange={handleCoinChange}
               index={coinIndex}
               bg={false}
+              style={{ marginRight: '10px' }}
             />
+          )}
+          {displayAccounts.length !== 0 && (
+            <Tooltip title={currentWallet ? '' : 'No wallet selected'}>
+              <div>
+                <DropMenu
+                  options={[
+                    'All Accounts',
+                    ...displayAccounts.map(account => {
+                      const name = COINS[account.coinId]?.name || '';
+                      return {
+                        name: `${name} ${account.accountIndex + 1}`,
+                        tag: AccountTypeDetails[account.accountType]?.tag || '',
+                        value: account.accountId
+                      };
+                    })
+                  ]}
+                  disabled={!currentWallet}
+                  handleMenuItemSelectionChange={handleAccountChange}
+                  index={accountIndex}
+                  bg={false}
+                />
+              </div>
+            </Tooltip>
           )}
         </Grid>
         <Grid
@@ -472,7 +579,7 @@ const Transaction = () => {
         >
           <Input
             style={{ width: '70%' }}
-            placeholder="Search Your Coins"
+            placeholder="Search Your Transactions"
             value={search}
             onChange={handleSearchChange}
             InputProps={{

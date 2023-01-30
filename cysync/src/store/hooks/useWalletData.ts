@@ -69,13 +69,26 @@ export const useWalletData: UseWalletData = () => {
         price: await getLatestPriceForCoin(coin.coinId),
         displayValue: '0',
         displayPrice: '0',
-        displayBalance: '0'
+        displayBalance: '0',
+        displayNearReservedForProtocol: undefined,
+        displayNearNativeBalance: undefined
       };
       const balance = new BigNumber(
         coin.totalBalance ? coin.totalBalance : 0
       ).dividedBy(coinObj.multiplier);
+      const nativeBalance = coin.metadata?.near?.nativeBalance
+        ? new BigNumber(coin.metadata?.near?.nativeBalance ?? 0).dividedBy(
+            coinObj.multiplier
+          )
+        : undefined;
+      const reservedBalance = nativeBalance
+        ? BigNumber.max(nativeBalance.minus(balance), new BigNumber(0))
+        : undefined;
 
-      coinWithPrice.displayBalance = balance.toString();
+      coinWithPrice.displayBalance = balance?.toString();
+      coinWithPrice.displayNearNativeBalance = nativeBalance?.toString();
+      coinWithPrice.displayNearReservedForProtocol =
+        reservedBalance?.toString();
 
       const latestPrice = coinWithPrice.price;
       const value = balance.multipliedBy(latestPrice || 0);
@@ -114,7 +127,7 @@ export const useWalletData: UseWalletData = () => {
       case 2:
         setCoinData(
           [...coins].sort((a, b) => {
-            return a.coinId.localeCompare(b.coinId);
+            return a.name.localeCompare(b.name);
           })
         );
         break;
@@ -122,7 +135,7 @@ export const useWalletData: UseWalletData = () => {
       case 3:
         setCoinData(
           [...coins].sort((a, b) => {
-            return b.coinId.localeCompare(a.coinId);
+            return b.name.localeCompare(a.name);
           })
         );
         break;

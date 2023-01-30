@@ -345,7 +345,7 @@ export const processResponses = async (
 
     for (const ele of erc20history) {
       const tokenObj = Object.values(coinData.tokenList).find(
-        e => ele.tokenSymbol.toLowerCase() === e.abbr
+        e => ele.contractAddress.toLowerCase() === e.address.toLowerCase()
       );
       const fromAddr = formatEthAddress(ele.from).toLowerCase();
       const toAddr = formatEthAddress(ele.to).toLowerCase();
@@ -353,11 +353,7 @@ export const processResponses = async (
       const amount = String(ele.value || 0);
 
       // Only add if it exists in our coin list
-      if (
-        tokenObj &&
-        ele.contractAddress &&
-        ele.contractAddress.toLowerCase() === tokenObj.address.toLowerCase()
-      ) {
+      if (tokenObj) {
         const fees = new BigNumber(ele.gasPrice || 0).multipliedBy(
           new BigNumber(ele.gasUsed || 0)
         );

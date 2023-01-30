@@ -7,7 +7,8 @@ import React from 'react';
 type MouseOverProps = {
   text?: any;
   children?: any;
-  hoverText: string;
+  hoverText?: string;
+  hoverChildren?: any;
   color?: TypographyProps['color'];
   variant?: TypographyProps['variant'];
   className?: TypographyProps['className'];
@@ -15,7 +16,7 @@ type MouseOverProps = {
 };
 
 const PopOverText: React.FC<MouseOverProps> = props => {
-  const { children, text, hoverText, variant } = props;
+  const { children, text, hoverText, variant, hoverChildren } = props;
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
   const handlePopoverOpen = (
@@ -64,7 +65,7 @@ const PopOverText: React.FC<MouseOverProps> = props => {
         disableRestoreFocus
       >
         <Typography sx={{ p: 1 }} variant="body2">
-          {hoverText}
+          {hoverChildren || hoverText}
         </Typography>
       </Popover>
     </>

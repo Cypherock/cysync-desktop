@@ -37,7 +37,9 @@ export const getRequestsMetadata = (
       throw new Error('Invalid coin in balance sync item: ' + item.coinId);
     }
 
-    const address = generateEthAddressFromXpub(item.xpub, item.coinId);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinId, {
+      forceHex: true
+    });
     if (!item.parentCoinId) {
       throw new Error('Invalid ethCoin found in balance sync item' + token);
     }
@@ -64,7 +66,9 @@ export const getRequestsMetadata = (
   }
 
   if (coin instanceof EthCoinData) {
-    const address = generateEthAddressFromXpub(item.xpub, item.coinId);
+    const address = generateEthAddressFromXpub(item.xpub, item.coinId, {
+      forceHex: true
+    });
     const balanceMetadata = ethServer.wallet
       .getBalance(
         {
@@ -168,24 +172,55 @@ export const processResponses = async (
     const balanceRes = responses[0];
 
     const balance = new BigNumber(balanceRes.data.balance ?? 0);
+    const nativeBalance = new BigNumber(balanceRes.data.nativeBalance ?? 0);
+    const reservedStorage = new BigNumber(balanceRes.data.reservedStorage ?? 0);
     if (item.customAccount) {
       await customAccountDb.updateBalance({
         accountId: item.accountId,
         name: item.customAccount,
         balance: balance.toString()
       });
+      await customAccountDb.updateMetadata({
+        accountId: item.accountId,
+        name: item.customAccount,
+        metadata: {
+          near: {
+            nativeBalance: nativeBalance.toString(),
+            reservedStorage: reservedStorage.toString()
+          }
+        }
+      });
     }
     const customAccounts = await customAccountDb.getAll({
       accountId: item.accountId
     });
     let totalBalance = new BigNumber(0);
+    let totalReservedStorage = new BigNumber(0);
+    let totalNativeBalance = new BigNumber(0);
+
     for (const customAccount of customAccounts) {
       totalBalance = totalBalance.plus(new BigNumber(customAccount.balance));
+      totalReservedStorage = totalReservedStorage.plus(
+        new BigNumber(customAccount.metadata?.near?.reservedStorage ?? 0)
+      );
+      totalNativeBalance = totalNativeBalance.plus(
+        new BigNumber(customAccount.metadata?.near?.nativeBalance ?? 0)
+      );
     }
+
     await accountDb.updateBalance({
       accountId: item.accountId,
       totalBalance: totalBalance.toString(),
       totalUnconfirmedBalance: '0'
+    });
+    await accountDb.updateMetadata({
+      accountId: item.accountId,
+      metadata: {
+        near: {
+          nativeBalance: totalNativeBalance.toString(),
+          reservedStorage: totalReservedStorage.toString()
+        }
+      }
     });
   } else if (coin instanceof SolanaCoinData) {
     const balanceRes = responses[0];

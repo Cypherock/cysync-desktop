@@ -122,7 +122,7 @@ const Device: React.FC<StepComponentProps> = ({ handleClose, handleNext }) => {
         inProgress={
           receiveTransaction.pathSent && !receiveTransaction.coinsConfirmed
         }
-        text="Verify the Coin on X1 wallet"
+        text="Verify the account on X1 wallet"
         stylex={{ marginTop: '0rem' }}
       />
       {selectedWallet.passphraseSet && (
