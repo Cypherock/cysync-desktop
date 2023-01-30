@@ -68,8 +68,8 @@ type Props = {
 };
 
 interface ICoin extends Account {
-  name: string;
   value: string;
+  abbr: string;
 }
 
 const WalletConnectAccountSelection: React.FC<Props> = () => {
@@ -108,7 +108,6 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
 
               return {
                 ...e,
-                name: coin.name,
                 value: formatDisplayAmount(
                   new BigNumber(e.totalBalance)
                     .dividedBy(coin.multiplier)
@@ -170,16 +169,15 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
           fullWidth
           options={coinData}
           autoHighlight
-          getOptionLabel={option => (option as any).name}
-          renderOption={(props, option) => {
+          getOptionLabel={(option: ICoin) => option.name}
+          renderOption={(props, option: ICoin) => {
             return (
               <Box component="span" {...props}>
                 <CoinIcon
-                  initial={(option as any).coinId}
+                  initial={option.coinId}
                   style={{ marginRight: '10px' }}
                 />
-                {(option as any).name} ({(option as any).value}{' '}
-                {(option as any).abbr.toUpperCase()})
+                {option.name} ({option.value} {option.abbr.toUpperCase()})
               </Box>
             );
           }}

@@ -3,6 +3,7 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
+import ReactJson from 'react-json-view';
 
 import ErrorDialog from '../../../../../designSystem/designComponents/dialog/errorDialog';
 import TextView from '../../../../../designSystem/designComponents/textComponents/textView';
@@ -25,7 +26,8 @@ const classes = {
   divider: `${PREFIX}-divider`,
   footer: `${PREFIX}-footer`,
   deviceContinueButon: `${PREFIX}-deviceContinueButon`,
-  center: `${PREFIX}-center`
+  center: `${PREFIX}-center`,
+  messageContainer: `${PREFIX}-messageContainer`
 };
 
 const Root = styled(Grid)(({ theme }) => ({
@@ -93,6 +95,13 @@ const Root = styled(Grid)(({ theme }) => ({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%'
+  },
+  [`& .${classes.messageContainer}`]: {
+    display: 'flex',
+    width: '100%',
+    flexDirection: 'column',
+    maxHeight: '300px',
+    overflow: 'auto'
   }
 }));
 
@@ -109,6 +118,7 @@ const WalletConnectSignMessageDevice: React.FC<Props> = ({
   const walletConnect = useWalletConnect();
   const [messageToSign, setMessageToSign] = React.useState('');
   const { deviceConnection, deviceSdkVersion, setIsInFlow } = useConnection();
+  const [useJSON, setUseJSON] = React.useState(false);
 
   const signRequest = async () => {
     let message = '';
@@ -121,6 +131,12 @@ const WalletConnectSignMessageDevice: React.FC<Props> = ({
     } else {
       message = walletConnect.callRequestParams[1];
       setMessageToSign(message);
+    }
+    if (
+      walletConnect.callRequestMethod ===
+      WalletConnectCallRequestMethodMap.SIGN_TYPED
+    ) {
+      setUseJSON(true);
     }
 
     const account = walletConnect.selectedAccount;
@@ -173,14 +189,22 @@ const WalletConnectSignMessageDevice: React.FC<Props> = ({
           <Typography color="textSecondary" variant="h6" gutterBottom>
             Message
           </Typography>
-          <Typography
-            color="textPrimary"
-            variant="body1"
-            gutterBottom
-            sx={{ overflowWrap: 'anywhere' }}
-          >
-            {messageToSign}
-          </Typography>
+          <div className={classes.messageContainer}>
+            {useJSON || (
+              <Typography
+                color="textPrimary"
+                variant="body1"
+                gutterBottom
+                sx={{ overflowWrap: 'anywhere' }}
+              >
+                {messageToSign}
+              </Typography>
+            )}
+
+            {useJSON && (
+              <ReactJson src={JSON.parse(messageToSign)} theme="twilight" />
+            )}
+          </div>
           <Typography color="textSecondary" variant="h6" gutterBottom>
             Follow the instructions on X1 Wallet
           </Typography>

@@ -6,7 +6,10 @@ import React from 'react';
 
 import CustomButton from '../../../../designSystem/designComponents/buttons/button';
 import CoinIcon from '../../../../designSystem/genericComponents/coinIcons';
-import { useWalletConnect } from '../../../../store/provider';
+import {
+  useWalletConnect,
+  WalletConnectContextInterface
+} from '../../../../store/provider';
 
 import ClientMeta from './clientMeta';
 
@@ -41,6 +44,50 @@ const Root = styled(Grid)(() => ({
   }
 }));
 
+export const WalletConnectStatus: React.FC<{
+  walletConnect: WalletConnectContextInterface;
+}> = (props: { walletConnect: WalletConnectContextInterface }) => {
+  return props.walletConnect.selectedAccount ? (
+    <>
+      <Typography
+        align="center"
+        color="textPrimary"
+        variant="body2"
+        gutterBottom
+        sx={{ color: '#7E7D7D', marginLeft: 'auto', marginRight: 'auto' }}
+      >
+        Connected to the following account through your wallet:
+      </Typography>
+
+      <div className={classes.accountDisplayConatiner}>
+        <div
+          style={{
+            marginBottom: '8px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
+          <CoinIcon initial={props.walletConnect.selectedAccount.coinId} />
+          <Typography color="textPrimary" variant="body2" sx={{ ml: 2 }}>
+            {props.walletConnect.selectedAccount.name}
+          </Typography>
+        </div>
+        <Typography
+          color="textPrimary"
+          variant="body2"
+          gutterBottom
+          sx={{ color: '#7E7D7D' }}
+        >
+          {props.walletConnect.selectedAccount.address}
+        </Typography>
+      </div>
+    </>
+  ) : (
+    <></>
+  );
+};
+
 type Props = {
   handleClose: () => void;
 };
@@ -51,44 +98,7 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
   return (
     <Root container>
       <ClientMeta />
-
-      {walletConnect.selectedAccount && (
-        <>
-          <Typography
-            align="center"
-            color="textPrimary"
-            variant="body2"
-            gutterBottom
-            sx={{ color: '#7E7D7D', marginLeft: 'auto', marginRight: 'auto' }}
-          >
-            Connected to the following account through your wallet:
-          </Typography>
-
-          <div className={classes.accountDisplayConatiner}>
-            <div
-              style={{
-                marginBottom: '8px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}
-            >
-              <CoinIcon initial={walletConnect.selectedAccount.coinId} />
-              <Typography color="textPrimary" variant="body2" sx={{ ml: 2 }}>
-                {walletConnect.selectedAccount.name}
-              </Typography>
-            </div>
-            <Typography
-              color="textPrimary"
-              variant="body2"
-              gutterBottom
-              sx={{ color: '#7E7D7D' }}
-            >
-              {walletConnect.selectedAccount.address}
-            </Typography>
-          </div>
-        </>
-      )}
+      <WalletConnectStatus walletConnect={walletConnect} />
 
       <div className={classes.errorButtons}>
         <CustomButton

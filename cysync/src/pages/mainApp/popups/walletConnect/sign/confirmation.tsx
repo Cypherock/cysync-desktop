@@ -3,22 +3,24 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
+import ReactJson from 'react-json-view';
 
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
-import CoinIcon from '../../../../../designSystem/genericComponents/coinIcons';
 import { UseSignMessageValues } from '../../../../../store/hooks';
 import {
   useConnection,
   useWalletConnect,
   WalletConnectCallRequestMethodMap
 } from '../../../../../store/provider';
+import { WalletConnectStatus } from '../connected';
 
 const PREFIX = 'WalletConnect-Connected';
 
 const classes = {
   accountDisplayConatiner: `${PREFIX}-accountDisplayConatiner`,
   errorButtons: `${PREFIX}-errorButtons`,
-  padBottom: `${PREFIX}-padBottom`
+  padBottom: `${PREFIX}-padBottom`,
+  messageContainer: `${PREFIX}-messageContainer`
 };
 
 const Root = styled('div')(() => ({
@@ -43,6 +45,13 @@ const Root = styled('div')(() => ({
   },
   [`& .${classes.padBottom}`]: {
     marginBottom: 5
+  },
+  [`& .${classes.messageContainer}`]: {
+    display: 'flex',
+    width: '100%',
+    flexDirection: 'column',
+    maxHeight: '300px',
+    overflow: 'auto'
   }
 }));
 
@@ -56,6 +65,7 @@ const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
   const walletConnect = useWalletConnect();
   const { beforeFlowStart, deviceConnection } = useConnection();
   const [messageToSign, setMessageToSign] = React.useState('');
+  const [useJSON, setUseJSON] = React.useState(false);
 
   const onContinue = () => {
     if (beforeFlowStart()) {
@@ -75,6 +85,12 @@ const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
       message = walletConnect.callRequestParams[1];
       setMessageToSign(message);
     }
+    if (
+      walletConnect.callRequestMethod ===
+      WalletConnectCallRequestMethodMap.SIGN_TYPED
+    ) {
+      setUseJSON(true);
+    }
   };
 
   React.useEffect(() => {
@@ -85,56 +101,28 @@ const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
 
   return (
     <Root>
-      {walletConnect.selectedAccount && (
-        <>
-          <Typography
-            align="center"
-            color="textPrimary"
-            variant="body2"
-            gutterBottom
-            sx={{ color: '#7E7D7D', marginLeft: 'auto', marginRight: 'auto' }}
-          >
-            Connected to the following account through your wallet:
-          </Typography>
-
-          <div className={classes.accountDisplayConatiner}>
-            <div
-              style={{
-                marginBottom: '8px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}
-            >
-              <CoinIcon initial={walletConnect.selectedAccount.coinId} />
-              <Typography color="textPrimary" variant="body2" sx={{ ml: 2 }}>
-                {walletConnect.selectedAccount.name}
-              </Typography>
-            </div>
-            <Typography
-              color="textPrimary"
-              variant="body2"
-              gutterBottom
-              sx={{ color: '#7E7D7D' }}
-            >
-              {walletConnect.selectedAccount.address}
-            </Typography>
-          </div>
-        </>
-      )}
+      <WalletConnectStatus walletConnect={walletConnect} />
 
       <Typography color="textSecondary" variant="h6" gutterBottom>
         Sign Message:
       </Typography>
 
-      <Typography
-        color="textPrimary"
-        variant="body1"
-        gutterBottom
-        sx={{ overflowWrap: 'anywhere' }}
-      >
-        {messageToSign}
-      </Typography>
+      <div className={classes.messageContainer}>
+        {useJSON || (
+          <Typography
+            color="textPrimary"
+            variant="body1"
+            gutterBottom
+            sx={{ overflowWrap: 'anywhere' }}
+          >
+            {messageToSign}
+          </Typography>
+        )}
+
+        {useJSON && (
+          <ReactJson src={JSON.parse(messageToSign)} theme="twilight" />
+        )}
+      </div>
 
       <div className={classes.errorButtons}>
         {!deviceConnection && (

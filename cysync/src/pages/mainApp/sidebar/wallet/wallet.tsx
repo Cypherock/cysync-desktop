@@ -3,8 +3,8 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
-import SensorsIcon from '@mui/icons-material/Sensors';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import { Avatar } from '@mui/material';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
@@ -16,6 +16,7 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
+import walletConnectLogo from '../../../../assets/icons/wallet_connect.svg';
 import Input from '../../../../designSystem/designComponents/input/input';
 import { useHistory, useWalletData } from '../../../../store/hooks';
 import {
@@ -57,6 +58,9 @@ const Root = styled(Grid)(({ theme }) => ({
     height: '100%',
     textTransform: 'none',
     background: 'rgba(255,255,255,0.05)',
+    '&:hover': {
+      background: 'rgba(255,255,255,0.15)'
+    },
     color: theme.palette.text.primary
   },
   [`& .${classes.walletButtons}`]: {
@@ -337,9 +341,19 @@ const WalletView: React.FC<WalletViewProps> = ({
             </div>
             <IconButton
               onClick={walletConnect.openDialog}
-              sx={{ marginLeft: '12px' }}
+              sx={{
+                marginLeft: '12px',
+                background: 'rgba(255,255,255,0.05)',
+                '&:hover': {
+                  background: 'rgba(255,255,255,0.15)'
+                }
+              }}
             >
-              <SensorsIcon />
+              <Avatar
+                alt="WalletConnect"
+                src={walletConnectLogo}
+                sx={{ width: 24, height: 24 }}
+              />
             </IconButton>
           </Grid>
         </Grid>

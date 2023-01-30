@@ -16,7 +16,7 @@ import path from 'path';
 
 import packageJson from '../package.json';
 
-// Sets config variable on envirnment, must be set before any other import
+// Sets config variable on environment, must be set before any other import
 import './mainProcess';
 import { handleError, reportCrash } from './mainProcess/crashReporter';
 import logger from './mainProcess/logger';
@@ -135,6 +135,7 @@ if (
 }
 
 const handleUriOpen = async (uri: string) => {
+  logger.info('Deep link uri', { uri });
   try {
     const newUrl = uri.startsWith('cypherock://') ? uri : 'cypherock://' + uri;
     const url = new URL(newUrl);
@@ -504,6 +505,5 @@ app.on('activate', () => {
 app.on('open-url', (event, url) => {
   // Handle deeplink for macos and linux
   event.preventDefault();
-  logger.info('deep link uri', { url });
   handleUriOpen(url);
 });

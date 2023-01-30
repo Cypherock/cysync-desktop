@@ -152,7 +152,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       setSelectedAccount({
         ...(await getCoinWithPrices(coin)),
         chain: coinMeta.chain,
-        name: coinMeta.name,
+        name: coin.name,
         address,
         passphraseExists: walletData.passphraseSet,
         pinExists: walletData.passwordSet
