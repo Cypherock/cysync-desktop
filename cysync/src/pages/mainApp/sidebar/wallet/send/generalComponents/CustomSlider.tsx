@@ -146,8 +146,8 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
     handleTransactionFeeChangeSlider(v);
   };
 
-  const stepValue =
-    step ?? (mediumFee < 5 ? (mediumFee < 0.1 ? 0.00001 : 0.1) : 0.2);
+  // Use specified step value or '1% of the value' as step value
+  const stepValue = step ?? Number((mediumFee * 0.01).toPrecision(1));
 
   return (
     <Root className={classes.root}>
