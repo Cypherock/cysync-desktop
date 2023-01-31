@@ -1,4 +1,5 @@
 import { COINS } from '@cypherock/communication';
+import { TriggeredBy } from '@src/store/hooks';
 import React, { useEffect } from 'react';
 
 import DialogBox from '../../../../../designSystem/designComponents/dialog/dialogBox';
@@ -26,7 +27,29 @@ const SenderData = [
   ['Confirmation', Confirmation]
 ];
 
-const WalletSend = () => {
+interface WalletSendProps {
+  onSuccess?: (result: string) => void;
+  onReject?: (reason?: string) => void;
+  txnParams?: {
+    from: string;
+    to: string;
+    data?: string;
+    gas?: string; // hex
+    gasPrice?: string; // hex
+    value?: string; // hex
+    nonce?: string; // hex
+  };
+  resultType?: 'signature' | 'hash';
+  triggeredBy?: TriggeredBy;
+}
+
+const WalletSend: React.FC<WalletSendProps> = ({
+  onSuccess,
+  onReject,
+  txnParams,
+  resultType,
+  triggeredBy
+}) => {
   const { sendForm, setSendForm, sendTransaction } =
     useSendTransactionContext();
 
@@ -53,6 +76,7 @@ const WalletSend = () => {
   const handleSendFormClose = (abort?: boolean) => {
     if (abort) {
       sendTransaction.cancelSendTxn(deviceConnection);
+      if (onReject) onReject('Rejected');
     }
     Analytics.Instance.event(
       Analytics.Categories.SEND_TXN,
@@ -78,6 +102,11 @@ const WalletSend = () => {
           <StepperForm
             stepsData={SenderData}
             handleClose={handleSendFormClose}
+            onSuccess={onSuccess}
+            onReject={onReject}
+            txnParams={txnParams}
+            resultType={resultType}
+            triggeredBy={triggeredBy}
           />
         }
       />

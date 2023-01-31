@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useUpdater } from '../../../../store/provider';
+import { useUpdater } from '../../../../../store/provider';
 
 import PersistentInfo from './persistent';
 

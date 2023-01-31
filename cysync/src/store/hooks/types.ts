@@ -2,24 +2,12 @@ import BigNumber from 'bignumber.js';
 import PropTypes from 'prop-types';
 
 import {
-  Account,
   CustomAccount,
   InputOutput,
   IOtype,
   Token,
   Transaction
 } from '../database/databaseInit';
-
-export interface DisplayCoin extends Account {
-  displayValue: string;
-  displayPrice: string;
-  displayBalance: string;
-  isEmpty: boolean;
-  price: number;
-  priceLastUpdatedAt?: Date;
-  displayNearReservedForProtocol?: string;
-  displayNearNativeBalance?: string;
-}
 
 export interface DisplayToken extends Token {
   displayValue: string;

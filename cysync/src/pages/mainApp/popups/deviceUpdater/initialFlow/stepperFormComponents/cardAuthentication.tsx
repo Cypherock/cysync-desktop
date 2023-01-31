@@ -5,16 +5,16 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
-import success from '../../../../../assets/icons/generic/success.png';
-import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
-import AvatarIcon from '../../../../../designSystem/designComponents/icons/AvatarIcon';
-import Icon from '../../../../../designSystem/designComponents/icons/Icon';
-import ErrorExclamation from '../../../../../designSystem/iconGroups/errorExclamation';
-import { useCardAuth } from '../../../../../store/hooks/flows';
-import { useConnection } from '../../../../../store/provider';
-import Analytics from '../../../../../utils/analytics';
-import logger from '../../../../../utils/logger';
-import DynamicTextView from '../../../../mainApp/sidebar/settings/tabViews/deviceHealth/dynamicTextView';
+import success from '../../../../../../assets/icons/generic/success.png';
+import CustomButton from '../../../../../../designSystem/designComponents/buttons/button';
+import AvatarIcon from '../../../../../../designSystem/designComponents/icons/AvatarIcon';
+import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
+import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
+import { useCardAuth } from '../../../../../../store/hooks/flows';
+import { useConnection } from '../../../../../../store/provider';
+import Analytics from '../../../../../../utils/analytics';
+import logger from '../../../../../../utils/logger';
+import DynamicTextView from '../../../../../mainApp/sidebar/settings/tabViews/deviceHealth/dynamicTextView';
 
 import {
   StepComponentProps,

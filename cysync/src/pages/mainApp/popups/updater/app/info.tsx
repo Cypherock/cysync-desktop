@@ -5,7 +5,7 @@ import { shell } from 'electron';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import Button from '../../../../designSystem/designComponents/buttons/button';
+import Button from '../../../../../designSystem/designComponents/buttons/button';
 
 const PREFIX = 'UpdaterAppInfo';
 

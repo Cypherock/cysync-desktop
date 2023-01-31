@@ -439,6 +439,9 @@ export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
     [DeviceErrorType.FLASH_NACK]: {
       message: 'Flash Negative Acknowledgement'
     },
+    [DeviceErrorType.FEATURE_NOT_SUPPORTED]: {
+      message: 'Feature Not Supported\nUpdate your device'
+    },
     [DeviceErrorType.EXECUTING_OTHER_COMMAND]: {
       message: 'The device is executing some other command'
     },

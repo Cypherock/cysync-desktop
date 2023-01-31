@@ -4,10 +4,13 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import CustomButton from '../../../designSystem/designComponents/buttons/button';
-import { DeviceConnectionState, useConnection } from '../../../store/provider';
-import Analytics from '../../../utils/analytics';
-import logger from '../../../utils/logger';
+import CustomButton from '../../../../designSystem/designComponents/buttons/button';
+import {
+  DeviceConnectionState,
+  useConnection
+} from '../../../../store/provider';
+import Analytics from '../../../../utils/analytics';
+import logger from '../../../../utils/logger';
 
 const PREFIX = 'DeviceUpdater-Confirmation';
 

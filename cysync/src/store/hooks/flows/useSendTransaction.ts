@@ -9,6 +9,8 @@ import {
   EthCoinData,
   EthCoinMap,
   ETHCOINS,
+  FeatureName,
+  isFeatureEnabled,
   NearCoinData,
   NearCoinMap,
   SolanaCoinData,
@@ -39,9 +41,13 @@ import {
 } from '../../../errors';
 import Analytics from '../../../utils/analytics';
 import logger from '../../../utils/logger';
-import { accountDb, addressDb, transactionDb } from '../../database';
+import {
+  accountDb,
+  addressDb,
+  DisplayCoin,
+  transactionDb
+} from '../../database';
 import { useStatusCheck } from '../../provider/transactionStatusProvider';
-import { DisplayCoin } from '../types';
 
 import * as flowHandlers from './handlers';
 
@@ -187,6 +193,11 @@ export const verifyAddress = (address: string, coin: DisplayCoin) => {
   );
 };
 
+export enum TriggeredBy {
+  SendFlow = 0,
+  WalletConnect
+}
+
 export interface HandleSendTransactionOptions {
   connection: DeviceConnection;
   sdkVersion: string;
@@ -204,12 +215,16 @@ export interface HandleSendTransactionOptions {
   outputList: any[];
   fees: number;
   isSendAll: boolean | undefined;
-  data?: {
+  data: {
     gasLimit: number;
     contractAddress?: string;
     contractAbbr?: string;
+    contractData?: string;
+    nonce?: string;
     subCoinId?: string;
   };
+  onlySignature?: boolean;
+  triggeredBy?: TriggeredBy;
 }
 
 export interface UseSendTransactionValues {
@@ -236,6 +251,7 @@ export interface UseSendTransactionValues {
   passphraseEntered: boolean;
   cardsTapped: boolean;
   signedTxn: string;
+  signature: string;
   hash: string;
   setHash: React.Dispatch<React.SetStateAction<string>>;
   totalFees: string;
@@ -297,6 +313,7 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [passphraseEntered, setPassphraseEntered] = useState(false);
   const [cardsTapped, setCardsTapped] = useState(false);
   const [signedTxn, setSignedTxn] = useState('');
+  const [signature, setSignature] = useState('');
   const [hash, setHash] = useState('');
   const [metadataSent, setMetadataSent] = useState(false);
   const sendTransaction = new TransactionSender();
@@ -359,7 +376,13 @@ export const useSendTransaction: UseSendTransaction = () => {
           }
         }
 
-        if (!hasInput) {
+        const coin = COINS[coinId];
+
+        if (!coin) {
+          throw new Error(`Invalid coinType ${coinId}`);
+        }
+
+        if (coin.group !== CoinGroup.Ethereum && !hasInput) {
           setApproxTotalFees(0);
           setSendMaxAmount('0');
           setEstimationError(undefined);
@@ -492,7 +515,9 @@ export const useSendTransaction: UseSendTransaction = () => {
       outputList,
       fees,
       isSendAll,
-      data
+      data,
+      onlySignature,
+      triggeredBy
     }) => {
       clearAll();
 
@@ -504,7 +529,9 @@ export const useSendTransaction: UseSendTransaction = () => {
         outputList,
         fees,
         isSendAll,
-        data
+        data,
+        onlySignature,
+        triggeredBy
       });
       logger.debug('SendTransaction Xpub', {
         xpub
@@ -513,6 +540,17 @@ export const useSendTransaction: UseSendTransaction = () => {
       if (!connection) {
         const cyError = new CyError(DeviceErrorType.NOT_CONNECTED);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
+        return;
+      }
+
+      if (
+        !isFeatureEnabled(FeatureName.WalletConnectSupport, sdkVersion) &&
+        triggeredBy === TriggeredBy.WalletConnect
+      ) {
+        const cyError = new CyError(DeviceErrorType.FEATURE_NOT_SUPPORTED);
+        setErrorObj(
+          handleErrors(errorObj, cyError, flowName, { coinId, sdkVersion })
+        );
         return;
       }
 
@@ -668,6 +706,19 @@ export const useSendTransaction: UseSendTransaction = () => {
         setMetadataSent(true);
       });
 
+      sendTransaction.on('signature', sig => {
+        if (sig) {
+          logger.verbose('SendTransaction: Signature generated', { coinId });
+          setSignature(sig);
+        } else {
+          const cyError = new CyError(CysyncError.SEND_TXN_UNKNOWN_ERROR);
+          cyError.pushSubErrors(CysyncError.SEND_TXN_SIGNED_TXN_NOT_FOUND);
+          setErrorObj(
+            handleErrors(errorObj, cyError, flowName, { txn: sig, coinId })
+          );
+        }
+      });
+
       sendTransaction.on('signedTxn', txn => {
         if (txn) {
           logger.verbose('SendTransaction: Signed txn generated', { coinId });
@@ -722,7 +773,8 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputList,
           fee: fees,
           isSendAll,
-          data
+          data,
+          onlySignature
         });
         setIsInFlow(false);
         logger.info('SendTransaction: Completed', { coinId });
@@ -1009,6 +1061,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     passphraseEntered,
     cardsTapped,
     signedTxn,
+    signature,
     metadataSent,
     hash,
     setHash,

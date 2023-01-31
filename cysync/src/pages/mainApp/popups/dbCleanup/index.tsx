@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import DialogBox from '../../../designSystem/designComponents/dialog/dialogBox';
+import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
 import {
   addressDb,
   coinDb,
@@ -12,9 +12,9 @@ import {
   tokenDb,
   transactionDb,
   walletDb
-} from '../../../store/database';
-import Analytics from '../../../utils/analytics';
-import logger from '../../../utils/logger';
+} from '../../../../store/database';
+import Analytics from '../../../../utils/analytics';
+import logger from '../../../../utils/logger';
 
 import ConfirmationComponent from './confirmation';
 
