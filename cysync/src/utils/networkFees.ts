@@ -35,7 +35,7 @@ const getFees = async (coinId: string) => {
       );
     }
 
-    const fees = value.dividedBy(1000000000).integerValue().toNumber();
+    const fees = Number(value.dividedBy(1000000000).toPrecision(3));
 
     if (fees <= 0) {
       throw new Error(
