@@ -79,7 +79,9 @@ const mapFromCoinDbToAccountDb: MapFunction<Account> = async ({ allCoins }) => {
   const accountList: Account[] = [];
 
   for (const coin of allCoins) {
-    const coinObj = Object.values(COINS).find(elem => elem.oldId === coin.slug);
+    const coinObj = Object.values(COINS).find(
+      elem => elem.oldId && elem.oldId === coin.slug
+    );
 
     if (!coinObj) {
       logger.warn('Invalid slug found in coinDb', { coin });
@@ -171,7 +173,7 @@ const mapAddressDb: MapFunction<Address> = async ({
 
   for (const address of allAddresses) {
     const coinObj = Object.values(COINS).find(
-      elem => elem.oldId === address.coinType
+      elem => elem.oldId && elem.oldId === address.coinType
     );
 
     if (!coinObj) {
@@ -211,7 +213,9 @@ const mapCoinPriceDb: MapFunction<CoinPrice> = async ({
   const newCoinPriceList: CoinPrice[] = [];
 
   for (const coin of allCoins) {
-    const coinObj = Object.values(COINS).find(elem => elem.oldId === coin.slug);
+    const coinObj = Object.values(COINS).find(
+      elem => elem.oldId && elem.oldId === coin.slug
+    );
 
     if (!coinObj) {
       logger.warn('Invalid slug found in coinDb', { coin });
@@ -230,7 +234,7 @@ const mapCoinPriceDb: MapFunction<CoinPrice> = async ({
   const allTokens = await tokenDb.getAll({ databaseVersion: 'v1' });
   for (const token of allTokens) {
     const coinObj = Object.values(COINS).find(
-      elem => elem.oldId === token.coin
+      elem => elem.oldId && elem.oldId === token.coin
     );
 
     if (!coinObj) {
@@ -239,7 +243,7 @@ const mapCoinPriceDb: MapFunction<CoinPrice> = async ({
     }
 
     const tokenObj = Object.values(coinObj.tokenList).find(
-      elem => elem.oldId === token.slug
+      elem => elem.oldId && elem.oldId === token.slug
     );
 
     if (!tokenObj) {
@@ -270,7 +274,7 @@ const mapCustomAccountDb: MapFunction<CustomAccount> = async ({
 
   for (const customAccount of allCustomAccounts) {
     const coinObj = Object.values(COINS).find(
-      elem => elem.oldId === customAccount.coin
+      elem => elem.oldId && elem.oldId === customAccount.coin
     );
 
     if (!coinObj) {
@@ -392,7 +396,7 @@ const mapTokenDb: MapFunction<Token> = async () => {
 
   // for (const token of allTokens) {
   //   const coinObj = Object.values(COINS).find(
-  //     elem => elem.oldId === token.coin
+  //     elem => elem.oldId && elem.oldId === token.coin
   //   );
 
   //   if (!coinObj) {
@@ -403,7 +407,7 @@ const mapTokenDb: MapFunction<Token> = async () => {
   //   }
 
   //   const tokenObj = Object.values(coinObj.tokenList).find(
-  //     elem => elem.oldId === token.slug
+  //     elem => elem.oldId && elem.oldId === token.slug
   //   );
 
   //   if (!tokenObj) {
@@ -451,7 +455,7 @@ const mapTransactionDb: MapFunction<Transaction> = async ({
 
     if (transaction.coin && transaction.coin !== transaction.slug) {
       parentCoinObj = Object.values(COINS).find(
-        elem => elem.oldId === transaction.coin
+        elem => elem.oldId && elem.oldId === transaction.coin
       );
 
       if (!parentCoinObj) {
@@ -462,11 +466,11 @@ const mapTransactionDb: MapFunction<Transaction> = async ({
       }
 
       coinObj = Object.values(parentCoinObj.tokenList).find(
-        elem => elem.oldId === transaction.slug
+        elem => elem.oldId && elem.oldId === transaction.slug
       );
     } else {
       coinObj = Object.values(COINS).find(
-        elem => elem.oldId === transaction.slug
+        elem => elem.oldId && elem.oldId === transaction.slug
       );
     }
 

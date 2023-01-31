@@ -2,7 +2,8 @@ import {
   CoinGroup,
   COINS,
   Erc20CoinData,
-  EthCoinData
+  EthCoinData,
+  EthCoinMap
 } from '@cypherock/communication';
 import { EthereumWallet } from '@cypherock/wallet';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -311,7 +312,10 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     const coin = COINS[coinDetails.coinId];
 
     if (!token) {
-      setGasLimit(21000);
+      let limit = 21000;
+      // Refer: https://api.arbiscan.io/api?module=proxy&action=eth_estimateGas&data=0x&to=0xf6c3c3621f42ec1f1cd1207bb1571d93646ab29a&value=0xff22&gasPrice=0x51da038cc&gas=0x5f5e0ff&apikey=YourApiKeyToken
+      if (coin.id === EthCoinMap.arbitrum) limit = 255595;
+      setGasLimit(limit);
       return;
     }
 
@@ -402,7 +406,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   useEffect(() => {
     sendTransaction.setIsEstimatingFees(true);
     debouncedCaclFee();
-    if (!transactionFee || (parseInt(transactionFee, 10) || 0) <= 0) {
+    if (!transactionFee || (parseFloat(transactionFee) || 0) <= 0) {
       setButtonDisabled(true);
     } else {
       setButtonDisabled(false);
