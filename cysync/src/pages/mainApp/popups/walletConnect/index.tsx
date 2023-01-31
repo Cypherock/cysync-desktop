@@ -23,7 +23,7 @@ const WalletConnectPopup = () => {
         open={isOpen}
         handleClose={handleClose}
         isClosePresent
-        dialogHeading="Wallet Connect"
+        dialogHeading="WalletConnect"
         restComponents={<UrlFormComponent handleClose={handleClose} />}
       />
     );
@@ -37,7 +37,7 @@ const WalletConnectPopup = () => {
         open={isOpen}
         handleClose={handleClose}
         isClosePresent
-        dialogHeading="Wallet Connect"
+        dialogHeading="WalletConnect"
         restComponents={<AccountSelection handleClose={handleClose} />}
       />
     );
@@ -54,7 +54,7 @@ const WalletConnectPopup = () => {
           open={isOpen}
           handleClose={handleClose}
           isClosePresent
-          dialogHeading="Wallet Connect"
+          dialogHeading="WalletConnect"
           restComponents={<ConnectedPopup handleClose={handleClose} />}
         />
       </>
