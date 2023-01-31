@@ -23,7 +23,10 @@ import React, { useEffect, useState } from 'react';
 import CreateComponent from '../../../../../components/createComponent';
 import ErrorBox from '../../../../../designSystem/designComponents/dialog/errorDialog';
 import { useDebouncedFunction } from '../../../../../store/hooks';
-import { changeFormatOfOutputList } from '../../../../../store/hooks/flows';
+import {
+  changeFormatOfOutputList,
+  TriggeredBy
+} from '../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
   useCustomAccountContext,
@@ -214,6 +217,7 @@ type StepperProps = {
     nonce?: string; // hex
   };
   resultType?: 'signature' | 'hash';
+  triggeredBy?: TriggeredBy;
 };
 
 const SendForm: React.FC<StepperProps> = ({
@@ -222,7 +226,8 @@ const SendForm: React.FC<StepperProps> = ({
   onSuccess,
   onReject,
   txnParams,
-  resultType
+  resultType,
+  triggeredBy
 }) => {
   const { sendForm, sendTransaction } = useSendTransactionContext();
   const [activeStep, setActiveStep] = useState(0);
@@ -736,7 +741,8 @@ const SendForm: React.FC<StepperProps> = ({
             onSuccess,
             onReject,
             txnParams,
-            resultType
+            resultType,
+            triggeredBy
           }}
         />
       </div>
@@ -758,7 +764,8 @@ SendForm.propTypes = {
     value: PropTypes.string,
     nonce: PropTypes.string
   }),
-  resultType: PropTypes.oneOf(['signature', 'hash'])
+  resultType: PropTypes.oneOf(['signature', 'hash']),
+  triggeredBy: PropTypes.number
 };
 
 export default SendForm;

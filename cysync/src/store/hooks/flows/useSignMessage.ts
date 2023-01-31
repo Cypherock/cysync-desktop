@@ -2,7 +2,9 @@ import {
   COINS,
   DeviceConnection,
   DeviceError,
-  DeviceErrorType
+  DeviceErrorType,
+  FeatureName,
+  isFeatureEnabled
 } from '@cypherock/communication';
 import { SignMessage, WalletStates } from '@cypherock/protocols';
 import { WalletError } from '@cypherock/wallet';
@@ -124,6 +126,12 @@ export const useSignMessage: UseSignMessage = () => {
 
     if (!connection) {
       const cyError = new CyError(DeviceErrorType.NOT_CONNECTED);
+      setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
+      return;
+    }
+
+    if (!isFeatureEnabled(FeatureName.WalletConnectSupport, sdkVersion)) {
+      const cyError = new CyError(DeviceErrorType.FEATURE_NOT_SUPPORTED);
       setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
       return;
     }

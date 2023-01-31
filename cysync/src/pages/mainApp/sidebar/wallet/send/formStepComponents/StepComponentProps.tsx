@@ -1,3 +1,4 @@
+import { TriggeredBy } from '@src/store/hooks';
 import BigNumber from 'bignumber.js';
 import PropTypes from 'prop-types';
 
@@ -75,6 +76,7 @@ export interface StepComponentProps {
     nonce?: string; // hex
   };
   resultType?: 'signature' | 'hash';
+  triggeredBy?: TriggeredBy;
 }
 
 export const StepComponentPropTypes = {

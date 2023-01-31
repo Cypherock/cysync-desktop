@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
-import { useSendTransaction } from '../../../../../store/hooks/flows';
+import {
+  TriggeredBy,
+  useSendTransaction
+} from '../../../../../store/hooks/flows';
 import {
   CurrentCoinContext,
   SelectedWalletContext,
@@ -75,6 +78,7 @@ const WalletConnectSign = () => {
                   ? 'hash'
                   : 'signature'
               }
+              triggeredBy={TriggeredBy.WalletConnect}
               onSuccess={onSuccess}
               onReject={onReject}
               txnParams={walletConnect.callRequestParams[0]}

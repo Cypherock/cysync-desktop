@@ -1,4 +1,5 @@
 import { COINS } from '@cypherock/communication';
+import { TriggeredBy } from '@src/store/hooks';
 import React, { useEffect } from 'react';
 
 import DialogBox from '../../../../../designSystem/designComponents/dialog/dialogBox';
@@ -39,13 +40,15 @@ interface WalletSendProps {
     nonce?: string; // hex
   };
   resultType?: 'signature' | 'hash';
+  triggeredBy?: TriggeredBy;
 }
 
 const WalletSend: React.FC<WalletSendProps> = ({
   onSuccess,
   onReject,
   txnParams,
-  resultType
+  resultType,
+  triggeredBy
 }) => {
   const { sendForm, setSendForm, sendTransaction } =
     useSendTransactionContext();
@@ -103,6 +106,7 @@ const WalletSend: React.FC<WalletSendProps> = ({
             onReject={onReject}
             txnParams={txnParams}
             resultType={resultType}
+            triggeredBy={triggeredBy}
           />
         }
       />

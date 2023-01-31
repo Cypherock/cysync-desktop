@@ -9,6 +9,8 @@ import {
   EthCoinData,
   EthCoinMap,
   ETHCOINS,
+  FeatureName,
+  isFeatureEnabled,
   NearCoinData,
   NearCoinMap,
   SolanaCoinData,
@@ -191,6 +193,11 @@ export const verifyAddress = (address: string, coin: DisplayCoin) => {
   );
 };
 
+export enum TriggeredBy {
+  SendFlow = 0,
+  WalletConnect
+}
+
 export interface HandleSendTransactionOptions {
   connection: DeviceConnection;
   sdkVersion: string;
@@ -217,6 +224,7 @@ export interface HandleSendTransactionOptions {
     subCoinId?: string;
   };
   onlySignature?: boolean;
+  triggeredBy?: TriggeredBy;
 }
 
 export interface UseSendTransactionValues {
@@ -508,7 +516,8 @@ export const useSendTransaction: UseSendTransaction = () => {
       fees,
       isSendAll,
       data,
-      onlySignature
+      onlySignature,
+      triggeredBy
     }) => {
       clearAll();
 
@@ -521,7 +530,8 @@ export const useSendTransaction: UseSendTransaction = () => {
         fees,
         isSendAll,
         data,
-        onlySignature
+        onlySignature,
+        triggeredBy
       });
       logger.debug('SendTransaction Xpub', {
         xpub
@@ -530,6 +540,17 @@ export const useSendTransaction: UseSendTransaction = () => {
       if (!connection) {
         const cyError = new CyError(DeviceErrorType.NOT_CONNECTED);
         setErrorObj(handleErrors(errorObj, cyError, flowName, { coinId }));
+        return;
+      }
+
+      if (
+        !isFeatureEnabled(FeatureName.WalletConnectSupport, sdkVersion) &&
+        triggeredBy === TriggeredBy.WalletConnect
+      ) {
+        const cyError = new CyError(DeviceErrorType.FEATURE_NOT_SUPPORTED);
+        setErrorObj(
+          handleErrors(errorObj, cyError, flowName, { coinId, sdkVersion })
+        );
         return;
       }
 
