@@ -51,7 +51,16 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: "recursive"
+      - name: Windows Certificate Config
+        id: write_file
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: 'win-certificate.pfx'
+          encodedString: ${{ secrets.CERTIFICATE_WINDOWS_PFX }}
       - name: Use Node.js ${{ matrix.node-version }}
+        env:
+          WINDOWS_PFX_FILE: ${{ steps.write_file.outputs.filePath }}
+          WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
