@@ -798,7 +798,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
                 ? batchRecipientData[0].errorRecipient
                 : undefined
             }
-            isClipboardPresent
+            isClipboardPresent={!txnParams?.to}
             handleCopyFromClipboard={e => {
               handleCopyFromClipboard(e);
               debouncedHandleCheckAddresses();
