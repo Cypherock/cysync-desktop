@@ -70,7 +70,7 @@ export const WalletConnectMessage: React.FC<{
           color="textPrimary"
           variant="body1"
           gutterBottom
-          sx={{ overflowWrap: 'anywhere' }}
+          sx={{ overflowWrap: 'anywhere', whiteSpace: 'pre-line' }}
         >
           {message}
         </Typography>

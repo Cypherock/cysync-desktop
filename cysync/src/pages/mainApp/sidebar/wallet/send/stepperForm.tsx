@@ -239,9 +239,7 @@ const SendForm: React.FC<StepperProps> = ({
   const [gasLimitError, setGasLimitError] = React.useState<string | undefined>(
     undefined
   );
-  const [estimateGasLimit, setEstimateGasLimit] = React.useState(
-    !txnParams?.gas
-  );
+  const [estimateGasLimit, setEstimateGasLimit] = React.useState(true);
 
   // State Management Semaphore for Button of Transaction Type
   // 0 => Single Transaction

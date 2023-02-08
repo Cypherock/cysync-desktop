@@ -149,7 +149,8 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
           renderInput={params => (
             <DefaultTextField
               {...params}
-              label="Select a Wallet"
+              hiddenLabel
+              placeholder="Select a Wallet"
               inputProps={{
                 ...params.inputProps,
                 autoComplete: 'wallet-connect-wallet' // disable autocomplete and autofill
@@ -184,7 +185,8 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
           renderInput={params => (
             <DefaultTextField
               {...params}
-              label="Choose an account"
+              hiddenLabel
+              placeholder="Select an Account"
               inputProps={{
                 ...params.inputProps,
                 autoComplete: 'wallet-connect-account' // disable autocomplete and autofill
