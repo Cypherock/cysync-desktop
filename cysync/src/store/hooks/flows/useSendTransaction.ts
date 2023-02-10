@@ -235,8 +235,9 @@ export interface UseSendTransactionValues {
     fromAddress: string,
     toAddress: string,
     network: string,
-    contractAddress: string,
-    amount: string
+    amount: string,
+    contractAddress?: string,
+    data?: string
   ) => Promise<any>;
   deviceConnected: boolean;
   setDeviceConnected: React.Dispatch<React.SetStateAction<boolean>>;
@@ -458,25 +459,34 @@ export const useSendTransaction: UseSendTransaction = () => {
     fromAddress: string,
     toAddress: string,
     network: string,
-    contractAddress: string,
-    amount: string
+    amount: string,
+    contractAddress?: string,
+    data?: string
   ) => {
     return new Promise(resolve => {
       const subFlowName = Analytics.Categories.ESTIMATE_GAS_LIMIT;
       logger.info(`${subFlowName}: Initiated', ${contractAddress}`);
-      Server.eth.transaction
-        .getContractFees({
-          fromAddress,
-          toAddress: toAddress.trim(),
-          network,
-          contractAddress,
-          amount,
-          responseType: 'v2'
-        })
+      (data
+        ? Server.eth.transaction.getEstimatedGas({
+            from: fromAddress,
+            to: toAddress,
+            network,
+            amount,
+            data
+          })
+        : Server.eth.transaction.getContractFees({
+            fromAddress,
+            toAddress: toAddress.trim(),
+            network,
+            contractAddress,
+            amount,
+            responseType: 'v2'
+          })
+      )
         .request()
         .then(res => {
           logger.info(`${subFlowName}: Completed', ${contractAddress}`);
-          resolve(res.data.fees);
+          resolve(res?.data?.fees);
         })
         .catch(e => {
           logger.info(`${subFlowName}: Error', ${contractAddress}`);
