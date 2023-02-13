@@ -486,7 +486,9 @@ export const useSendTransaction: UseSendTransaction = () => {
         .request()
         .then(res => {
           logger.info(`${subFlowName}: Completed', ${contractAddress}`);
-          resolve(res?.data?.fees);
+          if (res?.data?.fees === undefined)
+            throw new Error('Invalid Response');
+          resolve(res.data.fees);
         })
         .catch(e => {
           logger.info(`${subFlowName}: Error', ${contractAddress}`);
