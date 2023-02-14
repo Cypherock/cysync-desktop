@@ -32,13 +32,13 @@ const WalletConnectSign = () => {
     const isOpen = !!(
       walletConnect.connectionState ===
         WalletConnectConnectionState.CONNECTED &&
-      walletConnect.callRequestId &&
+      walletConnect.callRequestData &&
       (
         [
           WalletConnectCallRequestMethodMap.ETH_SEND_TXN,
           WalletConnectCallRequestMethodMap.ETH_SIGN_TXN
         ] as WalletConnectCallRequestMethod[]
-      ).includes(walletConnect.callRequestMethod)
+      ).includes(walletConnect.callRequestData.method)
     );
 
     if (sendForm !== isOpen) {
@@ -49,9 +49,7 @@ const WalletConnectSign = () => {
   if (
     walletConnect.selectedWallet &&
     walletConnect.selectedAccount &&
-    walletConnect.callRequestParams &&
-    walletConnect.callRequestId &&
-    walletConnect.callRequestMethod &&
+    walletConnect.callRequestData &&
     sendForm
   ) {
     return (
@@ -73,7 +71,7 @@ const WalletConnectSign = () => {
           >
             <Send
               resultType={
-                walletConnect.callRequestMethod ===
+                walletConnect.callRequestData.method ===
                 WalletConnectCallRequestMethodMap.ETH_SEND_TXN
                   ? 'hash'
                   : 'signature'
@@ -81,7 +79,10 @@ const WalletConnectSign = () => {
               triggeredBy={TriggeredBy.WalletConnect}
               onSuccess={onSuccess}
               onReject={onReject}
-              txnParams={{ value: 0, ...walletConnect.callRequestParams[0] }}
+              txnParams={{
+                value: 0,
+                ...walletConnect.callRequestData.params[0]
+              }}
             />
           </SendTransactionContext.Provider>
         </CurrentCoinContext.Provider>

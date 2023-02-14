@@ -1,19 +1,14 @@
-import { FeatureName, isFeatureEnabled } from '@cypherock/communication';
 import { styled, useTheme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React from 'react';
 import ReactJson from 'react-json-view';
 
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
-import { UseSignMessageValues } from '../../../../../store/hooks';
-import {
-  useConnection,
-  useWalletConnect,
-  WalletConnectCallRequestMethodMap
-} from '../../../../../store/provider';
+import { useConnection, useWalletConnect } from '../../../../../store/provider';
 import { WalletConnectStatus } from '../connected';
+
+import { ISignProps, SignPropTypes } from './types';
 
 const PREFIX = 'WalletConnect-Connected';
 
@@ -78,7 +73,7 @@ export const WalletConnectMessage: React.FC<{
 
       {isJSON && (
         <ReactJson
-          src={JSON.parse(message)}
+          src={message as any}
           // theme="tomorrow"
           theme={{
             base00: '#1F262E',
@@ -111,58 +106,20 @@ export const WalletConnectMessage: React.FC<{
   );
 };
 
-type Props = {
-  handleNext: () => void;
-  handleClose: () => void;
-  signMessage: UseSignMessageValues;
-};
-
-const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
+const WalletConnectSignConfirm: React.FC<ISignProps> = ({
+  handleNext,
+  walletConnectSupported,
+  messageToSign,
+  isJSON
+}) => {
   const walletConnect = useWalletConnect();
-  const { beforeFlowStart, deviceConnection, deviceSdkVersion } =
-    useConnection();
-  const [messageToSign, setMessageToSign] = React.useState('');
-  const [walletConnectSupported, setWalletConnectSupported] =
-    React.useState(false);
-  const [useJSON, setUseJSON] = React.useState(false);
+  const { beforeFlowStart, deviceConnection } = useConnection();
 
   const onContinue = () => {
     if (beforeFlowStart()) {
       handleNext();
     }
   };
-  useEffect(() => {
-    if (deviceSdkVersion)
-      setWalletConnectSupported(
-        isFeatureEnabled(FeatureName.WalletConnectSupport, deviceSdkVersion)
-      );
-  }, [deviceSdkVersion]);
-
-  const decodeMessage = () => {
-    let message = '';
-    if (
-      walletConnect.callRequestMethod ===
-      WalletConnectCallRequestMethodMap.SIGN_PERSONAL
-    ) {
-      message = walletConnect.callRequestParams[0];
-      setMessageToSign(Buffer.from(message.slice(2), 'hex').toString());
-    } else {
-      message = walletConnect.callRequestParams[1];
-      setMessageToSign(message);
-    }
-    if (
-      walletConnect.callRequestMethod ===
-      WalletConnectCallRequestMethodMap.SIGN_TYPED
-    ) {
-      setUseJSON(true);
-    }
-  };
-
-  React.useEffect(() => {
-    if (walletConnect.callRequestMethod && walletConnect.callRequestParams) {
-      decodeMessage();
-    }
-  }, [walletConnect.callRequestParams, walletConnect.callRequestMethod]);
 
   return (
     <Root>
@@ -173,7 +130,7 @@ const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
       </Typography>
 
       <WalletConnectMessage
-        isJSON={useJSON}
+        isJSON={isJSON}
         message={messageToSign}
         className={classes.messageContainer}
       />
@@ -208,10 +165,6 @@ const WalletConnectSignConfirm: React.FC<Props> = ({ handleNext }) => {
   );
 };
 
-WalletConnectSignConfirm.propTypes = {
-  handleNext: PropTypes.func.isRequired,
-  handleClose: PropTypes.func.isRequired,
-  signMessage: PropTypes.any.isRequired
-};
+WalletConnectSignConfirm.propTypes = SignPropTypes;
 
 export default WalletConnectSignConfirm;

@@ -1,3 +1,4 @@
+import { FeatureName, isFeatureEnabled } from '@cypherock/communication';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
@@ -9,10 +10,16 @@ import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import CreateComponent from '../../../../../components/createComponent';
 import { UseSignMessageValues } from '../../../../../store/hooks';
+import {
+  useConnection,
+  useWalletConnect,
+  WalletConnectCallRequestMethodMap
+} from '../../../../../store/provider';
+import logger from '../../../../../utils/logger';
 
 const QontoConnector = withStyles((theme: Theme) =>
   createStyles({
@@ -187,11 +194,69 @@ const WalletConnectSignStepperForm: React.FC<StepperProps> = ({
   handleClose,
   signMessage
 }) => {
+  const walletConnect = useWalletConnect();
+  const { deviceSdkVersion } = useConnection();
+
   const [activeStep, setActiveStep] = useState(0);
+
+  const [messageToSign, setMessageToSign] = React.useState<string | any>('');
+  const [walletConnectSupported, setWalletConnectSupported] =
+    React.useState(false);
+
+  useEffect(() => {
+    if (deviceSdkVersion)
+      setWalletConnectSupported(
+        isFeatureEnabled(FeatureName.WalletConnectSupport, deviceSdkVersion)
+      );
+  }, [deviceSdkVersion]);
+
+  const decodeMessage = () => {
+    try {
+      let message = '';
+
+      if (
+        walletConnect.callRequestData.method ===
+        WalletConnectCallRequestMethodMap.SIGN_PERSONAL
+      ) {
+        message = walletConnect.callRequestData?.params[0];
+        setMessageToSign(Buffer.from(message.slice(2), 'hex').toString());
+      } else if (
+        walletConnect.callRequestData?.method ===
+        WalletConnectCallRequestMethodMap.SIGN_TYPED
+      ) {
+        setMessageToSign(JSON.parse(walletConnect.callRequestData.params[1]));
+      } else {
+        message = walletConnect.callRequestData.params[1];
+        setMessageToSign(message);
+      }
+    } catch (error) {
+      // Abort when the message is invalid
+      logger.error(error);
+      handleClose();
+    }
+  };
+
+  React.useEffect(() => {
+    if (walletConnect.callRequestData) {
+      decodeMessage();
+    }
+  }, [walletConnect.callRequestData]);
 
   const handleNext = () => {
     setActiveStep(prevActiveStep => prevActiveStep + 1);
   };
+
+  const isJSON = React.useMemo(
+    () => typeof messageToSign !== 'string',
+    [messageToSign]
+  );
+  const isReadable = React.useMemo(
+    () =>
+      walletConnect.callRequestData?.method ===
+      WalletConnectCallRequestMethodMap.SIGN_PERSONAL,
+    [walletConnect.callRequestData]
+  );
+
   return (
     <Root className={classes.root}>
       <Stepper
@@ -219,7 +284,15 @@ const WalletConnectSignStepperForm: React.FC<StepperProps> = ({
       <div style={{ marginTop: '10px' }}>
         <CreateComponent
           component={stepsData[activeStep][1]}
-          props={{ handleNext, handleClose, signMessage }}
+          props={{
+            handleNext,
+            handleClose,
+            signMessage,
+            walletConnectSupported,
+            messageToSign,
+            isJSON,
+            isReadable
+          }}
         />
       </div>
     </Root>

@@ -26,14 +26,14 @@ const WalletConnectSign = () => {
 
   const isOpen = !!(
     walletConnect.connectionState === WalletConnectConnectionState.CONNECTED &&
-    walletConnect.callRequestId &&
+    walletConnect.callRequestData &&
     (
       [
         WalletConnectCallRequestMethodMap.SIGN_TYPED,
         WalletConnectCallRequestMethodMap.SIGN_PERSONAL,
         WalletConnectCallRequestMethodMap.ETH_SIGN
       ] as WalletConnectCallRequestMethod[]
-    ).includes(walletConnect.callRequestMethod)
+    ).includes(walletConnect.callRequestData.method)
   );
 
   const handleClose = () => {

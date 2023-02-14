@@ -1,20 +1,18 @@
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import ErrorDialog from '../../../../../designSystem/designComponents/dialog/errorDialog';
 import TextView from '../../../../../designSystem/designComponents/textComponents/textView';
-import { UseSignMessageValues } from '../../../../../store/hooks';
 import {
   getProtoBufferEnum,
   useConnection,
-  useWalletConnect,
-  WalletConnectCallRequestMethodMap
+  useWalletConnect
 } from '../../../../../store/provider';
 
 import { WalletConnectMessage } from './confirmation';
+import { ISignProps, SignPropTypes } from './types';
 
 const PREFIX = 'WalletConnect-Device';
 
@@ -97,41 +95,25 @@ const Root = styled(Grid)(({ theme }) => ({
   }
 }));
 
-type Props = {
-  handleNext: () => void;
-  handleClose: () => void;
-  signMessage: UseSignMessageValues;
-};
-
-const WalletConnectSignMessageDevice: React.FC<Props> = ({
+const WalletConnectSignMessageDevice: React.FC<ISignProps> = ({
   handleClose,
-  signMessage
+  signMessage,
+  messageToSign,
+  isJSON,
+  isReadable
 }) => {
   const walletConnect = useWalletConnect();
-  const [messageToSign, setMessageToSign] = React.useState('');
   const { deviceConnection, deviceSdkVersion, setIsInFlow } = useConnection();
-  const [useJSON, setUseJSON] = React.useState(false);
 
   const signRequest = async () => {
-    let message = '';
-    if (
-      walletConnect.callRequestMethod ===
-      WalletConnectCallRequestMethodMap.SIGN_PERSONAL
-    ) {
-      message = walletConnect.callRequestParams[0];
-      setMessageToSign(Buffer.from(message.slice(2), 'hex').toString());
-    } else {
-      message = walletConnect.callRequestParams[1];
-      setMessageToSign(message);
-    }
-    if (
-      walletConnect.callRequestMethod ===
-      WalletConnectCallRequestMethodMap.SIGN_TYPED
-    ) {
-      setUseJSON(true);
-    }
-
     const account = walletConnect.selectedAccount;
+    let message = messageToSign;
+
+    if (isJSON) {
+      message = JSON.stringify(messageToSign);
+    } else if (isReadable) {
+      message = '0x' + Buffer.from(message).toString('hex');
+    }
 
     signMessage.handleSignMessage({
       connection: deviceConnection,
@@ -146,7 +128,7 @@ const WalletConnectSignMessageDevice: React.FC<Props> = ({
       accountType: account.accountType,
       setIsInFlow,
       message,
-      requestType: getProtoBufferEnum(walletConnect.callRequestMethod)
+      requestType: getProtoBufferEnum(walletConnect.callRequestData?.method)
     });
   };
 
@@ -161,6 +143,7 @@ const WalletConnectSignMessageDevice: React.FC<Props> = ({
   React.useEffect(() => {
     if (signMessage.signature) {
       walletConnect.approveCallRequest(signMessage.signature);
+      signMessage.resetHooks();
     }
   }, [signMessage.signature]);
 
@@ -178,7 +161,7 @@ const WalletConnectSignMessageDevice: React.FC<Props> = ({
       )}
       <Root container>
         <WalletConnectMessage
-          isJSON={useJSON}
+          isJSON={isJSON}
           message={messageToSign}
           className={classes.messageContainer}
         />
@@ -237,10 +220,6 @@ const WalletConnectSignMessageDevice: React.FC<Props> = ({
   );
 };
 
-WalletConnectSignMessageDevice.propTypes = {
-  handleNext: PropTypes.func.isRequired,
-  handleClose: PropTypes.func.isRequired,
-  signMessage: PropTypes.any.isRequired
-};
+WalletConnectSignMessageDevice.propTypes = SignPropTypes;
 
 export default WalletConnectSignMessageDevice;
