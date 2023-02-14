@@ -335,7 +335,7 @@ const SendForm: React.FC<StepperProps> = ({
   const triggerCalcGasLimit = async () => {
     const coin = COINS[coinDetails.coinId];
 
-    if (!token) {
+    if (!token && !txnParams?.data) {
       let limit = 21000;
       // Refer: https://api.arbiscan.io/api?module=proxy&action=eth_estimateGas&data=0x&to=0xf6c3c3621f42ec1f1cd1207bb1571d93646ab29a&value=0xff22&gasPrice=0x51da038cc&gas=0x5f5e0ff&apikey=YourApiKeyToken
       if (coin.id === EthCoinMap.arbitrum) limit = 255595;
@@ -354,11 +354,6 @@ const SendForm: React.FC<StepperProps> = ({
       return;
     }
 
-    if (!token) {
-      setGasLimit(21000);
-      return;
-    }
-
     setIsButtonLoading(true);
     const wallet = new EthereumWallet(
       coinDetails.accountIndex,
@@ -368,8 +363,8 @@ const SendForm: React.FC<StepperProps> = ({
     const fromAddress = wallet.address;
     const toAddress = batchRecipientData[0].recipient.trim();
     const { network } = coin;
-    const tokenData = coin.tokenList[token.coinId];
-    const contractAddress = tokenData.address;
+    const tokenData = coin.tokenList[token?.coinId];
+    const contractAddress = tokenData?.address;
     // According to our research, amount does not matter in estimating gas limit, small or large,
     let amount = '1';
 
@@ -379,7 +374,7 @@ const SendForm: React.FC<StepperProps> = ({
       Number(sendTransaction.sendMaxAmount) > 0
     ) {
       amount = new BigNumber(sendTransaction.sendMaxAmount)
-        .multipliedBy(tokenData.multiplier)
+        .multipliedBy(tokenData?.multiplier)
         .toString(10);
     }
 
@@ -388,7 +383,7 @@ const SendForm: React.FC<StepperProps> = ({
       Number(batchRecipientData[0].amount) > 0
     ) {
       amount = new BigNumber(batchRecipientData[0].amount)
-        .multipliedBy(tokenData.multiplier)
+        .multipliedBy(tokenData?.multiplier)
         .toString(10);
     }
 
@@ -396,8 +391,9 @@ const SendForm: React.FC<StepperProps> = ({
       fromAddress,
       toAddress,
       network,
+      amount,
       contractAddress,
-      amount
+      txnParams?.data
     );
 
     if (estimatedLimit) {

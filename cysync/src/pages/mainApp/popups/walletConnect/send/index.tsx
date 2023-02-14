@@ -81,7 +81,7 @@ const WalletConnectSign = () => {
               triggeredBy={TriggeredBy.WalletConnect}
               onSuccess={onSuccess}
               onReject={onReject}
-              txnParams={walletConnect.callRequestParams[0]}
+              txnParams={{ value: 0, ...walletConnect.callRequestParams[0] }}
             />
           </SendTransactionContext.Provider>
         </CurrentCoinContext.Provider>
