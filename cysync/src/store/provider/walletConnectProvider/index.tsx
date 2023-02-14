@@ -221,6 +221,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       payload?.params &&
       ACCEPTED_CALL_METHODS.includes(payload?.method)
     ) {
+      ipcRenderer.send('focus');
       logger.info('WalletConnect: Call Request received', { payload });
       const params = payload.params;
       setCallRequestParams(params);

@@ -804,36 +804,50 @@ const Recipient: React.FC<StepComponentProps> = props => {
               debouncedHandleCheckAddresses();
             }}
           />
-          <Input
-            onKeyDown={handleKeyPress}
-            id="1"
-            name="amount"
-            type="number"
-            label={`Amount ${coinAbbr.toUpperCase()}`}
-            onChange={handleInputChange}
-            value={
-              !maxSend
-                ? batchRecipientData[0].amount
-                : sendTransaction.sendMaxAmount
+          <Tooltip
+            title={
+              txnParams?.value !== undefined &&
+              batchRecipientData[0].amount === '0'
+                ? "The amount being 0 doesn't necessarily mean that no amount will be deducted.\nContract data in this transaction might contain the actual amount."
+                : ''
             }
-            showLoading={maxSend && sendTransaction.isEstimatingFees}
-            error={!!batchRecipientData[0].errorAmount}
-            helperText={batchRecipientData[0].errorAmount}
-            placeHolder="0"
-            decimal={coin.decimal}
-            disabled={!!txnParams?.value || maxSend}
-            customIcon={
-              <Button
-                className={`${classes.sendMaxBtn} ${
-                  maxSend ? classes.sendMaxBtnActive : ''
-                }`}
-                onClick={() => setMaxSend(!maxSend)}
-                disabled={!!txnParams?.value}
-              >
-                Send Max
-              </Button>
-            }
-          />
+          >
+            <div>
+              <Input
+                onKeyDown={handleKeyPress}
+                id="1"
+                name="amount"
+                type="number"
+                label={`Amount ${coinAbbr.toUpperCase()}`}
+                onChange={handleInputChange}
+                value={
+                  !maxSend
+                    ? batchRecipientData[0].amount
+                    : sendTransaction.sendMaxAmount
+                }
+                showLoading={maxSend && sendTransaction.isEstimatingFees}
+                error={!!batchRecipientData[0].errorAmount}
+                helperText={batchRecipientData[0].errorAmount}
+                placeHolder="0"
+                decimal={coin.decimal}
+                disabled={txnParams?.value !== undefined || maxSend}
+                customIcon={
+                  txnParams?.value === undefined ? (
+                    <Button
+                      className={`${classes.sendMaxBtn} ${
+                        maxSend ? classes.sendMaxBtnActive : ''
+                      }`}
+                      onClick={() => setMaxSend(!maxSend)}
+                    >
+                      Send Max
+                    </Button>
+                  ) : (
+                    <></>
+                  )
+                }
+              />
+            </div>
+          </Tooltip>
           <Typography className={amountUSD}>
             {' '}
             ~( $

@@ -46,6 +46,14 @@ const WalletConnectSign = () => {
     }
   }, [walletConnect]);
 
+  const txnData = React.useMemo(
+    () =>
+      walletConnect.callRequestParams
+        ? { value: '0', ...walletConnect.callRequestParams[0] }
+        : undefined,
+    [walletConnect.callRequestParams]
+  );
+
   if (
     walletConnect.selectedWallet &&
     walletConnect.selectedAccount &&
@@ -81,7 +89,7 @@ const WalletConnectSign = () => {
               triggeredBy={TriggeredBy.WalletConnect}
               onSuccess={onSuccess}
               onReject={onReject}
-              txnParams={{ value: 0, ...walletConnect.callRequestParams[0] }}
+              txnParams={txnData}
             />
           </SendTransactionContext.Provider>
         </CurrentCoinContext.Provider>
