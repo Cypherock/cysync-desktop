@@ -78,15 +78,15 @@ export const usePortfolio: UsePortfolio = () => {
     tokenDb.emitter.on('delete', debouncedRefreshFromDB);
 
     priceHistoryDb.emitter.on('insert', debouncedRefreshFromDB);
-    priceHistoryDb.emitter.on('insert', debouncedRefreshFromDB);
     priceHistoryDb.emitter.on('update', debouncedRefreshFromDB);
+    priceHistoryDb.emitter.on('delete', debouncedRefreshFromDB);
 
+    accountDb.emitter.on('insert', debouncedRefreshFromDB);
     accountDb.emitter.on('update', debouncedRefreshFromDB);
     accountDb.emitter.on('delete', debouncedRefreshFromDB);
-    accountDb.emitter.on('delete', debouncedRefreshFromDB);
 
+    coinPriceDb.emitter.on('insert', debouncedRefreshFromDB);
     coinPriceDb.emitter.on('update', debouncedRefreshFromDB);
-    coinPriceDb.emitter.on('delete', debouncedRefreshFromDB);
     coinPriceDb.emitter.on('delete', debouncedRefreshFromDB);
 
     transactionDb.emitter.on('insert', debouncedRefreshFromDB);
@@ -99,15 +99,15 @@ export const usePortfolio: UsePortfolio = () => {
       tokenDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
       priceHistoryDb.emitter.removeListener('insert', debouncedRefreshFromDB);
-      priceHistoryDb.emitter.removeListener('insert', debouncedRefreshFromDB);
       priceHistoryDb.emitter.removeListener('update', debouncedRefreshFromDB);
+      priceHistoryDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
+      accountDb.emitter.removeListener('insert', debouncedRefreshFromDB);
       accountDb.emitter.removeListener('update', debouncedRefreshFromDB);
       accountDb.emitter.removeListener('delete', debouncedRefreshFromDB);
-      accountDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
+      coinPriceDb.emitter.removeListener('insert', debouncedRefreshFromDB);
       coinPriceDb.emitter.removeListener('update', debouncedRefreshFromDB);
-      coinPriceDb.emitter.removeListener('delete', debouncedRefreshFromDB);
       coinPriceDb.emitter.removeListener('delete', debouncedRefreshFromDB);
 
       transactionDb.emitter.removeListener('insert', debouncedRefreshFromDB);
