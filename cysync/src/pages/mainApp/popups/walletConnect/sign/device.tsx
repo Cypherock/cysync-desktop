@@ -160,11 +160,13 @@ const WalletConnectSignMessageDevice: React.FC<ISignProps> = ({
         />
       )}
       <Root container>
-        <WalletConnectMessage
-          isJSON={isJSON}
-          message={messageToSign}
-          className={classes.messageContainer}
-        />
+        {!isJSON && (
+          <WalletConnectMessage
+            isJSON={isJSON}
+            message={messageToSign}
+            className={classes.messageContainer}
+          />
+        )}
         <div className={classes.deviceDetails}>
           <Typography color="textSecondary" variant="h6" gutterBottom>
             Follow the instructions on X1 Wallet

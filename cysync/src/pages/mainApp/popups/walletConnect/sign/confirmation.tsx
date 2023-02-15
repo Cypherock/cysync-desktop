@@ -1,3 +1,4 @@
+import { addEIP712TypeFields } from '@cypherock/wallet';
 import { styled, useTheme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
@@ -6,6 +7,7 @@ import ReactJson from 'react-json-view';
 
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
 import { useConnection, useWalletConnect } from '../../../../../store/provider';
+import logger from '../../../../../utils/logger';
 import { WalletConnectStatus } from '../connected';
 
 import { ISignProps, SignPropTypes } from './types';
@@ -52,12 +54,61 @@ const Root = styled('div')(() => ({
   }
 }));
 
+const processEIP712Field = (json: any, jsonWithType: any) => {
+  if (jsonWithType?.data) {
+    return json;
+  }
+
+  if (!jsonWithType?.children) {
+    return undefined;
+  }
+
+  const obj: any = {};
+
+  for (const child of jsonWithType.children) {
+    obj[child.name] = processEIP712Field(json[child.name], child);
+  }
+
+  return obj;
+};
+
+const processEIP712 = (json: any) => {
+  const jsonWithType = addEIP712TypeFields(json);
+  let message = {};
+  let domain = {};
+
+  if (jsonWithType?.message) {
+    message = processEIP712Field(json.message, jsonWithType.message);
+  }
+
+  if (jsonWithType?.domain) {
+    domain = processEIP712Field(json.domain, jsonWithType.domain);
+  }
+
+  return {
+    domain,
+    message
+  };
+};
+
 export const WalletConnectMessage: React.FC<{
   isJSON: boolean;
-  message: string;
+  message: string | any;
   className: string;
 }> = ({ isJSON, message, className }) => {
   const theme = useTheme();
+
+  const parsedMessage = React.useMemo(() => {
+    if (!isJSON) return message;
+
+    try {
+      return processEIP712(message);
+    } catch (error) {
+      logger.error(error);
+      return message || {};
+    }
+  }, [isJSON, message]);
+
   return (
     <div className={className}>
       {isJSON || (
@@ -67,13 +118,13 @@ export const WalletConnectMessage: React.FC<{
           gutterBottom
           sx={{ overflowWrap: 'anywhere', whiteSpace: 'pre-line' }}
         >
-          {message}
+          {parsedMessage}
         </Typography>
       )}
 
       {isJSON && (
         <ReactJson
-          src={message as any}
+          src={parsedMessage}
           // theme="tomorrow"
           theme={{
             base00: '#1F262E',
@@ -95,6 +146,7 @@ export const WalletConnectMessage: React.FC<{
           }}
           quotesOnKeys={false}
           displayDataTypes={false}
+          displayObjectSize={false}
           enableClipboard={false}
           name={false}
           iconStyle={'triangle'}
