@@ -6,7 +6,8 @@ import Routes from '../../../../constants/routes';
 import DialogBox from '../../../../designSystem/designComponents/dialog/dialogBox';
 import {
   DeviceConnectionState,
-  useConnection
+  useConnection,
+  useWalletConnect
 } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
@@ -20,6 +21,7 @@ const DeviceUpdatePopup = () => {
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
+  const walletConnect = useWalletConnect();
   const [updateType, setUpdateType] = useState<UpdateType>('update');
   const {
     deviceConnectionState,
@@ -54,6 +56,7 @@ const DeviceUpdatePopup = () => {
         }
       }
 
+      walletConnect.handleClose();
       if (localUpdateType === 'initial') {
         setIsOpen(true);
       }

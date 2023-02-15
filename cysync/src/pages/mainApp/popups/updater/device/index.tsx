@@ -6,7 +6,8 @@ import DialogBox from '../../../../../designSystem/designComponents/dialog/dialo
 import {
   DeviceConnectionState,
   useConnection,
-  useUpdater
+  useUpdater,
+  useWalletConnect
 } from '../../../../../store/provider';
 import {
   compareVersion,
@@ -19,6 +20,7 @@ import UpdateInfoComponent from './info';
 const Updater = () => {
   const { isDeviceUpdateAvailable, deviceVersion } = useUpdater();
   const navigate = useNavigate();
+  const walletConnect = useWalletConnect();
 
   const [isOpen, setIsOpen] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
@@ -64,6 +66,7 @@ const Updater = () => {
 
   const onUpdate = () => {
     finalizeDontShow();
+    walletConnect.handleClose();
     navigate(`${Routes.settings.device.upgrade}?isRefresh=true`);
     setIsOpen(false);
   };

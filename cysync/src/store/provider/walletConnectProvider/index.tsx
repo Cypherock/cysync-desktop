@@ -12,7 +12,6 @@ import {
   getCoinWithPrices,
   Wallet as IWallet
 } from '../../database';
-import { useConnection } from '../connectionProvider';
 
 import {
   IAccount,
@@ -57,8 +56,6 @@ export const WalletConnectContext: React.Context<WalletConnectContextInterface> 
   );
 
 export const WalletConnectProvider: React.FC = ({ children }) => {
-  const deviceConnection = useConnection();
-
   const [isOpen, setIsOpen] = React.useState(false);
   const [selectedWallet, setSelectedWallet] = React.useState<
     IWallet | undefined
@@ -85,7 +82,6 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   const connectionTimeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   const resetStates = () => {
-    deviceConnection.setBlockConnectionPopup(false);
     setConnectionClientMeta(undefined);
     setCallRequestData(undefined);
     setSelectedAccount(undefined);
@@ -102,7 +98,6 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   };
 
   const openDialog = () => {
-    deviceConnection.setBlockConnectionPopup(true);
     setIsOpen(true);
   };
 
