@@ -53,8 +53,9 @@ const WalletConnectPopup = () => {
           maxWidth="sm"
           open={isOpen}
           handleClose={handleClose}
-          isClosePresent
+          isClosePresent={false}
           dialogHeading="WalletConnect"
+          disableBackdropClick={true}
           restComponents={<ConnectedPopup handleClose={handleClose} />}
         />
       </>

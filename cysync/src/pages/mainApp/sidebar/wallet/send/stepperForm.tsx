@@ -335,11 +335,12 @@ const SendForm: React.FC<StepperProps> = ({
   const triggerCalcGasLimit = async () => {
     const coin = COINS[coinDetails.coinId];
 
+    let defaultLimit = 21000;
+    // Refer: https://api.arbiscan.io/api?module=proxy&action=eth_estimateGas&data=0x&to=0xf6c3c3621f42ec1f1cd1207bb1571d93646ab29a&value=0xff22&gasPrice=0x51da038cc&gas=0x5f5e0ff&apikey=YourApiKeyToken
+    if (coin.id === EthCoinMap.arbitrum) defaultLimit = 255595;
+
     if (!token && !txnParams?.data) {
-      let limit = 21000;
-      // Refer: https://api.arbiscan.io/api?module=proxy&action=eth_estimateGas&data=0x&to=0xf6c3c3621f42ec1f1cd1207bb1571d93646ab29a&value=0xff22&gasPrice=0x51da038cc&gas=0x5f5e0ff&apikey=YourApiKeyToken
-      if (coin.id === EthCoinMap.arbitrum) limit = 255595;
-      setGasLimit(limit);
+      setGasLimit(defaultLimit);
       return;
     }
 
@@ -387,14 +388,16 @@ const SendForm: React.FC<StepperProps> = ({
         .toString(10);
     }
 
-    const estimatedLimit = await sendTransaction.handleEstimateGasLimit(
-      fromAddress,
-      toAddress,
-      network,
-      amount,
-      contractAddress,
-      txnParams?.data
-    );
+    const estimatedLimit =
+      (await sendTransaction.handleEstimateGasLimit(
+        fromAddress,
+        toAddress,
+        network,
+        amount,
+        contractAddress,
+        txnParams?.data
+      )) ??
+      (parseInt(txnParams?.gas, 16) || defaultLimit);
 
     if (estimatedLimit) {
       setGasLimit(estimatedLimit);
