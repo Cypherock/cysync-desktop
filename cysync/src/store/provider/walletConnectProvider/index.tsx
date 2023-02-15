@@ -16,7 +16,7 @@ import { useConnection } from '../connectionProvider';
 
 import {
   IAccount,
-  WalletConnectCallRequestMethod,
+  WalletConnectCallRequestData,
   WalletConnectCallRequestMethodMap,
   WalletConnectConnectionState,
   WalletConnectionConnectionClientMeta
@@ -45,9 +45,7 @@ export interface WalletConnectContextInterface {
   connectionClientMeta: WalletConnectionConnectionClientMeta | undefined;
   approveCallRequest: (result: string) => void;
   rejectCallRequest: (reason?: string) => void;
-  callRequestId: number | undefined;
-  callRequestMethod: WalletConnectCallRequestMethod | undefined;
-  callRequestParams: any;
+  callRequestData: WalletConnectCallRequestData;
   selectedAccount: IAccount | undefined;
   selectedWallet: IWallet | undefined;
 }
@@ -75,14 +73,9 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   const [connectionClientMeta, setConnectionClientMeta] = React.useState<
     WalletConnectionConnectionClientMeta | undefined
   >(undefined);
-  const [callRequestId, setCallRequestId] = React.useState<number | undefined>(
-    undefined
-  );
-  const [callRequestMethod, setCallRequestMethod] = React.useState<
-    WalletConnectCallRequestMethod | undefined
+  const [callRequestData, setCallRequestData] = React.useState<
+    WalletConnectCallRequestData | undefined
   >(undefined);
-  const [callRequestParams, setCallRequestParams] =
-    React.useState<any>(undefined);
 
   const currentConnector = React.useRef<WalletConnect | undefined>(undefined);
   const currentConnectionState = React.useRef<
@@ -93,8 +86,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   const resetStates = () => {
     deviceConnection.setBlockConnectionPopup(false);
     setConnectionClientMeta(undefined);
-    setCallRequestMethod(undefined);
-    setCallRequestParams(undefined);
+    setCallRequestData(undefined);
     setSelectedAccount(undefined);
     setSelectedWallet(undefined);
     currentConnector.current = undefined;
@@ -166,30 +158,26 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
 
   const approveCallRequest = (result: string) => {
     logger.info('WalletConnect: Approving call request', { result });
-    if (callRequestId) {
+    if (callRequestData?.id) {
       currentConnector.current?.approveRequest({
-        id: callRequestId,
+        id: callRequestData.id,
         result
       });
     }
-    setCallRequestId(undefined);
-    setCallRequestMethod(undefined);
-    setCallRequestParams(undefined);
+    setCallRequestData(undefined);
   };
 
   const rejectCallRequest = (message?: string) => {
     logger.info('WalletConnect: Rejecting call request', { message });
-    if (callRequestId) {
+    if (callRequestData?.id) {
       currentConnector.current?.rejectRequest({
-        id: callRequestId,
+        id: callRequestData.id,
         error: {
           message
         }
       });
     }
-    setCallRequestId(undefined);
-    setCallRequestMethod(undefined);
-    setCallRequestParams(undefined);
+    setCallRequestData(undefined);
   };
 
   const handleSessionRequest = (error: Error, payload: any) => {
@@ -224,9 +212,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       ipcRenderer.send('focus');
       logger.info('WalletConnect: Call Request received', { payload });
       const params = payload.params;
-      setCallRequestParams(params);
-      setCallRequestId(payload.id);
-      setCallRequestMethod(payload.method);
+      setCallRequestData({ params, id: payload.id, method: payload.method });
     } else if (payload?.id) {
       logger.error('WalletConnect: Unsupported Call Request received', {
         payload
@@ -331,9 +317,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         connectionClientMeta,
         approveCallRequest,
         rejectCallRequest,
-        callRequestId,
-        callRequestMethod,
-        callRequestParams,
+        callRequestData,
         selectedAccount,
         selectedWallet
       }}

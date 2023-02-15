@@ -32,13 +32,13 @@ const WalletConnectSign = () => {
     const isOpen = !!(
       walletConnect.connectionState ===
         WalletConnectConnectionState.CONNECTED &&
-      walletConnect.callRequestId &&
+      walletConnect.callRequestData &&
       (
         [
           WalletConnectCallRequestMethodMap.ETH_SEND_TXN,
           WalletConnectCallRequestMethodMap.ETH_SIGN_TXN
         ] as WalletConnectCallRequestMethod[]
-      ).includes(walletConnect.callRequestMethod)
+      ).includes(walletConnect.callRequestData.method)
     );
 
     if (sendForm !== isOpen) {
@@ -48,18 +48,16 @@ const WalletConnectSign = () => {
 
   const txnData = React.useMemo(
     () =>
-      walletConnect.callRequestParams
-        ? { value: '0', ...walletConnect.callRequestParams[0] }
+      walletConnect.callRequestData?.params
+        ? { value: '0', ...walletConnect.callRequestData.params[0] }
         : undefined,
-    [walletConnect.callRequestParams]
+    [walletConnect.callRequestData]
   );
 
   if (
     walletConnect.selectedWallet &&
     walletConnect.selectedAccount &&
-    walletConnect.callRequestParams &&
-    walletConnect.callRequestId &&
-    walletConnect.callRequestMethod &&
+    walletConnect.callRequestData &&
     sendForm
   ) {
     return (
@@ -81,7 +79,7 @@ const WalletConnectSign = () => {
           >
             <Send
               resultType={
-                walletConnect.callRequestMethod ===
+                walletConnect.callRequestData.method ===
                 WalletConnectCallRequestMethodMap.ETH_SEND_TXN
                   ? 'hash'
                   : 'signature'

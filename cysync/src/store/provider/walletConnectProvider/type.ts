@@ -21,6 +21,12 @@ export const WalletConnectCallRequestMethodMap = {
 export type WalletConnectCallRequestMethod =
   typeof WalletConnectCallRequestMethodMap[keyof typeof WalletConnectCallRequestMethodMap];
 
+export interface WalletConnectCallRequestData {
+  method: WalletConnectCallRequestMethod;
+  params: any;
+  id: number;
+}
+
 export enum WalletConnectConnectionState {
   NOT_CONNECTED,
   CONNECTING,
