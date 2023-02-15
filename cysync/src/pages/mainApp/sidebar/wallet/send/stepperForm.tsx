@@ -395,7 +395,7 @@ const SendForm: React.FC<StepperProps> = ({
         amount,
         contractAddress,
         txnParams?.data
-      )) ?? parseInt(txnParams?.gas, 16);
+      )) ?? (txnParams?.gas ? parseInt(txnParams?.gas, 16) : 2100);
 
     if (estimatedLimit) {
       setGasLimit(estimatedLimit);
@@ -555,13 +555,10 @@ const SendForm: React.FC<StepperProps> = ({
       );
       let error = '';
       if (amount.isNaN() || amount.isZero() || amount.isNegative()) {
-        // Allow '0' amount for wallet connect transactions
-        if (!(amount.isZero() && txnParams?.data)) {
-          // Allow `0` amount transaction on ETH, and 0 amount is valid when it's a max send txn
-          if (!(amount.isZero() && isEthereum) && !maxSend) {
-            error = 'Enter a valid amount.';
-            isValid = false;
-          }
+        // Allow `0` amount transaction on ETH, and 0 amount is valid when it's a max send txn
+        if (!(amount.isZero() && isEthereum) && !maxSend) {
+          error = 'Enter a valid amount.';
+          isValid = false;
         }
       }
 

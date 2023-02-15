@@ -7,14 +7,15 @@ import {
 } from '@cypherock/communication';
 import { NearWallet } from '@cypherock/wallet';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
-import { Typography } from '@mui/material';
+import { Alert, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
+import { styled, Theme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
+import { createStyles, withStyles } from '@mui/styles';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
@@ -333,6 +334,15 @@ const BatchRecipient: React.FC<BatchRecipientProps> = props => {
     </Grid>
   );
 };
+
+const CustomAlert = withStyles((theme: Theme) =>
+  createStyles({
+    filledWarning: {
+      backgroundColor: '#E19A4C',
+      color: theme.palette.primary.main
+    }
+  })
+)(Alert);
 
 BatchRecipient.propTypes = {
   handleDelete: PropTypes.func.isRequired,
@@ -752,6 +762,19 @@ const Recipient: React.FC<StepComponentProps> = props => {
 
   return (
     <Root container className={root}>
+      {txnParams?.data && (
+        <CustomAlert severity="warning" variant="filled" color="warning">
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <div> This transaction contains contract data </div>
+          </div>
+        </CustomAlert>
+      )}
       {isBtc && (
         <ButtonGroup
           disableElevation
@@ -804,50 +827,39 @@ const Recipient: React.FC<StepComponentProps> = props => {
               debouncedHandleCheckAddresses();
             }}
           />
-          <Tooltip
-            title={
-              txnParams?.value !== undefined &&
-              batchRecipientData[0].amount === '0'
-                ? "The amount being 0 doesn't necessarily mean that no amount will be deducted.\nContract data in this transaction might contain the actual amount."
-                : ''
+          <Input
+            onKeyDown={handleKeyPress}
+            id="1"
+            name="amount"
+            type="number"
+            label={`Amount ${coinAbbr.toUpperCase()}`}
+            onChange={handleInputChange}
+            value={
+              !maxSend
+                ? batchRecipientData[0].amount
+                : sendTransaction.sendMaxAmount
             }
-          >
-            <div>
-              <Input
-                onKeyDown={handleKeyPress}
-                id="1"
-                name="amount"
-                type="number"
-                label={`Amount ${coinAbbr.toUpperCase()}`}
-                onChange={handleInputChange}
-                value={
-                  !maxSend
-                    ? batchRecipientData[0].amount
-                    : sendTransaction.sendMaxAmount
-                }
-                showLoading={maxSend && sendTransaction.isEstimatingFees}
-                error={!!batchRecipientData[0].errorAmount}
-                helperText={batchRecipientData[0].errorAmount}
-                placeHolder="0"
-                decimal={coin.decimal}
-                disabled={txnParams?.value !== undefined || maxSend}
-                customIcon={
-                  txnParams?.value === undefined ? (
-                    <Button
-                      className={`${classes.sendMaxBtn} ${
-                        maxSend ? classes.sendMaxBtnActive : ''
-                      }`}
-                      onClick={() => setMaxSend(!maxSend)}
-                    >
-                      Send Max
-                    </Button>
-                  ) : (
-                    <></>
-                  )
-                }
-              />
-            </div>
-          </Tooltip>
+            showLoading={maxSend && sendTransaction.isEstimatingFees}
+            error={!!batchRecipientData[0].errorAmount}
+            helperText={batchRecipientData[0].errorAmount}
+            placeHolder="0"
+            decimal={coin.decimal}
+            disabled={txnParams?.value !== undefined || maxSend}
+            customIcon={
+              txnParams?.value === undefined ? (
+                <Button
+                  className={`${classes.sendMaxBtn} ${
+                    maxSend ? classes.sendMaxBtnActive : ''
+                  }`}
+                  onClick={() => setMaxSend(!maxSend)}
+                >
+                  Send Max
+                </Button>
+              ) : (
+                <></>
+              )
+            }
+          />
           <Typography className={amountUSD}>
             {' '}
             ~( $

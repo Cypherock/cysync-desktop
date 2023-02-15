@@ -460,6 +460,18 @@ const createWindow = async () => {
     handleError(errors);
   });
 
+  ipcMain.on('focus', () => {
+    if (mainWindow === null) {
+      throw new Error('Main window is not defined');
+    }
+
+    if (mainWindow.isDestroyed()) {
+      return;
+    }
+
+    mainWindow.show();
+  });
+
   ipcMain.on('clear-data', async () => {
     if (mainWindow === null) {
       throw new Error('Main window is not defined');
