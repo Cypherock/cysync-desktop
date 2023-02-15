@@ -471,7 +471,7 @@ export const useSendTransaction: UseSendTransaction = () => {
             from: fromAddress,
             to: toAddress,
             network,
-            amount,
+            value: amount,
             data
           })
         : Server.eth.transaction.getContractFees({
