@@ -1,8 +1,11 @@
+import AssignmentOutlined from '@mui/icons-material/AssignmentOutlined';
+import { IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { clipboard } from 'electron';
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import CustomButton from '../../../../designSystem/designComponents/buttons/button';
 import Input from '../../../../designSystem/designComponents/input/input';
@@ -58,7 +61,7 @@ const WalletConnectUrlForm: React.FC<Props> = () => {
     if (isDisabled) return;
 
     if (!input.startsWith('wc')) {
-      setError('Invalid url');
+      setError('Invalid URI');
       return;
     }
 
@@ -70,16 +73,26 @@ const WalletConnectUrlForm: React.FC<Props> = () => {
     setInput(e.target.value);
   };
 
+  const handleCopyFromClipboard = () => {
+    const clipboardText = clipboard.readText().trim();
+    setInput(clipboardText);
+  };
+
+  useEffect(() => {
+    const clipboardText = clipboard.readText().trim();
+    if (clipboardText.startsWith('wc:')) setInput(clipboardText);
+  }, []);
+
   return (
     <Root container>
       <form onSubmit={onPositiveClick} className={classes.form}>
         <Typography color="textPrimary" variant="body2" gutterBottom>
-          Enter connection URL
+          Enter connection URI
         </Typography>
         <Input
           fullWidth
-          name="URL"
-          placeholder="Connection URL"
+          name="URI"
+          placeholder="Connection URI"
           value={input}
           error={!!(error || walletConnect.connectionError)}
           onChange={handleChange}
@@ -88,6 +101,16 @@ const WalletConnectUrlForm: React.FC<Props> = () => {
             walletConnect.connectionState ===
             WalletConnectConnectionState.CONNECTING
           }
+          InputProps={{
+            endAdornment: (
+              <IconButton
+                title="Paste from Clipboard"
+                onClick={handleCopyFromClipboard}
+              >
+                <AssignmentOutlined color="secondary" />
+              </IconButton>
+            )
+          }}
         />
         {(error || walletConnect.connectionError) && (
           <Typography

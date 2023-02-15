@@ -48,6 +48,7 @@ export interface WalletConnectContextInterface {
   callRequestData: WalletConnectCallRequestData;
   selectedAccount: IAccount | undefined;
   selectedWallet: IWallet | undefined;
+  setSelectedWallet: (wallet: IWallet) => void;
 }
 
 export const WalletConnectContext: React.Context<WalletConnectContextInterface> =
@@ -277,6 +278,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
           'WalletConnect: Connection timeout exceeded, disconnecting...',
           { url }
         );
+        setConnectionError('Timeout exceeded, Try again with latest URI');
         disconnect();
       }, CONNECTION_TIMEOUT);
     } catch (error) {
@@ -319,7 +321,8 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         rejectCallRequest,
         callRequestData,
         selectedAccount,
-        selectedWallet
+        selectedWallet,
+        setSelectedWallet
       }}
     >
       {children}

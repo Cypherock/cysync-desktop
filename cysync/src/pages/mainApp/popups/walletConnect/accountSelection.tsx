@@ -77,7 +77,9 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
   const walletConnect = useWalletConnect();
   const { allWallets: walletData } = useWallets();
 
-  const [selectedWallet, setSelectedWallet] = useState<Wallet>(null);
+  const [selectedWallet, setSelectedWallet] = useState<Wallet>(
+    walletConnect.selectedWallet
+  );
   const [selectedAccount, setSelectedAccount] = useState<Account>(null);
   const [coinData, setCoinData] = useState<ICoin[]>([]);
   const [error, setError] = useState('');
