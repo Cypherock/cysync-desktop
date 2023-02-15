@@ -340,7 +340,10 @@ const WalletView: React.FC<WalletViewProps> = ({
               </Tooltip>
             </div>
             <IconButton
-              onClick={walletConnect.openDialog}
+              onClick={() => {
+                walletConnect.setSelectedWallet(selectedWallet);
+                walletConnect.openDialog();
+              }}
               sx={{
                 marginLeft: '12px',
                 background: 'rgba(255,255,255,0.05)',

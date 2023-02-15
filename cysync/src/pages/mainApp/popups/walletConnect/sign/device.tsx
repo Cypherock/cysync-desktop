@@ -174,14 +174,21 @@ const WalletConnectSignMessageDevice: React.FC<ISignProps> = ({
             inProgress={!signMessage.coinsConfirmed}
             text="Confirm On Device"
           />
+          <TextView
+            completed={signMessage.verified}
+            inProgress={signMessage.coinsConfirmed && !signMessage.verified}
+            text="Verify Data"
+            stylex={{ marginTop: '0px' }}
+          />
           {walletConnect.selectedAccount.passphraseExists && (
             <>
               <TextView
                 completed={signMessage.passphraseEntered}
                 inProgress={
-                  signMessage.coinsConfirmed && !signMessage.passphraseEntered
+                  signMessage.verified && !signMessage.passphraseEntered
                 }
                 text="Enter Passphrase"
+                stylex={{ marginTop: '0px' }}
               />
             </>
           )}
@@ -197,6 +204,7 @@ const WalletConnectSignMessageDevice: React.FC<ISignProps> = ({
                     : !signMessage.pinEntered || !signMessage.cardsTapped
                 }
                 text="Enter PIN and Tap any X1 Card"
+                stylex={{ marginTop: '0px' }}
               />
             </>
           )}
@@ -208,7 +216,7 @@ const WalletConnectSignMessageDevice: React.FC<ISignProps> = ({
                 walletConnect.selectedAccount.passphraseExists &&
                 !signMessage.cardsTapped
                   ? false
-                  : signMessage.coinsConfirmed && !signMessage.cardsTapped
+                  : signMessage.verified && !signMessage.cardsTapped
               }
               text="Tap any X1 Card"
               stylex={{ marginTop: '0px' }}
