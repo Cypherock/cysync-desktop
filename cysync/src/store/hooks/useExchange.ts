@@ -1,4 +1,4 @@
-import { COINS } from '@cypherock/communication';
+import { COINS, Erc20CoinData } from '@cypherock/communication';
 import Server from '@cypherock/server-wrapper';
 import { useEffect, useState } from 'react';
 
@@ -41,6 +41,18 @@ export interface UseExchangeValues {
   allWallets: Wallet[];
   receiveFlowStep: ReceiveFlowSteps;
   sendFlowStep: SendFlowSteps;
+  changellyCoinId: (
+    coinId: string
+  ) =>
+    | 'bitcoin'
+    | 'ethereum'
+    | 'solana'
+    | 'polygon'
+    | 'bitcoin-testnet'
+    | 'near'
+    | 'litecoin'
+    | 'dogecoin';
+  deviceSerial: string;
 }
 
 export type UseExchange = () => UseExchangeValues;
@@ -49,7 +61,8 @@ export const useExchange: UseExchange = () => {
   const { allWallets, isLoading: isWalletLoading } = useWallets();
   const { getCoinsWithPrices } = useWalletData();
 
-  const { deviceConnection, deviceSdkVersion, setIsInFlow } = useConnection();
+  const { deviceConnection, deviceSdkVersion, setIsInFlow, deviceSerial } =
+    useConnection();
   const swapTransaction = useSwapTransaction();
 
   const [fromToken, setFromToken] = useState<DisplayCoin>();
@@ -192,6 +205,15 @@ export const useExchange: UseExchange = () => {
       errorAmount: ''
     };
 
+    const coinAbbr = fromToken
+      ? COINS[fromToken.coinId]?.tokenList[fromToken.coinId]?.abbr
+      : COINS[fromToken.coinId].abbr;
+
+    let contractAddress: string | undefined;
+    if (fromToken && fromToken instanceof Erc20CoinData) {
+      contractAddress = fromToken.address;
+    }
+
     swapTransaction
       .handleSwapTransaction({
         connection: deviceConnection,
@@ -218,9 +240,11 @@ export const useExchange: UseExchange = () => {
             undefined
           ),
           data: {
-            gasLimit: 21000
+            gasLimit: 21000,
+            contractAddress,
+            contractAbbr: coinAbbr ? coinAbbr.toUpperCase() : undefined
           },
-          isSendAll: false
+          isSendAll: true
         },
         receiveFlow: {
           walletId: toWallet._id,
@@ -231,7 +255,8 @@ export const useExchange: UseExchange = () => {
           coinName: COINS[toToken.coinId]?.name,
           xpub: toToken.xpub,
           passphraseExists: toWallet.passphraseSet
-        }
+        },
+        deviceSerialId: deviceSerial
       })
       .then(() => {
         logger.info('SwapTransaction: Started');
@@ -271,6 +296,27 @@ export const useExchange: UseExchange = () => {
     return unsortedCoins;
   };
 
+  const changellyCoinId = (coinId: string) => {
+    switch (coinId) {
+      case 'btc':
+        return 'bitcoin';
+      case 'eth':
+        return 'ethereum';
+      case 'sol':
+        return 'solana';
+      case 'matic':
+        return 'polygon';
+      case 'btct':
+        return 'bitcoin-testnet';
+      case 'near':
+        return 'near';
+      case 'ltc':
+        return 'litecoin';
+      case 'doge':
+        return 'dogecoin';
+    }
+  };
+
   return {
     fromToken,
     setFromToken,
@@ -295,6 +341,8 @@ export const useExchange: UseExchange = () => {
     toWalletCoinData,
     allWallets,
     receiveFlowStep,
-    sendFlowStep
+    sendFlowStep,
+    changellyCoinId,
+    deviceSerial
   };
 };

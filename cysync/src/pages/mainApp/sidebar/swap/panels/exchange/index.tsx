@@ -59,7 +59,8 @@ const ExchangePanel = () => {
     setFromWallet,
     fromWalletCoinData,
     toWalletCoinData,
-    allWallets
+    allWallets,
+    deviceSerial
   } = useExchange();
 
   const [showSwapCompletedDialog, setSwapCompletedDialog] = useState(false);
@@ -127,6 +128,7 @@ const ExchangePanel = () => {
                   setShowSwapDetailsVerifyDialog(true);
                   startSwapFlow();
                 }}
+                disabled={!deviceSerial}
               >
                 <Typography
                   variant="h5"

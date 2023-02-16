@@ -92,7 +92,7 @@ const groupTransactionsByDate = (
 
 const HistoryPanel = () => {
   const { allWallets, isLoading } = useWallets();
-  const { getSwapTransactions } = useExchange();
+  const { getSwapTransactions, changellyCoinId } = useExchange();
   const [rawTransactions, setRawTransactions] = useState([]);
   const [selectedWalletIndex, setSelectedWalletIndex] = useState(0);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
@@ -314,11 +314,11 @@ const HistoryPanel = () => {
                             alignItems={'center'}
                           >
                             <CoinIcons
-                              initial={txn.currencyFrom.toUpperCase()}
+                              initial={changellyCoinId(txn.currencyFrom)}
                               style={{ marginRight: '10px' }}
                             />
                             <Typography variant="body1" color="textPrimary">
-                              {COINS[txn.currencyFrom]?.name}
+                              {txn.currencyFrom}
                             </Typography>
                           </Grid>
                           <Grid
@@ -339,11 +339,11 @@ const HistoryPanel = () => {
                             alignItems={'center'}
                           >
                             <CoinIcons
-                              initial={txn.currencyTo.toUpperCase()}
+                              initial={changellyCoinId(txn.currencyTo)}
                               style={{ marginRight: '10px' }}
                             />
                             <Typography variant="body1" color="textPrimary">
-                              {COINS[txn.currencyTo]?.name}
+                              {txn.currencyTo}
                             </Typography>
                           </Grid>
                         </Grid>

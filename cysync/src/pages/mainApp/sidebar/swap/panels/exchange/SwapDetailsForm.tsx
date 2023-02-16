@@ -168,7 +168,7 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
                   disabled={fromTokenSlug === ''}
                   handleChange={() => {
                     setIsAmountToSendMax(currVal => !currVal);
-                    setAmountToSend(fromToken?.totalBalance || '0');
+                    setAmountToSend(fromToken.displayBalance || '0');
                   }}
                 />
               </Grid>
@@ -181,6 +181,7 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
             value={amountToSend}
             onChange={handleChangeAmountToSend}
             className={classesForm}
+            disabled={isAmountToSendMax}
           />
         </Grid>
       </Grid>
@@ -250,34 +251,10 @@ const SwapDetailsForm: React.FC<SwapDetailsFormProps> = ({
           </FormControl>
         </Grid>
         <Grid item xs={6}>
-          <Grid container>
-            <Grid
-              container
-              display={'flex'}
-              justifyContent={'flex-end'}
-              alignContent={'center'}
-              alignItems={'center'}
-              gap={2}
-            >
-              <Grid item>
-                <Typography variant="h6" color="textSecondary">
-                  Max
-                </Typography>
-              </Grid>
-              <Grid item>
-                <SwitchButton
-                  completed={false}
-                  handleChange={() => {
-                    //   empty
-                  }}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
           <Box
             border={'0.5px solid #CDCDCD'}
             borderRadius="5px"
-            marginTop="10px"
+            marginTop="35px"
             padding="5px 10px"
             textAlign="right"
           >

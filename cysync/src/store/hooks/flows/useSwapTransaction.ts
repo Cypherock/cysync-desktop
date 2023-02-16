@@ -69,6 +69,7 @@ export interface HandleSwapTransactionOptions {
     passphraseExists?: boolean;
     customAccount?: string;
   };
+  deviceSerialId: string;
 }
 
 export interface UseSwapTransactionValues {
@@ -200,7 +201,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
       receiveAmount,
       changellyFee,
       receiveFlow,
-      sendFlow
+      sendFlow,
+      deviceSerialId
     }) => {
       clearAll();
 
@@ -735,7 +737,8 @@ export const useSwapTransaction: UseSwapTransaction = () => {
             fee: sendFlow.fees,
             isSendAll: sendFlow.isSendAll,
             data: sendFlow.data
-          }
+          },
+          deviceSerialId
         });
 
         setIsInFlow(false);
