@@ -85,7 +85,6 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     setConnectionClientMeta(undefined);
     setCallRequestData(undefined);
     setSelectedAccount(undefined);
-    setSelectedWallet(undefined);
     currentConnector.current = undefined;
   };
 
@@ -108,6 +107,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
 
   const handleClose = () => {
     disconnect();
+    setSelectedWallet(undefined);
     setConnectionError('');
     setIsOpen(false);
   };
