@@ -222,7 +222,9 @@ const WalletConnectSignStepperForm: React.FC<StepperProps> = ({
         setMessageToSign(Buffer.from(message.slice(2), 'hex').toString());
       } else if (
         walletConnect.callRequestData?.method ===
-        WalletConnectCallRequestMethodMap.SIGN_TYPED
+          WalletConnectCallRequestMethodMap.SIGN_TYPED ||
+        walletConnect.callRequestData?.method ===
+          WalletConnectCallRequestMethodMap.SIGN_TYPED_V4
       ) {
         setMessageToSign(JSON.parse(walletConnect.callRequestData.params[1]));
       } else {

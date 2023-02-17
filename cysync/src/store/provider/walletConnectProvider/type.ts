@@ -15,7 +15,8 @@ export const WalletConnectCallRequestMethodMap = {
   ETH_SIGN_TXN: 'eth_signTransaction',
   ETH_SIGN: 'eth_sign',
   SIGN_PERSONAL: 'personal_sign',
-  SIGN_TYPED: 'eth_signTypedData'
+  SIGN_TYPED: 'eth_signTypedData',
+  SIGN_TYPED_V4: 'eth_signTypedData_v4'
 } as const;
 
 export type WalletConnectCallRequestMethod =
@@ -37,11 +38,14 @@ export enum WalletConnectConnectionState {
 const protobufEnumMapper = [
   WalletConnectCallRequestMethodMap.ETH_SIGN,
   WalletConnectCallRequestMethodMap.SIGN_PERSONAL,
-  WalletConnectCallRequestMethodMap.SIGN_TYPED
+  WalletConnectCallRequestMethodMap.SIGN_TYPED,
+  WalletConnectCallRequestMethodMap.SIGN_TYPED_V4
 ];
 
-export const getProtoBufferEnum = (type: WalletConnectCallRequestMethod) =>
-  protobufEnumMapper.findIndex(el => el === type) + 1;
+export const getProtoBufferEnum = (type: WalletConnectCallRequestMethod) => {
+  if (type === WalletConnectCallRequestMethodMap.SIGN_TYPED_V4) return 3;
+  else return protobufEnumMapper.findIndex(el => el === type) + 1;
+};
 
 export interface WalletConnectionConnectionClientMeta {
   description?: string;
