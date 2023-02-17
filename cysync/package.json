@@ -12,7 +12,8 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "tslint -p tsconfig.json -c tslint.json --fix",
-    "lint:check": "tslint -p tsconfig.json -c tslint.json"
+    "lint:check": "tslint -p tsconfig.json -c tslint.json",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",
@@ -66,6 +67,7 @@
     "lint-staged": "^12.3.4",
     "mock-aws-s3": "^4.0.2",
     "node-loader": "^2.0.0",
+    "patch-package": "^6.5.1",
     "prettier": "^2.5.1",
     "style-loader": "^3.0.0",
     "ts-loader": "^9.2.2",
@@ -88,6 +90,7 @@
     "@mui/lab": "^5.0.0-alpha.77",
     "@mui/material": "^5.6.1",
     "@mui/styles": "^5.6.1",
+    "@walletconnect/client": "^1.8.0",
     "apexcharts": "^3.32.1",
     "axios": "^0.26.0",
     "bcrypt": "^5.0.1",

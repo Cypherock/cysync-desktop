@@ -1,0 +1,47 @@
+diff --git a/node_modules/@walletconnect/socket-transport/dist/esm/index.js b/node_modules/@walletconnect/socket-transport/dist/esm/index.js
+index 9a6cc32..f2b845c 100644
+--- a/node_modules/@walletconnect/socket-transport/dist/esm/index.js
++++ b/node_modules/@walletconnect/socket-transport/dist/esm/index.js
+@@ -101,6 +101,7 @@ class SocketTransport {
+         this._pushQueue();
+     }
+     _socketClose() {
++        this._netMonitor.close();
+         if (this._socket) {
+             this._socket.onclose = () => {
+             };
+diff --git a/node_modules/@walletconnect/socket-transport/dist/esm/network.js b/node_modules/@walletconnect/socket-transport/dist/esm/network.js
+index 1523f92..ec75897 100644
+--- a/node_modules/@walletconnect/socket-transport/dist/esm/network.js
++++ b/node_modules/@walletconnect/socket-transport/dist/esm/network.js
+@@ -1,9 +1,11 @@
+ class NetworkMonitor {
+     constructor() {
++        this._onOnline = () => this.trigger('online');
++        this._onOffline = () => this.trigger('offline');
+         this._eventEmitters = [];
+         if (typeof window !== "undefined" && typeof window.addEventListener !== "undefined") {
+-            window.addEventListener("online", () => this.trigger("online"));
+-            window.addEventListener("offline", () => this.trigger("offline"));
++              window.addEventListener('online', this._onOnline);
++              window.addEventListener('offline', this._onOffline);
+         }
+     }
+     on(event, callback) {
+@@ -21,6 +23,16 @@ class NetworkMonitor {
+             eventEmitter.callback();
+         });
+     }
++    close() {
++      this._eventEmitters = [];
++      if (
++        typeof window !== 'undefined' &&
++        typeof window.addEventListener !== 'undefined'
++      ) {
++        window.removeEventListener('online', this._onOnline);
++        window.removeEventListener('offline', this._onOffline);
++      }
++    }
+ }
+ export default NetworkMonitor;
+ //# sourceMappingURL=network.js.map

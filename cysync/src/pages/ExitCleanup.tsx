@@ -6,7 +6,7 @@ import { ipcRenderer } from 'electron';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { passEnDb } from '../store/database';
-import { useConnection } from '../store/provider';
+import { useConnection, useWalletConnect } from '../store/provider';
 import logger from '../utils/logger';
 
 const PREFIX = 'ExitCleanup';
@@ -28,6 +28,7 @@ export interface ExitCleanupProps {
 const ExitCleanup: React.FC<ExitCleanupProps> = ({ setDoCleanupFunction }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { internalDeviceConnection, deviceSdkVersion } = useConnection();
+  const walletConnect = useWalletConnect();
 
   const latestDeviceConnection = useRef<DeviceConnection | undefined>(
     undefined
@@ -39,7 +40,7 @@ const ExitCleanup: React.FC<ExitCleanupProps> = ({ setDoCleanupFunction }) => {
 
   const cancelFlow = new CancelFlow();
 
-  const exitCleanup = async () => {
+  const abortDeviceFlow = async () => {
     try {
       const response = await cancelFlow.run({
         connection: latestDeviceConnection.current,
@@ -48,9 +49,23 @@ const ExitCleanup: React.FC<ExitCleanupProps> = ({ setDoCleanupFunction }) => {
       logger.info('Exit cleanup cancel response', { response });
       passEnDb.destroyHash();
     } catch (error) {
-      logger.error('Error in exit cleanup');
+      logger.error('Error in exit cleanup: Device Abort');
       logger.error(error);
     }
+  };
+
+  const abortWalletConnect = async () => {
+    try {
+      walletConnect.handleClose();
+    } catch (error) {
+      logger.error('Error in exit cleanup: Wallet connect');
+      logger.error(error);
+    }
+  };
+
+  const exitCleanup = async () => {
+    await abortDeviceFlow();
+    await abortWalletConnect();
   };
 
   const runExitCleanup = async () => {
