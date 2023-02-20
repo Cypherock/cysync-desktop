@@ -301,7 +301,7 @@ const Summary: React.FC<StepComponentProps> = ({
         {activeButton !== 0 && (
           <LabelText
             label={`Amount ${coinAbbr.toUpperCase()}`}
-            text={formatDisplayAmount(total, undefined, true)}
+            text={total.toString()}
             verified
           />
         )}

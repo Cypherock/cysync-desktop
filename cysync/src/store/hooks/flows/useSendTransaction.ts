@@ -76,16 +76,17 @@ export const changeFormatOfOutputList = (
     multiplier = tokenObj.multiplier;
   }
 
-  const list = targetList.map((rec: any) => {
-    return {
-      address: rec.recipient.trim(),
+  const list = targetList
+    .filter((elem: any) => !!elem.recipient.trim())
+    .map((rec: any) => {
+      return {
+        address: rec.recipient.trim(),
 
-      value:
-        rec.amount === undefined
+        value: [undefined, null, ''].includes(rec.amount)
           ? undefined
           : new BigNumber(rec.amount).multipliedBy(new BigNumber(multiplier))
-    };
-  });
+      };
+    });
 
   return list;
 };
