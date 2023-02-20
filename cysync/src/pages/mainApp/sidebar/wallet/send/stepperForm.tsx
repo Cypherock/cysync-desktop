@@ -339,11 +339,6 @@ const SendForm: React.FC<StepperProps> = ({
     // Refer: https://api.arbiscan.io/api?module=proxy&action=eth_estimateGas&data=0x&to=0xf6c3c3621f42ec1f1cd1207bb1571d93646ab29a&value=0xff22&gasPrice=0x51da038cc&gas=0x5f5e0ff&apikey=YourApiKeyToken
     if (coin.id === EthCoinMap.arbitrum) defaultLimit = 255595;
 
-    if (!token && !txnParams?.data) {
-      setGasLimit(defaultLimit);
-      return;
-    }
-
     if (
       !(
         estimateGasLimit &&
