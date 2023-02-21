@@ -263,7 +263,7 @@ const getAllCoinPriceHistory = async (params: {
     );
     if (!coinPrices || !coinPrices.pricesToDisplay) continue;
 
-    allCoinList.push(coin.abbr);
+    allCoinList.push(coin.name);
     const tempCoin: CoinHistory = {
       name: item.coinId,
       data: coinPrices.pricesToDisplay

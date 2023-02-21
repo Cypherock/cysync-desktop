@@ -70,7 +70,7 @@ const Donut: React.FC<chartProps> = ({
           labels: {
             show: true,
             name: {
-              show: true,
+              show: false,
               offsetY: 5
             },
             value: {
