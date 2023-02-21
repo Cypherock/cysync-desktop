@@ -383,14 +383,22 @@ const SendForm: React.FC<StepperProps> = ({
         .toString(10);
     }
 
+    const data =
+      txnParams?.data ??
+      wallet.generateContractData(
+        contractAddress,
+        toAddress,
+        new BigNumber(amount)
+      );
+
     const estimatedLimit =
       (await sendTransaction.handleEstimateGasLimit(
         fromAddress,
         toAddress,
         network,
-        amount,
+        '0x0',
         contractAddress,
-        txnParams?.data
+        data
       )) ??
       (parseInt(txnParams?.gas, 16) || defaultLimit);
 

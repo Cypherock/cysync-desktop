@@ -469,7 +469,7 @@ export const useSendTransaction: UseSendTransaction = () => {
       Server.eth.transaction
         .getEstimatedGas({
           from: fromAddress,
-          to: toAddress,
+          to: contractAddress || toAddress,
           network,
           value: amount,
           data
