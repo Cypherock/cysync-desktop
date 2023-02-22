@@ -1,3 +1,8 @@
+const windowsSigning = {};
+if (process.env.WINDOWS_PFX_FILE && process.env.WINDOWS_PFX_PASSWORD) {
+  windowsSigning.certificateFile = process.env.WINDOWS_PFX_FILE;
+  windowsSigning.certificatePassword = process.env.WINDOWS_PFX_PASSWORD;
+}
 const config = {
   packagerConfig: {
     asr: true,
@@ -28,7 +33,8 @@ const config = {
       config: {
         setupIcon: 'src/icon.ico',
         iconUrl: 'https://www.cypherock.com/favicon.ico',
-        title: 'Cypherock CySync'
+        title: 'Cypherock CySync',
+        ...windowsSigning
       }
     },
     {

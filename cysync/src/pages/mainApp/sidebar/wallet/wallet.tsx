@@ -4,9 +4,11 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import { Avatar } from '@mui/material';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { styled, useTheme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
@@ -14,13 +16,15 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
+import walletConnectLogo from '../../../../assets/icons/wallet_connect.svg';
 import Input from '../../../../designSystem/designComponents/input/input';
 import { useHistory, useWalletData } from '../../../../store/hooks';
 import {
   CurrentCoinContext,
   useAddCoinContext,
   useConnection,
-  useSelectedWallet
+  useSelectedWallet,
+  useWalletConnect
 } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 
@@ -54,6 +58,9 @@ const Root = styled(Grid)(({ theme }) => ({
     height: '100%',
     textTransform: 'none',
     background: 'rgba(255,255,255,0.05)',
+    '&:hover': {
+      background: 'rgba(255,255,255,0.15)'
+    },
     color: theme.palette.text.primary
   },
   [`& .${classes.walletButtons}`]: {
@@ -117,6 +124,7 @@ const WalletView: React.FC<WalletViewProps> = ({
   addCoinOpened
 }) => {
   const theme = useTheme();
+  const walletConnect = useWalletConnect();
 
   const {
     coinData,
@@ -331,6 +339,22 @@ const WalletView: React.FC<WalletViewProps> = ({
                 </span>
               </Tooltip>
             </div>
+            <IconButton
+              onClick={walletConnect.openDialog}
+              sx={{
+                marginLeft: '12px',
+                background: 'rgba(255,255,255,0.05)',
+                '&:hover': {
+                  background: 'rgba(255,255,255,0.15)'
+                }
+              }}
+            >
+              <Avatar
+                alt="WalletConnect"
+                src={walletConnectLogo}
+                sx={{ width: 24, height: 24 }}
+              />
+            </IconButton>
           </Grid>
         </Grid>
         <div style={{ width: '100%' }}>
@@ -465,6 +489,10 @@ const WalletView: React.FC<WalletViewProps> = ({
                           accountId={coin.accountId}
                           initial={coinObj.abbr.toUpperCase()}
                           name={coin.name}
+                          coinName={coinObj.name}
+                          accountType={coin.accountType}
+                          accountIndex={coin.accountIndex}
+                          derivationPath={coin.derivationPath}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
                           price={coin.displayPrice}
@@ -481,6 +509,10 @@ const WalletView: React.FC<WalletViewProps> = ({
                           accountId={coin.accountId}
                           initial={coinObj.abbr.toUpperCase()}
                           name={coin.name}
+                          coinName={coinObj.name}
+                          accountType={coin.accountType}
+                          accountIndex={coin.accountIndex}
+                          derivationPath={coin.derivationPath}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
                           price={coin.displayPrice}
@@ -490,6 +522,8 @@ const WalletView: React.FC<WalletViewProps> = ({
                           deleteHistory={deleteCoinHistory}
                           walletId={selectedWallet._id}
                           sortIndex={sortIndex}
+                          reservedBalance={coin.displayNearReservedForProtocol}
+                          nativeBalance={coin.displayNearNativeBalance}
                         />
                       ) : (
                         <OneCoin
@@ -497,6 +531,10 @@ const WalletView: React.FC<WalletViewProps> = ({
                           accountId={coin.accountId}
                           initial={coinObj.abbr.toUpperCase()}
                           name={coin.name}
+                          coinName={coinObj.name}
+                          accountType={coin.accountType}
+                          accountIndex={coin.accountIndex}
+                          derivationPath={coin.derivationPath}
                           holding={coin.displayBalance}
                           value={coin.displayValue}
                           price={coin.displayPrice}

@@ -68,6 +68,7 @@ export const useAddWallet: UseAddWallet = () => {
   const [isConfigDiff, setIsConfigDiff] = useState(false);
   const [walletId, setWalletId] = useState('');
   const [isCancelled, setIsCancelled] = useState(false);
+  const [doDeleteCoinsOnUpdate, setDoDeleteCoinsOnUpdate] = useState(false);
 
   const wallets = useWallets();
   const { deviceSerial } = useConnection();
@@ -82,6 +83,7 @@ export const useAddWallet: UseAddWallet = () => {
 
   const clearAll = () => {
     setIsCancelled(false);
+    setDoDeleteCoinsOnUpdate(false);
     setWalletSuccess(false);
     setIsConfigDiff(false);
     setPasswordSet(false);
@@ -164,6 +166,7 @@ export const useAddWallet: UseAddWallet = () => {
               'AddWallet: Same wallet found with different passphrase config'
             );
             setWalletName(walletDetails.name);
+            setDoDeleteCoinsOnUpdate(true);
             setWalletId(walletDetails._id);
             setPasswordSet(walletDetails.passwordSet);
             setPassphraseSet(walletDetails.passphraseSet);
@@ -286,7 +289,9 @@ export const useAddWallet: UseAddWallet = () => {
       duplicateWallet.name = walletName;
       duplicateWallet.passphraseSet = passphraseSet;
       duplicateWallet.passwordSet = passwordSet;
-      await coinsDelete();
+      if (doDeleteCoinsOnUpdate) {
+        await coinsDelete();
+      }
       await walletDb.update(duplicateWallet);
       setIsConfigDiff(false);
       clearErrorObj();

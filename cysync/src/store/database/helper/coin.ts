@@ -1,7 +1,19 @@
 import { AbsCoinData, COINS } from '@cypherock/communication';
+import BigNumber from 'bignumber.js';
 
 import logger from '../../../utils/logger';
-import { coinPriceDb } from '../databaseInit';
+import { Account, coinPriceDb } from '../databaseInit';
+
+export interface DisplayCoin extends Account {
+  displayValue: string;
+  displayPrice: string;
+  displayBalance: string;
+  isEmpty: boolean;
+  price: number;
+  priceLastUpdatedAt?: Date;
+  displayNearReservedForProtocol?: string;
+  displayNearNativeBalance?: string;
+}
 
 export const getLatestPriceForCoin = async (
   coinId: string,
@@ -46,4 +58,34 @@ export const getLatestPriceForCoins = async (
     );
   }
   return latestPrices;
+};
+
+export const getCoinWithPrices = async (account: Account) => {
+  const coinObj = COINS[account.coinId];
+  if (!coinObj) {
+    throw new Error(`Cannot find coinType: ${account.coinId}`);
+  }
+  const coinPrice = await coinPriceDb.getOne({ coinId: account.coinId });
+
+  const coinWithPrice: DisplayCoin = {
+    ...account,
+    isEmpty: true,
+    displayValue: '0',
+    displayPrice: '0',
+    displayBalance: '0',
+    price: coinPrice.price
+  };
+  const balance = new BigNumber(
+    account.totalBalance ? account.totalBalance : 0
+  ).dividedBy(coinObj.multiplier);
+
+  coinWithPrice.displayBalance = balance.toString();
+
+  const latestPrice = coinPrice?.price || 0;
+  const value = balance.multipliedBy(latestPrice || 0);
+  coinWithPrice.displayValue = value.toString();
+  coinWithPrice.displayPrice = latestPrice.toString() || '0';
+  coinWithPrice.isEmpty = balance.isZero();
+
+  return coinWithPrice;
 };

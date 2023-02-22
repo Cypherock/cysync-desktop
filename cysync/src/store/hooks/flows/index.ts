@@ -8,3 +8,4 @@ export * from './useReceiveTransation';
 export * from './useSwapTransaction';
 export * from './useLogFetcher';
 export * from './useGetDeviceInfo';
+export * from './useSignMessage';

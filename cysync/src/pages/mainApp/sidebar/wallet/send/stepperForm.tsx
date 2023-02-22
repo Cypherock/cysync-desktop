@@ -2,7 +2,8 @@ import {
   CoinGroup,
   COINS,
   Erc20CoinData,
-  EthCoinData
+  EthCoinData,
+  EthCoinMap
 } from '@cypherock/communication';
 import { EthereumWallet } from '@cypherock/wallet';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -23,7 +24,10 @@ import React, { useEffect, useState } from 'react';
 import CreateComponent from '../../../../../components/createComponent';
 import ErrorBox from '../../../../../designSystem/designComponents/dialog/errorDialog';
 import { useDebouncedFunction } from '../../../../../store/hooks';
-import { changeFormatOfOutputList } from '../../../../../store/hooks/flows';
+import {
+  changeFormatOfOutputList,
+  TriggeredBy
+} from '../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
   useCustomAccountContext,
@@ -202,9 +206,30 @@ const Root = styled('div')(({ theme }) => ({
 type StepperProps = {
   stepsData: any[][];
   handleClose: (abort?: boolean) => void;
+  onSuccess?: (result: string) => void;
+  onReject?: (reason?: string) => void;
+  txnParams?: {
+    from: string;
+    to: string;
+    data?: string;
+    gas?: string; // hex
+    gasPrice?: string; // hex
+    value?: string; // hex
+    nonce?: string; // hex
+  };
+  resultType?: 'signature' | 'hash';
+  triggeredBy?: TriggeredBy;
 };
 
-const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
+const SendForm: React.FC<StepperProps> = ({
+  stepsData,
+  handleClose,
+  onSuccess,
+  onReject,
+  txnParams,
+  resultType,
+  triggeredBy
+}) => {
   const { sendForm, sendTransaction } = useSendTransactionContext();
   const [activeStep, setActiveStep] = useState(0);
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -214,7 +239,9 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   const [gasLimitError, setGasLimitError] = React.useState<string | undefined>(
     undefined
   );
-  const [estimateGasLimit, setEstimateGasLimit] = React.useState(true);
+  const [estimateGasLimit, setEstimateGasLimit] = React.useState(
+    !txnParams?.gas
+  );
 
   // State Management Semaphore for Button of Transaction Type
   // 0 => Single Transaction
@@ -311,7 +338,10 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
     const coin = COINS[coinDetails.coinId];
 
     if (!token) {
-      setGasLimit(21000);
+      let limit = 21000;
+      // Refer: https://api.arbiscan.io/api?module=proxy&action=eth_estimateGas&data=0x&to=0xf6c3c3621f42ec1f1cd1207bb1571d93646ab29a&value=0xff22&gasPrice=0x51da038cc&gas=0x5f5e0ff&apikey=YourApiKeyToken
+      if (coin.id === EthCoinMap.arbitrum) limit = 255595;
+      setGasLimit(limit);
       return;
     }
 
@@ -323,6 +353,11 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
         batchRecipientData[0].recipient.length === 42
       )
     ) {
+      return;
+    }
+
+    if (!token) {
+      setGasLimit(21000);
       return;
     }
 
@@ -402,7 +437,7 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
   useEffect(() => {
     sendTransaction.setIsEstimatingFees(true);
     debouncedCaclFee();
-    if (!transactionFee || (parseInt(transactionFee, 10) || 0) <= 0) {
+    if (!transactionFee || (parseFloat(transactionFee) || 0) <= 0) {
       setButtonDisabled(true);
     } else {
       setButtonDisabled(false);
@@ -711,7 +746,12 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
             estimateGasLimit,
             setEstimateGasLimit,
             duplicateBatchAddresses,
-            isButtonLoading
+            isButtonLoading,
+            onSuccess,
+            onReject,
+            txnParams,
+            resultType,
+            triggeredBy
           }}
         />
       </div>
@@ -721,7 +761,20 @@ const SendForm: React.FC<StepperProps> = ({ stepsData, handleClose }) => {
 
 SendForm.propTypes = {
   stepsData: PropTypes.array.isRequired,
-  handleClose: PropTypes.func.isRequired
+  handleClose: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func,
+  onReject: PropTypes.func,
+  txnParams: PropTypes.exact({
+    from: PropTypes.string.isRequired,
+    to: PropTypes.string.isRequired,
+    data: PropTypes.string,
+    gas: PropTypes.string,
+    gasPrice: PropTypes.string,
+    value: PropTypes.string,
+    nonce: PropTypes.string
+  }),
+  resultType: PropTypes.oneOf(['signature', 'hash']),
+  triggeredBy: PropTypes.number
 };
 
 export default SendForm;

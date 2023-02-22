@@ -149,9 +149,9 @@ export const useToken: UseToken = () => {
               throw new Error(`Cannot find parentCoin: ${coinB}`);
             }
 
-            const coinObjB = coinB.tokenList[a.coinId];
+            const coinObjB = coinB.tokenList[b.coinId];
             if (!coinObjB) {
-              throw new Error(`Cannot find coinId: ${a.coinId}`);
+              throw new Error(`Cannot find coinId: ${b.coinId}`);
             }
 
             const tokenA = coinObjA.name;
@@ -180,9 +180,9 @@ export const useToken: UseToken = () => {
               throw new Error(`Cannot find parentCoin: ${coinB}`);
             }
 
-            const coinObjB = coinB.tokenList[a.coinId];
+            const coinObjB = coinB.tokenList[b.coinId];
             if (!coinObjB) {
-              throw new Error(`Cannot find coinId: ${a.coinId}`);
+              throw new Error(`Cannot find coinId: ${b.coinId}`);
             }
 
             const tokenA = coinObjA.name;

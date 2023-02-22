@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { DisplayCoin } from '../hooks/types';
+import { DisplayCoin } from '../database';
 
 export interface CurrentCoinContextInterface {
   coinDetails: DisplayCoin;

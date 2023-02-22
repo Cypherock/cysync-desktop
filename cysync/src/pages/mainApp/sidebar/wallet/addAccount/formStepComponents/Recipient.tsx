@@ -224,7 +224,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
   const { connected } = useNetwork();
   const { coinDetails } = useCurrentCoin();
 
-  const { customAccountData, setCurrentAccountId } = useCustomAccount();
+  const {
+    customAccountData,
+    setCurrentAccountId,
+    minimumBalanceForAddAccount
+  } = useCustomAccount();
 
   const [availableAccounts, setAvailableAccounts] = useState<string[]>([]);
   const coinNetwork = (COINS[coinDetails.coinId] as NearCoinData).network;
@@ -246,7 +250,9 @@ const Recipient: React.FC<StepComponentProps> = props => {
     if (customAccountData.length > 0) {
       setAvailableAccounts(
         customAccountData
-          .filter(acc => parseFloat(acc.displayBalance) >= 0.25)
+          .filter(
+            acc => parseFloat(acc.displayBalance) >= minimumBalanceForAddAccount
+          )
           .map(({ name }) => name)
       );
     }
