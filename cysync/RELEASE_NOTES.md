@@ -1,9 +1,15 @@
-# v1.1.779
+# v1.1.781
 
 ### 🚀 Features
 
 - Support for Arbitrum One and Optimism
 - WalletConnect support
+
+# v1.1.282
+
+### 🐛 Bugfixes
+
+- Bugfixes for Bitcoin legacy
 
 # v1.1.281
 

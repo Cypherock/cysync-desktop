@@ -467,23 +467,14 @@ export const useSendTransaction: UseSendTransaction = () => {
     return new Promise(resolve => {
       const subFlowName = Analytics.Categories.ESTIMATE_GAS_LIMIT;
       logger.info(`${subFlowName}: Initiated', ${contractAddress}`);
-      (data
-        ? Server.eth.transaction.getEstimatedGas({
-            from: fromAddress,
-            to: toAddress,
-            network,
-            value: amount,
-            data
-          })
-        : Server.eth.transaction.getContractFees({
-            fromAddress,
-            toAddress: toAddress.trim(),
-            network,
-            contractAddress,
-            amount,
-            responseType: 'v2'
-          })
-      )
+      Server.eth.transaction
+        .getEstimatedGas({
+          from: fromAddress,
+          to: contractAddress || toAddress,
+          network,
+          value: amount,
+          data
+        })
         .request()
         .then(res => {
           logger.info(`${subFlowName}: Completed', ${contractAddress}`);

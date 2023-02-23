@@ -339,11 +339,6 @@ const SendForm: React.FC<StepperProps> = ({
     // Refer: https://api.arbiscan.io/api?module=proxy&action=eth_estimateGas&data=0x&to=0xf6c3c3621f42ec1f1cd1207bb1571d93646ab29a&value=0xff22&gasPrice=0x51da038cc&gas=0x5f5e0ff&apikey=YourApiKeyToken
     if (coin.id === EthCoinMap.arbitrum) defaultLimit = 255595;
 
-    if (!token && !txnParams?.data) {
-      setGasLimit(defaultLimit);
-      return;
-    }
-
     if (
       !(
         estimateGasLimit &&
@@ -388,14 +383,22 @@ const SendForm: React.FC<StepperProps> = ({
         .toString(10);
     }
 
+    const data =
+      txnParams?.data ??
+      wallet.generateContractData(
+        contractAddress,
+        toAddress,
+        new BigNumber(amount)
+      );
+
     const estimatedLimit =
       (await sendTransaction.handleEstimateGasLimit(
         fromAddress,
         toAddress,
         network,
-        amount,
+        '0x0',
         contractAddress,
-        txnParams?.data
+        data
       )) ??
       (parseInt(txnParams?.gas, 16) || defaultLimit);
 
