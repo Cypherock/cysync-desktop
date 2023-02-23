@@ -203,7 +203,9 @@ const WalletConnectSignMessageDevice: React.FC<ISignProps> = ({
                   walletConnect.selectedAccount.passphraseExists &&
                   !signMessage.passphraseEntered
                     ? false
-                    : !signMessage.pinEntered || !signMessage.cardsTapped
+                    : signMessage.coinsConfirmed &&
+                      signMessage.verified &&
+                      (!signMessage.pinEntered || !signMessage.cardsTapped)
                 }
                 text="Enter PIN and Tap any X1 Card"
                 stylex={{ marginTop: '0px' }}
