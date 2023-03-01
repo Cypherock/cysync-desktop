@@ -76,7 +76,7 @@ export const changeFormatOfOutputList = (
     multiplier = tokenObj.multiplier;
   }
 
-  const list = targetList
+  let list = targetList
     .filter((elem: any) => !!elem.recipient.trim())
     .map((rec: any) => {
       return {
@@ -87,6 +87,8 @@ export const changeFormatOfOutputList = (
           : new BigNumber(rec.amount).multipliedBy(new BigNumber(multiplier))
       };
     });
+
+  if (list.length === 0) list = [{ address: '' }];
 
   return list;
 };
