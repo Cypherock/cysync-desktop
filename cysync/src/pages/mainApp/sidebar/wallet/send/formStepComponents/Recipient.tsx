@@ -7,7 +7,7 @@ import {
 } from '@cypherock/communication';
 import { NearWallet } from '@cypherock/wallet';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
-import { Alert, Typography } from '@mui/material';
+import { Alert, Skeleton, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -160,6 +160,7 @@ const Root = styled(Grid)(({ theme }) => ({
   },
   [`& .${classes.recipientTotal}`]: {
     display: 'flex',
+    minWidth: '200px',
     marginTop: 20,
     flexDirection: 'column',
     '& span': {
@@ -169,10 +170,17 @@ const Root = styled(Grid)(({ theme }) => ({
     '& .amount': {
       color: theme.palette.secondary.main,
       fontSize: '1.5rem',
+      display: 'flex',
+      alignItems: 'center',
       '& .amountCurrency': {
+        marginLeft: '5px',
         fontSize: '1rem'
       }
     }
+  },
+  ['& .amountCurrency']: {
+    marginLeft: '5px',
+    fontSize: '1rem'
   },
   [`& .${classes.recipientContinueButton}`]: {
     padding: '1rem 4rem',
@@ -636,6 +644,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
     }
   };
 
+  const getSkeletonForFee = () => {
+    if (isMediumFeeLoading || sendTransaction.isEstimatingFees)
+      return <Skeleton width={'100px'} />;
+  };
+
   const getFeeErrorInfo = () => {
     return (
       <div
@@ -879,7 +892,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
               />
             </div>
           )}
-          {isNear || (isSolana && <div style={{ marginBottom: '10px' }} />)}
+          {(isNear || isSolana) && <div style={{ marginBottom: '10px' }} />}
           {isEthereum && (
             <div style={{ marginTop: '10px' }}>
               <FormControlLabel
@@ -1023,51 +1036,69 @@ const Recipient: React.FC<StepComponentProps> = props => {
         ) : (
           <div className={recipientTotal}>
             <div>
-              <Typography variant="subtitle1" color="secondary">
-                <small>TRANSACTION FEE:</small>
-                {` ~${formatDisplayAmount(sendTransaction.approxTotalFee)} `}
-                <span className="amountCurrency">
-                  {COINS[coinDetails.coinId]?.abbr?.toUpperCase()}
-                  &nbsp;&nbsp;&nbsp;
-                </span>
-                <span style={{ fontSize: '0.7rem' }}>
-                  {`($${formatDisplayAmount(
-                    sendTransaction.approxTotalFee *
-                      parseFloat(coinDetails.displayPrice),
-                    2,
-                    true
-                  )})`}
-                </span>
+              <Typography
+                variant="subtitle1"
+                color="secondary"
+                style={{ display: 'flex', alignItems: 'center', width: '100%' }}
+              >
+                <small style={{ marginRight: '5px' }}>TRANSACTION FEE:</small>
+                {getSkeletonForFee() || (
+                  <>
+                    {` ~${formatDisplayAmount(
+                      sendTransaction.approxTotalFee
+                    )} `}
+                    <span className="amountCurrency">
+                      {COINS[coinDetails.coinId]?.abbr?.toUpperCase()}
+                      &nbsp;&nbsp;&nbsp;
+                    </span>
+                    <span style={{ fontSize: '0.7rem' }}>
+                      {`($${formatDisplayAmount(
+                        sendTransaction.approxTotalFee *
+                          parseFloat(coinDetails.displayPrice),
+                        2,
+                        true
+                      )})`}
+                    </span>
+                  </>
+                )}
               </Typography>
             </div>
             <Typography variant="caption" color="secondary">
               {token ? 'AMOUNT' : 'TOTAL'}
             </Typography>
             <Typography variant="caption" color="secondary" className="amount">
-              {token
-                ? `${formatDisplayAmount(total)} `
-                : `${formatDisplayAmount(
-                    total.plus(new BigNumber(sendTransaction.approxTotalFee))
-                  )} `}
-              <span className="amountCurrency">
-                {coinAbbr.toUpperCase()}
-                &nbsp;&nbsp;&nbsp;
-              </span>
-              <span style={{ fontSize: '1rem' }}>
-                {token
-                  ? `(~ $${formatDisplayAmount(
-                      total.multipliedBy(new BigNumber(token.displayPrice)),
-                      2,
-                      true
-                    )})`
-                  : `(~ $${formatDisplayAmount(
-                      total
-                        .plus(new BigNumber(sendTransaction.approxTotalFee))
-                        .multipliedBy(new BigNumber(coinDetails.displayPrice)),
-                      2,
-                      true
-                    )})`}
-              </span>
+              {getSkeletonForFee() || (
+                <>
+                  {token
+                    ? `${formatDisplayAmount(total)} `
+                    : `${formatDisplayAmount(
+                        total.plus(
+                          new BigNumber(sendTransaction.approxTotalFee)
+                        )
+                      )} `}
+                  <span className="amountCurrency">
+                    {coinAbbr.toUpperCase()}
+                    &nbsp;&nbsp;&nbsp;
+                  </span>
+                  <span style={{ fontSize: '1rem' }}>
+                    {token
+                      ? `(~ $${formatDisplayAmount(
+                          total.multipliedBy(new BigNumber(token.displayPrice)),
+                          2,
+                          true
+                        )})`
+                      : `(~ $${formatDisplayAmount(
+                          total
+                            .plus(new BigNumber(sendTransaction.approxTotalFee))
+                            .multipliedBy(
+                              new BigNumber(coinDetails.displayPrice)
+                            ),
+                          2,
+                          true
+                        )})`}
+                  </span>
+                </>
+              )}
             </Typography>
           </div>
         )}
