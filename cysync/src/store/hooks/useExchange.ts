@@ -3,10 +3,9 @@ import Server from '@cypherock/server-wrapper';
 import { useEffect, useState } from 'react';
 
 import logger from '../../mainProcess/logger';
-import { accountDb, Wallet } from '../database';
+import { accountDb, DisplayCoin, Wallet } from '../database';
 import {
   changeFormatOfOutputList,
-  DisplayCoin,
   useSwapTransaction,
   UseSwapTransactionValues,
   useWalletData

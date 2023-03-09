@@ -20,8 +20,7 @@ import SwitchButton from '../../../../../../designSystem/designComponents/button
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Input from '../../../../../../designSystem/designComponents/input/input';
 import CoinIcons from '../../../../../../designSystem/genericComponents/coinIcons';
-import { Wallet } from '../../../../../../store/database';
-import { DisplayCoin } from '../../../../../../store/hooks';
+import { DisplayCoin, Wallet } from '../../../../../../store/database';
 
 const trimString = (str: string, length: number) => {
   if (str.length > length) {

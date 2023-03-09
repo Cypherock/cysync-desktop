@@ -1,4 +1,3 @@
-import { COINS } from '@cypherock/communication';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Button, Grid, Typography } from '@mui/material';

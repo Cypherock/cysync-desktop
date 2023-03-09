@@ -129,7 +129,7 @@ const handleWalletErrors = (
 
 export const getMap = (langStrings: I18nStrings): CodeToErrorMap => {
   return {
-    [DeviceErrorType.SWAP_TXN_UNKNOWN_ERROR]: {
+    [CysyncError.SWAP_TXN_UNKNOWN_ERROR]: {
       parent: CysyncError.SWAP_TXN_UNKNOWN_ERROR,
       message: 'Swap Transaction Unknown Error'
     },
