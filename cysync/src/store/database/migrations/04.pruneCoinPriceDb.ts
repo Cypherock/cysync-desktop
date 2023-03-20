@@ -1,4 +1,5 @@
 import logger from '../../../utils/logger';
+import { CoinPriceDB } from '../databaseInit';
 
 import { MigrationFunction } from './types';
 
@@ -12,11 +13,14 @@ const pruneCoinPriceDb: MigrationFunction = async params => {
     let rebuildRequired = false;
     for (const coinId of allCoinItems) {
       const coinPrices = allPrices
-        .filter(el => el.priceLastUpdatedAt && el.coinId === coinId)
+        .filter(el => el.coinId === coinId)
         .sort((a, b) => b.priceLastUpdatedAt - a.priceLastUpdatedAt);
       if (coinPrices.length > 1) rebuildRequired = true;
       if (coinPrices.length > 0)
-        newCoinPriceList.push({ ...coinPrices[0], _id: `idx-${coinId}` });
+        newCoinPriceList.push({
+          ...coinPrices[0],
+          _id: CoinPriceDB.buildIndexString(coinId)
+        });
     }
 
     if (rebuildRequired) {
