@@ -1,3 +1,13 @@
+# v1.2.0
+
+### 🚀 Features
+
+- Token Support for EVM chains
+
+### 🐛 Bugfixes
+
+- Fixed latest price update
+
 # v1.1.786
 
 ### 🚀 Features
