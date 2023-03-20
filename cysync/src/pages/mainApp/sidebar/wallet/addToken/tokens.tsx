@@ -25,9 +25,7 @@ const getTokens = (ethCoinId: string) => {
     }
   }
 
-  return initialTokens.sort((a, b) => {
-    return a.name.localeCompare(b.name);
-  });
+  return initialTokens;
 };
 
 export default getTokens;
