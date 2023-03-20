@@ -33,7 +33,8 @@ export const processResponses = async (
   const res = responses[0];
 
   const data = res.data[item.id].usd;
-  const priceLastUpdatedAt = res.data[item.id].last_updated_at;
+  const priceLastUpdatedAt =
+    res.data[item.id].last_updated_at ?? Math.floor(Date.now() / 1000);
 
   await coinPriceDb.insert({
     coinId: item.coinId,
