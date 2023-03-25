@@ -220,6 +220,7 @@ export interface HandleSendTransactionOptions {
   isSendAll: boolean | undefined;
   data: {
     gasLimit: number;
+    l1Cost: string;
     contractAddress?: string;
     contractAbbr?: string;
     contractData?: string;
@@ -259,6 +260,8 @@ export interface UseSendTransactionValues {
   hash: string;
   setHash: React.Dispatch<React.SetStateAction<string>>;
   totalFees: string;
+  l1Fee: string;
+  getL2Fees: () => string;
   approxTotalFee: number;
   sendMaxAmount: string;
   resetHooks: () => void;
@@ -274,6 +277,7 @@ export interface UseSendTransactionValues {
     isSendAll: boolean | undefined;
     data?: {
       gasLimit: number;
+      l1Cost: string;
       contractAddress?: string;
       contractAbbr?: string;
       subCoinId?: string;
@@ -322,6 +326,7 @@ export const useSendTransaction: UseSendTransaction = () => {
   const [metadataSent, setMetadataSent] = useState(false);
   const sendTransaction = new TransactionSender();
   const [totalFees, setTotalFees] = useState('0');
+  const [l1Fee, setL1Fee] = useState('0');
   const [txnInputs, setTxnInputs] = useState<TxInputOutput[]>([]);
   const [txnOutputs, setTxnOutputs] = useState<TxInputOutput[]>([]);
   const [approxTotalFee, setApproxTotalFees] = useState(0);
@@ -334,6 +339,10 @@ export const useSendTransaction: UseSendTransaction = () => {
   );
   const [isEstimatingFees, setIsEstimatingFees] = useState(false);
   const { addTransactionStatusCheckItem } = useStatusCheck();
+
+  const getL2Fees = () => {
+    return new BigNumber(totalFees).minus(new BigNumber(l1Fee)).toString();
+  };
 
   const resetHooks = () => {
     setDeviceConnected(false);
@@ -482,7 +491,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.info(`${subFlowName}: Completed', ${contractAddress}`);
           if (res?.data?.fees === undefined)
             throw new Error('Invalid Response');
-          resolve(res.data.fees);
+          resolve({ gasLimit: res.data.fees, l1Cost: res.data.l1Cost });
         })
         .catch(e => {
           logger.info(`${subFlowName}: Error', ${contractAddress}`);
@@ -633,6 +642,11 @@ export const useSendTransaction: UseSendTransaction = () => {
       sendTransaction.on('totalFees', fee => {
         logger.info('SendTransaction: Total fee generated', { coinId, fee });
         setTotalFees(fee);
+      });
+
+      sendTransaction.on('l1Fees', fee => {
+        logger.info('SendTransaction: L1 fee generated', { coinId, fee });
+        setL1Fee(fee);
       });
 
       sendTransaction.on('inputOutput', ({ inputs, outputs }) => {
@@ -1074,6 +1088,8 @@ export const useSendTransaction: UseSendTransaction = () => {
     resetHooks,
     cancelSendTxn,
     totalFees,
+    l1Fee,
+    getL2Fees,
     approxTotalFee,
     handleEstimateFee,
     sendMaxAmount,

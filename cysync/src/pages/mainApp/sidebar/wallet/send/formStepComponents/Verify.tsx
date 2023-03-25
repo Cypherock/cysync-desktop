@@ -1,4 +1,4 @@
-import { COINS } from '@cypherock/communication';
+import { COINS, EthCoinMap } from '@cypherock/communication';
 import { Typography } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import { styled, Theme } from '@mui/material/styles';
@@ -188,18 +188,48 @@ const Verify = (props: any) => {
               }
               verified={sendTransaction.verified}
             />
-            <LabelText
-              label="Transaction Fee"
-              text={`~ ${sendTransaction.totalFees} ${COINS[
-                coinDetails.coinId
-              ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
-                parseFloat(sendTransaction.totalFees) *
-                  parseFloat(coinDetails.displayPrice),
-                2,
-                true
-              )})`}
-              verified={sendTransaction.verified}
-            />
+            {coinDetails.coinId === EthCoinMap.optimism || (
+              <LabelText
+                label="Transaction Fee"
+                text={`~ ${sendTransaction.totalFees} ${COINS[
+                  coinDetails.coinId
+                ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
+                  parseFloat(sendTransaction.totalFees) *
+                    parseFloat(coinDetails.displayPrice),
+                  2,
+                  true
+                )})`}
+                verified={sendTransaction.verified}
+              />
+            )}
+            {coinDetails.coinId === EthCoinMap.optimism && (
+              <>
+                <LabelText
+                  label="Transaction Fee"
+                  text={`~ ${sendTransaction.getL2Fees()} ${COINS[
+                    coinDetails.coinId
+                  ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
+                    parseFloat(sendTransaction.getL2Fees()) *
+                      parseFloat(coinDetails.displayPrice),
+                    2,
+                    true
+                  )})`}
+                  verified={sendTransaction.verified}
+                />
+                <LabelText
+                  label="L1 Data Fee"
+                  text={`~ ${sendTransaction.l1Fee} ${COINS[
+                    coinDetails.coinId
+                  ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
+                    parseFloat(sendTransaction.l1Fee) *
+                      parseFloat(coinDetails.displayPrice),
+                    2,
+                    true
+                  )})`}
+                  verified={sendTransaction.verified}
+                />
+              </>
+            )}
           </>
         ) : (
           <>
