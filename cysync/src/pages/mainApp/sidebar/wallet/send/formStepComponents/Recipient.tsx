@@ -840,49 +840,53 @@ const Recipient: React.FC<StepComponentProps> = props => {
               debouncedHandleCheckAddresses();
             }}
           />
-          <Input
-            onKeyDown={handleKeyPress}
-            id="1"
-            name="amount"
-            type="number"
-            label={`Amount ${coinAbbr.toUpperCase()}`}
-            onChange={handleInputChange}
-            value={
-              !maxSend
-                ? batchRecipientData[0].amount
-                : sendTransaction.sendMaxAmount
-            }
-            showLoading={maxSend && sendTransaction.isEstimatingFees}
-            error={!!batchRecipientData[0].errorAmount}
-            helperText={batchRecipientData[0].errorAmount}
-            placeHolder="0"
-            decimal={coin.decimal}
-            disabled={txnParams?.value !== undefined || maxSend}
-            customIcon={
-              txnParams?.value === undefined ? (
-                <Button
-                  className={`${classes.sendMaxBtn} ${
-                    maxSend ? classes.sendMaxBtnActive : ''
-                  }`}
-                  onClick={() => setMaxSend(!maxSend)}
-                >
-                  Send Max
-                </Button>
-              ) : (
-                <></>
-              )
-            }
-          />
-          <Typography className={amountUSD}>
-            {' '}
-            ~( $
-            {formatDisplayAmount(
-              total.multipliedBy(new BigNumber(coinPrice)),
-              2,
-              true
-            )}
-            )
-          </Typography>
+          {parseInt(txnParams?.value, 10) === 0 || (
+            <>
+              <Input
+                onKeyDown={handleKeyPress}
+                id="1"
+                name="amount"
+                type="number"
+                label={`Amount ${coinAbbr.toUpperCase()}`}
+                onChange={handleInputChange}
+                value={
+                  !maxSend
+                    ? batchRecipientData[0].amount
+                    : sendTransaction.sendMaxAmount
+                }
+                showLoading={maxSend && sendTransaction.isEstimatingFees}
+                error={!!batchRecipientData[0].errorAmount}
+                helperText={batchRecipientData[0].errorAmount}
+                placeHolder="0"
+                decimal={coin.decimal}
+                disabled={txnParams?.value !== undefined || maxSend}
+                customIcon={
+                  txnParams?.value === undefined ? (
+                    <Button
+                      className={`${classes.sendMaxBtn} ${
+                        maxSend ? classes.sendMaxBtnActive : ''
+                      }`}
+                      onClick={() => setMaxSend(!maxSend)}
+                    >
+                      Send Max
+                    </Button>
+                  ) : (
+                    <></>
+                  )
+                }
+              />
+              <Typography className={amountUSD}>
+                {' '}
+                ~( $
+                {formatDisplayAmount(
+                  total.multipliedBy(new BigNumber(coinPrice)),
+                  2,
+                  true
+                )}
+                )
+              </Typography>
+            </>
+          )}
           {customAccount && (
             <div style={{ marginTop: '5px', padding: '0.2rem 0.5rem' }}>
               <LabelText

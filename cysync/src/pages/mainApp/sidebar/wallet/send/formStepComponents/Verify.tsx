@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import Icon from '../../../../../../designSystem/designComponents/icons/Icon';
 import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop';
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
+import { TriggeredBy } from '../../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
   useNetwork,
@@ -100,7 +101,7 @@ const CustomAlert = withStyles((theme: Theme) =>
 )(Alert);
 
 const Verify = (props: any) => {
-  const { batchRecipientData, maxSend, activeButton } = props;
+  const { batchRecipientData, maxSend, activeButton, triggeredBy } = props;
 
   const { coinDetails } = useCurrentCoin();
 
@@ -170,24 +171,31 @@ const Verify = (props: any) => {
               text={batchRecipientData[0].recipient}
               verified={sendTransaction.verified}
             />
-            <LabelText
-              label={`Amount ${coinAbbr.toUpperCase()}`}
-              text={
-                !maxSend
-                  ? `${batchRecipientData[0].amount} ~( $${formatDisplayAmount(
-                      batchRecipientData[0].amount * parseFloat(coinPrice),
-                      2,
-                      true
-                    )}) `
-                  : `${sendTransaction.sendMaxAmount} ~( $${formatDisplayAmount(
-                      parseFloat(sendTransaction.sendMaxAmount) *
-                        parseFloat(coinPrice),
-                      2,
-                      true
-                    )}) `
-              }
-              verified={sendTransaction.verified}
-            />
+            {(triggeredBy === TriggeredBy.WalletConnect &&
+              parseInt(batchRecipientData[0].amount, 10) === 0) || (
+              <LabelText
+                label={`Amount ${coinAbbr.toUpperCase()}`}
+                text={
+                  !maxSend
+                    ? `${
+                        batchRecipientData[0].amount
+                      } ~( $${formatDisplayAmount(
+                        batchRecipientData[0].amount * parseFloat(coinPrice),
+                        2,
+                        true
+                      )}) `
+                    : `${
+                        sendTransaction.sendMaxAmount
+                      } ~( $${formatDisplayAmount(
+                        parseFloat(sendTransaction.sendMaxAmount) *
+                          parseFloat(coinPrice),
+                        2,
+                        true
+                      )}) `
+                }
+                verified={sendTransaction.verified}
+              />
+            )}
             <LabelText
               label="Transaction Fee"
               text={`~ ${sendTransaction.totalFees} ${COINS[
