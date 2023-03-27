@@ -139,7 +139,7 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
       <div className={classes.container}>
         <ClientMeta />
         <Typography color="textPrimary" variant="body2" gutterBottom>
-          Chose your wallet
+          Choose your wallet
         </Typography>
         <Autocomplete
           id="wallet-connect-wallet"
@@ -164,7 +164,7 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
         />
 
         <Typography color="textPrimary" variant="body2" gutterBottom>
-          Chose account
+          Choose your account
         </Typography>
         <Autocomplete
           id="wallet-connect-account"
