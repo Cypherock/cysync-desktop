@@ -171,8 +171,8 @@ const Verify = (props: any) => {
               text={batchRecipientData[0].recipient}
               verified={sendTransaction.verified}
             />
-            {(triggeredBy === TriggeredBy.WalletConnect &&
-              parseInt(batchRecipientData[0].amount, 10) === 0) || (
+            {(triggeredBy !== TriggeredBy.WalletConnect ||
+              parseInt(batchRecipientData[0].amount, 10)) && (
               <LabelText
                 label={`Amount ${coinAbbr.toUpperCase()}`}
                 text={

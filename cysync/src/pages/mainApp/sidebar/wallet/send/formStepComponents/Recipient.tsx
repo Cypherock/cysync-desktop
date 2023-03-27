@@ -840,7 +840,8 @@ const Recipient: React.FC<StepComponentProps> = props => {
               debouncedHandleCheckAddresses();
             }}
           />
-          {parseInt(txnParams?.value, 10) === 0 || (
+          {(triggeredBy !== TriggeredBy.WalletConnect ||
+            parseInt(batchRecipientData[0].amount, 10)) && (
             <>
               <Input
                 onKeyDown={handleKeyPress}

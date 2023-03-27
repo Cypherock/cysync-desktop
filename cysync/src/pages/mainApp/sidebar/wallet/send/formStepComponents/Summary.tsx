@@ -130,7 +130,6 @@ const Summary: React.FC<StepComponentProps> = ({
   const { addCustomAccountSyncItemFromCoin } = useSync();
 
   const handleSend = async () => {
-    return;
     if (onSuccess && resultType === 'signature') {
       onSuccess('0x' + sendTransaction.signature);
       handleNext();
