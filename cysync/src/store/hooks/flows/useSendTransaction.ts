@@ -174,7 +174,7 @@ export const verifyAddress = (address: string, coin: DisplayCoin) => {
   }
 
   if (
-    coinDetails.coinListId === ETHCOINS[EthCoinMap.harmony].coinListId &&
+    coinDetails.coinListId === ETHCOINS[EthCoinMap.harmony]?.coinListId &&
     address.startsWith('one1')
   ) {
     try {
