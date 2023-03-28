@@ -492,7 +492,11 @@ export const useSendTransaction: UseSendTransaction = () => {
           logger.info(`${subFlowName}: Completed', ${contractAddress}`);
           if (res?.data?.fees === undefined)
             throw new Error('Invalid Response');
-          resolve({ gasLimit: res.data.fees, l1Cost: res.data.l1Cost });
+          resolve({
+            gasLimit: res.data.fees,
+            //L1 fees may fluctuate upto 25% while broadcasting https://help.optimism.io/hc/en-us/articles/4416677738907-What-happens-if-the-L1-gas-price-spikes-while-a-transaction-is-in-process
+            l1Cost: new BigNumber(res.data.l1Cost).multipliedBy(1.25).toString()
+          });
         })
         .catch(e => {
           logger.info(`${subFlowName}: Error', ${contractAddress}`);
