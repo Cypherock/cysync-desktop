@@ -484,7 +484,8 @@ export const useSendTransaction: UseSendTransaction = () => {
           to: contractAddress || toAddress,
           network,
           value: amount,
-          data
+          data,
+          responseType: 'v2'
         })
         .request()
         .then(res => {
