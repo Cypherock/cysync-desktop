@@ -165,13 +165,13 @@ export const useHistory: UseHistory = () => {
       }
 
       const account = allAccounts.find(ob => ob.accountId === newTxn.accountId);
-      if (!account && doAdd) {
-        logger.warn(`Cannot find account with id: ${newTxn.accountId}`);
-        doAdd = false;
-      } else {
+      if (account && doAdd) {
         newTxn.accountName = account.name;
         newTxn.accountType = account.accountType;
         newTxn.accountIndex = account.accountIndex;
+      } else if (!account) {
+        logger.warn(`Cannot find account with id: ${newTxn.accountId}`);
+        doAdd = false;
       }
 
       if (doAdd) {
