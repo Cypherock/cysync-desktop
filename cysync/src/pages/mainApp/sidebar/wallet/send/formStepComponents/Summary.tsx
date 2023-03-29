@@ -10,7 +10,7 @@ import Backdrop from '../../../../../../designSystem/genericComponents/Backdrop'
 import ErrorExclamation from '../../../../../../designSystem/iconGroups/errorExclamation';
 import { CyError, CysyncError } from '../../../../../../errors';
 import { accountDb } from '../../../../../../store/database';
-import { broadcastTxn } from '../../../../../../store/hooks/flows';
+import { broadcastTxn, TriggeredBy } from '../../../../../../store/hooks/flows';
 import {
   useCurrentCoin,
   useNetwork,
@@ -99,7 +99,8 @@ const Summary: React.FC<StepComponentProps> = ({
   handleClose,
   activeButton,
   onSuccess,
-  resultType
+  resultType,
+  triggeredBy
 }) => {
   const [broadcastError, setBroadcastError] = useState('');
   const [advanceError, setAdvanceError] = useState('');
@@ -277,27 +278,29 @@ const Summary: React.FC<StepComponentProps> = ({
             verified
           />
         )}
-        {activeButton === 0 && (
-          <LabelText
-            label={`Amount ${coinAbbr.toUpperCase()}`}
-            text={
-              !maxSend
-                ? `${batchRecipientData[0].amount} ~( $${formatDisplayAmount(
-                    parseFloat(batchRecipientData[0].amount || '0') *
-                      parseFloat(coinPrice),
-                    2,
-                    true
-                  )}) `
-                : `${sendTransaction.sendMaxAmount} ~( $${formatDisplayAmount(
-                    parseFloat(sendTransaction.sendMaxAmount) *
-                      parseFloat(coinPrice),
-                    2,
-                    true
-                  )}) `
-            }
-            verified
-          />
-        )}
+        {activeButton === 0 &&
+          (triggeredBy !== TriggeredBy.WalletConnect ||
+            parseInt(batchRecipientData[0].amount, 10) !== 0) && (
+            <LabelText
+              label={`Amount ${coinAbbr.toUpperCase()}`}
+              text={
+                !maxSend
+                  ? `${batchRecipientData[0].amount} ~( $${formatDisplayAmount(
+                      parseFloat(batchRecipientData[0].amount || '0') *
+                        parseFloat(coinPrice),
+                      2,
+                      true
+                    )}) `
+                  : `${sendTransaction.sendMaxAmount} ~( $${formatDisplayAmount(
+                      parseFloat(sendTransaction.sendMaxAmount) *
+                        parseFloat(coinPrice),
+                      2,
+                      true
+                    )}) `
+              }
+              verified
+            />
+          )}
         {activeButton !== 0 && (
           <LabelText
             label={`Amount ${coinAbbr.toUpperCase()}`}
