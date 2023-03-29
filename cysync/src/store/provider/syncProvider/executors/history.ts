@@ -81,6 +81,20 @@ export const getRequestsMetadata = (
       )
       .getMetadata();
 
+    const ethInternalTxnMetadata = ethServer.transaction
+      .getHistory(
+        {
+          address,
+          network: coin.network,
+          limit: 100,
+          from: item.afterInternalBlock,
+          internal: true,
+          responseType: 'v2'
+        },
+        item.isRefresh
+      )
+      .getMetadata();
+
     const erc20Metadata = ethServer.transaction
       .getContractHistory(
         {
@@ -93,7 +107,7 @@ export const getRequestsMetadata = (
         item.isRefresh
       )
       .getMetadata();
-    return [ethTxnMetadata, erc20Metadata];
+    return [ethTxnMetadata, erc20Metadata, ethInternalTxnMetadata];
   }
 
   if (coin instanceof NearCoinData) {
@@ -230,7 +244,7 @@ export const processResponses = async (
   }
 
   if (coinData instanceof EthCoinData) {
-    if (responses.length < 2) {
+    if (responses.length < 3) {
       throw new Error('Did not find responses while processing');
     }
 
@@ -246,6 +260,9 @@ export const processResponses = async (
 
     const erc20history = responses[1].data?.result;
     const moreToken = responses[1].data?.more;
+
+    const internalHistory = responses[2].data?.result;
+    const moreInternal = responses[2].data?.more;
 
     if (!rawHistory) {
       throw new Error('Invalid eth history from server');
@@ -422,6 +439,56 @@ export const processResponses = async (
       }
     }
 
+    for (const ele of internalHistory) {
+      const fees = new BigNumber(0); //fee is only associated with parent transaction here only gas limit is provided
+
+      const fromAddr = ele.from.toLowerCase();
+      const toAddr = ele.to.toLowerCase();
+      const selfTransfer = fromAddr === toAddr;
+      const amount = String(ele.value || 0);
+
+      const txn: Transaction = {
+        accountId: item.accountId,
+        coinId: item.coinId,
+        parentCoinId: item.coinId,
+        isSub: false,
+        hash: ele.hash,
+        amount: selfTransfer ? '0' : amount,
+        fees: fees.toString(),
+        total: new BigNumber(amount).plus(fees).toString(),
+        confirmations: ele.confirmations || 0,
+        walletId: item.walletId,
+        // 2 for failed, 1 for pass
+        status: ele.isError === '0' ? 1 : 2,
+        sentReceive:
+          address === fromAddr ? SentReceive.SENT : SentReceive.RECEIVED,
+        confirmed: new Date(parseInt(ele.timeStamp, 10) * 1000).toISOString(),
+        blockHeight: ele.blockNumber,
+        inputs: [
+          {
+            address: fromAddr,
+            value: amount,
+            indexNumber: 0,
+            isMine: address === fromAddr,
+            type: IOtype.INPUT
+          }
+        ],
+        outputs: [
+          {
+            address: toAddr,
+            value: amount,
+            indexNumber: 0,
+            isMine: address === toAddr,
+            type: IOtype.OUTPUT
+          }
+        ],
+        type: ele.type + '_' + ele.traceId,
+        description: `Internal Transaction ${ele.errCode}`,
+        customIdentifier: 'internal'
+      };
+
+      history.push(txn);
+    }
     const transactionDbList = [];
     for (const txn of history) {
       transactionDbList.push(txn);
@@ -487,15 +554,24 @@ export const processResponses = async (
         );
       }
     }
-    const returnObj: { after?: number; afterToken?: number } = {};
-    if (moreParent || moreToken) {
+    const returnObj: {
+      after?: number;
+      afterToken?: number;
+      afterInternal?: number;
+    } = {};
+    if (moreParent || moreToken || moreInternal) {
       if (rawHistory.length > 0)
         returnObj.after = rawHistory[rawHistory.length - 1].blockNumber;
       if (erc20history.length > 0)
         returnObj.afterToken =
           erc20history[erc20history.length - 1].blockNumber;
+      if (internalHistory.length > 0)
+        returnObj.afterInternal =
+          internalHistory[internalHistory.length - 1].blockNumber;
     }
-    return returnObj.after || returnObj.afterToken ? returnObj : undefined;
+    return returnObj.after || returnObj.afterToken || returnObj.afterInternal
+      ? returnObj
+      : undefined;
   }
 
   if (coinData instanceof NearCoinData) {

@@ -66,10 +66,8 @@ export const getAllMetadata = (items: SyncQueueItem[]) => {
 };
 
 const getBatchResponses = async (
-  allMetadataInfo: RequestMetaProcessInfo[]
+  allMetadata: IRequestMetadata[]
 ): Promise<batchServer.IBatchResponse[]> => {
-  const allMetadata = flatMap(allMetadataInfo.map(elem => elem.meta));
-
   if (allMetadata.length <= 0) {
     return Promise.resolve([]);
   }
@@ -78,10 +76,8 @@ const getBatchResponses = async (
 };
 
 export const getClientResponses = async (
-  allMetadataInfo: RequestMetaProcessInfo[]
+  allMetadata: IRequestMetadata[]
 ): Promise<clientServer.IClientResponse[]> => {
-  const allMetadata = flatMap(allMetadataInfo.map(elem => elem.meta));
-
   if (allMetadata.length <= 0) {
     return Promise.resolve([]);
   }
@@ -177,9 +173,11 @@ export const executeBatch = async (
   items: SyncQueueItem[],
   options: OptionParams
 ): Promise<Array<ExecutionResult<SyncQueueItem>>> => {
+  const BATCH_SIZE = 5;
   if (items.length <= 0) return [];
 
   const allMetadataInfo = getAllMetadata(items);
+  const allMetadata = flatMap(allMetadataInfo.map(elem => elem.meta));
   if (allMetadataInfo.length !== items.length) {
     throw new Error(
       'allMetadataInfo length should be equal to items: ' +
@@ -191,10 +189,19 @@ export const executeBatch = async (
     batchServer.IBatchResponse | clientServer.IClientResponse
   > = [];
   try {
-    if (options.isClientBatch) {
-      allResponses = await getClientResponses(allMetadataInfo);
-    } else {
-      allResponses = await getBatchResponses(allMetadataInfo);
+    for (let i = 0; i < allMetadata.length; i += BATCH_SIZE) {
+      const trimmedMetadata = allMetadata.slice(i, i + BATCH_SIZE);
+      if (options.isClientBatch) {
+        allResponses = [
+          ...allResponses,
+          ...(await getClientResponses(trimmedMetadata))
+        ];
+      } else {
+        allResponses = [
+          ...allResponses,
+          ...(await getBatchResponses(trimmedMetadata))
+        ];
+      }
     }
   } catch (error) {
     return allMetadataInfo.map(elem => {
