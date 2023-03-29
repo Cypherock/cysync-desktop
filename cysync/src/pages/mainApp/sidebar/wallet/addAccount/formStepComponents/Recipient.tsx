@@ -370,6 +370,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         isSendAll: false,
         data: {
           gasLimit: 0,
+          l1Cost: '0',
           contractAddress,
           contractAbbr: token ? coinAbbr.toUpperCase() : undefined,
           subCoinId: token?.coinId

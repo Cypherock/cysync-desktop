@@ -378,6 +378,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
     handleCopyFromClipboard,
     setTransactionFee,
     gasLimit,
+    l1Cost,
     setGasLimit,
     gasLimitError,
     handleNext,
@@ -616,6 +617,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
         isSendAll: maxSend,
         data: {
           gasLimit,
+          l1Cost,
           contractAddress,
           contractAbbr: token ? coinAbbr.toUpperCase() : undefined,
           nonce: txnParams?.nonce,

@@ -55,6 +55,7 @@ export interface StepComponentProps {
   buttonDisabled: boolean;
   isButtonLoading: boolean;
   gasLimit: number;
+  l1Cost: string;
   gasLimitError: string | undefined;
   setGasLimit: (val: number) => void;
   handleCopyFromClipboard: (id: string) => void;
