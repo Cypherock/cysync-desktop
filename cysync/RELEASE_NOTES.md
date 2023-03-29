@@ -1,4 +1,4 @@
-# v1.2.0
+# v1.2.6
 
 ### 🚀 Features
 
@@ -7,6 +7,10 @@
 ### 🐛 Bugfixes
 
 - Fixed latest price update
+- Internal transactions for EVM
+- L1 fee for Optimism
+- Fixed AutoLock toggle
+- Removed support for Harmony and Ethereum classic
 
 # v1.1.786
 
