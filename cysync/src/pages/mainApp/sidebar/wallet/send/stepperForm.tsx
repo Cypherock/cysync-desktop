@@ -236,6 +236,7 @@ const SendForm: React.FC<StepperProps> = ({
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [maximum, setMaximum] = React.useState(false);
   const [gasLimit, setGasLimit] = React.useState(21000);
+  const [l1Cost, setL1Cost] = React.useState('0');
   const [gasLimitError, setGasLimitError] = React.useState<string | undefined>(
     undefined
   );
@@ -320,6 +321,7 @@ const SendForm: React.FC<StepperProps> = ({
       isSendAll: maxSend,
       data: {
         gasLimit,
+        l1Cost,
         contractAddress,
         contractAbbr: token
           ? COINS[coinDetails.coinId]?.tokenList[token.coinId]?.abbr
@@ -391,19 +393,20 @@ const SendForm: React.FC<StepperProps> = ({
         new BigNumber(amount)
       );
 
+    const estimatedGas = await sendTransaction.handleEstimateGasLimit(
+      fromAddress,
+      toAddress,
+      network,
+      '0x0',
+      contractAddress,
+      data
+    );
     const estimatedLimit =
-      (await sendTransaction.handleEstimateGasLimit(
-        fromAddress,
-        toAddress,
-        network,
-        '0x0',
-        contractAddress,
-        data
-      )) ??
-      (parseInt(txnParams?.gas, 16) || defaultLimit);
+      estimatedGas?.gasLimit ?? (parseInt(txnParams?.gas, 16) || defaultLimit);
 
     if (estimatedLimit) {
       setGasLimit(estimatedLimit);
+      setL1Cost(estimatedGas.l1Cost);
     }
     setIsButtonLoading(false);
   };
@@ -737,6 +740,7 @@ const SendForm: React.FC<StepperProps> = ({
             setTransactionFee,
             buttonDisabled,
             gasLimit,
+            l1Cost,
             gasLimitError,
             setGasLimit,
             handleCopyFromClipboard,

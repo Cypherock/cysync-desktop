@@ -136,6 +136,8 @@ export const SyncProvider: React.FC = ({ children }) => {
           result.processResult.before;
         (updatedItem as HistorySyncItem).afterTokenBlock =
           result.processResult.afterToken;
+        (updatedItem as HistorySyncItem).afterInternalBlock =
+          result.processResult.afterInternal;
       }
 
       if (removeFromQueue) {
@@ -330,6 +332,18 @@ export const SyncProvider: React.FC = ({ children }) => {
             excludePending: true
           }
         );
+        const topInternalBlock = await getTopBlock(
+          {
+            accountId: coin.accountId,
+            parentCoinId: coin.coinId,
+            customIdentifier: 'internal',
+            isSub: false
+          },
+          {
+            excludeFailed: true,
+            excludePending: true
+          }
+        );
         const newItem = new HistorySyncItem({
           accountId: coin.accountId,
           accountType: coin.accountType,
@@ -338,6 +352,7 @@ export const SyncProvider: React.FC = ({ children }) => {
           walletId: coin.walletId,
           afterBlock: topBlock,
           afterTokenBlock: topTokenBlock,
+          afterInternalBlock: topInternalBlock,
           isRefresh,
           module,
           coinGroup: CoinGroup.Ethereum

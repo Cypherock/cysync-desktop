@@ -4,6 +4,7 @@ import {
   pricing as pricingServer,
   serverBatch as batchServer
 } from '@cypherock/server-wrapper';
+import { flatMap } from 'lodash';
 
 import { ExecutionResult } from '../../../hooks';
 import { LatestPriceSyncItem, SyncQueueItem } from '../types';
@@ -75,7 +76,9 @@ export const executeLatestPriceBatch = async (
   > = [];
 
   try {
-    const response = await getClientResponses([metadata]);
+    const response = await getClientResponses(
+      flatMap([metadata].map(el => el.meta))
+    );
     for (let i = 0; i < items.length; i++) {
       allResponses.push(response[0]);
     }
