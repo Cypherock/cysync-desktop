@@ -245,7 +245,7 @@ const TransactionDialog: React.FC<TransactionDialogProps> = props => {
         ethServer.transaction.getOpenTxnLink({
           network: ecoin.network,
           txHash: txn.hash,
-          isConfirmed: txn.confirmations && txn.confirmations > 0
+          isConfirmed: true
         })
       );
       return;
