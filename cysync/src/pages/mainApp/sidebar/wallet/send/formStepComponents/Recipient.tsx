@@ -843,7 +843,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
             }}
           />
           {(triggeredBy !== TriggeredBy.WalletConnect ||
-            parseInt(batchRecipientData[0].amount, 10)) && (
+            parseInt(batchRecipientData[0].amount, 10) !== 0) && (
             <>
               <Input
                 onKeyDown={handleKeyPress}
