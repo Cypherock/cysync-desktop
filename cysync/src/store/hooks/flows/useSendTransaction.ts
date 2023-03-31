@@ -262,6 +262,7 @@ export interface UseSendTransactionValues {
   totalFees: string;
   l1Fee: string;
   getL2Fees: () => string;
+  updateL1FeeFromCost: (cost: string) => void;
   approxTotalFee: number;
   sendMaxAmount: string;
   resetHooks: () => void;
@@ -341,7 +342,20 @@ export const useSendTransaction: UseSendTransaction = () => {
   const { addTransactionStatusCheckItem } = useStatusCheck();
 
   const getL2Fees = () => {
-    return new BigNumber(totalFees).minus(new BigNumber(l1Fee)).toString();
+    let result = new BigNumber(approxTotalFee)
+      .minus(new BigNumber(l1Fee))
+      .toString();
+    if (totalFees !== '0')
+      result = new BigNumber(totalFees).minus(new BigNumber(l1Fee)).toString();
+    return result;
+  };
+
+  const updateL1FeeFromCost = (cost: string) => {
+    setL1Fee(
+      new BigNumber(cost)
+        .dividedBy(new BigNumber(10 ** ETHCOINS[EthCoinMap.optimism].decimal))
+        .toString()
+    );
   };
 
   const resetHooks = () => {
@@ -357,6 +371,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     setEstimationError(undefined);
     setIsEstimatingFees(false);
     setTotalFees('0');
+    setL1Fee('0');
     setSendMaxAmount('0');
     sendTransaction.removeAllListeners();
   };
@@ -397,6 +412,7 @@ export const useSendTransaction: UseSendTransaction = () => {
 
         if (coin.group !== CoinGroup.Ethereum && !hasInput) {
           setApproxTotalFees(0);
+          setL1Fee('0');
           setSendMaxAmount('0');
           setEstimationError(undefined);
           setIsEstimatingFees(false);
@@ -475,6 +491,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     contractAddress?: string,
     data?: string
   ) => {
+    setIsEstimatingFees(true);
     return new Promise(resolve => {
       const subFlowName = Analytics.Categories.ESTIMATE_GAS_LIMIT;
       logger.info(`${subFlowName}: Initiated', ${contractAddress}`);
@@ -513,6 +530,9 @@ export const useSendTransaction: UseSendTransaction = () => {
           }
           setErrorObj(handleErrors(errorObj, cyError, subFlowName, { err: e }));
           resolve(null);
+        })
+        .finally(() => {
+          setIsEstimatingFees(false);
         });
     });
   };
@@ -647,11 +667,6 @@ export const useSendTransaction: UseSendTransaction = () => {
       sendTransaction.on('totalFees', fee => {
         logger.info('SendTransaction: Total fee generated', { coinId, fee });
         setTotalFees(fee);
-      });
-
-      sendTransaction.on('l1Fees', fee => {
-        logger.info('SendTransaction: L1 fee generated', { coinId, fee });
-        setL1Fee(fee);
       });
 
       sendTransaction.on('inputOutput', ({ inputs, outputs }) => {
@@ -1095,6 +1110,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     totalFees,
     l1Fee,
     getL2Fees,
+    updateL1FeeFromCost,
     approxTotalFee,
     handleEstimateFee,
     sendMaxAmount,

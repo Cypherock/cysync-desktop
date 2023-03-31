@@ -211,32 +211,18 @@ const Verify = (props: any) => {
               />
             )}
             {coinDetails.coinId === EthCoinMap.optimism && (
-              <>
-                <LabelText
-                  label="Transaction Fee"
-                  text={`~ ${sendTransaction.getL2Fees()} ${COINS[
-                    coinDetails.coinId
-                  ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
-                    parseFloat(sendTransaction.getL2Fees()) *
-                      parseFloat(coinDetails.displayPrice),
-                    2,
-                    true
-                  )})`}
-                  verified={sendTransaction.verified}
-                />
-                <LabelText
-                  label="L1 Data Fee"
-                  text={`~ ${sendTransaction.l1Fee} ${COINS[
-                    coinDetails.coinId
-                  ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
-                    parseFloat(sendTransaction.l1Fee) *
-                      parseFloat(coinDetails.displayPrice),
-                    2,
-                    true
-                  )})`}
-                  verified={sendTransaction.verified}
-                />
-              </>
+              <LabelText
+                label="Transaction Fee"
+                text={`~ ${sendTransaction.getL2Fees()} ${COINS[
+                  coinDetails.coinId
+                ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
+                  parseFloat(sendTransaction.getL2Fees()) *
+                    parseFloat(coinDetails.displayPrice),
+                  2,
+                  true
+                )})`}
+                verified={sendTransaction.verified}
+              />
             )}
           </>
         ) : (

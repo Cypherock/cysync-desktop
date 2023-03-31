@@ -1,11 +1,13 @@
 import {
   CoinGroup,
   COINS,
+  EthCoinMap,
   FeatureName,
   isFeatureEnabled,
   NearCoinData
 } from '@cypherock/communication';
 import { NearWallet } from '@cypherock/wallet';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
 import AlertIcon from '@mui/icons-material/ReportProblemOutlined';
 import { Alert, Skeleton, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -83,7 +85,8 @@ const classes = {
   sliderFeeErrorInfo: `${PREFIX}-sliderFeeErrorInfo`,
   extras: `${PREFIX}-extras`,
   primaryColor: `${PREFIX}-primaryColor`,
-  dangerColor: `${PREFIX}-dangerColor`
+  dangerColor: `${PREFIX}-dangerColor`,
+  infoIcon: `${PREFIX}-infoIcon`
 };
 
 const Root = styled(Grid)(({ theme }) => ({
@@ -233,6 +236,10 @@ const Root = styled(Grid)(({ theme }) => ({
   },
   [`& .${classes.dangerColor}`]: {
     color: theme.palette.error.dark
+  },
+  [`& .${classes.infoIcon}`]: {
+    fontSize: '12px',
+    color: '#ADABAA'
   }
 }));
 
@@ -647,7 +654,11 @@ const Recipient: React.FC<StepComponentProps> = props => {
   };
 
   const getSkeletonForFee = () => {
-    if (isMediumFeeLoading || sendTransaction.isEstimatingFees)
+    if (
+      isMediumFeeLoading ||
+      sendTransaction.isEstimatingFees ||
+      isButtonLoading
+    )
       return <Skeleton width={'100px'} />;
   };
 
@@ -1027,7 +1038,7 @@ const Recipient: React.FC<StepComponentProps> = props => {
       )}
       <div className={divider} />
       <div className={recipientFooter}>
-        {sendTransaction.estimationError?.isSet ? (
+        {sendTransaction.estimationError?.isSet && !isButtonLoading ? (
           <div
             className={classes.center}
             style={{ justifyContent: 'flex-start' }}
@@ -1043,32 +1054,109 @@ const Recipient: React.FC<StepComponentProps> = props => {
         ) : (
           <div className={recipientTotal}>
             <div>
-              <Typography
-                variant="subtitle1"
-                color="secondary"
-                style={{ display: 'flex', alignItems: 'center', width: '100%' }}
-              >
-                <small style={{ marginRight: '5px' }}>TRANSACTION FEE:</small>
-                {getSkeletonForFee() || (
-                  <>
-                    {` ~${formatDisplayAmount(
-                      sendTransaction.approxTotalFee
-                    )} `}
-                    <span className="amountCurrency">
-                      {COINS[coinDetails.coinId]?.abbr?.toUpperCase()}
-                      &nbsp;&nbsp;&nbsp;
-                    </span>
-                    <span style={{ fontSize: '0.7rem' }}>
-                      {`($${formatDisplayAmount(
-                        sendTransaction.approxTotalFee *
-                          parseFloat(coinDetails.displayPrice),
-                        2,
-                        true
-                      )})`}
-                    </span>
-                  </>
-                )}
-              </Typography>
+              {coinDetails.coinId === EthCoinMap.optimism || (
+                <Typography
+                  variant="subtitle1"
+                  color="secondary"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '100%'
+                  }}
+                >
+                  <small style={{ marginRight: '5px' }}>TRANSACTION FEE:</small>
+                  {getSkeletonForFee() || (
+                    <>
+                      {` ~${formatDisplayAmount(
+                        sendTransaction.approxTotalFee
+                      )} `}
+                      <span className="amountCurrency">
+                        {COINS[coinDetails.coinId]?.abbr?.toUpperCase()}
+                        &nbsp;&nbsp;&nbsp;
+                      </span>
+                      <span style={{ fontSize: '0.7rem' }}>
+                        {`($${formatDisplayAmount(
+                          sendTransaction.approxTotalFee *
+                            parseFloat(coinDetails.displayPrice),
+                          2,
+                          true
+                        )})`}
+                      </span>
+                    </>
+                  )}
+                </Typography>
+              )}
+              {coinDetails.coinId === EthCoinMap.optimism && (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    color="secondary"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      width: '100%'
+                    }}
+                  >
+                    <small style={{ marginRight: '5px' }}>
+                      TRANSACTION FEE:
+                    </small>
+                    {getSkeletonForFee() || (
+                      <>
+                        {` ~${formatDisplayAmount(
+                          sendTransaction.getL2Fees()
+                        )} `}
+                        <span className="amountCurrency">
+                          {COINS[coinDetails.coinId]?.abbr?.toUpperCase()}
+                          &nbsp;&nbsp;&nbsp;
+                        </span>
+                        <span style={{ fontSize: '0.7rem' }}>
+                          {`($${formatDisplayAmount(
+                            parseFloat(sendTransaction.getL2Fees()) *
+                              parseFloat(coinDetails.displayPrice),
+                            2,
+                            true
+                          )})`}
+                        </span>
+                      </>
+                    )}
+                  </Typography>
+                  {sendTransaction.l1Fee !== '0' && (
+                    <Typography
+                      variant="subtitle1"
+                      color="secondary"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        width: '100%'
+                      }}
+                    >
+                      <small style={{ marginRight: '5px' }}>L1 DATA FEE:</small>
+                      {getSkeletonForFee() || (
+                        <>
+                          {` ~${formatDisplayAmount(sendTransaction.l1Fee)} `}
+                          <span className="amountCurrency">
+                            {COINS[coinDetails.coinId]?.abbr?.toUpperCase()}
+                            &nbsp;&nbsp;&nbsp;
+                          </span>
+                          <span
+                            style={{ fontSize: '0.7rem', marginRight: '5px' }}
+                          >
+                            {`($${formatDisplayAmount(
+                              parseFloat(sendTransaction.l1Fee) *
+                                parseFloat(coinDetails.displayPrice),
+                              2,
+                              true
+                            )})`}
+                          </span>
+                          <Tooltip title="L1 fees pay for the cost of publishing the transaction on L1. It is deducted automatically from the ETH balance on Optimistic Ethereum.">
+                            <InfoIcon className={classes.infoIcon} />
+                          </Tooltip>
+                        </>
+                      )}
+                    </Typography>
+                  )}
+                </>
+              )}
             </div>
             <Typography variant="caption" color="secondary">
               {token ? 'AMOUNT' : 'TOTAL'}
