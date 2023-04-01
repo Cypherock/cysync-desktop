@@ -262,7 +262,11 @@ export interface UseSendTransactionValues {
   totalFees: string;
   l1Fee: string;
   getL2Fees: () => string;
-  updateL1FeeFromCost: (cost: string) => void;
+  updateL1FeeFromCost: (params: {
+    cost: string;
+    parentCoinId?: string;
+    coinId: string;
+  }) => void;
   approxTotalFee: number;
   sendMaxAmount: string;
   resetHooks: () => void;
@@ -350,12 +354,30 @@ export const useSendTransaction: UseSendTransaction = () => {
     return result;
   };
 
-  const updateL1FeeFromCost = (cost: string) => {
-    setL1Fee(
-      new BigNumber(cost)
-        .dividedBy(new BigNumber(10 ** ETHCOINS[EthCoinMap.optimism].decimal))
-        .toString()
-    );
+  const updateL1FeeFromCost = (params: {
+    cost: string;
+    parentCoinId?: string;
+    coinId: string;
+  }) => {
+    const { cost, parentCoinId, coinId } = params;
+    let parentCoinObj: CoinData;
+    let coinObj: AbsCoinData;
+
+    if (parentCoinId && parentCoinId !== coinId) {
+      parentCoinObj = COINS[parentCoinId];
+      if (!parentCoinId) {
+        throw new Error(`Cannot find coinId: ${parentCoinId}`);
+      }
+      coinObj = parentCoinObj.tokenList[coinId];
+    } else {
+      coinObj = COINS[coinId];
+    }
+
+    if (!coinObj) {
+      throw new Error(`Cannot find coinId: ${coinId}`);
+    }
+
+    setL1Fee(new BigNumber(cost).dividedBy(coinObj.multiplier).toString());
   };
 
   const resetHooks = () => {
