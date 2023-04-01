@@ -402,11 +402,17 @@ const SendForm: React.FC<StepperProps> = ({
       data
     );
     const estimatedLimit =
-      estimatedGas?.gasLimit ?? (parseInt(txnParams?.gas, 16) || defaultLimit);
+      parseInt(estimatedGas?.gasLimit, 10) ??
+      (parseInt(txnParams?.gas, 16) || defaultLimit);
 
     if (estimatedLimit) {
       setGasLimit(estimatedLimit);
       setL1Cost(estimatedGas.l1Cost);
+      sendTransaction.updateL1FeeFromCost({
+        cost: estimatedGas.l1Cost,
+        coinId: coin.id,
+        parentCoinId: coin.parentId
+      });
     }
     setIsButtonLoading(false);
   };

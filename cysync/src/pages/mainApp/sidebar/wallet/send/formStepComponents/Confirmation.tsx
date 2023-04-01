@@ -173,7 +173,7 @@ const Confirmation: React.FC<StepComponentProps> = ({ handleClose }) => {
         Server.eth.transaction.getOpenTxnLink({
           network: coin.network,
           txHash: sendTransaction.hash,
-          isConfirmed
+          isConfirmed: true
         })
       );
     } else if (coin instanceof NearCoinData) {
