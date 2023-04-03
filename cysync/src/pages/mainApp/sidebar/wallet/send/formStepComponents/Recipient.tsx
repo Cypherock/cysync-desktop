@@ -1102,16 +1102,14 @@ const Recipient: React.FC<StepComponentProps> = props => {
                     </small>
                     {getSkeletonForFee() || (
                       <>
-                        {` ~${formatDisplayAmount(
-                          sendTransaction.getL2Fees()
-                        )} `}
+                        {` ~${formatDisplayAmount(sendTransaction.l2Fee)} `}
                         <span className="amountCurrency">
                           {COINS[coinDetails.coinId]?.abbr?.toUpperCase()}
                           &nbsp;&nbsp;&nbsp;
                         </span>
                         <span style={{ fontSize: '0.7rem' }}>
                           {`($${formatDisplayAmount(
-                            parseFloat(sendTransaction.getL2Fees()) *
+                            parseFloat(sendTransaction.l2Fee) *
                               parseFloat(coinDetails.displayPrice),
                             2,
                             true

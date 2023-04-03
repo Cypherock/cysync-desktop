@@ -29,7 +29,7 @@ import { WalletError, WalletErrorType } from '@cypherock/wallet';
 import bech32 from 'bech32';
 import BigNumber from 'bignumber.js';
 import WAValidator from 'multicoin-address-validator';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   CyError,
@@ -261,7 +261,7 @@ export interface UseSendTransactionValues {
   setHash: React.Dispatch<React.SetStateAction<string>>;
   totalFees: string;
   l1Fee: string;
-  getL2Fees: () => string;
+  l2Fee: string;
   updateL1FeeFromCost: (params: {
     cost: string;
     parentCoinId?: string;
@@ -344,15 +344,14 @@ export const useSendTransaction: UseSendTransaction = () => {
   );
   const [isEstimatingFees, setIsEstimatingFees] = useState(false);
   const { addTransactionStatusCheckItem } = useStatusCheck();
-
-  const getL2Fees = () => {
-    let result = new BigNumber(approxTotalFee)
-      .minus(new BigNumber(l1Fee))
-      .toString();
-    if (totalFees !== '0')
-      result = new BigNumber(totalFees).minus(new BigNumber(l1Fee)).toString();
-    return result;
-  };
+  const l2Fee = useMemo(() => {
+    const l1FeeNum = new BigNumber(l1Fee);
+    let result = new BigNumber(approxTotalFee);
+    //approxTotalFee can be updated without filling the fields required for l1Fee, we have to ignore l1Fee until sufficient fields are filled
+    if (result.isGreaterThan(l1FeeNum)) result = result.minus(l1FeeNum);
+    if (totalFees !== '0') result = new BigNumber(totalFees).minus(l1FeeNum);
+    return result.toString();
+  }, [approxTotalFee, totalFees, l1Fee]);
 
   const updateL1FeeFromCost = (params: {
     cost: string;
@@ -393,7 +392,6 @@ export const useSendTransaction: UseSendTransaction = () => {
     setEstimationError(undefined);
     setIsEstimatingFees(false);
     setTotalFees('0');
-    setL1Fee('0');
     setSendMaxAmount('0');
     sendTransaction.removeAllListeners();
   };
@@ -1131,7 +1129,7 @@ export const useSendTransaction: UseSendTransaction = () => {
     cancelSendTxn,
     totalFees,
     l1Fee,
-    getL2Fees,
+    l2Fee,
     updateL1FeeFromCost,
     approxTotalFee,
     handleEstimateFee,
