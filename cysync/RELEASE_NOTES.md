@@ -1,4 +1,4 @@
-# v1.2.6
+# v1.2.10
 
 ### 🚀 Features
 
@@ -6,7 +6,7 @@
 
 ### 🐛 Bugfixes
 
-- Fixed latest price update
+- Fixed price update issues
 - Internal transactions for EVM
 - L1 fee for Optimism
 - Fixed AutoLock toggle
