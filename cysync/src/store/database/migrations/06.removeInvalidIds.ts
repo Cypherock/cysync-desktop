@@ -100,8 +100,13 @@ const removeInvalidIds: MigrationFunction = async params => {
       let rebuildRequired = false;
 
       for (const item of dbItems) {
-        if (item._id !== dbObj.getId(item as any)) rebuildRequired = true;
-        else newDbItems.push(item);
+        const itemId = dbObj.getId(item as any);
+        if (item._id !== itemId) {
+          newDbItems.push({ ...item, _id: itemId });
+          rebuildRequired = true;
+        } else {
+          newDbItems.push(item);
+        }
       }
 
       if (rebuildRequired) {
