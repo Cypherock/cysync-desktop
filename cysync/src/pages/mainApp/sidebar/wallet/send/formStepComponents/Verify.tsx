@@ -213,10 +213,10 @@ const Verify = (props: any) => {
             {coinDetails.coinId === EthCoinMap.optimism && (
               <LabelText
                 label="Transaction Fee"
-                text={`~ ${sendTransaction.getL2Fees()} ${COINS[
+                text={`~ ${sendTransaction.l2Fee} ${COINS[
                   coinDetails.coinId
                 ]?.abbr?.toUpperCase()} ( $${formatDisplayAmount(
-                  parseFloat(sendTransaction.getL2Fees()) *
+                  parseFloat(sendTransaction.l2Fee) *
                     parseFloat(coinDetails.displayPrice),
                   2,
                   true
