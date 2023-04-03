@@ -29,7 +29,7 @@ import { WalletError, WalletErrorType } from '@cypherock/wallet';
 import bech32 from 'bech32';
 import BigNumber from 'bignumber.js';
 import WAValidator from 'multicoin-address-validator';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   CyError,
@@ -332,7 +332,6 @@ export const useSendTransaction: UseSendTransaction = () => {
   const sendTransaction = new TransactionSender();
   const [totalFees, setTotalFees] = useState('0');
   const [l1Fee, setL1Fee] = useState('0');
-  const [l2Fee, setL2Fee] = useState('0');
   const [txnInputs, setTxnInputs] = useState<TxInputOutput[]>([]);
   const [txnOutputs, setTxnOutputs] = useState<TxInputOutput[]>([]);
   const [approxTotalFee, setApproxTotalFees] = useState(0);
@@ -345,14 +344,13 @@ export const useSendTransaction: UseSendTransaction = () => {
   );
   const [isEstimatingFees, setIsEstimatingFees] = useState(false);
   const { addTransactionStatusCheckItem } = useStatusCheck();
-
-  useEffect(() => {
+  const l2Fee = useMemo(() => {
     const l1FeeNum = new BigNumber(l1Fee);
     let result = new BigNumber(approxTotalFee);
     //approxTotalFee can be updated without filling the fields required for l1Fee, we have to ignore l1Fee until sufficient fields are filled
     if (result.isGreaterThan(l1FeeNum)) result = result.minus(l1FeeNum);
     if (totalFees !== '0') result = new BigNumber(totalFees).minus(l1FeeNum);
-    setL2Fee(result.toString());
+    return result.toString();
   }, [approxTotalFee, totalFees, l1Fee]);
 
   const updateL1FeeFromCost = (params: {
