@@ -16,14 +16,14 @@ import ClientMeta from './clientMeta';
 const PREFIX = 'WalletConnect-Connected';
 
 const classes = {
-  accountDisplayConatiner: `${PREFIX}-accountDisplayConatiner`,
+  accountDisplayContainer: `${PREFIX}-accountDisplayContainer`,
   errorButtons: `${PREFIX}-errorButtons`,
   padBottom: `${PREFIX}-padBottom`
 };
 
 const Root = styled(Grid)(() => ({
   padding: '20px',
-  [`& .${classes.accountDisplayConatiner}`]: {
+  [`& .${classes.accountDisplayContainer}`]: {
     marginTop: '24px',
     padding: '10px',
     background: '#1F262E',
@@ -44,6 +44,43 @@ const Root = styled(Grid)(() => ({
   }
 }));
 
+const AccountInfo: React.FC<{
+  coinId: string;
+  accountName: string;
+  accountAddress: string;
+  walletName?: string;
+}> = ({ coinId, accountName, accountAddress, walletName }) => (
+  <div className={classes.accountDisplayContainer}>
+    <div
+      style={{
+        marginBottom: '8px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '16px'
+      }}
+    >
+      <CoinIcon initial={coinId} />
+      <Typography color="textPrimary" variant="body2">
+        {accountName}
+      </Typography>
+      {walletName && (
+        <Typography color="textSecondary" variant="body2">
+          {walletName}
+        </Typography>
+      )}
+    </div>
+    <Typography
+      color="textPrimary"
+      variant="body2"
+      gutterBottom
+      sx={{ color: '#7E7D7D' }}
+    >
+      {accountAddress}
+    </Typography>
+  </div>
+);
+
 export const WalletConnectStatus: React.FC<{
   walletConnect: WalletConnectContextInterface;
 }> = (props: { walletConnect: WalletConnectContextInterface }) => {
@@ -59,32 +96,40 @@ export const WalletConnectStatus: React.FC<{
         Connected to the following account through your wallet:
       </Typography>
 
-      <div className={classes.accountDisplayConatiner}>
-        <div
-          style={{
-            marginBottom: '8px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}
-        >
-          <CoinIcon initial={props.walletConnect.selectedAccount.coinId} />
-          <Typography color="textPrimary" variant="body2" sx={{ ml: 2 }}>
-            {props.walletConnect.selectedAccount.name}
-          </Typography>
-        </div>
-        <Typography
-          color="textPrimary"
-          variant="body2"
-          gutterBottom
-          sx={{ color: '#7E7D7D' }}
-        >
-          {props.walletConnect.selectedAccount.address}
-        </Typography>
-      </div>
+      <AccountInfo
+        coinId={props.walletConnect.selectedAccount.coinId}
+        accountName={props.walletConnect.selectedAccount.name}
+        accountAddress={props.walletConnect.selectedAccount.address}
+      />
     </>
   ) : (
-    <></>
+    <>
+      <Typography
+        align="center"
+        color="textPrimary"
+        variant="body2"
+        gutterBottom
+        sx={{ color: '#7E7D7D', marginLeft: 'auto', marginRight: 'auto' }}
+      >
+        Connected to the following accounts:
+      </Typography>
+
+      {Object.keys(props.walletConnect.selectedAccountList.current).map(
+        chain => {
+          const { account, wallet } =
+            props.walletConnect.selectedAccountList.current[chain];
+          return (
+            <AccountInfo
+              key={`account-${chain}`}
+              coinId={account.coinId}
+              accountName={account.name}
+              accountAddress={account.address}
+              walletName={wallet.name}
+            />
+          );
+        }
+      )}
+    </>
   );
 };
 
@@ -92,7 +137,7 @@ type Props = {
   handleClose: () => void;
 };
 
-const WalletConnectAccountSelection: React.FC<Props> = () => {
+const WalletConnectConnected: React.FC<Props> = () => {
   const walletConnect = useWalletConnect();
 
   return (
@@ -115,8 +160,8 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
   );
 };
 
-WalletConnectAccountSelection.propTypes = {
+WalletConnectConnected.propTypes = {
   handleClose: PropTypes.func.isRequired
 };
 
-export default WalletConnectAccountSelection;
+export default WalletConnectConnected;

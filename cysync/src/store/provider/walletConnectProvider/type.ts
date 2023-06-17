@@ -1,6 +1,6 @@
 import { EthCoinData } from '@cypherock/communication';
 
-import { DisplayCoin } from '../../database';
+import { DisplayCoin, Wallet } from '../../database';
 
 export interface IAccount extends DisplayCoin {
   chain: EthCoinData['chain'];
@@ -26,6 +26,7 @@ export interface WalletConnectCallRequestData {
   method: WalletConnectCallRequestMethod;
   params: any;
   id: number;
+  topic?: string;
 }
 
 export enum WalletConnectConnectionState {
@@ -53,3 +54,8 @@ export interface WalletConnectionConnectionClientMeta {
   icons?: string[];
   name?: string;
 }
+
+export type ChainMappedAccount = Record<
+  string,
+  { account: IAccount; wallet: Wallet }
+>;

@@ -15,7 +15,7 @@ import { ISignProps, SignPropTypes } from './types';
 const PREFIX = 'WalletConnect-Connected';
 
 const classes = {
-  accountDisplayConatiner: `${PREFIX}-accountDisplayConatiner`,
+  accountDisplayContainer: `${PREFIX}-accountDisplayContainer`,
   errorButtons: `${PREFIX}-errorButtons`,
   padBottom: `${PREFIX}-padBottom`,
   messageContainer: `${PREFIX}-messageContainer`
@@ -23,7 +23,7 @@ const classes = {
 
 const Root = styled('div')(() => ({
   padding: '20px',
-  [`& .${classes.accountDisplayConatiner}`]: {
+  [`& .${classes.accountDisplayContainer}`]: {
     boxSizing: 'border-box',
     marginTop: '24px',
     padding: '10px',
