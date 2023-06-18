@@ -104,11 +104,11 @@ const createAccountList = async (coinId: string) => {
 const AccountSelectionItem: React.FC<{
   onChange: (e: any, val: any) => void;
   chain: string;
-}> = ({ onChange, chain }) => {
+  initialValue: ICoin | undefined;
+}> = ({ onChange, chain, initialValue }) => {
   const [accountList, setAccountList] = useState<ICoin[]>([]);
-  const [selectedAccountOption, setSelectedAccountOption] = useState<
-    ICoin | string
-  >(null);
+  const [selectedAccountOption, setSelectedAccountOption] =
+    useState<ICoin | null>(initialValue ?? null);
   const [chainName, setChainName] = useState('');
   const initializeData = async () => {
     const chainId = parseInt(chain.split(':')[1] ?? '0', 10);
@@ -173,13 +173,11 @@ const AccountSelectionItem: React.FC<{
             style={{ marginBottom: '32px' }}
           />
         )}
-        onChange={(e, val) => {
+        onChange={(e, val: any) => {
           onChange(e, val);
           setSelectedAccountOption(val);
         }}
-        value={accountList.find(
-          account => account._id === (selectedAccountOption as ICoin)?._id
-        )}
+        value={selectedAccountOption}
       />
     </>
   );
@@ -336,8 +334,9 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
 
   useEffect(() => {
     if (walletConnect.currentVersion === 2) {
-      if (Object.keys(selectedAccountList).length === chains.length)
-        setButtonDisabled(false);
+      setButtonDisabled(
+        Object.keys(selectedAccountList).length !== chains.length
+      );
     } else if (walletConnect.currentVersion === 1) {
       setButtonDisabled(!selectedAccount);
     }
@@ -351,6 +350,7 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
             key={chain}
             onChange={(_e: any, val: any) => onAccountChange(val, chain)}
             chain={chain}
+            initialValue={selectedAccountList[chain]?.account as any}
           />
         ))}
       </>

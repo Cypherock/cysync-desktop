@@ -130,8 +130,8 @@ const Summary: React.FC<StepComponentProps> = ({
   const { addCustomAccountSyncItemFromCoin } = useSync();
 
   const handleSend = async () => {
-    if (onSuccess && resultType === 'signature') {
-      onSuccess('0x' + sendTransaction.signature);
+    if (onSuccess && resultType === 'signed') {
+      onSuccess('0x' + sendTransaction.signedTxn);
       handleNext();
       Analytics.Instance.event(
         Analytics.Categories.SEND_TXN,
@@ -235,10 +235,8 @@ const Summary: React.FC<StepComponentProps> = ({
       setStatusText('');
     }
 
-    if (sendTransaction.signature && resultType === 'signature') {
-      handleSend();
-    } else if (sendTransaction.signedTxn) {
-      setStatusText('Broadcasting transaction');
+    if (sendTransaction.signedTxn) {
+      if (resultType === 'hash') setStatusText('Broadcasting transaction');
       handleSend();
     } else {
       setStatusText('Waiting for signature from X1 wallet');

@@ -45,6 +45,7 @@ const ACCEPTED_CALL_METHODS = [
 ];
 
 const CONNECTION_TIMEOUT = 5000;
+const WALLET_CONNECT_PROJECT_ID = '892cb46355562fd3e2d37d2361f44c1d';
 
 export interface WalletConnectContextInterface {
   isOpen: boolean;
@@ -395,8 +396,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       connector.on('connect', walletConnectV1Methods.handleConnect);
     } else if (version === 2) {
       const core = new Core({
-        //TODO: replace with env variable
-        projectId: '892cb46355562fd3e2d37d2361f44c1d'
+        projectId: WALLET_CONNECT_PROJECT_ID
       });
 
       const web3wallet = await Web3Wallet.init({
@@ -427,6 +427,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
           method: event.params.request.method as any
         });
         ipcRenderer.send('focus');
+        logger.info('WalletConnect: Call Request received', { event });
       });
 
       await web3wallet.core.pairing.pair({ uri });

@@ -227,7 +227,6 @@ export interface HandleSendTransactionOptions {
     nonce?: string;
     subCoinId?: string;
   };
-  onlySignature?: boolean;
   triggeredBy?: TriggeredBy;
 }
 
@@ -576,7 +575,6 @@ export const useSendTransaction: UseSendTransaction = () => {
       fees,
       isSendAll,
       data,
-      onlySignature,
       triggeredBy
     }) => {
       clearAll();
@@ -590,7 +588,6 @@ export const useSendTransaction: UseSendTransaction = () => {
         fees,
         isSendAll,
         data,
-        onlySignature,
         triggeredBy
       });
       logger.debug('SendTransaction Xpub', {
@@ -833,8 +830,7 @@ export const useSendTransaction: UseSendTransaction = () => {
           outputList,
           fee: fees,
           isSendAll,
-          data,
-          onlySignature
+          data
         });
         setIsInFlow(false);
         logger.info('SendTransaction: Completed', { coinId });
