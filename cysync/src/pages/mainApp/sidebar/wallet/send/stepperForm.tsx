@@ -217,7 +217,7 @@ type StepperProps = {
     value?: string; // hex
     nonce?: string; // hex
   };
-  resultType?: 'signature' | 'hash';
+  resultType?: 'signed' | 'hash';
   triggeredBy?: TriggeredBy;
 };
 
@@ -784,7 +784,7 @@ SendForm.propTypes = {
     value: PropTypes.string,
     nonce: PropTypes.string
   }),
-  resultType: PropTypes.oneOf(['signature', 'hash']),
+  resultType: PropTypes.oneOf(['signed', 'hash']),
   triggeredBy: PropTypes.number
 };
 

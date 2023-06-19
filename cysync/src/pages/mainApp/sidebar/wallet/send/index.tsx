@@ -39,7 +39,7 @@ interface WalletSendProps {
     value?: string; // hex
     nonce?: string; // hex
   };
-  resultType?: 'signature' | 'hash';
+  resultType?: 'signed' | 'hash';
   triggeredBy?: TriggeredBy;
 }
 

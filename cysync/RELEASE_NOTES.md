@@ -1,3 +1,9 @@
+# v1.2.266
+
+### 🚀 Features
+
+- WalletConnect v2 support
+
 # v1.2.10
 
 ### 🚀 Features

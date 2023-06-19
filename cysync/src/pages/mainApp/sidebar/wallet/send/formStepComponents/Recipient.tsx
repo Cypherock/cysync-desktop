@@ -403,7 +403,6 @@ const Recipient: React.FC<StepComponentProps> = props => {
     duplicateBatchAddresses,
     addbatchRecipientData,
     txnParams,
-    resultType,
     triggeredBy
   } = props;
   const {
@@ -631,7 +630,6 @@ const Recipient: React.FC<StepComponentProps> = props => {
           contractData: txnParams?.data,
           subCoinId: token?.coinId
         },
-        onlySignature: resultType && resultType === 'signature',
         triggeredBy
       });
       handleNext();

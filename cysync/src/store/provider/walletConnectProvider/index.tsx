@@ -1,7 +1,18 @@
-import { COINS, EthCoinData } from '@cypherock/communication';
+import { COINS, EthCoinData, EthList } from '@cypherock/communication';
 import Wallet from '@cypherock/wallet';
-import WalletConnect from '@walletconnect/client';
+import { Core } from '@walletconnect/core';
+import WalletConnect from '@walletconnect/legacy-client';
+import { ProposalTypes, SessionTypes } from '@walletconnect/types';
+import {
+  buildApprovedNamespaces,
+  getSdkError,
+  normalizeNamespaces,
+  parseUri
+} from '@walletconnect/utils';
+import { Web3Wallet, Web3WalletTypes } from '@walletconnect/web3wallet';
+import { Web3Wallet as Web3WalletType } from '@walletconnect/web3wallet/dist/types/client';
 import { ipcRenderer } from 'electron';
+import { cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -14,6 +25,7 @@ import {
 } from '../../database';
 
 import {
+  ChainMappedAccount,
   IAccount,
   WalletConnectCallRequestData,
   WalletConnectCallRequestMethodMap,
@@ -33,6 +45,7 @@ const ACCEPTED_CALL_METHODS = [
 ];
 
 const CONNECTION_TIMEOUT = 5000;
+const WALLET_CONNECT_PROJECT_ID = '892cb46355562fd3e2d37d2361f44c1d';
 
 export interface WalletConnectContextInterface {
   isOpen: boolean;
@@ -49,6 +62,10 @@ export interface WalletConnectContextInterface {
   selectedAccount: IAccount | undefined;
   selectedWallet: IWallet | undefined;
   setSelectedWallet: (wallet: IWallet) => void;
+  selectedAccountList: React.MutableRefObject<ChainMappedAccount>;
+  approveSessionRequest: (data: ChainMappedAccount) => void;
+  currentVersion: number;
+  requiredNamespaces: ProposalTypes.RequiredNamespaces | undefined;
 }
 
 export const WalletConnectContext: React.Context<WalletConnectContextInterface> =
@@ -82,11 +99,30 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   >(WalletConnectConnectionState.NOT_CONNECTED);
   const connectionTimeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
+  const [currentVersion, setCurrentVersion] = React.useState(2);
+  const [requiredNamespaces, setRequiredNamespaces] = React.useState<
+    ProposalTypes.RequiredNamespaces | undefined
+  >(undefined);
+  const currentWeb3Wallet = React.useRef<Web3WalletType | undefined>(undefined);
+  const currentProposal = React.useRef<
+    Web3WalletTypes.SessionProposal | undefined
+  >(undefined);
+  const currentSession = React.useRef<SessionTypes.Struct | undefined>(
+    undefined
+  );
+  const selectedAccountList = React.useRef<ChainMappedAccount>({});
+
   const resetStates = () => {
     setConnectionClientMeta(undefined);
     setCallRequestData(undefined);
     setSelectedAccount(undefined);
     currentConnector.current = undefined;
+
+    setRequiredNamespaces(undefined);
+    setCurrentVersion(2);
+    currentWeb3Wallet.current = undefined;
+    currentProposal.current = undefined;
+    selectedAccountList.current = {};
   };
 
   const setConnectionState = (val: WalletConnectConnectionState) => {
@@ -101,8 +137,19 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     setIsOpen(true);
   };
 
-  const disconnect = () => {
+  const disconnect = async () => {
     currentConnector.current?.killSession();
+    if (connectionState === WalletConnectConnectionState.CONNECTED) {
+      await currentWeb3Wallet.current?.disconnectSession({
+        topic: currentSession.current.topic,
+        reason: getSdkError('USER_DISCONNECTED')
+      });
+    } else {
+      await currentWeb3Wallet.current?.rejectSession({
+        id: currentProposal.current.id,
+        reason: getSdkError('USER_REJECTED')
+      });
+    }
     setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
   };
 
@@ -153,9 +200,18 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     }
   };
 
-  const approveCallRequest = (result: string) => {
+  const approveCallRequest = async (result: string) => {
     logger.info('WalletConnect: Approving call request', { result });
-    if (callRequestData?.id) {
+    if (currentVersion === 2) {
+      await currentWeb3Wallet.current.respondSessionRequest({
+        topic: callRequestData.topic,
+        response: {
+          id: callRequestData.id,
+          jsonrpc: '2.0',
+          result
+        }
+      });
+    } else if (callRequestData?.id) {
       currentConnector.current?.approveRequest({
         id: callRequestData.id,
         result
@@ -164,9 +220,21 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     setCallRequestData(undefined);
   };
 
-  const rejectCallRequest = (message?: string) => {
+  const rejectCallRequest = async (message?: string) => {
     logger.info('WalletConnect: Rejecting call request', { message });
-    if (callRequestData?.id) {
+    if (currentVersion === 2) {
+      await currentWeb3Wallet.current.respondSessionRequest({
+        topic: callRequestData.topic,
+        response: {
+          id: callRequestData.id,
+          jsonrpc: '2.0',
+          error: {
+            code: 5000,
+            message: message ?? 'User rejected'
+          }
+        }
+      });
+    } else if (callRequestData?.id) {
       currentConnector.current?.rejectRequest({
         id: callRequestData.id,
         error: {
@@ -177,68 +245,195 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     setCallRequestData(undefined);
   };
 
-  const handleSessionRequest = (error: Error, payload: any) => {
-    if (error) {
-      logger.error('WalletConnect: Session request error', error);
-      return;
-    }
+  const walletConnectV1Methods = {
+    handleSessionRequest: (error: Error, payload: any) => {
+      if (error) {
+        logger.error('WalletConnect: Session request error', error);
+        return;
+      }
 
-    logger.info('WalletConnect: Session request received', payload);
-    if (connectionTimeout.current) {
-      clearTimeout(connectionTimeout.current);
-    }
+      logger.info('WalletConnect: Session request received', payload);
+      if (connectionTimeout.current) {
+        clearTimeout(connectionTimeout.current);
+      }
 
-    setConnectionClientMeta(currentConnector.current.peerMeta);
-    setConnectionState(WalletConnectConnectionState.SELECT_ACCOUNT);
-    if (!isOpen) {
-      openDialog();
+      setConnectionClientMeta(currentConnector.current.peerMeta);
+      setConnectionState(WalletConnectConnectionState.SELECT_ACCOUNT);
+      if (!isOpen) {
+        openDialog();
+      }
+    },
+
+    handleCallRequest: (error: Error, payload: any) => {
+      if (error) {
+        logger.error('WalletConnect: Session request error', error);
+        return;
+      }
+
+      if (
+        payload?.id &&
+        payload?.params &&
+        ACCEPTED_CALL_METHODS.includes(payload?.method)
+      ) {
+        ipcRenderer.send('focus');
+        logger.info('WalletConnect: Call Request received', { payload });
+        const { params } = payload;
+        setCallRequestData({ params, id: payload.id, method: payload.method });
+      } else if (payload?.id) {
+        logger.error('WalletConnect: Unsupported Call Request received', {
+          payload
+        });
+        currentConnector.current?.rejectRequest({
+          id: payload.id,
+          error: {
+            message: 'Unsupported method'
+          }
+        });
+      }
+    },
+
+    handleDisconnect: (error: Error, _payload: any) => {
+      logger.info('WalletConnect: Disconnect');
+      if (error) {
+        logger.error(error);
+      }
+      setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
+      setConnectionError('');
+      setIsOpen(false);
+    },
+
+    handleConnect: (error: Error, _payload: any) => {
+      logger.info('WalletConnect: Connected');
+      if (error) {
+        logger.error(error);
+      }
+      setConnectionState(WalletConnectConnectionState.CONNECTED);
     }
   };
 
-  const handleCallRequest = (error: Error, payload: any) => {
-    if (error) {
-      logger.error('WalletConnect: Session request error', error);
-      return;
-    }
+  const walletConnectV2Methods = {
+    handleSessionProposal: async (
+      proposal: Web3WalletTypes.SessionProposal
+    ) => {
+      logger.info('WalletConnect: Session proposal received', proposal);
 
-    if (
-      payload?.id &&
-      payload?.params &&
-      ACCEPTED_CALL_METHODS.includes(payload?.method)
-    ) {
-      ipcRenderer.send('focus');
-      logger.info('WalletConnect: Call Request received', { payload });
-      const params = payload.params;
-      setCallRequestData({ params, id: payload.id, method: payload.method });
-    } else if (payload?.id) {
-      logger.error('WalletConnect: Unsupported Call Request received', {
-        payload
+      setRequiredNamespaces(
+        normalizeNamespaces(proposal.params.requiredNamespaces)
+      );
+
+      currentProposal.current = proposal;
+
+      if (connectionTimeout.current) {
+        clearTimeout(connectionTimeout.current);
+      }
+
+      const areChainsSupported = async (
+        namespaces: ProposalTypes.RequiredNamespaces
+      ) => {
+        const requiredChains = Object.values(normalizeNamespaces(namespaces))
+          .map(namespace => namespace.chains)
+          .flat();
+        const supportedNamespaces = EthList.map(item => `eip155:${item.chain}`);
+        const unsupportedChains = requiredChains.filter(
+          chain => !supportedNamespaces.includes(chain)
+        );
+
+        if (unsupportedChains.length === 0) return true;
+
+        await currentWeb3Wallet.current.rejectSession({
+          id: proposal.id,
+          reason: getSdkError('UNSUPPORTED_CHAINS')
+        });
+
+        setConnectionError(
+          `cySync doesn't support the following chains: ${unsupportedChains.join(
+            '\n'
+          )}`
+        );
+        setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
+
+        logger.info('WalletConnect: Rejected due to unsupported chains');
+        return false;
+      };
+
+      if (!(await areChainsSupported(proposal.params.requiredNamespaces)))
+        return;
+
+      setConnectionClientMeta(proposal.params.proposer.metadata);
+      setConnectionState(WalletConnectConnectionState.SELECT_ACCOUNT);
+      if (!isOpen) {
+        openDialog();
+      }
+    }
+  };
+
+  const walletConnectInit = async (uri: string) => {
+    const { version } = parseUri(uri);
+    setCurrentVersion(version);
+
+    const cysyncMetadata = {
+      description: 'Cypherock CySync',
+      url: 'https://www.cypherock.com',
+      icons: ['https://www.cypherock.com/assets/logo.png'],
+      name: 'Cypherock CySync'
+    };
+
+    if (version === 1) {
+      const connector = new WalletConnect({
+        // Required
+        uri,
+        // Required
+        clientMeta: cysyncMetadata
       });
-      currentConnector.current?.rejectRequest({
-        id: payload.id,
-        error: {
-          message: 'Unsupported method'
-        }
+      currentConnector.current = connector;
+
+      connector.on(
+        'session_request',
+        walletConnectV1Methods.handleSessionRequest
+      );
+      connector.on('call_request', walletConnectV1Methods.handleCallRequest);
+      connector.on('disconnect', walletConnectV1Methods.handleDisconnect);
+      connector.on('connect', walletConnectV1Methods.handleConnect);
+    } else if (version === 2) {
+      const core = new Core({
+        projectId: WALLET_CONNECT_PROJECT_ID
       });
-    }
-  };
 
-  const handleDisconnect = (error: Error, _payload: any) => {
-    logger.info('WalletConnect: Disconnect');
-    if (error) {
-      logger.error(error);
-    }
-    setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
-    setConnectionError('');
-    setIsOpen(false);
-  };
+      const web3wallet = await Web3Wallet.init({
+        core,
+        metadata: cysyncMetadata
+      });
 
-  const handleConnect = (error: Error, _payload: any) => {
-    logger.info('WalletConnect: Connected');
-    if (error) {
-      logger.error(error);
+      currentWeb3Wallet.current = web3wallet;
+
+      web3wallet.on(
+        'session_proposal',
+        walletConnectV2Methods.handleSessionProposal
+      );
+      web3wallet.on('session_delete', () => {
+        setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
+        setConnectionError('');
+        setIsOpen(false);
+      });
+      web3wallet.on('session_request', async event => {
+        const { account, wallet } =
+          selectedAccountList.current[event.params.chainId];
+        setSelectedWallet(wallet);
+        setSelectedAccount(account);
+        setCallRequestData({
+          id: event.id,
+          topic: event.topic,
+          params: event.params.request.params,
+          method: event.params.request.method as any
+        });
+        ipcRenderer.send('focus');
+        logger.info('WalletConnect: Call Request received', { event });
+      });
+
+      await web3wallet.core.pairing.pair({ uri });
+    } else {
+      throw new Error('Unsupported WalletConnect version');
     }
-    setConnectionState(WalletConnectConnectionState.CONNECTED);
   };
 
   const createConnection = async (url: string) => {
@@ -250,24 +445,8 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
 
       setConnectionError('');
       setConnectionState(WalletConnectConnectionState.CONNECTING);
-      // Create connector
-      const connector = new WalletConnect({
-        // Required
-        uri: url,
-        // Required
-        clientMeta: {
-          description: 'Cypherock CySync',
-          url: 'https://www.cypherock.com',
-          icons: ['https://www.cypherock.com/assets/logo.png'],
-          name: 'Cypherock CySync'
-        }
-      });
-      currentConnector.current = connector;
 
-      connector.on('session_request', handleSessionRequest);
-      connector.on('call_request', handleCallRequest);
-      connector.on('disconnect', handleDisconnect);
-      connector.on('connect', handleConnect);
+      await walletConnectInit(url);
 
       connectionTimeout.current = setTimeout(() => {
         logger.info(
@@ -285,6 +464,66 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
       setConnectionError(error.message);
     }
+  };
+
+  const getAddresses = async (data: ChainMappedAccount) => {
+    const addresses = [];
+    const accountList: ChainMappedAccount = {};
+    for (const key of Object.keys(data)) {
+      const { account, wallet: walletData } = data[key];
+      const coinMeta = COINS[account.coinId];
+
+      if (!(coinMeta instanceof EthCoinData)) {
+        throw new Error('Non ETH coin received in wallet connect');
+      }
+      const wallet = Wallet({
+        coinId: account.coinId,
+        xpub: account.xpub,
+        walletId: account.walletId,
+        addressDB: addressDb,
+        accountType: account.accountType,
+        accountIndex: account.accountIndex,
+        accountId: account.accountId
+      });
+
+      const address = (await wallet.newReceiveAddress()).toLowerCase();
+
+      addresses.push(`${key}:${address}`);
+      accountList[key] = {
+        account: {
+          ...(await getCoinWithPrices(account)),
+          chain: coinMeta.chain,
+          name: account.name,
+          address,
+          passphraseExists: walletData.passphraseSet,
+          pinExists: walletData.passwordSet
+        },
+        wallet: walletData
+      };
+    }
+    selectedAccountList.current = cloneDeep(accountList);
+    return addresses;
+  };
+
+  const approveSessionRequest = async (data: ChainMappedAccount) => {
+    const reqNamespaces = buildApprovedNamespaces({
+      proposal: currentProposal.current.params,
+      supportedNamespaces: {
+        eip155: {
+          methods: ACCEPTED_CALL_METHODS,
+          chains: EthList.map(item => `eip155:${item.chain}`),
+          events: ['chainChanged', 'accountsChanged'],
+          accounts: await getAddresses(data)
+        }
+      }
+    });
+    const session = await currentWeb3Wallet.current.approveSession({
+      id: currentProposal.current.id,
+      namespaces: reqNamespaces
+    });
+    setConnectionState(WalletConnectConnectionState.CONNECTED);
+
+    currentSession.current = session;
   };
 
   const onExternalLink = (_event: any, uri: string) => {
@@ -318,7 +557,11 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         callRequestData,
         selectedAccount,
         selectedWallet,
-        setSelectedWallet
+        setSelectedWallet,
+        currentVersion,
+        requiredNamespaces,
+        selectedAccountList,
+        approveSessionRequest
       }}
     >
       {children}

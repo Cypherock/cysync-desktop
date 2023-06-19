@@ -46,13 +46,16 @@ const WalletConnectSign = () => {
     }
   }, [walletConnect]);
 
-  const txnData = React.useMemo(
-    () =>
-      walletConnect.callRequestData?.params
-        ? { value: '0', ...walletConnect.callRequestData.params[0] }
-        : undefined,
-    [walletConnect.callRequestData]
-  );
+  const txnData = React.useMemo(() => {
+    if (!walletConnect.callRequestData?.params) return undefined;
+
+    const txnParams = walletConnect.callRequestData?.params[0];
+    if (typeof txnParams === 'object') {
+      txnParams.gas = txnParams.gas ?? txnParams.gasLimit;
+      delete txnParams.gasLimit;
+    }
+    return txnParams;
+  }, [walletConnect.callRequestData]);
 
   if (
     walletConnect.selectedWallet &&
@@ -82,7 +85,7 @@ const WalletConnectSign = () => {
                 walletConnect.callRequestData.method ===
                 WalletConnectCallRequestMethodMap.ETH_SEND_TXN
                   ? 'hash'
-                  : 'signature'
+                  : 'signed'
               }
               triggeredBy={TriggeredBy.WalletConnect}
               onSuccess={onSuccess}
