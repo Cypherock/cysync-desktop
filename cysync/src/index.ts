@@ -529,17 +529,11 @@ app.on('activate', () => {
   }
 });
 
-app.on('open-url', (event, url) => {
-  // Handle deeplink for macos and linux
-  logger.info({ event, url });
-  event.preventDefault();
-  handleUriOpen(url);
-});
-
 app.on('will-finish-launching', () => {
   app.on('open-url', (event, url) => {
+    // Handle deeplink for macos
+    logger.info({ event, url });
     event.preventDefault();
-    logger.info({ event, url, info: 'will-finish-launching' });
 
     handleUriOpen(url);
   });

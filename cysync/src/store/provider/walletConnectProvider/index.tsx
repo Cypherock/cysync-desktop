@@ -97,7 +97,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   const currentConnector = React.useRef<WalletConnect | undefined>(undefined);
   const currentConnectionState = React.useRef<
     WalletConnectConnectionState | undefined
-  >(WalletConnectConnectionState.SELECT_ACCOUNT);
+  >(WalletConnectConnectionState.NOT_CONNECTED);
   const connectionTimeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   const [currentVersion, setCurrentVersion] = React.useState(2);
@@ -267,6 +267,8 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       if (!isOpen) {
         openDialog();
       }
+      // focus event for mac
+      ipcRenderer.send('focus');
     },
 
     handleCallRequest: (error: Error, payload: any) => {
@@ -376,6 +378,8 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       if (!isOpen) {
         openDialog();
       }
+      // focus event for mac
+      ipcRenderer.send('focus');
     }
   };
 
