@@ -442,7 +442,9 @@ const createWindow = async () => {
   });
 
   ipcMain.handle('wc-url-init', () => {
-    return wcUri;
+    const wcUriCopy = wcUri;
+    wcUri = undefined;
+    return wcUriCopy;
   });
 
   ipcMain.on('download', (_event, info) => {
