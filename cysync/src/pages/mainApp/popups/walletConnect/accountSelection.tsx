@@ -1,12 +1,13 @@
 import { CoinGroup, COINS, EthList } from '@cypherock/communication';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Autocomplete, Box, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import BigNumber from 'bignumber.js';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, difference } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import CustomButton from '../../../../designSystem/designComponents/buttons/button';
 import CoinIcon from '../../../../designSystem/genericComponents/coinIcons';
@@ -132,7 +133,9 @@ const AccountSelectionItem: React.FC<{
         fullWidth
         options={accountList}
         autoHighlight
-        getOptionLabel={(option: ICoin) => option.name}
+        getOptionLabel={(option: ICoin & { walletName?: string }) =>
+          `${option.name} (${option.walletName})`
+        }
         renderOption={(props, option: ICoin & { walletName?: string }) => {
           return (
             <Box
@@ -196,11 +199,9 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
 
   const [selectedAccountList, setSelectedAccountList] =
     useState<ChainMappedAccount>({});
-  const chains = walletConnect.requiredNamespaces
-    ? Object.values(walletConnect.requiredNamespaces)
-        .map(namespace => namespace.chains)
-        .flat()
-    : [];
+  const requiredChains = walletConnect.requiredNamespaces ?? [];
+  const optionalChains = walletConnect.optionalNamespaces ?? [];
+  const wasOptionalFieldsVisible = useRef(false);
   const [coinData, setCoinData] = useState<ICoin[]>([]);
   const [error, setError] = useState('');
 
@@ -335,7 +336,7 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
   useEffect(() => {
     if (walletConnect.currentVersion === 2) {
       setButtonDisabled(
-        Object.keys(selectedAccountList).length !== chains.length
+        difference(requiredChains, Object.keys(selectedAccountList)).length > 0
       );
     } else if (walletConnect.currentVersion === 1) {
       setButtonDisabled(!selectedAccount);
@@ -343,9 +344,17 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
   }, [selectedAccount, selectedAccountList]);
 
   const V2SelectionOptions: React.FC = () => {
+    const [isOptionalFieldsVisible, setIsOptionalFelidsVisible] = useState(
+      wasOptionalFieldsVisible.current
+    );
+
+    useEffect(() => {
+      wasOptionalFieldsVisible.current = isOptionalFieldsVisible;
+    }, [isOptionalFieldsVisible]);
+
     return (
       <>
-        {chains.map(chain => (
+        {requiredChains.map(chain => (
           <AccountSelectionItem
             key={chain}
             onChange={(_e: any, val: any) => onAccountChange(val, chain)}
@@ -353,6 +362,48 @@ const WalletConnectAccountSelection: React.FC<Props> = () => {
             initialValue={selectedAccountList[chain]?.account as any}
           />
         ))}
+
+        {optionalChains.length > 0 && (
+          <>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                marginBottom: '16px',
+                cursor: 'pointer'
+              }}
+              onClick={() => setIsOptionalFelidsVisible(e => !e)}
+            >
+              <Typography>Optional Accounts</Typography>
+              <ArrowDropDownIcon
+                style={{
+                  transform: isOptionalFieldsVisible
+                    ? 'rotate(180deg)'
+                    : 'rotate(0deg)',
+                  transition: 'transform 0.3s ease-in-out'
+                }}
+              />
+            </div>
+
+            <div
+              style={{
+                maxHeight: isOptionalFieldsVisible ? '100vh' : '0vh',
+                transition: 'max-height 0.3s ease-in-out',
+                overflow: 'hidden'
+              }}
+            >
+              {optionalChains.map(chain => (
+                <AccountSelectionItem
+                  key={chain}
+                  onChange={(_e: any, val: any) => onAccountChange(val, chain)}
+                  chain={chain}
+                  initialValue={selectedAccountList[chain]?.account as any}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </>
     );
   };

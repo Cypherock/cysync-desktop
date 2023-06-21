@@ -2,7 +2,7 @@ import { COINS, EthCoinData, EthList } from '@cypherock/communication';
 import Wallet from '@cypherock/wallet';
 import { Core } from '@walletconnect/core';
 import WalletConnect from '@walletconnect/legacy-client';
-import { ProposalTypes, SessionTypes } from '@walletconnect/types';
+import { SessionTypes } from '@walletconnect/types';
 import {
   buildApprovedNamespaces,
   getSdkError,
@@ -65,7 +65,8 @@ export interface WalletConnectContextInterface {
   selectedAccountList: React.MutableRefObject<ChainMappedAccount>;
   approveSessionRequest: (data: ChainMappedAccount) => void;
   currentVersion: number;
-  requiredNamespaces: ProposalTypes.RequiredNamespaces | undefined;
+  requiredNamespaces: string[];
+  optionalNamespaces: string[];
 }
 
 export const WalletConnectContext: React.Context<WalletConnectContextInterface> =
@@ -100,9 +101,12 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   const connectionTimeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   const [currentVersion, setCurrentVersion] = React.useState(2);
-  const [requiredNamespaces, setRequiredNamespaces] = React.useState<
-    ProposalTypes.RequiredNamespaces | undefined
-  >(undefined);
+  const [requiredNamespaces, setRequiredNamespaces] = React.useState<string[]>(
+    []
+  );
+  const [optionalNamespaces, setOptionalNamespaces] = React.useState<string[]>(
+    []
+  );
   const currentWeb3Wallet = React.useRef<Web3WalletType | undefined>(undefined);
   const currentProposal = React.useRef<
     Web3WalletTypes.SessionProposal | undefined
@@ -119,6 +123,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     currentConnector.current = undefined;
 
     setRequiredNamespaces(undefined);
+    setOptionalNamespaces(undefined);
     setCurrentVersion(2);
     currentWeb3Wallet.current = undefined;
     currentProposal.current = undefined;
@@ -262,6 +267,8 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       if (!isOpen) {
         openDialog();
       }
+      // focus event for mac
+      ipcRenderer.send('focus');
     },
 
     handleCallRequest: (error: Error, payload: any) => {
@@ -311,15 +318,52 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     }
   };
 
+  const areChainsSupported = async (
+    proposal: Web3WalletTypes.SessionProposal
+  ) => {
+    const requiredChainList = proposal.params.requiredNamespaces;
+    const optionalChainList = proposal.params.optionalNamespaces;
+    const requiredChains = Object.values(normalizeNamespaces(requiredChainList))
+      .map(namespace => namespace.chains)
+      .flat();
+    const optionalChains = Object.values(normalizeNamespaces(optionalChainList))
+      .map(namespace => namespace.chains)
+      .flat();
+    const supportedNamespaces = EthList.map(item => `eip155:${item.chain}`);
+    const unsupportedChains = requiredChains.filter(
+      chain => !supportedNamespaces.includes(chain)
+    );
+
+    if (unsupportedChains.length === 0) {
+      const supportedOptionalChains = supportedNamespaces.filter(chain =>
+        optionalChains.includes(chain)
+      );
+      setRequiredNamespaces(requiredChains);
+      setOptionalNamespaces(supportedOptionalChains);
+      return true;
+    }
+
+    await currentWeb3Wallet.current.rejectSession({
+      id: proposal.id,
+      reason: getSdkError('UNSUPPORTED_CHAINS')
+    });
+
+    setConnectionError(
+      `cySync doesn't support the following chains: ${unsupportedChains.join(
+        '\n'
+      )}`
+    );
+    setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
+
+    logger.info('WalletConnect: Rejected due to unsupported chains');
+    return false;
+  };
+
   const walletConnectV2Methods = {
     handleSessionProposal: async (
       proposal: Web3WalletTypes.SessionProposal
     ) => {
       logger.info('WalletConnect: Session proposal received', proposal);
-
-      setRequiredNamespaces(
-        normalizeNamespaces(proposal.params.requiredNamespaces)
-      );
 
       currentProposal.current = proposal;
 
@@ -327,43 +371,15 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         clearTimeout(connectionTimeout.current);
       }
 
-      const areChainsSupported = async (
-        namespaces: ProposalTypes.RequiredNamespaces
-      ) => {
-        const requiredChains = Object.values(normalizeNamespaces(namespaces))
-          .map(namespace => namespace.chains)
-          .flat();
-        const supportedNamespaces = EthList.map(item => `eip155:${item.chain}`);
-        const unsupportedChains = requiredChains.filter(
-          chain => !supportedNamespaces.includes(chain)
-        );
-
-        if (unsupportedChains.length === 0) return true;
-
-        await currentWeb3Wallet.current.rejectSession({
-          id: proposal.id,
-          reason: getSdkError('UNSUPPORTED_CHAINS')
-        });
-
-        setConnectionError(
-          `cySync doesn't support the following chains: ${unsupportedChains.join(
-            '\n'
-          )}`
-        );
-        setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
-
-        logger.info('WalletConnect: Rejected due to unsupported chains');
-        return false;
-      };
-
-      if (!(await areChainsSupported(proposal.params.requiredNamespaces)))
-        return;
+      if (!(await areChainsSupported(proposal))) return;
 
       setConnectionClientMeta(proposal.params.proposer.metadata);
       setConnectionState(WalletConnectConnectionState.SELECT_ACCOUNT);
       if (!isOpen) {
         openDialog();
       }
+      // focus event for mac
+      ipcRenderer.send('focus');
     }
   };
 
@@ -533,9 +549,14 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     }
   };
 
+  const getInitialUri = async () => {
+    const uri = await ipcRenderer.invoke('wc-url-init');
+    if (uri) onExternalLink(null, uri);
+  };
+
   React.useEffect(() => {
     ipcRenderer.on('wallet-connect', onExternalLink);
-
+    getInitialUri();
     return () => {
       ipcRenderer.removeListener('wallet-connect', onExternalLink);
     };
@@ -560,6 +581,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         setSelectedWallet,
         currentVersion,
         requiredNamespaces,
+        optionalNamespaces,
         selectedAccountList,
         approveSessionRequest
       }}
