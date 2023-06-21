@@ -30,6 +30,7 @@ import {
   rimrafPromise
 } from './mainProcess/utils';
 
+let wcUri: string;
 const handleMainProcessError = async (error: any, promise?: any) => {
   logger.error('Unhandled error on main process');
   logger.error(error);
@@ -147,6 +148,7 @@ const handleUriOpen = async (uri: string) => {
       if (connectionString && mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('wallet-connect', connectionString);
       }
+      wcUri = connectionString;
     }
   } catch (error) {
     logger.error('Error in handling URL');
@@ -401,6 +403,15 @@ const createWindow = async () => {
 
       mainWindow.show();
       fadeInWindow(mainWindow);
+      // Deep linking for when the app is not running already (Windows, Linux)
+      if (process.platform === 'win32' || process.platform === 'linux') {
+        logger.info({ argv: process.argv });
+        const { argv } = process;
+        const uri = argv.filter(arg => arg.startsWith('cypherock://'));
+        if (uri.length) {
+          handleUriOpen(uri[0]);
+        }
+      }
 
       if (loadingWindow && !loadingWindow.isDestroyed()) {
         loadingWindow.hide();
@@ -428,6 +439,10 @@ const createWindow = async () => {
     app.showExitPrompt = false;
     app.preventExit = false;
     app.quit();
+  });
+
+  ipcMain.handle('wc-url-init', () => {
+    return wcUri;
   });
 
   ipcMain.on('download', (_event, info) => {
@@ -516,6 +531,16 @@ app.on('activate', () => {
 
 app.on('open-url', (event, url) => {
   // Handle deeplink for macos and linux
+  logger.info({ event, url });
   event.preventDefault();
   handleUriOpen(url);
+});
+
+app.on('will-finish-launching', () => {
+  app.on('open-url', (event, url) => {
+    event.preventDefault();
+    logger.info({ event, url, info: 'will-finish-launching' });
+
+    handleUriOpen(url);
+  });
 });
