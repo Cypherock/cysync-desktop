@@ -84,7 +84,8 @@ const AccountInfo: React.FC<{
 export const WalletConnectStatus: React.FC<{
   walletConnect: WalletConnectContextInterface;
 }> = (props: { walletConnect: WalletConnectContextInterface }) => {
-  return props.walletConnect.selectedAccount ? (
+  return props.walletConnect.selectedAccount &&
+    props.walletConnect.currentVersion === 1 ? (
     <>
       <Typography
         align="center"
