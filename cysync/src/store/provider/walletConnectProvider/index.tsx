@@ -122,7 +122,7 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   const selectedAccountList = React.useRef<ChainMappedAccount>({});
 
   useEffect(() => {
-    if (connectionError === '') {
+    if (!connectionError) {
       setErrorSubtitle('');
       setErrorTitle('');
     }
