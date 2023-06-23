@@ -8,26 +8,13 @@ import {
 
 import AccountSelection from './accountSelection';
 import ConnectedPopup from './connected';
+import WalletConnectErrorDisplay from './errorDisplay';
 import Send from './send';
 import Sign from './sign';
 import UrlFormComponent from './urlForm';
 
 const WalletConnectPopup = () => {
   const { isOpen, handleClose, connectionState } = useWalletConnect();
-
-  if (connectionState <= WalletConnectConnectionState.CONNECTING) {
-    return (
-      <DialogBox
-        fullWidth
-        maxWidth="sm"
-        open={isOpen}
-        handleClose={handleClose}
-        isClosePresent
-        dialogHeading="WalletConnect"
-        restComponents={<UrlFormComponent handleClose={handleClose} />}
-      />
-    );
-  }
 
   if (connectionState === WalletConnectConnectionState.SELECT_ACCOUNT) {
     return (
@@ -59,6 +46,34 @@ const WalletConnectPopup = () => {
           restComponents={<ConnectedPopup handleClose={handleClose} />}
         />
       </>
+    );
+  }
+
+  if (connectionState === WalletConnectConnectionState.CONNECTION_ERROR) {
+    return (
+      <DialogBox
+        fullWidth
+        maxWidth="sm"
+        open={isOpen}
+        handleClose={handleClose}
+        isClosePresent
+        dialogHeading="WalletConnect"
+        restComponents={<WalletConnectErrorDisplay handleClose={handleClose} />}
+      />
+    );
+  }
+
+  if (connectionState === WalletConnectConnectionState.CONNECTING || isOpen) {
+    return (
+      <DialogBox
+        fullWidth
+        maxWidth="sm"
+        open={isOpen}
+        handleClose={handleClose}
+        isClosePresent
+        dialogHeading="WalletConnect"
+        restComponents={<UrlFormComponent handleClose={handleClose} />}
+      />
     );
   }
 

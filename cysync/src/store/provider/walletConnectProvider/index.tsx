@@ -14,7 +14,7 @@ import { Web3Wallet as Web3WalletType } from '@walletconnect/web3wallet/dist/typ
 import { ipcRenderer } from 'electron';
 import { cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import logger from '../../../utils/logger';
 import {
@@ -67,6 +67,8 @@ export interface WalletConnectContextInterface {
   currentVersion: number;
   requiredNamespaces: string[];
   optionalNamespaces: string[];
+  errorTitle: string;
+  errorSubtitle: string;
 }
 
 export const WalletConnectContext: React.Context<WalletConnectContextInterface> =
@@ -100,6 +102,9 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   >(WalletConnectConnectionState.NOT_CONNECTED);
   const connectionTimeout = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
+  const [errorTitle, setErrorTitle] = useState('');
+  const [errorSubtitle, setErrorSubtitle] = useState('');
+
   const [currentVersion, setCurrentVersion] = React.useState(2);
   const [requiredNamespaces, setRequiredNamespaces] = React.useState<string[]>(
     []
@@ -115,6 +120,13 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     undefined
   );
   const selectedAccountList = React.useRef<ChainMappedAccount>({});
+
+  useEffect(() => {
+    if (connectionError === '') {
+      setErrorSubtitle('');
+      setErrorTitle('');
+    }
+  }, [connectionError]);
 
   const resetStates = () => {
     setConnectionClientMeta(undefined);
@@ -149,7 +161,9 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         topic: currentSession.current.topic,
         reason: getSdkError('USER_DISCONNECTED')
       });
-    } else {
+    } else if (
+      connectionState !== WalletConnectConnectionState.CONNECTION_ERROR
+    ) {
       await currentWeb3Wallet.current?.rejectSession({
         id: currentProposal.current.id,
         reason: getSdkError('USER_REJECTED')
@@ -159,10 +173,10 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
   };
 
   const handleClose = () => {
+    setIsOpen(false);
     disconnect();
     setSelectedWallet(undefined);
     setConnectionError('');
-    setIsOpen(false);
   };
 
   const selectAccount = async (walletData: IWallet, coin: Account) => {
@@ -348,12 +362,31 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
       reason: getSdkError('UNSUPPORTED_CHAINS')
     });
 
-    setConnectionError(
-      `cySync doesn't support the following chains: ${unsupportedChains.join(
-        '\n'
-      )}`
+    const supportedChainNames = EthList.map(item => item.name);
+
+    const listToWords = (list: string[]) => {
+      if (list.length === 1) {
+        return list[0];
+      }
+      const last = list[list.length - 1];
+      const newList = list.slice(0, list.length - 1);
+      return `${newList.join(', ')} and ${last}`;
+    };
+
+    setErrorTitle(
+      `${proposal.params.proposer.metadata.name} requested to connect to chain${
+        unsupportedChains.length > 1 ? 's' : ''
+      } we don't support yet`
     );
-    setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
+    setErrorSubtitle(
+      `We currently support ${listToWords(supportedChainNames)}`
+    );
+    setConnectionError(`Unsupported Chains: ${listToWords(unsupportedChains)}`);
+
+    setConnectionState(WalletConnectConnectionState.CONNECTION_ERROR);
+    if (!isOpen) {
+      openDialog();
+    }
 
     logger.info('WalletConnect: Rejected due to unsupported chains');
     return false;
@@ -469,15 +502,21 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
           'WalletConnect: Connection timeout exceeded, disconnecting...',
           { url }
         );
-        setConnectionError('Timeout exceeded, Try again with latest URI');
-        disconnect();
+        setConnectionError('Timeout exceeded');
+        setConnectionState(WalletConnectConnectionState.CONNECTION_ERROR);
+        if (!isOpen) {
+          openDialog();
+        }
       }, CONNECTION_TIMEOUT);
     } catch (error) {
       if (error) {
         logger.error('WalletConnect: Connection error');
         logger.error(error);
       }
-      setConnectionState(WalletConnectConnectionState.NOT_CONNECTED);
+      setConnectionState(WalletConnectConnectionState.CONNECTION_ERROR);
+      if (!isOpen) {
+        openDialog();
+      }
       setConnectionError(error.message);
     }
   };
@@ -583,7 +622,9 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
         requiredNamespaces,
         optionalNamespaces,
         selectedAccountList,
-        approveSessionRequest
+        approveSessionRequest,
+        errorTitle,
+        errorSubtitle
       }}
     >
       {children}

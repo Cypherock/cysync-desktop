@@ -33,7 +33,8 @@ export enum WalletConnectConnectionState {
   NOT_CONNECTED,
   CONNECTING,
   SELECT_ACCOUNT,
-  CONNECTED
+  CONNECTED,
+  CONNECTION_ERROR
 }
 
 const protobufEnumMapper = [
