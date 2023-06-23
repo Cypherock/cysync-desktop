@@ -1,5 +1,5 @@
 import AssignmentOutlined from '@mui/icons-material/AssignmentOutlined';
-import { IconButton } from '@mui/material';
+import { CircularProgress, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -129,7 +129,11 @@ const WalletConnectUrlForm: React.FC<Props> = () => {
             }}
             disabled={isDisabled}
           >
-            Continue
+            {isDisabled ? (
+              <CircularProgress size={20} color="secondary" />
+            ) : (
+              'Continue'
+            )}
           </CustomButton>
         </div>
       </form>
