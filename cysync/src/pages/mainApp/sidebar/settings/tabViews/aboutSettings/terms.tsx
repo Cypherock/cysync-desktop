@@ -34,7 +34,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
             <br />
             <br />
             <Typography variant="caption" color="textPrimary">
-              NOVEMBER 29, 2020
+              JUNE 22, 2023
             </Typography>
             <br />
             <br />
@@ -54,12 +54,12 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
             </Typography>
             <Typography color="textPrimary">
               This agreement is between you (“you”, “your”, or “User”) and HODL
-              Tech Private Limited (“Cypherock”, “us”, “we,&apos;&apos; “our”,
-              or the “Company”). By using or clicking “I agree” to any of the
-              services provided by Cypherock or its affiliates in connection
-              with the Cypherock CySync software (the “Cypherock Services”), you
-              agree that you have carefully read and accept all of the below
-              terms and conditions.
+              Tech Private Limited (“Cypherock”, “us”, “we“, “our”, or the
+              “Company”). By using or clicking “I agree” to any of the services
+              provided by Cypherock or its affiliates in connection with the
+              Cypherock CySync software (the “Cypherock Services”), you agree
+              that you have carefully read and accept all of the below terms and
+              conditions.
               <br />
               <br />
               Your use of Cypherock Services is also subject to Cypherock’s
@@ -81,7 +81,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               YOU ARE WILLING TO TAKE. PLEASE BE AWARE THAT Cypherock DOES NOT
               PROVIDE FINANCIAL, TAX, OR LEGAL ADVICE. DECISIONS TO PERFORM
               OPERATIONS INVOLVING CRYPTO ASSETS SHOULD BE TAKEN ON YOUR OWN OR
-              RELY ON OPINIONS OF RELIABLE AND QUALIFIED EXPERTS.
+              RELY ON THE OPINIONS OF RELIABLE AND QUALIFIED EXPERTS.
             </Typography>
             <br />
             <br />
@@ -89,7 +89,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               variant="h5"
               color="textPrimary"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Definitions
             </Typography>
@@ -101,111 +101,113 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               clearly inappropriate.
               <br />
               <br />
-              <strong>“Crypto Assets” </strong>
+              <strong>“Crypto Assets”</strong>
               <span>
-                {` - means types of digital assets which can be transmitted with
-              blockchain technologies, including but not limited to Bitcoin,
-              Ethereum.`}
+                - means types of digital assets which can be transmitted with
+                blockchain technologies, including but not limited to Bitcoin,
+                Ethereum.
               </span>
               <br />
               <br />
               <strong>“Device Application”</strong>
               <span>
-                {` - means a software application, developed by Cypherock or by third
-                parties, which embeds a specific cryptographic signature logic
-                within Cypherock’s embedded system in order to create a
+                - means a software application, developed by Cypherock or by
+                third parties, which embeds a specific cryptographic signature
+                logic within Cypherock’s embedded system in order to create a
                 transaction, on Cypherock CySync or a third party application,
                 and signs various operations with a Cypherock Device, including
                 but not limited to: Crypto Assets transactions broadcast,
-                authentication, password management.`}
+                authentication, password management.
               </span>
               <br />
               <br />
               <strong>“Fork”</strong>
               <span>
-                {` - means a change to the underlying protocol of a blockchain network
-              that results in more than one version of a Crypto Asset, the
-              result of which may be one or more versions that are not supported
-              on Cypherock Services.`}
+                - means a change to the underlying protocol of a blockchain
+                network that results in more than one version of a Crypto Asset,
+                the result of which may be one or more versions that are not
+                supported on Cypherock Services.
               </span>
               <br />
               <br />
               <strong>“Cypherock Device”</strong>
               <span>
-                {` - means an electronic device coupled with Javacard-based Smartcards,
-              developed and distributed by Cypherock, generally referred to as a
-              “hardware wallet”, used to manage and secure Users’ Private Keys
-              and other cryptographic secrets, compatible with Cypherock CySync
-              or compatible Wallets.`}
+                - means a catalogue of Device Applications available for
+                download, which enables Users to update their Cypherock Device
+                firmware, install Device Applications and manage supported
+                Crypto Assets.
               </span>
               <br />
               <br />
               <strong>“Cypherock CySync”</strong>
               <span>
-                {` - means a catalogue of Device Applications available for download,
-              which enables Users to update their Cypherock Device firmware,
-              install Device Applications and manage supported Crypto Assets.`}
+                - means a catalogue of Device Applications available for
+                download, which enables Users to update their Cypherock Device
+                firmware, install Device Applications and manage supported
+                Crypto Assets.
               </span>
               <br />
               <br />
               <strong>“Materials”</strong>
               <span>
-                {` - means content, Cypherock Service documentation as well as source
-              and object codes for all software embedded within Cypherock CySync
-              and Cypherock Devices.`}
+                - means content, Cypherock Service documentation as well as
+                source and object codes for all software embedded within
+                Cypherock CySync and Cypherock Devices.
               </span>
               <br />
               <br />
               <strong>“PIN”</strong>
               <span>
-                {` - means the numeric password chosen by the User to unlock a
-              Cypherock Device.`}
+                - means the numeric password chosen by the User to unlock a
+                Cypherock Device.
               </span>
               <br />
               <br />
               <strong>“Private Keys”</strong>
               <span>
-                {` - means a critical piece of data used to authorize outgoing
-              transactions on blockchain networks.`}
+                - means a critical piece of data used to authorize outgoing
+                transactions on blockchain networks.
               </span>
               <br />
               <br />
               <strong>“Services”</strong>
               <span>
-                {` - means one or more of the Cypherock Services or Third Party
-              Services.`}
+                - means one or more of the Cypherock Services or Third Party
+                Services.
               </span>
               <br />
               <br />
               <strong>“Third Party Services”</strong>
               <span>
-                {` - refers to applications, softwares or other Materials that are
-              hosted, developed or operated by a third party, including, but not
-              limited to: cryptocurrency exchanges, staking service providers.`}
+                - refers to applications, softwares or other Materials that are
+                hosted, developed or operated by a third party, including, but
+                not limited to: cryptocurrency exchanges, staking service
+                providers.
               </span>
               <br />
               <br />
               <strong>“Wallet”</strong>
               <span>
-                {` - means a software program which interacts with various blockchain
-              networks to generate and manage sets of private keys and public
-              keys, configure transactions and monitor their balance.`}
+                - means a software program which interacts with various
+                blockchain networks to generate and manage sets of private keys
+                and public keys, configure transactions and monitor their
+                balance.
               </span>
               <br />
               <br />
               <strong>“Website”</strong>
               <span>
-                {` - means websites owned and operated by Cypherock, including the
-              e-commerce and corporate website hosted at Cypherock.com`}
+                - means websites owned and operated by Cypherock, including the
+                e-commerce and corporate website hosted at Cypherock.com
               </span>
               <br />
               <br />
               <strong>“24-word Recovery Phrase”</strong>
               <span>
-                {` - means a confidential combination of human readable words,
-              generated by Cypherock Devices, from which Users’ Private Keys are
-              derived. They are used to back-up and restore access to Crypto
-              Assets on other Cypherock Devices or compatible Wallets.`}
+                - means a confidential combination of human readable words,
+                generated by Cypherock Devices, from which Users’ Private Keys
+                are derived. They are used to back-up and restore access to
+                Crypto Assets on other Cypherock Devices or compatible Wallets.
               </span>
             </Typography>
             <br />
@@ -214,7 +216,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Eligibility
             </Typography>
@@ -238,7 +240,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Cypherock Services
             </Typography>
@@ -246,7 +248,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               Cypherock CySync, in connection with Cypherock Devices, provides
               you with a convenient and secure way to manage your Device
               Applications as well as use Private Keys derived from your 24-word
-              Recovery Phrase.
+              Recovery Phrase. Phrase.
               <br />
               <br />
               The Cypherock Services allow Users to:
@@ -262,7 +264,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               <FiberManualRecordIcon
                 style={{ fontSize: 10, marginRight: '0.5rem' }}
               />
-              {` Update the firmware of their Cypherock Device`}
+              Update the firmware of their Cypherock Device
             </Typography>
             <Typography
               color="textPrimary"
@@ -275,8 +277,8 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               <FiberManualRecordIcon
                 style={{ fontSize: 10, marginRight: '0.5rem' }}
               />
-              {` Install and uninstall Device Applications with the Cypherock
-              CySync`}
+              Install and uninstall Device Applications with the Cypherock
+              CySync
             </Typography>
             <Typography
               color="textPrimary"
@@ -289,7 +291,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               <FiberManualRecordIcon
                 style={{ fontSize: 10, marginRight: '0.5rem' }}
               />
-              {` View their portfolio of Crypto Assets`}
+              View their portfolio of Crypto Assets
             </Typography>
             <Typography
               color="textPrimary"
@@ -302,9 +304,9 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               <FiberManualRecordIcon
                 style={{ fontSize: 10, marginRight: '0.5rem' }}
               />
-              {` Access the means to perform operations on various blockchain
+              Access the means to perform operations on various blockchain
               networks in accordance with their respective protocol rules, such
-              as but not limited to:`}
+              as but not limited to:
             </Typography>
             <Typography
               color="textPrimary"
@@ -317,8 +319,8 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               <FiberManualRecordIcon
                 style={{ fontSize: 10, marginRight: '0.5rem' }}
               />
-              {` Send and receive Crypto Assets to and from Users of a dedicated
-              blockchain network;`}
+              Send and receive Crypto Assets to and from Users of a dedicated
+              blockchain network;
             </Typography>
             <Typography
               color="textPrimary"
@@ -331,9 +333,9 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               <FiberManualRecordIcon
                 style={{ fontSize: 10, marginRight: '0.5rem' }}
               />
-              {` connect with third party services, to access services such as the
+              Connect with Third Party Services, to access services such as the
               delegation of staking rights on supported proof-of-stake
-              blockchains or buying crypto.`}
+              blockchains or buying crypto.
             </Typography>
             <br />
             <Typography color="textPrimary">
@@ -354,7 +356,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Risk
             </Typography>
@@ -367,54 +369,53 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               <br />
               <strong>Regulatory changes</strong>
               <span>
-                {` - Blockchain technologies are subject to continuous regulatory
+                - Blockchain technologies are subject to continuous regulatory
                 changes and scrutiny around the world, including but not limited
                 to anti-money laundering and financial regulations. You
                 acknowledge that certain Services, including their availability,
-                could be impacted by one or more regulatory requirements.`}
+                could be impacted by one or more regulatory requirements.
               </span>
               <br />
               <br />
               <strong>Tax</strong>
               <span>
-                {` - Transactions in Crypto Assets, or more
-              generally Crypto Assets events, including but not limited to
-              exchanges, air-drops, forks, and gains arising from staking, may
-              be considered tax events according to the legislations under which
-              you are subject to taxation. These rules may be unclear or subject
-              to change, and you are therefore encouraged to consult your own
-                    tax or accounting adviser before doing Crypto Assets events.`}
+                - Transactions in Crypto Assets, or more generally Crypto Assets
+                events, including but not limited to exchanges, air-drops,
+                forks, and gains arising from staking, may be considered tax
+                events according to the legislations under which you are subject
+                to taxation. These rules may be unclear or subject to change,
+                and you are therefore encouraged to consult your own tax or
+                accounting adviser before doing Crypto Assets events.
               </span>
               <br />
               <br />
               <strong>Technology</strong>
               <span>
-                {` - Users understand that some of the
-              technology supported or made available through the Services are
-              new, untested and outside of Cypherock’s control. Advances in
-              cryptography, or other technical advances such as the development
-              of quantum computers, could present risks to blockchain networks
-              which could result in the theft or loss of Crypto Assets. Other
-              adverse changes in market forces or in the technology, broadly
-              construed, may prevent or compromise Cypherock’s performance under
-              these Terms.`}
+                - Users understand that some of the technology supported or made
+                available through the Services are new, untested and outside of
+                Cypherock’s control. Advances in cryptography, or other
+                technical advances such as the development of quantum computers,
+                could present risks to blockchain networks which could result in
+                the theft or loss of Crypto Assets. Other adverse changes in
+                market forces or in the technology, broadly construed, may
+                prevent or compromise Cypherock’s performance under these Terms.
               </span>
               <br />
               <br />
               <strong>Cybersecurity</strong>
               <span>
-                {` - Hackers or other groups or
-              organizations may attempt to interfere with Cypherock’s products
-              and information systems in several ways, including without
-              limitation denial of service attacks, side-channel attacks,
-              spoofing, smurfing, malware attacks, or consensus-based attacks.`}
+                - Hackers or other groups or organizations may attempt to
+                interfere with Cypherock’s products and information systems in
+                several ways, including without limitation denial of service
+                attacks, side-channel attacks, spoofing, smurfing, malware
+                attacks, or consensus-based attacks.
               </span>
               <br />
               <br />
               There may be additional risks that we have not foreseen or
               identified in these Terms. Before you use our Services, you are
               strongly encouraged to carefully assess whether your financial
-              situation and risk tolerance is compatible with such use.
+              situation and risk tolerance are compatible with such use.
               <br />
               <br />
               For the avoidance of doubt, and notwithstanding the generality of
@@ -447,9 +448,8 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               <br />
               Keep your credentials safe. When you set your Cypherock Device up,
               you must: (a) create and remember a strong PIN that you do not use
-              for any other service; (b) protect and keep your 24-word Recovery
-              Phrase secure and confidential; (c) protect access to your
-              Cypherock Device;
+              for any other service; (b) protect access to your Cypherock
+              Device;
             </Typography>
             <br />
             <br />
@@ -457,15 +457,16 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Acceptable Use
             </Typography>
             <Typography color="textPrimary">
-              As a user of the Cypherock Services, we grant you a limited,
-              personal, non-commercial, non-exclusive, non-transferable, and
-              revocable license to use the Cypherock Services. When using
-              Cypherock Services, we ask that you follow some basic rules:
+              Acceptable Use As a user of the Cypherock Services, we grant you a
+              limited, personal, non-commercial, non-exclusive,
+              non-transferable, and revocable license to use the Cypherock
+              Services. When using Cypherock Services, we ask that you follow
+              some basic rules:
               <br />
               <br />
               Do no harm. You agree (i) not to distribute any virus or other
@@ -516,7 +517,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Warranties and Disclaimers
             </Typography>
@@ -537,7 +538,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Availability of Cypherock Services
             </Typography>
@@ -566,7 +567,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Underlying blockchain protocols
             </Typography>
@@ -601,7 +602,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Device Applications
             </Typography>
@@ -630,7 +631,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Experimental features
             </Typography>
@@ -646,7 +647,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               long-term support of these features. We do not recommend to use
               these features unless you are an advanced User with strong
               technical skills. You expressly acknowledge and agree that all use
-              of the Experimental Features is at your sole risk
+              of the Experimental Features is at your sole risk.
             </Typography>
             <br />
             <br />
@@ -654,7 +655,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Transaction details
             </Typography>
@@ -679,7 +680,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Third Party Services and Materials
             </Typography>
@@ -748,7 +749,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Limitation of liability
             </Typography>
@@ -778,7 +779,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Intellectual Property
             </Typography>
@@ -814,7 +815,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Feedback
             </Typography>
@@ -833,7 +834,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Compliance and Export Control
             </Typography>
@@ -858,7 +859,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Termination
             </Typography>
@@ -880,13 +881,13 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Applicable law
             </Typography>
             <Typography color="textPrimary">
               These Terms will be governed by and interpreted in accordance with
-              the laws of India.
+              the laws of Singapore.
               <br />
               <br />
               Any dispute, controversy, difference or claim arising out of or
@@ -894,7 +895,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               interpretation, performance, breach or termination thereof or any
               dispute regarding non-contractual obligations arising out of or
               relating to it shall be referred to and finally resolved by the
-              competent courts of New Delhi, India.
+              competent courts of Singapore.
             </Typography>
             <br />
             <br />
@@ -902,7 +903,7 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               color="textPrimary"
               variant="h5"
               gutterBottom
-              style={{ fontWeight: 700 }}
+              style={{ fontWeight: 700, marginTop: '1.5rem' }}
             >
               Enforcement and Assignment of Terms
             </Typography>
@@ -919,9 +920,9 @@ const Terms: React.FC<PrivacyProps> = ({ open, handleClose }) => {
               We reserve the right to alter, amend or modify these Terms from
               time to time, in our sole discretion. We will provide you with
               notice of such changes by posting the amended Terms via Cypherock
-              CySync and updating the &quot;Last Updated&quot; date at the top
-              of these Terms. The amended Terms will be deemed effective
-              immediately upon posting on Cypherock CySync.
+              CySync and updating the "Last Updated" date at the top of these
+              Terms. The amended Terms will be deemed effective immediately upon
+              posting on Cypherock CySync.
               <br />
               <br />
               You may not assign your rights or obligations under these Terms of
