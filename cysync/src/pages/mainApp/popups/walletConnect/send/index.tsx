@@ -51,6 +51,7 @@ const WalletConnectSign = () => {
 
     const txnParams = walletConnect.callRequestData?.params[0];
     if (typeof txnParams === 'object') {
+      txnParams.value = txnParams.value ?? '0';
       txnParams.gas = txnParams.gas ?? txnParams.gasLimit;
       delete txnParams.gasLimit;
     }

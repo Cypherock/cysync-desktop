@@ -85,58 +85,67 @@ const WalletConnectUrlForm: React.FC<Props> = () => {
 
   return (
     <Root container>
-      <form onSubmit={onPositiveClick} className={classes.form}>
-        <Typography color="textPrimary" variant="body2" gutterBottom>
-          Enter connection URI
-        </Typography>
-        <Input
-          fullWidth
-          name="URI"
-          placeholder="Connection URI"
-          value={input}
-          error={!!(error || walletConnect.connectionError)}
-          onChange={handleChange}
-          className={classes.padBottom}
-          disabled={
-            walletConnect.connectionState ===
-            WalletConnectConnectionState.CONNECTING
-          }
-          InputProps={{
-            endAdornment: (
-              <IconButton
-                title="Paste from Clipboard"
-                onClick={handleCopyFromClipboard}
-              >
-                <AssignmentOutlined color="secondary" />
-              </IconButton>
-            )
+      {isDisabled ? (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%'
           }}
-        />
-        {(error || walletConnect.connectionError) && (
-          <Typography
-            variant="body2"
-            style={{ color: theme.palette.error.main }}
-          >
-            {error || walletConnect.connectionError}
-          </Typography>
-        )}
-        <div className={classes.errorButtons}>
-          <CustomButton
-            type="submit"
-            style={{
-              padding: '0.5rem 3rem',
-              margin: '1rem 0rem'
-            }}
-            disabled={isDisabled}
-          >
-            {isDisabled ? (
-              <CircularProgress size={20} color="secondary" />
-            ) : (
-              'Continue'
-            )}
-          </CustomButton>
+        >
+          <CircularProgress size={100} color="secondary" />
         </div>
-      </form>
+      ) : (
+        <form onSubmit={onPositiveClick} className={classes.form}>
+          <Typography color="textPrimary" variant="body2" gutterBottom>
+            Enter connection URI
+          </Typography>
+          <Input
+            fullWidth
+            name="URI"
+            placeholder="Connection URI"
+            value={input}
+            error={!!(error || walletConnect.connectionError)}
+            onChange={handleChange}
+            className={classes.padBottom}
+            disabled={
+              walletConnect.connectionState ===
+              WalletConnectConnectionState.CONNECTING
+            }
+            InputProps={{
+              endAdornment: (
+                <IconButton
+                  title="Paste from Clipboard"
+                  onClick={handleCopyFromClipboard}
+                >
+                  <AssignmentOutlined color="secondary" />
+                </IconButton>
+              )
+            }}
+          />
+          {(error || walletConnect.connectionError) && (
+            <Typography
+              variant="body2"
+              style={{ color: theme.palette.error.main }}
+            >
+              {error || walletConnect.connectionError}
+            </Typography>
+          )}
+          <div className={classes.errorButtons}>
+            <CustomButton
+              type="submit"
+              style={{
+                padding: '0.5rem 3rem',
+                margin: '1rem 0rem'
+              }}
+              disabled={isDisabled}
+            >
+              Continue
+            </CustomButton>
+          </div>
+        </form>
+      )}
     </Root>
   );
 };
