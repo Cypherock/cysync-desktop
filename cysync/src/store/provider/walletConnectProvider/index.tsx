@@ -349,9 +349,9 @@ export const WalletConnectProvider: React.FC = ({ children }) => {
     );
 
     if (unsupportedChains.length === 0) {
-      const supportedOptionalChains = supportedNamespaces.filter(chain =>
-        optionalChains.includes(chain)
-      );
+      const supportedOptionalChains = supportedNamespaces
+        .filter(chain => optionalChains.includes(chain))
+        .filter(chain => !requiredChains.includes(chain));
       setRequiredNamespaces(requiredChains);
       setOptionalNamespaces(supportedOptionalChains);
       return true;
