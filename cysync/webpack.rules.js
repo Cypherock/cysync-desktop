@@ -4,6 +4,10 @@ module.exports = [
     use: 'node-loader'
   },
   {
+    test: /\.md$/,
+    use: ['markdown-loader', 'html-loader']
+  },
+  {
     test: /\.(m?js|node)$/,
     parser: { amd: false },
     use: {
