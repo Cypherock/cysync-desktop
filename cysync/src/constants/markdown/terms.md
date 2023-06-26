@@ -1,4 +1,6 @@
-##### JUNE 18, 2023
+_JUNE 18, 2023_
+
+You are about to use the CySync platform. We’re excited for you! Before you get on, Cypherock needs you to carefully read, understand and accept our Terms of Use (the or these “Terms”).
 
 # Overview
 
@@ -12,43 +14,31 @@ BEFORE USING THE SERVICES, PLEASE EDUCATE YOURSELF TO MAKE INFORMED DECISIONS. C
 
 The following terms, when used in this Agreement, shall have the meanings described below, it being specified for the avoidance of doubt that in these definitions, reference to the singular includes a reference to the plural and vice versa, except when clearly inappropriate.
 
-**“Crypto Assets”**
-`-` means types of digital assets which can be transmitted with blockchain technologies, including but not limited to Bitcoin, Ethereum.
+**“Crypto Assets”** means types of digital assets which can be transmitted with blockchain technologies, including but not limited to Bitcoin, Ethereum.
 
-**“Device Application”**
-`-` means a software application, developed by Cypherock or by third parties, which embeds a specific cryptographic signature logic within Cypherock’s embedded system in order to create a transaction, on Cypherock CySync or a third party application, and signs various operations with a Cypherock Device, including but not limited to: Crypto Assets transactions broadcast, authentication, password management.
+**“Device Application”** means a software application, developed by Cypherock or by third parties, which embeds a specific cryptographic signature logic within Cypherock’s embedded system in order to create a transaction, on Cypherock CySync or a third party application, and signs various operations with a Cypherock Device, including but not limited to: Crypto Assets transactions broadcast, authentication, password management.
 
-**“Fork”**
-`-` means a change to the underlying protocol of a blockchain network that results in more than one version of a Crypto Asset, the result of which may be one or more versions that are not supported on Cypherock Services.
+**“Fork”** means a change to the underlying protocol of a blockchain network that results in more than one version of a Crypto Asset, the result of which may be one or more versions that are not supported on Cypherock Services.
 
-**“Cypherock Device”**
-`-` means an electronic device coupled with Javacard-based Smartcards, developed and distributed by Cypherock, generally referred to as a **“hardware wallet”, used to manage and secure Users’ Private Keys and other cryptographic secrets, compatible with Cypherock CySync or compatible Wallets.**
-**“Cypherock CySync”**
-`-` means a catalogue of Device Applications available for download, which enables Users to update their Cypherock Device firmware, install Device Applications and manage supported Crypto Assets.
+**“Cypherock Device”** means an electronic device coupled with Javacard-based Smartcards, developed and distributed by Cypherock, generally referred to as a **“hardware wallet”, used to manage and secure Users’ Private Keys and other cryptographic secrets, compatible with Cypherock CySync or compatible Wallets.**
 
-**“Materials”**
-`-` means content, Cypherock Service documentation as well as source and object codes for all software embedded within Cypherock CySync and Cypherock Devices.
+**“Cypherock CySync”** means a catalogue of Device Applications available for download, which enables Users to update their Cypherock Device firmware, install Device Applications and manage supported Crypto Assets.
 
-**“PIN”**
-`-` means the numeric password chosen by the User to unlock a Cypherock Device.
+**“Materials”** means content, Cypherock Service documentation as well as source and object codes for all software embedded within Cypherock CySync and Cypherock Devices.
 
-**“Private Keys”**
-`-` means a critical piece of data used to authorize outgoing transactions on blockchain networks.
+**“PIN”** means the numeric password chosen by the User to unlock a Cypherock Device.
 
-**“Services”**
-`-` means one or more of the Cypherock Services or Third Party Services.
+**“Private Keys”** means a critical piece of data used to authorize outgoing transactions on blockchain networks.
 
-**“Third Party Services”**
-`-` refers to applications, softwares or other Materials that are hosted, developed or operated by a third party, including, but not limited to: cryptocurrency exchanges, staking service providers.
+**“Services”** means one or more of the Cypherock Services or Third Party Services.
 
-**“Wallet”**
-`-` means a software program which interacts with various blockchain networks to generate and manage sets of private keys and public keys, configure transactions and monitor their balance.
+**“Third Party Services”** refers to applications, softwares or other Materials that are hosted, developed or operated by a third party, including, but not limited to: cryptocurrency exchanges, staking service providers.
 
-**“Website”**
-`-` means websites owned and operated by Cypherock, including the e-commerce and corporate website hosted at Cypherock.com
+**“Wallet”** means a software program which interacts with various blockchain networks to generate and manage sets of private keys and public keys, configure transactions and monitor their balance.
 
-**“24-word Recovery Phrase”**
-`-` means a confidential combination of human readable words, generated by Cypherock Devices, from which Users’ Private Keys are derived. They are used to back-up and restore access to Crypto Assets on other Cypherock Devices or compatible Wallets.
+**“Website”** means websites owned and operated by Cypherock, including the e-commerce and corporate website hosted at Cypherock.com
+
+**“24-word Recovery Phrase”** means a confidential combination of human readable words, generated by Cypherock Devices, from which Users’ Private Keys are derived. They are used to back-up and restore access to Crypto Assets on other Cypherock Devices or compatible Wallets.
 
 # Eligibility
 
@@ -77,17 +67,14 @@ Cypherock CySync and Cypherock Devices are only capable of supporting certain Cr
 
 You are deemed to be fully aware of all the legal norms and technical constraints relating to the proof-of-stake and proof-of-work blockchains, and to the Services. You acknowledge that you have been warned of the following associated risks:
 
-**Regulatory changes**
-`-` Blockchain technologies are subject to continuous regulatory changes and scrutiny around the world, including but not limited to anti-money laundering and financial regulations. You acknowledge that certain Services, including their availability, could be impacted by one or more regulatory requirements.
+**Regulatory changes**.
+Blockchain technologies are subject to continuous regulatory changes and scrutiny around the world, including but not limited to anti-money laundering and financial regulations. You acknowledge that certain Services, including their availability, could be impacted by one or more regulatory requirements.
 
-**Tax**
-`-` Transactions in Crypto Assets, or more generally Crypto Assets events, including but not limited to exchanges, air-drops, forks, and gains arising from staking, may be considered tax events according to the legislations under which you are subject to taxation. These rules may be unclear or subject to change, and you are therefore encouraged to consult your own tax or accounting adviser before doing Crypto Assets events.
+**Tax**. Transactions in Crypto Assets, or more generally Crypto Assets events, including but not limited to exchanges, air-drops, forks, and gains arising from staking, may be considered tax events according to the legislations under which you are subject to taxation. These rules may be unclear or subject to change, and you are therefore encouraged to consult your own tax or accounting adviser before doing Crypto Assets events.
 
-**Technology**
-`-` Users understand that some of the technology supported or made available through the Services are new, untested and outside of Cypherock’s control. Advances in cryptography, or other technical advances such as the development of quantum computers, could present risks to blockchain networks which could result in the theft or loss of Crypto Assets. Other adverse changes in market forces or in the technology, broadly construed, may prevent or compromise Cypherock’s performance under these Terms.
+**Technology**. Users understand that some of the technology supported or made available through the Services are new, untested and outside of Cypherock’s control. Advances in cryptography, or other technical advances such as the development of quantum computers, could present risks to blockchain networks which could result in the theft or loss of Crypto Assets. Other adverse changes in market forces or in the technology, broadly construed, may prevent or compromise Cypherock’s performance under these Terms.
 
-**Cybersecurity**
-`-` Hackers or other groups or organizations may attempt to interfere with Cypherock’s products and information systems in several ways, including without limitation denial of service attacks, side-channel attacks, spoofing, smurfing, malware attacks, or consensus-based attacks.
+**Cybersecurity**. Hackers or other groups or organizations may attempt to interfere with Cypherock’s products and information systems in several ways, including without limitation denial of service attacks, side-channel attacks, spoofing, smurfing, malware attacks, or consensus-based attacks.
 
 There may be additional risks that we have not foreseen or identified in these Terms. Before you use our Services, you are strongly encouraged to carefully assess whether your financial situation and risk tolerance are compatible with such use.
 
@@ -95,37 +82,43 @@ For the avoidance of doubt, and notwithstanding the generality of the Limitation
 
 # No retrieval of Private Keys
 
-The only existing backup is with you. Cypherock does not have access to or store passwords, 24-word Recovery Phrase, Private Keys, passphrases, transaction history, PIN, or other credentials associated with your use of the Services. We are not in a position to help you retrieve your credentials. You are solely responsible for remembering, storing, and keeping your credentials in a secure location, away from prying eyes. Any third party with knowledge of one or more of your 24-word Recovery Phrase or PIN can gain control of the Private Keys associated with your Cypherock Device or of the 24-word Recovery Phrase;
+**The only existing backup is with you**. Cypherock does not have access to or store passwords, 24-word Recovery Phrase, Private Keys, passphrases, transaction history, PIN, or other credentials associated with your use of the Services. We are not in a position to help you retrieve your credentials. You are solely responsible for remembering, storing, and keeping your credentials in a secure location, away from prying eyes. Any third party with knowledge of one or more of your 24-word Recovery Phrase or PIN can gain control of the Private Keys associated with your Cypherock Device or of the 24-word Recovery Phrase;
 
-Keep your credentials safe. When you set your Cypherock Device up, you must: (a) create and remember a strong PIN that you do not use for any other service; (b) protect access to your Cypherock Device;
+**Keep your credentials safe**. When you set your Cypherock Device up, you must: (a) create and remember a strong PIN that you do not use for any other service; (b) protect access to your Cypherock Device;
 
-Acceptable Use As a user of the Cypherock Services, we grant you a limited, personal, non-commercial, non-exclusive, non-transferable, and revocable license to use the Cypherock Services. When using Cypherock Services, we ask that you follow some basic rules:
+# Acceptable Use
 
-Do no harm. You agree (i) not to distribute any virus or other harmful computer code through Cypherock’s systems, (ii) not to use any robot, spider, crawler, scraper or other automated means or interface not provided by us to access Cypherock Services or to extract data, (iii) not to provide false, inaccurate, or misleading information, and (iv) not to take any action that may impose an unreasonable or disproportionately large load on our or any of our third party providers’ infrastructure.
+As a user of the Cypherock Services, we grant you a limited, personal, non-commercial, non-exclusive, non-transferable, and revocable license to use the Cypherock Services. When using Cypherock Services, we ask that you follow some basic rules:
 
-Don’t circumvent our security. You agree not to bypass, circumvent, or attempt to bypass or circumvent any measures that we may use to prevent or restrict access to Cypherock Services including, without limitation, Cypherock Devices connected to Cypherock Services, other accounts, information systems, or networks.
+**Do no harm**. You agree (i) not to distribute any virus or other harmful computer code through Cypherock’s systems, (ii) not to use any robot, spider, crawler, scraper or other automated means or interface not provided by us to access Cypherock Services or to extract data, (iii) not to provide false, inaccurate, or misleading information, and (iv) not to take any action that may impose an unreasonable or disproportionately large load on our or any of our third party providers’ infrastructure.
 
-Don’t break the law. You agree that you will not violate any laws when using Cypherock Services. This includes any local, provincial, state, federal, national, or international laws that may apply to you. You agree that you will not use Cypherock Services to pay for, support, or otherwise engage in any illegal activities including, but not limited to, fraud, illegal gambling, money laundering, or terrorist activities. You further agree not to encourage or induce any third party to engage in any of the activities prohibited under this section.
+**Don’t circumvent our security**. You agree not to bypass, circumvent, or attempt to bypass or circumvent any measures that we may use to prevent or restrict access to Cypherock Services including, without limitation, Cypherock Devices connected to Cypherock Services, other accounts, information systems, or networks.
 
-Don’t interfere. You agree that you will not use or attempt to use another user’s Wallet without authorization, or use Cypherock Services in any manner that could interfere with, disrupt, negatively affect, or inhibit other Users from fully enjoying Cypherock Services, or that could damage, disable, overburden or impair the functioning of Cypherock Services in any manner.
+**Don’t break the law**. You agree that you will not violate any laws when using Cypherock Services. This includes any local, provincial, state, federal, national, or international laws that may apply to you. You agree that you will not use Cypherock Services to pay for, support, or otherwise engage in any illegal activities including, but not limited to, fraud, illegal gambling, money laundering, or terrorist activities. You further agree not to encourage or induce any third party to engage in any of the activities prohibited under this section.
+
+**Don’t interfere**. You agree that you will not use or attempt to use another user’s Wallet without authorization, or use Cypherock Services in any manner that could interfere with, disrupt, negatively affect, or inhibit other Users from fully enjoying Cypherock Services, or that could damage, disable, overburden or impair the functioning of Cypherock Services in any manner.
 
 Any use of Cypherock Services other than as specifically authorized in these Terms, without our prior written permission, is strictly prohibited and will terminate your license to use Cypherock Services.
 
-Warranties and Disclaimers Cypherock will use reasonable level of skill and care to ensure that Cypherock Services can be accessed by you in accordance with the present Terms of Use, but there are no guarantees that access and features will not be interrupted or that there will be no delays, failures, errors, omissions, corruption or loss of transmitted information. Cypherock Services are provided “as is” without any warranty of any kind, either express or implied, and in particular without implied warranties of merchantability, reliability, and fitness for a particular purpose.
+# Warranties and Disclaimers
 
-Availability of Cypherock Services We may change, update or suspend the Services, temporarily or indefinitely, so as to carry out works including, but not limited to: firmware and software updates, maintenance operations, amendments to the servers, bug fixes etc. We will make reasonable efforts to give you prior notice of any significant disruption of Cypherock Services.
+Cypherock will use reasonable level of skill and care to ensure that Cypherock Services can be accessed by you in accordance with the present Terms of Use, but there are no guarantees that access and features will not be interrupted or that there will be no delays, failures, errors, omissions, corruption or loss of transmitted information. Cypherock Services are provided “as is” without any warranty of any kind, either express or implied, and in particular without implied warranties of merchantability, reliability, and fitness for a particular purpose.
+
+## Availability of Cypherock Services
+
+We may change, update or suspend the Services, temporarily or indefinitely, so as to carry out works including, but not limited to: firmware and software updates, maintenance operations, amendments to the servers, bug fixes etc. We will make reasonable efforts to give you prior notice of any significant disruption of Cypherock Services.
 
 Cypherock does not guarantee the correct functioning of the Services in the event of the installation or use of programs or applications that do not conform to Service specifications and technical standards.
 
 Please note that when a Cypherock Service is unavailable or suspended, you can always recover your Private Keys using your 24-Recovery Phrase on any compatible Wallet.
 
-# Underlying blockchain protocols
+## Underlying blockchain protocols
 
 All transactions created through Cypherock Services are confirmed and recorded in associated blockchain networks. Such networks are decentralized peer-to-peer networks run by independent third parties, which Cypherock does not own, control or operate. We have no control over blockchain networks and, therefore, cannot and do not ensure that the transactions you broadcast on Cypherock Services will be confirmed and processed. You acknowledge that we do not store, send, or receive Crypto Assets and you agree that the transactions you configure on Cypherock Services may fail, or may be substantially delayed by the underlying blockchain networks.
 
 On occasions, the blockchain protocol of a given Crypto Asset may change, which may have consequences on its key characteristics including but not limited to their availability, name, security, valuation or the way it operates. Forks entail that forked Crypto Assets may be misdirected or replicated. In any such events, Cypherock may decide, at its discretion, to suspend support of the impacted Crypto Asset for as long as Cypherock deems necessary. When it so decides, Cypherock will endeavor to give you advance notice, but may not be able to. You should keep yourself apprised of such events and make all necessary arrangements.
 
-# Device Applications
+## Device Applications
 
 Device Applications are available for download on Cypherock CySync.
 
@@ -133,7 +126,7 @@ Developers of Device Applications are responsible for the said applications and 
 
 Cypherock does not warranty that Device Applications will be maintained over time and reserves the right to restrict or suspend access to them from Cypherock Services for any reason for as long as deemed necessary.
 
-# Experimental features
+## Experimental features
 
 In order to accommodate advanced Users’ requests and to build new features and functionalities, we have released a series of experimental features on Cypherock CySync. These features may not be complete and have not been fully tested, which may present heightened risks. They may contain errors or inaccuracies that could cause failures, corruption or loss of data and/or information. You can think of these features as beta features. Cypherock does not guarantee the stability, functionality, or long-term support of these features. We do not recommend to use these features unless you are an advanced User with strong technical skills. You expressly acknowledge and agree that all use of the Experimental Features is at your sole risk.
 
@@ -154,25 +147,29 @@ We advise not to share any credential, password, Private Key, passphrase, or any
 We retain the exclusive right to add to, modify, or cancel the availability of any such Third Party Service for any reason and without prior notice.
 Specific rules and obligations apply to the following Services:
 
-**A. Buy Crypto services**
+- **Buy Crypto services**
 
 Links to Buy Crypto services are sponsored links. The existence of a link to or from one of Cypherock Services does not represent or imply any endorsement of such services.
 
-**B. Delegation of staking rights**
+- **Delegation of staking rights**
 
-Rewards. You explicitly confirm that you are aware that delegation of staking rights to a validator operator listed in Cypherock CySync does not grant to your benefit any right to request payment of any kind, but merely a potential right to share a reward perceived by the validator. Please note that lock-up periods depend on the validator and blockchain protocols.
+**Rewards**. You explicitly confirm that you are aware that delegation of staking rights to a validator operator listed in Cypherock CySync does not grant to your benefit any right to request payment of any kind, but merely a potential right to share a reward perceived by the validator. Please note that lock-up periods depend on the validator and blockchain protocols.
 
-Validators. Cypherock reserves the right to modify the list of referenced validators at any time without prior notice.
+**Validators**. Cypherock reserves the right to modify the list of referenced validators at any time without prior notice.
 
-Limitation of liability YOU EXPRESSLY UNDERSTAND AND AGREE THAT CYPHEROCK AND ITS DIRECTORS AND EMPLOYEES SHALL NOT BE LIABLE TO YOU FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES, INCLUDING, BUT NOT LIMITED TO, DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, DATA, COST OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR OTHER INTANGIBLE LOSSES, RESULTING FROM: (I) THE USE OR INABILITY TO USE THE SERVICES (II) ANY CHANGES MADE TO THE SERVICE OR ANY SUSPENSION OR CESSATION OF THE SERVICES OR ANY PART THEREOF; (III) THE UNAUTHORIZED ACCESS TO OR ALTERATION OF YOUR TRANSMISSIONS OR DATA; (IV) THE DELETION OF, CORRUPTION OF, OR FAILURE TO STORE AND/OR SEND OR RECEIVE YOUR TRANSMISSIONS OR DATA ON OR THROUGH THE SERVICE; AND (V) ANY OTHER MATTER RELATING TO THE SERVICE.
+# Limitation of liability
+
+YOU EXPRESSLY UNDERSTAND AND AGREE THAT CYPHEROCK AND ITS DIRECTORS AND EMPLOYEES SHALL NOT BE LIABLE TO YOU FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES, INCLUDING, BUT NOT LIMITED TO, DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, DATA, COST OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR OTHER INTANGIBLE LOSSES, RESULTING FROM: (I) THE USE OR INABILITY TO USE THE SERVICES (II) ANY CHANGES MADE TO THE SERVICE OR ANY SUSPENSION OR CESSATION OF THE SERVICES OR ANY PART THEREOF; (III) THE UNAUTHORIZED ACCESS TO OR ALTERATION OF YOUR TRANSMISSIONS OR DATA; (IV) THE DELETION OF, CORRUPTION OF, OR FAILURE TO STORE AND/OR SEND OR RECEIVE YOUR TRANSMISSIONS OR DATA ON OR THROUGH THE SERVICE; AND (V) ANY OTHER MATTER RELATING TO THE SERVICE.
 
 THE ABOVE LIMITATIONS DO NOT APPLY IN RESPECT OF LOSS RESULTING FROM (A) CYPHEROCK’S FRAUD, WILFUL MISCONDUCT OR GROSS NEGLIGENCE, WILFUL MISCONDUCT OR FRAUD; OR (B) DEATH OR PERSONAL INJURY.
 
-Intellectual Property Cypherock respects the intellectual property of others and we ask our Users to do the same. You acknowledge and agree that, with the exception of Materials released or anyway made available pursuant to public license agreements, open source, MIT, or other non-proprietary license schemes normally used by the Cypherock community, Cypherock owns all copyrights, trademarks, know-how or any other intellectual property rights in respect of the software, text, video, audio, artwork, logos, layout as well as the look and feel pertaining to Cypherock CySync, Device Applications, and the Website.
+# Intellectual Property
+
+Cypherock respects the intellectual property of others and we ask our Users to do the same. You acknowledge and agree that, with the exception of Materials released or anyway made available pursuant to public license agreements, open source, MIT, or other non-proprietary license schemes normally used by the Cypherock community, Cypherock owns all copyrights, trademarks, know-how or any other intellectual property rights in respect of the software, text, video, audio, artwork, logos, layout as well as the look and feel pertaining to Cypherock CySync, Device Applications, and the Website.
 
 You may view, print and/or download a copy of proprietary Materials from Cypherock Services on any single computer solely for your personal, informational and/or non-commercial use, provided you comply with all copyright and other proprietary notices.
 
-The trademarks, service marks and logos of Cypherock and others used in the Services (“Trademarks”) are the property of Cypherock and their respective owners. It is strictly prohibited to use these Trademarks without our express written authorisation or the express written authorisation of any third parties.
+The trademarks, service marks and logos of Cypherock and others used in the Services (“Trademarks”) are the property of Cypherock and their respective owners. It is strictly prohibited to use these Trademarks without our express written authorization or the express written authorization of any third parties.
 
 # Feedback
 

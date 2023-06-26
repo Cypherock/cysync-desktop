@@ -31,16 +31,18 @@ const options = {
       component: Typography,
       props: {
         color: 'textPrimary',
-        variant: 'h5',
+        variant: 'h3',
         gutterBottom: true,
         style: { fontWeight: 700, marginTop: '1.5rem' }
       }
     },
-    h5: {
+    h2: {
       component: Typography,
       props: {
-        variant: 'caption',
-        color: 'textPrimary'
+        color: 'textPrimary',
+        variant: 'h5',
+        gutterBottom: true,
+        style: { fontWeight: 600, marginTop: '1rem' }
       }
     },
     p: {
