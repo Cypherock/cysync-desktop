@@ -1,3 +1,9 @@
+# v1.2.260
+
+### ⚠️ Notice
+
+- Added Near API deprecation notice
+
 # v1.2.259
 
 ### 🚀 Features
