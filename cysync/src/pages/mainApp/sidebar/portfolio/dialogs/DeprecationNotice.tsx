@@ -9,7 +9,7 @@ import DialogBox from '../../../../../designSystem/designComponents/dialog/dialo
 import CustomCheckBox from '../../../../../designSystem/designComponents/input/checkbox';
 import Markdown from '../../../../../designSystem/designComponents/textComponents/Markdown';
 
-const alertText = 'Live Data for Near is under maintenance';
+const alertText = 'Live data for Near is under maintenance';
 
 export const DeprecationNotice: React.FC = () => {
   const [isAlertHidden, setIsAlertHidden] = useState(
@@ -65,13 +65,11 @@ export const DeprecationNotice: React.FC = () => {
               <CustomButton
                 onClick={() => {
                   setIsDialogOpen(false);
-                  setIsAlertHidden(true);
                   localStorage.setItem(
                     'isNearAlertHidden',
                     isAlertHidden.toString()
                   );
                 }}
-                disabled={!isAlertHidden}
                 style={{
                   textTransform: 'none',
                   padding: '0.5rem 3.5rem',
