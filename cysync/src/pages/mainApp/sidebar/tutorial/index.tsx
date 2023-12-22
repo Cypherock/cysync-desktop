@@ -3,52 +3,12 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
-import ReactPlayer from 'react-player/youtube';
+import React, { useEffect } from 'react';
 
+import { CustomPlayer } from '../../../../components/customPlayer';
 import { useTutorial } from '../../../../store/provider';
 import Analytics from '../../../../utils/analytics';
 import logger from '../../../../utils/logger';
-
-export interface CustomPlayerProps {
-  url: string;
-}
-
-const CustomPlayer = ({ url }: CustomPlayerProps) => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  const loadingComponent = () => {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingTop: '4rem'
-        }}
-      >
-        <CircularProgress color="secondary" />
-      </div>
-    );
-  };
-
-  return (
-    <div style={{ width: '100%' }}>
-      {isLoading && loadingComponent()}
-      <ReactPlayer
-        style={{ opacity: isLoading ? '0' : '1' }}
-        width="100%"
-        url={url}
-        onReady={() => setIsLoading(false)}
-      />
-    </div>
-  );
-};
-
-CustomPlayer.propTypes = {
-  url: PropTypes.string.isRequired
-};
 
 const PREFIX = 'Tutorial';
 

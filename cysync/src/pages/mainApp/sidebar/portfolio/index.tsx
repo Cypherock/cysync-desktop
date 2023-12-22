@@ -15,7 +15,7 @@ import logger from '../../../../utils/logger';
 
 import Charts from './charts';
 import CoinAllocation from './coins';
-import { DeprecationNotice } from './dialogs';
+import { DeprecationNotice, UpdateNotice } from './dialogs';
 
 const Portfolio = () => {
   const { allWallets } = useWallets();
@@ -142,6 +142,7 @@ const Portfolio = () => {
           </div>
         </div>
       )}
+      <UpdateNotice />
       <DeprecationNotice />
 
       <Grid

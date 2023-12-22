@@ -1,7 +1,6 @@
 import content from '!!html-loader!markdown-loader!../../../../../constants/markdown/near-deprecation.md';
 import { Alert, Button, Typography } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import CustomButton from '../../../../../designSystem/designComponents/buttons/button';
@@ -112,9 +111,4 @@ export const DeprecationNotice: React.FC = () => {
       )}
     </>
   );
-};
-
-DeprecationNotice.propTypes = {
-  open: PropTypes.bool.isRequired,
-  handleClose: PropTypes.func.isRequired
 };
