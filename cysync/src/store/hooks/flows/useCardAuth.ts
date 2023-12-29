@@ -402,6 +402,7 @@ export const useCardAuth: UseCardAuth = isInitial => {
       }
       setErrorObj(handleErrors(errorObj, cyError, flowName));
     });
+    await sleep(600); // for UI purposes
 
     try {
       setIsInFlow(true);
