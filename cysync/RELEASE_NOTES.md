@@ -1,3 +1,15 @@
+# v1.2.262
+
+### 🐛 Bugfixes
+
+- Device update fix
+
+# v1.2.261
+
+### ⚠️ Notice
+
+- CySync v2 is now available
+
 # v1.2.260
 
 ### ⚠️ Notice
