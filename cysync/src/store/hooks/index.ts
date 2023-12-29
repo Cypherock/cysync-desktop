@@ -7,3 +7,4 @@ export * from './useToken';
 export * from './useCustomAccount';
 export * from './useTransactionData';
 export * from './useWalletData';
+export * from './useExchange';

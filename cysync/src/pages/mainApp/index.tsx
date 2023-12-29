@@ -19,6 +19,7 @@ import WalletConnectPopup from './popups/walletConnect';
 import Sidebar from './sidebar';
 import Portfolio from './sidebar/portfolio';
 import Settings from './sidebar/settings';
+import Swap from './sidebar/swap';
 import Transaction from './sidebar/transaction';
 import Tutorial from './sidebar/tutorial';
 import Wallet from './sidebar/wallet';
@@ -143,6 +144,8 @@ const MainApp: React.FC = () => {
                     path={RouteLinks.wallet.index + '/*'}
                     element={<Wallet />}
                   />
+
+                  <Route path={RouteLinks.swap.index} element={<Swap />} />
 
                   <Route
                     path={RouteLinks.transactions.index}
