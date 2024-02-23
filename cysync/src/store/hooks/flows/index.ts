@@ -5,6 +5,7 @@ export * from './useDeviceAuth';
 export * from './useDeviceUpgrade';
 export * from './useSendTransaction';
 export * from './useReceiveTransation';
+export * from './useSwapTransaction';
 export * from './useLogFetcher';
 export * from './useGetDeviceInfo';
 export * from './useSignMessage';

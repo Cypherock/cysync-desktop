@@ -25,6 +25,7 @@ import colors from '../../../designSystem/designConstants/colors';
 import LastTransaction from '../../../designSystem/iconGroups/lastTransaction';
 import Portfolio from '../../../designSystem/iconGroups/portfolio';
 import Settings from '../../../designSystem/iconGroups/settings';
+import Swap from '../../../designSystem/iconGroups/swap';
 import Tutorial from '../../../designSystem/iconGroups/tutorial';
 import Wallet from '../../../designSystem/iconGroups/wallet';
 import { useFeedback, useWallets } from '../../../store/provider';
@@ -185,6 +186,10 @@ const TabValues = [
     route: Routes.wallet.index
   },
   {
+    tab: 10, // this is a dummy value for the Swap tab
+    route: Routes.swap.index //TODO: Update the route
+  },
+  {
     tab: 5,
     route: Routes.transactions.index
   },
@@ -259,7 +264,6 @@ const Sidebar = () => {
   const handleChange = (_event: React.ChangeEvent | undefined, val: number) => {
     setValue(val);
     const tab = TabValues.find(elem => elem.tab === val);
-
     if (tab) {
       // If wallet tab is selected, route to the first wallet
       if (tab.tab === 2 && walletData && walletData.length > 0) {
@@ -375,6 +379,19 @@ const Sidebar = () => {
               )}
             </div>
           </CustomCollapse>
+          <CustomDivider value={4} className={classes.divider} />
+          <Tab
+            label="Swap"
+            wrapped={true}
+            value={10} //TODO: Update with the true value
+            icon={
+              <Icon
+                size={21}
+                viewBox="0 0 24 21"
+                iconGroup={<Swap color="white" />} //TODO: Update the icon
+              />
+            }
+          />
           <CustomDivider value={4} className={classes.divider} />
           <Tab
             label="Transactions"
